@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v24-moments-sections";
+const WORKER_VERSION = "v25-moments-emotional";
 
 export default {
   async fetch(request, env, ctx) {
@@ -346,8 +346,11 @@ function renderMomentPage(page, origin) {
   const state = page.state || {};
   const title = String(state.title || page.title || "KhamaKey Moments").trim();
   const description = String(state.subtitle || page.description || state.description || "").trim();
+  const pill = String(state.pill || "").trim();
   const coverUrl = safeUrl(state.cover_url || "") !== "#" ? safeUrl(state.cover_url || "") : "";
-  const theme = ["classic", "celebration", "minimal", "memorial"].includes(state.theme) ? state.theme : "classic";
+  const profileUrl = safeUrl(state.profile_photo || "") !== "#" ? safeUrl(state.profile_photo || "") : "";
+  const colors = resolveMomentPalette(state);
+  const heroStyle = ["classico", "profilo", "romantico", "intimo", "fullscreen"].includes(state.heroStyle) ? state.heroStyle : "classico";
   const sections = state.sections && typeof state.sections === "object" ? state.sections : {};
   const sectionOrder = Array.isArray(state.sectionOrder) && state.sectionOrder.length
     ? state.sectionOrder
@@ -358,56 +361,173 @@ function renderMomentPage(page, origin) {
       section.title || section.body || section.address || section.email || section.phone ||
       (Array.isArray(section.images) && section.images.length)
     ));
+  const counterHtml = renderTogetherCounter(state, colors);
   const sectionHtml = ordered.length
-    ? ordered.map(({ key, section }) => renderMomentSection(key, section)).join("")
-    : `<div class="moment-card moment-card-empty"><strong>Pagina in preparazione</strong><p>Il proprietario sta ancora scegliendo i contenuti da mostrare.</p></div>`;
+    ? ordered.map(({ key, section }) => renderMomentSection(key, section, colors)).join("")
+    : `<div class="moment-card moment-card-empty rv"><strong>Pagina in preparazione</strong><p>Il proprietario sta ancora scegliendo i contenuti da mostrare.</p></div>`;
   const heroCover = coverUrl ? `<img class="moment-cover" src="${attr(coverUrl)}" alt="">` : "";
+  const profileBlock = profileUrl && heroStyle === "profilo"
+    ? `<img class="moment-profile" src="${attr(profileUrl)}" alt="">` : "";
+  const ogImage = coverUrl || profileUrl || "";
   return `<!doctype html>
 <html lang="it">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${escapeHtml(title)}</title>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="${attr(colors.bl)}">
+<title>${escapeHtml(title)} · KhamaKey Moments</title>
+<meta name="description" content="${escapeHtml(description || "Un ricordo da custodire nel tempo.")}">
+${ogImage ? `<meta property="og:image" content="${attr(ogImage)}">` : ""}
+<meta property="og:title" content="${escapeHtml(title)}">
+<meta property="og:description" content="${escapeHtml(description || "Un ricordo da custodire nel tempo.")}">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-<style>${momentPageCss()}</style></head>
-<body><main class="moment-page theme-${attr(theme)}">
-<section class="moment-hero">${heroCover}<div class="moment-hero-overlay"></div><div class="moment-hero-content"><small>KhamaKey Moments</small><h1>${escapeHtml(title)}</h1>${description ? `<p>${escapeHtml(description)}</p>` : ""}</div></section>
-<section class="moment-content">${sectionHtml}</section>
-<footer class="moment-footer">Powered by KhamaKey Moments</footer>
-</main></body></html>`;
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;600;700&family=Great+Vibes&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>${momentPageCss(colors)}</style></head>
+<body><main class="moment-page hero-${attr(heroStyle)}">
+<section class="moment-hero">${heroCover}<div class="moment-hero-overlay"></div><div class="moment-hero-content">
+${pill ? `<span class="moment-pill">${escapeHtml(pill)}</span>` : `<small>KhamaKey Moments</small>`}
+${profileBlock}
+<h1>${escapeHtml(title)}</h1>${description ? `<p>${escapeHtml(description)}</p>` : ""}
+</div><div class="moment-scroll-hint" aria-hidden="true"><span>Scorri</span><i></i></div></section>
+<section class="moment-content">${counterHtml}${sectionHtml}</section>
+<footer class="moment-footer">Creato con cura · KhamaKey Moments</footer>
+</main>
+<script>${momentPageScript(state.together_since, Boolean(state.show_together_counter))}</script>
+</body></html>`;
 }
 
-function momentPageCss() {
-  return `*{box-sizing:border-box}body{margin:0;font-family:"DM Sans",Arial,sans-serif;background:#eef2f7;color:#172036}
-.moment-page{width:min(100%,680px);min-height:100vh;margin:auto;background:#fff;box-shadow:0 24px 70px rgba(17,32,65,.12)}
-.moment-hero{position:relative;min-height:320px;padding:72px 24px 42px;text-align:center;color:#fff;background:linear-gradient(145deg,#1b2a5e 0%,#4caf27 100%);overflow:hidden;display:grid;align-content:end}
-.theme-celebration .moment-hero{background:linear-gradient(145deg,#6d28d9 0%,#f59e0b 100%)}
-.theme-minimal .moment-hero{background:linear-gradient(145deg,#334155 0%,#94a3b8 100%)}
-.theme-memorial .moment-hero{background:linear-gradient(145deg,#475569 0%,#1e293b 100%)}
-.moment-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.moment-hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(9,16,36,.08),rgba(9,16,36,.68))}
+function resolveMomentPalette(state) {
+  const palettes = {
+    rosa:{go:"#C8A977",g2:"#E8CC95",ro:"#F2C4B8",bl:"#FFF8F5",bl2:"#FDEEE8",in:"#1C1C1E",hero:"#FDE8E0",mu:"#8E8E93"},
+    blu:{go:"#4A7CBF",g2:"#8BB5E8",ro:"#B8D0F2",bl:"#F5F8FF",bl2:"#EAF0FB",in:"#1A2A3A",hero:"#1A2A4A",mu:"#64748B"},
+    salvia:{go:"#5A7A5A",g2:"#8AB58A",ro:"#B8D4B0",bl:"#F5FAF5",bl2:"#E8F4E8",in:"#1E2E1E",hero:"#2A4A2A",mu:"#64748B"},
+    bordeaux:{go:"#8C3A4A",g2:"#C47A87",ro:"#E8B0BB",bl:"#FFF5F7",bl2:"#FDEAE0",in:"#2A1018",hero:"#3A1020",mu:"#64748B"},
+    perla:{go:"#6A6A7A",g2:"#9A9AAA",ro:"#C8C8D8",bl:"#F8F8FA",bl2:"#EEEEEE",in:"#1E1E2E",hero:"#2A2A3A",mu:"#64748B"},
+    lavanda:{go:"#7B68AE",g2:"#A694D4",ro:"#C8B8E8",bl:"#F8F5FF",bl2:"#EEE8F8",in:"#1E1828",hero:"#2A1E3A",mu:"#64748B"},
+    cipria:{go:"#C4917A",g2:"#E0B8A4",ro:"#F0D0C4",bl:"#FFF7F4",bl2:"#FDE8E0",in:"#2A1E18",hero:"#3A2820",mu:"#64748B"},
+    corallo:{go:"#D4756A",g2:"#E8A098",ro:"#F0C0B8",bl:"#FFF6F4",bl2:"#FDE8E4",in:"#2A1614",hero:"#3A2018",mu:"#64748B"},
+    miele:{go:"#B8922E",g2:"#D4B05A",ro:"#E8D0A0",bl:"#FFFBF2",bl2:"#F8F0E0",in:"#2A2210",hero:"#3A3018",mu:"#64748B"},
+    notte:{go:"#8AA0C8",g2:"#B0C4E0",ro:"#C8D4E8",bl:"#F0F4FA",bl2:"#E0E8F4",in:"#101828",hero:"#0E1420",mu:"#64748B"},
+    neve:{go:"#A0A0AE",g2:"#C0C0CC",ro:"#D8D8E0",bl:"#FAFAFA",bl2:"#F0F0F2",in:"#18181E",hero:"#E8E8EE",mu:"#64748B"},
+    classic:{go:"#4CAF27",g2:"#3A8E1E",ro:"#EBF7E4",bl:"#F5F7FA",bl2:"#E2E8F0",in:"#172036",hero:"#1B2A5E",mu:"#64748B"}
+  };
+  const variants = {
+    caldo:{
+      rosa:{bl:"#F8EDE4",bl2:"#F0E0D2",in:"#2A1E14"},
+      blu:{bl:"#E8EEF8",bl2:"#D8E4F0",in:"#1A2440"},
+      salvia:{bl:"#E8F0E4",bl2:"#D8E8D0",in:"#1E2E1A"},
+      bordeaux:{bl:"#F8E4E8",bl2:"#F0D4D8",in:"#2E1018"},
+      perla:{bl:"#F0EEE8",bl2:"#E4E0D8",in:"#22201A"},
+      lavanda:{bl:"#EEE8F4",bl2:"#E0D8EC",in:"#201828"},
+      cipria:{bl:"#F4E4DA",bl2:"#ECD8CC",in:"#2E1E14"},
+      corallo:{bl:"#F8E2DC",bl2:"#F0D4CC",in:"#2E1A14"},
+      miele:{bl:"#F4ECDA",bl2:"#ECE0C8",in:"#2E2410"},
+      notte:{bl:"#E4E8F0",bl2:"#D4D8E4",in:"#141820"},
+      neve:{bl:"#EEEEE4",bl2:"#E0E0D8",in:"#1E1E18"}
+    },
+    scuro:{
+      rosa:{bl:"#1E1814",bl2:"#2A2018",in:"#F0E4DA",go:"#D4B888",g2:"#E8CC95",ro:"#C4947A",mu:"#A09080"},
+      blu:{bl:"#0E1420",bl2:"#182030",in:"#D8E4F0",go:"#6A9CD8",g2:"#8BB5E8",ro:"#8AA0C0",mu:"#7888A0"},
+      salvia:{bl:"#121E14",bl2:"#1A2A1C",in:"#D4E8D0",go:"#7AA07A",g2:"#8AB58A",ro:"#90B488",mu:"#789878"},
+      bordeaux:{bl:"#1A0E14",bl2:"#281420",in:"#F0D4DA",go:"#B05060",g2:"#C47A87",ro:"#A06A78",mu:"#987080"},
+      perla:{bl:"#141418",bl2:"#1E1E24",in:"#E0E0E8",go:"#8888A0",g2:"#9A9AAA",ro:"#9898A8",mu:"#787888"},
+      lavanda:{bl:"#141020",bl2:"#1E1830",in:"#D8D0E8",go:"#9480C0",g2:"#A694D4",ro:"#9888B8",mu:"#807098"},
+      cipria:{bl:"#1E1410",bl2:"#2A1E18",in:"#F0DCD0",go:"#D4A088",g2:"#E0B8A4",ro:"#C0988A",mu:"#A08878"},
+      corallo:{bl:"#1E1210",bl2:"#2A1A18",in:"#F0DAD4",go:"#E08878",g2:"#E8A098",ro:"#C08878",mu:"#A08078"},
+      miele:{bl:"#1A1608",bl2:"#282010",in:"#F0E4C8",go:"#D0A840",g2:"#D4B05A",ro:"#C0A870",mu:"#A09060"},
+      notte:{bl:"#080C14",bl2:"#0E1420",in:"#C8D4E4",go:"#90A8D0",g2:"#B0C4E0",ro:"#8898B8",mu:"#607090"},
+      neve:{bl:"#141414",bl2:"#1E1E1E",in:"#E0E0E0",go:"#B0B0B8",g2:"#C0C0CC",ro:"#989898",mu:"#808088"}
+    }
+  };
+  const legacy = { celebration:"corallo", minimal:"neve", memorial:"perla" };
+  const paletteKey = state.colorPalette || legacy[state.theme] || "classic";
+  const base = { ...(palettes[paletteKey] || palettes.classic) };
+  const variant = state.themeVariant === "scuro" || state.themeVariant === "caldo" ? state.themeVariant : "chiaro";
+  const overrides = variants[variant]?.[paletteKey];
+  if(overrides) Object.assign(base, overrides);
+  return base;
+}
+
+function renderTogetherCounter(state, colors) {
+  if(!state.show_together_counter || !state.together_since) return "";
+  const date = String(state.together_since).slice(0, 10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return "";
+  return `<section class="moment-counter rv" data-since="${attr(date)}" data-hms="${state.show_counter_hms ? "1" : "0"}">
+<div class="moment-counter-label">Insieme da</div>
+<div class="moment-counter-grid">
+<span class="moment-counter-unit"><b data-unit="years">0</b><small>anni</small></span>
+<span class="moment-counter-unit"><b data-unit="months">0</b><small>mesi</small></span>
+<span class="moment-counter-unit"><b data-unit="days">0</b><small>giorni</small></span>
+</div></section>`;
+}
+
+function momentPageScript(since, enabled) {
+  if(!enabled || !since) return `(function(){document.querySelectorAll(".rv").forEach(function(n,i){setTimeout(function(){n.classList.add("on")},80*i)});})();`;
+  return `(function(){
+var nodes=document.querySelectorAll(".rv");nodes.forEach(function(n,i){setTimeout(function(){n.classList.add("on")},80*i)});
+var box=document.querySelector(".moment-counter");if(!box)return;
+var since=new Date(box.dataset.since+"T00:00:00");if(isNaN(since))return;
+function paint(){
+var now=new Date();var y=now.getFullYear()-since.getFullYear();var m=now.getMonth()-since.getMonth();var d=now.getDate()-since.getDate();
+if(d<0){m--;d+=new Date(now.getFullYear(),now.getMonth(),0).getDate()}if(m<0){y--;m+=12}
+var map={years:y,months:m,days:d};Object.keys(map).forEach(function(k){var n=box.querySelector('[data-unit="'+k+'"]');if(n)n.textContent=map[k]});
+}
+paint();setInterval(paint,box.dataset.hms==="1"?1000:60000);
+})();`;
+}
+
+function momentPageCss(colors) {
+  const c = colors;
+  return `*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:"Cormorant Infant",Georgia,serif;background:${c.bl};color:${c.in};-webkit-font-smoothing:antialiased}
+.moment-page{width:min(100%,680px);min-height:100vh;margin:auto;background:${c.bl};box-shadow:0 24px 70px rgba(17,32,65,.12);overflow:hidden}
+.moment-hero{position:relative;min-height:min(92svh,720px);padding:72px 24px 56px;text-align:center;color:#fff;background:linear-gradient(145deg,${c.hero},${c.go});overflow:hidden;display:grid;align-content:end}
+.hero-fullscreen .moment-hero{min-height:100svh}
+.moment-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.02);animation:heroZoom 14s ease forwards}
+@keyframes heroZoom{to{transform:scale(1)}}
+.moment-hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(10,10,20,.82))}
 .moment-hero-content{position:relative;z-index:1;max-width:520px;margin:0 auto}
-.moment-hero small{display:block;font-weight:800;text-transform:uppercase;letter-spacing:.16em;opacity:.92}
-.moment-hero h1{font-family:"Syne",sans-serif;font-size:clamp(2rem,8vw,3.6rem);line-height:1.02;margin:12px 0}
-.moment-hero p{line-height:1.6;margin:0 auto;max-width:480px;opacity:.95}
-.moment-content{padding:20px 18px 28px}
-.moment-card{border:1px solid #e2e8f0;border-radius:20px;padding:18px 18px 16px;margin:14px 0;background:#fff;box-shadow:0 10px 28px rgba(27,42,94,.06)}
-.moment-card-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.moment-card-icon{width:34px;height:34px;border-radius:999px;display:grid;place-items:center;background:#f8fafc;border:1px solid #e2e8f0;font-size:.9rem}
-.moment-card strong{display:block;color:#1b2a5e;font-size:1.08rem;font-family:"Syne",sans-serif}
-.moment-card p{color:#526078;line-height:1.7;white-space:pre-wrap;margin:0}
-.moment-card-empty strong{margin-bottom:8px}
-.moment-timeline{display:grid;gap:10px;margin-top:4px}
-.moment-timeline-item{display:grid;grid-template-columns:10px 1fr;gap:12px;align-items:start}
-.moment-timeline-dot{width:10px;height:10px;border-radius:999px;background:#4caf27;margin-top:7px;box-shadow:0 0 0 4px rgba(76,175,39,.16)}
-.theme-celebration .moment-timeline-dot{background:#f59e0b;box-shadow:0 0 0 4px rgba(245,158,11,.18)}
-.theme-memorial .moment-timeline-dot{background:#94a3b8;box-shadow:0 0 0 4px rgba(148,163,184,.18)}
-.moment-timeline-text{color:#334155;line-height:1.55;font-weight:600}
-.moment-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.moment-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #e2e8f0;border-radius:999px;padding:7px 12px;font-size:.84rem;color:#1b2a5e;background:#f8fafc;text-decoration:none;font-weight:700}
-.moment-chip-action{background:#1b2a5e;color:#fff;border-color:#1b2a5e}
+.moment-pill{display:inline-block;font-family:"DM Sans",sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.92);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:8px 18px;margin-bottom:16px}
+.moment-hero small{display:block;font-family:"DM Sans",sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.16em;opacity:.88;margin-bottom:12px}
+.moment-profile{width:96px;height:96px;border-radius:999px;object-fit:cover;border:3px solid rgba(255,255,255,.85);box-shadow:0 12px 40px rgba(0,0,0,.25);margin:0 auto 16px;display:block}
+.moment-hero h1{font-family:"Great Vibes","Cormorant Infant",cursive;font-size:clamp(2.4rem,10vw,3.8rem);font-weight:400;line-height:1.08;margin:8px 0;text-shadow:0 2px 24px rgba(0,0,0,.35)}
+.moment-hero p{font-family:"Cormorant Infant",serif;font-size:clamp(1rem,3.8vw,1.15rem);font-style:italic;line-height:1.65;margin:0 auto;max-width:480px;opacity:.92}
+.moment-scroll-hint{position:absolute;left:0;right:0;bottom:18px;display:grid;justify-items:center;gap:6px;opacity:.7}
+.moment-scroll-hint span{font-family:"DM Sans",sans-serif;font-size:.58rem;letter-spacing:.22em;text-transform:uppercase}
+.moment-scroll-hint i{display:block;width:1px;height:28px;background:linear-gradient(#fff,transparent);animation:scrollPulse 2.4s ease-in-out infinite}
+@keyframes scrollPulse{0%,100%{opacity:.5;transform:scaleY(1)}50%{opacity:.15;transform:scaleY(.55)}}
+.moment-content{padding:8px 0 28px}
+.moment-counter{background:${c.bl2};padding:40px 20px;text-align:center;border-bottom:1px solid rgba(0,0,0,.04)}
+.moment-counter-label{font-family:"DM Sans",sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:${c.go};margin-bottom:20px}
+.moment-counter-grid{display:flex;justify-content:center;gap:0}
+.moment-counter-unit{flex:1;max-width:100px;padding:0 14px}
+.moment-counter-unit:not(:last-child){border-right:1px solid ${c.ro}}
+.moment-counter-unit b{display:block;font-size:clamp(1.8rem,8vw,2.4rem);font-weight:300;font-style:italic;line-height:1;color:${c.in}}
+.moment-counter-unit small{display:block;font-family:"DM Sans",sans-serif;font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:${c.mu};margin-top:8px}
+.moment-card{border:none;border-radius:0;padding:36px 22px;margin:0;background:transparent;max-width:460px;margin-inline:auto}
+.moment-card:nth-child(even){background:${c.bl2}}
+.moment-card-head{display:grid;justify-items:center;text-align:center;margin-bottom:18px}
+.moment-card-icon{width:auto;height:auto;border-radius:0;background:transparent;border:none;font-size:1rem;color:${c.go};margin-bottom:8px}
+.moment-card strong{display:block;color:${c.in};font-size:clamp(1.15rem,4vw,1.35rem);font-family:"Cormorant Infant",serif;font-weight:600;letter-spacing:.02em}
+.moment-card strong::before,.moment-card strong::after{content:"";display:inline-block;width:18px;height:1px;background:${c.go};opacity:.35;vertical-align:middle;margin:0 10px}
+.moment-card p{color:${c.in};opacity:.82;line-height:1.85;white-space:pre-wrap;margin:0;font-size:clamp(1rem,3.6vw,1.08rem)}
+.moment-card-empty{text-align:center;padding:48px 24px}
+.moment-card-message p{font-style:italic;text-align:center;font-size:clamp(1.05rem,4vw,1.2rem)}
+.moment-timeline{display:grid;gap:0;margin-top:8px;padding-left:20px;border-left:1px solid ${c.ro}}
+.moment-timeline-item{padding:0 0 28px 24px;position:relative}
+.moment-timeline-item:last-child{padding-bottom:0}
+.moment-timeline-dot{position:absolute;left:-5px;top:6px;width:9px;height:9px;border-radius:999px;background:${c.go};box-shadow:0 0 0 4px ${c.bl}}
+.moment-timeline-text{color:${c.in};line-height:1.65;font-size:1.02rem}
+.moment-meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.moment-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid ${c.ro};border-radius:999px;padding:8px 14px;font-family:"DM Sans",sans-serif;font-size:.78rem;color:${c.in};background:${c.bl};text-decoration:none;font-weight:700}
+.moment-chip-action{background:${c.in};color:${c.bl};border-color:${c.in}}
+.moment-gallery-scroll{margin:16px -22px 0;padding:0 22px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x mandatory}
+.moment-gallery-scroll::-webkit-scrollbar{display:none}
+.moment-gallery-track{display:flex;gap:12px;width:max-content}
+.moment-gallery-scroll img{width:70vw;max-width:240px;height:calc(70vw * 1.25);max-height:300px;object-fit:cover;border-radius:18px;scroll-snap-align:start;box-shadow:0 10px 32px rgba(0,0,0,.1)}
 .moment-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
-.moment-gallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;border:1px solid #e2e8f0}
-.moment-footer{text-align:center;color:#64748b;font-size:12px;padding:8px 20px 24px}
-@media(min-width:720px){body{padding:24px}.moment-page{border-radius:12px;overflow:hidden}.moment-gallery{grid-template-columns:repeat(3,minmax(0,1fr))}}`;
+.moment-gallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;border:1px solid ${c.ro}}
+.moment-footer{text-align:center;color:${c.mu};font-family:"DM Sans",sans-serif;font-size:12px;padding:16px 20px 28px}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease}
+.rv.on{opacity:1;transform:none}
+@media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{border-radius:16px;overflow:hidden}.moment-gallery-scroll img{width:240px;height:300px}}`;
 }
 
 const MOMENT_SECTION_ICONS = {
@@ -420,17 +540,23 @@ const MOMENT_SECTION_ICONS = {
   message: "❝"
 };
 
-function renderMomentSection(key, section) {
+function renderMomentSection(key, section, colors) {
   const images = Array.isArray(section.images) ? section.images.filter(url => safeUrl(url) !== "#").slice(0, 24) : [];
   const icon = MOMENT_SECTION_ICONS[key] || "•";
   const head = `<div class="moment-card-head"><span class="moment-card-icon">${icon}</span><strong>${escapeHtml(section.title || "Sezione")}</strong></div>`;
+  const rv = `moment-card moment-card-${escapeHtml(key)} rv`;
 
   if (key === "schedule" && section.body) {
     const items = String(section.body).split("\n").map(line => line.trim()).filter(Boolean);
     const timeline = items.length
-      ? `<div class="moment-timeline">${items.map(line => `<div class="moment-timeline-item"><span class="moment-timeline-dot"></span><span class="moment-timeline-text">${escapeHtml(line)}</span></div>`).join("")}</div>`
+      ? `<div class="moment-timeline">${items.map(line => {
+          const parts = line.match(/^(.+?)[\s·\-–—]+(.+)$/);
+          const date = parts ? parts[1] : "";
+          const text = parts ? parts[2] : line;
+          return `<div class="moment-timeline-item"><span class="moment-timeline-dot"></span><span class="moment-timeline-text">${date ? `<span style="font-family:DM Sans,sans-serif;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:${colors.go};display:block;margin-bottom:4px">${escapeHtml(date)}</span>` : ""}${escapeHtml(text)}</span></div>`;
+        }).join("")}</div>`
       : "";
-    return `<article class="moment-card moment-card-schedule">${head}${timeline}</article>`;
+    return `<article class="${rv}">${head}${timeline}</article>`;
   }
 
   if (key === "location") {
@@ -440,7 +566,7 @@ function renderMomentSection(key, section) {
     if (mapsUrl !== "#") chips.push(`<a class="moment-chip moment-chip-action" href="${attr(mapsUrl)}" target="_blank" rel="noopener">Apri mappe</a>`);
     const body = section.body ? `<p>${escapeHtml(section.body)}</p>` : "";
     const meta = chips.length ? `<div class="moment-meta">${chips.join("")}</div>` : "";
-    return `<article class="moment-card moment-card-location">${head}${body}${meta}</article>`;
+    return `<article class="${rv}">${head}${body}${meta}</article>`;
   }
 
   if (key === "contacts") {
@@ -449,14 +575,17 @@ function renderMomentSection(key, section) {
     if (section.phone) chips.push(`<a class="moment-chip moment-chip-action" href="tel:${attr(section.phone.replace(/\s+/g, ""))}">${escapeHtml(section.phone)}</a>`);
     const body = section.body ? `<p>${escapeHtml(section.body)}</p>` : "";
     const meta = chips.length ? `<div class="moment-meta">${chips.join("")}</div>` : "";
-    return `<article class="moment-card moment-card-contacts">${head}${body}${meta}</article>`;
+    return `<article class="${rv}">${head}${body}${meta}</article>`;
   }
 
-  const gallery = key === "gallery" && images.length
-    ? `<div class="moment-gallery">${images.map(url => `<img src="${attr(url)}" alt="">`).join("")}</div>`
-    : "";
+  let gallery = "";
+  if (key === "gallery" && images.length) {
+    gallery = images.length >= 2
+      ? `<div class="moment-gallery-scroll"><div class="moment-gallery-track">${images.map(url => `<img src="${attr(url)}" alt="" loading="lazy">`).join("")}</div></div>`
+      : `<div class="moment-gallery">${images.map(url => `<img src="${attr(url)}" alt="" loading="lazy">`).join("")}</div>`;
+  }
   const body = section.body ? `<p>${escapeHtml(section.body)}</p>` : "";
-  return `<article class="moment-card moment-card-${escapeHtml(key)}">${head}${body}${gallery}</article>`;
+  return `<article class="${rv}${key === "message" ? " moment-card-message" : ""}">${head}${body}${gallery}</article>`;
 }
 
 function renderMomentActivationPage(product, origin, env = {}) {

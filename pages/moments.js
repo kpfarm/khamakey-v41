@@ -15,12 +15,11 @@ const signupForm = document.getElementById("momentsSignupForm");
 const forgotForm = document.getElementById("momentsForgotForm");
 const recoveryForm = document.getElementById("momentsRecoveryForm");
 const statusNode = document.getElementById("momentsAuthStatus");
-const activationForm = document.getElementById("activationForm");
-const activationStatus = document.getElementById("activationStatus");
-const list = document.getElementById("momentsList");
 const detail = document.getElementById("momentDetail");
 const userEmail = document.getElementById("momentsUserEmail");
-const objectCount = document.getElementById("objectCount");
+const userAvatar = document.getElementById("momentsUserAvatar");
+const userMenu = document.getElementById("momentsUserMenu");
+const userMenuBtn = document.getElementById("momentsUserMenuBtn");
 const PUBLIC_BASE_URL = WORKER_BASE_URL;
 
 const SECTION_ORDER_DEFAULT = ["intro","details","gallery","schedule","location","contacts","message"];
@@ -66,13 +65,28 @@ const SECTION_SUBTITLES = {
 };
 
 const EDITOR_PANELS = {
+  objects:{title:"Oggetti & Account",subtitle:"Scegli quale pagina modificare o attiva un nuovo prodotto NFC"},
   cover:{title:"Copertina",subtitle:"Titolo, immagine e tema della pagina pubblica"},
   order:{title:"Ordine sezioni",subtitle:"Trascina per definire l'ordine nella pagina NFC"},
   privacy:{title:"Privacy & PIN",subtitle:"Visibilità, bozza e protezione con PIN"}
 };
 
-let activeEditorPanel = "cover";
+let activeEditorPanel = "objects";
 let mobilePreviewMode = false;
+
+const MOBILE_NAV = [
+  {id:"objects",label:"Oggetti",icon:"◉"},
+  {id:"cover",label:"Copertina",icon:"✦"},
+  {id:"section-intro",label:"Intro",icon:"✦"},
+  {id:"section-details",label:"Dettagli",icon:"◎"},
+  {id:"section-gallery",label:"Foto",icon:"▣"},
+  {id:"section-schedule",label:"Programma",icon:"◷"},
+  {id:"section-location",label:"Luogo",icon:"⌖"},
+  {id:"section-contacts",label:"Contatti",icon:"☎"},
+  {id:"section-message",label:"Messaggio",icon:"❝"},
+  {id:"order",label:"Ordine",icon:"☰"},
+  {id:"privacy",label:"PIN",icon:"🔒"}
+];
 
 const SECTION_ICONS = {
   intro:"✦",
@@ -178,6 +192,45 @@ function validatePin(pin){
   const clean = String(pin || "").trim();
   if(clean.length < 4) throw new Error("Il PIN deve avere almeno 4 caratteri.");
   return clean;
+}
+
+function pinStorageKey(eventId){
+  return `moments_pin_${eventId}`;
+}
+
+function rememberPin(eventId,pin){
+  if(!eventId || !pin) return;
+  try{ localStorage.setItem(pinStorageKey(eventId),String(pin)); }catch{}
+}
+
+function getRememberedPin(eventId){
+  try{ return localStorage.getItem(pinStorageKey(eventId)) || ""; }catch{ return ""; }
+}
+
+function clearRememberedPin(eventId){
+  try{ localStorage.removeItem(pinStorageKey(eventId)); }catch{}
+}
+
+function showPinSuccessBanner(eventId,pin,title){
+  const existing = document.getElementById("pinSuccessBanner");
+  existing?.remove();
+  const banner = document.createElement("div");
+  banner.id = "pinSuccessBanner";
+  banner.className = "pin-success-banner";
+  banner.innerHTML = `
+    <div>
+      <p class="eyebrow">PIN impostato</p>
+      <h3>Salva il PIN di «${esc(title || "la tua pagina")}»</h3>
+      <p>Serve per aprire la pagina pubblica NFC. Non possiamo mostrarlo di nuovo su altri dispositivi.</p>
+      <div class="pin-reveal-row">
+        <code id="pinRevealValue">${esc(pin)}</code>
+        <button type="button" class="ghost" id="copyPinBtn">Copia PIN</button>
+      </div>
+    </div>
+    <button type="button" class="pin-success-close" id="dismissPinBanner" aria-label="Chiudi">×</button>`;
+  detail.prepend(banner);
+  document.getElementById("copyPinBtn")?.addEventListener("click",()=>copyText(pin,document.getElementById("copyPinBtn")));
+  document.getElementById("dismissPinBanner")?.addEventListener("click",()=>banner.remove());
 }
 
 function parseImageLines(value){
@@ -343,30 +396,171 @@ function showAuth(message=""){
 }
 
 async function showApp(user){
+  if(!user) return;
   currentUser = user;
   auth.hidden = true;
   app.hidden = false;
-  userEmail.textContent = user.email || "";
-  if(adminMode){
-    document.getElementById("activationPanel")?.setAttribute("hidden","");
-    document.querySelector(".side-panel")?.setAttribute("hidden","");
-    document.querySelector(".layout")?.classList.add("admin-layout");
+  const email = user.email || "";
+  if(userEmail) userEmail.textContent = email;
+  if(userAvatar) userAvatar.textContent = (email[0] || "K").toUpperCase();
+  ensureMobileNav();
+  bindGlobalAppChrome();
+  try{
+    await loadObjects();
+    if(!adminMode) await tryPendingActivation(user);
+  }catch(error){
+    console.error(error);
+    setStatus(statusNode,error.message || "Errore caricamento area Moments.","error");
   }
-  await loadObjects();
-  if(!adminMode) await tryPendingActivation(user);
+}
+
+function bindGlobalAppChrome(){
+  if(userMenuBtn && userMenu && userMenuBtn.dataset.bound !== "1"){
+    userMenuBtn.dataset.bound = "1";
+    userMenuBtn.addEventListener("click",event=>{
+      event.stopPropagation();
+      userMenu.classList.toggle("open");
+    });
+    document.addEventListener("click",event=>{
+      if(!userMenu.contains(event.target) && event.target !== userMenuBtn) userMenu.classList.remove("open");
+    });
+  }
+  if(document.getElementById("momentsPreviewFab")?.dataset.bound !== "1"){
+    const fab = document.getElementById("momentsPreviewFab");
+    fab.dataset.bound = "1";
+    fab.addEventListener("click",()=>{
+      const shell = document.getElementById("momentEditorShell");
+      if(!shell) return;
+      mobilePreviewMode = !mobilePreviewMode;
+      shell.classList.toggle("show-preview",mobilePreviewMode);
+      fab.textContent = mobilePreviewMode ? "Modifica" : "Anteprima";
+    });
+  }
+}
+
+function ensureMobileNav(){
+  const inner = document.getElementById("momentsBnavInner");
+  if(!inner || inner.dataset.ready === "1") return;
+  inner.dataset.ready = "1";
+  MOBILE_NAV.forEach(item=>{
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "bnav-item";
+    button.dataset.editorPanel = item.id;
+    button.innerHTML = `<span class="bnav-icon">${item.icon}</span>${item.label}`;
+    button.addEventListener("click",()=>{
+      setEditorPanel(item.id);
+      const shell = document.getElementById("momentEditorShell");
+      if(shell && mobilePreviewMode){
+        mobilePreviewMode = false;
+        shell.classList.remove("show-preview");
+        const fab = document.getElementById("momentsPreviewFab");
+        if(fab) fab.textContent = "Anteprima";
+      }
+      window.scrollTo({top:0,behavior:"smooth"});
+    });
+    inner.appendChild(button);
+  });
+}
+
+function syncMobileNav(panelId){
+  document.querySelectorAll("#momentsBnavInner .bnav-item").forEach(button=>{
+    button.classList.toggle("active",button.dataset.editorPanel === panelId);
+  });
+}
+
+function bindPageMenuActions(publicUrl,nfcUrl){
+  const openPage = document.getElementById("momentsMenuOpenPage");
+  const testNfc = document.getElementById("momentsMenuTestNfc");
+  const copyLink = document.getElementById("momentsMenuCopyLink");
+  if(openPage){
+    openPage.hidden = !publicUrl;
+    openPage.onclick = ()=>publicUrl && window.open(publicUrl,"_blank","noopener");
+  }
+  if(testNfc){
+    testNfc.hidden = !nfcUrl;
+    testNfc.onclick = ()=>nfcUrl && window.open(nfcUrl,"_blank","noopener");
+  }
+  if(copyLink){
+    copyLink.hidden = !publicUrl;
+    copyLink.onclick = ()=>publicUrl && copyText(publicUrl,copyLink);
+  }
 }
 
 async function tryPendingActivation(user){
   const pendingCode = normalizeCode(user?.user_metadata?.pending_moment_code || "");
   if(!pendingCode || rows.some(row=>normalizeCode(row.nfc_code) === pendingCode)) return;
-  setStatus(activationStatus,`Hai un codice da attivare (${pendingCode}). Compila il modulo sotto.`,"ok");
-  const codeInput = activationForm?.elements?.code;
-  if(codeInput && !codeInput.value) codeInput.value = pendingCode;
-  document.getElementById("activationPanel")?.scrollIntoView({behavior:"smooth",block:"start"});
+  activeEditorPanel = "objects";
+  if(activeId) renderDetail(activeId);
+  else renderEmptyState(`Hai un codice da attivare (${pendingCode}). Compilalo nel modulo sotto.`,pendingCode);
+}
+
+function renderObjectsListHtml(){
+  if(!rows.length) return `<p class="empty-inline">Nessun oggetto collegato. Attiva il primo codice nel modulo sotto.</p>`;
+  return rows.map(row=>{
+    const state = mergedState(row);
+    const type = TYPE_LABELS[state.type] || state.type;
+    return `<button class="object-pick ${row.id === activeId ? "active" : ""}" type="button" data-object-id="${esc(row.id)}">
+      ${esc(state.title || row.slug)}
+      <span>${esc(row.nfc_code || "NFC")} · ${row.public_visible ? "pubblicata" : "bozza"}</span>
+      <span class="type-pill">${esc(type)}</span>
+    </button>`;
+  }).join("");
+}
+
+function renderActivationFormHtml(formId = "editorActivationForm",statusId = "editorActivationStatus",prefillCode = ""){
+  return `<form id="${formId}" class="activation-inline-form">
+    <label>Codice NFC<input name="code" autocomplete="off" placeholder="Esempio MOMENT1234" value="${esc(prefillCode)}" required></label>
+    <label>Nome pagina<input name="title" placeholder="Esempio Il nostro viaggio" required></label>
+    <label>PIN pagina<input name="access_pin" inputmode="numeric" autocomplete="new-password" placeholder="Esempio 1234" minlength="4" required></label>
+    <label>Tipo utilizzo
+      <select name="moment_type">
+        ${Object.entries(TYPE_LABELS).map(([value,label])=>option(value,label,"free")).join("")}
+      </select>
+    </label>
+    <button type="submit" class="primary">Attiva oggetto</button>
+  </form>
+  <p class="status" id="${statusId}"></p>`;
+}
+
+function renderObjectsPanel(){
+  return `<div class="editor-panel ${activeEditorPanel === "objects" ? "active" : ""}" data-editor-panel="objects">
+    ${renderSectionHeader(EDITOR_PANELS.objects.title,EDITOR_PANELS.objects.subtitle)}
+    <div class="editor-card">
+      <div class="side-head">
+        <strong>Pagine collegate</strong>
+        <span class="objects-count">${rows.length}</span>
+      </div>
+      <div class="objects-switcher" id="objectsSwitcher">${renderObjectsListHtml()}</div>
+      <div class="activation-inline">
+        <h3>Attiva un altro prodotto</h3>
+        <p class="field-hint">Ogni codice NFC attiva il link pubblico già preparato per quell'oggetto.</p>
+        ${renderActivationFormHtml()}
+      </div>
+    </div>
+    <div class="editor-card account-card">
+      <p class="eyebrow">Account</p>
+      <p>${esc(currentUser?.email || "")}</p>
+      <button type="button" class="ghost" id="editorLogout">Esci dall'account</button>
+    </div>
+  </div>`;
+}
+
+function renderEmptyState(message = "",prefillCode = ""){
+  setEditorChromeVisible(false);
+  detail.innerHTML = `
+    <div class="empty-state">
+      <p class="eyebrow">KhamaKey Moments</p>
+      <h2>Attiva il tuo primo oggetto</h2>
+      <p>${esc(message || "Inserisci il codice NFC ricevuto con il prodotto per creare la pagina collegata.")}</p>
+    </div>
+    <div class="editor-card" style="margin-top:16px;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:14px">
+      ${renderActivationFormHtml("emptyActivationForm","emptyActivationStatus",prefillCode)}
+    </div>`;
+  bindActivationForm(document.getElementById("emptyActivationForm"),document.getElementById("emptyActivationStatus"));
 }
 
 async function loadObjects(){
-  list.textContent = "Caricamento oggetti...";
   let query = supabase
     .from("moment_events")
     .select("id,title,slug,event_type,moment_type,status,description,nfc_code,pin_enabled,public_visible,owner_email,page_state,created_at")
@@ -379,8 +573,7 @@ async function loadObjects(){
   const { data,error } = await query;
   if(error){
     console.error(error);
-    list.textContent = adminMode ? "Oggetto non trovato o permessi admin insufficienti." : "Oggetti non disponibili. Verifica SQL v40 e account Moments.";
-    if(objectCount) objectCount.textContent = "0";
+    renderEmptyState(adminMode ? "Oggetto non trovato o permessi admin insufficienti." : "Oggetti non disponibili. Verifica account e codice prodotto.");
     return;
   }
   rows = data || [];
@@ -390,21 +583,68 @@ async function loadObjects(){
       banner.hidden = false;
       banner.textContent = `Modalità admin — stai modificando l'oggetto di ${rows[0].owner_email || "cliente"}. Le modifiche sono visibili al cliente.`;
     }
-    if(list) list.hidden = true;
   }
-  if(objectCount) objectCount.textContent = String(rows.length);
-  list.innerHTML = rows.length ? rows.map(row=>{
-    const state = mergedState(row);
-    const type = TYPE_LABELS[state.type] || state.type;
-    return `<button class="object-button ${row.id === activeId ? "active" : ""}" type="button" data-object-id="${esc(row.id)}">
-      ${esc(state.title || row.slug)}
-      <span>${esc(row.nfc_code || "NFC")} · ${row.public_visible ? "pubblicata" : "bozza"}</span>
-      <span class="type-pill">${esc(type)}</span>
-    </button>`;
-  }).join("") : `<p class="empty-inline">Nessun oggetto collegato. Attiva il codice ricevuto con il prodotto.</p>`;
   if(rows.length && !rows.some(row=>row.id === activeId)) activeId = rows[0].id;
   if(activeId) renderDetail(activeId);
-  else detail.innerHTML = `<div class="empty-state"><h2>Attiva il tuo primo oggetto</h2><p>Inserisci il codice NFC nel modulo attivazione oppure crea l’account con il codice prodotto.</p></div>`;
+  else renderEmptyState();
+}
+
+function refreshObjectsSwitcher(){
+  const node = document.getElementById("objectsSwitcher");
+  if(node) node.innerHTML = renderObjectsListHtml();
+  document.querySelectorAll(".objects-count").forEach(node=>{ node.textContent = String(rows.length); });
+  bindObjectSwitcher(detail);
+}
+
+function bindObjectSwitcher(root){
+  root?.querySelectorAll("[data-object-id]").forEach(button=>{
+    if(button.dataset.bound === "1") return;
+    button.dataset.bound = "1";
+    button.addEventListener("click",()=>{
+      if(button.dataset.objectId === activeId) return;
+      if(editorDirty && !confirm("Hai modifiche non salvate. Vuoi cambiare oggetto senza salvare?")) return;
+      activeEditorPanel = "objects";
+      renderDetail(button.dataset.objectId);
+    });
+  });
+}
+
+function bindActivationForm(form,statusEl){
+  if(!form) return;
+  bindCodeInputs(form);
+  form.addEventListener("submit",async event=>{
+    event.preventDefault();
+    const data = new FormData(form);
+    const code = normalizeCode(data.get("code"));
+    const title = String(data.get("title") || "").trim();
+    const pin = String(data.get("access_pin") || "").trim();
+    const momentType = String(data.get("moment_type") || "free");
+    if(!/^[A-Z0-9]{8,32}$/.test(code)) return setStatus(statusEl,"Codice non valido.","error");
+    if(!title) return setStatus(statusEl,"Inserisci il nome della pagina.","error");
+    try{ validatePin(pin); }catch(error){ return setStatus(statusEl,error.message,"error"); }
+    setStatus(statusEl,"Collegamento in corso...");
+    try{
+      const item = await activateCode({code,title,momentType,pin});
+      activeId = item.event_id || activeId;
+      rememberPin(activeId,pin);
+      form.reset();
+      setStatus(statusEl,"Prodotto collegato al tuo account.","ok");
+      activeEditorPanel = "cover";
+      await loadObjects();
+      if(activeId) showPinSuccessBanner(activeId,pin,title);
+    }catch(error){
+      console.error(error);
+      setStatus(statusEl,error.message || "Collegamento non riuscito.","error");
+    }
+  });
+}
+
+function enableSection(formNode,key){
+  const enabled = formNode.querySelector(`[name="section_${key}_enabled"]`);
+  if(enabled && !enabled.checked){
+    enabled.checked = true;
+    enabled.dispatchEvent(new Event("change",{bubbles:true}));
+  }
 }
 
 function applyTemplateToForm(formNode,type){
@@ -438,22 +678,22 @@ function needsOnboarding(row){
   return !hasContent && enabledSections <= 2;
 }
 
+function setEditorChromeVisible(visible){
+  document.getElementById("momentsBottomNav")?.toggleAttribute("hidden",!visible);
+  document.getElementById("momentsPreviewFab")?.toggleAttribute("hidden",!visible);
+  app?.classList.toggle("has-editor",visible);
+}
+
 function renderEditorSidebar(activePanel){
   const contentItems = sectionOrder.map(key=>`
     <button type="button" class="editor-nav-item ${activePanel === `section-${key}` ? "active" : ""}" data-editor-panel="section-${esc(key)}">
       <span class="editor-nav-icon">${esc(SECTION_ICONS[key] || "•")}</span>${esc(SECTION_LABELS[key])}
     </button>`).join("");
-  const mobileOptions = [
-    {id:"cover",label:"Copertina"},
-    {id:"order",label:"Ordine sezioni"},
-    ...sectionOrder.map(key=>({id:`section-${key}`,label:SECTION_LABELS[key]})),
-    {id:"privacy",label:"Privacy & PIN"}
-  ].map(item=>`<option value="${esc(item.id)}" ${activePanel === item.id ? "selected" : ""}>${esc(item.label)}</option>`).join("");
   return `<nav class="editor-sidebar" aria-label="Sezioni editor">
-    <label class="editor-mobile-nav">
-      <span>Sezione</span>
-      <select id="editorMobileNav">${mobileOptions}</select>
-    </label>
+    <div class="editor-sidebar-group">Account</div>
+    <button type="button" class="editor-nav-item ${activePanel === "objects" ? "active" : ""}" data-editor-panel="objects">
+      <span class="editor-nav-icon">◉</span>Oggetti & Account
+    </button>
     <div class="editor-sidebar-group">Pagina</div>
     <button type="button" class="editor-nav-item ${activePanel === "cover" ? "active" : ""}" data-editor-panel="cover">
       <span class="editor-nav-icon">✦</span>Copertina
@@ -529,9 +769,24 @@ function renderSectionPanels(state){
 }
 
 function renderPrivacyPanel(row){
+  const savedPin = getRememberedPin(row.id);
+  const pinHintBlock = savedPin ? `
+    <div class="pin-reminder-card">
+      <p class="pin-reminder-label">PIN salvato su questo dispositivo</p>
+      <div class="pin-reveal-row">
+        <code id="savedPinValue">${esc(savedPin)}</code>
+        <button type="button" class="ghost" id="copySavedPinBtn">Copia</button>
+        <button type="button" class="ghost" id="forgetSavedPinBtn">Rimuovi da qui</button>
+      </div>
+      <p class="field-hint">Visibile solo su questo browser. Su un altro dispositivo imposta un nuovo PIN sotto.</p>
+    </div>` : `
+    <div class="pin-reminder-card pin-reminder-empty">
+      <p class="field-hint"><strong>Il PIN non è recuperabile dal server</strong> (viene salvato cifrato). Se l'hai dimenticato, imposta un <em>nuovo PIN</em> nel campo sotto e clicca Salva.</p>
+    </div>`;
   return `<div class="editor-panel ${activeEditorPanel === "privacy" ? "active" : ""}" data-editor-panel="privacy">
     ${renderSectionHeader(EDITOR_PANELS.privacy.title,EDITOR_PANELS.privacy.subtitle)}
     <div class="editor-card">
+      ${pinHintBlock}
       <div class="pin-row">
         <label>Visibilità
           <select name="public_visible" id="publicVisibleSelect">
@@ -547,7 +802,7 @@ function renderPrivacyPanel(row){
         </label>
       </div>
       <label>Nuovo PIN<input name="access_pin" inputmode="numeric" autocomplete="new-password" placeholder="Lascia vuoto per mantenere il PIN attuale"></label>
-      <p class="field-hint">Il PIN protegge la pagina pubblica. Chi ha il link deve inserirlo per vedere i contenuti.</p>
+      <p class="field-hint">Il PIN protegge la pagina pubblica collegata all'NFC. Condividilo solo con chi deve aprire la pagina.</p>
     </div>
   </div>`;
 }
@@ -579,27 +834,20 @@ function setEditorPanel(panelId){
       node.classList.toggle("active",node.dataset.editorPanel === panelId);
     }
   });
-  const mobileNav = document.getElementById("editorMobileNav");
-  if(mobileNav && mobileNav.value !== panelId) mobileNav.value = panelId;
+  syncMobileNav(panelId);
 }
 
 function bindEditorNavigation(root){
   root.querySelectorAll(".editor-nav-item[data-editor-panel]").forEach(button=>{
     button.addEventListener("click",()=>{
       setEditorPanel(button.dataset.editorPanel);
-      const mobileNav = document.getElementById("editorMobileNav");
-      if(mobileNav) mobileNav.value = button.dataset.editorPanel;
       if(mobilePreviewMode){
         mobilePreviewMode = false;
         root.classList.remove("show-preview");
-        root.querySelectorAll("[data-mobile-view]").forEach(item=>{
-          item.classList.toggle("active",item.dataset.mobileView === "edit");
-        });
+        const fab = document.getElementById("momentsPreviewFab");
+        if(fab) fab.textContent = "Anteprima";
       }
     });
-  });
-  document.getElementById("editorMobileNav")?.addEventListener("change",event=>{
-    setEditorPanel(event.target.value);
   });
 }
 
@@ -617,9 +865,11 @@ function bindMobilePreviewToggle(root){
 
 function updateSaveStatus(saved){
   const node = document.getElementById("editorSaveStatus");
-  if(!node) return;
-  node.textContent = saved ? "Salvato" : "Modifiche non salvate";
-  node.classList.toggle("dirty",!saved);
+  if(node){
+    node.textContent = saved ? "Salvato" : "Modifiche non salvate";
+    node.classList.toggle("dirty",!saved);
+  }
+  document.getElementById("momentsSaveBar")?.classList.toggle("visible",!saved);
 }
 
 function renderSectionOrderList(){
@@ -690,11 +940,8 @@ function bindQuickPublish(root,row){
 
 function renderDetail(id){
   activeId = id;
-  activeEditorPanel = "cover";
-  mobilePreviewMode = false;
   const row = rows.find(item=>item.id === id);
   if(!row) return;
-  document.querySelectorAll("[data-object-id]").forEach(button=>button.classList.toggle("active",button.dataset.objectId === id));
   const state = mergedState(row);
   sectionOrder = [...state.sectionOrder];
   editorDirty = false;
@@ -702,6 +949,7 @@ function renderDetail(id){
   const nfcUrl = row.nfc_code ? `${PUBLIC_BASE_URL}/k/${encodeURIComponent(row.nfc_code)}` : "";
   const showWizard = needsOnboarding(row);
   detail.innerHTML = `
+    ${adminMode ? `<p class="admin-mode-banner" id="adminModeBanner">Modalità admin — stai modificando l'oggetto di ${esc(row.owner_email || "cliente")}.</p>` : ""}
     <div class="detail-head">
       <div>
         <p class="eyebrow">Editor pagina</p>
@@ -734,13 +982,16 @@ function renderDetail(id){
       </div>
       <div class="editor-layout">
         ${renderEditorSidebar(activeEditorPanel)}
-        <form class="editor-main" id="momentEditorForm">
-          ${renderCoverPanel(state)}
-          ${renderOrderPanel()}
-          ${renderSectionPanels(state)}
-          ${renderPrivacyPanel(row)}
-          <p class="status editor-form-status" id="editorStatus"></p>
-        </form>
+        <div class="editor-main">
+          ${renderObjectsPanel()}
+          <form id="momentEditorForm" class="editor-form-inner">
+            ${renderCoverPanel(state)}
+            ${renderOrderPanel()}
+            ${renderSectionPanels(state)}
+            ${renderPrivacyPanel(row)}
+            <p class="status editor-form-status" id="editorStatus"></p>
+          </form>
+        </div>
         <aside class="preview-card" id="momentPreview">
           <div class="preview-label">Anteprima live</div>
         </aside>
@@ -748,6 +999,10 @@ function renderDetail(id){
     </div>`;
   const editorForm = document.getElementById("momentEditorForm");
   const editorShell = document.getElementById("momentEditorShell");
+  mobilePreviewMode = false;
+  const previewFab = document.getElementById("momentsPreviewFab");
+  if(previewFab) previewFab.textContent = "Anteprima";
+  editorShell?.classList.remove("show-preview");
   savedEditorSnapshot = JSON.stringify(readFormState(editorForm));
   updateSaveStatus(true);
   editorForm.addEventListener("submit",event=>saveMoment(event,row));
@@ -756,7 +1011,13 @@ function renderDetail(id){
     renderPreview(readFormState(editorForm));
     updateCoverPreview(editorForm);
   });
-  editorForm.addEventListener("change",()=>markEditorDirty(editorForm));
+  editorForm.addEventListener("change",()=>{
+    markEditorDirty(editorForm);
+    renderPreview(readFormState(editorForm));
+  });
+  bindObjectSwitcher(detail);
+  bindActivationForm(document.getElementById("editorActivationForm"),document.getElementById("editorActivationStatus"));
+  document.getElementById("editorLogout")?.addEventListener("click",()=>document.getElementById("momentsLogout")?.click());
   document.getElementById("applyMomentTemplate")?.addEventListener("click",()=>{
     applyTemplateToForm(editorForm,editorForm.elements.moment_type.value || "free");
   });
@@ -764,6 +1025,11 @@ function renderDetail(id){
   bindMobilePreviewToggle(editorShell);
   bindQuickPublish(editorShell,row);
   bindMediaUploads(detail,row);
+  document.getElementById("copySavedPinBtn")?.addEventListener("click",()=>copyText(getRememberedPin(row.id),document.getElementById("copySavedPinBtn")));
+  document.getElementById("forgetSavedPinBtn")?.addEventListener("click",()=>{
+    clearRememberedPin(row.id);
+    renderDetail(row.id);
+  });
   detail.querySelectorAll("[data-copy]").forEach(button=>{
     button.addEventListener("click",()=>copyText(button.dataset.copy,button));
   });
@@ -779,6 +1045,9 @@ function renderDetail(id){
   if(orderList) delete orderList.dataset.bound;
   bindSectionOrderDnD();
   renderPreview(readFormState(editorForm));
+  syncMobileNav(activeEditorPanel);
+  bindPageMenuActions(publicUrl,nfcUrl);
+  setEditorChromeVisible(true);
 }
 
 function setUploadStatus(node,message="",type=""){
@@ -837,9 +1106,10 @@ async function uploadGalleryImages(files,row,formNode,key){
     const urls = await uploadImages(supabase,{scope:"moments",scopeId:row.id},batch);
     writeGalleryUrls(formNode,key,[...current,...urls]);
     renderGalleryThumbs(formNode,key);
+    enableSection(formNode,key);
     markEditorDirty(formNode);
     renderPreview(readFormState(formNode));
-    setUploadStatus(status,`${urls.length} foto caricate.`,"ok");
+    setUploadStatus(status,`${urls.length} foto caricate. Clicca Salva per pubblicarle.`,"ok");
   }catch(error){
     setUploadStatus(status,error.message || "Upload non riuscito.","error");
   }finally{
@@ -871,6 +1141,7 @@ function bindMediaUploads(root,row){
 }
 
 function bindMediaUploadDelegation(){
+  if(!detail) return;
   if(detail.dataset.mediaBound === "1") return;
   detail.dataset.mediaBound = "1";
   detail.addEventListener("click",event=>{
@@ -895,8 +1166,6 @@ function bindMediaUploadDelegation(){
     renderPreview(readFormState(formNode));
   });
 }
-  return `<option value="${esc(value)}" ${value === current ? "selected" : ""}>${esc(label)}</option>`;
-}
 
 function option(value,label,current){
   return `<option value="${esc(value)}" ${value === current ? "selected" : ""}>${esc(label)}</option>`;
@@ -913,7 +1182,7 @@ function renderGalleryUpload(section,key){
     <label class="gallery-urls-label">URL aggiuntivi (una per riga, opzionale)
       <textarea name="section_${esc(key)}_images" class="gallery-urls" placeholder="https://...">${esc(formatImageLines(section.images))}</textarea>
     </label>
-    <p class="field-hint" id="galleryUploadStatus_${esc(key)}">Carica fino a ${MAX_GALLERY_IMAGES} foto. Vengono compresse e salvate su cloud.</p>
+    <p class="field-hint" id="galleryUploadStatus_${esc(key)}">Carica fino a ${MAX_GALLERY_IMAGES} foto. Attiva la sezione e clicca Salva per vederle nella pagina pubblica.</p>
   </div>`;
 }
 
@@ -1046,6 +1315,7 @@ async function saveMoment(event,row){
   if(pin){
     try{ pinHash = await momentPinHash(row.slug,validatePin(pin)); }
     catch(error){ return setStatus(editorStatus,error.message,"error"); }
+    rememberPin(row.id,pin);
   }
   const { error } = adminMode
     ? await supabase.rpc("admin_save_moment_page",{
@@ -1081,12 +1351,7 @@ async function saveMoment(event,row){
 }
 
 supabase = createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
-  auth:{
-    persistSession:true,
-    autoRefreshToken:true,
-    detectSessionInUrl:true,
-    flowType:"pkce"
-  }
+  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
 });
 bindPasswordToggles();
 bindCodeInputs();
@@ -1117,16 +1382,23 @@ recoveryForm?.addEventListener("submit",async event=>{
   setStatus(statusNode,"Password aggiornata. Ora puoi accedere.","ok");
 });
 
-loginForm.addEventListener("submit",async event=>{
+loginForm?.addEventListener("submit",async event=>{
   event.preventDefault();
   setStatus(statusNode,"Accesso in corso...");
-  const { error } = await supabase.auth.signInWithPassword({
-    email:document.getElementById("momentsEmail").value.trim().toLowerCase(),
-    password:document.getElementById("momentsPassword").value
-  });
-  if(error) return setStatus(statusNode,error.message || "Accesso non riuscito.","error");
-  const { data } = await supabase.auth.getUser();
-  await showApp(data.user);
+  try{
+    const { data,error } = await supabase.auth.signInWithPassword({
+      email:document.getElementById("momentsEmail").value.trim().toLowerCase(),
+      password:document.getElementById("momentsPassword").value
+    });
+    if(error) return setStatus(statusNode,error.message || "Accesso non riuscito.","error");
+    const user = data.session?.user || data.user;
+    if(!user) return setStatus(statusNode,"Sessione non disponibile. Riprova.","error");
+    await showApp(user);
+    setStatus(statusNode,"");
+  }catch(error){
+    console.error(error);
+    setStatus(statusNode,error.message || "Errore imprevisto durante l'accesso.","error");
+  }
 });
 
 document.getElementById("signupNextStep")?.addEventListener("click",()=>{
@@ -1138,7 +1410,7 @@ document.getElementById("signupNextStep")?.addEventListener("click",()=>{
 
 document.getElementById("signupPrevStep")?.addEventListener("click",()=>setSignupStep(1));
 
-signupForm.addEventListener("submit",async event=>{
+signupForm?.addEventListener("submit",async event=>{
   event.preventDefault();
   const email = document.getElementById("momentsSignupEmail").value.trim().toLowerCase();
   const code = normalizeCode(document.getElementById("momentsSignupCode").value);
@@ -1159,37 +1431,16 @@ signupForm.addEventListener("submit",async event=>{
     try{
       const item = await activateCode({code,title,momentType,pin});
       activeId = item.event_id || "";
+      rememberPin(activeId,pin);
       setStatus(statusNode,"Account creato e prodotto collegato.","ok");
     }catch(activationError){
       console.error(activationError);
       setStatus(statusNode,activationError.message || "Account creato, ma codice non collegato. Usa il modulo attivazione.","error");
     }
     await showApp(data.session.user);
+    if(activeId) showPinSuccessBanner(activeId,pin,title);
   }else{
     setStatus(statusNode,"Account creato. Conferma l’email, poi accedi e attiva lo stesso codice prodotto.","ok");
-  }
-});
-
-activationForm.addEventListener("submit",async event=>{
-  event.preventDefault();
-  const form = new FormData(activationForm);
-  const code = normalizeCode(form.get("code"));
-  const title = String(form.get("title") || "").trim();
-  const pin = String(form.get("access_pin") || "").trim();
-  const momentType = String(form.get("moment_type") || "free");
-  if(!/^[A-Z0-9]{8,32}$/.test(code)) return setStatus(activationStatus,"Codice non valido.","error");
-  if(!title) return setStatus(activationStatus,"Inserisci il nome della pagina.","error");
-  try{ validatePin(pin); }catch(error){ return setStatus(activationStatus,error.message,"error"); }
-  setStatus(activationStatus,"Collegamento in corso...");
-  try{
-    const item = await activateCode({code,title,momentType,pin});
-    activeId = item.event_id || activeId;
-    activationForm.reset();
-    setStatus(activationStatus,"Prodotto collegato al tuo account.","ok");
-    await loadObjects();
-  }catch(error){
-    console.error(error);
-    setStatus(activationStatus,error.message || "Collegamento non riuscito.","error");
   }
 });
 
@@ -1199,13 +1450,6 @@ document.getElementById("momentsLogout").addEventListener("click",async()=>{
   rows = [];
   showAuthTab("login");
   showAuth("Sessione chiusa.");
-});
-
-list.addEventListener("click",event=>{
-  const button = event.target.closest("[data-object-id]");
-  if(!button) return;
-  if(editorDirty && !confirm("Hai modifiche non salvate. Vuoi cambiare oggetto senza salvare?")) return;
-  renderDetail(button.dataset.objectId);
 });
 
 window.addEventListener("beforeunload",event=>{
@@ -1222,11 +1466,13 @@ supabase.auth.onAuthStateChange(async(event,session)=>{
     return;
   }
   if(event === "INITIAL_SESSION") return;
-  if(session?.user){
-    if(app.hidden) await showApp(session.user);
+  if(event === "SIGNED_IN" && session?.user){
+    await showApp(session.user);
     return;
   }
+  if(session?.user) return;
   if(recoveryMode) return;
+  if(event !== "SIGNED_OUT") return;
   currentUser = null;
   activeId = "";
   rows = [];

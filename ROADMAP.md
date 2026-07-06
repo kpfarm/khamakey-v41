@@ -101,3 +101,4 @@ Obiettivo: stessa semplicità percepita dell'editor Business, adattata al contes
 | 2026-07-06 | Cursor | Moments editor v44: sidebar sezioni, topbar, wizard onboarding, anteprima mobile |
 | 2026-07-06 | Cursor | Storage v44 + upload cloud Moments/Business, compressione WebP, login PKCE |
 | 2026-07-06 | Cursor | Git init + commit iniziale, GITHUB.md per collegamento remoto |
+| 2026-07-06 | Cloud Agent | Sync repo da produzione (Moments v49, worker v25); PKCE app.js v45 pronto per deploy |

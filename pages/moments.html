@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="moments.css?v=44">
+  <link rel="stylesheet" href="moments.css?v=49">
 </head>
 <body>
   <main class="moments-auth" id="momentsAuth">
@@ -137,60 +137,45 @@
 
   <main class="moments-app" id="momentsApp" hidden>
     <header class="topbar">
-      <img src="khamakey-wordmark-dark.png" alt="KhamaKey">
-      <div>
-        <p class="eyebrow">Area Moments</p>
-        <h1>I tuoi oggetti</h1>
+      <div class="topbar-left">
+        <img src="khamakey-wordmark-dark.png" alt="KhamaKey" class="topbar-logo">
+        <p class="topbar-title">Moments</p>
       </div>
-      <span id="momentsUserEmail" class="user-chip"></span>
-      <button type="button" id="momentsLogout">Esci</button>
+      <div class="topbar-right">
+        <div class="user-menu-wrap">
+          <button type="button" class="user-menu-btn" id="momentsUserMenuBtn" aria-label="Menu account">
+            <span class="user-avatar" id="momentsUserAvatar">K</span>
+          </button>
+          <div class="user-menu" id="momentsUserMenu">
+            <div class="user-menu-head">
+              <p class="user-menu-email" id="momentsUserEmail"></p>
+            </div>
+            <button type="button" class="user-menu-item" id="momentsMenuOpenPage" hidden>Apri pagina pubblica</button>
+            <button type="button" class="user-menu-item" id="momentsMenuTestNfc" hidden>Test link NFC</button>
+            <button type="button" class="user-menu-item" id="momentsMenuCopyLink" hidden>Copia link pagina</button>
+            <button type="button" class="user-menu-item danger" id="momentsLogout">Esci</button>
+          </div>
+        </div>
+      </div>
     </header>
 
-    <section class="activation-panel" id="activationPanel">
-      <div>
-        <p class="eyebrow">Attivazione</p>
-        <h2>Collega un altro prodotto Moments</h2>
-        <p>Hai più oggetti? Ogni codice attiva il link pubblico già preparato per quel portachiavi o card.</p>
+    <section class="main-panel" id="momentDetail">
+      <div class="empty-state">
+        <h2>Caricamento...</h2>
+        <p>Attendere qualche istante.</p>
       </div>
-      <form id="activationForm" class="activation-form">
-        <label>Codice NFC<input name="code" autocomplete="off" placeholder="Esempio MOMENT1234" required></label>
-        <label>Nome pagina<input name="title" placeholder="Esempio Il nostro viaggio" required></label>
-        <label>PIN pagina<input name="access_pin" inputmode="numeric" autocomplete="new-password" placeholder="Esempio 1234" minlength="4" required></label>
-        <label>Tipo utilizzo
-          <select name="moment_type">
-            <option value="free">Uso libero</option>
-            <option value="wedding">Matrimonio</option>
-            <option value="party">Festa</option>
-            <option value="travel">Viaggio</option>
-            <option value="memory">Ricordo</option>
-            <option value="memorial">Memoriale</option>
-            <option value="portfolio">Portfolio</option>
-          </select>
-        </label>
-        <button type="submit">Attiva oggetto</button>
-      </form>
-      <p class="status" id="activationStatus"></p>
     </section>
 
-    <section class="layout">
-      <p class="admin-mode-banner" id="adminModeBanner" hidden></p>
-      <aside class="side-panel">
-        <div class="side-head">
-          <h2>Oggetti collegati</h2>
-          <span id="objectCount" class="object-count">0</span>
-        </div>
-        <div id="momentsList" class="object-list">Caricamento oggetti...</div>
-      </aside>
-
-      <section class="main-panel" id="momentDetail">
-        <div class="empty-state">
-          <h2>Attiva o seleziona un oggetto</h2>
-          <p>Da qui scegli sezioni, testi, privacy, PIN e pubblicazione della pagina collegata all’NFC.</p>
-        </div>
-      </section>
-    </section>
+    <div class="save-bar" id="momentsSaveBar">
+      <div class="save-msg">Hai <strong>modifiche non salvate</strong></div>
+      <button type="submit" form="momentEditorForm" class="btn-save">Salva</button>
+    </div>
+    <button type="button" class="preview-fab" id="momentsPreviewFab">Anteprima</button>
+    <nav class="bottom-nav" id="momentsBottomNav" aria-label="Navigazione editor">
+      <div class="bottom-nav-inner" id="momentsBnavInner"></div>
+    </nav>
   </main>
 
-  <script type="module" src="moments.js?v=44"></script>
+  <script type="module" src="moments.js?v=49"></script>
 </body>
 </html>

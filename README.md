@@ -161,18 +161,17 @@ python3 ~/.codex/skills/khamakey-release-workflow/scripts/package_release.py \
 
 > Lo skill Codex punta ancora a `khamakey-test-app` — nella sessione specifica sempre la root **v41-consolidated** (vedi `CODEX-COLLAB.md`).
 
-### Git (consigliato per tracciare tutto)
+### Git (backup su GitHub)
 
-Se il progetto non è ancora su git nella cartella v41:
+Repository git inizializzato con commit iniziale. Per collegare GitHub e pushare:
+
+**Vedi [GITHUB.md](GITHUB.md)** — istruzioni passo-passo.
 
 ```bash
-cd /Users/user/Documents/Codex/2026-07-04/files-mentioned-by-the-user-khamakey/outputs/khamakey-v41-consolidated
-git init
-git add pages worker sql README.md ROADMAP.md CODEX-COLLAB.md
-git commit -m "KhamaKey v41 consolidato — stato deploy v43"
+# Dopo aver creato il repo vuoto su github.com/new:
+git remote add origin git@github.com:TUO-USERNAME/khamakey-v41.git
+git push -u origin main
 ```
-
-Poi push su GitHub/GitLab: sia Cursor che Codex possono clonare lo stesso repo.
 
 ---
 

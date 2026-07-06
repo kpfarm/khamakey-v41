@@ -1,0 +1,1031 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KhamaKey Admin</title>
+  <link rel="icon" href="khamakey-favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css?v=43">
+</head>
+<body>
+  <main class="admin-shell locked" id="adminShell">
+    <aside class="admin-sidebar" id="adminSidebar" hidden>
+      <a class="admin-logo" href="./admin.html" aria-label="KhamaKey Admin">
+        <img src="khamakey-wordmark-dark.png" alt="KhamaKey">
+        <span>Admin</span>
+      </a>
+      <nav class="admin-nav grouped" aria-label="Navigazione admin">
+        <section class="nav-group open" data-nav-group>
+          <button class="nav-group-toggle" type="button" data-nav-toggle>Controllo</button>
+          <div class="nav-group-items">
+            <button class="active" data-admin-tab="dashboard">Dashboard</button>
+            <button data-admin-tab="integrations">Integrazioni</button>
+          </div>
+        </section>
+        <section class="nav-group open" data-nav-group>
+          <button class="nav-group-toggle" type="button" data-nav-toggle>Business</button>
+          <div class="nav-group-items">
+            <button data-admin-tab="clients">Clienti</button>
+            <button data-admin-tab="crm">CRM</button>
+            <button data-admin-tab="support">Supporto</button>
+            <button data-admin-tab="inventory">Magazzino Business</button>
+          </div>
+        </section>
+        <section class="nav-group open" data-nav-group>
+          <button class="nav-group-toggle" type="button" data-nav-toggle>Moments</button>
+          <div class="nav-group-items">
+            <button data-admin-tab="momentClients">Clienti Moments</button>
+            <button data-admin-tab="momentInventory">Magazzino NFC Moments</button>
+          </div>
+        </section>
+        <section class="nav-group open" data-nav-group>
+          <button class="nav-group-toggle" type="button" data-nav-toggle>Servizi centrali</button>
+          <div class="nav-group-items">
+            <button data-admin-tab="platformOrders">Ordini</button>
+            <button data-admin-tab="nfc">NFC / Spedizioni</button>
+            <button data-admin-tab="billing">Piani e fatturazione</button>
+            <button data-admin-tab="commissions">Provvigioni</button>
+          </div>
+        </section>
+        <section class="nav-group" data-nav-group>
+          <button class="nav-group-toggle" type="button" data-nav-toggle>Team e agenti</button>
+          <div class="nav-group-items">
+            <button data-admin-tab="staff">Collaboratori</button>
+            <button data-admin-tab="agents">Agenti</button>
+            <button data-admin-tab="permissions">Permessi</button>
+          </div>
+        </section>
+        <section class="nav-group" data-nav-group>
+          <button class="nav-group-toggle" type="button" data-nav-toggle>Configurazioni</button>
+          <div class="nav-group-items">
+            <button data-admin-tab="plans">Piani</button>
+            <button data-admin-tab="materials">Materiali</button>
+          </div>
+        </section>
+      </nav>
+    </aside>
+
+    <section class="admin-main">
+      <header class="admin-topbar" id="adminTopbar" hidden>
+        <div>
+          <p class="eyebrow">Gestionale interno</p>
+          <h1 id="adminTitle">Dashboard</h1>
+        </div>
+        <div class="admin-user">
+          <span id="adminEmail">Verifica sessione...</span>
+          <a href="./" class="ghost-link" target="_blank" rel="noopener">Area Business</a>
+          <a href="./moments.html" class="ghost-link" target="_blank" rel="noopener">Area Moments</a>
+          <button id="adminLogout" type="button">Esci</button>
+        </div>
+      </header>
+
+      <section id="adminGate" class="gate-card">
+        <img src="khamakey-wordmark-dark.png" alt="KhamaKey">
+        <h2>Controllo accesso admin</h2>
+        <p id="adminGateText">Sto verificando sessione e autorizzazioni.</p>
+        <form class="admin-login-form" id="adminLoginForm" hidden>
+          <label>Email admin
+            <input id="adminLoginEmail" type="email" autocomplete="email" required>
+          </label>
+          <label>Password
+            <input id="adminLoginPassword" type="password" autocomplete="current-password" minlength="6" required>
+          </label>
+          <button class="primary-action" type="submit">Accedi al pannello</button>
+          <button class="ghost-button" id="adminResetPassword" type="button">Recupera password</button>
+        </form>
+        <div class="gate-actions">
+          <a href="./" id="adminLoginLink">Apri area cliente</a>
+        </div>
+      </section>
+
+      <div id="adminContent" hidden>
+        <section class="admin-panel active" data-panel="dashboard">
+          <div class="metric-grid">
+            <article><strong id="mClients">0</strong><span>Clienti / attività</span></article>
+            <article><strong id="mPublished">0</strong><span>Pagine pubblicate</span></article>
+            <article><strong id="mNfc">0</strong><span>Prodotti NFC</span></article>
+            <article><strong id="mEvents">0</strong><span>Eventi analytics</span></article>
+            <article><strong id="mStock">0</strong><span>Stock Business</span></article>
+            <article><strong id="mMomentStock">0</strong><span>Link NFC Moments disp.</span></article>
+            <article><strong id="mPlatformOrders">0</strong><span>Ordini interni</span></article>
+            <article><strong id="mAgents">0</strong><span>Agenti attivi</span></article>
+            <article><strong id="mPendingCommissions">0</strong><span>Provvigioni pending</span></article>
+            <article><strong id="mMoments">0</strong><span>Moments / eventi</span></article>
+          </div>
+          <div class="admin-card">
+            <h2>Priorità operative</h2>
+            <div class="task-list">
+              <div><strong>Collaboratori</strong><span>Creare ruoli e permessi reali su Supabase.</span></div>
+              <div><strong>Agenti</strong><span>Gestire rivenditori, codici referral e percentuali.</span></div>
+              <div><strong>Magazzino</strong><span>Caricare prodotti, quantità e soglie minime prima dell’e-commerce.</span></div>
+              <div><strong>Ordini</strong><span>Gestire ordini NFC/setup/e-commerce con cliente, agente e spedizione.</span></div>
+              <div><strong>Configurazioni</strong><span>Piani, materiali, categorie ticket e valori gestibili da pannello.</span></div>
+              <div><strong>Integrazioni</strong><span>Preparare Stripe, Resend, WhatsApp, corrieri e automazioni senza chiavi nel frontend.</span></div>
+              <div><strong>Spedizioni</strong><span>Collegare ordini NFC, stato produzione e tracking.</span></div>
+              <div><strong>Supporto</strong><span>Centralizzare richieste cliente e note interne.</span></div>
+              <div><strong>Moments</strong><span>Controllare oggetti NFC, pagine cliente, PIN e contenuti separati da KhamaKey Business.</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="clients">
+          <div class="admin-card">
+            <h2>Clienti</h2>
+            <p class="system-note"><strong>Sistema Business</strong> — attività clienti con pagina pubblica <code>/p/</code> e editor dedicato. Distinto dal sistema Moments.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Attività</th><th>Slug</th><th>Categoria</th><th>Azioni</th></tr></thead>
+                <tbody id="clientsTable"><tr><td colspan="4">Caricamento clienti...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="staff">
+          <div class="admin-card">
+            <h2>Collaboratori</h2>
+            <p>Invita collaboratori KhamaKey e assegna permessi per assistenza, spedizioni, CRM, pagine clienti o accesso completo.</p>
+            <form class="admin-form" id="memberForm">
+              <label>Nome
+                <input name="full_name" type="text" placeholder="Es. Mario Rossi">
+              </label>
+              <label>Email
+                <input name="email" type="email" placeholder="collaboratore@email.it" required>
+              </label>
+              <label>Ruolo
+                <select name="role">
+                  <option value="collaborator">Collaboratore</option>
+                  <option value="admin">Admin</option>
+                  <option value="agent">Agente</option>
+                </select>
+              </label>
+              <div>
+                <span class="field-label">Permessi</span>
+                <div class="permission-checklist" id="memberPermissionChecklist"></div>
+              </div>
+              <button class="primary-action" type="submit">Salva collaboratore</button>
+              <p class="form-status" id="memberFormStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Email</th><th>Ruolo</th><th>Stato</th><th>Permessi</th></tr></thead>
+                <tbody id="membersTable"><tr><td colspan="4">Caricamento collaboratori...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="momentClients">
+          <div class="admin-card">
+            <h2>Clienti Moments</h2>
+            <p class="system-note"><strong>Sistema Moments</strong> — separato da Business. Ogni oggetto NFC attivato ha la sua pagina pubblica <code>/m/</code> e il suo editor. Qui controlli clienti, schede, editor e pagine senza aspettare il cliente.</p>
+            <form class="admin-form" id="momentProvisionForm">
+              <label>Email cliente Moments
+                <input name="email" type="email" placeholder="cliente@email.it" required>
+              </label>
+              <label>Nome visualizzato
+                <input name="display_name" type="text" placeholder="Nome cliente (opzionale)">
+              </label>
+              <label>Codice NFC da attivare (opzionale)
+                <input name="code" type="text" placeholder="MOMENT... (dal magazzino NFC)">
+              </label>
+              <label>Titolo pagina (se attivi codice)
+                <input name="title" type="text" placeholder="Es. Matrimonio Anna e Marco">
+              </label>
+              <label>Template pagina
+                <select name="moment_type">
+                  <option value="free">Uso libero</option>
+                  <option value="wedding">Matrimonio</option>
+                  <option value="party">Festa</option>
+                  <option value="travel">Viaggio</option>
+                  <option value="memory">Ricordo</option>
+                  <option value="memorial">Memoriale</option>
+                  <option value="portfolio">Portfolio</option>
+                </select>
+              </label>
+              <button class="primary-action" type="submit">Crea / collega cliente</button>
+              <p class="form-status" id="momentProvisionStatus"></p>
+            </form>
+            <h3 class="section-title">Account registrati</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Cliente</th><th>Email</th><th>Oggetti</th><th>Pubblicate</th><th>Ultima attivazione</th><th>Stato</th></tr></thead>
+                <tbody id="momentCustomersTable"><tr><td colspan="6">Caricamento account Moments...</td></tr></tbody>
+              </table>
+            </div>
+            <h3 class="section-title">Oggetti attivati</h3>
+            <p>Ogni riga è un prodotto NFC con pagina pubblica. Usa le azioni come per i clienti Business.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Oggetto</th><th>Cliente</th><th>Tipo</th><th>NFC</th><th>Pubblicata</th><th>Stato</th><th>Azioni</th></tr></thead>
+                <tbody id="momentsTable"><tr><td colspan="7">Caricamento oggetti...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="momentInventory">
+          <div class="admin-card">
+            <h2>Magazzino NFC Moments</h2>
+            <p class="system-note"><strong>Magazzino Moments</strong> — distinto dal magazzino Business. Qui generi i link NFC fisici (orsetti, portachiavi, card…) organizzati per lotto e linea prodotto.</p>
+            <form class="admin-form compact-form moment-batch-form" id="momentBatchForm">
+              <label>Linea oggetto fisico
+                <select name="product_line" required>
+                  <option value="orsetto">Orsetto NFC</option>
+                  <option value="portachiavi">Portachiavi NFC</option>
+                  <option value="card">Card NFC</option>
+                  <option value="magnete">Magnete NFC</option>
+                  <option value="tag">Tag / tessera NFC</option>
+                  <option value="confezione">Confezione regalo</option>
+                  <option value="altro">Altro oggetto</option>
+                </select>
+              </label>
+              <label>Prefisso codice
+                <input name="prefix" type="text" value="MOMENT" placeholder="MOMENT">
+              </label>
+              <label>Quantità
+                <input name="quantity" type="number" min="1" max="500" value="100">
+              </label>
+              <label>Template pagina predefinito
+                <select name="product_type">
+                  <option value="free">Uso libero</option>
+                  <option value="wedding">Matrimonio</option>
+                  <option value="party">Festa</option>
+                  <option value="travel">Viaggio</option>
+                  <option value="memory">Ricordo</option>
+                  <option value="memorial">Memoriale</option>
+                  <option value="portfolio">Portfolio</option>
+                </select>
+              </label>
+              <label>Nome lotto / produzione
+                <input name="batch_label" type="text" placeholder="Es. Orsetti blu - luglio 2026" required>
+              </label>
+              <button class="primary-action" type="submit">Genera prodotti NFC</button>
+              <p class="form-status" id="momentBatchStatus"></p>
+            </form>
+            <div class="inventory-stats" id="momentInventoryStats">
+              <p class="inventory-stats-empty">Caricamento statistiche lotti...</p>
+            </div>
+            <div class="inventory-filters" id="momentInventoryFilters">
+              <label>Filtra linea
+                <select id="momentFilterLine"><option value="">Tutte le linee</option></select>
+              </label>
+              <label>Filtra lotto
+                <select id="momentFilterBatch"><option value="">Tutti i lotti</option></select>
+              </label>
+              <label>Filtra stato
+                <select id="momentFilterStatus">
+                  <option value="">Tutti gli stati</option>
+                  <option value="available">Disponibili</option>
+                  <option value="claimed">Attivati</option>
+                  <option value="paused">In pausa</option>
+                </select>
+              </label>
+            </div>
+            <h3 class="section-title">Link NFC generati</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Codice</th><th>Link pubblico</th><th>Linea</th><th>Template</th><th>Lotto</th><th>Stato</th><th>Cliente</th></tr></thead>
+                <tbody id="momentProductsTable"><tr><td colspan="7">Caricamento prodotti...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="agents">
+          <div class="admin-card">
+            <h2>Agenti e rivenditori</h2>
+            <p>Registra chi rivende KhamaKey o porta clienti. Ogni agente può avere modello commerciale e percentuale dedicata.</p>
+            <form class="admin-form" id="agentForm">
+              <label>Nome referente
+                <input name="contact_name" type="text" placeholder="Nome agente">
+              </label>
+              <label>Email
+                <input name="email" type="email" placeholder="agente@email.it" required>
+              </label>
+              <label>Azienda / team
+                <input name="business_name" type="text" placeholder="Nome società">
+              </label>
+              <label>Telefono
+                <input name="phone" type="tel" placeholder="+39 ...">
+              </label>
+              <label>Codice referral
+                <input name="referral_code" type="text" placeholder="AUTO se vuoto">
+              </label>
+              <label>Percentuale
+                <input name="commission_percent" type="number" min="0" max="100" step="0.01" value="10">
+              </label>
+              <label>Modello
+                <select name="model">
+                  <option value="referral">Segnalazione: vendiamo noi, agente prende %</option>
+                  <option value="reseller">Rivenditore: acquista e rivende ai clienti</option>
+                  <option value="hybrid">Ibrido</option>
+                </select>
+              </label>
+              <button class="primary-action" type="submit">Salva agente</button>
+              <p class="form-status" id="agentFormStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Agente</th><th>Codice</th><th>Modello</th><th>%</th><th>Stato</th></tr></thead>
+                <tbody id="agentsTable"><tr><td colspan="5">Caricamento agenti...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="commissions">
+          <div class="admin-card">
+            <h2>Provvigioni</h2>
+            <p>Qui vengono tracciati abbonamenti, ordini NFC, setup e rettifiche manuali collegati agli agenti.</p>
+            <div class="automation-status">
+              <div>
+                <strong>Automazione abbonamenti</strong>
+                <span>Attiva: se un cliente è collegato a un agente e passa a Starter/Business/Premium, viene creata una provvigione in attesa.</span>
+              </div>
+              <div>
+                <strong>Ordini NFC</strong>
+                <span>Preparata ma non agganciata agli ordini catalogo pubblici, per evitare commissioni errate.</span>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Agente</th><th>Evento</th><th>Importo</th><th>Provvigione</th><th>Stato</th></tr></thead>
+                <tbody id="commissionsTable"><tr><td colspan="5">Caricamento provvigioni...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="admin-card">
+            <h2>Regole automatiche</h2>
+            <p>Le regole definiscono quando creare una provvigione. Gli importi sono a zero finché non colleghiamo prezzi reali, Stripe o listino definitivo.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Tipo</th><th>Piano</th><th>Importo</th><th>% default</th><th>Stato</th><th>Note</th></tr></thead>
+                <tbody id="commissionRulesTable"><tr><td colspan="6">Caricamento regole...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="inventory">
+          <div class="admin-card">
+            <h2>Magazzino Business</h2>
+            <p class="system-note"><strong>Sistema Business</strong> — prodotti fisici e servizi per le attività clienti (card NFC business, setup, e-commerce). Separato dal magazzino NFC Moments.</p>
+            <form class="admin-form" id="productForm">
+              <label>SKU
+                <input name="sku" type="text" placeholder="NFC-CARD-GOLD" required>
+              </label>
+              <label>Nome prodotto
+                <input name="name" type="text" placeholder="Card NFC Gold" required>
+              </label>
+              <label>Categoria
+                <select name="category">
+                  <option value="nfc">NFC</option>
+                  <option value="service">Servizio</option>
+                  <option value="accessory">Accessorio</option>
+                  <option value="ecommerce">E-commerce</option>
+                </select>
+              </label>
+              <label>Prezzo vendita
+                <input name="sale_price" type="number" min="0" step="0.01" value="0">
+              </label>
+              <label>Costo unitario
+                <input name="unit_cost" type="number" min="0" step="0.01" value="0">
+              </label>
+              <label>Soglia minima
+                <input name="min_stock" type="number" min="0" step="1" value="0">
+              </label>
+              <label>Fornitore
+                <input name="supplier" type="text" placeholder="Fornitore / tipografia">
+              </label>
+              <label class="wide-field">Immagine prodotto
+                <input name="image_url" type="url" placeholder="https://...">
+              </label>
+              <label class="wide-field">Descrizione
+                <textarea name="description" rows="2" placeholder="Dettagli interni prodotto"></textarea>
+              </label>
+              <label>Stato
+                <select name="status">
+                  <option value="active">Attivo</option>
+                  <option value="hidden">Nascosto</option>
+                  <option value="out_of_stock">Esaurito</option>
+                  <option value="archived">Archiviato</option>
+                </select>
+              </label>
+              <button class="primary-action" type="submit">Salva prodotto</button>
+              <button class="ghost-button" type="button" data-reset-form="productForm">Nuovo prodotto</button>
+              <p class="form-status" id="productFormStatus"></p>
+            </form>
+            <form class="admin-form compact-form" id="stockForm">
+              <label>Prodotto
+                <select name="product_id" id="stockProductSelect" required></select>
+              </label>
+              <label>Movimento
+                <select name="movement_type">
+                  <option value="stock_in">Carico magazzino</option>
+                  <option value="adjustment">Rettifica</option>
+                  <option value="reserved">Riserva</option>
+                  <option value="released">Rilascio riserva</option>
+                  <option value="defective">Difettoso</option>
+                  <option value="returned">Reso</option>
+                </select>
+              </label>
+              <label>Quantità
+                <input name="quantity" type="number" step="1" value="1" required>
+              </label>
+              <label>Note
+                <input name="notes" type="text" placeholder="Motivo movimento">
+              </label>
+              <button class="primary-action" type="submit">Registra movimento</button>
+              <p class="form-status" id="stockFormStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Prodotto</th><th>SKU</th><th>Cat.</th><th>Prezzi</th><th>Margine</th><th>Disponibile</th><th>Riservato</th><th>Min.</th><th>Stato</th><th>Azioni</th></tr></thead>
+                <tbody id="productsTable"><tr><td colspan="10">Caricamento prodotti...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="admin-card">
+            <h2>Ultimi movimenti</h2>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Prodotto</th><th>Tipo</th><th>Quantità</th><th>Note</th><th>Data</th></tr></thead>
+                <tbody id="stockMovementsTable"><tr><td colspan="5">Caricamento movimenti...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="platformOrders">
+          <div class="admin-card">
+            <h2>Ordini KhamaKey</h2>
+            <p>Ordini interni per NFC, setup, abbonamenti e futuro e-commerce. Separati dagli ordini catalogo dei clienti.</p>
+            <form class="admin-form" id="platformOrderForm">
+              <label>Tipo ordine
+                <select name="order_type">
+                  <option value="nfc">NFC</option>
+                  <option value="setup">Setup</option>
+                  <option value="subscription">Abbonamento</option>
+                  <option value="ecommerce">E-commerce</option>
+                  <option value="manual">Manuale</option>
+                </select>
+              </label>
+              <label>Cliente
+                <select name="business_id" id="orderBusinessSelect">
+                  <option value="">Nessun cliente collegato</option>
+                </select>
+              </label>
+              <label>Agente
+                <select name="agent_id" id="orderAgentSelect">
+                  <option value="">Nessun agente</option>
+                </select>
+              </label>
+              <label>Nome cliente
+                <input name="customer_name" type="text" placeholder="Nome referente">
+              </label>
+              <label>Email cliente
+                <input name="customer_email" type="email" placeholder="cliente@email.it">
+              </label>
+              <label>Telefono cliente
+                <input name="customer_phone" type="tel" placeholder="+39 ...">
+              </label>
+              <label>Totale provvisorio
+                <input name="subtotal" type="number" min="0" step="0.01" value="0">
+              </label>
+              <label>Spedizione
+                <input name="shipping_total" type="number" min="0" step="0.01" value="0">
+              </label>
+              <label>Sconto
+                <input name="discount_total" type="number" min="0" step="0.01" value="0">
+              </label>
+              <label>Stato ordine
+                <select name="status">
+                  <option value="draft">Bozza</option>
+                  <option value="pending" selected>In attesa</option>
+                  <option value="paid">Pagato</option>
+                  <option value="production">Produzione</option>
+                  <option value="ready">Pronto</option>
+                  <option value="shipped">Spedito</option>
+                  <option value="completed">Completato</option>
+                </select>
+              </label>
+              <label>Pagamento
+                <select name="payment_status">
+                  <option value="unpaid">Non pagato</option>
+                  <option value="pending">In attesa</option>
+                  <option value="paid">Pagato</option>
+                  <option value="failed">Fallito</option>
+                </select>
+              </label>
+              <label class="wide-field">Note ordine
+                <textarea name="notes" rows="2" placeholder="Produzione, spedizione, richiesta cliente"></textarea>
+              </label>
+              <button class="primary-action" type="submit">Crea ordine</button>
+              <p class="form-status" id="platformOrderFormStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Ordine</th><th>Tipo</th><th>Cliente</th><th>Agente</th><th>Totale</th><th>Pagamento</th><th>Stato</th><th>Azioni</th></tr></thead>
+                <tbody id="platformOrdersTable"><tr><td colspan="8">Caricamento ordini...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="permissions">
+          <div class="admin-card">
+            <h2>Permessi granulari</h2>
+            <div class="permission-grid" id="permissionGrid"></div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="nfc">
+          <div class="admin-card">
+            <h2>NFC / Spedizioni</h2>
+            <p>Area per prodotti NFC, produzione, associazione codici e stato spedizione.</p>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="support">
+          <div class="admin-card">
+            <h2>Supporto</h2>
+            <p>Ticket assistenza globali. Puoi creare ticket dalla scheda cliente o gestire categorie modificabili qui sotto.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Ticket</th><th>Cliente</th><th>Priorità</th><th>Stato</th></tr></thead>
+                <tbody id="supportTicketsTable"><tr><td colspan="4">Caricamento ticket...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="admin-card">
+            <h2>Categorie ticket</h2>
+            <form class="admin-form" id="ticketCategoryForm">
+              <label>Codice
+                <input name="category_key" type="text" placeholder="technical" required>
+              </label>
+              <label>Nome
+                <input name="name" type="text" placeholder="Problema tecnico" required>
+              </label>
+              <label>Priorità default
+                <select name="default_priority">
+                  <option value="low">Bassa</option>
+                  <option value="normal">Normale</option>
+                  <option value="high">Alta</option>
+                  <option value="urgent">Urgente</option>
+                </select>
+              </label>
+              <button class="primary-action" type="submit">Salva categoria</button>
+              <p class="form-status" id="ticketCategoryStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Categoria</th><th>Codice</th><th>Priorità</th><th>Stato</th><th>Azioni</th></tr></thead>
+                <tbody id="ticketCategoriesTable"><tr><td colspan="5">Caricamento categorie...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="crm">
+          <div class="admin-card">
+            <h2>CRM</h2>
+            <p>Pipeline clienti, stato onboarding, note commerciali e follow-up.</p>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="billing">
+          <div class="admin-card">
+            <h2>Piani e fatturazione</h2>
+            <p>Vista riepilogo. La modifica completa dei piani è nella sezione “Piani”.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Piano</th><th>Mensile</th><th>Annuale</th><th>Setup</th><th>Stato</th></tr></thead>
+                <tbody id="billingPlansTable"><tr><td colspan="5">Caricamento piani...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="plans">
+          <div class="admin-card">
+            <h2>Piani modificabili</h2>
+            <p>Aggiungi e modifica piani senza intervenire sul codice. Questi dati saranno collegati a fatturazione/e-commerce.</p>
+            <form class="admin-form" id="planForm">
+              <label>Codice piano
+                <input name="plan_key" type="text" placeholder="business" required>
+              </label>
+              <label>Nome
+                <input name="name" type="text" placeholder="Business" required>
+              </label>
+              <label>Prezzo mensile
+                <input name="price_monthly" type="number" min="0" step="0.01" value="0">
+              </label>
+              <label>Prezzo annuale
+                <input name="price_yearly" type="number" min="0" step="0.01" value="0">
+              </label>
+              <label>Setup
+                <input name="setup_fee" type="number" min="0" step="0.01" value="0">
+              </label>
+              <label>Stripe product ID
+                <input name="stripe_product_id" type="text" placeholder="prod_...">
+              </label>
+              <label>Stripe price mensile
+                <input name="stripe_price_monthly_id" type="text" placeholder="price_...">
+              </label>
+              <label>Stripe price annuale
+                <input name="stripe_price_yearly_id" type="text" placeholder="price_...">
+              </label>
+              <label>Visibilità
+                <select name="public_visible">
+                  <option value="false">Privato</option>
+                  <option value="true">Pubblico</option>
+                </select>
+              </label>
+              <label>Stato
+                <select name="active">
+                  <option value="true">Attivo</option>
+                  <option value="false">Disattivo</option>
+                </select>
+              </label>
+              <label>Ordine
+                <input name="sort_order" type="number" step="1" value="0">
+              </label>
+              <label class="wide-field">Descrizione
+                <textarea name="description" rows="3" placeholder="Descrizione piano"></textarea>
+              </label>
+              <label class="wide-field">Funzionalità
+                <input name="features" type="text" placeholder="Editor completo, Analytics, Supporto">
+              </label>
+              <button class="primary-action" type="submit">Salva piano</button>
+              <button class="ghost-button" type="button" data-reset-form="planForm">Nuovo piano</button>
+              <p class="form-status" id="planFormStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Piano</th><th>Codice</th><th>Mensile</th><th>Annuale</th><th>Stripe</th><th>Funzioni</th><th>Stato</th><th>Azioni</th></tr></thead>
+                <tbody id="plansTable"><tr><td colspan="8">Caricamento piani...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="materials">
+          <div class="admin-card">
+            <h2>Materiali</h2>
+            <p>Guide, link, documenti, asset brand e kit agenti gestibili dal pannello.</p>
+            <form class="admin-form" id="materialForm">
+              <label>Codice
+                <input name="material_key" type="text" placeholder="agent-kit" required>
+              </label>
+              <label>Nome
+                <input name="name" type="text" placeholder="Kit agente" required>
+              </label>
+              <label>Tipo
+                <select name="material_type">
+                  <option value="document">Documento</option>
+                  <option value="template">Template</option>
+                  <option value="image">Immagine</option>
+                  <option value="video">Video</option>
+                  <option value="link">Link</option>
+                  <option value="guide">Guida</option>
+                  <option value="contract">Contratto</option>
+                  <option value="brand_asset">Asset brand</option>
+                  <option value="other">Altro</option>
+                </select>
+              </label>
+              <label>Destinatari
+                <select name="audience">
+                  <option value="internal">Interno</option>
+                  <option value="client">Cliente</option>
+                  <option value="agent">Agente</option>
+                  <option value="public">Pubblico</option>
+                </select>
+              </label>
+              <label class="wide-field">URL
+                <input name="url" type="url" placeholder="https://...">
+              </label>
+              <label class="wide-field">Descrizione
+                <textarea name="description" rows="3" placeholder="Descrizione materiale"></textarea>
+              </label>
+              <label>Stato
+                <select name="active">
+                  <option value="true">Attivo</option>
+                  <option value="false">Disattivo</option>
+                </select>
+              </label>
+              <button class="primary-action" type="submit">Salva materiale</button>
+              <button class="ghost-button" type="button" data-reset-form="materialForm">Nuovo materiale</button>
+              <p class="form-status" id="materialFormStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Materiale</th><th>Tipo</th><th>Destinatari</th><th>URL</th><th>Stato</th><th>Azioni</th></tr></thead>
+                <tbody id="materialsTable"><tr><td colspan="6">Caricamento materiali...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="integrations">
+          <div class="admin-card">
+            <h2>Integration Hub</h2>
+            <p>Stato dei collegamenti esterni. Le chiavi segrete non devono essere salvate qui: vanno configurate solo lato backend/Cloudflare.</p>
+            <form class="admin-form" id="integrationForm">
+              <label>Provider
+                <select name="provider">
+                  <option value="stripe">Stripe</option>
+                  <option value="resend">Resend</option>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="shipping">Corrieri / Tracking</option>
+                  <option value="automation">Make / Zapier</option>
+                  <option value="other">Altro</option>
+                </select>
+              </label>
+              <label>Nome
+                <input name="name" type="text" placeholder="Stripe pagamenti" required>
+              </label>
+              <label>Ambiente
+                <select name="environment">
+                  <option value="test">Test</option>
+                  <option value="live">Live</option>
+                </select>
+              </label>
+              <label>Stato
+                <select name="status">
+                  <option value="not_configured">Non configurata</option>
+                  <option value="test">Test</option>
+                  <option value="active">Attiva</option>
+                  <option value="error">Errore</option>
+                  <option value="disabled">Disabilitata</option>
+                </select>
+              </label>
+              <label class="wide-field">Webhook URL
+                <input name="webhook_url" type="url" placeholder="https://...">
+              </label>
+              <label class="wide-field">Note
+                <textarea name="notes" rows="3" placeholder="Note operative. Non inserire chiavi segrete."></textarea>
+              </label>
+              <button class="primary-action" type="submit">Salva integrazione</button>
+              <button class="ghost-button" type="button" data-reset-form="integrationForm">Nuova integrazione</button>
+              <p class="form-status" id="integrationFormStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Provider</th><th>Ambiente</th><th>Stato</th><th>Webhook</th><th>Ultimo evento</th><th>Azioni</th></tr></thead>
+                <tbody id="integrationsTable"><tr><td colspan="6">Caricamento integrazioni...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="admin-card">
+            <h2>Transazioni pagamenti</h2>
+            <p>Qui confluiranno Stripe Checkout, abbonamenti, rimborsi e pagamenti setup/prodotti.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Provider</th><th>Tipo</th><th>Importo</th><th>Ordine</th><th>Stato</th></tr></thead>
+                <tbody id="paymentTransactionsTable"><tr><td colspan="5">Caricamento transazioni...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="admin-card">
+            <h2>Eventi webhook</h2>
+            <p>Registro eventi ricevuti da Stripe, Resend, corrieri e automazioni. Sarà alimentato dai backend/webhook.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Provider</th><th>Evento</th><th>Stato</th><th>Ricevuto</th></tr></thead>
+                <tbody id="webhookEventsTable"><tr><td colspan="4">Caricamento eventi...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <aside class="client-drawer" id="clientDrawer" aria-hidden="true">
+    <div class="client-drawer-backdrop" data-client-drawer-close></div>
+    <section class="client-drawer-panel" role="dialog" aria-label="Scheda cliente">
+      <header class="client-drawer-head">
+        <div>
+          <p class="eyebrow">Scheda cliente</p>
+          <h2 id="drawerClientName">Cliente</h2>
+          <span id="drawerClientMeta">Dettagli attività</span>
+        </div>
+        <button type="button" data-client-drawer-close>Chiudi</button>
+      </header>
+      <div class="drawer-actions">
+        <button type="button" data-drawer-view="summary" class="active">Riepilogo</button>
+        <button type="button" data-drawer-view="operations">Operatività</button>
+        <button type="button" data-drawer-view="orders">Ordini</button>
+        <button type="button" data-drawer-view="analytics">Analytics</button>
+        <button type="button" data-drawer-view="support">Supporto</button>
+        <button type="button" data-drawer-view="notes">Note</button>
+        <button type="button" data-drawer-view="public">Pagina pubblica</button>
+        <button type="button" data-drawer-view="editor">Editor cliente</button>
+      </div>
+      <div class="drawer-view active" id="drawer-summary">
+        <div class="drawer-grid">
+          <div class="admin-card compact">
+            <h2>Informazioni</h2>
+            <div class="client-kv">
+              <span>Slug</span><strong id="drawerSlug">-</strong>
+              <span>Categoria</span><strong id="drawerCategory">-</strong>
+              <span>Pagina pubblica</span><strong id="drawerPublicUrl">-</strong>
+              <span>Onboarding</span><strong id="drawerOnboarding">-</strong>
+              <span>Priorità</span><strong id="drawerPriority">-</strong>
+              <span>Agente</span><strong id="drawerAgent">-</strong>
+            </div>
+            <button class="primary-action" type="button" id="copyPublicUrl">Copia link pubblico</button>
+          </div>
+          <div class="admin-card compact">
+            <h2>Indicatori cliente</h2>
+            <div class="mini-metrics">
+              <article><strong id="drawerMetricOrders">0</strong><span>Ordini</span></article>
+              <article><strong id="drawerMetricEvents">0</strong><span>Eventi</span></article>
+              <article><strong id="drawerMetricTickets">0</strong><span>Ticket aperti</span></article>
+              <article><strong id="drawerMetricNotes">0</strong><span>Note</span></article>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="drawer-view" id="drawer-operations">
+        <div class="admin-card compact">
+          <h2>Dati modificabili</h2>
+          <p>Questi dati sono gestiti dal pannello admin, senza modificare codice.</p>
+          <form class="admin-form" id="clientRecordForm">
+            <label>Stato onboarding
+              <select name="onboarding_status">
+                <option value="new">Nuovo</option>
+                <option value="contacted">Contattato</option>
+                <option value="setup">Setup</option>
+                <option value="waiting_client">In attesa cliente</option>
+                <option value="ready">Pronto</option>
+                <option value="active">Attivo</option>
+                <option value="paused">Pausato</option>
+                <option value="cancelled">Annullato</option>
+              </select>
+            </label>
+            <label>Priorità
+              <select name="priority">
+                <option value="low">Bassa</option>
+                <option value="normal">Normale</option>
+                <option value="high">Alta</option>
+                <option value="urgent">Urgente</option>
+              </select>
+            </label>
+            <label>Piano
+              <select name="plan_key">
+                <option value="">Nessun piano</option>
+                <option value="free">Free</option>
+                <option value="starter">Starter</option>
+                <option value="business">Business</option>
+                <option value="premium">Premium</option>
+              </select>
+            </label>
+            <label>Agente collegato
+              <select name="assigned_agent_id" id="clientAgentSelect">
+                <option value="">Nessun agente</option>
+              </select>
+            </label>
+            <label>Tag
+              <input name="tags" type="text" placeholder="hotel, urgente, setup">
+            </label>
+            <label>Follow-up
+              <input name="next_follow_up_at" type="datetime-local">
+            </label>
+            <label class="wide-field">Note interne cliente
+              <textarea name="admin_notes" rows="4" placeholder="Note operative visibili solo al team KhamaKey"></textarea>
+            </label>
+            <button class="primary-action" type="submit">Salva scheda cliente</button>
+            <p class="form-status" id="clientRecordStatus"></p>
+          </form>
+        </div>
+      </div>
+      <div class="drawer-view" id="drawer-orders">
+        <div class="admin-card compact">
+          <h2>Ordini cliente</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Ordine</th><th>Tipo</th><th>Totale</th><th>Stato</th></tr></thead>
+              <tbody id="drawerOrdersTable"><tr><td colspan="4">Caricamento ordini...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="drawer-view" id="drawer-analytics">
+        <div class="admin-card compact">
+          <h2>Analytics pagina</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Evento</th><th>Quantità</th></tr></thead>
+              <tbody id="drawerAnalyticsTable"><tr><td colspan="2">Caricamento analytics...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="drawer-view" id="drawer-support">
+        <div class="admin-card compact">
+          <h2>Ticket supporto</h2>
+          <form class="admin-form compact-form" id="ticketForm">
+            <label>Oggetto
+              <input name="subject" type="text" placeholder="Richiesta cliente" required>
+            </label>
+            <label>Priorità
+              <select name="priority">
+                <option value="normal">Normale</option>
+                <option value="high">Alta</option>
+                <option value="urgent">Urgente</option>
+                <option value="low">Bassa</option>
+              </select>
+            </label>
+            <label>Descrizione
+              <input name="description" type="text" placeholder="Dettagli ticket">
+            </label>
+            <button class="primary-action" type="submit">Crea ticket</button>
+            <p class="form-status" id="ticketFormStatus"></p>
+          </form>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Ticket</th><th>Priorità</th><th>Stato</th></tr></thead>
+              <tbody id="drawerTicketsTable"><tr><td colspan="3">Caricamento ticket...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="drawer-view" id="drawer-notes">
+        <div class="admin-card compact">
+          <h2>Note interne</h2>
+          <form class="admin-form compact-form" id="clientNoteForm">
+            <label>Tipo
+              <select name="note_type">
+                <option value="note">Nota</option>
+                <option value="call">Telefonata</option>
+                <option value="email">Email</option>
+                <option value="task">Task</option>
+              </select>
+            </label>
+            <label>Nota
+              <input name="body" type="text" placeholder="Scrivi una nota interna" required>
+            </label>
+            <button class="primary-action" type="submit">Aggiungi nota</button>
+            <p class="form-status" id="clientNoteStatus"></p>
+          </form>
+          <div id="clientNotesList" class="note-list">Caricamento note...</div>
+        </div>
+      </div>
+      <div class="drawer-view" id="drawer-public">
+        <iframe id="drawerPublicFrame" title="Anteprima pagina pubblica" loading="lazy"></iframe>
+      </div>
+      <div class="drawer-view" id="drawer-editor">
+        <iframe id="drawerEditorFrame" title="Editor Business cliente" loading="lazy"></iframe>
+      </div>
+    </section>
+  </aside>
+
+  <aside class="client-drawer moment-drawer" id="momentDrawer" aria-hidden="true">
+    <div class="client-drawer-backdrop" data-moment-drawer-close></div>
+    <section class="client-drawer-panel" role="dialog" aria-label="Scheda oggetto Moments">
+      <header class="client-drawer-head">
+        <div>
+          <p class="eyebrow">KhamaKey Moments</p>
+          <h2 id="momentDrawerTitle">Oggetto Moments</h2>
+          <span id="momentDrawerMeta">Cliente e dettagli NFC</span>
+        </div>
+        <button type="button" data-moment-drawer-close>Chiudi</button>
+      </header>
+      <div class="drawer-actions">
+        <button type="button" data-moment-drawer-view="summary" class="active">Scheda</button>
+        <button type="button" data-moment-drawer-view="public">Pagina pubblica</button>
+        <button type="button" data-moment-drawer-view="editor">Editor Moments</button>
+      </div>
+      <div class="drawer-view active" id="moment-drawer-summary">
+        <div class="client-kv">
+          <span>Cliente</span><strong id="momentDrawerEmail">-</strong>
+          <span>Slug pagina</span><strong id="momentDrawerSlug">-</strong>
+          <span>Codice NFC</span><strong id="momentDrawerNfc">-</strong>
+          <span>Tipo</span><strong id="momentDrawerType">-</strong>
+          <span>Pubblicata</span><strong id="momentDrawerPublished">-</strong>
+          <span>PIN</span><strong id="momentDrawerPin">-</strong>
+          <span>Link pubblico</span><strong id="momentDrawerPublicUrl">-</strong>
+        </div>
+        <div class="row-actions" style="margin-top:12px">
+          <button type="button" class="small-action" id="momentCopyPublicUrl">Copia link</button>
+          <a class="small-action" id="momentOpenPublicUrl" href="#" target="_blank" rel="noopener">Apri pagina</a>
+          <a class="small-action" id="momentOpenEditorUrl" href="#" target="_blank" rel="noopener">Apri editor</a>
+        </div>
+      </div>
+      <div class="drawer-view" id="moment-drawer-public">
+        <iframe id="momentDrawerPublicFrame" title="Pagina pubblica Moments" loading="lazy"></iframe>
+      </div>
+      <div class="drawer-view" id="moment-drawer-editor">
+        <iframe id="momentDrawerEditorFrame" title="Editor Moments admin" loading="lazy"></iframe>
+      </div>
+    </section>
+  </aside>
+
+  <script type="module" src="admin.js?v=43"></script>
+</body>
+</html>

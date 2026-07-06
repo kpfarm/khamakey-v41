@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets (mai in git)
+.env
+.env.*
+!.env.example
+.dev.vars
+worker/.dev.vars
+
+# Build / deploy artifacts (rigenerabili con package_release.py)
+*.zip
+
+# Node (se aggiungi tooling locale)
+node_modules/
+.wrangler/
+.dev.vars
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*~
+
+# Logs
+*.log
+npm-debug.log*

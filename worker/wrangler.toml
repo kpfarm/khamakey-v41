@@ -1,0 +1,15 @@
+name = "khamakey-nfc"
+main = "worker.js"
+compatibility_date = "2026-06-25"
+
+# Variabili pubbliche (aggiorna PAGES_ASSET_BASE se usi un dominio custom)
+[vars]
+PAGES_ASSET_BASE = "https://khamakey-app.pages.dev"
+
+# Segreti da impostare con `wrangler secret put`:
+# SUPABASE_URL
+# SUPABASE_PUBLISHABLE_KEY
+# ANALYTICS_INGEST_KEY
+# VISITOR_SALT
+# RESEND_API_KEY          (opzionale, per prenotazioni email)
+# RESEND_FROM_EMAIL       (opzionale)

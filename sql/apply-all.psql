@@ -1,0 +1,19 @@
+-- KhamaKey v41 - applicazione completa migrazioni Moments (ordine obbligatorio)
+-- Eseguire solo se le versioni precedenti non sono già applicate.
+
+\echo 'v37 admin'
+\i khamakey-moments-admin-v37.sql
+\echo 'v38 platform'
+\i khamakey-moments-platform-v38.sql
+\echo 'v39 activation'
+\i khamakey-moments-activation-v39.sql
+\echo 'v40 products'
+\i khamakey-moments-products-v40.sql
+\echo 'v41 activate fix'
+\i khamakey-moments-activate-fix-v41.sql
+\echo 'v42 inventory'
+\i khamakey-moments-inventory-v42.sql
+\echo 'v43 admin customers'
+\i khamakey-moments-admin-customers-v43.sql
+\echo 'v44 media storage'
+\i khamakey-media-storage-v44.sql

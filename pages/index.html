@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KhamaKey - Accesso</title>
+  <link rel="icon" href="khamakey-favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
+  <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
+  <link rel="stylesheet" href="shell.css?v=40">
+</head>
+<body>
+  <main class="auth-page" id="authView">
+    <section class="auth-brand">
+      <img class="brand-logo" src="khamakey-wordmark-dark.png" alt="KhamaKey">
+      <h1>La tua pagina, sempre aggiornata.</h1>
+      <p>Gestisci i prodotti KhamaKey con NFC integrato.</p>
+      <div class="auth-points">
+        <span>Editor completo</span>
+        <span>Salvataggio cloud</span>
+        <span>Pagina pubblica</span>
+      </div>
+    </section>
+
+    <section class="auth-panel">
+      <div class="auth-card">
+        <div class="auth-tabs" role="tablist">
+          <button class="active" type="button" data-auth-tab="login">Accedi</button>
+          <button type="button" data-auth-tab="signup">Registrati</button>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+          <div>
+            <h2>Bentornato</h2>
+            <p>Continua a lavorare sulla tua pagina KhamaKey.</p>
+          </div>
+          <label>Email<input id="loginEmail" type="email" autocomplete="email" required></label>
+          <label>Password
+            <span class="password-field">
+              <input id="loginPassword" type="password" autocomplete="current-password" minlength="6" required>
+              <button class="password-toggle" type="button" data-password-target="loginPassword" aria-label="Mostra password" title="Mostra password">
+                <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 5.2A11 11 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-2.1 2.9M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.2-1"/></svg>
+              </button>
+            </span>
+          </label>
+          <button class="primary" type="submit">Accedi</button>
+          <button class="text-button" id="forgotPassword" type="button">Password dimenticata?</button>
+        </form>
+
+        <form id="signupForm" class="auth-form" hidden>
+          <div>
+            <h2>Crea il tuo account</h2>
+            <p>Per il test tutte le funzioni sono disponibili.</p>
+          </div>
+          <label>Nome e cognome<input id="signupName" type="text" autocomplete="name" required></label>
+          <label>Nome attività<input id="signupBusiness" type="text" autocomplete="organization" required></label>
+          <label>Email<input id="signupEmail" type="email" autocomplete="email" required></label>
+          <label>Password
+            <span class="password-field">
+              <input id="signupPassword" type="password" autocomplete="new-password" minlength="8" required>
+              <button class="password-toggle" type="button" data-password-target="signupPassword" aria-label="Mostra password" title="Mostra password">
+                <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 5.2A11 11 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-2.1 2.9M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.2-1"/></svg>
+              </button>
+            </span>
+          </label>
+          <button class="primary" type="submit">Crea account</button>
+        </form>
+
+        <form id="recoveryForm" class="auth-form" hidden>
+          <div>
+            <h2>Scegli una nuova password</h2>
+            <p>Inserisci una password di almeno 8 caratteri.</p>
+          </div>
+          <label>Nuova password
+            <span class="password-field">
+              <input id="recoveryPassword" type="password" autocomplete="new-password" minlength="8" required>
+              <button class="password-toggle" type="button" data-password-target="recoveryPassword" aria-label="Mostra password" title="Mostra password">
+                <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 5.2A11 11 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-2.1 2.9M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.2-1"/></svg>
+              </button>
+            </span>
+          </label>
+          <button class="primary" type="submit">Aggiorna password</button>
+        </form>
+
+        <div class="auth-status" id="authStatus" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <main class="app-view" id="appView" hidden>
+    <header class="app-header">
+      <img class="header-logo" src="khamakey-wordmark-dark.png" alt="KhamaKey">
+      <div class="cloud-state"><span id="cloudDot"></span><strong id="cloudStatus">Connessione...</strong></div>
+      <div class="app-user">
+        <span id="userEmail"></span>
+        <button type="button" id="logoutButton">Esci</button>
+      </div>
+    </header>
+    <iframe id="editorFrame" title="Editor KhamaKey" src="about:blank"></iframe>
+  </main>
+
+  <script type="module" src="app.js?v=44"></script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KhamaKey Moments</title>
+  <link rel="icon" href="khamakey-favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
+  <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
+  <link rel="stylesheet" href="moments.css?v=44">
+</head>
+<body>
+  <main class="moments-auth" id="momentsAuth">
+    <section class="auth-brand">
+      <img src="khamakey-wordmark-dark.png" alt="KhamaKey" class="brand-logo">
+      <p class="eyebrow">KhamaKey Moments</p>
+      <h1>Il tuo spazio privato collegato all’NFC.</h1>
+      <p>Ogni oggetto KhamaKey Moments ha già il suo link pubblico. Inserisci il codice ricevuto con il prodotto per attivarlo e costruire la pagina.</p>
+      <div class="auth-steps">
+        <div class="auth-step"><span>1</span><div><strong>Inserisci il codice</strong><p>Trovi il codice sulla confezione o sull’oggetto NFC.</p></div></div>
+        <div class="auth-step"><span>2</span><div><strong>Crea l’account</strong><p>Collega il codice al tuo profilo Moments.</p></div></div>
+        <div class="auth-step"><span>3</span><div><strong>Personalizza la pagina</strong><p>Sezioni, testi, PIN e pubblicazione.</p></div></div>
+      </div>
+    </section>
+
+    <section class="auth-panel">
+      <div class="auth-card">
+        <div class="auth-tabs" id="authTabs" role="tablist">
+          <button class="active" type="button" data-auth-tab="login">Accedi</button>
+          <button type="button" data-auth-tab="signup">Crea account</button>
+        </div>
+
+        <form id="momentsLoginForm" class="auth-form">
+          <div class="form-intro">
+            <h2>Accesso Moments</h2>
+            <p>Entra per gestire le pagine collegate ai tuoi oggetti NFC.</p>
+          </div>
+          <label>Email<input id="momentsEmail" type="email" autocomplete="email" required></label>
+          <label>Password
+            <span class="password-field">
+              <input id="momentsPassword" type="password" autocomplete="current-password" minlength="8" required>
+              <button class="password-toggle" type="button" data-password-target="momentsPassword" aria-label="Mostra password">
+                <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 5.2A11 11 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-2.1 2.9M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.2-1"/></svg>
+              </button>
+            </span>
+          </label>
+          <button type="submit" class="primary">Accedi</button>
+          <button type="button" class="text-button" id="momentsForgot">Password dimenticata?</button>
+        </form>
+
+        <form id="momentsForgotForm" class="auth-form" hidden>
+          <div class="form-intro">
+            <h2>Recupera password</h2>
+            <p>Ti invieremo un link per scegliere una nuova password.</p>
+          </div>
+          <label>Email<input id="momentsForgotEmail" type="email" autocomplete="email" required></label>
+          <button type="submit" class="primary">Invia link di recupero</button>
+          <button type="button" class="text-button" id="momentsForgotBack">Torna all’accesso</button>
+        </form>
+
+        <form id="momentsRecoveryForm" class="auth-form" hidden>
+          <div class="form-intro">
+            <h2>Nuova password</h2>
+            <p>Scegli una password di almeno 8 caratteri.</p>
+          </div>
+          <label>Nuova password
+            <span class="password-field">
+              <input id="momentsRecoveryPassword" type="password" autocomplete="new-password" minlength="8" required>
+              <button class="password-toggle" type="button" data-password-target="momentsRecoveryPassword" aria-label="Mostra password">
+                <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 5.2A11 11 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-2.1 2.9M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.2-1"/></svg>
+              </button>
+            </span>
+          </label>
+          <button type="submit" class="primary">Aggiorna password</button>
+        </form>
+
+        <form id="momentsSignupForm" class="auth-form" hidden>
+          <div class="form-intro">
+            <h2>Nuovo account Moments</h2>
+            <p>Collega il codice prodotto al tuo profilo e crea la prima pagina.</p>
+          </div>
+          <div class="signup-steps" id="signupSteps">
+            <span class="signup-step active" data-step="1">1. Codice</span>
+            <span class="signup-step" data-step="2">2. Account</span>
+          </div>
+          <div class="signup-panel" data-signup-panel="1">
+            <label>Codice prodotto
+              <input id="momentsSignupCode" type="text" autocomplete="off" placeholder="Esempio MOMENT1234ABCDEF" required>
+              <span class="field-hint">8–32 caratteri, lettere e numeri. Viene scritto in maiuscolo automaticamente.</span>
+            </label>
+            <button type="button" class="primary" id="signupNextStep">Continua</button>
+          </div>
+          <div class="signup-panel" data-signup-panel="2" hidden>
+            <label>Nome e cognome<input id="momentsSignupName" type="text" autocomplete="name" required></label>
+            <label>Email<input id="momentsSignupEmail" type="email" autocomplete="email" required></label>
+            <label>Password account
+              <span class="password-field">
+                <input id="momentsSignupPassword" type="password" autocomplete="new-password" minlength="8" required>
+                <button class="password-toggle" type="button" data-password-target="momentsSignupPassword" aria-label="Mostra password">
+                  <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg class="eye-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 5.2A11 11 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-2.1 2.9M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.2-1"/></svg>
+                </button>
+              </span>
+            </label>
+            <label>Nome pagina<input id="momentsSignupTitle" type="text" placeholder="Esempio Il nostro ricordo" required></label>
+            <label>PIN pagina (per aprire la pagina pubblica)
+              <input id="momentsSignupPin" type="text" inputmode="numeric" autocomplete="new-password" placeholder="Esempio 1234" minlength="4" required>
+              <span class="field-hint">Scegli un PIN da 4 cifre o più. Lo userai per aprire la pagina collegata all’NFC.</span>
+            </label>
+            <label>Tipo pagina
+              <select id="momentsSignupType">
+                <option value="free">Uso libero</option>
+                <option value="wedding">Matrimonio</option>
+                <option value="party">Festa</option>
+                <option value="travel">Viaggio</option>
+                <option value="memory">Ricordo</option>
+                <option value="memorial">Memoriale</option>
+                <option value="portfolio">Portfolio</option>
+              </select>
+            </label>
+            <div class="signup-actions">
+              <button type="button" class="ghost" id="signupPrevStep">Indietro</button>
+              <button type="submit" class="primary">Crea account e attiva</button>
+            </div>
+          </div>
+        </form>
+
+        <p id="momentsAuthStatus" class="status" aria-live="polite"></p>
+      </div>
+    </section>
+  </main>
+
+  <main class="moments-app" id="momentsApp" hidden>
+    <header class="topbar">
+      <img src="khamakey-wordmark-dark.png" alt="KhamaKey">
+      <div>
+        <p class="eyebrow">Area Moments</p>
+        <h1>I tuoi oggetti</h1>
+      </div>
+      <span id="momentsUserEmail" class="user-chip"></span>
+      <button type="button" id="momentsLogout">Esci</button>
+    </header>
+
+    <section class="activation-panel" id="activationPanel">
+      <div>
+        <p class="eyebrow">Attivazione</p>
+        <h2>Collega un altro prodotto Moments</h2>
+        <p>Hai più oggetti? Ogni codice attiva il link pubblico già preparato per quel portachiavi o card.</p>
+      </div>
+      <form id="activationForm" class="activation-form">
+        <label>Codice NFC<input name="code" autocomplete="off" placeholder="Esempio MOMENT1234" required></label>
+        <label>Nome pagina<input name="title" placeholder="Esempio Il nostro viaggio" required></label>
+        <label>PIN pagina<input name="access_pin" inputmode="numeric" autocomplete="new-password" placeholder="Esempio 1234" minlength="4" required></label>
+        <label>Tipo utilizzo
+          <select name="moment_type">
+            <option value="free">Uso libero</option>
+            <option value="wedding">Matrimonio</option>
+            <option value="party">Festa</option>
+            <option value="travel">Viaggio</option>
+            <option value="memory">Ricordo</option>
+            <option value="memorial">Memoriale</option>
+            <option value="portfolio">Portfolio</option>
+          </select>
+        </label>
+        <button type="submit">Attiva oggetto</button>
+      </form>
+      <p class="status" id="activationStatus"></p>
+    </section>
+
+    <section class="layout">
+      <p class="admin-mode-banner" id="adminModeBanner" hidden></p>
+      <aside class="side-panel">
+        <div class="side-head">
+          <h2>Oggetti collegati</h2>
+          <span id="objectCount" class="object-count">0</span>
+        </div>
+        <div id="momentsList" class="object-list">Caricamento oggetti...</div>
+      </aside>
+
+      <section class="main-panel" id="momentDetail">
+        <div class="empty-state">
+          <h2>Attiva o seleziona un oggetto</h2>
+          <p>Da qui scegli sezioni, testi, privacy, PIN e pubblicazione della pagina collegata all’NFC.</p>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="moments.js?v=44"></script>
+</body>
+</html>

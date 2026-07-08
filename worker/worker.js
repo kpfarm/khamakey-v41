@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v92-moments-fix";
+const WORKER_VERSION = "v94-business-editor";
 
 export default {
   async fetch(request, env, ctx) {
@@ -525,7 +525,7 @@ function renderSnapshotPage(page, origin, env = {}) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>${escapeHtml(title)}</title>
-<link rel="stylesheet" href="${attr(pagesBase)}/public-page.css?v=${attr(snapshot.version || "48")}">
+<link rel="stylesheet" href="${attr(pagesBase)}/public-page.css?v=${attr(snapshot.version || "94")}">
 </head>
 <body>
 <main class="public-page-root ${attr(className)}" style="${attr(style)}">${snapshot.html}</main>

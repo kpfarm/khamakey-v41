@@ -1,0 +1,33 @@
+---
+description: Commit e push su GitHub dopo ogni sessione di sviluppo KhamaKey
+alwaysApply: true
+---
+
+# Git — aggiornare sempre dopo le modifiche
+
+Ogni volta che creiamo o modifichiamo codice in questo repo, **chiudere con commit + push su GitHub** (salvo richiesta esplicita di non committare).
+
+## Workflow obbligatorio
+
+1. Al termine del lavoro (o prima di considerare il task completato):
+   - `git status` + `git diff` per verificare cosa va incluso
+   - **Non committare** segreti (`.env`, `.dev.vars`, credenziali)
+2. Staging solo file del progetto (escludere export chat, artefatti locali)
+3. Commit con messaggio chiaro (1–2 frasi sul *perché*)
+4. Push su `origin` (branch corrente, di solito `main`)
+
+## Versioning unificato
+
+Un solo contatore release per tutta la piattaforma (Moments, Business, Admin, Worker):
+
+- Incrementare **`v=N+1`** su cache bust (`?v=`) e snapshot pubblico ad ogni release
+- Allineare insieme: `moments.html`, `editor.html`, `admin.html`, `index.html`, `app.js`, `worker.js` (`WORKER_VERSION` + fallback CSS)
+- Annotare in `ROADMAP.md` (sezione changelog)
+
+Moments attuale: v93 → prossima release: **v94**, poi v95, ecc.
+
+## Eccezioni
+
+- Non fare commit/push se l'utente chiede esplicitamente solo anteprima locale
+- Non amendare commit già pushati senza richiesta esplicita
+- Non modificare `git config` globale

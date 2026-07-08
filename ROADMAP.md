@@ -184,3 +184,4 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 | 2026-07-06 | kpfarm | Push GitHub: github.com/kpfarm/khamakey-v41 |
 | 2026-07-06 | Cursor | SQL v44 applicato su Supabase (bucket khamakey-media + RLS) |
 | 2026-07-08 | Cursor | Moments v89–v90: template tutte categorie, Altre sezioni complete, guide per tipo, onboarding |
+| 2026-07-08 | Cursor | **v94**: Business editor (hub, anteprima live, pagina pubblica pro), admin fulfillment, SQL v61–v63, regola git commit sempre |

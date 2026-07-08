@@ -40,6 +40,9 @@ Flusso: rivenditore compila brief personalizzazione → ordine produzione KhamaK
 - [x] Documentazione collaborazione Cursor/Codex
 - [x] Prenotazioni: canale email automatico Resend nell'editor
 - [x] Moments: template per tipo, riordino sezioni, galleria URL
+- [x] Template bilanciati per tutte le categorie + «Altre sezioni» con tutte le sezioni adattate (v89–v90)
+- [x] Fix upload media Safari/iOS (MIME vuoto, v87)
+- [x] SQL v59/v60 categorie Moments verificate in produzione
 - [x] Worker: ordine sezioni e galleria Moments
 - [x] Admin: clienti Moments, magazzino NFC separato, provisioning admin (v43)
 
@@ -62,6 +65,35 @@ Obiettivo: stessa semplicità percepita dell'editor Business, adattata al contes
 - [x] Wizard primo accesso post-attivazione (3 step guidati)
 - [x] Upload immagini Supabase Storage
 - [x] Temi visivi base (classic, celebration, minimal, memorial)
+
+## Fase 2c — Creator emotivo (da love.html)
+
+Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispirazione: `khamakey love.html` (Creator).
+
+### Già integrato (v52)
+- [x] Upload media su **Cloudflare R2** via Worker (`POST /api/media/upload`, serve `/cdn/...`)
+- [x] Foto, video, audio dalla libreria locale con limiti di dimensione e quantità
+- [x] Titolo + descrizione per ogni media (tap per aprire dettaglio / lightbox)
+- [x] Copertina: sposta, centra e zoom con anteprima formato smartphone
+- [x] 11 palette colore + 3 varianti atmosfera (`moment-themes.js`)
+- [x] Stili hero, pillola, foto profilo, contatore «insieme da»
+- [x] Pagina pubblica Worker v26: tipografia serif, scroll reveal, galleria swipe
+- [x] Anteprima editor allineata ai colori scelti
+- [x] Navigazione mobile a 2 livelli: Design · Contenuti · Account
+- [x] Sezioni emotive: dedica, timeline, promesse, luoghi, sogni, countdown, musica, citazione, firma
+- [x] Rimosso da Moments: dettagli generici, contatti, messaggio libero, luogo/mappa secco, programma piatto
+
+### Prossimo — sezioni emotive avanzate
+- [x] Upload audio in sezione Musica (oltre Spotify)
+- [x] Video YouTube embed
+- [x] Lettera al futuro (sigillata)
+- [x] Galleria lightbox fullscreen con navigazione
+- [x] Rituali, pet, numeri simbolici
+- [x] Endpoint delete media su R2
+
+### Solo team interno (non editor cliente)
+- [ ] Integrazione ordini Airtable + WhatsApp consegna link
+- [ ] Export HTML standalone (sostituito da URL NFC permanente)
 
 ## Fase 3 — Moments avanzato
 
@@ -101,3 +133,6 @@ Obiettivo: stessa semplicità percepita dell'editor Business, adattata al contes
 | 2026-07-06 | Cursor | Moments editor v44: sidebar sezioni, topbar, wizard onboarding, anteprima mobile |
 | 2026-07-06 | Cursor | Storage v44 + upload cloud Moments/Business, compressione WebP, login PKCE |
 | 2026-07-06 | Cursor | Git init + commit iniziale, GITHUB.md per collegamento remoto |
+| 2026-07-06 | kpfarm | Push GitHub: github.com/kpfarm/khamakey-v41 |
+| 2026-07-06 | Cursor | SQL v44 applicato su Supabase (bucket khamakey-media + RLS) |
+| 2026-07-08 | Cursor | Moments v89–v90: template tutte categorie, Altre sezioni complete, guide per tipo, onboarding |

@@ -97,7 +97,7 @@ In `wrangler.toml` verifica `PAGES_ASSET_BASE = "https://khamakey-app.pages.dev"
 | https://khamakey-nfc...workers.dev/m/{slug} | Pagina pubblica Moment |
 | https://khamakey-nfc...workers.dev/p/{slug} | Pagina pubblica business |
 
-Hard refresh (`Cmd+Shift+R`) se vedi CSS/JS vecchi — i file usano `?v=43`.
+Hard refresh (`Cmd+Shift+R`) se vedi CSS/JS vecchi — Moments usa `?v=90` su `moments.html`.
 
 ---
 
@@ -197,6 +197,8 @@ cd pages && zip -r ../khamakey-cloudflare-pages-v41.zip . -x "*.DS_Store"
 ```bash
 cd worker
 cp .env.example .dev.vars   # solo per sviluppo locale
+# Bucket R2 per foto, video e audio (una tantum):
+npx wrangler r2 bucket create khamakey-media
 npx wrangler secret put SUPABASE_URL
 npx wrangler secret put SUPABASE_PUBLISHABLE_KEY
 npx wrangler secret put ANALYTICS_INGEST_KEY
@@ -221,6 +223,8 @@ Aggiorna `PAGES_ASSET_BASE` in `wrangler.toml` se usi un dominio custom per Page
 | `/k/{code}` | Worker | Redirect NFC → business o moment |
 | `/event` | Worker | Analytics eventi |
 | `/booking` | Worker | Invio prenotazioni (Resend) |
+| `POST /api/media/upload` | Worker + R2 | Upload foto, video, audio (Moments + Business) |
+| `/cdn/{path}` | Worker + R2 | CDN pubblico per i file caricati |
 
 ## Correzioni incluse in v41
 

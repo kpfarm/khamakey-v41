@@ -140,11 +140,25 @@ const PRODUCT_LINE_LABELS = {
 };
 
 const MOMENT_TEMPLATE_LABELS = {
-  free:"Uso libero",
+  free:"Evento generale",
+  love:"Amore",
+  mom:"Mamma",
+  dad:"Papà",
+  child:"Figlio / Figlia",
+  kids:"Bambini",
+  memory:"Ricordi",
+  photo:"Album foto",
+  pet:"Animali",
+  communion:"Comunione",
+  baptism:"Battesimo",
+  friendship:"Amicizia",
+  family:"Famiglia",
+  valentine:"San Valentino",
+  christmas:"Natale",
+  birthday:"Compleanno",
   wedding:"Matrimonio",
   party:"Festa",
   travel:"Viaggio",
-  memory:"Ricordo",
   memorial:"Memoriale",
   portfolio:"Portfolio"
 };

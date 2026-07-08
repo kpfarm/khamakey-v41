@@ -6,6 +6,11 @@ compatibility_date = "2026-06-25"
 [vars]
 PAGES_ASSET_BASE = "https://khamakey-app.pages.dev"
 
+# Bucket R2 per foto, video e audio (Moments + Business)
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "khamakey-media"
+
 # Segreti da impostare con `wrangler secret put`:
 # SUPABASE_URL
 # SUPABASE_PUBLISHABLE_KEY

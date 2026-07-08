@@ -17,3 +17,9 @@
 \i khamakey-moments-admin-customers-v43.sql
 \echo 'v44 media storage'
 \i khamakey-media-storage-v44.sql
+\echo 'v45 save fix'
+\i khamakey-moments-save-fix-v45.sql
+\echo 'v59 categories'
+\i khamakey-moments-categories-v59.sql
+\echo 'v60 event type'
+\i khamakey-moments-event-type-v60.sql

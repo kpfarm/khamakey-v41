@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v38-counter-live";
+const WORKER_VERSION = "v91-moments-qa";
 
 export default {
   async fetch(request, env, ctx) {
@@ -864,23 +864,47 @@ function momentSectionVisible(key, section) {
   return momentSectionHasContent(key, section);
 }
 
+function normalizeWhatsAppDigits(raw) {
+  let wa = String(raw || "").replace(/\D/g, "");
+  if (!wa) return "";
+  if (wa.startsWith("0")) wa = wa.replace(/^0+/, "");
+  if ((wa.length === 9 || wa.length === 10) && wa.startsWith("3")) wa = `39${wa}`;
+  return wa;
+}
+
 function momentSectionHasContent(key, section) {
   if (!section) return false;
-  if (section.title || section.body) return true;
-  if (Array.isArray(section.images) && section.images.length) return true;
-  if (key === "gallery" && normalizeMomentMedia(section).length) return true;
-  if (key === "timeline" && resolveJourneyStepsWorker(section).length) return true;
-  if (key === "dedication" && (section.recipient || section.signature)) return true;
-  if (key === "countdown" && section.target_date) return true;
-  if (key === "rsvp" && section.whatsapp_number) return true;
-  if (key === "music" && (section.spotify_url || section.youtube_url || section.audio_url)) return true;
-  if (key === "letter_future" && (section.body || section.unlock_date || section.media_url)) return true;
-  if (key === "pet" && (section.pet_name || section.body || section.pet_photo)) return true;
-  if (key === "numbers" && section.body) return true;
-  if (key === "rituals" && section.body) return true;
-  if (key === "quote" && section.author) return true;
-  if (key === "signature" && (section.sign_name || section.sign_subtitle)) return true;
-  return false;
+  switch (key) {
+    case "intro":
+      return Boolean(String(section.body || "").trim());
+    case "dedication":
+      return Boolean(section.body || section.recipient || section.signature);
+    case "timeline":
+      return resolveJourneyStepsWorker(section).length > 0;
+    case "gallery":
+      return normalizeMomentMedia(section).length > 0;
+    case "rsvp":
+      return Boolean(normalizeWhatsAppDigits(section.whatsapp_number));
+    case "promises":
+    case "dreams":
+    case "rituals":
+    case "numbers":
+      return Boolean(String(section.body || "").trim());
+    case "countdown":
+      return Boolean(section.target_date);
+    case "music":
+      return Boolean(section.spotify_url || section.youtube_url || section.audio_url);
+    case "letter_future":
+      return Boolean(section.body || section.unlock_date || section.media_url);
+    case "pet":
+      return Boolean(section.pet_name || section.body || section.pet_photo);
+    case "quote":
+      return Boolean(section.body || section.author);
+    case "signature":
+      return Boolean(section.sign_name || section.sign_subtitle || section.body);
+    default:
+      return Boolean(section.title || section.body || (Array.isArray(section.images) && section.images.length));
+  }
 }
 
 function parseMomentLines(body, mode) {
@@ -1403,7 +1427,7 @@ function renderMomentSection(key, section, colors) {
   if (key === "places") return "";
 
   if (key === "rsvp") {
-    const wa = String(section.whatsapp_number || "").replace(/\D/g, "");
+    const wa = normalizeWhatsAppDigits(section.whatsapp_number);
     const askGuests = section.ask_guests !== false;
     const askNotes = section.ask_notes !== false;
     const eventName = String(section.event_name || section.title || "Evento").trim();

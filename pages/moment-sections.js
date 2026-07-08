@@ -217,21 +217,37 @@ export function migrateSections(rawSections = {}){
 
 export function sectionHasContent(key, section){
   if(!section) return false;
-  if(section.title || section.body) return true;
-  if(Array.isArray(section.images) && section.images.length) return true;
-  if(key === "gallery" && normalizeMediaList(section).length) return true;
-  if(key === "timeline" && resolveJourneySteps(section).length) return true;
-  if(key === "dedication" && (section.recipient || section.signature)) return true;
-  if(key === "countdown" && (section.target_date || section.image_url || section.images?.length)) return true;
-  if(key === "rsvp" && section.whatsapp_number) return true;
-  if(key === "music" && (section.spotify_url || section.youtube_url || section.audio_url)) return true;
-  if(key === "letter_future" && (section.body || section.unlock_date || section.media_url)) return true;
-  if(key === "pet" && (section.pet_name || section.body || section.pet_photo)) return true;
-  if(key === "numbers" && section.body) return true;
-  if(key === "rituals" && section.body) return true;
-  if(key === "quote" && section.author) return true;
-  if(key === "signature" && (section.sign_name || section.sign_subtitle)) return true;
-  return false;
+  switch(key){
+    case "intro":
+      return Boolean(String(section.body || "").trim());
+    case "dedication":
+      return Boolean(section.body || section.recipient || section.signature);
+    case "timeline":
+      return resolveJourneySteps(section).length > 0;
+    case "gallery":
+      return normalizeMediaList(section).length > 0;
+    case "rsvp":
+      return Boolean(String(section.whatsapp_number || "").replace(/\D/g, ""));
+    case "promises":
+    case "dreams":
+    case "rituals":
+    case "numbers":
+      return Boolean(String(section.body || "").trim());
+    case "countdown":
+      return Boolean(section.target_date || section.image_url || section.images?.length);
+    case "music":
+      return Boolean(section.spotify_url || section.youtube_url || section.audio_url);
+    case "letter_future":
+      return Boolean(section.body || section.unlock_date || section.media_url);
+    case "pet":
+      return Boolean(section.pet_name || section.body || section.pet_photo);
+    case "quote":
+      return Boolean(section.body || section.author);
+    case "signature":
+      return Boolean(section.sign_name || section.sign_subtitle || section.body);
+    default:
+      return Boolean(section.title || section.body || (Array.isArray(section.images) && section.images.length));
+  }
 }
 
 /** Sezione attiva in pagina: basta che sia abilitata (mostra anche stato vuoto). */

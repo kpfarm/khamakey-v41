@@ -123,7 +123,24 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 
 ---
 
-## Log sessioni
+## Piano sprint (2026-07-08)
+
+| Sprint | Obiettivo | Stato |
+|--------|-----------|-------|
+| **A** | Test + bugfix Moments (mobile, pagina pubblica, RSVP, sezioni vuote) | in corso |
+| **B** | RSVP completo (condivisione inviti + riepilogo admin) | prossimo |
+| **C** | Business editor — wizard onboarding settore | in coda |
+| **D** | Rivenditori — tracciabilità codici e report | in coda |
+
+### Sprint A — checklist
+
+- [x] Sezioni vuote nascoste in pagina pubblica (logica contenuto strict)
+- [x] Fix citazione senza autore non visibile
+- [x] RSVP WhatsApp: prefisso 39 automatico per numeri italiani
+- [ ] Smoke test iPhone su 5 tipi pagina
+- [x] Deploy Worker allineato (`v91-moments-qa`)
+
+---
 
 | Data | Autore | Note |
 |------|--------|------|

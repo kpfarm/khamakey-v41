@@ -23,3 +23,9 @@
 \i khamakey-moments-categories-v59.sql
 \echo 'v60 event type'
 \i khamakey-moments-event-type-v60.sql
+\echo 'v61 reseller tracking'
+\i khamakey-moments-reseller-v61.sql
+\echo 'v62 order fulfillment'
+\i khamakey-moments-fulfillment-v62.sql
+\echo 'v63 admin business rls'
+\i khamakey-admin-business-rls-v63.sql

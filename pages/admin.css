@@ -101,6 +101,33 @@ tr:last-child td{border-bottom:0}
 .inventory-progress span{display:block;height:100%;background:linear-gradient(90deg,var(--navy),var(--green));border-radius:999px}
 .inventory-stat-foot{margin:0;color:var(--muted);font-size:.72rem;font-weight:800}
 .inventory-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 14px;padding:12px;border:1px solid var(--border);border-radius:12px;background:#F8FAFC}
+.inventory-filters-4{grid-template-columns:repeat(3,minmax(0,1fr))}
+.inventory-toolbar{display:flex;align-items:flex-end;gap:10px;margin:0 0 12px;flex-wrap:wrap}
+.inventory-search{flex:1;min-width:220px;display:grid;gap:6px;font-size:.72rem;font-weight:900;color:var(--navy)}
+.inventory-search input{width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 11px;font:inherit;font-size:.84rem}
+.inventory-bulk-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border:1px dashed var(--border);border-radius:12px;background:#FFFBEB}
+.inventory-bulk-bar select{min-width:120px;border:1px solid var(--border);border-radius:9px;padding:7px 9px;font-size:.78rem}
+.inventory-table-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 10px;flex-wrap:wrap}
+.inventory-export-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.inventory-export-actions span{color:var(--muted);font-size:.76rem;font-weight:800}
+.admin-details{margin:0 0 16px;border:1px solid var(--border);border-radius:12px;background:#F8FAFC;overflow:hidden}
+.admin-details summary{cursor:pointer;padding:12px 14px;font-weight:900;color:var(--navy);list-style:none}
+.admin-details summary::-webkit-details-marker{display:none}
+.admin-details[open] summary{border-bottom:1px solid var(--border);background:white}
+.admin-details .admin-form{margin:0;padding:14px}
+.field-hint{margin:0;color:var(--muted);font-size:.76rem;line-height:1.45}
+.link-button{border:none;background:none;padding:0;color:var(--navy);font:inherit;font-weight:900;text-decoration:underline;cursor:pointer}
+.small-action.primary-outline{background:#EFF6FF;border-color:#93C5FD;color:#1D4ED8}
+.small-action.primary-outline:hover{background:#DBEAFE}
+.admin-workflow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#F8FAFC;font-size:.78rem;color:var(--muted)}
+.workflow-link{display:inline-flex;align-items:center;border-radius:999px;background:var(--navy);color:#fff;padding:8px 12px;font-weight:900;text-decoration:none;font-size:.76rem}
+.workflow-link:hover{opacity:.92}
+.admin-workflow-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 16px;padding:0;list-style:none}
+.admin-workflow-steps li{border:1px solid var(--border);border-radius:12px;background:#fff;padding:12px;display:grid;gap:4px}
+.admin-workflow-steps strong{color:var(--navy);font-size:.82rem}
+.admin-workflow-steps span{color:var(--muted);font-size:.72rem;line-height:1.35}
+.nfc-order-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.nfc-order-fields[hidden]{display:none!important}
 .inventory-filters label{display:grid;gap:6px;font-size:.72rem;font-weight:900;color:var(--navy)}
 .system-note{margin:0 0 16px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:#F8FAFC;color:var(--text);font-size:.82rem;line-height:1.5}
 .system-note strong{color:var(--navy)}
@@ -159,8 +186,10 @@ textarea{width:100%;border:1px solid var(--border);border-radius:10px;background
 .note-item{border:1px solid var(--border);background:#F8FAFC;border-radius:12px;padding:12px}
 .note-item strong{display:block;color:var(--navy);font-size:.78rem;margin-bottom:4px}
 .note-item p{margin:0;color:var(--text);font-size:.82rem;line-height:1.45}
+.small-action[disabled]{opacity:.55;cursor:wait}
 @media(max-width:900px){
   .admin-shell{grid-template-columns:1fr}
+  .admin-workflow-steps{grid-template-columns:1fr}
   .admin-sidebar{position:static}
   .admin-nav{grid-template-columns:repeat(2,minmax(0,1fr))}
   .admin-topbar{align-items:flex-start;flex-direction:column}

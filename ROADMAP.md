@@ -104,7 +104,7 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 ## Fase 3b — Piattaforma rivenditori e logistica
 
 - [ ] Portale rivenditori Business (brief personalizzazione + ordine)
-- [ ] SQL v44: `sold_channel`, allocazione codici Moments a agenti
+- [x] SQL v61: `sold_channel`, allocazione codici Moments a agenti
 - [ ] Hub spedizioni centralizzato con automazione corriere
 - [ ] Supporto unificato + CRM Moments
 
@@ -127,10 +127,10 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 
 | Sprint | Obiettivo | Stato |
 |--------|-----------|-------|
-| **A** | Test + bugfix Moments (mobile, pagina pubblica, RSVP, sezioni vuote) | in corso |
-| **B** | RSVP completo (condivisione inviti + riepilogo admin) | prossimo |
-| **C** | Business editor — wizard onboarding settore | in coda |
-| **D** | Rivenditori — tracciabilità codici e report | in coda |
+| **A** | Test + bugfix Moments (mobile, pagina pubblica, RSVP, sezioni vuote) | completato |
+| **B** | RSVP completo (condivisione inviti + riepilogo admin) | completato |
+| **C** | Business editor — wizard onboarding settore | completato |
+| **D** | Rivenditori — tracciabilità codici e report | in corso |
 
 ### Sprint A — checklist
 
@@ -139,6 +139,37 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 - [x] RSVP WhatsApp: prefisso 39 automatico per numeri italiani
 - [ ] Smoke test iPhone su 5 tipi pagina
 - [x] Deploy Worker allineato (`v91-moments-qa`)
+- [x] Lettera al futuro: sanitizzazione blob URL + messaggio rete chiaro
+- [x] RSVP pagina pubblica: contrasto testi e input
+- [x] Icone sezioni unificate (emoji + tile gradient)
+
+### Sprint B — checklist
+
+- [x] Link invito RSVP con anchor `#moment-section-rsvp`
+- [x] Pannello condivisione invito in editor (copia / share)
+- [x] Riepilogo organizzatore + anteprima messaggio WhatsApp
+- [x] Messaggi RSVP personalizzati per tipo evento
+- [x] Voci RSVP configurabili + voci personalizzate
+- [x] Sistema colori elegante (moduli bianchi, accento solo hero)
+- [ ] Tabella risposte RSVP (fase successiva — richiede backend)
+
+### Sprint C — checklist
+
+- [x] Wizard setup guidato per settore (5 template)
+- [x] Chiave wizard per ogni attività (non globale)
+- [x] Apertura automatica su attività nuova / vuota
+- [x] Pulsante «Apri setup guidato» in Informazioni
+- [x] Salvataggio cloud automatico dopo template wizard
+- [ ] Smoke test wizard su 5 settori
+
+### Sprint D — checklist
+
+- [x] SQL v61: `sold_channel`, `assigned_agent_id` su codici Moments
+- [x] SQL v62: `platform_order_id` + assegnazione codici da magazzino
+- [x] Stock-first: genera codici senza rivenditore, assegna all'ordine
+- [x] Admin: ricerca, filtri, modifica singola, bulk, drawer ordine/codice
+- [x] Agenti: modifica da tabella
+- [ ] Portale rivenditori self-service (fase successiva)
 
 ---
 

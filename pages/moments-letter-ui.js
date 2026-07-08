@@ -1,4 +1,4 @@
-import { uploadMediaFile, validateImageFile, validateVideoFile, validateAudioFile } from "./media-upload.js";
+import { uploadMediaFile, validateImageFile, validateVideoFile, validateAudioFile, inferMediaKind, fileWithMime } from "./media-upload.js";
 
 const LETTER_MEDIA_TYPES = ["image","video","audio"];
 
@@ -78,14 +78,15 @@ export async function uploadLetterMedia({supabase,row,formNode,file,onBusy}){
   if(!row?.id){
     throw new Error("Pagina non pronta. Ricarica l'editor e riprova.");
   }
-  const type = file.type.startsWith("video/") ? "video" : file.type.startsWith("audio/") ? "audio" : "image";
+  const type = inferMediaKind(file);
+  if(!type) throw new Error("Seleziona un file foto, video o audio valido.");
   if(type === "video") validateVideoFile(file);
   else if(type === "audio") validateAudioFile(file);
   else validateImageFile(file);
   const current = readLetterMedia(formNode);
   onBusy?.(true);
   try{
-    const url = await uploadMediaFile(supabase,{scope:"moments",scopeId:row.id,file});
+    const url = await uploadMediaFile(supabase,{scope:"moments",scopeId:row.id,file:fileWithMime(file,type)});
     writeLetterMedia(formNode,{
       media_type:type,
       media_url:url,

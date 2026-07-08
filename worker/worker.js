@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v91-moments-qa";
+const WORKER_VERSION = "v92-moments-fix";
 
 export default {
   async fetch(request, env, ctx) {
@@ -525,7 +525,7 @@ function renderSnapshotPage(page, origin, env = {}) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>${escapeHtml(title)}</title>
-<link rel="stylesheet" href="${attr(pagesBase)}/public-page.css?v=${attr(snapshot.version || "41")}">
+<link rel="stylesheet" href="${attr(pagesBase)}/public-page.css?v=${attr(snapshot.version || "48")}">
 </head>
 <body>
 <main class="public-page-root ${attr(className)}" style="${attr(style)}">${snapshot.html}</main>
@@ -592,8 +592,9 @@ function renderMomentPage(page, origin) {
     .filter(({ key, section }) => momentSectionVisible(key, section));
   const hasCounter = Boolean(state.show_together_counter && state.together_since);
   const counterHtml = renderTogetherCounter(state, colors);
+  const momentType = String(state.type || page.moment_type || "free").trim().toLowerCase();
   const sectionHtml = ordered.length
-    ? ordered.map(({ key, section }) => `<div class="moment-section-anchor" id="moment-section-${escapeHtml(key)}">${renderMomentSection(key, section, colors)}</div>`).join("")
+    ? ordered.map(({ key, section }) => `<div class="moment-section-anchor" id="moment-section-${escapeHtml(key)}">${renderMomentSection(key, section, colors, momentType, fonts)}</div>`).join("")
     : `<div class="moment-card moment-card-empty rv"><strong>Pagina in preparazione</strong><p>Il proprietario sta ancora scegliendo i contenuti da mostrare.</p></div>`;
   const navHtml = renderMomentNav(title, ordered, hasCounter);
   const decorHtml = renderMomentDecor(state);
@@ -753,10 +754,22 @@ function resolveMomentPalette(state) {
   const variant = state.themeVariant === "scuro" || state.themeVariant === "caldo" ? state.themeVariant : "chiaro";
   const overrides = variants[variant]?.[paletteKey];
   if(overrides) Object.assign(base, overrides);
+  const surfaceTints = {
+    amore:"#FBF3F3", rubino:"#FAF2F2", rosa:"#FBF2F7", bordeaux:"#FAF2F4", miele:"#F3F8F3",
+    corallo:"#FFF7F2", terracotta:"#FBF6F1", cipria:"#FBF7F2", classic:"#F4F6FA", blu:"#F2F6FB",
+    salvia:"#F2F8F3", aurora:"#F6F2FB", lavanda:"#F7F2FC", perla:"#F7F7F7", neve:"#F8F8F8",
+    notte:"#F2F2F2", uomo:"#F0F3F8", gentleman:"#F4F4F4"
+  };
   base.card = "#FFFFFF";
   base.bl2 = "#FFFFFF";
-  base.in = "#111111";
-  base.mu = base.mu || "#666666";
+  base.surface = surfaceTints[paletteKey] || "#F8FAFC";
+  base.cardSoft = "#F8FAFC";
+  base.ink = "#1F2937";
+  base.muted = "#64748B";
+  base.line = "rgba(15,23,42,.08)";
+  base.lineStrong = "rgba(15,23,42,.12)";
+  base.in = base.ink;
+  base.mu = base.muted;
   return base;
 }
 
@@ -1162,9 +1175,19 @@ document.querySelectorAll("[data-rsvp-form]").forEach(function(form){
     if(!wa)return;
     var fd=new FormData(form);
     var eventName=card.getAttribute("data-rsvp-event")||document.title.replace(/ · KhamaKey Moments$/,"");
-    var lines=["RSVP · "+eventName,"Nome: "+(fd.get("rsvp_name")||""),"Presenza: "+(fd.get("rsvp_attending")||"")];
-    if(fd.get("rsvp_guests"))lines.push("Ospiti: "+fd.get("rsvp_guests"));
-    if(fd.get("rsvp_notes"))lines.push("Note: "+fd.get("rsvp_notes"));
+    var intro=card.getAttribute("data-rsvp-intro")||("RSVP · "+eventName);
+    var lines=[intro,"","👤 Nome: "+(fd.get("rsvp_name")||""),"✓ Presenza: "+(fd.get("rsvp_attending")||"")];
+    if(fd.get("rsvp_guests"))lines.push("👥 Ospiti: "+fd.get("rsvp_guests"));
+    if(fd.get("rsvp_notes"))lines.push("📝 Note: "+fd.get("rsvp_notes"));
+    if(fd.get("rsvp_phone"))lines.push("📞 Tel.: "+fd.get("rsvp_phone"));
+    if(fd.get("rsvp_email"))lines.push("✉️ Email: "+fd.get("rsvp_email"));
+    try{
+      var custom=JSON.parse(card.getAttribute("data-rsvp-custom")||"[]");
+      custom.forEach(function(field){
+        var val=fd.get("rsvp_custom_"+field.id);
+        if(val)lines.push(field.label+": "+val);
+      });
+    }catch(e){}
     window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(lines.join("\\n")),"_blank","noopener");
   });
 });
@@ -1188,7 +1211,7 @@ document.addEventListener("keydown",function(e){if(!lb.classList.contains("open"
 function momentPageCss(colors, fonts) {
   const c = colors;
   const f = fonts || resolveMomentFontPair("classic");
-  return `*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:72px}body{margin:0;font-family:${f.body};background:${c.bl};color:${c.in};-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  return `*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:72px}body{margin:0;font-family:${f.body};background:${c.surface};color:${c.ink};-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 #moment-hero,.moment-section-anchor,#moment-section-counter{scroll-margin-top:72px}
 .moment-nav-backdrop{position:fixed;inset:0;background:rgba(12,16,24,.22);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:38}
 .moment-nav-backdrop.open{opacity:1;pointer-events:auto}
@@ -1198,25 +1221,29 @@ body.nav-open{overflow:hidden}
 .moment-nav.on-hero:not(.scrolled) .moment-nav-links a.active,.moment-nav.on-hero:not(.scrolled) .moment-nav-links a:hover{background:rgba(255,255,255,.14);color:#fff}
 .moment-nav.on-hero:not(.scrolled) .moment-nav-burger{border-color:rgba(255,255,255,.24);background:rgba(255,255,255,.08)}
 .moment-nav.on-hero:not(.scrolled) .moment-nav-burger span{background:rgba(255,255,255,.92)}
-.moment-nav.scrolled{background:${c.bl}d9;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom-color:${c.ro}66;box-shadow:0 4px 18px rgba(17,32,65,.05)}
+.moment-nav.scrolled{background:rgba(255,255,255,.97);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom-color:rgba(17,32,65,.08);box-shadow:0 4px 18px rgba(17,32,65,.08)}
+.moment-nav.scrolled .moment-nav-links a{color:#475569}
+.moment-nav.scrolled .moment-nav-links a.active,.moment-nav.scrolled .moment-nav-links a:hover{color:#0f172a;background:rgba(15,23,42,.06)}
+.moment-nav.scrolled .moment-nav-burger{border-color:rgba(15,23,42,.12);background:rgba(255,255,255,.92)}
+.moment-nav.scrolled .moment-nav-burger span{background:#334155}
 .moment-nav-links{display:none;list-style:none;margin:0;padding:0;gap:2px;align-items:center}
 .moment-nav-links a{display:inline-flex;align-items:center;min-height:32px;padding:0 9px;border-radius:999px;font-family:${f.ui};font-size:.64rem;font-weight:700;color:${c.mu};text-decoration:none;letter-spacing:.03em;transition:color .15s,background .15s}
 .moment-nav-links a.active,.moment-nav-links a:hover{color:${c.in};background:${c.ro}88}
 .moment-nav-burger{width:38px;height:38px;border:1px solid ${c.ro};border-radius:999px;background:${c.bl}88;display:grid;place-content:center;gap:4px;cursor:pointer;padding:0;transition:background .2s,border-color .2s}
 .moment-nav-burger span{display:block;width:16px;height:1.5px;background:${c.in};border-radius:999px;opacity:.88}
-.moment-nav-sheet{position:fixed;left:10px;right:10px;bottom:0;max-height:min(52vh,380px);background:${c.bl};border:1px solid ${c.ro};border-bottom:0;border-radius:18px 18px 0 0;transform:translateY(105%);transition:transform .3s cubic-bezier(.22,1,.36,1);z-index:39;padding:0 12px max(16px,env(safe-area-inset-bottom));box-shadow:0 -10px 36px rgba(17,32,65,.08);overflow:auto}
+.moment-nav-sheet{position:fixed;left:10px;right:10px;bottom:0;max-height:min(52vh,380px);background:#FFFFFF;border:1px solid ${c.lineStrong};border-bottom:0;border-radius:18px 18px 0 0;transform:translateY(105%);transition:transform .3s cubic-bezier(.22,1,.36,1);z-index:39;padding:0 12px max(16px,env(safe-area-inset-bottom));box-shadow:0 -10px 36px rgba(17,32,65,.08);overflow:auto}
 .moment-nav-sheet.open{transform:translateY(0)}
-.moment-nav-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 4px 10px;border-bottom:1px solid ${c.ro}55;margin-bottom:8px}
-.moment-nav-sheet-head span{font-family:${f.ui};font-size:.78rem;font-weight:700;color:${c.in};opacity:.82}
-.moment-nav-sheet-close{width:34px;height:34px;border:0;border-radius:999px;background:${c.bl2};color:${c.in};font-size:1.25rem;line-height:1;cursor:pointer}
+.moment-nav-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 4px 10px;border-bottom:1px solid ${c.line};margin-bottom:8px}
+.moment-nav-sheet-head span{font-family:${f.ui};font-size:.78rem;font-weight:700;color:${c.ink};opacity:.82}
+.moment-nav-sheet-close{width:34px;height:34px;border:0;border-radius:999px;background:${c.cardSoft};color:${c.ink};font-size:1.25rem;line-height:1;cursor:pointer}
 .moment-nav-sheet ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
-.moment-nav-sheet a{display:flex;align-items:center;min-height:42px;padding:0 12px;border-radius:12px;font-family:${f.ui};font-size:.86rem;font-weight:600;color:${c.in};text-decoration:none;background:transparent;border:0;transition:background .15s,color .15s}
-.moment-nav-sheet a.active,.moment-nav-sheet a:hover{background:${c.ro}66;color:${c.go}}
+.moment-nav-sheet a{display:flex;align-items:center;min-height:42px;padding:0 12px;border-radius:12px;font-family:${f.ui};font-size:.86rem;font-weight:600;color:${c.ink};text-decoration:none;background:transparent;border:0;transition:background .15s,color .15s}
+.moment-nav-sheet a.active,.moment-nav-sheet a:hover{background:${c.cardSoft};color:${c.ink}}
 @media(min-width:760px){.moment-nav-links{display:flex}.moment-nav-burger{display:none}.moment-nav-brand{max-width:160px}.moment-nav-sheet{display:none}.moment-nav-backdrop{display:none}}
 .moment-decor{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
 .moment-decor-item{position:absolute;font-size:clamp(.95rem,2.8vw,1.35rem);opacity:.09;animation:momentDecorFloat linear infinite;filter:drop-shadow(0 2px 6px rgba(0,0,0,.08))}
 @keyframes momentDecorFloat{0%,100%{transform:translate3d(0,0,0) rotate(0deg)}50%{transform:translate3d(0,-16px,0) rotate(8deg)}}
-.moment-page{width:100%;max-width:100%;min-height:100dvh;margin:0;background:${c.bl};overflow-x:clip;position:relative}
+.moment-page{width:100%;max-width:100%;min-height:100dvh;margin:0;background:${c.surface};overflow-x:clip;position:relative}
 .moment-hero{position:relative;min-height:min(94dvh,760px);padding:max(72px,env(safe-area-inset-top)) 20px max(56px,env(safe-area-inset-bottom));text-align:center;color:#fff;background:linear-gradient(145deg,${c.hero},${c.go});overflow:hidden;display:grid;align-content:end}
 .hero-fullscreen .moment-hero{min-height:min(100dvh,780px)}
 .hero-romantico .moment-hero{min-height:min(88dvh,700px)}
@@ -1237,22 +1264,22 @@ body.nav-open{overflow:hidden}
 .moment-hero p{font-family:${f.body};font-size:clamp(1rem,4vw,1.12rem);font-style:italic;line-height:1.7;margin:0 auto;max-width:480px;opacity:.94}
 @keyframes scrollPulse{0%,100%{opacity:.5;transform:scaleY(1)}50%{opacity:.15;transform:scaleY(.55)}}
 @keyframes momentItemIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-.moment-content{padding:16px 14px 32px;display:grid;gap:16px;background:${c.bl}}
-.moment-counter{background:${c.card || c.bl2};padding:36px 18px;text-align:center;border-radius:22px;border:1px solid ${c.ro};box-shadow:0 8px 28px rgba(17,32,65,.06)}
-.moment-counter-label{font-family:${f.ui};font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:${c.go};margin-bottom:20px}
+.moment-content{padding:16px 14px 32px;display:grid;gap:16px;background:${c.surface}}
+.moment-counter{background:#FFFFFF;padding:36px 18px;text-align:center;border-radius:22px;border:1px solid ${c.line};box-shadow:0 8px 28px rgba(17,32,65,.05)}
+.moment-counter-label{font-family:${f.ui};font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:${c.muted};margin-bottom:20px}
 .moment-counter-grid{display:flex;justify-content:center;gap:0}
 .moment-counter-unit{flex:1;max-width:100px;padding:0 14px}
-.moment-counter-unit:not(:last-child){border-right:1px solid ${c.ro}}
-.moment-counter-unit b{display:block;font-size:clamp(1.8rem,8vw,2.4rem);font-weight:700;font-style:normal;line-height:1;color:${c.go};font-family:${f.ui}}
-.moment-counter-unit small{display:block;font-family:${f.ui};font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:${c.in};opacity:.62;margin-top:8px}
-.moment-card{position:relative;overflow:hidden;border:1px solid ${c.ro};border-radius:22px;padding:32px 18px 26px;margin:0;background:${c.card || c.bl2};max-width:none;box-shadow:0 8px 28px rgba(17,32,65,.06)}
-.moment-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,${c.hero},${c.go})}
-.moment-card:nth-child(even){background:${c.card || c.bl2}}
+.moment-counter-unit:not(:last-child){border-right:1px solid ${c.line}}
+.moment-counter-unit b{display:block;font-size:clamp(1.8rem,8vw,2.4rem);font-weight:700;font-style:normal;line-height:1;color:${c.ink};font-family:${f.ui}}
+.moment-counter-unit small{display:block;font-family:${f.ui};font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:${c.muted};margin-top:8px}
+.moment-card{position:relative;overflow:hidden;border:1px solid ${c.line};border-radius:22px;padding:32px 18px 26px;margin:0;background:#FFFFFF;max-width:none;box-shadow:0 8px 28px rgba(17,32,65,.05)}
+.moment-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,rgba(15,23,42,.06),rgba(15,23,42,.02))}
+.moment-card:nth-child(even){background:#FFFFFF}
 .moment-card-head{display:grid;justify-items:center;text-align:center;margin-bottom:16px;padding-top:4px}
-.moment-card-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:999px;background:${c.bl};border:2px solid ${c.go};font-size:1.05rem;color:${c.go};margin-bottom:10px}
-.moment-card-head strong{display:block;color:${c.in};font-size:clamp(1.08rem,4.2vw,1.28rem);font-family:${f.ui};font-weight:800;letter-spacing:.01em;line-height:1.25;text-transform:none}
-.moment-card-head strong::before,.moment-card-head strong::after{content:"";display:inline-block;width:18px;height:2px;background:${c.go};opacity:.65;vertical-align:middle;margin:0 8px;border-radius:999px}
-.moment-card p{color:${c.in};opacity:.88;line-height:1.75;white-space:pre-wrap;margin:0;font-size:clamp(.98rem,3.8vw,1.05rem);font-family:${f.ui}}
+.moment-card-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:999px;background:${c.cardSoft};border:1px solid ${c.line};font-size:1.05rem;color:${c.ink};margin-bottom:10px;box-shadow:none}
+.moment-card-head strong{display:block;color:${c.ink};font-size:clamp(1.08rem,4.2vw,1.28rem);font-family:${f.ui};font-weight:800;letter-spacing:.01em;line-height:1.25;text-transform:none}
+.moment-card-head strong::before,.moment-card-head strong::after{content:"";display:inline-block;width:18px;height:1px;background:${c.lineStrong};opacity:1;vertical-align:middle;margin:0 8px;border-radius:999px}
+.moment-card p{color:${c.ink};opacity:.88;line-height:1.75;white-space:pre-wrap;margin:0;font-size:clamp(.98rem,3.8vw,1.05rem);font-family:${f.ui}}
 .moment-card-empty{text-align:center;padding:48px 24px}
 .moment-card-message p{font-style:italic;text-align:center;font-size:clamp(1.05rem,4vw,1.2rem)}
 .rv.on .moment-journey-item,.rv.on .moment-promise,.rv.on .moment-ritual,.rv.on .moment-number,.rv.on .moment-dream{animation:momentItemIn .6s cubic-bezier(.22,1,.36,1) both}
@@ -1262,18 +1289,18 @@ body.nav-open{overflow:hidden}
 .rv.on .moment-journey-item:nth-child(n+5),.rv.on .moment-promise:nth-child(n+5),.rv.on .moment-ritual:nth-child(n+5),.rv.on .moment-number:nth-child(n+5),.rv.on .moment-dream:nth-child(n+5){animation-delay:.28s}
 .moment-journey{display:grid;gap:14px;margin-top:10px}
 .moment-journey-item{display:grid;gap:12px;padding:16px;border-radius:16px;background:${c.card || c.bl2};border:1px solid ${c.ro};position:relative;box-shadow:0 4px 16px rgba(17,32,65,.04)}
-.moment-journey-item::before{content:"";position:absolute;left:20px;top:-14px;width:2px;height:14px;background:${c.go}44}
+.moment-journey-item::before{content:"";position:absolute;left:20px;top:-14px;width:2px;height:14px;background:${c.line}}
 .moment-journey-item:first-child::before{display:none}
-.moment-journey-photo{width:100%;max-height:220px;object-fit:cover;border-radius:14px;border:1px solid ${c.ro};box-shadow:0 6px 18px rgba(0,0,0,.06)}
+.moment-journey-photo{width:100%;max-height:220px;object-fit:cover;border-radius:14px;border:1px solid ${c.line};box-shadow:0 6px 18px rgba(0,0,0,.06)}
 .moment-journey-copy{display:grid;gap:6px;min-width:0}
-.moment-journey-date{font-family:${f.ui};font-size:.62rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:${c.go}}
-.moment-journey-place{display:block;font-size:1.08rem;color:${c.in};font-weight:800;line-height:1.25;font-family:${f.ui}}
-.moment-journey-text{margin:0;color:${c.in};opacity:.82;line-height:1.7;font-size:.96rem;font-family:${f.ui}}
-.moment-journey-map{display:inline-flex;align-items:center;gap:4px;font-family:${f.ui};font-size:.78rem;font-weight:700;color:${c.go};text-decoration:none;margin-top:4px}
+.moment-journey-date{font-family:${f.ui};font-size:.62rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:${c.muted}}
+.moment-journey-place{display:block;font-size:1.08rem;color:${c.ink};font-weight:800;line-height:1.25;font-family:${f.ui}}
+.moment-journey-text{margin:0;color:${c.ink};opacity:.82;line-height:1.7;font-size:.96rem;font-family:${f.ui}}
+.moment-journey-map{display:inline-flex;align-items:center;gap:4px;font-family:${f.ui};font-size:.78rem;font-weight:700;color:${c.ink};text-decoration:underline;text-underline-offset:3px;margin-top:4px;opacity:.78}
 @media(min-width:560px){.moment-journey-item{grid-template-columns:120px minmax(0,1fr);align-items:start}.moment-journey-photo{width:120px;height:120px;max-height:none}}
 .moment-meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
-.moment-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid ${c.ro};border-radius:999px;padding:10px 16px;font-family:${f.ui};font-size:.78rem;color:${c.in};background:${c.bl};text-decoration:none;font-weight:700;min-height:44px}
-.moment-chip-action{background:${c.in};color:${c.bl};border-color:${c.in}}
+.moment-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid ${c.line};border-radius:999px;padding:10px 16px;font-family:${f.ui};font-size:.78rem;color:${c.ink};background:#FFFFFF;text-decoration:none;font-weight:700;min-height:44px}
+.moment-chip-action{background:${c.ink};color:#FFFFFF;border-color:${c.ink}}
 .moment-gallery-scroll{margin:14px -4px 0;padding:0 12px 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x mandatory;scroll-padding-inline:12px;mask-image:linear-gradient(90deg,transparent,black 6%,black 94%,transparent)}
 .moment-gallery-scroll::-webkit-scrollbar{display:none}
 .moment-gallery-track{display:flex;gap:12px;width:max-content;padding-bottom:2px}
@@ -1298,36 +1325,36 @@ body.nav-open{overflow:hidden}
 .moment-lightbox-counter{font-family:${f.ui};font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;opacity:.72;margin:0 0 8px}
 .moment-youtube{margin-top:12px;border-radius:16px;overflow:hidden;border:1px solid ${c.ro};aspect-ratio:16/9;background:#111}
 .moment-youtube iframe{display:block;width:100%;height:100%;border:0}
-.moment-audio{margin-top:12px;border-radius:16px;padding:16px;background:${c.bl};border:1px solid ${c.ro};box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+.moment-audio{margin-top:12px;border-radius:16px;padding:16px;background:${c.cardSoft};border:1px solid ${c.line};box-shadow:none}
 .moment-audio audio{width:100%}
-.moment-audio-title{font-family:${f.body};font-size:1.1rem;margin:0 0 6px;color:${c.in}}
-.moment-audio-desc{font-size:.92rem;opacity:.82;margin:0 0 10px;line-height:1.5}
-.moment-sealed{text-align:center;padding:32px 20px;background:linear-gradient(180deg,${c.ro},${c.bl});border:2px dashed ${c.go};border-radius:18px;margin-top:8px}
-.moment-sealed-icon{font-size:2rem;margin-bottom:10px;color:${c.go};animation:scrollPulse 3s ease-in-out infinite}
-.moment-sealed-date{font-family:${f.ui};font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:${c.in};opacity:.62;margin-top:8px}
+.moment-audio-title{font-family:${f.body};font-size:1.1rem;margin:0 0 6px;color:${c.ink}}
+.moment-audio-desc{font-size:.92rem;opacity:.82;margin:0 0 10px;line-height:1.5;color:${c.muted}}
+.moment-sealed{text-align:center;padding:32px 20px;background:#FFFFFF;border:1px dashed ${c.lineStrong};border-radius:18px;margin-top:8px}
+.moment-sealed-icon{font-size:2rem;margin-bottom:10px;color:${c.ink};opacity:.55;animation:scrollPulse 3s ease-in-out infinite}
+.moment-sealed-date{font-family:${f.ui};font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:${c.muted};margin-top:8px}
 .moment-rituals{display:grid;gap:10px;margin-top:10px}
-.moment-ritual{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:${c.bl};border:1px solid ${c.ro};border-left:4px solid ${c.go};box-shadow:0 4px 16px rgba(17,32,65,.05)}
-.moment-card:nth-child(even) .moment-ritual,.moment-card:nth-child(even) .moment-promise,.moment-card:nth-child(even) .moment-number{background:${c.bl2}}
+.moment-ritual{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:${c.cardSoft};border:1px solid ${c.line};border-left:3px solid ${c.lineStrong};box-shadow:none}
+.moment-card:nth-child(even) .moment-ritual,.moment-card:nth-child(even) .moment-promise,.moment-card:nth-child(even) .moment-number{background:${c.cardSoft}}
 .moment-pet-card{display:grid;justify-items:center;text-align:center;gap:12px;margin-top:8px}
-.moment-pet-photo{width:120px;height:120px;border-radius:999px;object-fit:cover;border:3px solid ${c.go};box-shadow:0 12px 32px ${c.go}33}
-.moment-pet-name{font-family:${f.body};font-size:1.35rem;margin:0;color:${c.in};font-weight:600}
+.moment-pet-photo{width:120px;height:120px;border-radius:999px;object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 12px 32px rgba(15,23,42,.12)}
+.moment-pet-name{font-family:${f.body};font-size:1.35rem;margin:0;color:${c.ink};font-weight:600}
 .moment-numbers{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:12px}
-.moment-number{flex:1 1 100px;max-width:140px;text-align:center;padding:16px 10px;border-radius:16px;background:${c.bl};border:1px solid ${c.ro};border-top:3px solid ${c.go};box-shadow:0 4px 16px rgba(17,32,65,.05)}
-.moment-number b{display:block;font-size:clamp(1.6rem,7vw,2rem);font-weight:400;font-style:italic;color:${c.go};line-height:1}
-.moment-number small{display:block;font-family:${f.ui};font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:${c.in};opacity:.62;margin-top:8px;line-height:1.35}
+.moment-number{flex:1 1 100px;max-width:140px;text-align:center;padding:16px 10px;border-radius:16px;background:${c.cardSoft};border:1px solid ${c.line};border-top:3px solid ${c.lineStrong};box-shadow:none}
+.moment-number b{display:block;font-size:clamp(1.6rem,7vw,2rem);font-weight:400;font-style:italic;color:${c.ink};line-height:1}
+.moment-number small{display:block;font-family:${f.ui};font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:${c.muted};margin-top:8px;line-height:1.35}
 .moment-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
 .moment-gallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:16px;border:2px solid ${c.ro};box-shadow:0 10px 28px rgba(0,0,0,.1)}
-.moment-letter{background:linear-gradient(180deg,${c.bl},${c.ro});border-radius:18px;padding:26px 20px;margin-top:8px;border:1px solid ${c.ro};border-left:5px solid ${c.go};position:relative;box-shadow:inset 0 1px 0 rgba(255,255,255,.65)}
-.moment-letter p{line-height:1.95;letter-spacing:.01em;color:${c.in}}
-.moment-letter-to{font-style:italic;color:${c.go};font-weight:600;margin:0 0 12px}
-.moment-letter-sign{display:block;margin-top:18px;font-family:${f.display};font-size:1.6rem;color:${c.go}}
-.moment-letter-heart{position:absolute;right:18px;bottom:14px;opacity:.22;color:${c.go};font-size:1.4rem}
+.moment-letter{background:#FFFFFF;border-radius:18px;padding:26px 20px;margin-top:8px;border:1px solid ${c.line};border-left:3px solid ${c.lineStrong};position:relative;box-shadow:none}
+.moment-letter p{line-height:1.95;letter-spacing:.01em;color:${c.ink}}
+.moment-letter-to{font-style:italic;color:${c.muted};font-weight:600;margin:0 0 12px}
+.moment-letter-sign{display:block;margin-top:18px;font-family:${f.display};font-size:1.6rem;color:${c.ink}}
+.moment-letter-heart{position:absolute;right:18px;bottom:14px;opacity:.12;color:${c.ink};font-size:1.4rem}
 .moment-letter-media{margin-top:18px;display:grid;gap:10px;justify-items:center}
 .moment-letter-media img{width:100%;max-width:420px;border-radius:14px;border:1px solid ${c.ro};object-fit:cover}
 .moment-letter-media video{width:100%;max-width:420px;border-radius:14px;border:1px solid ${c.ro};background:#111}
 .moment-letter-media-title{font-family:${f.body};font-size:1.05rem;margin:0;color:${c.in}}
 .moment-promises{display:grid;gap:10px;margin-top:10px}
-.moment-promise{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:${c.bl};border:1px solid ${c.ro};border-left:4px solid ${c.go};box-shadow:0 4px 16px rgba(17,32,65,.05)}
+.moment-promise{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:${c.cardSoft};border:1px solid ${c.line};border-left:3px solid ${c.lineStrong};box-shadow:none}
 .moment-promise-emoji{font-size:1.2rem;line-height:1.2}
 .moment-places{display:grid;gap:10px;margin-top:10px}
 .moment-place{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;background:${c.bl};border:1px solid ${c.ro};text-decoration:none;color:${c.in}}
@@ -1335,42 +1362,49 @@ body.nav-open{overflow:hidden}
 .moment-dreams{display:grid;gap:8px;margin-top:10px}
 .moment-dream{display:flex;gap:10px;align-items:center;font-size:1.02rem;padding:8px 0;border-bottom:1px solid ${c.ro}}
 .moment-dream:last-child{border-bottom:0}
-.moment-dream-mark{width:24px;height:24px;border-radius:999px;border:2px solid ${c.go};display:grid;place-items:center;font-size:.72rem;color:${c.go};flex-shrink:0;background:${c.bl}}
-.moment-dream.done .moment-dream-mark{background:${c.go};color:${c.bl}}
-.moment-dream.done .moment-dream-text{opacity:.55;text-decoration:line-through;color:${c.mu}}
-.moment-countdown{text-align:center;padding:36px 18px;background:linear-gradient(145deg,${c.bl2},${c.ro});border-radius:22px;border:1px solid ${c.ro};box-shadow:0 14px 40px rgba(17,32,65,.08)}
-.moment-countdown-photo{width:min(100%,280px);height:160px;object-fit:cover;border-radius:16px;margin:0 auto 16px;display:block;border:2px solid ${c.go}55;box-shadow:0 10px 28px rgba(0,0,0,.12)}
-.moment-countdown-label{font-family:${f.ui};font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:${c.go};margin-bottom:14px}
-.moment-countdown-event{font-size:1.15rem;font-style:italic;margin:0 0 18px;color:${c.in}}
-.moment-countdown-note{margin:0 0 16px;color:${c.in};opacity:.82;line-height:1.6;font-size:.98rem}
-.moment-rsvp-intro{margin:0 0 10px;line-height:1.65;color:${c.in};opacity:.88}
-.moment-rsvp-form{display:grid;gap:14px;margin-top:12px}
-.moment-rsvp-form label{display:grid;gap:6px;font-family:${f.ui};font-size:.82rem;font-weight:700;color:${c.in}}
-.moment-rsvp-form input,.moment-rsvp-form textarea{width:100%;border:1px solid ${c.ro};border-radius:12px;padding:12px 14px;font:inherit;background:${c.bl};color:${c.in}}
-.moment-rsvp-attending{border:0;padding:0;margin:0;display:grid;gap:8px}
-.moment-rsvp-attending legend{font-family:${f.ui};font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:${c.mu};margin-bottom:4px}
-.moment-rsvp-attending label{font-weight:600;display:flex;align-items:center;gap:8px}
+.moment-dream-mark{width:24px;height:24px;border-radius:999px;border:2px solid ${c.lineStrong};display:grid;place-items:center;font-size:.72rem;color:${c.ink};flex-shrink:0;background:#FFFFFF}
+.moment-dream.done .moment-dream-mark{background:${c.ink};color:#FFFFFF;border-color:${c.ink}}
+.moment-dream.done .moment-dream-text{opacity:.55;text-decoration:line-through;color:${c.muted}}
+.moment-countdown{text-align:center;padding:36px 18px;background:#FFFFFF;border-radius:22px;border:1px solid ${c.line};box-shadow:0 8px 28px rgba(17,32,65,.05)}
+.moment-countdown-photo{width:min(100%,280px);height:160px;object-fit:cover;border-radius:16px;margin:0 auto 16px;display:block;border:1px solid ${c.line};box-shadow:0 10px 28px rgba(0,0,0,.08)}
+.moment-countdown-label{font-family:${f.ui};font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:${c.muted};margin-bottom:14px}
+.moment-countdown-event{font-size:1.15rem;font-style:italic;margin:0 0 18px;color:${c.ink}}
+.moment-countdown-note{margin:0 0 16px;color:${c.ink};opacity:.82;line-height:1.6;font-size:.98rem}
+.moment-rsvp-intro{margin:0 0 16px;line-height:1.75;color:${c.ink};font-size:1.02rem;font-weight:500;opacity:.88}
+.moment-rsvp-event{text-align:center;margin:0 0 20px;padding:8px 0 0}
+.moment-rsvp-event-eyebrow{font-family:${f.ui};font-size:.62rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:${c.muted};margin:0 0 8px}
+.moment-rsvp-event-title{font-family:${f.display};font-size:clamp(1.65rem,7vw,2.35rem);color:${c.ink};margin:0;line-height:1.15;font-weight:400}
+.moment-rsvp-form{display:grid;gap:16px;margin-top:4px;padding:18px;border-radius:18px;background:${c.cardSoft};border:1px solid ${c.line}}
+.moment-rsvp-form label{display:grid;gap:8px;font-family:${f.ui};font-size:.88rem;font-weight:700;color:${c.ink}}
+.moment-rsvp-form input,.moment-rsvp-form textarea{width:100%;border:1px solid ${c.lineStrong};border-radius:12px;padding:13px 14px;font:inherit;background:#FFFFFF;color:${c.ink};font-size:1rem;line-height:1.4;-webkit-text-fill-color:${c.ink};box-shadow:inset 0 1px 2px rgba(15,23,42,.03)}
+.moment-rsvp-form input::placeholder,.moment-rsvp-form textarea::placeholder{color:${c.muted};opacity:1;-webkit-text-fill-color:${c.muted}}
+.moment-rsvp-attending{border:0;padding:0;margin:0;display:grid;gap:10px}
+.moment-rsvp-attending legend{font-family:${f.ui};font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:${c.muted};margin-bottom:6px}
+.moment-rsvp-attending label{font-weight:600;display:flex;align-items:center;gap:10px;color:${c.ink};font-size:.95rem}
+.moment-rsvp-attending input[type=radio]{width:18px;height:18px;margin:0;flex-shrink:0;accent-color:${c.ink}}
+.moment-card-head strong{color:${c.ink}}
 .moment-rsvp-submit{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:14px 18px;background:#25D366;color:#fff;font-family:${f.ui};font-weight:800;font-size:.95rem;cursor:pointer;box-shadow:0 10px 24px rgba(37,211,102,.25)}
+.moment-card-head .moment-card-icon{font-size:1.15rem;line-height:1;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:${c.cardSoft};border:1px solid ${c.line};flex-shrink:0;color:${c.ink}}
 .moment-countdown-grid{display:flex;justify-content:center;gap:0}
 .moment-countdown-unit{flex:1;max-width:100px;padding:0 14px}
-.moment-countdown-unit:not(:last-child){border-right:1px solid ${c.go}44}
-.moment-countdown-unit b{display:block;font-size:clamp(1.8rem,8vw,2.4rem);font-weight:400;font-style:italic;line-height:1;color:${c.go}}
-.moment-countdown-unit small{display:block;font-family:${f.ui};font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:${c.in};opacity:.62;margin-top:8px}
-.moment-spotify{margin-top:12px;border-radius:16px;overflow:hidden;border:1px solid ${c.ro}}
+.moment-countdown-unit b{display:block;font-size:clamp(1.8rem,8vw,2.4rem);font-weight:400;font-style:italic;line-height:1;color:${c.ink}}
+.moment-countdown-unit small{display:block;font-family:${f.ui};font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:${c.muted};margin-top:8px}
+.moment-countdown-unit:not(:last-child){border-right:1px solid ${c.line}}
+.moment-spotify{margin-top:12px;border-radius:16px;overflow:hidden;border:1px solid ${c.line}}
 .moment-spotify iframe{display:block;width:100%;border:0;min-height:152px}
-.moment-quote-wrap{text-align:center;padding:42px 20px;background:${c.card || c.bl2};border-radius:22px;border:1px solid ${c.ro};box-shadow:0 8px 28px rgba(17,32,65,.06)}
-.moment-quote-wrap::before{content:"";display:block;width:48px;height:3px;margin:0 auto 18px;border-radius:999px;background:linear-gradient(90deg,${c.hero},${c.go})}
-.moment-quote-mark{font-family:${f.ui};font-size:2.4rem;line-height:1;color:${c.go};opacity:.8;margin-bottom:-8px;font-weight:800}
-.moment-quote-text{font-size:clamp(1.05rem,4.5vw,1.28rem);font-style:italic;line-height:1.65;margin:0;color:${c.in};font-family:${f.body};font-weight:500}
-.moment-quote-author{display:block;margin-top:16px;font-family:${f.ui};font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:${c.go}}
-.moment-signature{text-align:center;padding:42px 20px 48px;border-radius:22px;background:linear-gradient(180deg,${c.bl2},${c.ro});border:1px solid ${c.ro};box-shadow:0 14px 44px rgba(17,32,65,.08)}
-.moment-signature-label{font-family:${f.ui};font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:${c.go};margin:0 0 10px}
-.moment-signature-name{font-family:${f.display};font-size:clamp(2rem,8vw,2.8rem);color:${c.in};margin:0;line-height:1.1}
-.moment-signature-sub{font-style:italic;color:${c.in};opacity:.68;margin-top:10px;font-size:1rem}
-.moment-gallery-empty,.moment-empty-hint{font-family:${f.ui};font-size:.88rem;line-height:1.55;color:${c.in};opacity:.62;font-style:italic;margin:12px 0 0;padding:14px 16px;border-radius:12px;background:transparent;border:1px dashed ${c.ro};text-align:center}
+.moment-quote-wrap{text-align:center;padding:42px 20px;background:#FFFFFF;border-radius:22px;border:1px solid ${c.line};box-shadow:0 8px 28px rgba(17,32,65,.05)}
+.moment-quote-wrap::before{content:"";display:block;width:48px;height:2px;margin:0 auto 18px;border-radius:999px;background:${c.lineStrong}}
+.moment-quote-mark{font-family:${f.ui};font-size:2.4rem;line-height:1;color:${c.muted};opacity:.55;margin-bottom:-8px;font-weight:800}
+.moment-quote-text{font-size:clamp(1.05rem,4.5vw,1.28rem);font-style:italic;line-height:1.65;margin:0;color:${c.ink};font-family:${f.body};font-weight:500}
+.moment-quote-author{display:block;margin-top:16px;font-family:${f.ui};font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:${c.muted}}
+.moment-signature{text-align:center;padding:42px 20px 48px;border-radius:22px;background:#FFFFFF;border:1px solid ${c.line};box-shadow:0 8px 28px rgba(17,32,65,.05)}
+.moment-signature-label{font-family:${f.ui};font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:${c.muted};margin:0 0 10px}
+.moment-signature-name{font-family:${f.display};font-size:clamp(2rem,8vw,2.8rem);color:${c.ink};margin:0;line-height:1.1}
+.moment-signature-sub{font-style:italic;color:${c.muted};margin-top:10px;font-size:1rem}
+.moment-gallery-empty,.moment-empty-hint{font-family:${f.ui};font-size:.88rem;line-height:1.55;color:${c.muted};font-style:italic;margin:12px 0 0;padding:14px 16px;border-radius:12px;background:${c.cardSoft};border:1px dashed ${c.lineStrong};text-align:center}
 .moment-gallery-group{margin-top:20px}
 .moment-gallery-group:first-child{margin-top:8px}
-.moment-gallery-group-label{font-family:${f.ui};font-size:.62rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${c.go};text-align:center;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid ${c.ro}}
+.moment-gallery-group-label{font-family:${f.ui};font-size:.62rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${c.muted};text-align:center;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid ${c.line}}
 .moment-gallery-group-items{display:grid;gap:10px}
 .moment-media-list{display:grid;gap:10px}
 .moment-gallery-figure{margin:0;display:grid;gap:6px;justify-items:center}
@@ -1378,33 +1412,124 @@ body.nav-open{overflow:hidden}
 .moment-media-card-audio{min-height:88px}
 .moment-footer{text-align:center;color:${c.mu};font-family:${f.ui};font-size:12px;padding:16px 20px max(28px,env(safe-area-inset-bottom))}
 @media(prefers-reduced-motion:reduce){.hero-in,.rv{opacity:1;transform:none;transition:none}.rv.on .moment-journey-item,.rv.on .moment-promise,.rv.on .moment-ritual,.rv.on .moment-number,.rv.on .moment-dream{animation:none}.moment-sealed-icon,.moment-decor-item{animation:none}.moment-decor{display:none}}
-@media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:20px;box-shadow:0 24px 70px rgba(17,32,65,.12)}.moment-content{padding:16px 16px 32px}.moment-gallery-scroll img,.moment-gallery-scroll .moment-gallery-figure img{width:260px;height:320px}}`;
+@media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:20px;box-shadow:0 24px 70px rgba(17,32,65,.12);background:${c.surface}}.moment-content{padding:16px 16px 32px}.moment-gallery-scroll img,.moment-gallery-scroll .moment-gallery-figure img{width:260px;height:320px}}`;
 }
 
 const MOMENT_SECTION_ICONS = {
-  intro: "✦",
+  intro: "✨",
   dedication: "💌",
-  timeline: "◷",
-  rsvp: "✓",
-  gallery: "▣",
-  promises: "🤝",
+  timeline: "🗺️",
+  rsvp: "📲",
+  gallery: "📸",
+  promises: "💍",
   places: "📍",
-  dreams: "✨",
+  dreams: "🌟",
   countdown: "⏳",
   music: "🎵",
-  letter_future: "🔒",
-  rituals: "🕯",
+  letter_future: "🔐",
+  rituals: "🕯️",
   pet: "🐾",
-  numbers: "#",
-  quote: "❝",
-  signature: "♥"
+  numbers: "🔢",
+  quote: "✍️",
+  signature: "💫"
 };
 
 function renderSectionTag(title, colors) {
   return title ? `<p class="moment-tag">${escapeHtml(title)}</p>` : "";
 }
 
-function renderMomentSection(key, section, colors) {
+function normalizeRsvpSectionWorker(section = {}) {
+  const next = { ...section };
+  const optional = {
+    guests: { label: "Quanti siete?", type: "number", placeholder: "1" },
+    notes: { label: "Note (allergie, bambini…)", type: "textarea", placeholder: "Facoltativo" },
+    phone: { label: "Telefono", type: "tel", placeholder: "Es. 333 1234567" },
+    email: { label: "Email", type: "email", placeholder: "Es. marco@email.it" }
+  };
+  if (!Array.isArray(next.field_keys)) {
+    next.field_keys = [];
+    if (next.ask_guests !== false) next.field_keys.push("guests");
+    if (next.ask_notes !== false) next.field_keys.push("notes");
+  }
+  next.field_keys = [...new Set(next.field_keys.filter(key => optional[key]))];
+  if (!Array.isArray(next.custom_fields)) next.custom_fields = [];
+  next.custom_fields = next.custom_fields
+    .map((field, index) => ({
+      id: String(field?.id || `custom_${index + 1}`).trim() || `custom_${index + 1}`,
+      label: String(field?.label || "").trim(),
+      placeholder: String(field?.placeholder || "").trim(),
+      type: field?.type === "textarea" ? "textarea" : "text",
+      enabled: field?.enabled !== false
+    }))
+    .filter(field => field.label && field.enabled !== false)
+    .slice(0, 8);
+  return next;
+}
+
+function renderRsvpOptionalFields(section) {
+  const safe = normalizeRsvpSectionWorker(section);
+  const optional = {
+    guests: { label: "Quanti siete?", type: "number", placeholder: "1" },
+    notes: { label: "Note (allergie, bambini…)", type: "textarea", placeholder: "Facoltativo" },
+    phone: { label: "Telefono", type: "tel", placeholder: "Es. 333 1234567" },
+    email: { label: "Email", type: "email", placeholder: "Es. marco@email.it" }
+  };
+  let html = "";
+  safe.field_keys.forEach(key => {
+    const spec = optional[key];
+    if (!spec) return;
+    if (spec.type === "number") {
+      html += `<label>${escapeHtml(spec.label)}<input type="number" name="rsvp_${escapeHtml(key)}" min="1" max="30" placeholder="${attr(spec.placeholder)}"></label>`;
+      return;
+    }
+    if (spec.type === "textarea") {
+      html += `<label>${escapeHtml(spec.label)}<textarea name="rsvp_${escapeHtml(key)}" rows="2" placeholder="${attr(spec.placeholder)}"></textarea></label>`;
+      return;
+    }
+    const inputMode = key === "phone" ? ' inputmode="tel"' : "";
+    const auto = key === "email" ? ' autocomplete="email"' : key === "phone" ? ' autocomplete="tel"' : "";
+    html += `<label>${escapeHtml(spec.label)}<input type="${attr(spec.type)}" name="rsvp_${escapeHtml(key)}"${inputMode}${auto} placeholder="${attr(spec.placeholder)}"></label>`;
+  });
+  safe.custom_fields.forEach(field => {
+    if (field.type === "textarea") {
+      html += `<label>${escapeHtml(field.label)}<textarea name="rsvp_custom_${attr(field.id)}" rows="2" placeholder="${attr(field.placeholder || "Facoltativo")}"></textarea></label>`;
+      return;
+    }
+    html += `<label>${escapeHtml(field.label)}<input type="text" name="rsvp_custom_${attr(field.id)}" placeholder="${attr(field.placeholder || "Facoltativo")}"></label>`;
+  });
+  return { html, customFields: safe.custom_fields };
+}
+
+function renderRsvpEventBadge(eventName, fonts) {
+  const label = String(eventName || "").trim();
+  if (!label) return "";
+  const f = fonts || resolveMomentFontPair("classic");
+  return `<div class="moment-rsvp-event"><p class="moment-rsvp-event-eyebrow">RSVP</p><p class="moment-rsvp-event-title">${escapeHtml(label)}</p></div>`;
+}
+
+function rsvpWhatsAppIntro(momentType, eventName) {
+  const type = String(momentType || "free").trim().toLowerCase();
+  const label = String(eventName || "Evento").trim();
+  const emojiMap = {
+    wedding: "💍", birthday: "🎂", baptism: "🕊️", communion: "✨", graduation: "🎓",
+    party: "🎉", anniversary: "💑", memorial: "🕯️", travel: "✈️"
+  };
+  const emoji = emojiMap[type] || "👋";
+  const hooks = {
+    wedding: `Ciao! ${emoji} RSVP matrimonio · ${label}`,
+    birthday: `Ciao! ${emoji} RSVP compleanno · ${label}`,
+    baptism: `Ciao! ${emoji} RSVP battesimo · ${label}`,
+    communion: `Ciao! ${emoji} RSVP comunione · ${label}`,
+    graduation: `Ciao! ${emoji} RSVP laurea · ${label}`,
+    party: `Ciao! ${emoji} RSVP festa · ${label}`,
+    anniversary: `Ciao! ${emoji} RSVP anniversario · ${label}`,
+    memorial: `Ciao! ${emoji} Partecipazione · ${label}`,
+    travel: `Ciao! ${emoji} RSVP viaggio · ${label}`
+  };
+  return hooks[type] || `Ciao! ${emoji} RSVP · ${label}`;
+}
+
+function renderMomentSection(key, section, colors, momentType = "free", fonts = null) {
   const images = Array.isArray(section.images) ? section.images.filter(url => safeUrl(url) !== "#").slice(0, 24) : [];
   const icon = MOMENT_SECTION_ICONS[key] || "•";
   const head = (title) => `<div class="moment-card-head"><span class="moment-card-icon">${icon}</span><strong>${escapeHtml(title || "Sezione")}</strong></div>`;
@@ -1428,19 +1553,15 @@ function renderMomentSection(key, section, colors) {
 
   if (key === "rsvp") {
     const wa = normalizeWhatsAppDigits(section.whatsapp_number);
-    const askGuests = section.ask_guests !== false;
-    const askNotes = section.ask_notes !== false;
     const eventName = String(section.event_name || section.title || "Evento").trim();
     if (!wa) {
       return `<article class="${rv}">${head(section.title || "Conferma presenza")}<p class="moment-empty-hint">Aggiungi il numero WhatsApp dell'organizzatore nell'editor.</p></article>`;
     }
-    const guestsField = askGuests
-      ? `<label>Quanti siete?<input type="number" name="rsvp_guests" min="1" max="30" placeholder="1"></label>`
-      : "";
-    const notesField = askNotes
-      ? `<label>Note (allergie, bambini…)<textarea name="rsvp_notes" rows="2" placeholder="Facoltativo"></textarea></label>`
-      : "";
-    return `<article class="${rv} moment-rsvp" data-rsvp-wa="${attr(wa)}" data-rsvp-event="${attr(eventName)}">${head(section.title || "Conferma presenza")}${section.body ? `<p class="moment-rsvp-intro">${escapeHtml(section.body)}</p>` : ""}<form class="moment-rsvp-form" data-rsvp-form><label>Nome e cognome<input type="text" name="rsvp_name" required placeholder="Es. Marco Rossi" autocomplete="name"></label><fieldset class="moment-rsvp-attending"><legend>Vieni?</legend><label><input type="radio" name="rsvp_attending" value="Sì, ci sarò" checked> Sì, ci sarò</label><label><input type="radio" name="rsvp_attending" value="No, non posso"> No, non posso</label><label><input type="radio" name="rsvp_attending" value="Forse"> Forse</label></fieldset>${guestsField}${notesField}<button type="submit" class="moment-rsvp-submit">Invia su WhatsApp</button></form></article>`;
+    const { html: optionalFields, customFields } = renderRsvpOptionalFields(section);
+    const eventBadge = renderRsvpEventBadge(eventName, fonts);
+    const rsvpIntro = rsvpWhatsAppIntro(momentType, eventName);
+    const customAttr = attr(JSON.stringify(customFields.map(field => ({ id: field.id, label: field.label }))));
+    return `<article class="${rv} moment-rsvp" data-rsvp-wa="${attr(wa)}" data-rsvp-event="${attr(eventName)}" data-rsvp-intro="${attr(rsvpIntro)}" data-rsvp-custom="${customAttr}">${head(section.title || "Conferma presenza")}${eventBadge}${section.body ? `<p class="moment-rsvp-intro">${escapeHtml(section.body)}</p>` : ""}<form class="moment-rsvp-form" data-rsvp-form><label>Nome e cognome<input type="text" name="rsvp_name" required placeholder="Es. Marco Rossi" autocomplete="name"></label><fieldset class="moment-rsvp-attending"><legend>Vieni?</legend><label><input type="radio" name="rsvp_attending" value="Sì, ci sarò" checked> Sì, ci sarò</label><label><input type="radio" name="rsvp_attending" value="No, non posso"> No, non posso</label><label><input type="radio" name="rsvp_attending" value="Forse"> Forse</label></fieldset>${optionalFields}<button type="submit" class="moment-rsvp-submit">Invia su WhatsApp</button></form></article>`;
   }
 
   if (key === "timeline") {

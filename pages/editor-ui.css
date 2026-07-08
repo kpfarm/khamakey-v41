@@ -1,0 +1,86 @@
+/* KhamaKey Business Editor — UI v48 */
+
+/* ── Workspace + live preview dock ── */
+.editor-workspace{display:flex;flex:1;min-width:0;position:relative;}
+.editor-preview-dock{display:none;}
+
+@media(min-width:1180px){
+  .editor-preview-dock{
+    display:flex;flex-direction:column;width:min(420px,34vw);flex-shrink:0;
+    border-left:1px solid var(--border,#E2E8F0);background:linear-gradient(180deg,#EEF2F7 0%,#F5F7FA 100%);
+    position:sticky;top:var(--topbar-h,56px);height:calc(100vh - var(--topbar-h,56px));padding:16px 14px 20px;
+  }
+  .editor-preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;padding:0 4px;}
+  .editor-preview-head span{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:800;color:var(--navy,#1B2A5E);letter-spacing:.02em;}
+  .editor-preview-head small{display:block;font-size:.64rem;font-weight:700;color:var(--muted,#64748B);margin-top:2px;}
+  .editor-preview-expand{border:1px solid var(--border,#E2E8F0);background:white;color:var(--navy,#1B2A5E);border-radius:999px;padding:7px 12px;font:700 .7rem 'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:background .15s,box-shadow .15s;}
+  .editor-preview-expand:hover{background:var(--verde-light,#EBF7E4);border-color:rgba(76,175,39,.28);}
+  .editor-dock-frame{margin:0 auto;zoom:.68;transform-origin:top center;}
+  .editor-dock-frame .phone-preview-inner{height:min(780px,calc(100vh - 140px));border-radius:28px;box-shadow:0 24px 60px rgba(9,16,36,.16);}
+  .layout .main{max-width:min(680px,100%);}
+  .preview-fab{display:none!important;}
+}
+
+/* ── Hub navigation ── */
+.editor-hub{
+  display:flex;gap:8px;flex-wrap:wrap;margin:-8px 0 20px;padding:10px;
+  background:linear-gradient(135deg,rgba(27,42,94,.04),rgba(76,175,39,.06));
+  border:1px solid var(--border,#E2E8F0);border-radius:16px;
+}
+.editor-hub-btn{
+  border:1px solid transparent;background:white;color:var(--muted,#64748B);
+  border-radius:999px;padding:9px 14px;font:700 .76rem 'DM Sans',sans-serif;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;transition:all .15s;box-shadow:0 2px 8px rgba(27,42,94,.04);
+}
+.editor-hub-btn:hover{color:var(--navy,#1B2A5E);border-color:var(--border,#E2E8F0);}
+.editor-hub-btn.active{
+  background:linear-gradient(135deg,var(--navy,#1B2A5E),#263B7E);color:white;
+  border-color:transparent;box-shadow:0 8px 22px rgba(27,42,94,.22);
+}
+.editor-hub-btn .hub-dot{width:7px;height:7px;border-radius:999px;background:currentColor;opacity:.45;}
+.editor-hub-btn.active .hub-dot{opacity:1;background:#7BE054;}
+
+.sidebar .nav-item.hub-hidden{display:none;}
+
+/* ── Editor polish ── */
+.topbar{background:linear-gradient(90deg,#091024 0%,var(--navy,#1B2A5E) 55%,#1a3568 100%);}
+.sidebar{width:236px;background:linear-gradient(180deg,#fff 0%,#FAFBFD 100%);}
+.sidebar-section{color:var(--verde-dark,#3A8E1E);letter-spacing:1.6px;font-size:.56rem;}
+.nav-item{border-radius:0 10px 10px 0;margin-right:8px;}
+.nav-item.active{background:linear-gradient(90deg,var(--verde-dim,rgba(76,175,39,.12)),transparent);}
+
+.section-header{
+  padding-bottom:14px;margin-bottom:22px;border-bottom:1px solid var(--border,#E2E8F0);
+}
+.section-title{font-size:1.42rem;letter-spacing:-.02em;}
+.section-sub{max-width:52ch;line-height:1.5;}
+
+.card{
+  border-radius:16px;border-color:#E8EDF4;
+  box-shadow:0 4px 18px rgba(27,42,94,.05);
+  transition:box-shadow .15s,border-color .15s;
+}
+.card:hover{box-shadow:0 8px 28px rgba(27,42,94,.08);}
+
+.card-title{
+  font-size:.88rem;padding-bottom:12px;margin-bottom:4px;
+  border-bottom:1px solid #EEF2F7;
+}
+
+.field-hint{background:#F8FAFC;border:1px dashed #D8E0EA;border-radius:10px;padding:10px 12px;}
+
+.btn-save{
+  background:linear-gradient(135deg,var(--verde,#4CAF27),var(--verde-dark,#3A8E1E));
+  box-shadow:0 8px 20px rgba(76,175,39,.28);
+}
+
+.save-bar{
+  background:rgba(255,255,255,.92);backdrop-filter:blur(12px);
+  border-top:1px solid var(--border,#E2E8F0);
+}
+
+/* ── Mobile hub scroll ── */
+@media(max-width:1179px){
+  .editor-hub{overflow-x:auto;flex-wrap:nowrap;padding-bottom:12px;-webkit-overflow-scrolling:touch;}
+  .editor-hub-btn{flex:0 0 auto;}
+}

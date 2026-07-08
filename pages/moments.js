@@ -99,6 +99,8 @@ import {
   sectionFillGuideForType,
   primarySectionsForType
 } from "./moment-editor-kit.js";
+import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
+import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js";
 
 const auth = document.getElementById("momentsAuth");
 const app = document.getElementById("momentsApp");
@@ -229,6 +231,18 @@ function bindCodeInputs(root=document){
       input.value = normalizeCode(input.value);
       if(pos != null) input.setSelectionRange(pos,pos);
     });
+  });
+}
+
+function rsvpGuestPreviewFromForm(formNode, pageTitle = ""){
+  const form = new FormData(formNode);
+  const extra = readRsvpFieldsFromForm(form);
+  return rsvpGuestPreviewLines({
+    event_name:String(form.get("section_rsvp_event_name") || pageTitle || "").trim(),
+    field_keys:extra.field_keys,
+    custom_fields:extra.custom_fields,
+    ask_guests:extra.ask_guests,
+    ask_notes:extra.ask_notes
   });
 }
 
@@ -985,10 +999,10 @@ function applyTemplateToForm(formNode,type){
     if(body) body.value = section.body || "";
     if(images) images.value = formatImageLines(section.images);
     if(key === "rsvp"){
-      const askGuests = formNode.querySelector('[name="section_rsvp_ask_guests"]');
-      const askNotes = formNode.querySelector('[name="section_rsvp_ask_notes"]');
-      if(askGuests) askGuests.checked = section.ask_guests !== false;
-      if(askNotes) askNotes.checked = section.ask_notes !== false;
+      const askGuests = formNode.querySelector('[name="section_rsvp_field_guests"]');
+      const askNotes = formNode.querySelector('[name="section_rsvp_field_notes"]');
+      if(askGuests) askGuests.checked = section.field_keys ? section.field_keys.includes("guests") : section.ask_guests !== false;
+      if(askNotes) askNotes.checked = section.field_keys ? section.field_keys.includes("notes") : section.ask_notes !== false;
     }
     ["recipient","signature","event_label","target_date","spotify_url","author","sign_name","sign_subtitle","whatsapp_number","event_name"].forEach(field=>{
       const input = formNode.querySelector(`[name="section_${key}_${field}"]`);
@@ -1484,7 +1498,7 @@ function bindExtrasPanel(formNode){
   });
 }
 
-function renderSectionPanels(state){
+function renderSectionPanels(state, shareMeta = {}){
   const panelKeys = new Set(kitSectionKeys(state.type));
   const enabled = Object.fromEntries(Object.entries(state.sections || {}).map(([k,v])=>[k, Boolean(v?.enabled)]));
   const navKeys = new Set(navSectionsForEditor(state.type, sectionOrder, state.pinned_sections || [], enabled));
@@ -1494,12 +1508,22 @@ function renderSectionPanels(state){
     const enabledOn = Boolean(section?.enabled);
     const hidden = !panelKeys.has(key);
     const mutedNav = panelKeys.has(key) && !navKeys.has(key);
+    const rsvpShare = key === "rsvp"
+      ? renderRsvpSharePanel({
+          publicUrl:shareMeta.publicUrl,
+          momentType:state.type,
+          section,
+          pageTitle:state.title,
+          published:shareMeta.published !== false
+        })
+      : "";
     return `<div class="editor-panel ${activeEditorPanel === panelId ? "active" : ""}" data-editor-panel="${esc(panelId)}" data-section-panel-key="${esc(key)}" ${hidden ? "hidden" : ""}>
       ${renderSectionHeader(sectionLabelForType(state.type, key),sectionSubtitleForType(state.type, key))}
       ${mutedNav ? `<p class="field-hint extras-hint">Sezione extra — attivala con l'interruttore sotto o da <strong>Altre sezioni</strong>.</p>` : ""}
       ${renderSectionPanelToggle(key,enabledOn)}
       <div class="section-editor-stack ${enabledOn ? "" : "is-muted"}" data-section-stack="${esc(key)}">
         ${sectionEditor(key,section,true)}
+        ${rsvpShare}
       </div>
     </div>`;
   }).join("");
@@ -1813,7 +1837,7 @@ function renderDetail(id){
             ${renderDesignPanel(state)}
             ${renderCounterPanel(state)}
             ${renderOrderPanel(state)}
-            ${renderSectionPanels(state)}
+            ${renderSectionPanels(state,{ publicUrl, published:row.public_visible, pageTitle:state.title })}
             ${renderExtrasPanel(state)}
             ${renderGalleryFileInput("gallery")}
             ${renderJourneyFileInput()}
@@ -1928,6 +1952,25 @@ function renderDetail(id){
   syncMobileNav(activeEditorPanel);
   bindPageMenuActions(publicUrl, state.title || row.slug);
   bindEditorPageActions(publicUrl, state.title || row.slug);
+  bindRsvpSharePanel(editorForm,{
+    publicUrl,
+    momentType:state.type,
+    pageTitle:state.title || row.slug,
+    published:row.public_visible,
+    copyText,
+    sharePageUrl
+  });
+  bindRsvpFieldsEditor(editorForm,()=>{
+    markEditorDirty(editorForm);
+    schedulePreviewUpdate(editorForm);
+    const panel = document.getElementById("rsvpSharePanel");
+    if(panel){
+      const preview = panel.querySelector("#rsvpGuestPreview");
+      if(preview){
+        preview.textContent = rsvpGuestPreviewFromForm(editorForm, state.title || row.slug);
+      }
+    }
+  });
   setEditorChromeVisible(true);
 }
 
@@ -2441,12 +2484,7 @@ function sectionEditor(key,section,standalone=false){
       <label>Numero WhatsApp<input name="section_${esc(key)}_whatsapp_number" value="${esc(section.whatsapp_number || "")}" placeholder="393331234567" inputmode="tel" autocomplete="tel"></label>
       <p class="field-hint">Prefisso internazionale senza + (39 = Italia). Gli invitati inviano il RSVP a questo numero.</p>
     </div>
-    <div class="editor-card smart-card">
-      <p class="ecard-title"><span class="step-badge">2</span> Cosa chiedere</p>
-      <label class="smart-toggle"><input type="checkbox" name="section_${esc(key)}_ask_guests" ${section.ask_guests !== false ? "checked" : ""}> Chiedi quanti siete</label>
-      <label class="smart-toggle"><input type="checkbox" name="section_${esc(key)}_ask_notes" ${section.ask_notes !== false ? "checked" : ""}> Chiedi note (allergie, bambini…)</label>
-      <label>Nome evento nel messaggio<input name="section_${esc(key)}_event_name" value="${esc(section.event_name || "")}" placeholder="Es. Matrimonio Marco & Giulia"></label>
-    </div>` : "";
+    ${renderRsvpFieldsEditor(section)}` : "";
   const petFields = key === "pet" ? `
     <label>Nome<input name="section_${esc(key)}_pet_name" value="${esc(section.pet_name || "")}" placeholder="Es. Luna"></label>
     <label>Emoji<input name="section_${esc(key)}_pet_emoji" value="${esc(section.pet_emoji || "🐾")}" maxlength="4" placeholder="🐾"></label>
@@ -2497,6 +2535,60 @@ function sectionEditor(key,section,standalone=false){
     <summary><span class="section-icon">${esc(icon)}</span><label><input type="checkbox" name="section_${esc(key)}_enabled" ${section.enabled ? "checked" : ""} onclick="event.stopPropagation()"> <span>${esc(SECTION_LABELS[key])}</span></label></summary>
     <div class="section-body">${fillGuide}${fields}</div>
   </details>`;
+}
+
+function normalizeWhatsAppDigits(raw){
+  let wa = String(raw || "").replace(/\D/g, "");
+  if(!wa) return "";
+  if(wa.startsWith("0")) wa = wa.replace(/^0+/, "");
+  if((wa.length === 9 || wa.length === 10) && wa.startsWith("3")) wa = `39${wa}`;
+  return wa;
+}
+
+function sanitizeStateForSave(state){
+  let clone;
+  try{
+    clone = JSON.parse(JSON.stringify(state));
+  }catch{
+    throw new Error("Contenuti non validi. Controlla testi e allegati della lettera al futuro.");
+  }
+  const stripBlob = value=>{
+    const url = String(value || "").trim();
+    return url.startsWith("blob:") ? "" : url;
+  };
+  const sections = clone.sections || {};
+  if(sections.letter_future){
+    const letter = sections.letter_future;
+    letter.media_url = stripBlob(letter.media_url);
+    if(!letter.media_url){
+      letter.media_type = "";
+      letter.media_title = "";
+    }else if(!letter.media_type){
+      letter.media_type = letter.media_url.match(/\.(mp4|webm|mov|m4v)(\?|$)/i) ? "video"
+        : letter.media_url.match(/\.(mp3|m4a|wav|ogg|aac)(\?|$)/i) ? "audio" : "image";
+    }
+  }
+  if(sections.gallery?.media){
+    sections.gallery.media = sections.gallery.media.filter(item=>!String(item?.url || "").startsWith("blob:"));
+    sections.gallery.images = sections.gallery.media.filter(item=>item.type === "image").map(item=>item.url);
+  }
+  if(sections.music){
+    sections.music.audio_url = stripBlob(sections.music.audio_url);
+  }
+  if(sections.rsvp){
+    sections.rsvp = normalizeRsvpSection(sections.rsvp);
+    if(sections.rsvp.whatsapp_number){
+      sections.rsvp.whatsapp_number = normalizeWhatsAppDigits(sections.rsvp.whatsapp_number);
+    }
+  }
+  if(sections.timeline?.items){
+    sections.timeline.items = sections.timeline.items.map(step=>({
+      ...step,
+      image_url:stripBlob(step.image_url),
+      maps_url:stripBlob(step.maps_url)
+    }));
+  }
+  return clone;
 }
 
 function readFormState(formNode){
@@ -2682,64 +2774,90 @@ async function saveMoment(event,row){
   event.preventDefault();
   const formNode = event.currentTarget;
   const editorStatus = document.getElementById("editorStatus");
-  const state = readFormState(formNode);
+  let state;
+  try{
+    state = sanitizeStateForSave(readFormState(formNode));
+  }catch(error){
+    setStatus(editorStatus,error.message || "Controlla i campi e riprova.","error");
+    return;
+  }
   const pin = String(new FormData(formNode).get("access_pin") || "").trim();
   const publicVisible = new FormData(formNode).get("public_visible") === "true";
   const pinEnabled = new FormData(formNode).get("pin_enabled") === "true";
   if(!state.title) return setStatus(editorStatus,"Inserisci il titolo della pagina.","error");
-  setStatus(editorStatus,"Salvataggio...");
-  let pinHash = null;
-  if(pin){
-    try{ pinHash = await momentPinHash(row.slug,validatePin(pin)); }
-    catch(error){ return setStatus(editorStatus,error.message,"error"); }
-    rememberPin(row.id,pin);
-  }
-  const { error } = adminMode
-    ? await supabase.rpc("admin_save_moment_page",{
-        p_event_id:row.id,
-        p_title:state.title,
-        p_moment_type:state.type,
-        p_description:state.description,
-        p_page_state:state,
-        p_public_visible:publicVisible,
-        p_pin_enabled:pinEnabled,
-        p_pin_hash:pinHash
-      })
-    : await supabase.rpc("save_my_moment_page",{
-        p_event_id:row.id,
-        p_title:state.title,
-        p_moment_type:state.type,
-        p_description:state.description,
-        p_page_state:state,
-        p_public_visible:publicVisible,
-        p_pin_enabled:pinEnabled,
-        p_pin_hash:pinHash
-      });
-  if(error){
-    console.error(error);
-    const msg = error.message || "Salvataggio non riuscito.";
-    setStatus(editorStatus,msg,"error");
-    const saveStatus = document.getElementById("editorSaveStatus");
-    if(saveStatus){
-      saveStatus.textContent = "Errore salvataggio";
-      saveStatus.classList.add("dirty");
+  if(state.sections?.letter_future?.enabled){
+    const letter = state.sections.letter_future;
+    const hasLetter = Boolean(String(letter.body || "").trim() || letter.unlock_date || letter.media_url);
+    if(!hasLetter){
+      return setStatus(editorStatus,"Lettera al futuro: scrivi il testo, la data di apertura o un allegato.","error");
     }
-    document.getElementById("editorStatus")?.scrollIntoView({behavior:"smooth",block:"nearest"});
-    return;
+    if(letter.media_url && !letter.media_type){
+      return setStatus(editorStatus,"Lettera al futuro: ricarica l'allegato prima di salvare.","error");
+    }
   }
-  savedEditorSnapshot = JSON.stringify(state);
-  editorDirty = false;
-  updateSaveStatus(true);
-  localStorage.setItem(onboardingKey(row.id),"done");
-  setStatus(editorStatus,"Pagina salvata.","ok");
-  const hint = document.getElementById("editorActionHint");
-  if(hint) hint.hidden = true;
-  const panel = activeEditorPanel;
-  await loadObjects();
-  activeEditorPanel = panel;
-  setEditorPanel(panel);
-  const formAfter = document.getElementById("momentEditorForm");
-  if(formAfter) schedulePreviewUpdate(formAfter,{immediate:true,force:true});
+  setStatus(editorStatus,"Salvataggio...");
+  try{
+    let pinHash = null;
+    if(pin){
+      pinHash = await momentPinHash(row.slug,validatePin(pin));
+      rememberPin(row.id,pin);
+    }
+    const { error } = adminMode
+      ? await supabase.rpc("admin_save_moment_page",{
+          p_event_id:row.id,
+          p_title:state.title,
+          p_moment_type:state.type,
+          p_description:state.description,
+          p_page_state:state,
+          p_public_visible:publicVisible,
+          p_pin_enabled:pinEnabled,
+          p_pin_hash:pinHash
+        })
+      : await supabase.rpc("save_my_moment_page",{
+          p_event_id:row.id,
+          p_title:state.title,
+          p_moment_type:state.type,
+          p_description:state.description,
+          p_page_state:state,
+          p_public_visible:publicVisible,
+          p_pin_enabled:pinEnabled,
+          p_pin_hash:pinHash
+        });
+    if(error){
+      console.error(error);
+      setStatus(editorStatus,error.message || "Salvataggio non riuscito.","error");
+      const saveStatus = document.getElementById("editorSaveStatus");
+      if(saveStatus){
+        saveStatus.textContent = "Errore salvataggio";
+        saveStatus.classList.add("dirty");
+      }
+      document.getElementById("editorStatus")?.scrollIntoView({behavior:"smooth",block:"nearest"});
+      return;
+    }
+    savedEditorSnapshot = JSON.stringify(state);
+    editorDirty = false;
+    updateSaveStatus(true);
+    localStorage.setItem(onboardingKey(row.id),"done");
+    setStatus(editorStatus,"Pagina salvata.","ok");
+    const hint = document.getElementById("editorActionHint");
+    if(hint) hint.hidden = true;
+    const panel = activeEditorPanel;
+    try{
+      await loadObjects();
+    }catch(loadError){
+      console.warn(loadError);
+    }
+    activeEditorPanel = panel;
+    setEditorPanel(panel);
+    const formAfter = document.getElementById("momentEditorForm");
+    if(formAfter) schedulePreviewUpdate(formAfter,{immediate:true,force:true});
+  }catch(error){
+    console.error(error);
+    const msg = String(error?.message || "").includes("Load failed")
+      ? "Connessione interrotta durante il salvataggio. Controlla la rete e riprova."
+      : (error?.message || "Salvataggio non riuscito.");
+    setStatus(editorStatus,msg,"error");
+  }
 }
 
 supabase = createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{

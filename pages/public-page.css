@@ -336,3 +336,125 @@ html,body{margin:0;min-height:100%;background:#EEF2F7;font-family:'DM Sans',sans
 .public-page-root.phone-preview-inner{height:auto;min-height:100vh;overflow:visible}
 .public-page-root .pub-jump{top:0}
 @media(min-width:700px){body{padding:22px}.public-page-root{border-radius:8px;overflow:hidden;box-shadow:0 20px 60px rgba(17,32,65,.15)}}
+
+/* ══ KhamaKey Pro v48 — pagina pubblica business ══ */
+.public-page-root{
+  width:min(100%,520px);
+  background:var(--pub-page-bg,#F8FAFC);
+  box-shadow:0 0 0 1px rgba(27,42,94,.04);
+}
+.public-page-root::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%,rgba(76,175,39,.08),transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 0%,rgba(27,42,94,.06),transparent 50%),
+    #EEF2F7;
+  pointer-events:none;
+}
+
+/* Hero pro */
+.pub-hero-eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.14);
+  border-radius:999px;padding:5px 11px;margin-bottom:10px;
+  font-size:.62rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+  backdrop-filter:blur(10px);color:rgba(255,255,255,.92);
+}
+.phone-preview-inner.hero-soft .pub-hero-eyebrow,
+.phone-preview-inner.hero-minimal .pub-hero-eyebrow{
+  border-color:rgba(27,42,94,.12);background:rgba(27,42,94,.06);color:var(--pub-primary,var(--navy));
+}
+.pub-hero h2{font-family:'Syne',sans-serif!important;font-weight:800!important;letter-spacing:-.03em;}
+.pub-hero::after{background:linear-gradient(180deg,rgba(9,16,36,.04),rgba(9,16,36,.58));}
+.pub-hero.cover::after{background:linear-gradient(180deg,rgba(9,16,36,.12),rgba(9,16,36,.78));}
+.pub-logo{box-shadow:0 16px 36px rgba(0,0,0,.24),0 0 0 1px rgba(255,255,255,.85);}
+
+/* Jump nav sticky pro */
+.pub-jump{
+  position:sticky;top:0;z-index:5;
+  background:rgba(255,255,255,.88);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(27,42,94,.08);
+  padding:10px 12px;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.pub-jump::-webkit-scrollbar{display:none;}
+.pub-jump button{
+  border:1px solid #E5EAF1;background:#F8FAFC;color:var(--pub-text,var(--navy));
+  border-radius:999px;padding:8px 12px;font-size:.68rem;font-weight:900;white-space:nowrap;
+  transition:background .12s,border-color .12s,transform .12s;
+}
+.pub-jump button:hover{background:white;border-color:rgba(76,175,39,.35);}
+.pub-jump button:active{transform:scale(.97);}
+
+/* Azioni rapide — CTA brand */
+.pub-actions{
+  padding:14px 12px 16px;
+  background:linear-gradient(180deg,var(--pub-block-bg,#fff) 0%,rgba(248,250,252,.96) 100%);
+  border-bottom:1px solid rgba(27,42,94,.06);
+}
+.pub-actions a{
+  min-height:78px;border-radius:16px;
+  box-shadow:0 6px 18px rgba(27,42,94,.06);
+  transition:transform .12s,box-shadow .12s;
+}
+.pub-actions a:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(27,42,94,.1);}
+.pub-actions a.brand-action-whatsapp{background:linear-gradient(145deg,#25D366,#128C7E);color:white;border-color:transparent;}
+.pub-actions a.brand-action-call{background:linear-gradient(145deg,var(--pub-primary,var(--navy)),#263B7E);color:white;border-color:transparent;}
+.pub-actions a.brand-action-maps{background:linear-gradient(145deg,#4285F4,#1A73E8);color:white;border-color:transparent;}
+.pub-actions a.brand-action-book{background:linear-gradient(145deg,var(--pub-accent,var(--verde)),var(--verde-dark));color:white;border-color:transparent;}
+.phone-preview-inner.buttons-solid .pub-actions a.brand-action-whatsapp,
+.phone-preview-inner.buttons-solid .pub-actions a.brand-action-call,
+.phone-preview-inner.buttons-solid .pub-actions a.brand-action-maps,
+.phone-preview-inner.buttons-solid .pub-actions a.brand-action-book{box-shadow:0 10px 22px rgba(27,42,94,.14);}
+
+/* Blocchi contenuto */
+.pub-block{
+  margin:12px;border-radius:20px;padding:18px;
+  border:1px solid rgba(27,42,94,.07);
+  box-shadow:0 10px 32px rgba(27,42,94,.07);
+  background:var(--pub-block-bg,#fff);
+}
+.pub-block h4{
+  font-family:'Syne',sans-serif!important;font-size:1.02rem!important;
+  letter-spacing:-.02em;margin-bottom:12px!important;
+  color:var(--pub-text,var(--navy))!important;
+}
+.pub-block>p{font-size:.82rem;line-height:1.55;color:var(--pub-muted,var(--muted));}
+
+/* Menu / catalogo */
+.pub-menu-row{
+  border-radius:14px;padding:10px;margin:0 -4px;
+  transition:background .12s;
+}
+.pub-menu-row:hover{background:#F8FAFC;}
+.pub-product-name{font-weight:900;color:var(--pub-text,var(--navy));}
+
+/* Promo ed eventi */
+.pub-promo-card,.pub-event-card{
+  border-radius:18px;overflow:hidden;
+  box-shadow:0 14px 36px rgba(27,42,94,.1);
+}
+
+/* Desktop — layout professionale */
+@media(min-width:768px){
+  body{padding:28px 24px 40px;}
+  .public-page-root{
+    width:min(100%,640px);
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 28px 80px rgba(9,16,36,.14),0 0 0 1px rgba(27,42,94,.05);
+  }
+  .pub-hero{min-height:var(--pub-hero-height,340px)!important;padding:24px 20px;}
+  .pub-hero h2{font-size:2rem!important;}
+  .pub-hero p{font-size:.94rem!important;max-width:420px;}
+  .pub-actions{grid-template-columns:repeat(3,1fr)!important;gap:10px;padding:16px 18px;}
+  .pub-actions a{min-height:86px;font-size:.72rem;}
+  .pub-block{margin:14px 18px;}
+  .pub-social-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media(min-width:1024px){
+  body{padding:36px 32px 48px;display:flex;align-items:flex-start;justify-content:center;}
+  .public-page-root{width:min(100%,720px);}
+  .pub-actions{grid-template-columns:repeat(6,1fr)!important;}
+  .pub-gallery-track .pub-gallery-item{flex-basis:32%;}
+}

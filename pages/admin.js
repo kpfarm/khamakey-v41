@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL } from "./config.js";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js";
 
 const ADMIN_EMAILS = new Set([
   "kristianperelli@gmail.com",
@@ -60,7 +61,39 @@ const momentInventoryStats = document.getElementById("momentInventoryStats");
 const momentFilterLine = document.getElementById("momentFilterLine");
 const momentFilterBatch = document.getElementById("momentFilterBatch");
 const momentFilterStatus = document.getElementById("momentFilterStatus");
+const momentFilterAgent = document.getElementById("momentFilterAgent");
+const momentFilterChannel = document.getElementById("momentFilterChannel");
+const momentFilterOrder = document.getElementById("momentFilterOrder");
+const momentSearchInput = document.getElementById("momentSearchInput");
+const momentSearchClear = document.getElementById("momentSearchClear");
+const momentSelectAll = document.getElementById("momentSelectAll");
+const momentBulkBar = document.getElementById("momentBulkBar");
+const momentBulkCount = document.getElementById("momentBulkCount");
+const momentBulkAgent = document.getElementById("momentBulkAgent");
+const momentBulkChannel = document.getElementById("momentBulkChannel");
+const momentBulkStatus = document.getElementById("momentBulkStatus");
+const momentBulkApply = document.getElementById("momentBulkApply");
+const momentBulkClearAgent = document.getElementById("momentBulkClearAgent");
+const momentBulkClearOrder = document.getElementById("momentBulkClearOrder");
+const momentTableCount = document.getElementById("momentTableCount");
+const momentExportFiltered = document.getElementById("momentExportFiltered");
+const momentExportSelected = document.getElementById("momentExportSelected");
+const momentLabelsFiltered = document.getElementById("momentLabelsFiltered");
+const momentLabelsSelected = document.getElementById("momentLabelsSelected");
+const momentAgentStats = document.getElementById("momentAgentStats");
 const momentProductsTable = document.getElementById("momentProductsTable");
+const codeDrawer = document.getElementById("codeDrawer");
+const codeEditForm = document.getElementById("codeEditForm");
+const codeEditFormStatus = document.getElementById("codeEditFormStatus");
+const codeEditAgent = document.getElementById("codeEditAgent");
+const orderDrawer = document.getElementById("orderDrawer");
+const orderEditForm = document.getElementById("orderEditForm");
+const orderEditStatus = document.getElementById("orderEditStatus");
+const orderAssignForm = document.getElementById("orderAssignForm");
+const orderAssignStatus = document.getElementById("orderAssignStatus");
+const orderAssignAgent = document.getElementById("orderAssignAgent");
+const orderCodesTable = document.getElementById("orderCodesTable");
+const nfcOrderFields = document.getElementById("nfcOrderFields");
 const membersTable = document.getElementById("membersTable");
 const agentsTable = document.getElementById("agentsTable");
 const commissionsTable = document.getElementById("commissionsTable");
@@ -127,6 +160,10 @@ let momentCustomerRows = [];
 let momentProductRows = [];
 let currentMoment = null;
 let momentInventoryRows = [];
+let momentAgentInventoryRows = [];
+let selectedMomentCodes = new Set();
+let currentCodeRow = null;
+let currentPlatformOrder = null;
 
 const PRODUCT_LINE_LABELS = {
   orsetto:"Orsetto NFC",
@@ -136,6 +173,15 @@ const PRODUCT_LINE_LABELS = {
   tag:"Tag / tessera NFC",
   confezione:"Confezione regalo",
   altro:"Altro oggetto",
+  non_specificato:"Non specificato"
+};
+
+const SOLD_CHANNEL_LABELS = {
+  direct:"Diretto / sito",
+  agent:"Agente",
+  reseller:"Rivenditore",
+  gift:"Regalo / confezione",
+  other:"Altro",
   non_specificato:"Non specificato"
 };
 
@@ -290,6 +336,24 @@ function renderAgentOptions(selectedId=""){
   `).join("");
   orderAgentSelect.innerHTML = options;
   clientAgentSelect.innerHTML = options;
+  if(codeEditAgent) codeEditAgent.innerHTML = options;
+  if(orderAssignAgent) orderAssignAgent.innerHTML = `<option value="">Usa agente ordine</option>` + agentRows.map(row=>`
+    <option value="${esc(row.id)}">${esc(row.contact_name || row.email)} · ${esc(row.referral_code)}</option>
+  `).join("");
+  if(momentBulkAgent) momentBulkAgent.innerHTML = `<option value="">Agente…</option>` + agentRows.map(row=>`
+    <option value="${esc(row.id)}">${esc(row.contact_name || row.email)}</option>
+  `).join("");
+  populateMomentAgentFilter();
+}
+
+function soldChannelLabel(value){
+  return SOLD_CHANNEL_LABELS[value] || value || "Non specificato";
+}
+
+function agentLabelById(id){
+  if(!id) return "-";
+  const agent = agentRows.find(row=>row.id === id);
+  return agent ? (agent.contact_name || agent.email) : String(id).slice(0,8) + "…";
 }
 
 function renderPermissions(){
@@ -425,7 +489,10 @@ async function loadClients(){
     `).join("") : `<tr><td colspan="4">Nessun cliente trovato o permessi database non ancora configurati.</td></tr>`;
   }catch(error){
     console.error(error);
-    clientsTable.innerHTML = `<tr><td colspan="4">Dati clienti non disponibili. Servono permessi Supabase per pages.read.</td></tr>`;
+    const hint = String(error?.message || "").includes("permission") || String(error?.code || "") === "42501"
+      ? "Accesso negato dal database. Ricarica la pagina: se persiste, verifica SQL v63."
+      : (error?.message || "Errore caricamento clienti.");
+    clientsTable.innerHTML = `<tr><td colspan="4">Clienti non disponibili: ${esc(hint)}</td></tr>`;
   }
 }
 
@@ -506,40 +573,174 @@ function momentTemplateLabel(value){
   return MOMENT_TEMPLATE_LABELS[value] || value || "-";
 }
 
+function momentNfcUrl(row){
+  return row?.public_slug ? `${PUBLIC_BASE_URL}/m/${row.public_slug}` : "";
+}
+
+function csvCell(value){
+  const text = String(value ?? "");
+  return `"${text.replace(/"/g,'""')}"`;
+}
+
+function momentExportRows(rows,filenameStem="khamakey-moments"){
+  if(!rows.length){
+    alert("Nessun codice da esportare.");
+    return;
+  }
+  const header = [
+    "Codice attivazione",
+    "Link NFC",
+    "Codice confezione",
+    "Slug pagina",
+    "Linea prodotto",
+    "Lotto",
+    "Template",
+    "Stato",
+    "Canale",
+    "Agente",
+    "Ordine",
+    "Cliente",
+    "Creato il"
+  ];
+  const lines = [header.map(csvCell).join(",")];
+  rows.forEach(row=>{
+    lines.push([
+      row.code,
+      momentNfcUrl(row),
+      row.code,
+      row.public_slug || "",
+      productLineLabel(row.product_line || "non_specificato"),
+      row.batch_label || "",
+      momentTemplateLabel(row.product_type),
+      row.status,
+      soldChannelLabel(row.sold_channel || "non_specificato"),
+      agentLabelById(row.assigned_agent_id),
+      orderLabelById(row.platform_order_id),
+      row.claimed_by_email || "",
+      row.created_at ? dateShort(row.created_at) : ""
+    ].map(csvCell).join(","));
+  });
+  const blob = new Blob(["\uFEFF" + lines.join("\n")],{type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0,10);
+  anchor.href = url;
+  anchor.download = `${filenameStem}-${stamp}-${rows.length}.csv`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+async function runLabelExport(rows, filenameStem, triggerButton){
+  if(!rows.length){
+    alert("Nessun codice da esportare.");
+    return;
+  }
+  const buttons = [momentLabelsFiltered,momentLabelsSelected].filter(Boolean);
+  buttons.forEach(btn=>{ btn.disabled = true; });
+  if(triggerButton) triggerButton.textContent = "PDF in corso…";
+  try{
+    await exportMomentLabelsPdf(rows, filenameStem);
+  }catch(error){
+    console.error(error);
+    alert(error.message || "Generazione PDF non riuscita.");
+  }finally{
+    buttons.forEach(btn=>{ btn.disabled = false; });
+    if(momentLabelsFiltered) momentLabelsFiltered.textContent = "PDF etichette (filtri)";
+    if(momentLabelsSelected) momentLabelsSelected.textContent = "PDF etichette (selezione)";
+  }
+}
+
+function orderLabelById(orderId){
+  if(!orderId) return "-";
+  const order = platformOrderRows.find(row=>row.id === orderId);
+  return order ? order.order_code : String(orderId).slice(0,8) + "…";
+}
+
 function getMomentProductFilters(){
   return {
     line:momentFilterLine?.value || "",
     batch:momentFilterBatch?.value || "",
-    status:momentFilterStatus?.value || ""
+    status:momentFilterStatus?.value || "",
+    agent:momentFilterAgent?.value || "",
+    channel:momentFilterChannel?.value || "",
+    order:momentFilterOrder?.value || "",
+    search:String(momentSearchInput?.value || "").trim().toLowerCase()
   };
 }
 
+function momentRowMatchesSearch(row,search){
+  if(!search) return true;
+  const haystack = [
+    row.code,
+    row.public_slug,
+    row.claimed_by_email,
+    row.batch_label,
+    row.product_line,
+    orderLabelById(row.platform_order_id)
+  ].filter(Boolean).join(" ").toLowerCase();
+  return haystack.includes(search);
+}
+
 function filteredMomentProducts(){
-  const { line,batch,status } = getMomentProductFilters();
+  const { line,batch,status,agent,channel,order,search } = getMomentProductFilters();
   return momentProductRows.filter(row=>{
     const rowLine = row.product_line || "non_specificato";
     const rowBatch = row.batch_label || "senza_lotto";
+    const rowAgent = row.assigned_agent_id || "";
+    const rowChannel = row.sold_channel || "";
     if(line && rowLine !== line) return false;
     if(batch && rowBatch !== batch) return false;
     if(status && row.status !== status) return false;
+    if(agent === "__none__" && rowAgent) return false;
+    if(agent && agent !== "__none__" && rowAgent !== agent) return false;
+    if(channel === "__none__" && rowChannel) return false;
+    if(channel && channel !== "__none__" && rowChannel !== channel) return false;
+    if(order === "__none__" && row.platform_order_id) return false;
+    if(order === "__linked__" && !row.platform_order_id) return false;
+    if(!momentRowMatchesSearch(row,search)) return false;
     return true;
   });
+}
+
+function refreshMomentTable(){
+  const rows = filteredMomentProducts();
+  renderMomentProductsTable(rows);
+  if(momentTableCount) momentTableCount.textContent = `${fmt(rows.length)} codici visibili`;
+  updateMomentBulkBar();
+}
+
+function updateMomentBulkBar(){
+  const count = selectedMomentCodes.size;
+  if(momentBulkBar) momentBulkBar.hidden = count === 0;
+  if(momentBulkCount) momentBulkCount.textContent = `${count} selezionati`;
+}
+
+function toggleMomentCodeSelection(code,checked){
+  if(checked) selectedMomentCodes.add(code);
+  else selectedMomentCodes.delete(code);
+  updateMomentBulkBar();
 }
 
 function renderMomentProductsTable(rows){
   if(!momentProductsTable) return;
   momentProductsTable.innerHTML = rows.length ? rows.map(row=>{
     const publicUrl = row.public_slug ? `${PUBLIC_BASE_URL}/m/${row.public_slug}` : "";
+    const claimed = row.status === "claimed";
+    const checked = selectedMomentCodes.has(row.code) ? "checked" : "";
     return `<tr>
-      <td><strong>${esc(row.code)}</strong></td>
-      <td>${publicUrl ? `<a href="${esc(publicUrl)}" target="_blank" rel="noopener">${esc(publicUrl)}</a>` : "-"}</td>
+      <td>${claimed ? "" : `<input type="checkbox" data-moment-select="${esc(row.code)}" ${checked} aria-label="Seleziona ${esc(row.code)}">`}</td>
+      <td><strong>${esc(row.code)}</strong><div class="muted-cell">${esc(momentTemplateLabel(row.product_type))}</div></td>
+      <td>${publicUrl ? `<a href="${esc(publicUrl)}" target="_blank" rel="noopener">${esc(row.public_slug)}</a>` : "-"}</td>
       <td>${esc(productLineLabel(row.product_line || "non_specificato"))}</td>
-      <td>${esc(momentTemplateLabel(row.product_type))}</td>
       <td>${esc(row.batch_label || "-")}</td>
+      <td>${esc(soldChannelLabel(row.sold_channel || "non_specificato"))}</td>
+      <td>${esc(agentLabelById(row.assigned_agent_id))}</td>
+      <td>${row.platform_order_id ? `<button type="button" class="link-button" data-order-open="${esc(row.platform_order_id)}">${esc(orderLabelById(row.platform_order_id))}</button>` : "-"}</td>
       <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
       <td>${esc(row.claimed_by_email || "-")}</td>
+      <td><button class="small-action" type="button" data-code-edit="${esc(row.code)}">Modifica</button></td>
     </tr>`;
-  }).join("") : `<tr><td colspan="7">Nessun prodotto corrisponde ai filtri selezionati.</td></tr>`;
+  }).join("") : `<tr><td colspan="11">Nessun codice corrisponde ai filtri selezionati.</td></tr>`;
 }
 
 function populateMomentFilters(){
@@ -554,6 +755,18 @@ function populateMomentFilters(){
   momentFilterBatch.innerHTML = `<option value="">Tutti i lotti</option>` + batches.map(value=>`
     <option value="${esc(value)}" ${value === batchValue ? "selected" : ""}>${esc(value === "senza_lotto" ? "Senza lotto" : value)}</option>
   `).join("");
+  populateMomentAgentFilter();
+}
+
+function populateMomentAgentFilter(){
+  if(!momentFilterAgent) return;
+  const agentValue = momentFilterAgent.value;
+  const agentIds = [...new Set(momentProductRows.map(row=>row.assigned_agent_id).filter(Boolean))];
+  momentFilterAgent.innerHTML = `<option value="">Tutti gli agenti</option>`
+    + `<option value="__none__" ${agentValue === "__none__" ? "selected" : ""}>Senza agente</option>`
+    + agentIds.map(id=>`
+      <option value="${esc(id)}" ${id === agentValue ? "selected" : ""}>${esc(agentLabelById(id))}</option>
+    `).join("");
 }
 
 function renderMomentInventoryStats(){
@@ -602,17 +815,56 @@ async function loadMomentProducts(){
   try{
     const { data,error } = await supabase
       .from("moment_activation_codes")
-      .select("code,status,public_slug,product_type,product_line,batch_label,claimed_by_email,claimed_at,created_at")
+      .select("code,status,public_slug,product_type,product_line,batch_label,claimed_by_email,claimed_at,created_at,sold_channel,assigned_agent_id,platform_order_id")
       .order("created_at",{ascending:false})
-      .limit(500);
+      .limit(2000);
     if(error) throw error;
     momentProductRows = data || [];
     populateMomentFilters();
-    renderMomentProductsTable(filteredMomentProducts());
+    refreshMomentTable();
   }catch(error){
     console.error(error);
-    momentProductsTable.innerHTML = `<tr><td colspan="7">Prodotti Moments non disponibili. Applica lo script SQL v42.</td></tr>`;
+    momentProductsTable.innerHTML = `<tr><td colspan="11">Prodotti Moments non disponibili. Applica SQL v61/v62.</td></tr>`;
   }
+}
+
+async function loadMomentAgentInventoryStats(){
+  if(!momentAgentStats) return;
+  try{
+    const { data,error } = await supabase.rpc("get_moment_agent_inventory_stats");
+    if(error) throw error;
+    momentAgentInventoryRows = data || [];
+    renderMomentAgentInventoryStats();
+  }catch(error){
+    console.error(error);
+    momentAgentStats.innerHTML = `<p class="inventory-stats-empty">Report agenti non disponibile. Applica lo script SQL v61.</p>`;
+  }
+}
+
+function renderMomentAgentInventoryStats(){
+  if(!momentAgentStats) return;
+  if(!momentAgentInventoryRows.length){
+    momentAgentStats.innerHTML = `<p class="inventory-stats-empty">Nessun codice assegnato ad agenti. Genera un lotto con agente o canale vendita.</p>`;
+    return;
+  }
+  momentAgentStats.innerHTML = momentAgentInventoryRows.map(row=>{
+    const total = Number(row.total_count || 0);
+    const claimed = Number(row.claimed_count || 0);
+    const pct = total ? Math.round((claimed / total) * 100) : 0;
+    return `<article class="inventory-stat-card">
+      <div class="inventory-stat-head">
+        <strong>${esc(row.agent_name || "Senza agente")}</strong>
+        <span>${esc(soldChannelLabel(row.sold_channel))}</span>
+      </div>
+      <div class="inventory-stat-grid">
+        <div><span>Consegnati</span><strong>${fmt(row.total_count)}</strong></div>
+        <div><span>Disponibili</span><strong class="available">${fmt(row.available_count)}</strong></div>
+        <div><span>Attivati</span><strong class="claimed">${fmt(row.claimed_count)}</strong></div>
+        <div><span>Tasso</span><strong>${pct}%</strong></div>
+      </div>
+      <div class="inventory-progress" aria-hidden="true"><span style="width:${pct}%"></span></div>
+    </article>`;
+  }).join("");
 }
 
 async function loadMembers(){
@@ -653,8 +905,10 @@ async function loadAgents(){
         <td>${esc(row.model)}</td>
         <td>${fmt(row.commission_percent)}%</td>
         <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
+        <td><button class="small-action" type="button" data-agent-edit="${esc(row.id)}">Modifica</button></td>
       </tr>
-    `).join("") : `<tr><td colspan="5">Nessun agente registrato.</td></tr>`;
+    `).join("") : `<tr><td colspan="6">Nessun agente registrato.</td></tr>`;
+    if(momentProductRows.length) refreshMomentTable();
   }catch(error){
     console.error(error);
     agentsTable.innerHTML = `<tr><td colspan="5">Agenti non disponibili. Verifica permessi agents.read.</td></tr>`;
@@ -782,7 +1036,7 @@ async function loadPlatformOrders(){
   try{
     const { data,error } = await supabase
       .from("platform_orders")
-      .select("id,order_code,order_type,customer_name,customer_email,customer_phone,status,payment_status,subtotal,shipping_total,discount_total,total,notes,stripe_checkout_session_id,stripe_invoice_id,platform_agents(contact_name,email,referral_code),businesses(nome,slug)")
+      .select("id,order_code,order_type,customer_name,customer_email,customer_phone,status,payment_status,subtotal,shipping_total,discount_total,total,notes,agent_id,stripe_checkout_session_id,stripe_invoice_id,platform_agents(contact_name,email,referral_code),businesses(nome,slug)")
       .order("created_at",{ascending:false})
       .limit(50);
     if(error) throw error;
@@ -796,9 +1050,13 @@ async function loadPlatformOrders(){
         <td><strong>${money(row.total)}</strong><div class="muted-cell">Sub ${money(row.subtotal)} · Sped ${money(row.shipping_total)}</div></td>
         <td><select class="inline-select" data-order-payment="${esc(row.id)}">${selectOptions(PAYMENT_STATUS_OPTIONS,row.payment_status)}</select></td>
         <td><select class="inline-select" data-order-status="${esc(row.id)}">${selectOptions(ORDER_STATUS_OPTIONS,row.status)}</select></td>
-        <td><button class="small-action" type="button" data-order-save="${esc(row.id)}">Aggiorna</button></td>
+        <td>
+          <button class="small-action" type="button" data-order-save="${esc(row.id)}">Aggiorna</button>
+          <button class="small-action" type="button" data-order-open="${esc(row.id)}">Gestisci</button>
+        </td>
       </tr>
     `).join("") : `<tr><td colspan="8">Nessun ordine interno registrato.</td></tr>`;
+    if(momentProductRows.length) refreshMomentTable();
   }catch(error){
     console.error(error);
     platformOrdersTable.innerHTML = `<tr><td colspan="8">Ordini non disponibili. Verifica permessi orders.read.</td></tr>`;
@@ -1289,6 +1547,238 @@ function closeMomentDrawer(){
   currentMoment = null;
 }
 
+function openCodeDrawer(code){
+  const row = momentProductRows.find(item=>item.code === code);
+  if(!row || !codeDrawer) return;
+  currentCodeRow = row;
+  document.getElementById("codeDrawerTitle").textContent = row.code;
+  document.getElementById("codeDrawerMeta").textContent = productLineLabel(row.product_line || "non_specificato");
+  document.getElementById("codeEditCode").value = row.code;
+  const statusSelect = document.getElementById("codeEditStatus");
+  statusSelect.value = row.status;
+  statusSelect.querySelector('option[value="claimed"]').disabled = row.status !== "claimed";
+  if(row.status === "claimed") statusSelect.value = "claimed";
+  document.getElementById("codeEditChannel").value = row.sold_channel || "";
+  renderAgentOptions(row.assigned_agent_id || "");
+  document.getElementById("codeEditBatch").value = row.batch_label || "";
+  document.getElementById("codeEditOrder").value = row.platform_order_id ? orderLabelById(row.platform_order_id) : "";
+  document.getElementById("codeEditPublicUrl").value = row.public_slug ? `${PUBLIC_BASE_URL}/m/${row.public_slug}` : "";
+  setFormStatus(codeEditFormStatus,"");
+  codeDrawer.classList.add("open");
+  codeDrawer.setAttribute("aria-hidden","false");
+}
+
+function closeCodeDrawer(){
+  if(!codeDrawer) return;
+  codeDrawer.classList.remove("open");
+  codeDrawer.setAttribute("aria-hidden","true");
+  currentCodeRow = null;
+}
+
+async function saveCodeEdit(event){
+  event.preventDefault();
+  if(!hasPermission("moments.write")){
+    setFormStatus(codeEditFormStatus,"Non hai il permesso moments.write.","error");
+    return;
+  }
+  const form = event.currentTarget;
+  const code = String(form.elements.code.value || "").trim().toUpperCase();
+  const row = momentProductRows.find(item=>item.code === code);
+  if(row?.status === "claimed"){
+    setFormStatus(codeEditFormStatus,"Codice già attivato: non modificabile.","error");
+    return;
+  }
+  const payload = {
+    status:form.elements.status.value,
+    sold_channel:form.elements.sold_channel.value || null,
+    assigned_agent_id:form.elements.assigned_agent_id.value || null,
+    batch_label:String(form.elements.batch_label.value || "").trim() || null,
+    updated_at:new Date().toISOString()
+  };
+  setFormStatus(codeEditFormStatus,"Salvataggio...");
+  const { error } = await supabase.from("moment_activation_codes").update(payload).eq("code",code);
+  if(error){
+    console.error(error);
+    setFormStatus(codeEditFormStatus,error.message || "Salvataggio non riuscito.","error");
+    return;
+  }
+  setFormStatus(codeEditFormStatus,"Codice aggiornato.","ok");
+  await Promise.all([loadMomentProducts(),loadMomentInventoryStats(),loadMomentAgentInventoryStats()]);
+  closeCodeDrawer();
+}
+
+async function unlinkCodeOrder(){
+  if(!currentCodeRow || !hasPermission("moments.write")) return;
+  setFormStatus(codeEditFormStatus,"Scollegamento ordine...");
+  const { error } = await supabase.rpc("bulk_update_moment_activation_codes",{
+    p_codes:[currentCodeRow.code],
+    p_clear_order:true
+  });
+  if(error){
+    setFormStatus(codeEditFormStatus,error.message || "Scollegamento non riuscito.","error");
+    return;
+  }
+  setFormStatus(codeEditFormStatus,"Ordine scollegato.","ok");
+  await loadMomentProducts();
+  openCodeDrawer(currentCodeRow.code);
+}
+
+function setOrderDrawerView(view="summary"){
+  document.querySelectorAll("[data-order-drawer-view]").forEach(button=>{
+    button.classList.toggle("active",button.dataset.orderDrawerView === view);
+  });
+  document.querySelectorAll("#orderDrawer .drawer-view").forEach(panel=>{
+    panel.classList.toggle("active",panel.id === `order-drawer-${view}`);
+  });
+}
+
+async function loadOrderCodes(orderId){
+  if(!orderCodesTable) return;
+  const codes = momentProductRows.filter(row=>row.platform_order_id === orderId);
+  orderCodesTable.innerHTML = codes.length ? codes.map(row=>{
+    const publicUrl = row.public_slug ? `${PUBLIC_BASE_URL}/m/${row.public_slug}` : "";
+    return `<tr>
+      <td><strong>${esc(row.code)}</strong></td>
+      <td>${esc(productLineLabel(row.product_line || "non_specificato"))}</td>
+      <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
+      <td>${publicUrl ? `<a href="${esc(publicUrl)}" target="_blank" rel="noopener">Apri</a>` : "-"}</td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="4">Nessun codice collegato. Usa «Assegna codici».</td></tr>`;
+}
+
+function openOrderDrawer(orderId,view="summary"){
+  const row = platformOrderRows.find(item=>item.id === orderId);
+  if(!row || !orderDrawer) return;
+  currentPlatformOrder = row;
+  document.getElementById("orderDrawerTitle").textContent = row.order_code;
+  document.getElementById("orderDrawerMeta").textContent = `${row.order_type || "ordine"} · ${row.customer_name || row.businesses?.nome || "Cliente"}`;
+  document.getElementById("orderDrawerKv").innerHTML = `
+    <span>Cliente</span><strong>${esc(row.customer_name || row.businesses?.nome || "-")}</strong>
+    <span>Email</span><strong>${esc(row.customer_email || "-")}</strong>
+    <span>Agente</span><strong>${esc(row.platform_agents?.contact_name || row.platform_agents?.email || "-")}</strong>
+    <span>Totale</span><strong>${money(row.total)}</strong>
+    <span>Tipo</span><strong>${esc(row.order_type)}</strong>
+  `;
+  document.getElementById("orderEditId").value = row.id;
+  document.getElementById("orderEditStatus").innerHTML = selectOptions(ORDER_STATUS_OPTIONS,row.status);
+  document.getElementById("orderEditPayment").innerHTML = selectOptions(PAYMENT_STATUS_OPTIONS,row.payment_status);
+  document.getElementById("orderEditNotes").value = row.notes || "";
+  document.getElementById("orderAssignOrderId").value = row.id;
+  renderAgentOptions(row.agent_id || "");
+  setFormStatus(orderEditStatus,"");
+  setFormStatus(orderAssignStatus,"");
+  loadOrderCodes(row.id);
+  orderDrawer.classList.add("open");
+  orderDrawer.setAttribute("aria-hidden","false");
+  setOrderDrawerView(view);
+}
+
+function closeOrderDrawer(){
+  if(!orderDrawer) return;
+  orderDrawer.classList.remove("open");
+  orderDrawer.setAttribute("aria-hidden","true");
+  currentPlatformOrder = null;
+}
+
+async function saveOrderEdit(event){
+  event.preventDefault();
+  if(!hasPermission("orders.write")){
+    setFormStatus(orderEditStatus,"Non hai il permesso orders.write.","error");
+    return;
+  }
+  const form = event.currentTarget;
+  const id = form.elements.id.value;
+  const payload = {
+    status:form.elements.status.value,
+    payment_status:form.elements.payment_status.value,
+    notes:String(form.elements.notes.value || "").trim() || null
+  };
+  setFormStatus(orderEditStatus,"Salvataggio...");
+  const { error } = await supabase.from("platform_orders").update(payload).eq("id",id);
+  if(error){
+    setFormStatus(orderEditStatus,error.message || "Salvataggio non riuscito.","error");
+    return;
+  }
+  setFormStatus(orderEditStatus,"Ordine aggiornato.","ok");
+  await loadPlatformOrders();
+  openOrderDrawer(id);
+}
+
+async function assignOrderCodes(event){
+  event.preventDefault();
+  if(!hasPermission("orders.write") && !hasPermission("moments.write")){
+    setFormStatus(orderAssignStatus,"Permesso orders.write o moments.write richiesto.","error");
+    return;
+  }
+  const form = event.currentTarget;
+  const orderId = form.elements.order_id.value;
+  const quantity = Math.min(500,Math.max(1,Number(form.elements.quantity.value || 1)));
+  const productLine = String(form.elements.product_line.value || "").trim() || null;
+  const agentId = String(form.elements.agent_id.value || currentPlatformOrder?.agent_id || "").trim() || null;
+  const soldChannel = form.elements.sold_channel.value || "agent";
+  setFormStatus(orderAssignStatus,`Assegnazione ${quantity} codici da magazzino...`);
+  const { data,error } = await supabase.rpc("assign_moment_codes_to_order",{
+    p_order_id:orderId,
+    p_quantity:quantity,
+    p_product_line:productLine,
+    p_agent_id:agentId,
+    p_sold_channel:soldChannel
+  });
+  if(error){
+    console.error(error);
+    setFormStatus(orderAssignStatus,error.message || "Assegnazione non riuscita. Applica SQL v62.","error");
+    return;
+  }
+  const rows = data || [];
+  setFormStatus(orderAssignStatus,`Assegnati ${rows.length} codici all'ordine.`,"ok");
+  await Promise.all([loadMomentProducts(),loadPlatformOrders()]);
+  openOrderDrawer(orderId,"codes");
+}
+
+async function applyMomentBulk(action={}){
+  const codes = [...selectedMomentCodes];
+  if(!codes.length) return;
+  if(!hasPermission("moments.write")){
+    alert("Permesso moments.write richiesto.");
+    return;
+  }
+  const { error } = await supabase.rpc("bulk_update_moment_activation_codes",{
+    p_codes:codes,
+    p_status:action.status || null,
+    p_sold_channel:action.channel ?? null,
+    p_assigned_agent_id:action.agentId ?? null,
+    p_clear_agent:Boolean(action.clearAgent),
+    p_clear_order:Boolean(action.clearOrder)
+  });
+  if(error){
+    alert(error.message || "Aggiornamento bulk non riuscito.");
+    return;
+  }
+  selectedMomentCodes.clear();
+  if(momentSelectAll) momentSelectAll.checked = false;
+  await Promise.all([loadMomentProducts(),loadMomentInventoryStats(),loadMomentAgentInventoryStats()]);
+}
+
+function editAgent(id){
+  const row = agentRows.find(item=>item.id === id);
+  if(!row) return;
+  const form = document.getElementById("agentForm");
+  form.elements.contact_name.value = row.contact_name || "";
+  form.elements.email.value = row.email || "";
+  form.elements.business_name.value = row.business_name || "";
+  form.elements.phone.value = row.phone || "";
+  form.elements.referral_code.value = row.referral_code || "";
+  form.elements.commission_percent.value = row.commission_percent ?? 10;
+  form.elements.model.value = row.model || "referral";
+  focusForm(form,agentFormStatus,"Agente caricato nel form. Modifica e salva.");
+}
+
+function syncNfcOrderFieldsVisibility(){
+  if(!nfcOrderFields) return;
+  const type = platformOrderForm?.elements?.order_type?.value || "";
+  nfcOrderFields.hidden = type !== "nfc";
+}
+
 async function provisionMomentCustomer(event){
   event.preventDefault();
   if(!hasPermission("moments.write")){
@@ -1582,8 +2072,25 @@ async function createMomentBatch(event){
     return;
   }
   const rows = data || [];
-  setFormStatus(momentBatchStatus,`Creati ${rows.length} link per ${productLineLabel(productLine)} · lotto «${batchLabel}». Ogni codice ha già il link /m/.`,"ok");
-  await Promise.all([loadMomentProducts(),loadMomentInventoryStats(),loadMomentCustomers(),loadMoments(),loadDashboard()]);
+  setFormStatus(momentBatchStatus,`Creati ${rows.length} codici in stock · lotto «${batchLabel}». Assegna agente/ordine quando serve.`,"ok");
+  if(rows.length){
+    const exportRows = rows.map(row=>({
+      code:row.out_code || row.code,
+      public_slug:row.public_slug,
+      product_type:row.product_type,
+      product_line:row.product_line || productLine,
+      batch_label:row.batch_label || batchLabel,
+      status:"available",
+      sold_channel:null,
+      assigned_agent_id:null,
+      platform_order_id:null,
+      claimed_by_email:"",
+      created_at:new Date().toISOString()
+    }));
+    momentExportRows(exportRows,`khamakey-lotto-${batchLabel.replace(/[^a-z0-9]+/gi,"-").slice(0,24).toLowerCase() || "stock"}`);
+    await runLabelExport(exportRows, `khamakey-etichette-${batchLabel.replace(/[^a-z0-9]+/gi,"-").slice(0,24).toLowerCase() || "stock"}`);
+  }
+  await Promise.all([loadMomentProducts(),loadMomentInventoryStats(),loadMomentAgentInventoryStats(),loadMomentCustomers(),loadMoments(),loadDashboard()]);
 }
 
 async function saveProduct(event){
@@ -1683,20 +2190,42 @@ async function savePlatformOrder(event){
     notes:String(form.elements.notes.value || "").trim() || null
   };
   setFormStatus(platformOrderFormStatus,"Creazione ordine...");
-  const { error } = await supabase
+  const { data:inserted,error } = await supabase
     .from("platform_orders")
-    .insert(payload);
+    .insert(payload)
+    .select("id,order_code")
+    .single();
   if(error){
     console.error(error);
     setFormStatus(platformOrderFormStatus,error.message || "Errore creazione ordine.","error");
     return;
   }
+  const nfcQty = Number(form.elements.nfc_quantity?.value || 0);
+  if(nfcQty > 0 && inserted?.id){
+    const productLine = String(form.elements.nfc_product_line?.value || "").trim() || null;
+    const { data:assigned,error:assignError } = await supabase.rpc("assign_moment_codes_to_order",{
+      p_order_id:inserted.id,
+      p_quantity:nfcQty,
+      p_product_line:productLine,
+      p_agent_id:payload.agent_id,
+      p_sold_channel:payload.agent_id ? "agent" : "direct"
+    });
+    if(assignError){
+      setFormStatus(platformOrderFormStatus,`Ordine creato ma codici non assegnati: ${assignError.message}`,"error");
+      await Promise.all([loadPlatformOrders(),loadMomentProducts(),loadDashboard()]);
+      return;
+    }
+    setFormStatus(platformOrderFormStatus,`Ordine ${inserted.order_code} creato con ${(assigned || []).length} codici da magazzino.`,"ok");
+  }else{
+    setFormStatus(platformOrderFormStatus,"Ordine creato.","ok");
+  }
   form.reset();
   form.elements.subtotal.value = "0";
   form.elements.shipping_total.value = "0";
   form.elements.discount_total.value = "0";
-  setFormStatus(platformOrderFormStatus,"Ordine creato.","ok");
-  await Promise.all([loadPlatformOrders(),loadDashboard()]);
+  if(form.elements.nfc_quantity) form.elements.nfc_quantity.value = "0";
+  syncNfcOrderFieldsVisibility();
+  await Promise.all([loadPlatformOrders(),loadMomentProducts(),loadDashboard()]);
 }
 
 async function saveClientRecord(event){
@@ -1935,6 +2464,7 @@ async function loadAdminSession(){
     loadMomentCustomers(),
     loadMomentProducts(),
     loadMomentInventoryStats(),
+    loadMomentAgentInventoryStats(),
     loadMembers(),
     loadAgents(),
     loadCommissions(),
@@ -2037,8 +2567,10 @@ momentsTable.addEventListener("click",event=>{
 if(momentProvisionForm) momentProvisionForm.addEventListener("submit",provisionMomentCustomer);
 
 platformOrdersTable.addEventListener("click",event=>{
-  const button = event.target.closest("[data-order-save]");
-  if(button) updatePlatformOrder(button.dataset.orderSave);
+  const saveBtn = event.target.closest("[data-order-save]");
+  if(saveBtn) return updatePlatformOrder(saveBtn.dataset.orderSave);
+  const openBtn = event.target.closest("[data-order-open]");
+  if(openBtn) openOrderDrawer(openBtn.dataset.orderOpen);
 });
 
 plansTable.addEventListener("click",event=>{
@@ -2110,13 +2642,100 @@ document.getElementById("momentCopyPublicUrl")?.addEventListener("click",async()
   try{ await navigator.clipboard.writeText(url); }catch(error){ console.warn("Copia link non riuscita",error); }
 });
 
+document.querySelectorAll("[data-code-drawer-close]").forEach(button=>{
+  button.addEventListener("click",closeCodeDrawer);
+});
+document.querySelectorAll("[data-order-drawer-close]").forEach(button=>{
+  button.addEventListener("click",closeOrderDrawer);
+});
+document.querySelectorAll("[data-order-drawer-view]").forEach(button=>{
+  button.addEventListener("click",()=>setOrderDrawerView(button.dataset.orderDrawerView));
+});
+if(codeEditForm) codeEditForm.addEventListener("submit",saveCodeEdit);
+document.getElementById("codeEditUnlinkOrder")?.addEventListener("click",unlinkCodeOrder);
+if(orderEditForm) orderEditForm.addEventListener("submit",saveOrderEdit);
+if(orderAssignForm) orderAssignForm.addEventListener("submit",assignOrderCodes);
+
+document.querySelectorAll("[data-admin-tab-jump]").forEach(button=>{
+  button.addEventListener("click",()=>switchTab(button.dataset.adminTabJump));
+});
+
+if(momentSearchInput){
+  let searchTimer = null;
+  momentSearchInput.addEventListener("input",()=>{
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(refreshMomentTable,180);
+  });
+}
+momentSearchClear?.addEventListener("click",()=>{
+  if(momentSearchInput) momentSearchInput.value = "";
+  refreshMomentTable();
+});
+
+[momentFilterLine,momentFilterBatch,momentFilterStatus,momentFilterAgent,momentFilterChannel,momentFilterOrder].forEach(node=>{
+  if(node) node.addEventListener("change",refreshMomentTable);
+});
+
+momentSelectAll?.addEventListener("change",event=>{
+  const checked = event.target.checked;
+  filteredMomentProducts().forEach(row=>{
+    if(row.status === "claimed") return;
+    if(checked) selectedMomentCodes.add(row.code);
+    else selectedMomentCodes.delete(row.code);
+  });
+  refreshMomentTable();
+});
+
+momentProductsTable?.addEventListener("change",event=>{
+  const input = event.target.closest("[data-moment-select]");
+  if(!input) return;
+  toggleMomentCodeSelection(input.dataset.momentSelect,input.checked);
+});
+
+momentProductsTable?.addEventListener("click",event=>{
+  const editBtn = event.target.closest("[data-code-edit]");
+  if(editBtn) return openCodeDrawer(editBtn.dataset.codeEdit);
+  const orderBtn = event.target.closest("[data-order-open]");
+  if(orderBtn) return openOrderDrawer(orderBtn.dataset.orderOpen,"codes");
+});
+
+momentBulkApply?.addEventListener("click",()=>{
+  applyMomentBulk({
+    status:momentBulkStatus?.value || null,
+    channel:momentBulkChannel?.value || null,
+    agentId:momentBulkAgent?.value || null
+  });
+});
+momentBulkClearAgent?.addEventListener("click",()=>applyMomentBulk({clearAgent:true}));
+momentBulkClearOrder?.addEventListener("click",()=>applyMomentBulk({clearOrder:true}));
+
+momentExportFiltered?.addEventListener("click",()=>{
+  momentExportRows(filteredMomentProducts(), "khamakey-magazzino");
+});
+momentExportSelected?.addEventListener("click",()=>{
+  const rows = momentProductRows.filter(row=>selectedMomentCodes.has(row.code));
+  momentExportRows(rows, "khamakey-selezione");
+});
+momentLabelsFiltered?.addEventListener("click",async event=>{
+  await runLabelExport(filteredMomentProducts(), "khamakey-etichette", event.currentTarget);
+});
+momentLabelsSelected?.addEventListener("click",async event=>{
+  const rows = momentProductRows.filter(row=>selectedMomentCodes.has(row.code));
+  await runLabelExport(rows, "khamakey-etichette-selezione", event.currentTarget);
+});
+
+agentsTable?.addEventListener("click",event=>{
+  const button = event.target.closest("[data-agent-edit]");
+  if(button) editAgent(button.dataset.agentEdit);
+});
+
+platformOrderForm?.elements?.order_type?.addEventListener("change",syncNfcOrderFieldsVisibility);
+syncNfcOrderFieldsVisibility();
+
 memberForm.addEventListener("submit",saveMember);
 agentForm.addEventListener("submit",saveAgent);
 if(momentForm) momentForm.addEventListener("submit",saveMoment);
 if(momentBatchForm) momentBatchForm.addEventListener("submit",createMomentBatch);
-[momentFilterLine,momentFilterBatch,momentFilterStatus].forEach(node=>{
-  if(node) node.addEventListener("change",()=>renderMomentProductsTable(filteredMomentProducts()));
-});
 productForm.addEventListener("submit",saveProduct);
 stockForm.addEventListener("submit",saveStockMovement);
 platformOrderForm.addEventListener("submit",savePlatformOrder);

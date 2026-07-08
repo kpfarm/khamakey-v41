@@ -15,10 +15,13 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 9 | `khamakey-moments-save-fix-v45.sql` | Fix salvataggio editor (`slug is ambiguous`) + PIN |
 | 10 | `khamakey-moments-categories-v59.sql` | Categorie estese (amore, famiglia, feste, animali…) + save con `_moment_type_valid` |
 | 11 | `khamakey-moments-event-type-v60.sql` | Allinea `event_type` alle nuove categorie (+ tipi legacy) |
+| 12 | `khamakey-moments-reseller-v61.sql` | Canale vendita e agente su codici NFC Moments + report rivenditori |
+| 13 | `khamakey-moments-fulfillment-v62.sql` | Collegamento ordini ↔ codici da magazzino (pronta consegna) |
+| 14 | `khamakey-admin-business-rls-v63.sql` | Policy RLS admin su tabelle Business (`pages.read`) |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti.
 
-**Stato produzione (2026-07-08):** su progetto `cuxlwaocjqwzluycznyp` risultano applicati v45 (slug fix via v59), v59 e v60.
+**Stato produzione (2026-07-08):** su progetto `cuxlwaocjqwzluycznyp` risultano applicati v59–v63.
 
 ## Supabase SQL Editor
 

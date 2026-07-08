@@ -1,6 +1,8 @@
 /** Kit editor — sezioni consigliate, opzionali e etichette adattive per tipo pagina. */
 import { MOMENT_TYPE_GROUPS, normalizeMomentType } from "./moment-categories.js";
-import { SECTION_ORDER_DEFAULT, sectionFillGuide } from "./moment-sections.js";
+import { SECTION_ORDER_DEFAULT, sectionFillGuide, SECTION_ICONS } from "./moment-sections.js";
+
+export { SECTION_ICONS };
 
 /** Tutte le sezioni disponibili nel kit (places deprecato → timeline). */
 export const ALL_KIT_SECTIONS = SECTION_ORDER_DEFAULT.filter(key => key !== "places");
@@ -39,24 +41,6 @@ const BASE_SECTION_SUBTITLES = {
   numbers:"Numeri simbolo (giorni, km…)",
   quote:"Una frase che vi rappresenta",
   signature:"Chiusura finale della pagina"
-};
-
-export const SECTION_ICONS = {
-  intro:"✦",
-  dedication:"💌",
-  timeline:"◷",
-  rsvp:"✓",
-  gallery:"▦",
-  promises:"♡",
-  dreams:"☁",
-  countdown:"⏳",
-  music:"♫",
-  letter_future:"✉",
-  rituals:"☕",
-  pet:"🐾",
-  numbers:"#",
-  quote:"❝",
-  signature:"—"
 };
 
 const TYPE_TO_GROUP = Object.fromEntries(

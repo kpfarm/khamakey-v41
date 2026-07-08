@@ -2,6 +2,7 @@
 
 import { normalizeMediaList, parseMediaList } from "./moment-media.js";
 import { mergePlacesIntoTimeline, resolveJourneySteps, parseJourneySteps } from "./moment-journey.js";
+import { readRsvpFieldsFromForm } from "./moment-rsvp-fields.js";
 
 export const SECTION_ORDER_DEFAULT = [
   "intro",
@@ -25,7 +26,7 @@ export const DEFAULT_SECTIONS = {
   intro:{ enabled:true, title:"La nostra storia", body:"", images:[] },
   dedication:{ enabled:false, title:"Una dedica per te", body:"", recipient:"", signature:"", images:[] },
   timeline:{ enabled:false, title:"Tappe & luoghi", body:"", items:[], images:[] },
-  rsvp:{ enabled:false, title:"Conferma presenza", body:"Compila il modulo e invia la risposta su WhatsApp.", whatsapp_number:"", event_name:"", ask_guests:true, ask_notes:true, images:[] },
+  rsvp:{ enabled:false, title:"Conferma presenza", body:"Compila il modulo e invia la risposta su WhatsApp.", whatsapp_number:"", event_name:"", ask_guests:true, ask_notes:true, field_keys:["guests","notes"], custom_fields:[], images:[] },
   gallery:{ enabled:false, title:"I nostri ricordi", body:"", images:[], media:[] },
   promises:{ enabled:false, title:"Le nostre promesse", body:"", images:[] },
   places:{ enabled:false, title:"Luoghi del cuore", body:"", images:[] },
@@ -80,22 +81,22 @@ export const SECTION_SUBTITLES = {
 };
 
 export const SECTION_ICONS = {
-  intro:"✦",
+  intro:"✨",
   dedication:"💌",
-  timeline:"◷",
-  rsvp:"✓",
-  gallery:"▣",
-  promises:"🤝",
+  timeline:"🗺️",
+  rsvp:"📲",
+  gallery:"📸",
+  promises:"💍",
   places:"📍",
-  dreams:"✨",
+  dreams:"🌟",
   countdown:"⏳",
   music:"🎵",
-  letter_future:"🔒",
-  rituals:"🕯",
+  letter_future:"🔐",
+  rituals:"🕯️",
   pet:"🐾",
-  numbers:"#",
-  quote:"❝",
-  signature:"♥"
+  numbers:"🔢",
+  quote:"✍️",
+  signature:"💫"
 };
 
 export const LEGACY_SECTION_MAP = {
@@ -312,8 +313,7 @@ export function readSectionFromForm(form, key){
   if(key === "rsvp"){
     base.whatsapp_number = String(form.get(`section_${key}_whatsapp_number`) || "").trim();
     base.event_name = String(form.get(`section_${key}_event_name`) || "").trim();
-    base.ask_guests = form.get(`section_${key}_ask_guests`) === "on";
-    base.ask_notes = form.get(`section_${key}_ask_notes`) === "on";
+    Object.assign(base, readRsvpFieldsFromForm(form));
   }
   if(key === "music"){
     base.spotify_url = String(form.get(`section_${key}_spotify_url`) || "").trim();

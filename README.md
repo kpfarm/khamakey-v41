@@ -97,7 +97,7 @@ In `wrangler.toml` verifica `PAGES_ASSET_BASE = "https://khamakey-app.pages.dev"
 | https://khamakey-nfc...workers.dev/m/{slug} | Pagina pubblica Moment |
 | https://khamakey-nfc...workers.dev/p/{slug} | Pagina pubblica business |
 
-Hard refresh (`Cmd+Shift+R`) se vedi CSS/JS vecchi — release corrente **v94** (cache bust `?v=94` su `moments.html`, `editor.html`, `admin.html`, `index.html`).
+Hard refresh (`Cmd+Shift+R`) se vedi CSS/JS vecchi — release corrente **v95** (cache bust `?v=95` su `editor.html`, `index.html`, ecc.).
 
 ---
 

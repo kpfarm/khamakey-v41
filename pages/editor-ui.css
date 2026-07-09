@@ -7,16 +7,31 @@ html.editor-embedded body{
   height:100%!important;
   min-height:0!important;
   overflow:hidden!important;
+  overflow-x:hidden!important;
   padding:0!important;
   margin:0!important;
+  max-width:100%!important;
 }
-.editor-embedded{--topbar-h:0px;}
-.editor-embedded .topbar{display:none!important;}
+.editor-embedded{--topbar-h:46px;}
+/* Topbar compatta: solo Anteprima + Account (niente logo duplicato) */
+.editor-embedded .topbar{
+  display:flex!important;
+  height:var(--topbar-h);
+  position:sticky;
+  top:0;
+  z-index:300;
+  justify-content:flex-end;
+  padding:0 12px;
+}
+.editor-embedded .topbar-left{display:none!important;}
+.editor-embedded .topbar-right{margin-left:0;gap:8px;}
+.editor-embedded .btn-preview{display:inline-flex!important;}
+.editor-embedded .user-name-short{display:inline!important;}
 .editor-embedded .layout{
   display:flex!important;
   flex-direction:row!important;
   align-items:stretch!important;
-  height:100%!important;
+  height:calc(100% - var(--topbar-h))!important;
   min-height:0!important;
   overflow:hidden!important;
 }
@@ -42,9 +57,9 @@ html.editor-embedded body{
   overflow-y:auto!important;
   overflow-x:hidden!important;
 }
-/* Nell'iframe: niente dock laterale (usa modal anteprima) */
+/* Nell'iframe: niente dock laterale; anteprima da topbar o shell */
 .editor-embedded .editor-preview-dock{display:none!important;}
-.editor-embedded .preview-fab{display:flex!important;bottom:22px;right:16px;z-index:520;}
+.editor-embedded .preview-fab{display:none!important;}
 
 /* ── Workspace (standalone / futuro) ── */
 .editor-workspace{
@@ -128,4 +143,8 @@ html.editor-embedded body{
 @media(max-width:1179px){
   .editor-hub{overflow-x:auto;flex-wrap:nowrap;padding-bottom:12px;-webkit-overflow-scrolling:touch;}
   .editor-hub-btn{flex:0 0 auto;}
+}
+@media(max-width:768px){
+  .editor-embedded .btn-preview{display:none!important;}
+  .editor-embedded .preview-fab{display:flex!important;bottom:22px;right:16px;z-index:520;}
 }

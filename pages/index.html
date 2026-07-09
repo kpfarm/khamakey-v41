@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="shell.css?v=40">
+  <link rel="stylesheet" href="shell.css?v=97">
 </head>
 <body>
   <main class="auth-page" id="authView">
@@ -97,6 +97,10 @@
     <header class="app-header">
       <img class="header-logo" src="khamakey-wordmark-dark.png" alt="KhamaKey">
       <div class="cloud-state"><span id="cloudDot"></span><strong id="cloudStatus">Connessione...</strong></div>
+      <div class="app-actions">
+        <button type="button" id="shellPreviewBtn" class="app-tool-btn">Anteprima</button>
+        <button type="button" id="shellAccountBtn" class="app-tool-btn">Account</button>
+      </div>
       <div class="app-user">
         <span id="userEmail"></span>
         <button type="button" id="logoutButton">Esci</button>
@@ -105,6 +109,6 @@
     <iframe id="editorFrame" title="Editor KhamaKey" src="about:blank"></iframe>
   </main>
 
-  <script type="module" src="app.js?v=96"></script>
+  <script type="module" src="app.js?v=97"></script>
 </body>
 </html>

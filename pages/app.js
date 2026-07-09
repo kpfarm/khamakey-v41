@@ -362,7 +362,7 @@ async function loadApplication(){
     currentUser = userData.user;
     currentBusiness = await ensureWorkspace(currentUser);
     userEmail.textContent = currentUser.email || "";
-    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=96`;
+    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=97`;
     if(editorFrame.getAttribute("src") !== editorUrl){
       editorFrame.src = editorUrl;
     }
@@ -511,6 +511,19 @@ document.getElementById("forgotPassword").addEventListener("click",async()=>{
 
 document.getElementById("logoutButton").addEventListener("click",async()=>{
   if(supabase) await supabase.auth.signOut();
+});
+
+function postToEditor(message){
+  if(!editorFrame.contentWindow) return;
+  editorFrame.contentWindow.postMessage(message,messageOrigin);
+}
+
+document.getElementById("shellPreviewBtn")?.addEventListener("click",()=>{
+  postToEditor({type:"khamakey:open-preview"});
+});
+
+document.getElementById("shellAccountBtn")?.addEventListener("click",()=>{
+  postToEditor({type:"khamakey:open-account",tab:"profile"});
 });
 
 editorFrame.addEventListener("load",()=>sendStateToEditor());

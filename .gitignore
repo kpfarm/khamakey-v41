@@ -26,3 +26,6 @@ node_modules/
 # Logs
 *.log
 npm-debug.log*
+
+# Export chat locali (non versionare)
+CHAT-EXPORT*.md

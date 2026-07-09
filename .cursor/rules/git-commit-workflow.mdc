@@ -24,7 +24,8 @@ Un solo contatore release per tutta la piattaforma (Moments, Business, Admin, Wo
 - Allineare insieme: `moments.html`, `editor.html`, `admin.html`, `index.html`, `app.js`, `worker.js` (`WORKER_VERSION` + fallback CSS)
 - Annotare in `ROADMAP.md` (sezione changelog)
 
-Moments attuale: v93 → prossima release: **v94**, poi v95, ecc.
+Admin attuale: v105 — prossima release piattaforma: **v106**, poi v107, ecc.
+Worker attuale: v103 — allineare `WORKER_VERSION` quando cambia il renderer NFC.
 
 ## Eccezioni
 

@@ -217,6 +217,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-08 | Cursor | Moments v89–v90: template tutte categorie, Altre sezioni complete, guide per tipo, onboarding |
 | 2026-07-09 | Cursor | **v104**: pannello admin user-friendly — guide sezione, chip filtri, legende Shopify/ordini, welcome dashboard |
 | 2026-07-09 | Cursor | **v68 Supabase**: rete rivenditori applicata in produzione (tier, listini, consegne, RPC) |
+| 2026-07-09 | Cursor | **Collab multi-agente**: `CODEX-COLLAB.md` + regola Cursor `.cursor/rules/multi-agent-collab.mdc` |
 | 2026-07-09 | Cursor | **v105**: admin Rete rivenditori + guida Stripe personale (`STRIPE-PERSONAL-SETUP.md`) |
 | 2026-07-09 | Cursor | **v103**: email ordine con codici NFC, Stripe Checkout, ingest webhook Stripe |
 | 2026-07-09 | Cursor | **v102**: Integration Hub, Stripe/PayPal/Resend webhook, email ordine, i18n v66 |

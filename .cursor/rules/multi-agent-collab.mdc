@@ -1,0 +1,40 @@
+---
+description: Coordinamento tra più agenti Cursor/Codex sullo stesso repo KhamaKey
+alwaysApply: true
+---
+
+# Multi-agent — KhamaKey v41
+
+Prima di **qualsiasi modifica**, leggere `CODEX-COLLAB.md` (lock attivi + area di lavoro).
+
+## Inizio sessione (obbligatorio)
+
+1. `git pull origin main`
+2. Leggere `ROADMAP.md` (ultime righe log) e sezione **Lock attivi** in `CODEX-COLLAB.md`
+3. Se tocchi un'area lockata: chiedere all'utente o aggiornare il lock con nome task + data
+4. Scope minimo: non refactorare file fuori dal task
+
+## Fine sessione (obbligatorio)
+
+1. `git status` + `git diff` — niente segreti in commit
+2. Aggiornare `ROADMAP.md` (log sessione) se il lavoro cambia stato piattaforma
+3. Rilasciare o aggiornare lock in `CODEX-COLLAB.md` se li avevi presi
+4. Commit + push su `main` (salvo richiesta esplicita di non committare)
+5. Se release: incrementare `?v=` + `WORKER_VERSION` insieme — vedi regola git-commit-workflow
+
+## Conflitti tra agenti
+
+- Mai `git push --force` su `main`
+- Se `git pull` mostra conflitti: fermarsi, risolvere a mano o con l'utente — non sovrascrivere altrui
+- Un agente = un task = un'area file correlata per sessione
+
+## Contratto pagina pubblica (4 punti)
+
+Campo nuovo o cambiato che impatta `/p/` o `/k/` → aggiornare **tutti**:
+`editor.html` → anteprima → `publicStateFromEditor()` in `app.js` → `worker/worker.js`
+
+Moments: anche `moments.js` + `renderMomentPage` nel Worker.
+
+## Messaggio utente per nuova chat Cursor
+
+L'utente può incollare il template in `CODEX-COLLAB.md` → **Aprire una nuova chat agente**.

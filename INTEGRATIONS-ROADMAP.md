@@ -34,15 +34,15 @@ Legenda: ✅ operativo · 🟡 predisposto · ⬜ da fare
 ## Sprint F — Pagamenti e email ordini (prossimo)
 
 ### F1 Resend ordini Moments (E3)
-- [ ] Email post-ordine Shopify con `order_code` + link attivazione
-- [ ] Template HTML multilingua (`platform_moment_catalog_i18n`)
+- [x] Email post-ordine Shopify con codici NFC + link attivazione (`moments.html?code=`)
+- [x] Invio solo su ordine pagato; dedup con `activation_email_sent_at`
+- [ ] Template multilingua completo (IT/EN base ok)
 - [ ] Secret `RESEND_API_KEY` in produzione
-- [ ] Test ordine reale su Shopify test/live
 
 ### F2 Stripe Business
+- [x] Webhook `checkout.session.completed` → `ingest_stripe_checkout_event`
+- [x] `POST /api/billing/stripe/checkout-session` da Admin → Piani
 - [ ] `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` nel Worker
-- [ ] Webhook `checkout.session.completed` → aggiorna `platform_orders`
-- [ ] Checkout da admin piani (collegare `stripe_price_*_id` già in tabella)
 - [ ] Payment Link da landing khamakey.it
 
 ### F3 PayPal (opzionale)

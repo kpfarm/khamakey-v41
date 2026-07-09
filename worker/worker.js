@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v102-integrations-i18n-foundation";
+const WORKER_VERSION = "v103-shopify-email-stripe-complete";
 
 export default {
   async fetch(request, env, ctx) {
@@ -65,6 +65,9 @@ export default {
       }
       if (url.pathname === "/api/channels/shopify/register-webhooks" && request.method === "POST") {
         return handleShopifyRegisterWebhooks(request, env);
+      }
+      if (url.pathname === "/api/billing/stripe/checkout-session" && request.method === "POST") {
+        return handleStripeCheckoutSession(request, env);
       }
       if (url.pathname === "/health") {
         return json(buildIntegrationsHealth(env));
@@ -2110,8 +2113,17 @@ async function handleShopifyOrderWebhook(request, env) {
       p_ingest_key: env.WEBHOOK_INGEST_KEY,
       p_payload: payload
     });
-    if (result?.ok && !result?.duplicate && payload.customer_email) {
-      sendMomentOrderEmail(env, payload, result).catch(err => console.warn("order email", err));
+    if (shouldSendMomentOrderEmail(result, payload)) {
+      sendMomentOrderEmail(env, payload, result)
+        .then(async () => {
+          if (result?.order_id) {
+            await rpc(env, "mark_order_activation_email_sent", {
+              p_ingest_key: env.WEBHOOK_INGEST_KEY,
+              p_order_id: result.order_id
+            }).catch(err => console.warn("mark email sent", err));
+          }
+        })
+        .catch(err => console.warn("order email", err));
     }
     return json({ ok: true, result });
   } catch (error) {
@@ -2282,7 +2294,8 @@ async function handleShopifyCatalogSync(request, env) {
 
 const SHOPIFY_ORDER_WEBHOOKS = [
   "orders/create",
-  "orders/paid"
+  "orders/paid",
+  "orders/updated"
 ];
 
 async function handleShopifyRegisterWebhooks(request, env) {
@@ -2331,6 +2344,10 @@ async function handleShopifyRegisterWebhooks(request, env) {
 const SUPPORTED_LOCALES = ["it", "en", "fr", "de", "es"];
 
 function stripeConfigured(env) {
+  return Boolean(env.STRIPE_SECRET_KEY);
+}
+
+function stripeWebhookConfigured(env) {
   return Boolean(env.STRIPE_SECRET_KEY && env.STRIPE_WEBHOOK_SECRET);
 }
 
@@ -2352,7 +2369,7 @@ function buildIntegrationsHealth(env) {
     integrations: {
       shopify: { configured: shopifyConfigured(env), status: shopifyConfigured(env) ? "active" : "not_configured" },
       resend: { configured: resendConfigured(env), status: resendConfigured(env) ? "active" : "not_configured" },
-      stripe: { configured: stripeConfigured(env), status: stripeConfigured(env) ? "active" : "not_configured" },
+      stripe: { configured: stripeConfigured(env), webhook: stripeWebhookConfigured(env), status: stripeConfigured(env) ? "active" : "not_configured" },
       paypal: { configured: paypalConfigured(env), status: paypalConfigured(env) ? "active" : "not_configured" }
     }
   };
@@ -2367,18 +2384,24 @@ async function handleIntegrationsStatus(request, env) {
 }
 
 async function logWebhookEvent(env, provider, eventType, externalId, payload, status = "received") {
+  const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) {
+    console.info("[webhook]", provider, eventType, status, externalId);
+    return;
+  }
   try {
-    await supabaseRest(env, env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_PUBLISHABLE_KEY, "platform_webhook_events", {
+    await supabaseRest(env, serviceKey, "platform_webhook_events", {
       method: "POST",
       prefer: "return=minimal",
       body: JSON.stringify({
         provider,
+        environment: "live",
         event_type: eventType,
-        external_id: externalId || null,
+        external_event_id: externalId || null,
         payload: payload || {},
-        processed: status === "processed",
         status,
-        received_at: new Date().toISOString()
+        received_at: new Date().toISOString(),
+        processed_at: status === "processed" ? new Date().toISOString() : null
       })
     });
   } catch (error) {
@@ -2389,25 +2412,272 @@ async function logWebhookEvent(env, provider, eventType, externalId, payload, st
 async function handleStripeWebhook(request, env) {
   const signature = request.headers.get("Stripe-Signature") || "";
   const rawBody = await request.text();
-  let payload = {};
+  let event = {};
   try {
-    payload = rawBody ? JSON.parse(rawBody) : {};
+    event = rawBody ? JSON.parse(rawBody) : {};
   } catch {
     return json({ error: "JSON non valido." }, 400);
   }
 
+  if (!stripeWebhookConfigured(env)) {
+    await logWebhookEvent(env, "stripe", event?.type || "unknown", event?.id, { note: "stripe webhook not configured" }, "skipped");
+    return json({ ok: true, skipped: true, reason: "stripe_webhook_not_configured" });
+  }
+
+  const verified = await verifyStripeWebhook(rawBody, signature, env.STRIPE_WEBHOOK_SECRET);
+  if (!verified) return json({ error: "Firma Stripe non valida." }, 401);
+
+  const eventType = event?.type || "unknown";
+  await logWebhookEvent(env, "stripe", eventType, event?.id, event, "received");
+
+  if (eventType === "checkout.session.completed") {
+    const session = event?.data?.object || {};
+    try {
+      const result = await rpc(env, "ingest_stripe_checkout_event", {
+        p_ingest_key: env.WEBHOOK_INGEST_KEY,
+        p_payload: stripeCheckoutPayload(session, eventType)
+      });
+      return json({ ok: true, received: true, type: eventType, result });
+    } catch (error) {
+      console.error("ingest_stripe_checkout_event", error);
+      return json({ error: error.message || "Errore ingest Stripe." }, 500);
+    }
+  }
+
+  return json({ ok: true, received: true, type: eventType, handled: false });
+}
+
+function stripeCheckoutPayload(session, eventType) {
+  return {
+    event_type: eventType,
+    session_id: String(session?.id || ""),
+    payment_status: session?.payment_status || "unpaid",
+    customer_email: session?.customer_details?.email || session?.customer_email || "",
+    customer_name: session?.customer_details?.name || "",
+    amount_total: session?.amount_total ?? 0,
+    currency: session?.currency || "eur",
+    plan_key: session?.metadata?.plan_key || session?.metadata?.planKey || "",
+    billing_cycle: session?.metadata?.billing_cycle || ""
+  };
+}
+
+async function handleStripeCheckoutSession(request, env) {
+  const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  if (!jwt) return cors(json({ error: "Accesso non autorizzato." }, 401));
+  const admin = await verifyPlatformAdmin(env, jwt);
+  if (!admin) return cors(json({ error: "Permesso admin richiesto." }, 403));
   if (!stripeConfigured(env)) {
-    await logWebhookEvent(env, "stripe", payload?.type || "unknown", payload?.id, { note: "stripe not configured" }, "skipped");
-    return json({ ok: true, skipped: true, reason: "stripe_not_configured" });
+    return cors(json({ error: "Stripe non configurato nel Worker (STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET)." }, 503));
   }
 
-  // Verifica firma: implementazione completa in Sprint F2
-  if (!signature) {
-    return json({ error: "Firma Stripe mancante." }, 401);
+  let body = {};
+  try {
+    body = await request.json();
+  } catch {
+    return cors(json({ error: "JSON non valido." }, 400));
   }
 
-  await logWebhookEvent(env, "stripe", payload?.type || "unknown", payload?.id, payload, "received");
-  return json({ ok: true, received: true, type: payload?.type || null });
+  const planKey = String(body.plan_key || "").trim();
+  const billingCycle = String(body.billing_cycle || "monthly").trim();
+  const customerEmail = String(body.customer_email || admin.email || "").trim();
+  const pagesBase = String(env.PAGES_ASSET_BASE || "https://khamakey-app.pages.dev").replace(/\/$/, "");
+  const successUrl = String(body.success_url || `${pagesBase}/index.html?stripe=success`).trim();
+  const cancelUrl = String(body.cancel_url || `${pagesBase}/index.html?stripe=cancel`).trim();
+
+  if (!planKey) return cors(json({ error: "plan_key obbligatorio." }, 400));
+
+  try {
+    const plans = await supabaseRest(
+      env,
+      jwt,
+      `platform_plans?plan_key=eq.${encodeURIComponent(planKey)}&select=plan_key,name,stripe_price_monthly_id,stripe_price_yearly_id,setup_fee,active`
+    );
+    const plan = plans?.[0];
+    if (!plan) return cors(json({ error: "Piano non trovato." }, 404));
+    if (!plan.active) return cors(json({ error: "Piano non attivo." }, 400));
+
+    const priceId = billingCycle === "yearly"
+      ? plan.stripe_price_yearly_id
+      : plan.stripe_price_monthly_id;
+    if (!priceId) {
+      return cors(json({ error: `Stripe price ID mancante per ciclo ${billingCycle}. Configura in Admin → Piani.` }, 400));
+    }
+
+    const params = new URLSearchParams();
+    params.set("mode", "subscription");
+    params.set("success_url", successUrl);
+    params.set("cancel_url", cancelUrl);
+    params.set("line_items[0][price]", priceId);
+    params.set("line_items[0][quantity]", "1");
+    params.set("metadata[plan_key]", planKey);
+    params.set("metadata[billing_cycle]", billingCycle);
+    params.set("metadata[source]", "khamakey_admin");
+    if (customerEmail) params.set("customer_email", customerEmail);
+
+    const session = await stripeApiFetch(env, "/checkout/sessions", {
+      method: "POST",
+      body: params.toString()
+    });
+
+    if (!session?.id || !session?.url) {
+      throw new Error("Risposta Stripe incompleta.");
+    }
+
+    return cors(json({
+      ok: true,
+      session_id: session.id,
+      checkout_url: session.url,
+      plan_key: planKey,
+      billing_cycle: billingCycle
+    }));
+  } catch (error) {
+    console.error("stripe checkout", error);
+    return cors(json({ error: error.message || "Errore creazione checkout Stripe." }, 500));
+  }
+}
+
+async function stripeApiFetch(env, path, options = {}) {
+  const response = await fetch(`https://api.stripe.com/v1${path}`, {
+    method: options.method || "GET",
+    headers: {
+      Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+      ...(options.headers || {})
+    },
+    body: options.body
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(`Stripe ${response.status}: ${result?.error?.message || JSON.stringify(result)}`);
+  }
+  return result;
+}
+
+async function verifyStripeWebhook(rawBody, signatureHeader, secret) {
+  if (!secret || !signatureHeader) return false;
+  const parts = Object.fromEntries(
+    signatureHeader.split(",").map(item => {
+      const idx = item.indexOf("=");
+      return idx === -1 ? [item, ""] : [item.slice(0, idx), item.slice(idx + 1)];
+    })
+  );
+  const timestamp = parts.t;
+  if (!timestamp) return false;
+  const age = Math.floor(Date.now() / 1000) - Number(timestamp);
+  if (!Number.isFinite(age) || age > 300) return false;
+
+  const signatures = signatureHeader
+    .split(",")
+    .filter(item => item.startsWith("v1="))
+    .map(item => item.slice(3));
+
+  const signedPayload = `${timestamp}.${rawBody}`;
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const digest = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(signedPayload));
+  const expected = [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, "0")).join("");
+  return signatures.some(sig => timingSafeEqual(sig, expected));
+}
+
+function shouldSendMomentOrderEmail(result, payload) {
+  if (!result?.ok) return false;
+  if (result.activation_email_sent) return false;
+  if (result.should_send_email === false) return false;
+  const email = String(payload?.customer_email || "").trim();
+  if (!email) return false;
+  const paid = result.payment_status === "paid"
+    || String(payload?.financial_status || "").toLowerCase() === "paid";
+  return paid;
+}
+
+const ORDER_EMAIL_I18N = {
+  it: {
+    subject: code => `KhamaKey Moments — ordine ${code} confermato`,
+    greeting: name => `Ciao ${name},`,
+    thanks: code => `Grazie per il tuo ordine KhamaKey Moments (${code}).`,
+    codesIntro: "Ecco i tuoi codici di attivazione NFC:",
+    codeLine: (code, url) => `• ${code} → ${url}`,
+    noCodes: "Stiamo preparando il tuo codice di attivazione NFC. Ti invieremo un aggiornamento appena pronto.",
+    activate: "Attiva la pagina Moments",
+    footer: "Il team KhamaKey"
+  },
+  en: {
+    subject: code => `KhamaKey Moments — order ${code} confirmed`,
+    greeting: name => `Hi ${name},`,
+    thanks: code => `Thank you for your KhamaKey Moments order (${code}).`,
+    codesIntro: "Your NFC activation codes:",
+    codeLine: (code, url) => `• ${code} → ${url}`,
+    noCodes: "We are preparing your NFC activation code and will email you when it is ready.",
+    activate: "Activate your Moments page",
+    footer: "The KhamaKey team"
+  }
+};
+
+function orderEmailLocale(payload) {
+  const locale = String(payload?.customer_locale || payload?.locale || "it").slice(0, 2).toLowerCase();
+  return ORDER_EMAIL_I18N[locale] || ORDER_EMAIL_I18N.it;
+}
+
+async function sendMomentOrderEmail(env, orderPayload, ingestResult) {
+  if (!resendConfigured(env)) return null;
+  const to = String(orderPayload.customer_email || "").trim();
+  if (!to) return null;
+
+  const t = orderEmailLocale(orderPayload);
+  const orderCode = ingestResult?.order_code || orderPayload.order_number || "";
+  const customerName = orderPayload.customer_name || "Cliente";
+  const pagesBase = String(env.PAGES_ASSET_BASE || "https://khamakey-app.pages.dev").replace(/\/$/, "");
+  const workerBase = String(env.WORKER_PUBLIC_BASE || "https://khamakey-nfc.khamakey-nfc.workers.dev").replace(/\/$/, "");
+  const codes = Array.isArray(ingestResult?.activation_codes) ? ingestResult.activation_codes : [];
+  const subject = t.subject(orderCode);
+
+  const codeLines = codes.map(item => {
+    const code = item?.code || "";
+    const activateUrl = `${pagesBase}/moments.html?code=${encodeURIComponent(code)}`;
+    return t.codeLine(code, activateUrl);
+  });
+
+  const text = [
+    t.greeting(customerName),
+    "",
+    t.thanks(orderCode),
+    "",
+    codes.length ? t.codesIntro : t.noCodes,
+    ...codeLines,
+    "",
+    `${t.activate}: ${pagesBase}/moments.html`,
+    "",
+    t.footer
+  ].join("\n");
+
+  const codeHtml = codes.length
+    ? `<ul>${codes.map(item => {
+      const code = escapeHtml(item?.code || "");
+      const activateUrl = `${pagesBase}/moments.html?code=${encodeURIComponent(item?.code || "")}`;
+      const nfcUrl = `${workerBase}/k/${encodeURIComponent(item?.code || "")}`;
+      return `<li><strong>${code}</strong><br><a href="${escapeHtml(activateUrl)}">${escapeHtml(t.activate)}</a> · <a href="${escapeHtml(nfcUrl)}">Link NFC</a></li>`;
+    }).join("")}</ul>`
+    : `<p>${escapeHtml(t.noCodes)}</p>`;
+
+  const htmlBody = `<div style="font-family:Arial,sans-serif;line-height:1.55;color:#172036;max-width:560px">
+    <h2 style="color:#1b2a5e;margin:0 0 12px">${escapeHtml(t.thanks(orderCode))}</h2>
+    <p>${escapeHtml(t.greeting(customerName))}</p>
+    ${codes.length ? `<p>${escapeHtml(t.codesIntro)}</p>${codeHtml}` : `<p>${escapeHtml(t.noCodes)}</p>`}
+    <p style="margin-top:20px"><a href="${escapeHtml(`${pagesBase}/moments.html`)}" style="background:#1b2a5e;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none">${escapeHtml(t.activate)}</a></p>
+  </div>`;
+
+  return sendResendEmail(env, {
+    to,
+    subject,
+    html: htmlBody,
+    text,
+    tags: [{ name: "source", value: "khamakey_moment_order" }]
+  });
 }
 
 async function handlePayPalWebhook(request, env) {
@@ -2442,44 +2712,6 @@ async function handleResendWebhook(request, env) {
   const externalId = payload?.data?.email_id || payload?.created_at || null;
   await logWebhookEvent(env, "resend", eventType, externalId ? String(externalId) : null, payload, "processed");
   return json({ ok: true, received: true });
-}
-
-async function sendMomentOrderEmail(env, orderPayload, ingestResult) {
-  if (!resendConfigured(env)) return null;
-  const to = String(orderPayload.customer_email || "").trim();
-  if (!to) return null;
-
-  const orderCode = ingestResult?.order_code || orderPayload.order_number || "";
-  const customerName = orderPayload.customer_name || "Cliente";
-  const activationUrl = `${String(env.PAGES_ASSET_BASE || "https://khamakey-app.pages.dev").replace(/\/$/, "")}/moments.html`;
-  const subject = `KhamaKey Moments — ordine ${orderCode} confermato`;
-  const text = [
-    `Ciao ${customerName},`,
-    "",
-    `Grazie per il tuo ordine KhamaKey Moments (${orderCode}).`,
-    ingestResult?.codes_assigned
-      ? `Abbiamo riservato ${ingestResult.codes_assigned} codice/i NFC per la tua pagina.`
-      : "Stiamo preparando il tuo codice di attivazione NFC.",
-    "",
-    `Attiva la pagina su: ${activationUrl}`,
-    "",
-    "Il team KhamaKey"
-  ].join("\n");
-  const htmlBody = `<div style="font-family:Arial,sans-serif;line-height:1.55;color:#172036">
-    <h2 style="color:#1b2a5e">Ordine Moments confermato</h2>
-    <p>Ciao ${escapeHtml(customerName)},</p>
-    <p>Grazie per il tuo ordine <strong>${escapeHtml(orderCode)}</strong>.</p>
-    <p>${ingestResult?.codes_assigned ? `Abbiamo riservato <strong>${ingestResult.codes_assigned}</strong> codice/i NFC.` : "Stiamo preparando il tuo codice di attivazione NFC."}</p>
-    <p><a href="${escapeHtml(activationUrl)}">Attiva la tua pagina Moments</a></p>
-  </div>`;
-
-  return sendResendEmail(env, {
-    to,
-    subject,
-    html: htmlBody,
-    text,
-    tags: [{ name: "source", value: "khamakey_moment_order" }]
-  });
 }
 
 async function sendResendEmail(env, { to, subject, html, text, tags = [] }) {

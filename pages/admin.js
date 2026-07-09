@@ -1519,7 +1519,7 @@ async function loadPlans(){
         <td>${row.stripe_product_id ? "configurato" : "-"}<div class="muted-cell">${esc(row.stripe_price_monthly_id || row.stripe_price_yearly_id || "")}</div></td>
         <td>${(row.features || []).slice(0,3).map(esc).join(", ")}</td>
         <td><span class="status-pill ${row.active ? "active" : "disabled"}">${row.active ? "attivo" : "disattivo"}</span><div class="muted-cell">${row.public_visible ? "pubblico" : "privato"}</div></td>
-        <td><button class="small-action" type="button" data-plan-edit="${esc(row.id)}">Modifica</button></td>
+        <td><button class="small-action" type="button" data-plan-edit="${esc(row.id)}">Modifica</button>${row.stripe_price_monthly_id ? `<button class="small-action" type="button" data-plan-stripe="${esc(row.id)}" data-cycle="monthly">Stripe mese</button>` : ""}${row.stripe_price_yearly_id ? `<button class="small-action" type="button" data-plan-stripe="${esc(row.id)}" data-cycle="yearly">Stripe anno</button>` : ""}</td>
       </tr>
     `).join("") : `<tr><td colspan="8">Nessun piano configurato.</td></tr>`;
     plansTable.innerHTML = renderedPlans;
@@ -1536,6 +1536,52 @@ async function loadPlans(){
     console.error(error);
     plansTable.innerHTML = `<tr><td colspan="8">Piani non disponibili. Verifica permessi billing/settings.</td></tr>`;
     billingPlansTable.innerHTML = `<tr><td colspan="5">Piani non disponibili.</td></tr>`;
+  }
+}
+
+async function createStripeCheckoutForPlan(planId, billingCycle){
+  const row = planRows.find(item=>item.id === planId);
+  if(!row){
+    setFormStatus(planFormStatus,"Piano non trovato.","error");
+    return;
+  }
+  const priceId = billingCycle === "yearly" ? row.stripe_price_yearly_id : row.stripe_price_monthly_id;
+  if(!priceId){
+    setFormStatus(planFormStatus,`Configura stripe_price_${billingCycle === "yearly" ? "yearly" : "monthly"}_id nel piano.`,"error");
+    return;
+  }
+  const customerEmail = window.prompt("Email cliente (opzionale — lascia vuoto per usare la tua email admin):","") || "";
+  const { data:sessionData } = await supabase.auth.getSession();
+  const token = sessionData?.session?.access_token;
+  if(!token){
+    setFormStatus(planFormStatus,"Sessione scaduta. Riaccedi.","error");
+    return;
+  }
+  setFormStatus(planFormStatus,`Creazione checkout Stripe (${billingCycle})...`);
+  try{
+    const response = await fetch(`${WORKER_BASE_URL}/api/billing/stripe/checkout-session`,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:`Bearer ${token}`
+      },
+      body:JSON.stringify({
+        plan_key:row.plan_key,
+        billing_cycle:billingCycle,
+        customer_email:customerEmail || undefined
+      })
+    });
+    const result = await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(result.error || `Errore ${response.status}`);
+    if(result.checkout_url){
+      window.open(result.checkout_url,"_blank","noopener");
+      setFormStatus(planFormStatus,`Checkout Stripe aperto per ${row.name} (${billingCycle}).`,"ok");
+    }else{
+      setFormStatus(planFormStatus,"Checkout creato ma URL mancante.","error");
+    }
+  }catch(error){
+    console.error(error);
+    setFormStatus(planFormStatus,error.message || "Errore Stripe Checkout.","error");
   }
 }
 
@@ -3072,6 +3118,11 @@ platformOrdersTable.addEventListener("click",event=>{
 });
 
 plansTable.addEventListener("click",event=>{
+  const stripeBtn = event.target.closest("[data-plan-stripe]");
+  if(stripeBtn){
+    createStripeCheckoutForPlan(stripeBtn.dataset.planStripe, stripeBtn.dataset.cycle || "monthly");
+    return;
+  }
   const button = event.target.closest("[data-plan-edit]");
   if(button) editPlan(button.dataset.planEdit);
 });

@@ -5,6 +5,7 @@ compatibility_date = "2026-06-25"
 # Variabili pubbliche (aggiorna PAGES_ASSET_BASE se usi un dominio custom)
 [vars]
 PAGES_ASSET_BASE = "https://khamakey-app.pages.dev"
+WORKER_PUBLIC_BASE = "https://khamakey-nfc.khamakey-nfc.workers.dev"
 
 # Bucket R2 per foto, video e audio (Moments + Business)
 [[r2_buckets]]

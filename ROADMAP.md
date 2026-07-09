@@ -150,9 +150,10 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 - [x] Applicare SQL v64 su Supabase produzione
 - [x] Configurare WEBHOOK_INGEST_KEY Worker + Supabase (Shopify API ancora da collegare)
 - [x] v101: prodotti Shopify in bozza finché incompleti (`shopify_live`)
-- [x] v102: Integration Hub, webhook Stripe/PayPal/Resend, email ordine, i18n base
-- [ ] Applicare SQL v66 su Supabase produzione
-- [ ] Email ordine + codice attivazione (Resend) — fase E3 / F1
+- [x] v102: Integration Hub, webhook Stripe/PayPal/Resend, i18n base
+- [x] v103: email ordine con codici NFC, Stripe Checkout + webhook ingest
+- [x] Applicare SQL v66 + v67 su Supabase produzione
+- [ ] Configurare RESEND_API_KEY + STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET nel Worker
 - [ ] Packlink / tracking spedizioni in admin — fase E4
 - [ ] Marketplace Etsy / Amazon / TikTok — fase E5
 
@@ -209,6 +210,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-06 | kpfarm | Push GitHub: github.com/kpfarm/khamakey-v41 |
 | 2026-07-06 | Cursor | SQL v44 applicato su Supabase (bucket khamakey-media + RLS) |
 | 2026-07-08 | Cursor | Moments v89–v90: template tutte categorie, Altre sezioni complete, guide per tipo, onboarding |
+| 2026-07-09 | Cursor | **v103**: email ordine con codici NFC, Stripe Checkout, ingest webhook Stripe |
 | 2026-07-09 | Cursor | **v102**: Integration Hub, Stripe/PayPal/Resend webhook, email ordine, i18n v66 |
 | 2026-07-09 | Cursor | **v101 Sprint E**: Shopify sync in bozza finché prodotto incompleto; flag `shopify_live` in admin |
 | 2026-07-09 | Cursor | **v99 Sprint E**: catalogo vendita Moments, webhook/sync Shopify, bundle NFC, SHOPIFY-SETUP.md |

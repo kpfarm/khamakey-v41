@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=102">
+  <link rel="stylesheet" href="admin.css?v=103">
 </head>
 <body>
   <main class="admin-shell locked" id="adminShell">
@@ -856,7 +856,7 @@
         <section class="admin-panel" data-panel="billing">
           <div class="admin-card">
             <h2>Piani e fatturazione</h2>
-            <p>Vista riepilogo. La modifica completa dei piani è nella sezione “Piani”.</p>
+            <p>Vista riepilogo. Usa <strong>Stripe Checkout</strong> dalla tabella Piani (dopo aver configurato i price ID). Webhook: <code>/webhooks/stripe</code></p>
             <div class="table-wrap">
               <table>
                 <thead><tr><th>Piano</th><th>Mensile</th><th>Annuale</th><th>Setup</th><th>Stato</th></tr></thead>
@@ -1432,6 +1432,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=102"></script>
+  <script type="module" src="admin.js?v=103"></script>
 </body>
 </html>

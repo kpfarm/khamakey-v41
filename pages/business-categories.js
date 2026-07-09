@@ -1,0 +1,66 @@
+/** Catalogo unico categorie Business — usato da select e setup guidato */
+window.KHAMA_BUSINESS_CATEGORIES = [
+  { value:'ristorante', label:'Ristorante / Pizzeria', group:'Food & beverage', template:'ristorante', icon:'i-list', hint:'Menu, orari, prenotazioni e ordini WhatsApp.' },
+  { value:'bar', label:'Bar / Caffetteria', group:'Food & beverage', template:'ristorante', icon:'i-list', hint:'Menu drink, orari e contatti rapidi.' },
+  { value:'pub', label:'Pub / Birreria', group:'Food & beverage', template:'ristorante', icon:'i-list', hint:'Menu, eventi e prenotazioni tavoli.' },
+  { value:'gelateria', label:'Gelateria / Pasticceria', group:'Food & beverage', template:'ristorante', icon:'i-list', hint:'Listino dolci, orari e indicazioni.' },
+  { value:'panificio', label:'Panificio / Gastronomia', group:'Food & beverage', template:'ristorante', icon:'i-list', hint:'Prodotti, orari e ordini.' },
+  { value:'foodtruck', label:'Food truck / Street food', group:'Food & beverage', template:'ristorante', icon:'i-list', hint:'Menu mobile, orari e posizione.' },
+  { value:'cantina', label:'Cantina / Enoteca', group:'Food & beverage', template:'ristorante', icon:'i-list', hint:'Degustazioni, catalogo e prenotazioni.' },
+  { value:'catering', label:'Catering / Banqueting', group:'Food & beverage', template:'ristorante', icon:'i-list', hint:'Servizi, menu eventi e preventivi.' },
+  { value:'hotel', label:'Hotel', group:'Ospitalità & turismo', template:'hotel', icon:'i-building', hint:'Camere, servizi, WiFi e prenotazioni.' },
+  { value:'bb', label:'B&B / Affittacamere', group:'Ospitalità & turismo', template:'hotel', icon:'i-building', hint:'Camere, welcome book e contatti ospiti.' },
+  { value:'casa-vacanze', label:'Casa vacanze', group:'Ospitalità & turismo', template:'hotel', icon:'i-building', hint:'Alloggi, regole casa e richieste.' },
+  { value:'agriturismo', label:'Agriturismo', group:'Ospitalità & turismo', template:'hotel', icon:'i-building', hint:'Esperienza, camere e ristorazione.' },
+  { value:'stabilimento', label:'Lido / Stabilimento balneare', group:'Ospitalità & turismo', template:'hotel', icon:'i-building', hint:'Servizi spiaggia, orari e prenotazioni.' },
+  { value:'tour', label:'Tour / Esperienze', group:'Ospitalità & turismo', template:'hotel', icon:'i-building', hint:'Esperienze, date e richieste gruppo.' },
+  { value:'negozio', label:'Negozio', group:'Negozi & retail', template:'negozio', icon:'i-target', hint:'Prodotti, carrello e promo.' },
+  { value:'abbigliamento', label:'Abbigliamento / Boutique', group:'Negozi & retail', template:'negozio', icon:'i-target', hint:'Collezioni, taglie e ordini.' },
+  { value:'gioielleria', label:'Gioielleria / Accessori', group:'Negozi & retail', template:'negozio', icon:'i-target', hint:'Catalogo, promo e contatti.' },
+  { value:'arredamento', label:'Arredamento / Design', group:'Negozi & retail', template:'negozio', icon:'i-target', hint:'Prodotti, showroom e preventivi.' },
+  { value:'alimentari', label:'Alimentari / Prodotti tipici', group:'Negozi & retail', template:'negozio', icon:'i-target', hint:'Prodotti locali e ordini.' },
+  { value:'fioraio', label:'Fioraio', group:'Negozi & retail', template:'negozio', icon:'i-target', hint:'Composizioni, consegne e ordini.' },
+  { value:'ecommerce', label:'E-commerce / Catalogo online', group:'Negozi & retail', template:'negozio', icon:'i-target', hint:'Catalogo digitale e carrello.' },
+  { value:'studio', label:'Studio professionale', group:'Servizi professionali', template:'professionista', icon:'i-user', hint:'Servizi, appuntamenti e portfolio.' },
+  { value:'avvocato', label:'Avvocato', group:'Servizi professionali', template:'professionista', icon:'i-user', hint:'Aree di competenza e consulenze.' },
+  { value:'commercialista', label:'Commercialista / Consulente', group:'Servizi professionali', template:'professionista', icon:'i-user', hint:'Servizi, appuntamenti e contatti.' },
+  { value:'architetto', label:'Architetto / Ingegnere', group:'Servizi professionali', template:'professionista', icon:'i-user', hint:'Portfolio, servizi e preventivi.' },
+  { value:'agenzia-marketing', label:'Agenzia marketing / Creativi', group:'Servizi professionali', template:'professionista', icon:'i-user', hint:'Servizi, case study e lead.' },
+  { value:'fotografo', label:'Fotografo / Videomaker', group:'Servizi professionali', template:'professionista', icon:'i-user', hint:'Portfolio, pacchetti e prenotazioni.' },
+  { value:'formazione', label:'Formazione / Corsi', group:'Servizi professionali', template:'professionista', icon:'i-user', hint:'Corsi, calendario e iscrizioni.' },
+  { value:'medico', label:'Studio medico', group:'Salute, benessere & sport', template:'salute', icon:'i-phone', hint:'Prestazioni, orari e appuntamenti.' },
+  { value:'dentista', label:'Dentista', group:'Salute, benessere & sport', template:'salute', icon:'i-phone', hint:'Trattamenti e prenotazioni.' },
+  { value:'fisioterapia', label:'Fisioterapia / Riabilitazione', group:'Salute, benessere & sport', template:'salute', icon:'i-phone', hint:'Sedute, orari e richieste.' },
+  { value:'psicologo', label:'Psicologo / Terapista', group:'Salute, benessere & sport', template:'salute', icon:'i-phone', hint:'Approccio, servizi e contatto.' },
+  { value:'farmacia', label:'Farmacia / Parafarmacia', group:'Salute, benessere & sport', template:'salute', icon:'i-phone', hint:'Servizi, orari e consulenze.' },
+  { value:'spa', label:'SPA / Benessere', group:'Salute, benessere & sport', template:'salute', icon:'i-phone', hint:'Trattamenti, promo e prenotazioni.' },
+  { value:'centro-estetico', label:'Centro estetico', group:'Salute, benessere & sport', template:'salute', icon:'i-phone', hint:'Servizi, listino e appuntamenti.' },
+  { value:'parrucchiere', label:'Parrucchiere / Barber', group:'Salute, benessere & sport', template:'salute', icon:'i-phone', hint:'Servizi, orari e prenotazioni.' },
+  { value:'palestra', label:'Palestra / Fitness', group:'Salute, benessere & sport', template:'salute', icon:'i-phone', hint:'Abbonamenti, classi e contatti.' },
+  { value:'personal-trainer', label:'Personal trainer', group:'Salute, benessere & sport', template:'salute', icon:'i-phone', hint:'Pacchetti, obiettivi e prenotazioni.' },
+  { value:'artigiano', label:'Artigiano', group:'Casa, edilizia & artigiani', template:'professionista', icon:'i-user', hint:'Lavori, preventivi e contatti.' },
+  { value:'edilizia', label:'Impresa edile', group:'Casa, edilizia & artigiani', template:'professionista', icon:'i-user', hint:'Servizi, cantieri e richieste.' },
+  { value:'impianti', label:'Elettricista / Idraulico / Impianti', group:'Casa, edilizia & artigiani', template:'professionista', icon:'i-user', hint:'Interventi, urgenze e preventivi.' },
+  { value:'pulizie', label:'Pulizie / Facility', group:'Casa, edilizia & artigiani', template:'professionista', icon:'i-user', hint:'Servizi, piani e contatti.' },
+  { value:'giardinaggio', label:'Giardinaggio', group:'Casa, edilizia & artigiani', template:'professionista', icon:'i-user', hint:'Manutenzione, progetti e preventivi.' },
+  { value:'interior', label:'Interior design', group:'Casa, edilizia & artigiani', template:'professionista', icon:'i-user', hint:'Portfolio, servizi e consulenze.' },
+  { value:'immobiliare', label:'Agenzia immobiliare', group:'Casa, edilizia & artigiani', template:'professionista', icon:'i-user', hint:'Annunci, servizi e contatti.' },
+  { value:'associazione', label:'Associazione', group:'Enti, cultura & community', template:'professionista', icon:'i-user', hint:'Missione, eventi e contatti.' },
+  { value:'no-profit', label:'No profit', group:'Enti, cultura & community', template:'professionista', icon:'i-user', hint:'Progetti, donazioni e contatti.' },
+  { value:'scuola', label:'Scuola / Ente formativo', group:'Enti, cultura & community', template:'professionista', icon:'i-user', hint:'Corsi, iscrizioni e informazioni.' },
+  { value:'museo', label:'Museo / Cultura', group:'Enti, cultura & community', template:'professionista', icon:'i-user', hint:'Visite, eventi e orari.' },
+  { value:'comune', label:'Comune / Ente pubblico', group:'Enti, cultura & community', template:'professionista', icon:'i-user', hint:'Servizi, uffici e contatti.' },
+  { value:'auto', label:'Concessionaria / Noleggio auto', group:'Auto, mobilità & tecnologia', template:'negozio', icon:'i-target', hint:'Modelli, promo e richieste.' },
+  { value:'officina', label:'Officina / Carrozzeria', group:'Auto, mobilità & tecnologia', template:'professionista', icon:'i-user', hint:'Servizi, preventivi e appuntamenti.' },
+  { value:'trasporti', label:'Trasporti / NCC', group:'Auto, mobilità & tecnologia', template:'professionista', icon:'i-user', hint:'Corse, prenotazioni e contatti.' },
+  { value:'tech', label:'Tecnologia / Software', group:'Auto, mobilità & tecnologia', template:'professionista', icon:'i-user', hint:'Servizi, demo e lead.' },
+  { value:'altro', label:'Altro', group:'Auto, mobilità & tecnologia', template:'professionista', icon:'i-user', hint:'Preset generico personalizzabile.' }
+];
+
+window.khamaCategoryByValue = function(value){
+  return window.KHAMA_BUSINESS_CATEGORIES.find(c => c.value === value) || null;
+};
+
+window.khamaTemplateForCategory = function(value){
+  return window.khamaCategoryByValue(value)?.template || 'professionista';
+};

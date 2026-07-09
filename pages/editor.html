@@ -278,7 +278,11 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .wizard-kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--verde-dark);font-weight:900;margin-bottom:7px;}
 .wizard-shell h2{font-family:'Syne',sans-serif;font-size:1.75rem;line-height:1.05;color:var(--navy);margin:0 42px 8px 0;}
 .wizard-shell p{color:var(--muted);font-size:.88rem;line-height:1.5;margin-bottom:18px;max-width:620px;}
+.wizard-search{width:100%;margin-bottom:14px;border:1.5px solid #E1E7EF;border-radius:12px;padding:11px 13px;font-family:'DM Sans',sans-serif;font-size:.88rem;}
+.wizard-group{margin-bottom:16px;}
+.wizard-group-title{font-size:.68rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--verde-dark);margin:0 0 8px;}
 .wizard-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.wizard-card.hidden{display:none;}
 .wizard-card{border:1px solid #DFE7F0;background:#F8FAFC;border-radius:16px;padding:16px;text-align:left;cursor:pointer;font-family:'DM Sans',sans-serif;transition:transform .18s,border-color .18s,box-shadow .18s,background .18s;}
 .wizard-card:hover{transform:translateY(-2px);border-color:var(--verde);box-shadow:0 16px 36px rgba(27,42,94,.12);background:white;}
 .wizard-card .ui-ico{width:24px;height:24px;color:var(--verde-dark);margin-bottom:12px;}
@@ -831,7 +835,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
   .pub-doc-actions,.pub-wifi-actions{grid-template-columns:1fr;}
 }
 </style>
-<link rel="stylesheet" href="editor-ui.css?v=97">
+<link rel="stylesheet" href="editor-ui.css?v=98">
+<script src="business-categories.js?v=98"></script>
 </head>
 <body>
 <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
@@ -939,8 +944,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
       </div>
       <div class="card wizard-setup-card">
         <div class="card-title"><svg class="ui-ico"><use href="#i-rocket"/></svg>Setup guidato</div>
-        <p class="field-hint">Scegli il settore e KhamaKey prepara moduli, catalogo e prenotazioni. Puoi riaprirlo quando vuoi.</p>
-        <button class="btn-add-row" type="button" id="openWizardBtn">Apri setup guidato</button>
+        <p class="field-hint">Scegli la categoria della tua attività: KhamaKey applica gli stessi moduli, catalogo e prenotazioni sia dal menu qui sotto sia dal setup guidato.</p>
+        <button class="btn-add-row" type="button" id="openWizardBtn">Sfoglia tutte le categorie</button>
       </div>
       <div class="card">
         <div class="card-title"><svg class="ui-ico"><use href="#i-building"/></svg>La tua attività</div>
@@ -950,81 +955,11 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         </div>
         <div class="field-row">
           <div class="field">
-            <label>Categoria</label>
+            <label>Categoria attività</label>
             <select id="categoria">
-              <option value="">Seleziona...</option>
-              <optgroup label="Food & beverage">
-                <option value="ristorante">Ristorante / Pizzeria</option>
-                <option value="bar">Bar / Caffetteria</option>
-                <option value="pub">Pub / Birreria</option>
-                <option value="gelateria">Gelateria / Pasticceria</option>
-                <option value="panificio">Panificio / Gastronomia</option>
-                <option value="foodtruck">Food truck / Street food</option>
-                <option value="cantina">Cantina / Enoteca</option>
-                <option value="catering">Catering / Banqueting</option>
-              </optgroup>
-              <optgroup label="Ospitalità & turismo">
-                <option value="hotel">Hotel</option>
-                <option value="bb">B&B / Affittacamere</option>
-                <option value="casa-vacanze">Casa vacanze</option>
-                <option value="agriturismo">Agriturismo</option>
-                <option value="stabilimento">Lido / Stabilimento balneare</option>
-                <option value="tour">Tour / Esperienze</option>
-              </optgroup>
-              <optgroup label="Negozi & retail">
-                <option value="negozio">Negozio</option>
-                <option value="abbigliamento">Abbigliamento / Boutique</option>
-                <option value="gioielleria">Gioielleria / Accessori</option>
-                <option value="arredamento">Arredamento / Design</option>
-                <option value="alimentari">Alimentari / Prodotti tipici</option>
-                <option value="fioraio">Fioraio</option>
-                <option value="ecommerce">E-commerce / Catalogo online</option>
-              </optgroup>
-              <optgroup label="Servizi professionali">
-                <option value="studio">Studio professionale</option>
-                <option value="avvocato">Avvocato</option>
-                <option value="commercialista">Commercialista / Consulente</option>
-                <option value="architetto">Architetto / Ingegnere</option>
-                <option value="agenzia-marketing">Agenzia marketing / Creativi</option>
-                <option value="fotografo">Fotografo / Videomaker</option>
-                <option value="formazione">Formazione / Corsi</option>
-              </optgroup>
-              <optgroup label="Salute, benessere & sport">
-                <option value="medico">Studio medico</option>
-                <option value="dentista">Dentista</option>
-                <option value="fisioterapia">Fisioterapia / Riabilitazione</option>
-                <option value="psicologo">Psicologo / Terapista</option>
-                <option value="farmacia">Farmacia / Parafarmacia</option>
-                <option value="spa">SPA / Benessere</option>
-                <option value="centro-estetico">Centro estetico</option>
-                <option value="parrucchiere">Parrucchiere / Barber</option>
-                <option value="palestra">Palestra / Fitness</option>
-                <option value="personal-trainer">Personal trainer</option>
-              </optgroup>
-              <optgroup label="Casa, edilizia & artigiani">
-                <option value="artigiano">Artigiano</option>
-                <option value="edilizia">Impresa edile</option>
-                <option value="impianti">Elettricista / Idraulico / Impianti</option>
-                <option value="pulizie">Pulizie / Facility</option>
-                <option value="giardinaggio">Giardinaggio</option>
-                <option value="interior">Interior design</option>
-                <option value="immobiliare">Agenzia immobiliare</option>
-              </optgroup>
-              <optgroup label="Enti, cultura & community">
-                <option value="associazione">Associazione</option>
-                <option value="no-profit">No profit</option>
-                <option value="scuola">Scuola / Ente formativo</option>
-                <option value="museo">Museo / Cultura</option>
-                <option value="comune">Comune / Ente pubblico</option>
-              </optgroup>
-              <optgroup label="Auto, mobilità & tecnologia">
-                <option value="auto">Concessionaria / Noleggio auto</option>
-                <option value="officina">Officina / Carrozzeria</option>
-                <option value="trasporti">Trasporti / NCC</option>
-                <option value="tech">Tecnologia / Software</option>
-                <option value="altro">Altro</option>
-              </optgroup>
+              <option value="">Seleziona categoria...</option>
             </select>
+            <div class="field-hint" id="categoriaHint">La categoria configura moduli, azioni rapide e catalogo come nel setup guidato.</div>
           </div>
         </div>
         <div class="field">
@@ -2216,15 +2151,10 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
   <div class="wizard-shell">
     <button class="wizard-close" id="wizardClose" type="button" aria-label="Chiudi setup"><svg class="ui-ico"><use href="#i-x"/></svg></button>
     <div class="wizard-kicker">Setup guidato</div>
-    <h2>Scegli il punto di partenza</h2>
-    <p>Khama prepara automaticamente moduli, catalogo, prenotazioni e azioni rapide in base al tipo di pagina. Dopo puoi modificare tutto.</p>
-    <div class="wizard-grid">
-      <button class="wizard-card" type="button" data-wizard-template="ristorante"><svg class="ui-ico"><use href="#i-list"/></svg><strong>Ristorante / bar</strong><span>Menu, orari, prenotazioni, recensioni e ordini via WhatsApp.</span></button>
-      <button class="wizard-card" type="button" data-wizard-template="hotel"><svg class="ui-ico"><use href="#i-building"/></svg><strong>Hotel / B&B</strong><span>Camere, servizi, WiFi, indicazioni e richiesta prenotazione.</span></button>
-      <button class="wizard-card" type="button" data-wizard-template="professionista"><svg class="ui-ico"><use href="#i-user"/></svg><strong>Professionista</strong><span>Servizi, appuntamenti, contatti, portfolio e lead.</span></button>
-      <button class="wizard-card" type="button" data-wizard-template="negozio"><svg class="ui-ico"><use href="#i-target"/></svg><strong>Negozio</strong><span>Prodotti, carrello, promo, coupon e pagamento collegabile.</span></button>
-      <button class="wizard-card" type="button" data-wizard-template="salute"><svg class="ui-ico"><use href="#i-phone"/></svg><strong>Studio / palestra</strong><span>Servizi, fasce orarie, prenotazioni, contatti e privacy.</span></button>
-    </div>
+    <h2>Scegli la categoria della tua attività</h2>
+    <p>Stesso risultato del menu Categoria: moduli, catalogo, prenotazioni e azioni rapide vengono configurati automaticamente.</p>
+    <input type="search" class="wizard-search" id="wizardSearch" placeholder="Cerca categoria (es. hotel, bar, palestra...)">
+    <div id="wizardGroups"></div>
     <div class="wizard-footer">
       <span class="wizard-small">Il link NFC resta bloccato: cambiano solo contenuti e moduli.</span>
       <button class="wizard-skip" id="wizardSkip" type="button">Salta setup</button>
@@ -4938,7 +4868,7 @@ function buildPublicSnapshot(){
   const preview = document.getElementById('publicPreview');
   const sprite = document.querySelector('body > svg[aria-hidden="true"]');
   return {
-    version:'97',
+    version:'98',
     className:preview.className,
     style:`--pub-primary:${val('c1')||'#1B2A5E'};--pub-accent:${val('c2')||'#4CAF27'};--pub-page-bg:${val('pubPageBg')||'#F8FAFC'};--pub-block-bg:${val('pubBlockBg')||'#FFFFFF'};--pub-text:${val('pubTextColor')||'#1B2A5E'};--pub-muted:${val('pubMutedColor')||'#64748B'};--pub-logo-size:${preview.style.getPropertyValue('--pub-logo-size')};--pub-hero-height:${preview.style.getPropertyValue('--pub-hero-height')}`,
     html:`${sprite?.outerHTML||''}${preview.innerHTML}`
@@ -5124,9 +5054,15 @@ function enableAboutPreset(text='', strengths=''){
   if(strengths) setFieldValue('aboutStrengths',strengths);
 }
 function applyWizardTemplate(type){
+  applyCategoryPreset(type, {fromWizard:true});
+}
+function applyCategoryPreset(categoryValue, options = {}){
+  const cat = khamaCategoryByValue(categoryValue);
+  const family = cat ? cat.template : (['ristorante','hotel','professionista','negozio','salute'].includes(categoryValue) ? categoryValue : khamaTemplateForCategory(categoryValue));
+  const value = cat?.value || categoryValue;
   const templates = {
     ristorante(){
-      setFieldValue('categoria','ristorante');
+      setFieldValue('categoria', value);
       activateActions(['aWhatsApp','aChiama','aIndicazioni','aRecensioni','aPrenota','aMenu','aOrdinaWa','tCart']);
       setFieldValue('bookingTitle','Prenota un tavolo');
       setFieldValue('bookingType','Prenotazione');
@@ -5134,7 +5070,7 @@ function applyWizardTemplate(type){
       templateCatalog('menu','Menu principale','Piatto o proposta','Descrizione, ingredienti o dettagli utili.','€ 0,00');
     },
     hotel(){
-      setFieldValue('categoria','hotel');
+      setFieldValue('categoria', value);
       activateActions(['aWhatsApp','aChiama','aIndicazioni','aRecensioni','aPrenota','aMenu','tWifi']);
       setFieldValue('bookingTitle','Richiedi disponibilità');
       setFieldValue('bookingType','Prenotazione');
@@ -5143,7 +5079,7 @@ function applyWizardTemplate(type){
       enableAboutPreset('Racconta la struttura, l’accoglienza, i servizi e l’esperienza che offri agli ospiti.','Accoglienza personalizzata\nPosizione strategica\nServizi per gli ospiti');
     },
     professionista(){
-      setFieldValue('categoria','studio');
+      setFieldValue('categoria', value);
       activateActions(['aWhatsApp','aChiama','aIndicazioni','aPrenota','aMenu']);
       setFieldValue('bookingTitle','Richiedi appuntamento');
       setFieldValue('bookingType','Consulenza');
@@ -5152,7 +5088,7 @@ function applyWizardTemplate(type){
       enableAboutPreset('Presenta esperienza, metodo di lavoro e approccio professionale.','Consulenza personalizzata\nEsperienza nel settore\nRisposte rapide');
     },
     negozio(){
-      setFieldValue('categoria','negozio');
+      setFieldValue('categoria', value);
       activateActions(['aWhatsApp','aChiama','aIndicazioni','aRecensioni','aMenu','aOrdinaWa','tCart']);
       setFieldValue('bookingTitle','Richiedi informazioni prodotto');
       setFieldValue('bookingType','Preventivo');
@@ -5161,7 +5097,7 @@ function applyWizardTemplate(type){
       if(!promoItems.some(p=>p.active)) promoItems[0].active = true;
     },
     salute(){
-      setFieldValue('categoria','medico');
+      setFieldValue('categoria', value);
       activateActions(['aWhatsApp','aChiama','aIndicazioni','aPrenota','aMenu']);
       setFieldValue('bookingTitle','Prenota appuntamento');
       setFieldValue('bookingType','Appuntamento');
@@ -5170,18 +5106,66 @@ function applyWizardTemplate(type){
       enableAboutPreset('Presenta lo studio, il team e il metodo con cui seguite i clienti.','Professionalità\nAppuntamenti organizzati\nAttenzione alla persona');
     }
   };
-  (templates[type] || templates.professionista)();
+  (templates[family] || templates.professionista)();
+  updateCategoryHint();
   updateCatalogLabels();
   renderCats();
   renderPromoEditor();
   renderEventsEditor();
   renderBlockOrder();
   changed();
-  storageSet(WIZARD_KEY,'1');
-  wizardModal.classList.remove('open');
-  save();
-  document.getElementById('s-info')?.scrollIntoView({behavior:'smooth',block:'start'});
-  showToast('Template applicato e salvato. Ora puoi personalizzare tutto.','ok');
+  if(options.fromWizard !== false){
+    storageSet(WIZARD_KEY,'1');
+    wizardModal.classList.remove('open');
+  }
+  if(options.save !== false) save();
+  const label = cat?.label || value;
+  if(options.toast !== false) showToast(`Configurazione «${label}» applicata. Ora puoi personalizzare tutto.`,'ok');
+  if(options.fromWizard) document.getElementById('s-info')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderCategorySelect(){
+  const sel = document.getElementById('categoria');
+  if(!sel || !window.KHAMA_BUSINESS_CATEGORIES) return;
+  const current = sel.value;
+  const groups = [...new Set(KHAMA_BUSINESS_CATEGORIES.map(c=>c.group))];
+  sel.innerHTML = '<option value="">Seleziona categoria...</option>' + groups.map(group=>{
+    const items = KHAMA_BUSINESS_CATEGORIES.filter(c=>c.group === group);
+    return `<optgroup label="${esc(group)}">${items.map(c=>`<option value="${esc(c.value)}">${esc(c.label)}</option>`).join('')}</optgroup>`;
+  }).join('');
+  if(current) sel.value = current;
+}
+function renderWizardCategories(){
+  const host = document.getElementById('wizardGroups');
+  if(!host || !window.KHAMA_BUSINESS_CATEGORIES) return;
+  const groups = [...new Set(KHAMA_BUSINESS_CATEGORIES.map(c=>c.group))];
+  host.innerHTML = groups.map(group=>{
+    const items = KHAMA_BUSINESS_CATEGORIES.filter(c=>c.group === group);
+    const cards = items.map(c=>`<button class="wizard-card" type="button" data-wizard-category="${esc(c.value)}" data-search="${esc((c.label+' '+c.group+' '+c.hint).toLowerCase())}"><svg class="ui-ico"><use href="#${esc(c.icon)}"/></svg><strong>${esc(c.label)}</strong><span>${esc(c.hint)}</span></button>`).join('');
+    return `<section class="wizard-group" data-wizard-group="${esc(group)}"><h3 class="wizard-group-title">${esc(group)}</h3><div class="wizard-grid">${cards}</div></section>`;
+  }).join('');
+  host.querySelectorAll('[data-wizard-category]').forEach(btn=>{
+    btn.addEventListener('click',()=>applyCategoryPreset(btn.dataset.wizardCategory,{fromWizard:true}));
+  });
+}
+function filterWizardCategories(query=''){
+  const q = String(query || '').trim().toLowerCase();
+  document.querySelectorAll('[data-wizard-category]').forEach(btn=>{
+    const hay = btn.dataset.search || '';
+    btn.classList.toggle('hidden', Boolean(q) && !hay.includes(q));
+  });
+  document.querySelectorAll('[data-wizard-group]').forEach(section=>{
+    const visible = section.querySelectorAll('.wizard-card:not(.hidden)').length;
+    section.style.display = visible ? '' : 'none';
+  });
+}
+function updateCategoryHint(){
+  const hint = document.getElementById('categoriaHint');
+  const cat = khamaCategoryByValue(val('categoria'));
+  if(hint) hint.textContent = cat ? `${cat.hint} (preset applicato come nel setup guidato)` : 'La categoria configura moduli, azioni rapide e catalogo come nel setup guidato.';
+}
+function shouldConfirmCategoryPreset(){
+  if(needsSetupWizard()) return false;
+  return !confirm('Applicare il preset per questa categoria? Moduli e catalogo verranno aggiornati.');
 }
 function needsSetupWizard(state = collectState()){
   const fields = state?.fields || {};
@@ -5195,14 +5179,24 @@ function maybeOpenWizard(force = false){
   if(force || (needsSetupWizard() && storageGet(WIZARD_KEY) !== '1')) openWizard();
 }
 function openWizard(){
+  filterWizardCategories(document.getElementById('wizardSearch')?.value || '');
   wizardModal.classList.add('open');
 }
 function closeWizard(markDone=true){
   if(markDone) storageSet(WIZARD_KEY,'1');
   wizardModal.classList.remove('open');
 }
-document.querySelectorAll('[data-wizard-template]').forEach(btn => btn.addEventListener('click',()=>applyWizardTemplate(btn.dataset.wizardTemplate)));
 document.getElementById('openWizardBtn')?.addEventListener('click',()=>openWizard());
+document.getElementById('wizardSearch')?.addEventListener('input',e=>filterWizardCategories(e.target.value));
+let lastCategoryValue = '';
+document.getElementById('categoria')?.addEventListener('change',e=>{
+  const value = e.target.value;
+  if(!value) { lastCategoryValue = ''; updateCategoryHint(); return; }
+  if(shouldConfirmCategoryPreset()) { e.target.value = lastCategoryValue; return; }
+  lastCategoryValue = value;
+  applyCategoryPreset(value,{fromWizard:false});
+  document.getElementById('s-info')?.scrollIntoView({behavior:'smooth',block:'start'});
+});
 document.getElementById('wizardClose').onclick = () => closeWizard();
 document.getElementById('wizardSkip').onclick = () => closeWizard();
 wizardModal.addEventListener('click',e=>{ if(e.target.id === 'wizardModal') closeWizard(); });
@@ -5525,9 +5519,13 @@ bindBlockOrderDnD();
 renderSlots();
 syncActionInputsFromFields();
 updateActionConfigVisibility();
+renderCategorySelect();
+renderWizardCategories();
+updateCategoryHint();
+lastCategoryValue = val('categoria');
 renderPublicPreview();
 if(!restoredState) maybeOpenWizard(false);
 </script>
-<script type="module" src="editor-media.js?v=97"></script>
+<script type="module" src="editor-media.js?v=98"></script>
 </body>
 </html>

@@ -168,6 +168,7 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 - [x] SQL v62: `platform_order_id` + assegnazione codici da magazzino
 - [x] Stock-first: genera codici senza rivenditore, assegna all'ordine
 - [x] Admin: ricerca, filtri, modifica singola, bulk, drawer ordine/codice
+- [x] Admin Sprint E: ricerca/filtri Clienti, Moments, Ordini, Agenti + alert dashboard
 - [x] Agenti: modifica da tabella
 - [ ] Portale rivenditori self-service (fase successiva)
 
@@ -184,4 +185,5 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 | 2026-07-06 | kpfarm | Push GitHub: github.com/kpfarm/khamakey-v41 |
 | 2026-07-06 | Cursor | SQL v44 applicato su Supabase (bucket khamakey-media + RLS) |
 | 2026-07-08 | Cursor | Moments v89–v90: template tutte categorie, Altre sezioni complete, guide per tipo, onboarding |
-| 2026-07-09 | Cursor | **v95**: fix layout editor desktop in iframe (rimosso public-page.css dall'editor, topbar embedded nascosta) |
+| 2026-07-09 | Cursor | **v98**: categorie unificate — setup guidato e select usano stesso catalogo e preset |
+| 2026-07-09 | Cursor | **v97 admin**: ricerca/filtri Clienti, Moments, Ordini, Agenti; template 21 categorie; dashboard alert operativi |

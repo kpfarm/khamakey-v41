@@ -18,10 +18,13 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 12 | `khamakey-moments-reseller-v61.sql` | Canale vendita e agente su codici NFC Moments + report rivenditori |
 | 13 | `khamakey-moments-fulfillment-v62.sql` | Collegamento ordini ↔ codici da magazzino (pronta consegna) |
 | 14 | `khamakey-admin-business-rls-v63.sql` | Policy RLS admin su tabelle Business (`pages.read`) |
+| 15 | `khamakey-moments-sales-channels-v64.sql` | Catalogo vendita Moments, sync Shopify, bundle NFC, ingest ordini |
+| 16 | `khamakey-moment-catalog-shopify-live-v65.sql` | Flag `shopify_live`: bozza Shopify fino a contenuti completi |
+| 17 | `khamakey-integrations-i18n-v66.sql` | Integration Hub, pagamenti, lingue, traduzioni catalogo |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti.
 
-**Stato produzione (2026-07-08):** su progetto `cuxlwaocjqwzluycznyp` risultano applicati v59–v63.
+**Stato produzione (2026-07-09):** v64–v65 applicati; **v66 da applicare** (Stripe/PayPal/Resend/i18n).
 
 ## Supabase SQL Editor
 

@@ -375,6 +375,45 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .brand-action-call .ui-ico{color:#2563EB;}
 .brand-action-book .ui-ico{color:#7C3AED;}
 .brand-action-menu .ui-ico{color:#F59E0B;}
+/* Layout social — copertina + profilo sotto, senza sovrapposizione */
+.hero-layout-social .pub-hero-cover{min-height:var(--pub-hero-height,340px);height:var(--pub-hero-height,340px);max-height:520px;padding:0;align-items:stretch;justify-content:flex-start;}
+.hero-layout-social.cover-orient-portrait .pub-hero-cover{min-height:clamp(300px,calc(var(--pub-hero-height,340px) * 1.12),520px);height:clamp(300px,calc(var(--pub-hero-height,340px) * 1.12),520px);}
+.hero-layout-social.cover-orient-portrait.cover-fit-contain .pub-hero-cover{background:var(--pub-primary,var(--navy));}
+.hero-layout-social.cover-orient-portrait.cover-fit-contain .pub-cover-img{object-fit:contain;}
+.hero-layout-social .pub-hero-cover.cover::after{background:linear-gradient(180deg,rgba(9,16,36,.05) 48%,rgba(9,16,36,.42) 100%);}
+.pub-profile{position:relative;z-index:2;background:var(--pub-block-bg,#fff);padding:0 16px 14px;margin-top:0;border-bottom:1px solid rgba(27,42,94,.06);}
+.pub-profile-has-logo{padding:14px 16px;}
+.pub-profile-has-logo .pub-profile-inner{display:flex;flex-direction:row;align-items:center;gap:14px;text-align:left;max-width:100%;}
+.pub-profile-title-only{padding:18px 20px 14px;text-align:center;}
+.pub-profile-title-only .pub-profile-inner{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:100%;}
+.pub-logo-float{width:var(--pub-profile-logo-size,calc(var(--pub-logo-size,76px) * 1.35));height:var(--pub-profile-logo-size,calc(var(--pub-logo-size,76px) * 1.35));margin:0;border-radius:22%;border:3px solid var(--pub-block-bg,#fff);box-shadow:0 8px 22px rgba(0,0,0,.14);flex:0 0 auto;}
+.pub-profile-has-logo .pub-profile-copy{flex:1;min-width:0;padding:0;}
+.pub-profile-title-only .pub-profile-copy{width:100%;padding:0;}
+.hero-layout-social .pub-profile-copy h2{font-family:var(--pub-title-font,'DM Sans',sans-serif)!important;font-size:1.42rem!important;line-height:1.12;color:var(--pub-text,var(--navy))!important;text-shadow:none!important;margin:0 0 4px;text-align:left;font-weight:800!important;letter-spacing:-.02em;}
+.pub-profile-title-only .pub-profile-copy h2{font-size:1.72rem!important;text-align:center!important;}
+.hero-layout-social .pub-profile-copy p{font-size:.82rem;line-height:1.45;color:var(--pub-muted,#64748B)!important;opacity:1;text-shadow:none!important;max-width:none;text-align:left;font-weight:500;}
+.pub-profile-title-only .pub-profile-copy p{text-align:center!important;max-width:320px;margin:0 auto;}
+.hero-layout-social .pub-profile-copy .pub-hero-eyebrow{margin-bottom:8px;border-color:rgba(27,42,94,.1);background:rgba(27,42,94,.05);color:var(--pub-primary,var(--navy));}
+.pub-hero-brand{min-height:auto;padding:32px 20px 28px;align-items:center;justify-content:center;text-align:center;}
+.pub-hero-brand .pub-brand-stack{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;width:100%;max-width:360px;gap:0;}
+.pub-logo-hero{width:calc(var(--pub-logo-size,76px) * 1.9);height:calc(var(--pub-logo-size,76px) * 1.9);margin:0 0 14px;border-radius:24%;border:3px solid rgba(255,255,255,.82);}
+.pub-hero-brand h2{font-family:var(--pub-title-font,'DM Sans',sans-serif)!important;font-size:1.78rem!important;line-height:1.08;margin:0 0 8px;font-weight:800;color:white;text-shadow:0 2px 12px rgba(0,0,0,.2);}
+.pub-hero-brand p{font-size:.88rem;line-height:1.46;opacity:.92;max-width:300px;margin:0 auto;font-weight:500;color:white;}
+.pub-hero-brand .pub-brand-category{margin-top:4px;margin-bottom:8px;}
+.phone-preview-inner.hero-soft .pub-hero-brand{color:var(--navy);background:linear-gradient(145deg,#fff,#EEF8EA);}
+.phone-preview-inner.hero-soft .pub-hero-brand h2,.phone-preview-inner.hero-soft .pub-hero-brand p{text-shadow:none;color:var(--navy);}
+.phone-preview-inner.hero-minimal .pub-hero-brand{color:var(--navy);background:#fff;border-bottom:1px solid #E5EAF1;}
+.phone-preview-inner.hero-minimal .pub-hero-brand h2,.phone-preview-inner.hero-minimal .pub-hero-brand p{text-shadow:none;color:var(--navy);}
+.phone-preview.device-phone .hero-layout-social .pub-hero-cover{min-height:var(--pub-hero-height,340px);height:var(--pub-hero-height,340px);}
+.phone-preview.device-phone .hero-layout-social.cover-orient-portrait .pub-hero-cover{min-height:clamp(280px,calc(var(--pub-hero-height,340px) * 1.1),480px);height:clamp(280px,calc(var(--pub-hero-height,340px) * 1.1),480px);}
+/* Azioni compatte — icone senza riquadri */
+.actions-style-icons .pub-actions-icons{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:2px 6px;padding:12px 14px 14px;background:var(--pub-block-bg,#fff);border-bottom:1px solid rgba(27,42,94,.06);grid-template-columns:unset;}
+.actions-style-icons .pub-actions-icons a{min-height:auto;min-width:58px;max-width:72px;flex:0 0 auto;padding:6px 4px 8px;border:0!important;background:transparent!important;box-shadow:none!important;border-radius:10px;font-size:.56rem;font-weight:800;color:var(--pub-muted,#64748B)!important;line-height:1.2;}
+.actions-style-icons .pub-actions-icons a:hover{transform:none;background:rgba(27,42,94,.04)!important;}
+.actions-style-icons .pub-actions-icons a .ui-ico,.actions-style-icons .pub-actions-icons a .brand-ico{width:28px;height:28px;margin:0 auto 5px;}
+.actions-style-icons .pub-actions-icons a.brand-action-whatsapp,.actions-style-icons .pub-actions-icons a.brand-action-call,.actions-style-icons .pub-actions-icons a.brand-action-maps,.actions-style-icons .pub-actions-icons a.brand-action-book,.actions-style-icons .pub-actions-icons a.brand-action-google,.actions-style-icons .pub-actions-icons a.brand-action-menu{background:transparent!important;color:var(--pub-muted,#64748B)!important;border-color:transparent!important;}
+.phone-preview.device-phone .hero-layout-social .pub-hero-cover{min-height:var(--pub-hero-height,340px);height:var(--pub-hero-height,340px);}
+.phone-preview.device-phone.actions-style-icons .pub-actions-icons{gap:2px 4px;padding:10px 12px;}
 .pub-jump{position:sticky;top:0;z-index:2;display:flex;gap:7px;overflow:auto;background:color-mix(in srgb,var(--pub-block-bg,#FFFFFF) 92%,transparent);border-bottom:1px solid #E5EAF1;padding:10px 11px;backdrop-filter:blur(10px);}
 .pub-jump button{border:1px solid #E5EAF1;background:var(--pub-block-bg,#FFFFFF);color:var(--pub-text,#1B2A5E);border-radius:999px;padding:8px 11px;font-size:.69rem;font-weight:800;white-space:nowrap;cursor:pointer;box-shadow:0 3px 10px rgba(27,42,94,.04);}
 .pub-block{background:var(--pub-block-bg,#FFFFFF);border:1px solid #E5EAF1;border-radius:18px;padding:17px;margin:12px;box-shadow:0 8px 24px rgba(27,42,94,.06);}
@@ -391,7 +430,16 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .action-config{display:grid;gap:10px;margin:-6px 0 14px 0;padding:12px;border:1px solid #E5EAF1;border-radius:16px;background:#F8FAFC;}
 .action-config .field{margin-bottom:0;}
 .action-config .field-hint{margin-top:3px;}
-.action-config.is-muted{background:#FBFCFE;color:var(--muted);}
+.brand-advanced{margin-top:14px;border:1px solid #E5EAF1;border-radius:12px;padding:10px 12px;background:#FBFCFE;}
+.brand-advanced summary{cursor:pointer;font-weight:800;font-size:.82rem;color:var(--navy);}
+.simple-label{display:block;font-size:.78rem;font-weight:800;color:var(--navy);margin:12px 0 8px;}
+.theme-preset-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
+.theme-preset{border:2px solid #E5EAF1;background:white;border-radius:12px;padding:10px;display:flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:800;color:var(--navy);cursor:pointer;}
+.theme-preset.active{border-color:var(--verde);box-shadow:0 0 0 2px rgba(76,175,39,.15);}
+.theme-swatch{width:34px;height:34px;border-radius:10px;flex:0 0 auto;border:1px solid rgba(27,42,94,.08);}
+.simple-color-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.simple-color-btn{display:flex;flex-direction:column;gap:8px;border:1px solid #E5EAF1;background:#F8FAFC;border-radius:12px;padding:12px;font-size:.78rem;font-weight:800;color:var(--navy);cursor:pointer;}
+.simple-color-btn input[type=color]{width:100%;height:44px;border:0;padding:0;background:transparent;cursor:pointer;}
 .pub-map-card{border:1px solid #DDE5EF;background:white;border-radius:18px;overflow:hidden;margin-top:12px;box-shadow:0 8px 24px rgba(27,42,94,.06);}
 .pub-map-frame{position:relative;background:#EEF2F7;aspect-ratio:16/9;overflow:hidden;}
 .pub-map-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
@@ -580,7 +628,45 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .checkout-send,.checkout-pay{border:0;border-radius:13px;padding:11px 12px;font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:900;cursor:pointer;text-align:center;text-decoration:none;}
 .checkout-send{background:#25D366;color:white;}
 .checkout-pay{background:var(--navy);color:white;}
-.checkout-send .brand-ico{display:inline-block;width:16px;height:16px;margin:0 6px -3px 0;}
+.checkout-send .checkout-send-note{display:block;font-size:.62rem;font-weight:700;opacity:.88;margin-top:3px;}
+.pub-order-guide{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin:0 12px 10px;padding:10px 12px;border:1px solid rgba(76,175,39,.22);background:linear-gradient(180deg,#F8FFF5,#fff);border-radius:14px;font-size:.68rem;font-weight:900;color:var(--navy);}
+.pub-order-guide span{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:white;border:1px solid #E5EAF1;}
+.pub-order-guide .step-num{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:999px;background:var(--verde-dark);color:white;font-size:.58rem;}
+.checkout-steps{display:grid;gap:4px;margin:-2px 0 10px;}
+.checkout-steps p{margin:0;font-size:.72rem;line-height:1.4;color:#64748B;font-weight:700;}
+.checkout-steps strong{color:var(--navy);}
+.quick-start-card{border:1px solid rgba(76,175,39,.22);background:linear-gradient(180deg,#F8FFF5,#fff);}
+.quick-start-card .card-title{margin-bottom:8px;}
+.quick-start-list{display:grid;gap:8px;margin:0;padding:0;list-style:none;}
+.quick-start-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid #E5EAF1;border-radius:12px;background:white;font-size:.82rem;line-height:1.4;}
+.quick-start-item.done{border-color:rgba(76,175,39,.35);background:#F8FFF5;}
+.quick-start-item .qs-mark{width:22px;height:22px;border-radius:999px;display:grid;place-items:center;font-size:.72rem;font-weight:900;flex:0 0 auto;background:#EEF2F7;color:#64748B;}
+.quick-start-item.done .qs-mark{background:var(--verde-dark);color:white;}
+.quick-start-item strong{display:block;color:var(--navy);font-size:.8rem;margin-bottom:2px;}
+.quick-start-item span{color:var(--muted);font-size:.74rem;}
+.cart-flow-hint{display:grid;gap:8px;margin-bottom:14px;padding:12px;border:1px solid rgba(76,175,39,.2);border-radius:14px;background:#F8FFF5;}
+.cart-flow-hint strong{display:block;color:var(--navy);font-size:.82rem;margin-bottom:4px;}
+.cart-flow-hint ol{margin:0;padding-left:18px;color:#64748B;font-size:.78rem;line-height:1.55;}
+.cart-flow-hint li{margin:2px 0;}
+.cart-pay-advanced{margin-top:14px;border:1px solid #E5EAF1;border-radius:12px;padding:10px 12px;background:#F8FAFC;}
+.cart-pay-advanced summary{cursor:pointer;font-weight:900;color:var(--navy);font-size:.8rem;list-style:none;}
+.cart-pay-advanced summary::-webkit-details-marker{display:none;}
+.order-ready-card{border:1px solid rgba(76,175,39,.28);background:linear-gradient(180deg,#F8FFF5,#fff);}
+.order-ready-status{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;}
+.order-ready-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #E5EAF1;border-radius:999px;padding:6px 10px;font-size:.72rem;font-weight:800;color:#64748B;background:white;}
+.order-ready-pill.ok{border-color:rgba(76,175,39,.35);color:var(--verde-dark);background:#F8FFF5;}
+.order-ready-pill button{border:0;background:transparent;color:inherit;font:inherit;font-weight:900;cursor:pointer;padding:0;}
+.legal-advanced{margin-top:12px;border:1px solid #E5EAF1;border-radius:12px;padding:10px 12px;background:#F8FAFC;}
+.legal-advanced summary{cursor:pointer;font-weight:900;color:var(--navy);font-size:.8rem;list-style:none;}
+.legal-advanced summary::-webkit-details-marker{display:none;}
+.privacy-simple-status{display:grid;gap:8px;margin-bottom:14px;padding:12px;border:1px solid rgba(76,175,39,.22);border-radius:14px;background:#F8FFF5;}
+.privacy-simple-row{display:flex;align-items:flex-start;gap:8px;font-size:.78rem;line-height:1.4;color:#334155;}
+.privacy-simple-row .ui-ico{width:16px;height:16px;color:var(--verde-dark);flex:0 0 auto;margin-top:1px;}
+.quick-start-item button{border:0;background:transparent;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer;width:100%;}
+.order-coach{margin:0 0 14px;padding:12px 14px;border-radius:14px;border:1px solid rgba(27,42,94,.12);background:linear-gradient(135deg,#EEF4FF,#F8FFF5);}
+.order-coach strong{display:block;color:var(--navy);font-size:.84rem;margin-bottom:4px;}
+.order-coach p{margin:0 0 10px;font-size:.76rem;line-height:1.45;color:#64748B;}
+.order-coach button{border:0;background:var(--navy);color:white;border-radius:10px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:900;cursor:pointer;}
 .pub-booking-card{padding:0;overflow:hidden;border-color:rgba(76,175,39,.18);box-shadow:0 18px 42px rgba(27,42,94,.08);}
 .booking-head{position:relative;background:linear-gradient(135deg,var(--pub-primary,var(--navy)),#101522);color:white;padding:16px 15px 18px;}
 .booking-head::after{content:'';position:absolute;inset:auto -34px -42px 38%;height:86px;background:radial-gradient(circle,rgba(76,175,39,.44),transparent 68%);pointer-events:none;}
@@ -636,6 +722,10 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .account-panel.active{display:block;}
 .account-panel h3{font-family:'Syne',sans-serif;font-size:1.25rem;color:var(--navy);margin-bottom:4px;}
 .account-panel p{font-size:.8rem;color:var(--muted);line-height:1.45;margin-bottom:18px;}
+.account-public-card{border:1px solid #DDE5EF;background:#F8FAFC;border-radius:14px;padding:14px;margin-top:8px;}
+.account-public-card strong{display:block;font-family:'DM Sans',sans-serif;font-size:.92rem;color:var(--navy);margin-bottom:4px;}
+.account-public-card p{font-size:.78rem;color:var(--muted);margin:0 0 12px;line-height:1.45;}
+.account-public-actions{display:flex;flex-wrap:wrap;gap:8px;}
 .account-close{position:absolute;top:14px;right:14px;background:white;border:0;border-radius:999px;width:38px;height:38px;cursor:pointer;box-shadow:var(--shadow-md);display:grid;place-items:center;color:var(--navy);}
 .billing-card{border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;background:#F8FAFC;}
 .billing-card strong{display:block;font-size:.82rem;color:var(--text);margin-bottom:4px;}
@@ -835,8 +925,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
   .pub-doc-actions,.pub-wifi-actions{grid-template-columns:1fr;}
 }
 </style>
-<link rel="stylesheet" href="editor-ui.css?v=98">
-<script src="business-categories.js?v=98"></script>
+<link rel="stylesheet" href="editor-ui.css?v=103">
+<script src="business-categories.js?v=103"></script>
 </head>
 <body>
 <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
@@ -944,8 +1034,17 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
       </div>
       <div class="card wizard-setup-card">
         <div class="card-title"><svg class="ui-ico"><use href="#i-rocket"/></svg>Setup guidato</div>
-        <p class="field-hint">Scegli la categoria della tua attività: KhamaKey applica gli stessi moduli, catalogo e prenotazioni sia dal menu qui sotto sia dal setup guidato.</p>
+        <p class="field-hint">In 5 minuti: scegli categoria, inserisci nome e WhatsApp, aggiungi almeno una voce al catalogo e salva. I tuoi clienti toccheranno l’oggetto NFC e ordineranno in 3 tap.</p>
         <button class="btn-add-row" type="button" id="openWizardBtn">Sfoglia tutte le categorie</button>
+      </div>
+      <div class="card quick-start-card">
+        <div class="card-title"><svg class="ui-ico"><use href="#i-target"/></svg>Checklist rapida</div>
+        <div class="order-coach" id="orderCoach" hidden>
+          <strong>La tua pagina in 3 mosse</strong>
+          <p>1. WhatsApp · 2. Una voce nel catalogo · 3. Salva. Poi tocca l’oggetto NFC e prova l’ordine.</p>
+          <button type="button" onclick="dismissOrderCoach()">Ok, ho capito</button>
+        </div>
+        <ul class="quick-start-list" id="quickStartList"></ul>
       </div>
       <div class="card">
         <div class="card-title"><svg class="ui-ico"><use href="#i-building"/></svg>La tua attività</div>
@@ -1004,7 +1103,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         <div class="toggle-row">
           <div>
             <div class="toggle-label">Mostra logo nella pagina pubblica</div>
-            <div class="toggle-sub">Puoi caricarlo e tenerlo nascosto finché non vuoi mostrarlo</div>
+            <div class="toggle-sub">Con copertina attiva, il logo compare a sinistra e il nome a destra. Senza logo, il titolo resta centrato.</div>
           </div>
           <label class="toggle"><input type="checkbox" id="showLogo" checked><span class="toggle-slider"></span></label>
         </div>
@@ -1045,7 +1144,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         <div class="toggle-row">
           <div>
             <div class="toggle-label">Mostra copertina nella pagina pubblica</div>
-            <div class="toggle-sub">Se disattivata, resta lo sfondo generato dai colori del brand</div>
+            <div class="toggle-sub">Se disattivata, al posto della copertina compare il logo grande con il nome sotto</div>
           </div>
           <label class="toggle"><input type="checkbox" id="showCover" checked><span class="toggle-slider"></span></label>
         </div>
@@ -1058,6 +1157,16 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
             </select>
           </div>
           <div class="field">
+            <label>Tipo foto copertina</label>
+            <select id="pubCoverOrientation">
+              <option value="auto" selected>Automatico (rileva dal file)</option>
+              <option value="landscape">Orizzontale</option>
+              <option value="portrait">Verticale</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
             <label>Posizione immagine</label>
             <select id="pubCoverPosition">
               <option value="top">In alto</option>
@@ -1065,13 +1174,13 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
               <option value="bottom">In basso</option>
             </select>
           </div>
-        </div>
-        <div class="field-hint">Per immagini verticali prova “immagine intera”; per fotografie orizzontali usa “riempi l’area”.</div>
-        <div class="field-row" style="margin-top:16px">
           <div class="field">
-            <label for="pubHeroHeight">Altezza copertina: <strong id="pubHeroHeightValue">300 px</strong></label>
-            <input id="pubHeroHeight" type="range" min="220" max="560" step="10" value="300" oninput="document.getElementById('pubHeroHeightValue').textContent=this.value+' px'">
+            <label for="pubHeroHeight">Altezza copertina: <strong id="pubHeroHeightValue">340 px</strong></label>
+            <input id="pubHeroHeight" type="range" min="240" max="560" step="10" value="340" oninput="document.getElementById('pubHeroHeightValue').textContent=this.value+' px'">
           </div>
+        </div>
+        <div class="field-hint">Foto orizzontali: «riempi l’area». Foto verticali: «immagine intera» + tipo verticale per più spazio in altezza.</div>
+        <div class="field-row" style="margin-top:16px">
           <div class="field">
             <label for="pubCoverZoom">Zoom immagine: <strong id="pubCoverZoomValue">100%</strong></label>
             <input id="pubCoverZoom" type="range" min="100" max="200" step="5" value="100" oninput="document.getElementById('pubCoverZoomValue').textContent=this.value+'%'">
@@ -1105,86 +1214,106 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
           <button class="media-remove" type="button" onclick="removeCover()"><svg class="ui-ico"><use href="#i-trash"/></svg>Elimina copertina</button>
         </div>
       </div>
-      <div class="card">
-        <div class="card-title"><svg class="ui-ico"><use href="#i-palette"/></svg>Colori pagina</div>
-        <div class="field-row">
-          <div class="field">
-            <label>Colore primario</label>
-            <div class="color-row">
-              <div class="color-swatch"><input type="color" id="c1" value="#1B2A5E" oninput="syncHex('c1','c1h')"></div>
-              <input type="text" id="c1h" value="#1B2A5E" oninput="syncColor('c1','c1h')" style="flex:1">
-            </div>
-          </div>
-          <div class="field">
-            <label>Colore accento</label>
-            <div class="color-row">
-              <div class="color-swatch"><input type="color" id="c2" value="#4CAF27" oninput="syncHex('c2','c2h')"></div>
-              <input type="text" id="c2h" value="#4CAF27" oninput="syncColor('c2','c2h')" style="flex:1">
-            </div>
-          </div>
+      <div class="card brand-simple-card">
+        <div class="card-title"><svg class="ui-ico"><use href="#i-palette"/></svg>Colori e aspetto</div>
+        <p class="field-hint" style="margin-top:-6px">Scegli un tema oppure tocca i colori. La pagina si aggiorna subito nell’anteprima.</p>
+        <label class="simple-label">Temi pronti</label>
+        <div class="theme-preset-grid">
+          <button type="button" class="theme-preset active" data-theme="classic" onclick="applyColorTheme('classic')"><span class="theme-swatch" style="background:linear-gradient(135deg,#1B2A5E,#4CAF27)"></span>Classico</button>
+          <button type="button" class="theme-preset" data-theme="hotel" onclick="applyColorTheme('hotel')"><span class="theme-swatch" style="background:linear-gradient(135deg,#1F4D3A,#4CAF27)"></span>Hotel</button>
+          <button type="button" class="theme-preset" data-theme="clean" onclick="applyColorTheme('clean')"><span class="theme-swatch" style="background:linear-gradient(135deg,#FFFFFF,#E8EEF5)"></span>Pulito</button>
+          <button type="button" class="theme-preset" data-theme="warm" onclick="applyColorTheme('warm')"><span class="theme-swatch" style="background:linear-gradient(135deg,#7C3E1E,#F59E0B)"></span>Caldo</button>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Sfondo pagina</label>
-            <div class="color-row">
-              <div class="color-swatch"><input type="color" id="pubPageBg" value="#F8FAFC" oninput="syncHex('pubPageBg','pubPageBgh')"></div>
-              <input type="text" id="pubPageBgh" value="#F8FAFC" oninput="syncColor('pubPageBg','pubPageBgh')" style="flex:1">
-            </div>
-          </div>
-          <div class="field">
-            <label>Sfondo blocchi</label>
-            <div class="color-row">
-              <div class="color-swatch"><input type="color" id="pubBlockBg" value="#FFFFFF" oninput="syncHex('pubBlockBg','pubBlockBgh')"></div>
-              <input type="text" id="pubBlockBgh" value="#FFFFFF" oninput="syncColor('pubBlockBg','pubBlockBgh')" style="flex:1">
-            </div>
-          </div>
+        <div class="simple-color-grid">
+          <label class="simple-color-btn"><span>Colore principale</span><input type="color" id="c1" value="#1B2A5E" oninput="syncHex('c1','c1h');markThemeCustom()"></label>
+          <label class="simple-color-btn"><span>Colore accento</span><input type="color" id="c2" value="#4CAF27" oninput="syncHex('c2','c2h');markThemeCustom()"></label>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Testo principale</label>
-            <div class="color-row">
-              <div class="color-swatch"><input type="color" id="pubTextColor" value="#1B2A5E" oninput="syncHex('pubTextColor','pubTextColorh')"></div>
-              <input type="text" id="pubTextColorh" value="#1B2A5E" oninput="syncColor('pubTextColor','pubTextColorh')" style="flex:1">
-            </div>
-          </div>
-          <div class="field">
-            <label>Testo secondario</label>
-            <div class="color-row">
-              <div class="color-swatch"><input type="color" id="pubMutedColor" value="#64748B" oninput="syncHex('pubMutedColor','pubMutedColorh')"></div>
-              <input type="text" id="pubMutedColorh" value="#64748B" oninput="syncColor('pubMutedColor','pubMutedColorh')" style="flex:1">
-            </div>
-          </div>
-        </div>
-        <div class="field-hint">Questi colori modificano solo la landing page pubblica: sfondo, card e leggibilità dei testi.</div>
-      </div>
-      <div class="card">
-        <div class="card-title"><svg class="ui-ico"><use href="#i-settings"/></svg>Stile interfaccia pubblica</div>
-        <div class="field-row">
-          <div class="field">
-            <label>Copertina</label>
-            <select id="pubHeroStyle">
-              <option value="premium">Premium scura</option>
-              <option value="soft">Chiara morbida</option>
-              <option value="minimal">Minimale</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Card</label>
-            <select id="pubCardStyle">
-              <option value="soft">Morbide</option>
-              <option value="sharp">Squadrate</option>
-              <option value="glass">Glass</option>
-            </select>
-          </div>
-        </div>
-        <div class="field">
-          <label>Pulsanti</label>
-          <select id="pubButtonStyle">
-            <option value="pill">Pillole arrotondate</option>
-            <option value="solid">Solidi</option>
-            <option value="outline">Outline</option>
+        <input type="hidden" id="c1h" value="#1B2A5E">
+        <input type="hidden" id="c2h" value="#4CAF27">
+        <div class="field" style="margin-top:14px">
+          <label>Come appare il titolo</label>
+          <select id="pubTitleFont">
+            <option value="simple" selected>Normale e leggibile</option>
+            <option value="soft">Più morbido</option>
           </select>
         </div>
+        <details class="brand-advanced">
+          <summary>Altre opzioni colori e stile</summary>
+          <div class="field-row" style="margin-top:12px">
+            <div class="field">
+              <label>Sfondo pagina</label>
+              <div class="color-row">
+                <div class="color-swatch"><input type="color" id="pubPageBg" value="#F8FAFC" oninput="syncHex('pubPageBg','pubPageBgh')"></div>
+                <input type="text" id="pubPageBgh" value="#F8FAFC" oninput="syncColor('pubPageBg','pubPageBgh')" style="flex:1">
+              </div>
+            </div>
+            <div class="field">
+              <label>Sfondo blocchi</label>
+              <div class="color-row">
+                <div class="color-swatch"><input type="color" id="pubBlockBg" value="#FFFFFF" oninput="syncHex('pubBlockBg','pubBlockBgh')"></div>
+                <input type="text" id="pubBlockBgh" value="#FFFFFF" oninput="syncColor('pubBlockBg','pubBlockBgh')" style="flex:1">
+              </div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Testo principale</label>
+              <div class="color-row">
+                <div class="color-swatch"><input type="color" id="pubTextColor" value="#1B2A5E" oninput="syncHex('pubTextColor','pubTextColorh')"></div>
+                <input type="text" id="pubTextColorh" value="#1B2A5E" oninput="syncColor('pubTextColor','pubTextColorh')" style="flex:1">
+              </div>
+            </div>
+            <div class="field">
+              <label>Testo secondario</label>
+              <div class="color-row">
+                <div class="color-swatch"><input type="color" id="pubMutedColor" value="#64748B" oninput="syncHex('pubMutedColor','pubMutedColorh')"></div>
+                <input type="text" id="pubMutedColorh" value="#64748B" oninput="syncColor('pubMutedColor','pubMutedColorh')" style="flex:1">
+              </div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Layout hero</label>
+              <select id="pubHeroLayout">
+                <option value="social" selected>Profilo sotto copertina</option>
+                <option value="classic">Classico (logo sulla copertina)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Azioni rapide</label>
+              <select id="pubActionStyle">
+                <option value="icons" selected>Icone piccole</option>
+                <option value="cards">Pulsanti grandi</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Stile copertina</label>
+              <select id="pubHeroStyle">
+                <option value="premium">Premium scura</option>
+                <option value="soft">Chiara morbida</option>
+                <option value="minimal">Minimale</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Card</label>
+              <select id="pubCardStyle">
+                <option value="soft">Morbide</option>
+                <option value="sharp">Squadrate</option>
+                <option value="glass">Glass</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Pulsanti</label>
+            <select id="pubButtonStyle">
+              <option value="pill">Pillole arrotondate</option>
+              <option value="solid">Solidi</option>
+              <option value="outline">Outline</option>
+            </select>
+          </div>
+        </details>
       </div>
     </div>
 
@@ -1242,6 +1371,40 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
       <div class="section-header">
         <div class="section-title">Azioni rapide</div>
         <div class="section-sub">I pulsanti principali sotto la copertina della pagina pubblica</div>
+      </div>
+      <div class="card order-ready-card">
+        <div class="card-title"><svg class="ui-ico"><use href="#i-zap"/></svg>Ordini WhatsApp — configurazione semplice</div>
+        <p class="field-hint" style="margin:0 0 12px;line-height:1.5">Un solo posto per attivare carrello, messaggi legali e privacy. Il cliente finale: sceglie → carrello → invia su WhatsApp.</p>
+        <div class="order-ready-status" id="orderReadyStatus"></div>
+        <div class="field">
+          <label>1. Numero WhatsApp per ricevere ordini *</label>
+          <input type="tel" id="waOrderQuick" data-sync-field="wa" placeholder="393391234567">
+          <div class="field-hint">Solo cifre con prefisso internazionale. Stesso numero usato nei Contatti.</div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>2. Cosa offri principalmente?</label>
+            <select id="orderBusinessType" onchange="syncOrderBusinessType()">
+              <option value="services">Servizi e appuntamenti</option>
+              <option value="physical">Prodotti (ritiro o consegna)</option>
+              <option value="digital">File o contenuti digitali</option>
+              <option value="both">Prodotti + digitali</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>3. Frase per i tuoi clienti</label>
+            <textarea id="orderRequestLegalText" rows="2" placeholder="Spiega che la richiesta WhatsApp non è un pagamento automatico...">La richiesta inviata via WhatsApp non è un acquisto concluso. L’attività ti risponderà per confermare disponibilità, importo finale e modalità di pagamento.</textarea>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Mostra guida «Scegli → Carrello → WhatsApp»</div><div class="toggle-sub">Aiuta chi usa l’oggetto NFC per la prima volta</div></div>
+          <label class="toggle"><input type="checkbox" id="showPublicOrderGuide" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn-add-row" type="button" onclick="applyOrderSimpleSetup()">Attiva tutto automaticamente</button>
+          <button class="btn-add-row" type="button" onclick="goTo('menu')">Vai al catalogo</button>
+        </div>
+        <div class="field-hint" style="margin-top:10px">Privacy, cookie e consenso dati ordine: attivati in automatico (modificabili in Dati & privacy).</div>
       </div>
       <div class="card">
         <div class="card-title"><svg class="ui-ico"><use href="#i-zap"/></svg>Home actions</div>
@@ -1384,35 +1547,39 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         </div>
       </div>
       <div class="card">
-        <div class="card-title"><svg class="ui-ico"><use href="#i-list"/></svg>Carrello & checkout</div>
+        <div class="card-title"><svg class="ui-ico"><use href="#i-list"/></svg>Carrello (opzioni extra)</div>
+        <div class="field-hint" style="margin-bottom:12px">Il flusso base è già attivo sopra. Qui puoi solo rifinire pagamento e carrello.</div>
         <div class="toggle-row">
-          <div><div class="toggle-label">Carrello attivo</div><div class="toggle-sub">I clienti aggiungono più prodotti prima di inviare l'ordine</div></div>
+          <div><div class="toggle-label">Carrello attivo</div><div class="toggle-sub">Più prodotti prima di inviare su WhatsApp</div></div>
           <label class="toggle"><input type="checkbox" id="tCart" checked><span class="toggle-slider"></span></label>
         </div>
         <div class="toggle-row">
-          <div><div class="toggle-label">Pagamento contanti</div><div class="toggle-sub">Disponibile per ritiro o consegna</div></div>
+          <div><div class="toggle-label">Pagamento in contanti</div><div class="toggle-sub">Opzione nel checkout (ritiro o consegna)</div></div>
           <label class="toggle"><input type="checkbox" id="payCash" checked><span class="toggle-slider"></span></label>
         </div>
-        <div class="toggle-row">
-          <div><div class="toggle-label">Pagamento carta / online</div><div class="toggle-sub">Mostralo solo quando hai un link o provider reale collegato</div></div>
-          <label class="toggle"><input type="checkbox" id="payCard"><span class="toggle-slider"></span></label>
-        </div>
-        <div class="field-row" style="margin-top:16px">
-          <div class="field">
-            <label>Provider pagamento</label>
-            <select id="payProvider">
-              <option value="link">Link pagamento cliente</option>
-              <option value="stripe">Stripe</option>
-              <option value="sumup">SumUp</option>
-              <option value="nexi">Nexi</option>
-              <option value="paypal">PayPal</option>
-            </select>
+        <details class="cart-pay-advanced">
+          <summary>Pagamento online avanzato (opzionale)</summary>
+          <div class="toggle-row" style="margin-top:10px">
+            <div><div class="toggle-label">Mostra pulsante pagamento online</div><div class="toggle-sub">Solo se hai un link Stripe/SumUp/PayPal del tuo conto</div></div>
+            <label class="toggle"><input type="checkbox" id="payCard"><span class="toggle-slider"></span></label>
           </div>
-          <div class="field">
-            <label>Link pagamento</label>
-            <input type="url" id="payLink" placeholder="https://pay.tuocliente.it/...">
+          <div class="field-row" style="margin-top:12px">
+            <div class="field">
+              <label>Provider pagamento</label>
+              <select id="payProvider">
+                <option value="link">Link pagamento cliente</option>
+                <option value="stripe">Stripe</option>
+                <option value="sumup">SumUp</option>
+                <option value="nexi">Nexi</option>
+                <option value="paypal">PayPal</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Link pagamento</label>
+              <input type="url" id="payLink" placeholder="https://pay.tuocliente.it/...">
+            </div>
           </div>
-        </div>
+        </details>
       </div>
       <div class="card">
         <div class="card-title"><svg class="ui-ico"><use href="#i-chart"/></svg>Tracciamento automatico</div>
@@ -1524,47 +1691,63 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         </div>
       </div>
       <div class="card">
-        <div class="card-title"><svg class="ui-ico"><use href="#i-lock"/></svg>Vendita e recesso</div>
+        <div class="card-title"><svg class="ui-ico"><use href="#i-lock"/></svg>Testi legali avanzati</div>
         <div class="field-hint" style="font-size:.82rem;line-height:1.5;margin-bottom:14px">
-          Informazioni da mostrare nel checkout quando il catalogo viene usato per vendere o ricevere ordini. I testi sono una base da far validare al consulente legale.
+          La configurazione base è in Azioni rapide. Qui puoi solo personalizzare recesso, digitali e link condizioni.
         </div>
-        <div class="toggle-row" style="margin-bottom:16px">
+        <div class="toggle-row" style="margin-bottom:14px">
           <div>
-            <div class="toggle-label">Mostra condizioni nel checkout</div>
-            <div class="toggle-sub">Aggiunge recesso, condizioni e consenso prima dell’invio ordine</div>
+            <div class="toggle-label">Mostra informazioni nel checkout</div>
+            <div class="toggle-sub">Consigliato: il cliente legge e accetta prima di inviare</div>
           </div>
           <label class="toggle"><input type="checkbox" id="showSaleTerms" checked><span class="toggle-slider"></span></label>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Tipo vendita</label>
-            <select id="saleProductType">
-              <option value="physical">Prodotti fisici</option>
-              <option value="digital">File / contenuti digitali</option>
-              <option value="both">Fisici + digitali</option>
-              <option value="services">Servizi / prenotazioni</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Link condizioni di vendita</label>
-            <input type="url" id="salesTermsUrl" placeholder="https://tuosito.it/condizioni-vendita">
-          </div>
-        </div>
-        <div class="field">
-          <label>Recesso prodotti fisici</label>
-          <textarea id="physicalReturnText" rows="3">Per gli acquisti a distanza di prodotti fisici, il consumatore può esercitare il diritto di recesso entro 14 giorni dalla consegna, salvo eccezioni previste dalla legge.</textarea>
-        </div>
-        <div class="field">
-          <label>File e contenuti digitali</label>
-          <textarea id="digitalReturnText" rows="3">Per file o contenuti digitali forniti subito dopo l’ordine, l’accesso immediato richiede consenso espresso e accettazione della perdita del diritto di recesso, quando previsto dalla normativa applicabile.</textarea>
-        </div>
-        <div class="toggle-row">
+        <div class="toggle-row" style="margin-bottom:14px">
           <div>
-            <div class="toggle-label">Richiedi consenso per contenuti digitali</div>
-            <div class="toggle-sub">Blocca l’invio ordine finché il cliente non accetta la consegna immediata del digitale</div>
+            <div class="toggle-label">Richiedi consenso privacy prima dell’invio</div>
+            <div class="toggle-sub">Per trattare nome, telefono e note della richiesta</div>
           </div>
-          <label class="toggle"><input type="checkbox" id="requireDigitalConsent" checked><span class="toggle-slider"></span></label>
+          <label class="toggle"><input type="checkbox" id="requireOrderConsent" checked><span class="toggle-slider"></span></label>
         </div>
+        <select id="saleProductType" hidden aria-hidden="true">
+          <option value="services">Servizi / prenotazioni</option>
+          <option value="physical">Prodotti fisici</option>
+          <option value="digital">File / contenuti digitali</option>
+          <option value="both">Fisici + digitali</option>
+        </select>
+        <details class="legal-advanced" open>
+          <summary>Testi recesso e condizioni (modificabili)</summary>
+          <div class="field-row" style="margin-top:12px">
+            <div class="field">
+              <label>Tipo vendita</label>
+              <select id="saleProductTypeVisible" onchange="syncOrderBusinessType(true)">
+                <option value="services">Servizi / prenotazioni</option>
+                <option value="physical">Prodotti fisici</option>
+                <option value="digital">File / contenuti digitali</option>
+                <option value="both">Fisici + digitali</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Link condizioni di vendita</label>
+              <input type="url" id="salesTermsUrl" placeholder="https://tuosito.it/condizioni-vendita">
+            </div>
+          </div>
+          <div class="field">
+            <label>Recesso prodotti fisici</label>
+            <textarea id="physicalReturnText" rows="3">Per gli acquisti a distanza di prodotti fisici, il consumatore può esercitare il diritto di recesso entro 14 giorni dalla consegna, salvo eccezioni previste dalla legge.</textarea>
+          </div>
+          <div class="field">
+            <label>File e contenuti digitali</label>
+            <textarea id="digitalReturnText" rows="3">Per file o contenuti digitali forniti subito dopo l’ordine, l’accesso immediato richiede consenso espresso e accettazione della perdita del diritto di recesso, quando previsto dalla normativa applicabile.</textarea>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Richiedi consenso per contenuti digitali</div>
+              <div class="toggle-sub">Solo se vendi file scaricabili subito dopo la richiesta</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="requireDigitalConsent" checked><span class="toggle-slider"></span></label>
+          </div>
+        </details>
       </div>
     </div>
 
@@ -1851,8 +2034,9 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
       </div>
       <div class="card">
         <div class="card-title"><svg class="ui-ico"><use href="#i-lock"/></svg>Centro privacy guidato</div>
+        <div class="privacy-simple-status" id="privacySimpleStatus"></div>
         <div class="field-hint" style="font-size:.82rem;line-height:1.5;margin-bottom:14px">
-          Il cliente non deve avere già un sito o scrivere documenti legali da zero. KhamaKey prepara privacy policy, cookie policy, preferenze consenso e link pubblici della pagina.
+          Per la maggior parte delle attività basta lasciare tutto così. KhamaKey genera privacy, cookie e consensi ordine in automatico.
         </div>
         <div class="toggle-row" style="margin-bottom:16px">
           <div>
@@ -1873,11 +2057,13 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         <div class="toggle-row">
           <div>
             <div class="toggle-label">Usa privacy policy esterna</div>
-            <div class="toggle-sub">Solo per clienti che hanno già documenti validati dal proprio consulente</div>
+            <div class="toggle-sub">Solo se hai già documenti validati dal tuo consulente</div>
           </div>
           <label class="toggle"><input type="checkbox" id="useExternalPrivacy"><span class="toggle-slider"></span></label>
         </div>
-        <div class="field">
+        <details class="legal-advanced">
+          <summary>Opzioni privacy avanzate</summary>
+        <div class="field" style="margin-top:12px">
           <label>Link privacy esterna, opzionale</label>
           <input type="url" id="externalPrivacyUrl" placeholder="https://tuosito.it/privacy">
         </div>
@@ -1906,6 +2092,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         <div class="field-hint" style="font-size:.78rem;line-height:1.45;margin-top:12px">
           Nota operativa: KhamaKey rende il percorso semplice e completo dentro la piattaforma. Per attività con trattamenti particolari, il titolare potrà far validare i testi dal proprio consulente prima della pubblicazione.
         </div>
+        </details>
       </div>
       <div id="trackWrap"></div>
     </div>
@@ -2031,6 +2218,14 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
           <div class="field"><label>Ruolo</label><input type="text" value="Proprietario workspace" disabled></div>
         </div>
         <div class="field-hint">Questi dati provengono dall’account con cui hai effettuato l’accesso.</div>
+        <div class="account-public-card">
+          <strong>Pagina finale</strong>
+          <p>Apri la pagina che vedono i tuoi clienti quando toccano il NFC.</p>
+          <div class="account-public-actions">
+            <button type="button" class="btn-generate" id="accountOpenPublicPage"><svg class="ui-ico"><use href="#i-eye"/></svg>Apri pagina finale</button>
+            <button type="button" class="media-remove" id="accountCopyPublicUrl"><svg class="ui-ico"><use href="#i-copy"/></svg>Copia link NFC</button>
+          </div>
+        </div>
       </section>
       <section class="account-panel" id="account-billing">
         <h3>Fatturazione</h3>
@@ -2152,7 +2347,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
     <button class="wizard-close" id="wizardClose" type="button" aria-label="Chiudi setup"><svg class="ui-ico"><use href="#i-x"/></svg></button>
     <div class="wizard-kicker">Setup guidato</div>
     <h2>Scegli la categoria della tua attività</h2>
-    <p>Stesso risultato del menu Categoria: moduli, catalogo, prenotazioni e azioni rapide vengono configurati automaticamente.</p>
+    <p>Scegli la categoria: in pochi minuti avrai pagina, catalogo e ordini WhatsApp pronti. I contenuti che inserisci non vengono cancellati.</p>
     <input type="search" class="wizard-search" id="wizardSearch" placeholder="Cerca categoria (es. hotel, bar, palestra...)">
     <div id="wizardGroups"></div>
     <div class="wizard-footer">
@@ -2190,7 +2385,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
   <div class="preview-shell">
     <aside class="preview-side">
       <h3>Anteprima pagina pubblica</h3>
-      <p>Qui vedi come apparira la pagina collegata a NFC e QR. Il menu interno permette di saltare subito alle sezioni principali.</p>
+      <p>Simula ciò che vede chi tocca l’oggetto NFC: pulsanti grandi, guida 3 passi e richiesta WhatsApp (non pagamento automatico).</p>
       <div class="preview-device-switch" aria-label="Dispositivo anteprima">
         <button class="preview-device-btn active" type="button" data-preview-device="phone">Smartphone<small>390 × 844 px</small></button>
         <button class="preview-device-btn" type="button" data-preview-device="ipad-portrait">iPad verticale<small>768 × 1024 px</small></button>
@@ -3513,12 +3708,16 @@ const I18N = {
     open:'Apri', download:'Scarica', watchYoutube:'Guarda il video su YouTube', copyPassword:'Copia password', copyWifi:'Copia dati',
     networkName:'Nome rete', password:'Password', noPassword:'Nessuna password', openNetwork:'Rete aperta', showPassword:'Mostra', hidePassword:'Nascondi', wifiAccess:'Dati per connessione manuale', wifiManual:'Per collegarti, apri le impostazioni WiFi del telefono e usa questi dati.',
     loadedPhotos:'foto caricate', scrollSide:'scorri lateralmente', photosHere:'Le foto caricate appariranno qui.',
-    add:'Aggiungi', order:'Ordina', remove:'Rimuovi', close:'Chiudi', itemAdded:'Aggiunto al carrello',
-    cartItems:'articoli nel carrello', checkout:'Checkout', checkoutTitle:'Carrello e checkout', emptyCart:'Il carrello è vuoto.', cartEmpty:'Carrello vuoto', subtotal:'Subtotale', total:'Totale indicativo',
+    add:'Aggiungi', order:'Ordina', remove:'Rimuovi', close:'Chiudi', itemAdded:'Aggiunto! Apri il carrello in basso',
+    addToCart:'+ Aggiungi', cartGo:'Vai al carrello', checkoutIntro:'Compila e invia su WhatsApp. L’attività ti risponderà per confermare.',
+    orderGuide1:'Scegli', orderGuide2:'Carrello', orderGuide3:'WhatsApp',
+    cartItems:'articoli nel carrello', checkout:'Checkout', checkoutTitle:'Il tuo ordine', emptyCart:'Il carrello è vuoto.', cartEmpty:'Carrello vuoto', subtotal:'Subtotale', total:'Totale indicativo',
     couponPlaceholder:'Codice coupon', applyCoupon:'Applica', couponHint:'Inserisci un codice promo valido, se disponibile.', couponApplied:'Coupon applicato', couponInvalid:'Codice promo non valido o scaduto', couponDiscount:'Sconto coupon',
-    saleTermsTitle:'Condizioni vendita e recesso', salesTerms:'Leggi condizioni di vendita', digitalConsent:'Accetto l’esecuzione immediata della fornitura digitale e riconosco la possibile perdita del diritto di recesso quando previsto dalla legge.', digitalConsentRequired:'Devi accettare il consenso per contenuti digitali prima di inviare l’ordine.',
+    saleTermsTitle:'Informazioni importanti', salesTerms:'Leggi condizioni di vendita', orderRequestNote:'', digitalConsent:'Accetto l’esecuzione immediata della fornitura digitale e riconosco la possibile perdita del diritto di recesso quando previsto dalla legge.', digitalConsentRequired:'Devi accettare il consenso per contenuti digitali prima di inviare la richiesta.',
+    orderConsent:'Ho letto le informazioni e acconsento al trattamento dei miei dati (nome, telefono, indirizzo, note) per gestire questa richiesta.', orderConsentRequired:'Devi accettare il consenso privacy prima di inviare la richiesta.',
+    orderNameRequired:'Inserisci il tuo nome per inviare la richiesta.', orderPhoneRequired:'Inserisci il telefono per essere ricontattato.',
     hidePrices:'Prezzi nascosti', toConfirm:'Da confermare', pickup:'Ritiro in sede', delivery:'Consegna a domicilio', cash:'Contanti', cardOnline:'Carta / online', undefined:'Da definire',
-    fullName:'Nome e cognome', phone:'Telefono', deliveryAddress:'Indirizzo consegna, se necessario', orderNotes:'Note ordine, orario, citofono, allergie...', payOnline:'Paga online con', sendOrder:'Invia ordine via WhatsApp',
+    fullName:'Nome e cognome', phone:'Telefono', deliveryAddress:'Indirizzo consegna, se necessario', orderNotes:'Note ordine, orario, citofono, allergie...', payOnline:'Paga online con', sendOrder:'Invia richiesta su WhatsApp', sendOrderNote:'Non è un pagamento automatico: riceverai conferma dall’attività',
     date:'Data', availableTime:'Orario disponibile', people:'Persone', name:'Nome', email:'Email', notes:'Note', send:'Invia', bookingFallback:'Prenota o richiedi appuntamento', bookingDesc:'Scegli una fascia disponibile e inviaci la richiesta.',
     manualBooking:'La richiesta arriva via WhatsApp o email. Potrai confermarla manualmente al cliente.',
     googleBooking:'Conferma manuale da WhatsApp/email. Il calendario automatico sarà valutato in una fase successiva.',
@@ -4092,19 +4291,146 @@ function saleIncludesDigital(){
 function saleTermsBlock(){
   if(!saleTermsEnabled()) return '';
   const type = val('saleProductType') || 'physical';
+  const orderNote = String(val('orderRequestLegalText') || '').trim();
   const physical = ['physical','both'].includes(type) ? `<p>${esc(val('physicalReturnText'))}</p>` : '';
   const digital = ['digital','both'].includes(type) ? `<p>${esc(val('digitalReturnText'))}</p>` : '';
-  const services = type === 'services' ? `<p>${esc('Per servizi, appuntamenti e prenotazioni possono applicarsi condizioni specifiche su conferma, modifica o annullamento.')}</p>` : '';
+  const services = type === 'services' ? `<p>${esc('Per servizi e appuntamenti valgono condizioni comunicate in conferma. Puoi modificare o annullare secondo quanto indicato dall’attività.')}</p>` : '';
   const terms = val('salesTermsUrl') ? `<a href="${esc(safeUrl(val('salesTermsUrl')))}" target="_blank" rel="noopener">${esc(tt('salesTerms'))}</a>` : '';
-  const consent = saleIncludesDigital() && checked('requireDigitalConsent') ? `<label class="checkout-consent"><input type="checkbox" data-digital-consent><span>${esc(tt('digitalConsent'))}</span></label>` : '';
+  const digitalConsent = saleIncludesDigital() && checked('requireDigitalConsent') ? `<label class="checkout-consent"><input type="checkbox" data-digital-consent><span>${esc(tt('digitalConsent'))}</span></label>` : '';
+  const orderConsent = checked('requireOrderConsent') ? `<label class="checkout-consent"><input type="checkbox" data-order-consent><span>${esc(tt('orderConsent'))}</span></label>` : '';
   return `<div class="checkout-legal">
     <div class="checkout-legal-title">${ico('i-lock')}${esc(tt('saleTermsTitle'))}</div>
+    ${orderNote ? `<p>${esc(orderNote)}</p>` : ''}
     ${physical}
     ${digital}
     ${services}
     ${terms}
-    ${consent}
+    ${orderConsent}
+    ${digitalConsent}
   </div>`;
+}
+
+function orderConsentRequired(){
+  return saleTermsEnabled() && checked('requireOrderConsent');
+}
+
+function orderConsentAccepted(){
+  const root = document.getElementById('publicPreview');
+  return !!root?.querySelector('[data-order-consent]')?.checked;
+}
+
+function renderPublicOrderGuide(){
+  if(!checked('tCart') || !checked('showPublicOrderGuide')) return '';
+  return `<div class="pub-order-guide" aria-label="Come ordinare">
+    <span><span class="step-num">1</span>${esc(tt('orderGuide1'))}</span>
+    →
+    <span><span class="step-num">2</span>${esc(tt('orderGuide2'))}</span>
+    →
+    <span><span class="step-num">3</span>${esc(tt('orderGuide3'))}</span>
+  </div>`;
+}
+
+function syncOrderBusinessType(fromVisible=false){
+  const main = document.getElementById('orderBusinessType');
+  const visible = document.getElementById('saleProductTypeVisible');
+  const hidden = document.getElementById('saleProductType');
+  if(!hidden) return;
+  const value = fromVisible && visible ? visible.value : (main?.value || visible?.value || hidden.value || 'services');
+  hidden.value = value;
+  if(main && main.value !== value) main.value = value;
+  if(visible && visible.value !== value) visible.value = value;
+  changed();
+}
+function saleTypeForFamily(family){
+  return ({ristorante:'physical',hotel:'services',professionista:'services',negozio:'physical',salute:'services'})[family] || 'services';
+}
+function applyOrderSimpleSetup(options={}){
+  setFieldValue('tCart',true);
+  setFieldValue('aOrdinaWa',true);
+  setFieldValue('aWhatsApp',true);
+  setFieldValue('aMenu',true);
+  setFieldValue('showPublicOrderGuide',true);
+  setFieldValue('showSaleTerms',true);
+  setFieldValue('requireOrderConsent',true);
+  setFieldValue('tCookie',true);
+  setFieldValue('useExternalPrivacy',false);
+  setFieldValue('payCash',true);
+  setFieldValue('payCard',false);
+  if(!String(val('orderRequestLegalText')||'').trim()){
+    setFieldValue('orderRequestLegalText','La richiesta inviata via WhatsApp non è un acquisto concluso. L’attività ti risponderà per confermare disponibilità, importo finale e modalità di pagamento.');
+  }
+  if(options.family) setFieldValue('saleProductType', saleTypeForFamily(options.family));
+  syncOrderBusinessType();
+  renderOrderReadyStatus();
+  renderPrivacySimpleStatus();
+  changed();
+  if(options.toast !== false) showToast('Ordini WhatsApp pronti. Aggiungi voci al catalogo e salva.','ok');
+}
+function orderReadyChecks(){
+  return [
+    {ok:!!String(val('wa')||'').trim(), label:'WhatsApp', go:'azioni'},
+    {ok:cats.some(cat=>normalizeCat(cat).voci.some(v=>String(v.nome||v.desc||'').trim())), label:'Catalogo', go:'menu'},
+    {ok:checked('tCart') && checked('aOrdinaWa'), label:'Carrello', go:'azioni'},
+    {ok:checked('showSaleTerms') && checked('requireOrderConsent'), label:'Legale', go:'menu'},
+    {ok:checked('tCookie'), label:'Privacy', go:'tracking'},
+    {ok:!dirty, label:'Salvato', go:null}
+  ];
+}
+function renderOrderReadyStatus(){
+  const host = document.getElementById('orderReadyStatus');
+  if(!host) return;
+  host.innerHTML = orderReadyChecks().map(item=>`<span class="order-ready-pill ${item.ok?'ok':''}">${item.ok?'✓':'○'} ${item.go ? `<button type="button" data-order-go="${esc(item.go)}">${esc(item.label)}</button>` : esc(item.label)}</span>`).join('');
+  host.querySelectorAll('[data-order-go]').forEach(btn=>btn.addEventListener('click',()=>{
+    const target = btn.dataset.orderGo;
+    if(target === 'menu') setEditorHub('contenuti');
+    else if(target === 'azioni') setEditorHub('setup');
+    else if(target === 'tracking') setEditorHub('dati');
+    goTo(target);
+  }));
+}
+function renderPrivacySimpleStatus(){
+  const host = document.getElementById('privacySimpleStatus');
+  if(!host) return;
+  const rows = [
+    {ok:checked('tCookie'), text:'Banner cookie attivo sulla pagina pubblica'},
+    {ok:!checked('useExternalPrivacy') || !!val('externalPrivacyUrl'), text:checked('useExternalPrivacy') ? 'Privacy esterna collegata' : 'Privacy generata da KhamaKey'},
+    {ok:checked('requireOrderConsent'), text:'Consenso dati ordine richiesto prima di WhatsApp'}
+  ];
+  host.innerHTML = rows.map(row=>`<div class="privacy-simple-row">${row.ok ? '✓' : '○'}<span>${esc(row.text)}</span></div>`).join('');
+}
+const ORDER_COACH_KEY = 'khamakey_order_coach_v1';
+function maybeShowOrderCoach(){
+  const coach = document.getElementById('orderCoach');
+  if(!coach || storageGet(ORDER_COACH_KEY) === '1') return;
+  const incomplete = orderReadyChecks().some(item=>!item.ok && item.label !== 'Salvato');
+  coach.hidden = !incomplete;
+}
+function dismissOrderCoach(){
+  storageSet(ORDER_COACH_KEY,'1');
+  const coach = document.getElementById('orderCoach');
+  if(coach) coach.hidden = true;
+}
+function renderQuickStart(){
+  const list = document.getElementById('quickStartList');
+  if(!list) return;
+  const steps = [
+    {done:!!String(val('nome') || '').trim(), title:'Nome attività', sub:'Come ti vedono i clienti', go:'info'},
+    {done:!!String(val('wa') || '').trim(), title:'Numero WhatsApp', sub:'Per ricevere richieste e ordini', go:'azioni'},
+    {done:!!String(val('categoria') || '').trim(), title:'Categoria', sub:'Attiva moduli adatti al tuo settore', go:'info'},
+    {done:cats.some(cat=>normalizeCat(cat).voci.some(v=>String(v.nome||v.desc||'').trim())), title:'Almeno 1 voce nel catalogo', sub:'Prodotti, servizi o menu', go:'menu'},
+    {done:!dirty, title:'Salva la pagina', sub:dirty ? 'Hai modifiche da salvare' : 'Ultima versione salvata', go:null}
+  ];
+  list.innerHTML = steps.map(step=>`<li class="quick-start-item ${step.done?'done':''}"><span class="qs-mark">${step.done?'✓':'·'}</span><div>${step.go ? `<button type="button" data-quick-go="${esc(step.go)}">` : ''}<strong>${esc(step.title)}</strong>${step.go ? `</button>` : ''}<span>${esc(step.sub)}</span></div></li>`).join('');
+  list.querySelectorAll('[data-quick-go]').forEach(btn=>btn.addEventListener('click',()=>{
+    const target = btn.dataset.quickGo;
+    if(target === 'menu') setEditorHub('contenuti');
+    else if(target === 'azioni' || target === 'contatti') setEditorHub('setup');
+    else if(target === 'tracking') setEditorHub('dati');
+    goTo(target);
+  }));
+  renderOrderReadyStatus();
+  renderPrivacySimpleStatus();
+  maybeShowOrderCoach();
 }
 
 function digitalConsentRequired(){
@@ -4133,7 +4459,7 @@ function checkoutWhatsAppUrl(){
     return `- ${item.qty}x ${item.nome}${price}${extra ? `\n  ${extra}` : ''}`;
   }).join('\n');
   const msg = [
-    `Nuovo ordine da pagina NFC/QR - ${val('nome') || 'KhamaKey'}`,
+    `Richiesta da pagina NFC/QR - ${val('nome') || 'KhamaKey'}`,
     '',
     lines || tt('cartEmpty'),
     '',
@@ -4210,7 +4536,7 @@ function renderBookingBlock(){
 }
 
 function renderCheckout(){
-  if(!checked('tCart') || !checkoutOpen) return publicCart.length ? `<div class="pub-cart"><div class="pub-cart-bar"><div><div class="pub-cart-title">${publicCart.length} ${esc(tt('cartItems'))}</div><div class="pub-cart-sub">${formatCartTotal()}</div></div><button class="pub-cart-btn" data-cart-open>${esc(tt('checkout'))}</button></div></div>` : '';
+  if(!checked('tCart') || !checkoutOpen) return publicCart.length ? `<div class="pub-cart"><div class="pub-cart-bar"><div><div class="pub-cart-title">${publicCart.length} ${esc(tt('cartItems'))}</div><div class="pub-cart-sub">${formatCartTotal()}</div></div><button class="pub-cart-btn" data-cart-open>${esc(tt('cartGo'))} →</button></div></div>` : '';
   const paymentOptions = [
     checked('payCash') ? `<option value="${esc(tt('cash'))}">${esc(tt('cash'))}</option>` : '',
     checked('payCard') && val('payLink') ? `<option value="${esc(tt('cardOnline'))}">${esc(tt('cardOnline'))}</option>` : ''
@@ -4235,6 +4561,7 @@ function renderCheckout(){
     </div>` : `<div class="checkout-total"><span>${esc(tt('total'))}</span><span>${formatCartTotal()}</span></div>`;
   return `<div class="pub-checkout" id="preview-checkout">
     <h4>${esc(tt('checkoutTitle'))}</h4>
+    <div class="checkout-steps"><p><strong>${esc(tt('checkoutIntro'))}</strong></p></div>
     ${publicCart.length ? publicCart.map(item=>`<div class="cart-line">
       <span>${esc(item.nome)}${checked('showCatalogPrices') && item.prezzo ? `<small style="display:block;color:#64748B;margin-top:2px">${esc(item.prezzo)}</small>` : ''}</span>
       <span><b>x${item.qty}</b><span class="cart-qty"><button data-cart-minus="${esc(item.key)}">-</button><button data-cart-plus="${esc(item.key)}">+</button></span></span>
@@ -4246,14 +4573,14 @@ function renderCheckout(){
       <select data-checkout="mode"><option>${esc(tt('pickup'))}</option><option>${esc(tt('delivery'))}</option></select>
       <select data-checkout="payment">${paymentOptions}</select>
       <select class="full" data-checkout="slot">${bookingSlotOptions()}</select>
-      <input data-checkout="name" placeholder="${esc(tt('fullName'))}">
-      <input data-checkout="phone" placeholder="${esc(tt('phone'))}">
+      <input data-checkout="name" placeholder="${esc(tt('fullName'))} *" required>
+      <input data-checkout="phone" placeholder="${esc(tt('phone'))} *" required>
       <input class="full" data-checkout="address" placeholder="${esc(tt('deliveryAddress'))}">
       <textarea class="full" data-checkout="notes" placeholder="${esc(tt('orderNotes'))}"></textarea>
     </div>
     <div class="checkout-actions">
       ${checked('payCard') && payLink ? `<a class="checkout-pay" href="${esc(safeUrl(payLink))}" target="_blank" rel="noopener">${esc(tt('payOnline'))} ${esc(val('payProvider')||'link')}</a>` : ''}
-      <a class="checkout-send" data-send-order href="${esc(checkoutWhatsAppUrl())}">${brandIco('whatsapp')}${esc(tt('sendOrder'))}</a>
+      <a class="checkout-send" data-send-order href="${esc(checkoutWhatsAppUrl())}">${brandIco('whatsapp')}${esc(tt('sendOrder'))}<span class="checkout-send-note">${esc(tt('sendOrderNote'))}</span></a>
     </div>
   </div>`;
 }
@@ -4266,7 +4593,7 @@ function renderExtraCatalogBlocks(){
       const qty = cartItemQty(key);
       const orderControl = checked('tCart') && qty
         ? `<div class="pub-product-qty"><button data-cart-minus="${esc(key)}">-</button><span class="qty-num">${qty}</span><button data-add-extra-cart="${ei}:${pi}">+</button></div><button class="pub-product-remove" data-cart-remove="${esc(key)}">${esc(tt('remove'))}</button>`
-        : `<button class="pub-order-btn" data-add-extra-cart="${ei}:${pi}">${checked('tCart') ? ico('i-plus')+esc(tt('add')) : brandIco('whatsapp')+esc(tt('order'))}</button>`;
+        : `<button class="pub-order-btn" data-add-extra-cart="${ei}:${pi}">${checked('tCart') ? esc(tt('addToCart')) : brandIco('whatsapp')+esc(tt('order'))}</button>`;
       const tags = productTags(p);
       return `<div class="pub-menu-row" data-product-detail="extra:${ei}:${pi}" data-catalog-search="${esc(catalogSearchText(p,'',catalog.title||'Catalogo'))}">
         <div class="pub-menu-main">
@@ -4292,6 +4619,51 @@ function categoryPublicLabel(){
   if(!sel || !sel.value) return '';
   const opt = sel.options[sel.selectedIndex];
   return opt ? opt.textContent.trim() : '';
+}
+
+function applyColorTheme(theme){
+  const presets = {
+    classic:{c1:'#1B2A5E',c2:'#4CAF27',pubPageBg:'#F8FAFC',pubBlockBg:'#FFFFFF',pubTextColor:'#1B2A5E',pubMutedColor:'#64748B',pubHeroStyle:'premium'},
+    hotel:{c1:'#1F4D3A',c2:'#4CAF27',pubPageBg:'#F4FAF6',pubBlockBg:'#FFFFFF',pubTextColor:'#163828',pubMutedColor:'#5B7268',pubHeroStyle:'premium'},
+    clean:{c1:'#1B2A5E',c2:'#4CAF27',pubPageBg:'#FFFFFF',pubBlockBg:'#FFFFFF',pubTextColor:'#1B2A5E',pubMutedColor:'#64748B',pubHeroStyle:'minimal'},
+    warm:{c1:'#7C3E1E',c2:'#F59E0B',pubPageBg:'#FFFBF5',pubBlockBg:'#FFFFFF',pubTextColor:'#5C2E12',pubMutedColor:'#8B6A4A',pubHeroStyle:'soft'}
+  };
+  const p = presets[theme] || presets.classic;
+  Object.entries(p).forEach(([id,value])=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.value = value;
+    const hex = document.getElementById(id+'h') || document.getElementById(id.replace(/Color$/,'Colorh'));
+    if(hex) hex.value = value;
+  });
+  document.querySelectorAll('.theme-preset').forEach(btn=>btn.classList.toggle('active',btn.dataset.theme===theme));
+  changed();
+}
+function markThemeCustom(){
+  document.querySelectorAll('.theme-preset').forEach(btn=>btn.classList.remove('active'));
+  changed();
+}
+
+function coverOrientationClass(){
+  const setting = ['auto','landscape','portrait'].includes(val('pubCoverOrientation')) ? val('pubCoverOrientation') : 'auto';
+  if(setting !== 'auto') return `cover-orient-${setting}`;
+  const img = document.getElementById('coverImg');
+  const aspect = img?.dataset?.aspect;
+  if(aspect === 'portrait' || aspect === 'landscape') return `cover-orient-${aspect}`;
+  const w = Number(img?.naturalWidth) || 0;
+  const h = Number(img?.naturalHeight) || 0;
+  if(w > 0 && h > 0) return h > w * 1.08 ? 'cover-orient-portrait' : 'cover-orient-landscape';
+  return 'cover-orient-landscape';
+}
+function rememberCoverAspect(img){
+  if(!img) return;
+  const apply = () => {
+    if(img.naturalWidth > 0 && img.naturalHeight > 0){
+      img.dataset.aspect = img.naturalHeight > img.naturalWidth * 1.08 ? 'portrait' : 'landscape';
+    }
+  };
+  if(img.complete) apply();
+  else img.addEventListener('load', apply, {once:true});
 }
 
 function syncPreviewDock(){
@@ -4324,23 +4696,33 @@ function renderPublicPreview(){
   const coverPosition = ['top','center','bottom'].includes(val('pubCoverPosition')) ? val('pubCoverPosition') : 'center';
   const logoScale = Math.min(160,Math.max(60,Number(val('pubLogoScale'))||100));
   const logoBaseSize = {small:58,medium:76,large:96}[logoSize];
-  const heroHeight = Math.min(560,Math.max(220,Number(val('pubHeroHeight'))||300));
+  const heroHeight = Math.min(560,Math.max(240,Number(val('pubHeroHeight'))||340));
   const coverZoom = Math.min(200,Math.max(100,Number(val('pubCoverZoom'))||100));
   const rawCoverPositionX = Number(val('pubCoverPositionX'));
   const rawCoverPositionY = Number(val('pubCoverPositionY'));
   const coverPositionX = Math.min(100,Math.max(0,Number.isFinite(rawCoverPositionX) ? rawCoverPositionX : 50));
   const coverPositionY = Math.min(100,Math.max(0,Number.isFinite(rawCoverPositionY) ? rawCoverPositionY : 50));
-  preview.className = `phone-preview-inner public-page-root hero-${val('pubHeroStyle')||'premium'} cards-${val('pubCardStyle')||'soft'} buttons-${val('pubButtonStyle')||'pill'} pub-logo-size-${logoSize} logo-fit-${logoFit} cover-fit-${coverFit} cover-pos-${coverPosition}`;
-  preview.style.setProperty('--pub-logo-size',`${Math.round(logoBaseSize*logoScale/100)}px`);
-  preview.style.setProperty('--pub-hero-height',`${heroHeight}px`);
   const coverSrc = checked('showCover') ? (document.getElementById('coverImg')?.dataset.src || '') : '';
+  const heroLayout = ['social','classic'].includes(val('pubHeroLayout')) ? val('pubHeroLayout') : 'social';
+  const actionStyle = ['icons','cards'].includes(val('pubActionStyle')) ? val('pubActionStyle') : 'icons';
+  const coverOrient = coverOrientationClass();
+  const titleFont = ['simple','soft'].includes(val('pubTitleFont')) ? val('pubTitleFont') : 'simple';
+  preview.className = `phone-preview-inner public-page-root hero-${val('pubHeroStyle')||'premium'} cards-${val('pubCardStyle')||'soft'} buttons-${val('pubButtonStyle')||'pill'} pub-logo-size-${logoSize} logo-fit-${logoFit} cover-fit-${coverFit} cover-pos-${coverPosition} hero-layout-${heroLayout} actions-style-${actionStyle} title-font-${titleFont}${coverSrc && coverOrient ? ' '+coverOrient : ''}`;
+  preview.style.setProperty('--pub-title-font', titleFont === 'soft' ? "'DM Sans',sans-serif" : "'DM Sans',sans-serif");
+  const logoPx = Math.round(logoBaseSize*logoScale/100);
+  preview.style.setProperty('--pub-logo-size',`${logoPx}px`);
+  preview.style.setProperty('--pub-profile-logo-size',`${Math.round(logoPx * (heroLayout === 'social' ? 1.35 : 1))}px`);
+  preview.style.setProperty('--pub-hero-height',`${heroHeight}px`);
   const showLogo = checked('showLogo');
   const heroName = val('nome').trim();
   const heroText = val('desc').trim();
   const showHeroName = checked('showHeroName') && Boolean(heroName);
   const showHeroText = checked('showHeroText') && Boolean(heroText);
   const hasHeroContent = showLogo || showHeroName || showHeroText;
-  if(coverSrc) document.documentElement.style.setProperty('--pub-cover',`url("${coverSrc}")`);
+  if(coverSrc) {
+    document.documentElement.style.setProperty('--pub-cover',`url("${coverSrc}")`);
+    rememberCoverAspect(document.getElementById('coverImg'));
+  }
   const nome = heroName;
   const desc = heroText;
   const wa = val('wa').replace(/\D/g,'');
@@ -4366,7 +4748,7 @@ function renderPublicPreview(){
       const qty = cartItemQty(key);
       const orderControl = checked('tCart') && qty
         ? `<div class="pub-product-qty"><button data-cart-minus="${esc(key)}">-</button><span class="qty-num">${qty}</span><button data-add-cart="${ci}:${pi}">+</button></div><button class="pub-product-remove" data-cart-remove="${esc(key)}">${esc(tt('remove'))}</button>`
-        : `<button class="pub-order-btn" data-add-cart="${ci}:${pi}">${checked('tCart') ? ico('i-plus')+esc(tt('add')) : brandIco('whatsapp')+esc(tt('order'))}</button>`;
+        : `<button class="pub-order-btn" data-add-cart="${ci}:${pi}">${checked('tCart') ? esc(tt('addToCart')) : brandIco('whatsapp')+esc(tt('order'))}</button>`;
       const tags = productTags(p);
       return `<div class="pub-menu-row" data-product-detail="main:${ci}:${pi}" data-catalog-search="${esc(catalogSearchText(p,cat.nome,catalogCfg().preview))}">
       <div class="pub-menu-main">
@@ -4402,8 +4784,25 @@ function renderPublicPreview(){
   };
   const orderedBlocks = publicBlockOrder.map(id=>publicBlocks[id]).filter(Boolean).join('');
   const categoryLabel = categoryPublicLabel();
-  document.getElementById('publicPreview').innerHTML = `
-    <section class="pub-hero ${coverSrc?'cover':''} ${hasHeroContent?'':'hero-clean'}">
+  const profileCopy = `${categoryLabel ? `<span class="pub-hero-eyebrow">${esc(categoryLabel)}</span>` : ''}${showHeroName ? `<h2>${esc(nome)}</h2>` : ''}${showHeroText ? `<p>${esc(desc)}</p>` : ''}`;
+  const profileLogo = showLogo ? `<div class="pub-logo pub-logo-float">${getLogoPreview()}</div>` : '';
+  const heroCoverSection = `<section class="pub-hero pub-hero-cover ${coverSrc?'cover':''}">
+      ${coverSrc ? `<img class="pub-cover-img" style="object-position:${coverPositionX}% ${coverPositionY}%;transform:scale(${coverZoom/100})" src="${esc(coverSrc)}" alt="">` : ''}
+      ${renderLanguageSwitch()}
+    </section>`;
+  const profileHeaderClass = showLogo ? 'pub-profile-has-logo' : ((showHeroName || showHeroText || categoryLabel) ? 'pub-profile-title-only' : '');
+  const profileHeader = profileHeaderClass ? `<header class="pub-profile ${profileHeaderClass}"><div class="pub-profile-inner">${showLogo ? profileLogo : ''}<div class="pub-profile-copy">${profileCopy}</div></div></header>` : '';
+  const heroBrandStack = `<section class="pub-hero pub-hero-brand ${hasHeroContent || categoryLabel ? '' : 'hero-clean'}">
+      ${renderLanguageSwitch()}
+      <div class="pub-brand-stack">
+        ${showLogo ? `<div class="pub-logo pub-logo-hero">${getLogoPreview()}</div>` : ''}
+        ${!showLogo && categoryLabel ? `<span class="pub-hero-eyebrow">${esc(categoryLabel)}</span>` : ''}
+        ${showHeroName ? `<h2>${esc(nome)}</h2>` : ''}
+        ${showLogo && categoryLabel ? `<span class="pub-hero-eyebrow pub-brand-category">${esc(categoryLabel)}</span>` : ''}
+        ${showHeroText ? `<p>${esc(desc)}</p>` : ''}
+      </div>
+    </section>`;
+  const heroClassic = `<section class="pub-hero ${coverSrc?'cover':''} ${hasHeroContent?'':'hero-clean'}">
       ${coverSrc ? `<img class="pub-cover-img" style="object-position:${coverPositionX}% ${coverPositionY}%;transform:scale(${coverZoom/100})" src="${esc(coverSrc)}" alt="">` : ''}
       ${renderLanguageSwitch()}
       <div class="pub-hero-content">
@@ -4412,9 +4811,14 @@ function renderPublicPreview(){
         ${showHeroName ? `<h2>${esc(nome)}</h2>` : ''}
         ${showHeroText ? `<p>${esc(desc)}</p>` : ''}
       </div>
-    </section>
+    </section>`;
+  const heroSocial = coverSrc ? `${heroCoverSection}${profileHeader}` : heroBrandStack;
+  const actionsClass = actionStyle === 'icons' ? 'pub-actions pub-actions-icons' : 'pub-actions';
+  document.getElementById('publicPreview').innerHTML = `
+    ${heroLayout === 'social' ? heroSocial : heroClassic}
     <nav class="pub-jump">${jump}</nav>
-    <div class="pub-actions">${actionItems}</div>
+    <div class="${actionsClass}">${actionItems}</div>
+    ${renderPublicOrderGuide()}
     ${orderedBlocks}
     ${renderCheckout()}
     ${cookieBanner}
@@ -4490,6 +4894,26 @@ document.getElementById('publicPreview').addEventListener('click',e=>{
   if(e.target.closest('[data-apply-coupon]')) applyCheckoutCoupon();
   const send = e.target.closest('[data-send-order]');
   if(send) {
+    const root = document.getElementById('publicPreview');
+    const name = root?.querySelector('[data-checkout="name"]')?.value?.trim() || '';
+    const phone = root?.querySelector('[data-checkout="phone"]')?.value?.trim() || '';
+    if(!name) {
+      e.preventDefault();
+      showToast(tt('orderNameRequired'),'err');
+      root?.querySelector('[data-checkout="name"]')?.focus();
+      return;
+    }
+    if(!phone) {
+      e.preventDefault();
+      showToast(tt('orderPhoneRequired'),'err');
+      root?.querySelector('[data-checkout="phone"]')?.focus();
+      return;
+    }
+    if(orderConsentRequired() && !orderConsentAccepted()) {
+      e.preventDefault();
+      showToast(tt('orderConsentRequired'),'err');
+      return;
+    }
     if(digitalConsentRequired() && !digitalConsentAccepted()) {
       e.preventDefault();
       showToast(tt('digitalConsentRequired'),'err');
@@ -4568,6 +4992,7 @@ function prevCover(input) {
   readImageFile(file,src => {
     const img = document.getElementById('coverImg');
     img.src = src; img.dataset.src = src; img.style.display='block';
+    rememberCoverAspect(img);
     document.getElementById('coverTxt').style.display='none';
     const toggle = document.getElementById('showCover');
     if(toggle) toggle.checked = true;
@@ -4813,6 +5238,7 @@ function changed(){
   syncActionInputsFromFields();
   updateActionConfigVisibility();
   renderBlockOrder();
+  renderQuickStart();
   schedulePublicPreview();
   if(window.parent !== window && !cloudHydrating){
     window.parent.postMessage({type:'khamakey:dirty',state:collectState(true)},'*');
@@ -4841,6 +5267,7 @@ function save(){
   }
   dirty=false;
   document.getElementById('saveBar').classList.remove('visible');
+  renderQuickStart();
   showToast(window.parent === window ? 'Salvato in questo browser' : 'Salvataggio cloud richiesto','ok');
 }
 function showToast(msg,type='ok'){
@@ -4868,9 +5295,9 @@ function buildPublicSnapshot(){
   const preview = document.getElementById('publicPreview');
   const sprite = document.querySelector('body > svg[aria-hidden="true"]');
   return {
-    version:'98',
+    version:'103',
     className:preview.className,
-    style:`--pub-primary:${val('c1')||'#1B2A5E'};--pub-accent:${val('c2')||'#4CAF27'};--pub-page-bg:${val('pubPageBg')||'#F8FAFC'};--pub-block-bg:${val('pubBlockBg')||'#FFFFFF'};--pub-text:${val('pubTextColor')||'#1B2A5E'};--pub-muted:${val('pubMutedColor')||'#64748B'};--pub-logo-size:${preview.style.getPropertyValue('--pub-logo-size')};--pub-hero-height:${preview.style.getPropertyValue('--pub-hero-height')}`,
+    style:`--pub-primary:${val('c1')||'#1B2A5E'};--pub-accent:${val('c2')||'#4CAF27'};--pub-page-bg:${val('pubPageBg')||'#F8FAFC'};--pub-block-bg:${val('pubBlockBg')||'#FFFFFF'};--pub-text:${val('pubTextColor')||'#1B2A5E'};--pub-muted:${val('pubMutedColor')||'#64748B'};--pub-title-font:${preview.style.getPropertyValue('--pub-title-font')||"'DM Sans',sans-serif"};--pub-logo-size:${preview.style.getPropertyValue('--pub-logo-size')};--pub-profile-logo-size:${preview.style.getPropertyValue('--pub-profile-logo-size')};--pub-hero-height:${preview.style.getPropertyValue('--pub-hero-height')}`,
     html:`${sprite?.outerHTML||''}${preview.innerHTML}`
   };
 }
@@ -4911,6 +5338,7 @@ function applyImageState(id,txtId,src,label){
 }
 function applyState(state){
   if(!state || typeof state !== 'object') return;
+  renderCategorySelect();
   Object.entries(state.fields || {}).forEach(([id,value]) => {
     const el = document.getElementById(id);
     if(!el || el.type === 'file' || el.closest('#accountModal')) return;
@@ -4941,6 +5369,7 @@ function applyState(state){
   uploadedPdfName = '';
   applyImageState('logoImg','logoTxt',state.logoSrc,'Logo caricato');
   applyImageState('coverImg','coverTxt',state.coverSrc,'Copertina caricata');
+  rememberCoverAspect(document.getElementById('coverImg'));
   applyImageState('aboutImg','aboutTxt',state.aboutSrc,'Immagine caricata');
   updatePublicSlug();
   if(['evento','matrimonio','compleanno','battesimo','nascita','regali'].includes(val('categoria'))) setFieldValue('categoria','');
@@ -4956,7 +5385,10 @@ function applyState(state){
   syncActionInputsFromFields();
   updateActionConfigVisibility();
   renderBlockOrder();
+  renderQuickStart();
   updWifi();
+  lastCategoryValue = val('categoria');
+  updateCategoryHint();
 }
 function persistLocalState(){
   const ok = storageSet(SCOPED_STORAGE_KEY, JSON.stringify(collectState()));
@@ -5031,6 +5463,19 @@ document.getElementById('openPublicUrl')?.addEventListener('click', () => {
   if(!cloudPublicPageUrl) return showToast('Pagina non ancora disponibile','err');
   window.open(cloudPublicPageUrl,'_blank','noopener');
 });
+document.getElementById('accountOpenPublicPage')?.addEventListener('click', () => {
+  if(!cloudPublicPageUrl) return showToast('Pagina non ancora disponibile. Salva prima.','err');
+  window.open(cloudPublicPageUrl,'_blank','noopener');
+});
+document.getElementById('accountCopyPublicUrl')?.addEventListener('click', async () => {
+  if(!cloudPublicUrl) return showToast('Link NFC non ancora disponibile','err');
+  try {
+    await navigator.clipboard.writeText(cloudPublicUrl);
+    showToast('Link NFC copiato','ok');
+  } catch {
+    showToast('Impossibile copiare automaticamente','err');
+  }
+});
 
 // ══ SETUP GUIDATO ══
 const wizardModal = document.getElementById('wizardModal');
@@ -5043,15 +5488,27 @@ function setFieldValue(id,value){
 function activateActions(ids){
   ['aWhatsApp','aChiama','aIndicazioni','aRecensioni','aPrenota','aMenu','aOrdinaWa','tCart','tWifi'].forEach(id => setFieldValue(id, ids.includes(id)));
 }
-function templateCatalog(type,title,item,desc,price){
+function setCatalogType(type){
   setFieldValue('catalogType',type);
-  cats = [{id:Date.now(),nome:title,voci:[{nome:item,desc,prezzo:price,img:''}]}];
+}
+function catalogHasItems(){
+  return Array.isArray(cats) && cats.some(rawCat => normalizeCat(rawCat).voci.length > 0);
+}
+function seedStarterCatalogIfEmpty(type,title,item,desc,price){
+  setCatalogType(type);
+  if(catalogHasItems()) return;
+  cats = [{id:Date.now(),nome:title,voci:[normalizeItem({nome:item,desc,prezzo:price,img:''})]}];
+}
+function setBookingPresetIfEmpty(title,type,desc){
+  if(!String(val('bookingTitle') || '').trim()) setFieldValue('bookingTitle',title);
+  if(!String(val('bookingType') || '').trim()) setFieldValue('bookingType',type);
+  if(!String(val('bookingDesc') || '').trim()) setFieldValue('bookingDesc',desc);
 }
 function enableAboutPreset(text='', strengths=''){
-  setFieldValue('tAbout',true);
-  setFieldValue('aboutTitle','Chi siamo');
-  if(text) setFieldValue('aboutText',text);
-  if(strengths) setFieldValue('aboutStrengths',strengths);
+  if((text || strengths) && !checked('tAbout')) setFieldValue('tAbout',true);
+  if(!String(val('aboutTitle') || '').trim()) setFieldValue('aboutTitle','Chi siamo');
+  if(text && !String(val('aboutText') || '').trim()) setFieldValue('aboutText',text);
+  if(strengths && !String(val('aboutStrengths') || '').trim()) setFieldValue('aboutStrengths',strengths);
 }
 function applyWizardTemplate(type){
   applyCategoryPreset(type, {fromWizard:true});
@@ -5064,49 +5521,40 @@ function applyCategoryPreset(categoryValue, options = {}){
     ristorante(){
       setFieldValue('categoria', value);
       activateActions(['aWhatsApp','aChiama','aIndicazioni','aRecensioni','aPrenota','aMenu','aOrdinaWa','tCart']);
-      setFieldValue('bookingTitle','Prenota un tavolo');
-      setFieldValue('bookingType','Prenotazione');
-      setFieldValue('bookingDesc','Scegli data, fascia oraria e numero di persone. Ti confermeremo appena possibile.');
-      templateCatalog('menu','Menu principale','Piatto o proposta','Descrizione, ingredienti o dettagli utili.','€ 0,00');
+      setBookingPresetIfEmpty('Prenota un tavolo','Prenotazione','Scegli data, fascia oraria e numero di persone. Ti confermeremo appena possibile.');
+      seedStarterCatalogIfEmpty('menu','Menu principale','Piatto o proposta','Descrizione, ingredienti o dettagli utili.','€ 0,00');
     },
     hotel(){
       setFieldValue('categoria', value);
       activateActions(['aWhatsApp','aChiama','aIndicazioni','aRecensioni','aPrenota','aMenu','tWifi']);
-      setFieldValue('bookingTitle','Richiedi disponibilità');
-      setFieldValue('bookingType','Prenotazione');
-      setFieldValue('bookingDesc','Scegli il periodo o una fascia di contatto. Ti invieremo disponibilità e condizioni.');
-      templateCatalog('camere','Camere e suite','Camera matrimoniale','Servizi inclusi, capienza e note.','da € 0,00');
+      setBookingPresetIfEmpty('Richiedi disponibilità','Prenotazione','Scegli il periodo o una fascia di contatto. Ti invieremo disponibilità e condizioni.');
+      seedStarterCatalogIfEmpty('camere','Camere e suite','Camera matrimoniale','Servizi inclusi, capienza e note.','da € 0,00');
       enableAboutPreset('Racconta la struttura, l’accoglienza, i servizi e l’esperienza che offri agli ospiti.','Accoglienza personalizzata\nPosizione strategica\nServizi per gli ospiti');
     },
     professionista(){
       setFieldValue('categoria', value);
       activateActions(['aWhatsApp','aChiama','aIndicazioni','aPrenota','aMenu']);
-      setFieldValue('bookingTitle','Richiedi appuntamento');
-      setFieldValue('bookingType','Consulenza');
-      setFieldValue('bookingDesc','Scegli una fascia disponibile e invia la richiesta. Verrai ricontattato per conferma.');
-      templateCatalog('servizi','Servizi','Consulenza iniziale','Descrivi obiettivo, durata e modalità.','da € 0,00');
+      setBookingPresetIfEmpty('Richiedi appuntamento','Consulenza','Scegli una fascia disponibile e invia la richiesta. Verrai ricontattato per conferma.');
+      seedStarterCatalogIfEmpty('servizi','Servizi','Consulenza iniziale','Descrivi obiettivo, durata e modalità.','da € 0,00');
       enableAboutPreset('Presenta esperienza, metodo di lavoro e approccio professionale.','Consulenza personalizzata\nEsperienza nel settore\nRisposte rapide');
     },
     negozio(){
       setFieldValue('categoria', value);
       activateActions(['aWhatsApp','aChiama','aIndicazioni','aRecensioni','aMenu','aOrdinaWa','tCart']);
-      setFieldValue('bookingTitle','Richiedi informazioni prodotto');
-      setFieldValue('bookingType','Preventivo');
-      setFieldValue('bookingDesc','Aggiungi prodotti al carrello e invia la richiesta via WhatsApp.');
-      templateCatalog('prodotti','Prodotti in evidenza','Prodotto principale','Descrizione, varianti o disponibilità.','€ 0,00');
+      setBookingPresetIfEmpty('Richiedi informazioni prodotto','Preventivo','Aggiungi prodotti al carrello e invia la richiesta via WhatsApp.');
+      seedStarterCatalogIfEmpty('prodotti','Prodotti in evidenza','Prodotto principale','Descrizione, varianti o disponibilità.','€ 0,00');
       if(!promoItems.some(p=>p.active)) promoItems[0].active = true;
     },
     salute(){
       setFieldValue('categoria', value);
       activateActions(['aWhatsApp','aChiama','aIndicazioni','aPrenota','aMenu']);
-      setFieldValue('bookingTitle','Prenota appuntamento');
-      setFieldValue('bookingType','Appuntamento');
-      setFieldValue('bookingDesc','Scegli data e orario disponibili. Riceverai conferma dopo la richiesta.');
-      templateCatalog('servizi','Prestazioni','Prima visita / servizio','Descrizione, durata e indicazioni.','da € 0,00');
+      setBookingPresetIfEmpty('Prenota appuntamento','Appuntamento','Scegli data e orario disponibili. Riceverai conferma dopo la richiesta.');
+      seedStarterCatalogIfEmpty('servizi','Prestazioni','Prima visita / servizio','Descrizione, durata e indicazioni.','da € 0,00');
       enableAboutPreset('Presenta lo studio, il team e il metodo con cui seguite i clienti.','Professionalità\nAppuntamenti organizzati\nAttenzione alla persona');
     }
   };
   (templates[family] || templates.professionista)();
+  applyOrderSimpleSetup({family, toast:false});
   updateCategoryHint();
   updateCatalogLabels();
   renderCats();
@@ -5120,7 +5568,7 @@ function applyCategoryPreset(categoryValue, options = {}){
   }
   if(options.save !== false) save();
   const label = cat?.label || value;
-  if(options.toast !== false) showToast(`Configurazione «${label}» applicata. Ora puoi personalizzare tutto.`,'ok');
+  if(options.toast !== false) showToast(`Configurazione «${label}» applicata. Catalogo e contenuti già inseriti restano; puoi adattarli o rimuoverli.`,'ok');
   if(options.fromWizard) document.getElementById('s-info')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function renderCategorySelect(){
@@ -5161,11 +5609,11 @@ function filterWizardCategories(query=''){
 function updateCategoryHint(){
   const hint = document.getElementById('categoriaHint');
   const cat = khamaCategoryByValue(val('categoria'));
-  if(hint) hint.textContent = cat ? `${cat.hint} (preset applicato come nel setup guidato)` : 'La categoria configura moduli, azioni rapide e catalogo come nel setup guidato.';
+  if(hint) hint.textContent = cat ? `${cat.hint} (adatta moduli e tipo catalogo; i contenuti già inseriti restano)` : 'La categoria adatta moduli, azioni e tipo catalogo. I contenuti già inseriti non vengono cancellati.';
 }
 function shouldConfirmCategoryPreset(){
   if(needsSetupWizard()) return false;
-  return !confirm('Applicare il preset per questa categoria? Moduli e catalogo verranno aggiornati.');
+  return !confirm('Applicare il preset per questa categoria? Moduli e tipo catalogo verranno aggiornati; catalogo, testi e upload già inseriti restano.');
 }
 function needsSetupWizard(state = collectState()){
   const fields = state?.fields || {};
@@ -5289,7 +5737,7 @@ function khamaAdvice(audit){
   if(checked('aChiama') && !val('tel')) tips.push('Chiama è attivo ma manca il telefono.');
   if(checked('aRecensioni') && !val('recensioni')) tips.push('Recensioni è attivo ma manca il link Google.');
   if(checked('aPrenota') && !bookingSlots.length) tips.push('Prenota è attivo: aggiungi almeno una fascia oraria.');
-  if(checked('tCart') && checked('payCard') && !val('payLink')) tips.push('Carrello e carta sono attivi: manca il link pagamento del cliente.');
+  if(checked('tCart') && !val('wa')) tips.push('Carrello attivo: inserisci il numero WhatsApp per ricevere le richieste.');
   if(checked('useExternalPrivacy') && !val('externalPrivacyUrl')) tips.push('Privacy esterna attiva: aggiungi il link della policy validata.');
   if(!audit.missing.length && !tips.length) tips.push('La pagina è pronta per una verifica finale in anteprima.');
   return tips;
@@ -5522,10 +5970,12 @@ updateActionConfigVisibility();
 renderCategorySelect();
 renderWizardCategories();
 updateCategoryHint();
-lastCategoryValue = val('categoria');
+  renderQuickStart();
+  syncOrderBusinessType();
+  lastCategoryValue = val('categoria');
 renderPublicPreview();
 if(!restoredState) maybeOpenWizard(false);
 </script>
-<script type="module" src="editor-media.js?v=98"></script>
+<script type="module" src="editor-media.js?v=103"></script>
 </body>
 </html>

@@ -97,7 +97,9 @@ In `wrangler.toml` verifica `PAGES_ASSET_BASE = "https://khamakey-app.pages.dev"
 | https://khamakey-nfc...workers.dev/m/{slug} | Pagina pubblica Moment |
 | https://khamakey-nfc...workers.dev/p/{slug} | Pagina pubblica business |
 
-Hard refresh (`Cmd+Shift+R`) se vedi CSS/JS vecchi — release corrente **v95** (cache bust `?v=95` su `editor.html`, `index.html`, ecc.).
+Hard refresh (`Cmd+Shift+R`) se vedi CSS/JS vecchi — release corrente **v99** (Sprint E Shopify).
+
+Setup negozio: vedi **[SHOPIFY-SETUP.md](SHOPIFY-SETUP.md)**.
 
 ---
 

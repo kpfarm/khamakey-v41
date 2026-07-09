@@ -18,3 +18,12 @@ bucket_name = "khamakey-media"
 # VISITOR_SALT
 # RESEND_API_KEY          (opzionale, per prenotazioni email)
 # RESEND_FROM_EMAIL       (opzionale)
+# SHOPIFY_SHOP_DOMAIN     (es. dj0wgt-0g.myshopify.com)
+# SHOPIFY_CLIENT_ID       (Dev dashboard → Credenziali)
+# SHOPIFY_CLIENT_SECRET   (shpss_... — anche per webhook HMAC)
+# SHOPIFY_ACCESS_TOKEN    (opzionale shpat_ — alternativa a client id/secret)
+# SHOPIFY_WEBHOOK_SECRET  (alias legacy di SHOPIFY_CLIENT_SECRET)
+# PAYPAL_CLIENT_ID          (Sprint F)
+# PAYPAL_CLIENT_SECRET
+# PAYPAL_WEBHOOK_ID
+# SUPABASE_SERVICE_ROLE_KEY (opzionale, log webhook in DB)

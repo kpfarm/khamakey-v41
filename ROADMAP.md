@@ -131,6 +131,30 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 | **B** | RSVP completo (condivisione inviti + riepilogo admin) | completato |
 | **C** | Business editor — wizard onboarding settore | completato |
 | **D** | Rivenditori — tracciabilità codici e report | in corso |
+| **E** | Shopify Moments — catalogo PIM, webhook ordini, sync | in corso |
+| **F** | Pagamenti (Stripe/PayPal) + email ordini Resend | prossimo |
+| **G** | Catalogo multilingua + pagine pubbliche `?lang=` | pianificato |
+| **H** | Logistica Packlink + marketplace Etsy/Amazon | pianificato |
+
+### Sprint E — Shopify & canali vendita (2026-07-09)
+
+**Strategia:** Moments first su Shopify; Business resta su khamakey.it (lead + Stripe Payment Link). Bundle condiviso = N fisici, 1 codice NFC.
+
+Documentazione operativa: `SHOPIFY-SETUP.md`
+
+- [x] SQL v64: `platform_moment_catalog`, listings, sync log, ingest Shopify
+- [x] Logica bundle: `physical_units` vs `activation_codes`
+- [x] Admin: tab **Catalogo vendita** Moments
+- [x] Worker: webhook `POST /webhooks/shopify/orders`
+- [x] Worker: sync `POST /api/channels/shopify/sync`
+- [x] Applicare SQL v64 su Supabase produzione
+- [x] Configurare WEBHOOK_INGEST_KEY Worker + Supabase (Shopify API ancora da collegare)
+- [x] v101: prodotti Shopify in bozza finché incompleti (`shopify_live`)
+- [x] v102: Integration Hub, webhook Stripe/PayPal/Resend, email ordine, i18n base
+- [ ] Applicare SQL v66 su Supabase produzione
+- [ ] Email ordine + codice attivazione (Resend) — fase E3 / F1
+- [ ] Packlink / tracking spedizioni in admin — fase E4
+- [ ] Marketplace Etsy / Amazon / TikTok — fase E5
 
 ### Sprint A — checklist
 
@@ -185,5 +209,8 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 | 2026-07-06 | kpfarm | Push GitHub: github.com/kpfarm/khamakey-v41 |
 | 2026-07-06 | Cursor | SQL v44 applicato su Supabase (bucket khamakey-media + RLS) |
 | 2026-07-08 | Cursor | Moments v89–v90: template tutte categorie, Altre sezioni complete, guide per tipo, onboarding |
+| 2026-07-09 | Cursor | **v102**: Integration Hub, Stripe/PayPal/Resend webhook, email ordine, i18n v66 |
+| 2026-07-09 | Cursor | **v101 Sprint E**: Shopify sync in bozza finché prodotto incompleto; flag `shopify_live` in admin |
+| 2026-07-09 | Cursor | **v99 Sprint E**: catalogo vendita Moments, webhook/sync Shopify, bundle NFC, SHOPIFY-SETUP.md |
 | 2026-07-09 | Cursor | **v98**: categorie unificate — setup guidato e select usano stesso catalogo e preset |
 | 2026-07-09 | Cursor | **v97 admin**: ricerca/filtri Clienti, Moments, Ordini, Agenti; template 21 categorie; dashboard alert operativi |

@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v95-editor-layout-fix";
+const WORKER_VERSION = "v102-integrations-i18n-foundation";
 
 export default {
   async fetch(request, env, ctx) {
@@ -45,7 +45,30 @@ export default {
       if (url.pathname.startsWith("/cdn/")) {
         return handleMediaServe(request, env, url.pathname.slice(5));
       }
-      if (url.pathname === "/health") return json({ ok: true, service: "khamakey-nfc", version: WORKER_VERSION, resend: Boolean(env.RESEND_API_KEY), media: Boolean(env.MEDIA) });
+      if (url.pathname === "/webhooks/shopify/orders" && request.method === "POST") {
+        return handleShopifyOrderWebhook(request, env);
+      }
+      if (url.pathname === "/webhooks/stripe" && request.method === "POST") {
+        return handleStripeWebhook(request, env);
+      }
+      if (url.pathname === "/webhooks/paypal" && request.method === "POST") {
+        return handlePayPalWebhook(request, env);
+      }
+      if (url.pathname === "/webhooks/resend" && request.method === "POST") {
+        return handleResendWebhook(request, env);
+      }
+      if (url.pathname === "/api/integrations/status" && request.method === "GET") {
+        return handleIntegrationsStatus(request, env);
+      }
+      if (url.pathname === "/api/channels/shopify/sync" && request.method === "POST") {
+        return handleShopifyCatalogSync(request, env);
+      }
+      if (url.pathname === "/api/channels/shopify/register-webhooks" && request.method === "POST") {
+        return handleShopifyRegisterWebhooks(request, env);
+      }
+      if (url.pathname === "/health") {
+        return json(buildIntegrationsHealth(env));
+      }
       return html(notFound("Pagina non trovata"), 404);
     } catch (error) {
       console.error(error);
@@ -1904,4 +1927,579 @@ function escapeHtml(value) {
     '"': "&quot;",
     "'": "&#39;"
   })[char]);
+}
+
+const ADMIN_EMAILS = new Set([
+  "kristianperelli@gmail.com",
+  "info.khamakey@gmail.com"
+]);
+
+async function verifyPlatformAdmin(env, jwt) {
+  const user = await supabaseUser(env, jwt);
+  if (!user?.email) return null;
+  const email = String(user.email).trim().toLowerCase();
+  if (ADMIN_EMAILS.has(email)) return user;
+  const headers = {
+    apikey: env.SUPABASE_PUBLISHABLE_KEY,
+    Authorization: `Bearer ${jwt}`
+  };
+  const response = await fetch(
+    `${env.SUPABASE_URL}/rest/v1/platform_members?email=eq.${encodeURIComponent(email)}&status=eq.active&select=permissions,role`,
+    { headers }
+  );
+  if (!response.ok) return null;
+  const rows = await response.json();
+  const member = rows?.[0];
+  if (!member) return null;
+  const perms = new Set(Array.isArray(member.permissions) ? member.permissions : []);
+  if (member.role === "owner" || member.role === "admin" || perms.has("admin.full") || perms.has("inventory.write")) {
+    return user;
+  }
+  return null;
+}
+
+async function verifyShopifyWebhook(request, secret) {
+  if (!secret) return false;
+  const hmacHeader = request.headers.get("X-Shopify-Hmac-Sha256") || "";
+  const body = await request.clone().arrayBuffer();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, body);
+  const computed = btoa(String.fromCharCode(...new Uint8Array(signature)));
+  return timingSafeEqual(hmacHeader, computed);
+}
+
+function timingSafeEqual(a, b) {
+  const left = String(a || "");
+  const right = String(b || "");
+  if (left.length !== right.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < left.length; i++) mismatch |= left.charCodeAt(i) ^ right.charCodeAt(i);
+  return mismatch === 0;
+}
+
+function shopifyClientSecret(env) {
+  return env.SHOPIFY_CLIENT_SECRET || env.SHOPIFY_WEBHOOK_SECRET || "";
+}
+
+function shopifyConfigured(env) {
+  if (!env.SHOPIFY_SHOP_DOMAIN) return false;
+  if (env.SHOPIFY_ACCESS_TOKEN) return true;
+  return Boolean(env.SHOPIFY_CLIENT_ID && shopifyClientSecret(env));
+}
+
+function shopifyShopDomain(env) {
+  return String(env.SHOPIFY_SHOP_DOMAIN || "").replace(/^https?:\/\//, "").replace(/\/$/, "");
+}
+
+function shopifyAdminUrl(env, path) {
+  return `https://${shopifyShopDomain(env)}/admin/api/2024-10${path}`;
+}
+
+async function getShopifyAccessToken(env) {
+  if (env.SHOPIFY_ACCESS_TOKEN) return env.SHOPIFY_ACCESS_TOKEN;
+  const clientId = String(env.SHOPIFY_CLIENT_ID || "").trim();
+  const clientSecret = String(shopifyClientSecret(env)).trim();
+  if (!clientId || !clientSecret) {
+    throw new Error("Shopify non configurato: manca token Admin API o coppia client id/secret.");
+  }
+  const response = await fetch(`https://${shopifyShopDomain(env)}/admin/oauth/access_token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: clientId,
+      client_secret: clientSecret
+    })
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data?.access_token) {
+    throw new Error(`Shopify OAuth ${response.status}: ${JSON.stringify(data)}`);
+  }
+  return data.access_token;
+}
+
+async function shopifyAdminFetch(env, path, options = {}) {
+  const accessToken = await getShopifyAccessToken(env);
+  const response = await fetch(shopifyAdminUrl(env, path), {
+    ...options,
+    headers: {
+      "X-Shopify-Access-Token": accessToken,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+  const text = await response.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = { raw: text };
+  }
+  if (!response.ok) {
+    throw new Error(`Shopify ${response.status}: ${JSON.stringify(data)}`);
+  }
+  return data;
+}
+
+async function supabaseRest(env, jwt, path, options = {}) {
+  const response = await fetch(`${env.SUPABASE_URL}/rest/v1/${path}`, {
+    ...options,
+    headers: {
+      apikey: env.SUPABASE_PUBLISHABLE_KEY,
+      Authorization: `Bearer ${jwt}`,
+      "Content-Type": "application/json",
+      Prefer: options.prefer || "return=representation",
+      ...(options.headers || {})
+    }
+  });
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : null;
+  if (!response.ok) throw new Error(`Supabase ${response.status}: ${JSON.stringify(data)}`);
+  return data;
+}
+
+function shopifyOrderPayload(order, topic) {
+  const customer = order?.customer || {};
+  const lineItems = (order?.line_items || []).map(item => ({
+    sku: item?.sku || "",
+    quantity: Number(item?.quantity || 1),
+    price: item?.price || "0",
+    title: item?.title || "",
+    variant_id: item?.variant_id ? String(item.variant_id) : null,
+    product_id: item?.product_id ? String(item.product_id) : null
+  }));
+  return {
+    topic: topic || "orders/create",
+    shopify_order_id: String(order?.id || ""),
+    order_number: String(order?.order_number || order?.name || ""),
+    customer_email: customer?.email || order?.email || "",
+    customer_name: [customer?.first_name, customer?.last_name].filter(Boolean).join(" ") || order?.shipping_address?.name || "",
+    customer_phone: customer?.phone || order?.phone || order?.shipping_address?.phone || "",
+    subtotal: order?.subtotal_price || order?.total_line_items_price || "0",
+    shipping_total: order?.total_shipping_price_set?.shop_money?.amount || order?.shipping_lines?.[0]?.price || "0",
+    total: order?.total_price || "0",
+    financial_status: order?.financial_status || "pending",
+    line_items: lineItems
+  };
+}
+
+async function handleShopifyOrderWebhook(request, env) {
+  if (!env.WEBHOOK_INGEST_KEY) {
+    return json({ error: "WEBHOOK_INGEST_KEY non configurata nel Worker." }, 503);
+  }
+  const verified = await verifyShopifyWebhook(request, shopifyClientSecret(env));
+  if (!verified) return json({ error: "Firma Shopify non valida." }, 401);
+
+  const topic = request.headers.get("X-Shopify-Topic") || "orders/create";
+  const order = await request.json();
+  const payload = shopifyOrderPayload(order, topic);
+
+  if (!payload.shopify_order_id) return json({ error: "Ordine Shopify non valido." }, 400);
+  if (!["orders/create", "orders/paid", "orders/updated"].includes(topic)) {
+    return json({ ok: true, skipped: true, topic });
+  }
+
+  try {
+    const result = await rpc(env, "ingest_shopify_order", {
+      p_ingest_key: env.WEBHOOK_INGEST_KEY,
+      p_payload: payload
+    });
+    if (result?.ok && !result?.duplicate && payload.customer_email) {
+      sendMomentOrderEmail(env, payload, result).catch(err => console.warn("order email", err));
+    }
+    return json({ ok: true, result });
+  } catch (error) {
+    console.error("ingest_shopify_order", error);
+    return json({ error: error.message || "Errore ingest ordine." }, 500);
+  }
+}
+
+function resolveShopifyProductStatus(catalog) {
+  if (catalog?.shopify_live !== true) return "draft";
+  if (catalog?.status !== "active") return "draft";
+  const description = String(catalog?.description || "").trim();
+  const imageUrl = String(catalog?.image_url || "").trim();
+  if (description.length < 20 || !imageUrl) return "draft";
+  return "active";
+}
+
+async function handleShopifyCatalogSync(request, env) {
+  const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  if (!jwt) return cors(json({ error: "Accesso non autorizzato." }, 401));
+  const admin = await verifyPlatformAdmin(env, jwt);
+  if (!admin) return cors(json({ error: "Permesso admin richiesto." }, 403));
+  if (!shopifyConfigured(env)) {
+    return cors(json({ error: "Shopify non configurato nel Worker. Vedi SHOPIFY-SETUP.md." }, 503));
+  }
+
+  let body = {};
+  try {
+    body = await request.json();
+  } catch {
+    return cors(json({ error: "JSON non valido." }, 400));
+  }
+  const catalogId = String(body.catalog_id || "").trim();
+  if (!catalogId) return cors(json({ error: "catalog_id obbligatorio." }, 400));
+
+  try {
+    const rows = await supabaseRest(
+      env,
+      jwt,
+      `platform_moment_catalog?id=eq.${encodeURIComponent(catalogId)}&select=*`
+    );
+    const catalog = rows?.[0];
+    if (!catalog) return cors(json({ error: "Prodotto catalogo non trovato." }, 404));
+
+    const listingRows = await supabaseRest(
+      env,
+      jwt,
+      `platform_product_listings?catalog_id=eq.${encodeURIComponent(catalogId)}&channel_key=eq.shopify&select=*`
+    );
+    let listing = listingRows?.[0] || null;
+
+    const shopifyStatus = resolveShopifyProductStatus(catalog);
+    const productPayload = {
+      product: {
+        title: catalog.name,
+        body_html: catalog.description || "",
+        vendor: "KhamaKey",
+        product_type: "Moments",
+        status: shopifyStatus,
+        variants: [{
+          sku: catalog.sku,
+          price: String(Number(catalog.sale_price || 0).toFixed(2)),
+          inventory_management: null,
+          requires_shipping: true
+        }]
+      }
+    };
+    if (catalog.image_url) {
+      productPayload.product.images = [{ src: catalog.image_url }];
+    }
+
+    let shopifyProduct;
+    if (listing?.external_product_id) {
+      shopifyProduct = await shopifyAdminFetch(env, `/products/${listing.external_product_id}.json`, {
+        method: "PUT",
+        body: JSON.stringify(productPayload)
+      });
+    } else {
+      shopifyProduct = await shopifyAdminFetch(env, "/products.json", {
+        method: "POST",
+        body: JSON.stringify(productPayload)
+      });
+    }
+
+    const product = shopifyProduct?.product;
+    const variant = product?.variants?.[0];
+    if (!product?.id || !variant?.id) throw new Error("Risposta Shopify incompleta.");
+
+    const listingPayload = {
+      catalog_id: catalogId,
+      channel_key: "shopify",
+      external_product_id: String(product.id),
+      external_variant_id: String(variant.id),
+      sync_status: "synced",
+      last_synced_at: new Date().toISOString(),
+      last_error: null
+    };
+
+    if (listing?.id) {
+      await supabaseRest(env, jwt, `platform_product_listings?id=eq.${listing.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(listingPayload)
+      });
+    } else {
+      await supabaseRest(env, jwt, "platform_product_listings", {
+        method: "POST",
+        body: JSON.stringify(listingPayload)
+      });
+    }
+
+    await supabaseRest(env, jwt, `platform_moment_catalog?id=eq.${encodeURIComponent(catalogId)}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        sync_status: "synced",
+        sync_error: null,
+        last_synced_at: new Date().toISOString(),
+        shopify_handle: product.handle || catalog.shopify_handle,
+        publish_shopify: true
+      })
+    });
+
+    await supabaseRest(env, jwt, "platform_sync_log", {
+      method: "POST",
+      prefer: "return=minimal",
+      body: JSON.stringify({
+        channel_key: "shopify",
+        catalog_id: catalogId,
+        action: listing?.external_product_id ? "update_product" : "create_product",
+        success: true,
+        payload: { shopify_product_id: product.id, shopify_variant_id: variant.id }
+      })
+    });
+
+    return cors(json({
+      ok: true,
+      shopify_product_id: product.id,
+      shopify_variant_id: variant.id,
+      handle: product.handle,
+      shopify_status: shopifyStatus
+    }));
+  } catch (error) {
+    console.error("shopify sync", error);
+    try {
+      await supabaseRest(env, jwt, `platform_moment_catalog?id=eq.${encodeURIComponent(catalogId)}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          sync_status: "error",
+          sync_error: String(error.message || error).slice(0, 500)
+        })
+      });
+      await supabaseRest(env, jwt, "platform_sync_log", {
+        method: "POST",
+        prefer: "return=minimal",
+        body: JSON.stringify({
+          channel_key: "shopify",
+          catalog_id: catalogId,
+          action: "sync_product",
+          success: false,
+          error_message: String(error.message || error).slice(0, 500)
+        })
+      });
+    } catch (logError) {
+      console.error("sync log failed", logError);
+    }
+    return cors(json({ error: error.message || "Sync Shopify fallita." }, 500));
+  }
+}
+
+const SHOPIFY_ORDER_WEBHOOKS = [
+  "orders/create",
+  "orders/paid"
+];
+
+async function handleShopifyRegisterWebhooks(request, env) {
+  const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  if (!jwt) return cors(json({ error: "Accesso non autorizzato." }, 401));
+  const admin = await verifyPlatformAdmin(env, jwt);
+  if (!admin) return cors(json({ error: "Permesso admin richiesto." }, 403));
+  if (!shopifyConfigured(env)) {
+    return cors(json({ error: "Shopify non configurato nel Worker." }, 503));
+  }
+
+  const webhookBase = new URL(request.url).origin;
+  const address = `${webhookBase}/webhooks/shopify/orders`;
+
+  try {
+    const existing = await shopifyAdminFetch(env, "/webhooks.json");
+    const current = existing?.webhooks || [];
+    const created = [];
+    const skipped = [];
+
+    for (const topic of SHOPIFY_ORDER_WEBHOOKS) {
+      const found = current.find(row => row.topic === topic && row.address === address);
+      if (found) {
+        skipped.push({ topic, id: found.id });
+        continue;
+      }
+      const result = await shopifyAdminFetch(env, "/webhooks.json", {
+        method: "POST",
+        body: JSON.stringify({
+          webhook: { topic, address, format: "json" }
+        })
+      });
+      created.push({ topic, id: result?.webhook?.id });
+    }
+
+    return cors(json({ ok: true, address, created, skipped }));
+  } catch (error) {
+    console.error("register webhooks", error);
+    return cors(json({
+      error: error.message || "Registrazione webhook fallita.",
+      manual: "Admin Shopify → Impostazioni → Notifiche → Webhook → Creazione ordine → " + address
+    }, 500));
+  }
+}
+
+const SUPPORTED_LOCALES = ["it", "en", "fr", "de", "es"];
+
+function stripeConfigured(env) {
+  return Boolean(env.STRIPE_SECRET_KEY && env.STRIPE_WEBHOOK_SECRET);
+}
+
+function paypalConfigured(env) {
+  return Boolean(env.PAYPAL_CLIENT_ID && env.PAYPAL_CLIENT_SECRET);
+}
+
+function resendConfigured(env) {
+  return Boolean(env.RESEND_API_KEY);
+}
+
+function buildIntegrationsHealth(env) {
+  return {
+    ok: true,
+    service: "khamakey-nfc",
+    version: WORKER_VERSION,
+    media: Boolean(env.MEDIA),
+    locales: SUPPORTED_LOCALES,
+    integrations: {
+      shopify: { configured: shopifyConfigured(env), status: shopifyConfigured(env) ? "active" : "not_configured" },
+      resend: { configured: resendConfigured(env), status: resendConfigured(env) ? "active" : "not_configured" },
+      stripe: { configured: stripeConfigured(env), status: stripeConfigured(env) ? "active" : "not_configured" },
+      paypal: { configured: paypalConfigured(env), status: paypalConfigured(env) ? "active" : "not_configured" }
+    }
+  };
+}
+
+async function handleIntegrationsStatus(request, env) {
+  const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  if (!jwt) return cors(json({ error: "Accesso non autorizzato." }, 401));
+  const admin = await verifyPlatformAdmin(env, jwt);
+  if (!admin) return cors(json({ error: "Permesso admin richiesto." }, 403));
+  return cors(json(buildIntegrationsHealth(env)));
+}
+
+async function logWebhookEvent(env, provider, eventType, externalId, payload, status = "received") {
+  try {
+    await supabaseRest(env, env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_PUBLISHABLE_KEY, "platform_webhook_events", {
+      method: "POST",
+      prefer: "return=minimal",
+      body: JSON.stringify({
+        provider,
+        event_type: eventType,
+        external_id: externalId || null,
+        payload: payload || {},
+        processed: status === "processed",
+        status,
+        received_at: new Date().toISOString()
+      })
+    });
+  } catch (error) {
+    console.warn("logWebhookEvent", provider, error);
+  }
+}
+
+async function handleStripeWebhook(request, env) {
+  const signature = request.headers.get("Stripe-Signature") || "";
+  const rawBody = await request.text();
+  let payload = {};
+  try {
+    payload = rawBody ? JSON.parse(rawBody) : {};
+  } catch {
+    return json({ error: "JSON non valido." }, 400);
+  }
+
+  if (!stripeConfigured(env)) {
+    await logWebhookEvent(env, "stripe", payload?.type || "unknown", payload?.id, { note: "stripe not configured" }, "skipped");
+    return json({ ok: true, skipped: true, reason: "stripe_not_configured" });
+  }
+
+  // Verifica firma: implementazione completa in Sprint F2
+  if (!signature) {
+    return json({ error: "Firma Stripe mancante." }, 401);
+  }
+
+  await logWebhookEvent(env, "stripe", payload?.type || "unknown", payload?.id, payload, "received");
+  return json({ ok: true, received: true, type: payload?.type || null });
+}
+
+async function handlePayPalWebhook(request, env) {
+  const rawBody = await request.text();
+  let payload = {};
+  try {
+    payload = rawBody ? JSON.parse(rawBody) : {};
+  } catch {
+    return json({ error: "JSON non valido." }, 400);
+  }
+
+  const eventType = payload?.event_type || payload?.event_type || "unknown";
+  const externalId = payload?.id || payload?.resource?.id || null;
+
+  if (!paypalConfigured(env)) {
+    await logWebhookEvent(env, "paypal", eventType, externalId, { note: "paypal not configured" }, "skipped");
+    return json({ ok: true, skipped: true, reason: "paypal_not_configured" });
+  }
+
+  await logWebhookEvent(env, "paypal", eventType, externalId, payload, "received");
+  return json({ ok: true, received: true, type: eventType });
+}
+
+async function handleResendWebhook(request, env) {
+  let payload = {};
+  try {
+    payload = await request.json();
+  } catch {
+    return json({ error: "JSON non valido." }, 400);
+  }
+  const eventType = payload?.type || "email.event";
+  const externalId = payload?.data?.email_id || payload?.created_at || null;
+  await logWebhookEvent(env, "resend", eventType, externalId ? String(externalId) : null, payload, "processed");
+  return json({ ok: true, received: true });
+}
+
+async function sendMomentOrderEmail(env, orderPayload, ingestResult) {
+  if (!resendConfigured(env)) return null;
+  const to = String(orderPayload.customer_email || "").trim();
+  if (!to) return null;
+
+  const orderCode = ingestResult?.order_code || orderPayload.order_number || "";
+  const customerName = orderPayload.customer_name || "Cliente";
+  const activationUrl = `${String(env.PAGES_ASSET_BASE || "https://khamakey-app.pages.dev").replace(/\/$/, "")}/moments.html`;
+  const subject = `KhamaKey Moments — ordine ${orderCode} confermato`;
+  const text = [
+    `Ciao ${customerName},`,
+    "",
+    `Grazie per il tuo ordine KhamaKey Moments (${orderCode}).`,
+    ingestResult?.codes_assigned
+      ? `Abbiamo riservato ${ingestResult.codes_assigned} codice/i NFC per la tua pagina.`
+      : "Stiamo preparando il tuo codice di attivazione NFC.",
+    "",
+    `Attiva la pagina su: ${activationUrl}`,
+    "",
+    "Il team KhamaKey"
+  ].join("\n");
+  const htmlBody = `<div style="font-family:Arial,sans-serif;line-height:1.55;color:#172036">
+    <h2 style="color:#1b2a5e">Ordine Moments confermato</h2>
+    <p>Ciao ${escapeHtml(customerName)},</p>
+    <p>Grazie per il tuo ordine <strong>${escapeHtml(orderCode)}</strong>.</p>
+    <p>${ingestResult?.codes_assigned ? `Abbiamo riservato <strong>${ingestResult.codes_assigned}</strong> codice/i NFC.` : "Stiamo preparando il tuo codice di attivazione NFC."}</p>
+    <p><a href="${escapeHtml(activationUrl)}">Attiva la tua pagina Moments</a></p>
+  </div>`;
+
+  return sendResendEmail(env, {
+    to,
+    subject,
+    html: htmlBody,
+    text,
+    tags: [{ name: "source", value: "khamakey_moment_order" }]
+  });
+}
+
+async function sendResendEmail(env, { to, subject, html, text, tags = [] }) {
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+      "Idempotency-Key": crypto.randomUUID()
+    },
+    body: JSON.stringify({
+      from: env.RESEND_FROM_EMAIL || "KhamaKey <noreply@khamakey.com>",
+      to: Array.isArray(to) ? to : [to],
+      subject,
+      html,
+      text,
+      tags
+    })
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(`Resend: ${response.status} ${JSON.stringify(result)}`);
+  return result;
 }

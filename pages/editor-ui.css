@@ -26,7 +26,8 @@ html.editor-embedded body{
 .editor-embedded .topbar-left{display:none!important;}
 .editor-embedded .topbar-right{margin-left:0;gap:8px;}
 .editor-embedded .btn-preview{display:inline-flex!important;}
-.editor-embedded .user-name-short{display:inline!important;}
+.editor-embedded .user-menu-wrap{display:none!important;}
+.editor-embedded .user-name-short{display:none!important;}
 .editor-embedded .layout{
   display:flex!important;
   flex-direction:row!important;

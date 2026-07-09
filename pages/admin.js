@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL } from "./config.js";
 import { exportMomentLabelsPdf } from "./admin-moment-labels.js";
+import { TYPE_LABELS, renderCategorySelect, normalizeMomentType } from "./moment-categories.js";
 
 const ADMIN_EMAILS = new Set([
   "kristianperelli@gmail.com",
@@ -137,6 +138,9 @@ const integrationFormStatus = document.getElementById("integrationFormStatus");
 const integrationsTable = document.getElementById("integrationsTable");
 const paymentTransactionsTable = document.getElementById("paymentTransactionsTable");
 const webhookEventsTable = document.getElementById("webhookEventsTable");
+const integrationHealthGrid = document.getElementById("integrationHealthGrid");
+const refreshIntegrationHealthBtn = document.getElementById("refreshIntegrationHealth");
+const supportedLocalesTable = document.getElementById("supportedLocalesTable");
 const permissionGrid = document.getElementById("permissionGrid");
 const memberPermissionChecklist = document.getElementById("memberPermissionChecklist");
 const memberForm = document.getElementById("memberForm");
@@ -149,6 +153,27 @@ const drawerEditorFrame = document.getElementById("drawerEditorFrame");
 const momentDrawer = document.getElementById("momentDrawer");
 const momentDrawerPublicFrame = document.getElementById("momentDrawerPublicFrame");
 const momentDrawerEditorFrame = document.getElementById("momentDrawerEditorFrame");
+const clientSearchInput = document.getElementById("clientSearchInput");
+const clientFilterCategory = document.getElementById("clientFilterCategory");
+const clientTableCount = document.getElementById("clientTableCount");
+const momentCustomerSearchInput = document.getElementById("momentCustomerSearchInput");
+const momentObjectSearchInput = document.getElementById("momentObjectSearchInput");
+const momentFilterType = document.getElementById("momentFilterType");
+const momentFilterPublished = document.getElementById("momentFilterPublished");
+const momentCustomerTableCount = document.getElementById("momentCustomerTableCount");
+const momentObjectTableCount = document.getElementById("momentObjectTableCount");
+const agentSearchInput = document.getElementById("agentSearchInput");
+const agentFilterStatus = document.getElementById("agentFilterStatus");
+const agentFilterModel = document.getElementById("agentFilterModel");
+const agentTableCount = document.getElementById("agentTableCount");
+const orderSearchInput = document.getElementById("orderSearchInput");
+const orderFilterStatus = document.getElementById("orderFilterStatus");
+const orderFilterType = document.getElementById("orderFilterType");
+const orderTableCount = document.getElementById("orderTableCount");
+const dashboardAlerts = document.getElementById("dashboardAlerts");
+const momentCatalogForm = document.getElementById("momentCatalogForm");
+const momentCatalogFormStatus = document.getElementById("momentCatalogFormStatus");
+const momentCatalogTable = document.getElementById("momentCatalogTable");
 
 let supabase = null;
 let currentMember = null;
@@ -185,34 +210,14 @@ const SOLD_CHANNEL_LABELS = {
   non_specificato:"Non specificato"
 };
 
-const MOMENT_TEMPLATE_LABELS = {
-  free:"Evento generale",
-  love:"Amore",
-  mom:"Mamma",
-  dad:"Papà",
-  child:"Figlio / Figlia",
-  kids:"Bambini",
-  memory:"Ricordi",
-  photo:"Album foto",
-  pet:"Animali",
-  communion:"Comunione",
-  baptism:"Battesimo",
-  friendship:"Amicizia",
-  family:"Famiglia",
-  valentine:"San Valentino",
-  christmas:"Natale",
-  birthday:"Compleanno",
-  wedding:"Matrimonio",
-  party:"Festa",
-  travel:"Viaggio",
-  memorial:"Memoriale",
-  portfolio:"Portfolio"
-};
+let supportTicketRows = [];
 let platformOrderRows = [];
 let planRows = [];
 let materialRows = [];
 let ticketCategoryRows = [];
 let integrationRows = [];
+let momentCatalogRows = [];
+let editingMomentCatalogId = null;
 let currentClient = null;
 let currentClientRecord = null;
 
@@ -241,6 +246,7 @@ function showAdmin(user,member){
   gate.hidden = true;
   adminLoginForm.hidden = true;
   content.hidden = false;
+  populateMomentTypeSelects();
   const label = member?.role ? `${user.email} · ${member.role}` : user.email;
   adminEmail.textContent = label || "Admin";
 }
@@ -397,6 +403,20 @@ async function safeCount(table,filter){
   }
 }
 
+async function countOpenSupportTickets(){
+  try{
+    const { data,error } = await supabase
+      .from("platform_support_tickets")
+      .select("status")
+      .limit(500);
+    if(error) throw error;
+    return (data || []).filter(row=>!["closed","resolved"].includes(String(row.status || "").toLowerCase())).length;
+  }catch(error){
+    console.warn("Conteggio ticket aperti non disponibile",error);
+    return 0;
+  }
+}
+
 async function loadCurrentMember(user){
   const email = String(user.email || "").toLowerCase();
   try{
@@ -424,7 +444,7 @@ async function loadCurrentMember(user){
 }
 
 async function loadDashboard(){
-  const [clients,published,nfc,events,agents,orders,pendingCommissions,moments,momentsAvailable] = await Promise.all([
+  const [clients,published,nfc,events,agents,orders,pendingCommissions,moments,momentsAvailable,pendingOrders,openTickets] = await Promise.all([
     safeCount("businesses"),
     safeCount("business_public_pages",query=>query.eq("published",true)),
     safeCount("nfc_tags"),
@@ -433,15 +453,23 @@ async function loadDashboard(){
     safeCount("platform_orders"),
     safeCount("platform_commission_events",query=>query.eq("status","pending")),
     safeCount("moment_events"),
-    safeCount("moment_activation_codes",query=>query.eq("status","available"))
+    safeCount("moment_activation_codes",query=>query.eq("status","available")),
+    safeCount("platform_orders",query=>query.in("status",["pending","paid","production","ready"])),
+    countOpenSupportTickets()
   ]);
   let stock = 0;
+  let lowStockProducts = 0;
   try{
     const { data,error } = await supabase
       .from("platform_product_stock_summary")
-      .select("available_quantity");
+      .select("available_quantity,min_stock");
     if(error) throw error;
     stock = (data || []).reduce((sum,row)=>sum + Number(row.available_quantity || 0),0);
+    lowStockProducts = (data || []).filter(row=>{
+      const available = Number(row.available_quantity || 0);
+      const minStock = Number(row.min_stock || 0);
+      return minStock > 0 && available <= minStock;
+    }).length;
   }catch(error){
     console.warn("Stock non disponibile",error);
   }
@@ -456,6 +484,13 @@ async function loadDashboard(){
   document.getElementById("mMoments").textContent = fmt(moments);
   const momentStockNode = document.getElementById("mMomentStock");
   if(momentStockNode) momentStockNode.textContent = fmt(momentsAvailable);
+  renderDashboardAlerts({
+    momentsAvailable,
+    pendingOrders,
+    openTickets,
+    lowStockProducts,
+    pendingCommissions
+  });
 }
 
 async function loadClients(){
@@ -464,29 +499,16 @@ async function loadClients(){
       .from("businesses")
       .select("id,profile_id,nome,slug,categoria")
       .order("created_at",{ascending:false})
-      .limit(50);
+      .limit(200);
     if(error) throw error;
-    const rows = data || [];
-    clientRows = rows;
-    const businessOptions = `<option value="">Nessun cliente collegato</option>` + rows.map(row=>`
+    clientRows = data || [];
+    const businessOptions = `<option value="">Nessun cliente collegato</option>` + clientRows.map(row=>`
       <option value="${esc(row.id)}">${esc(row.nome || row.slug || row.id)}</option>
     `).join("");
     orderBusinessSelect.innerHTML = businessOptions;
     momentBusinessSelect.innerHTML = businessOptions;
-    clientsTable.innerHTML = rows.length ? rows.map(row => `
-      <tr>
-        <td><strong>${esc(row.nome || "Senza nome")}</strong></td>
-        <td>${esc(row.slug || "-")}</td>
-        <td>${esc(row.categoria || "-")}</td>
-        <td>
-          <div class="row-actions">
-            <button type="button" data-client-open="${esc(row.id)}" data-client-view="summary">Scheda</button>
-            ${row.slug ? `<button type="button" data-client-open="${esc(row.id)}" data-client-view="public">Pagina</button>` : ""}
-            <button type="button" data-client-open="${esc(row.id)}" data-client-view="editor">Editor</button>
-          </div>
-        </td>
-      </tr>
-    `).join("") : `<tr><td colspan="4">Nessun cliente trovato o permessi database non ancora configurati.</td></tr>`;
+    populateClientCategoryFilter();
+    refreshClientsTable();
   }catch(error){
     console.error(error);
     const hint = String(error?.message || "").includes("permission") || String(error?.code || "") === "42501"
@@ -496,26 +518,67 @@ async function loadClients(){
   }
 }
 
+function populateClientCategoryFilter(){
+  if(!clientFilterCategory) return;
+  const current = clientFilterCategory.value;
+  const categories = [...new Set(clientRows.map(row=>row.categoria).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"it"));
+  clientFilterCategory.innerHTML = `<option value="">Tutte</option>` + categories.map(cat=>`
+    <option value="${esc(cat)}" ${cat === current ? "selected" : ""}>${esc(cat)}</option>
+  `).join("");
+}
+
+function refreshClientsTable(){
+  const search = String(clientSearchInput?.value || "").trim().toLowerCase();
+  const category = clientFilterCategory?.value || "";
+  const rows = clientRows.filter(row=>{
+    if(category && (row.categoria || "") !== category) return false;
+    return haystackIncludes(row, search, ["nome","slug","categoria","id"]);
+  });
+  if(clientTableCount) clientTableCount.textContent = `${fmt(rows.length)} clienti`;
+  clientsTable.innerHTML = rows.length ? rows.map(row => `
+    <tr>
+      <td><strong>${esc(row.nome || "Senza nome")}</strong></td>
+      <td>${esc(row.slug || "-")}</td>
+      <td>${esc(row.categoria || "-")}</td>
+      <td>
+        <div class="row-actions">
+          <button type="button" data-client-open="${esc(row.id)}" data-client-view="summary">Scheda</button>
+          ${row.slug ? `<button type="button" data-client-open="${esc(row.id)}" data-client-view="public">Pagina</button>` : ""}
+          <button type="button" data-client-open="${esc(row.id)}" data-client-view="editor">Editor</button>
+        </div>
+      </td>
+    </tr>
+  `).join("") : `<tr><td colspan="4">${clientRows.length ? "Nessun cliente corrisponde ai filtri." : "Nessun cliente trovato o permessi database non ancora configurati."}</td></tr>`;
+}
+
 async function loadMomentCustomers(){
   if(!momentCustomersTable) return;
   try{
     const { data,error } = await supabase.rpc("get_moment_customer_stats");
     if(error) throw error;
     momentCustomerRows = data || [];
-    momentCustomersTable.innerHTML = momentCustomerRows.length ? momentCustomerRows.map(row=>`
-      <tr>
-        <td><strong>${esc(row.display_name || row.email)}</strong></td>
-        <td>${esc(row.email)}</td>
-        <td>${fmt(row.object_count)}</td>
-        <td>${fmt(row.published_count)}</td>
-        <td>${dateShort(row.last_activated_at)}</td>
-        <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
-      </tr>
-    `).join("") : `<tr><td colspan="6">Nessun account Moments. Crea il primo cliente dal form sopra.</td></tr>`;
+    refreshMomentCustomersTable();
   }catch(error){
     console.error(error);
     momentCustomersTable.innerHTML = `<tr><td colspan="6">Account Moments non disponibili. Applica SQL v43.</td></tr>`;
   }
+}
+
+function refreshMomentCustomersTable(){
+  if(!momentCustomersTable) return;
+  const search = String(momentCustomerSearchInput?.value || "").trim().toLowerCase();
+  const rows = momentCustomerRows.filter(row=>haystackIncludes(row, search, ["display_name","email","status"]));
+  if(momentCustomerTableCount) momentCustomerTableCount.textContent = `${fmt(rows.length)} account`;
+  momentCustomersTable.innerHTML = rows.length ? rows.map(row=>`
+    <tr>
+      <td><strong>${esc(row.display_name || row.email)}</strong></td>
+      <td>${esc(row.email)}</td>
+      <td>${fmt(row.object_count)}</td>
+      <td>${fmt(row.published_count)}</td>
+      <td>${dateShort(row.last_activated_at)}</td>
+      <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
+    </tr>
+  `).join("") : `<tr><td colspan="6">${momentCustomerRows.length ? "Nessun account corrisponde alla ricerca." : "Nessun account Moments. Crea il primo cliente dal form sopra."}</td></tr>`;
 }
 
 function momentPublicUrl(slug){
@@ -537,32 +600,62 @@ async function loadMoments(){
       .select("id,title,slug,event_type,moment_type,status,event_date,nfc_code,pin_enabled,public_visible,owner_email,activated_at,created_at")
       .order("activated_at",{ascending:false,nullsFirst:false})
       .order("created_at",{ascending:false})
-      .limit(120);
+      .limit(200);
     if(error) throw error;
     momentRows = data || [];
-    momentsTable.innerHTML = momentRows.length ? momentRows.map(row=>{
-      const type = momentTemplateLabel(row.moment_type || row.event_type);
-      const publicUrl = momentPublicUrl(row.slug);
-      return `<tr>
-        <td><strong>${esc(row.title)}</strong><div class="muted-cell">/m/${esc(row.slug)}</div></td>
-        <td>${esc(row.owner_email || "-")}</td>
-        <td>${esc(type)}</td>
-        <td>${esc(row.nfc_code || "-")}</td>
-        <td><span class="status-pill ${row.public_visible ? "active" : "draft"}">${row.public_visible ? "sì" : "no"}</span></td>
-        <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
-        <td>
-          <div class="row-actions">
-            <button type="button" data-moment-open="${esc(row.id)}" data-moment-view="summary">Scheda</button>
-            ${publicUrl ? `<button type="button" data-moment-open="${esc(row.id)}" data-moment-view="public">Pagina</button>` : ""}
-            <button type="button" data-moment-open="${esc(row.id)}" data-moment-view="editor">Editor</button>
-          </div>
-        </td>
-      </tr>`;
-    }).join("") : `<tr><td colspan="7">Nessun oggetto Moments attivato.</td></tr>`;
+    populateMomentObjectTypeFilter();
+    refreshMomentsTable();
   }catch(error){
     console.error(error);
     momentsTable.innerHTML = `<tr><td colspan="7">Oggetti Moments non disponibili. Verifica permessi moments.read.</td></tr>`;
   }
+}
+
+function populateMomentObjectTypeFilter(){
+  if(!momentFilterType) return;
+  const current = momentFilterType.value;
+  const types = [...new Set(momentRows.map(row=>normalizeMomentType(row.moment_type || row.event_type)))].sort((a,b)=>
+    (TYPE_LABELS[a] || a).localeCompare(TYPE_LABELS[b] || b,"it")
+  );
+  momentFilterType.innerHTML = `<option value="">Tutti</option>` + types.map(type=>`
+    <option value="${esc(type)}" ${type === current ? "selected" : ""}>${esc(momentTemplateLabel(type))}</option>
+  `).join("");
+}
+
+function refreshMomentsTable(){
+  const search = String(momentObjectSearchInput?.value || "").trim().toLowerCase();
+  const typeFilter = momentFilterType?.value || "";
+  const publishedFilter = momentFilterPublished?.value || "";
+  const rows = momentRows.filter(row=>{
+    const type = normalizeMomentType(row.moment_type || row.event_type);
+    if(typeFilter && type !== typeFilter) return false;
+    if(publishedFilter === "yes" && !row.public_visible) return false;
+    if(publishedFilter === "no" && row.public_visible) return false;
+    return haystackIncludes(row, search, [
+      "title","slug","owner_email","nfc_code","status",
+      r=>momentTemplateLabel(r.moment_type || r.event_type)
+    ]);
+  });
+  if(momentObjectTableCount) momentObjectTableCount.textContent = `${fmt(rows.length)} oggetti`;
+  momentsTable.innerHTML = rows.length ? rows.map(row=>{
+    const type = momentTemplateLabel(row.moment_type || row.event_type);
+    const publicUrl = momentPublicUrl(row.slug);
+    return `<tr>
+      <td><strong>${esc(row.title)}</strong><div class="muted-cell">/m/${esc(row.slug)}</div></td>
+      <td>${esc(row.owner_email || "-")}</td>
+      <td>${esc(type)}</td>
+      <td>${esc(row.nfc_code || "-")}</td>
+      <td><span class="status-pill ${row.public_visible ? "active" : "draft"}">${row.public_visible ? "sì" : "no"}</span></td>
+      <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
+      <td>
+        <div class="row-actions">
+          <button type="button" data-moment-open="${esc(row.id)}" data-moment-view="summary">Scheda</button>
+          ${publicUrl ? `<button type="button" data-moment-open="${esc(row.id)}" data-moment-view="public">Pagina</button>` : ""}
+          <button type="button" data-moment-open="${esc(row.id)}" data-moment-view="editor">Editor</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="7">${momentRows.length ? "Nessun oggetto corrisponde ai filtri." : "Nessun oggetto Moments attivato."}</td></tr>`;
 }
 
 function productLineLabel(value){
@@ -570,7 +663,102 @@ function productLineLabel(value){
 }
 
 function momentTemplateLabel(value){
-  return MOMENT_TEMPLATE_LABELS[value] || value || "-";
+  return TYPE_LABELS[normalizeMomentType(value)] || value || "-";
+}
+
+function populateMomentTypeSelects(){
+  document.querySelectorAll("[data-moment-type-select]").forEach(select=>{
+    const current = select.value || select.dataset.defaultValue || "free";
+    select.innerHTML = renderCategorySelect(current);
+  });
+}
+
+function haystackIncludes(row, search, parts){
+  if(!search) return true;
+  const haystack = parts.map(part=>{
+    if(typeof part === "function") return part(row);
+    return row?.[part];
+  }).filter(Boolean).join(" ").toLowerCase();
+  return haystack.includes(search);
+}
+
+function bindSearchInput(input, onChange){
+  if(!input) return;
+  let timer = null;
+  input.addEventListener("input",()=>{
+    clearTimeout(timer);
+    timer = setTimeout(onChange,180);
+  });
+}
+
+function renderDashboardAlerts(stats){
+  if(!dashboardAlerts) return;
+  const alerts = [];
+  if(stats.momentsAvailable <= 10){
+    alerts.push({
+      level:stats.momentsAvailable === 0 ? "danger" : "warn",
+      title:"Stock NFC Moments",
+      text:stats.momentsAvailable === 0
+        ? "Nessun codice disponibile in magazzino — genera un nuovo lotto."
+        : `Solo ${fmt(stats.momentsAvailable)} codici disponibili — valuta nuova produzione.`,
+      tab:"momentInventory"
+    });
+  }
+  if(stats.pendingOrders > 0){
+    alerts.push({
+      level:"warn",
+      title:"Ordini da evadere",
+      text:`${fmt(stats.pendingOrders)} ordini in attesa, pagati o in produzione.`,
+      tab:"platformOrders"
+    });
+  }
+  if(stats.openTickets > 0){
+    alerts.push({
+      level:"warn",
+      title:"Ticket supporto aperti",
+      text:`${fmt(stats.openTickets)} richieste ancora da chiudere.`,
+      tab:"support"
+    });
+  }
+  if(stats.lowStockProducts > 0){
+    alerts.push({
+      level:"warn",
+      title:"Magazzino Business sotto soglia",
+      text:`${fmt(stats.lowStockProducts)} prodotti sotto la quantità minima.`,
+      tab:"inventory"
+    });
+  }
+  if(stats.pendingCommissions > 0){
+    alerts.push({
+      level:"info",
+      title:"Provvigioni da approvare",
+      text:`${fmt(stats.pendingCommissions)} provvigioni in stato pending.`,
+      tab:"commissions"
+    });
+  }
+  if(!alerts.length){
+    dashboardAlerts.innerHTML = `
+      <div class="alert-item alert-ok" data-admin-tab-jump="dashboard">
+        <strong>Tutto ok</strong>
+        <span>Nessun alert urgente. Stock Moments: ${fmt(stats.momentsAvailable)} · Ordini attivi: ${fmt(stats.pendingOrders)} · Ticket aperti: ${fmt(stats.openTickets)}.</span>
+      </div>`;
+    return;
+  }
+  dashboardAlerts.innerHTML = alerts.map(alert=>`
+    <div class="alert-item alert-${esc(alert.level)}" data-admin-tab-jump="${esc(alert.tab)}" role="button" tabindex="0">
+      <strong>${esc(alert.title)}</strong>
+      <span>${esc(alert.text)}</span>
+    </div>
+  `).join("");
+  dashboardAlerts.querySelectorAll("[data-admin-tab-jump]").forEach(node=>{
+    node.addEventListener("click",()=>switchTab(node.dataset.adminTabJump));
+    node.addEventListener("keydown",event=>{
+      if(event.key === "Enter" || event.key === " "){
+        event.preventDefault();
+        switchTab(node.dataset.adminTabJump);
+      }
+    });
+  });
 }
 
 function momentNfcUrl(row){
@@ -898,21 +1086,34 @@ async function loadAgents(){
     if(error) throw error;
     agentRows = data || [];
     renderAgentOptions(currentClientRecord?.assigned_agent_id || "");
-    agentsTable.innerHTML = agentRows.length ? agentRows.map(row=>`
-      <tr>
-        <td><strong>${esc(row.contact_name || row.email)}</strong><div class="muted-cell">${esc(row.business_name || row.email)}</div></td>
-        <td>${esc(row.referral_code)}</td>
-        <td>${esc(row.model)}</td>
-        <td>${fmt(row.commission_percent)}%</td>
-        <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
-        <td><button class="small-action" type="button" data-agent-edit="${esc(row.id)}">Modifica</button></td>
-      </tr>
-    `).join("") : `<tr><td colspan="6">Nessun agente registrato.</td></tr>`;
+    refreshAgentsTable();
     if(momentProductRows.length) refreshMomentTable();
   }catch(error){
     console.error(error);
-    agentsTable.innerHTML = `<tr><td colspan="5">Agenti non disponibili. Verifica permessi agents.read.</td></tr>`;
+    agentsTable.innerHTML = `<tr><td colspan="6">Agenti non disponibili. Verifica permessi agents.read.</td></tr>`;
   }
+}
+
+function refreshAgentsTable(){
+  const search = String(agentSearchInput?.value || "").trim().toLowerCase();
+  const status = agentFilterStatus?.value || "";
+  const model = agentFilterModel?.value || "";
+  const rows = agentRows.filter(row=>{
+    if(status && row.status !== status) return false;
+    if(model && row.model !== model) return false;
+    return haystackIncludes(row, search, ["contact_name","business_name","email","referral_code","model"]);
+  });
+  if(agentTableCount) agentTableCount.textContent = `${fmt(rows.length)} agenti`;
+  agentsTable.innerHTML = rows.length ? rows.map(row=>`
+    <tr>
+      <td><strong>${esc(row.contact_name || row.email)}</strong><div class="muted-cell">${esc(row.business_name || row.email)}</div></td>
+      <td>${esc(row.referral_code)}</td>
+      <td>${esc(row.model)}</td>
+      <td>${fmt(row.commission_percent)}%</td>
+      <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
+      <td><button class="small-action" type="button" data-agent-edit="${esc(row.id)}">Modifica</button></td>
+    </tr>
+  `).join("") : `<tr><td colspan="6">${agentRows.length ? "Nessun agente corrisponde ai filtri." : "Nessun agente registrato."}</td></tr>`;
 }
 
 async function loadCommissions(){
@@ -961,6 +1162,224 @@ async function loadCommissionRules(){
   }catch(error){
     console.error(error);
     commissionRulesTable.innerHTML = `<tr><td colspan="6">Regole non disponibili. Verifica permessi commissions.read.</td></tr>`;
+  }
+}
+
+function momentShopifyStoreLabel(row){
+  if(!row.publish_shopify) return "—";
+  const description = String(row.description || "").trim();
+  const imageUrl = String(row.image_url || "").trim();
+  const ready = description.length >= 20 && imageUrl;
+  if(row.shopify_live && ready) return "Online";
+  if(row.shopify_live && !ready) return "In attesa contenuti";
+  return "Bozza Shopify";
+}
+
+async function loadMomentCatalog(){
+  if(!momentCatalogTable) return;
+  try{
+    const { data,error } = await supabase
+      .from("platform_moment_catalog")
+      .select("id,sku,name,description,product_line,product_type,sale_price,unit_cost,physical_units,activation_codes,image_url,publish_shopify,shopify_live,sync_status,sync_error,last_synced_at,status,sort_order")
+      .order("sort_order",{ascending:true})
+      .order("name",{ascending:true});
+    if(error) throw error;
+    momentCatalogRows = data || [];
+    momentCatalogTable.innerHTML = momentCatalogRows.length ? momentCatalogRows.map(row=>{
+      const syncLabel = {
+        draft:"Bozza",
+        pending:"In coda",
+        synced:"Sincronizzato",
+        error:"Errore"
+      }[row.sync_status] || row.sync_status;
+      const syncClass = row.sync_status === "error" ? "low" : row.sync_status === "synced" ? "active" : row.sync_status;
+      return `
+        <tr>
+          <td><strong>${esc(row.name)}</strong><div class="muted-cell">${esc(productLineLabel(row.product_line))} · ${esc(momentTemplateLabel(row.product_type))}</div></td>
+          <td>${esc(row.sku)}</td>
+          <td><strong>${money(row.sale_price)}</strong><div class="muted-cell">Costo ${money(row.unit_cost)}</div></td>
+          <td>${fmt(row.physical_units)}</td>
+          <td>${fmt(row.activation_codes)}</td>
+          <td>${esc(momentShopifyStoreLabel(row))}</td>
+          <td><span class="status-pill ${esc(syncClass)}">${esc(syncLabel)}</span>${row.sync_error ? `<div class="muted-cell">${esc(row.sync_error)}</div>` : ""}</td>
+          <td>
+            <button class="small-action" type="button" data-moment-catalog-edit="${esc(row.id)}">Modifica</button>
+            <button class="small-action" type="button" data-moment-catalog-sync="${esc(row.id)}">Sync Shopify</button>
+          </td>
+        </tr>
+      `;
+    }).join("") : `<tr><td colspan="8">Nessun prodotto in catalogo. Applica SQL v64 o crea il primo SKU.</td></tr>`;
+  }catch(error){
+    console.error(error);
+    momentCatalogTable.innerHTML = `<tr><td colspan="8">Catalogo non disponibile. Applica sql/khamakey-moments-sales-channels-v64.sql su Supabase.</td></tr>`;
+  }
+}
+
+function editMomentCatalog(id){
+  const row = momentCatalogRows.find(item=>item.id === id);
+  if(!row || !momentCatalogForm) return;
+  editingMomentCatalogId = row.id;
+  momentCatalogForm.elements.sku.value = row.sku || "";
+  momentCatalogForm.elements.name.value = row.name || "";
+  momentCatalogForm.elements.product_line.value = row.product_line || "portachiavi";
+  momentCatalogForm.elements.product_type.innerHTML = renderCategorySelect(row.product_type || "free");
+  momentCatalogForm.elements.product_type.value = normalizeMomentType(row.product_type || "free");
+  momentCatalogForm.elements.sale_price.value = row.sale_price || 0;
+  momentCatalogForm.elements.unit_cost.value = row.unit_cost || 0;
+  momentCatalogForm.elements.physical_units.value = row.physical_units || 1;
+  momentCatalogForm.elements.activation_codes.value = row.activation_codes || 1;
+  momentCatalogForm.elements.publish_shopify.value = row.publish_shopify ? "true" : "false";
+  momentCatalogForm.elements.shopify_live.value = row.shopify_live ? "true" : "false";
+  momentCatalogForm.elements.status.value = row.status || "active";
+  momentCatalogForm.elements.image_url.value = row.image_url || "";
+  momentCatalogForm.elements.description.value = row.description || "";
+  focusForm(momentCatalogForm,momentCatalogFormStatus,`Stai modificando ${row.name || row.sku}.`);
+}
+
+async function syncMomentCatalogToShopify(catalogId){
+  if(!hasPermission("inventory.write")){
+    setFormStatus(momentCatalogFormStatus,"Non hai il permesso inventory.write.","error");
+    return { ok:false, error:"Permesso negato." };
+  }
+  const { data:sessionData } = await supabase.auth.getSession();
+  const token = sessionData?.session?.access_token;
+  if(!token){
+    setFormStatus(momentCatalogFormStatus,"Sessione scaduta. Riaccedi.","error");
+    return { ok:false, error:"Sessione scaduta." };
+  }
+  setFormStatus(momentCatalogFormStatus,"Sincronizzazione Shopify in corso...");
+  try{
+    const response = await fetch(`${WORKER_BASE_URL}/api/channels/shopify/sync`,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:`Bearer ${token}`
+      },
+      body:JSON.stringify({ catalog_id:catalogId })
+    });
+    const result = await response.json().catch(()=>({}));
+    if(!response.ok){
+      throw new Error(result.error || `Sync fallita (${response.status})`);
+    }
+    setFormStatus(momentCatalogFormStatus,`Shopify aggiornato (${result.handle || result.shopify_product_id}).`,"ok");
+    await loadMomentCatalog();
+    return { ok:true, result };
+  }catch(error){
+    console.error(error);
+    setFormStatus(momentCatalogFormStatus,error.message || "Errore sync Shopify.","error");
+    await loadMomentCatalog();
+    return { ok:false, error:error.message || "Errore sync." };
+  }
+}
+
+async function syncAllMomentCatalogToShopify(){
+  const targets = momentCatalogRows.filter(row=>row.status === "active");
+  if(!targets.length){
+    setFormStatus(momentCatalogFormStatus,"Nessun prodotto attivo da sincronizzare.","error");
+    return;
+  }
+  setFormStatus(momentCatalogFormStatus,`Sync Shopify: 0/${targets.length}...`);
+  let okCount = 0;
+  for(const row of targets){
+    const result = await syncMomentCatalogToShopify(row.id);
+    if(result.ok) okCount += 1;
+    setFormStatus(momentCatalogFormStatus,`Sync Shopify: ${okCount}/${targets.length} completati...`);
+  }
+  setFormStatus(momentCatalogFormStatus,`Sync completata: ${okCount}/${targets.length} prodotti su Shopify.`,"ok");
+}
+
+async function registerShopifyOrderWebhooks(){
+  if(!hasPermission("inventory.write")){
+    setFormStatus(momentCatalogFormStatus,"Non hai il permesso inventory.write.","error");
+    return;
+  }
+  const { data:sessionData } = await supabase.auth.getSession();
+  const token = sessionData?.session?.access_token;
+  if(!token){
+    setFormStatus(momentCatalogFormStatus,"Sessione scaduta. Riaccedi.","error");
+    return;
+  }
+  setFormStatus(momentCatalogFormStatus,"Registrazione webhook ordini Shopify...");
+  try{
+    const response = await fetch(`${WORKER_BASE_URL}/api/channels/shopify/register-webhooks`,{
+      method:"POST",
+      headers:{ Authorization:`Bearer ${token}` }
+    });
+    const result = await response.json().catch(()=>({}));
+    if(!response.ok){
+      throw new Error(result.error || result.manual || `Errore ${response.status}`);
+    }
+    const created = (result.created || []).length;
+    const skipped = (result.skipped || []).length;
+    setFormStatus(momentCatalogFormStatus,`Webhook ordini OK (${created} creati, ${skipped} già presenti).`,"ok");
+  }catch(error){
+    console.error(error);
+    setFormStatus(momentCatalogFormStatus,`${error.message}. In alternativa: Shopify → Impostazioni → Notifiche → Webhook.`,"error");
+  }
+}
+
+async function saveMomentCatalog(event){
+  event.preventDefault();
+  if(!hasPermission("inventory.write")){
+    setFormStatus(momentCatalogFormStatus,"Non hai il permesso inventory.write.","error");
+    return;
+  }
+  const form = event.currentTarget;
+  const description = String(form.elements.description.value || "").trim();
+  const imageUrl = String(form.elements.image_url.value || "").trim();
+  const publishShopify = form.elements.publish_shopify.value === "true";
+  const shopifyLive = form.elements.shopify_live.value === "true";
+  if(shopifyLive && (description.length < 20 || !imageUrl)){
+    setFormStatus(momentCatalogFormStatus,"Per pubblicare online servono immagine e descrizione (min. 20 caratteri).","error");
+    return;
+  }
+  const payload = {
+    sku:String(form.elements.sku.value || "").trim().toUpperCase(),
+    name:String(form.elements.name.value || "").trim(),
+    description:description || null,
+    product_line:form.elements.product_line.value,
+    product_type:normalizeMomentType(form.elements.product_type.value),
+    sale_price:Number(form.elements.sale_price.value || 0),
+    unit_cost:Number(form.elements.unit_cost.value || 0),
+    physical_units:Math.max(1,Number(form.elements.physical_units.value || 1)),
+    activation_codes:Math.max(1,Number(form.elements.activation_codes.value || 1)),
+    image_url:imageUrl || null,
+    publish_shopify:publishShopify,
+    shopify_live:shopifyLive,
+    status:form.elements.status.value,
+    sync_status:publishShopify ? "pending" : "draft",
+    updated_at:new Date().toISOString()
+  };
+  setFormStatus(momentCatalogFormStatus,"Salvataggio catalogo...");
+  let catalogId = editingMomentCatalogId;
+  if(catalogId){
+    const { error } = await supabase.from("platform_moment_catalog").update(payload).eq("id",catalogId);
+    if(error){
+      setFormStatus(momentCatalogFormStatus,error.message || "Errore salvataggio.","error");
+      return;
+    }
+  }else{
+    const { data,error } = await supabase.from("platform_moment_catalog").insert(payload).select("id").single();
+    if(error){
+      setFormStatus(momentCatalogFormStatus,error.message || "Errore salvataggio.","error");
+      return;
+    }
+    catalogId = data?.id;
+  }
+  editingMomentCatalogId = null;
+  form.reset();
+  form.elements.sale_price.value = "0";
+  form.elements.unit_cost.value = "0";
+  form.elements.physical_units.value = "1";
+  form.elements.activation_codes.value = "1";
+  form.elements.publish_shopify.value = "false";
+  form.elements.shopify_live.value = "false";
+  form.elements.status.value = "active";
+  populateMomentTypeSelects();
+  setFormStatus(momentCatalogFormStatus,"Prodotto catalogo salvato.","ok");
+  await loadMomentCatalog();
+  if((payload.publish_shopify || payload.shopify_live) && catalogId){
+    await syncMomentCatalogToShopify(catalogId);
   }
 }
 
@@ -1038,29 +1457,48 @@ async function loadPlatformOrders(){
       .from("platform_orders")
       .select("id,order_code,order_type,customer_name,customer_email,customer_phone,status,payment_status,subtotal,shipping_total,discount_total,total,notes,agent_id,stripe_checkout_session_id,stripe_invoice_id,platform_agents(contact_name,email,referral_code),businesses(nome,slug)")
       .order("created_at",{ascending:false})
-      .limit(50);
+      .limit(200);
     if(error) throw error;
     platformOrderRows = data || [];
-    platformOrdersTable.innerHTML = platformOrderRows.length ? platformOrderRows.map(row=>`
-      <tr>
-        <td><strong>${esc(row.order_code)}</strong></td>
-        <td>${esc(row.order_type)}</td>
-        <td><strong>${esc(row.businesses?.nome || row.customer_name || "-")}</strong><div class="muted-cell">${esc(row.customer_email || row.businesses?.slug || "")}</div></td>
-        <td>${esc(row.platform_agents?.contact_name || row.platform_agents?.email || "-")}</td>
-        <td><strong>${money(row.total)}</strong><div class="muted-cell">Sub ${money(row.subtotal)} · Sped ${money(row.shipping_total)}</div></td>
-        <td><select class="inline-select" data-order-payment="${esc(row.id)}">${selectOptions(PAYMENT_STATUS_OPTIONS,row.payment_status)}</select></td>
-        <td><select class="inline-select" data-order-status="${esc(row.id)}">${selectOptions(ORDER_STATUS_OPTIONS,row.status)}</select></td>
-        <td>
-          <button class="small-action" type="button" data-order-save="${esc(row.id)}">Aggiorna</button>
-          <button class="small-action" type="button" data-order-open="${esc(row.id)}">Gestisci</button>
-        </td>
-      </tr>
-    `).join("") : `<tr><td colspan="8">Nessun ordine interno registrato.</td></tr>`;
+    refreshOrdersTable();
     if(momentProductRows.length) refreshMomentTable();
   }catch(error){
     console.error(error);
     platformOrdersTable.innerHTML = `<tr><td colspan="8">Ordini non disponibili. Verifica permessi orders.read.</td></tr>`;
   }
+}
+
+function refreshOrdersTable(){
+  const search = String(orderSearchInput?.value || "").trim().toLowerCase();
+  const status = orderFilterStatus?.value || "";
+  const type = orderFilterType?.value || "";
+  const rows = platformOrderRows.filter(row=>{
+    if(status && row.status !== status) return false;
+    if(type && row.order_type !== type) return false;
+    return haystackIncludes(row, search, [
+      "order_code","order_type","customer_name","customer_email","customer_phone","status",
+      row=>row.businesses?.nome,
+      row=>row.businesses?.slug,
+      row=>row.platform_agents?.contact_name,
+      row=>row.platform_agents?.email
+    ]);
+  });
+  if(orderTableCount) orderTableCount.textContent = `${fmt(rows.length)} ordini`;
+  platformOrdersTable.innerHTML = rows.length ? rows.map(row=>`
+    <tr>
+      <td><strong>${esc(row.order_code)}</strong></td>
+      <td>${esc(row.order_type)}</td>
+      <td><strong>${esc(row.businesses?.nome || row.customer_name || "-")}</strong><div class="muted-cell">${esc(row.customer_email || row.businesses?.slug || "")}</div></td>
+      <td>${esc(row.platform_agents?.contact_name || row.platform_agents?.email || "-")}</td>
+      <td><strong>${money(row.total)}</strong><div class="muted-cell">Sub ${money(row.subtotal)} · Sped ${money(row.shipping_total)}</div></td>
+      <td><select class="inline-select" data-order-payment="${esc(row.id)}">${selectOptions(PAYMENT_STATUS_OPTIONS,row.payment_status)}</select></td>
+      <td><select class="inline-select" data-order-status="${esc(row.id)}">${selectOptions(ORDER_STATUS_OPTIONS,row.status)}</select></td>
+      <td>
+        <button class="small-action" type="button" data-order-save="${esc(row.id)}">Aggiorna</button>
+        <button class="small-action" type="button" data-order-open="${esc(row.id)}">Gestisci</button>
+      </td>
+    </tr>
+  `).join("") : `<tr><td colspan="8">${platformOrderRows.length ? "Nessun ordine corrisponde ai filtri." : "Nessun ordine interno registrato."}</td></tr>`;
 }
 
 async function loadPlans(){
@@ -1170,6 +1608,63 @@ async function loadSupportTickets(){
   }catch(error){
     console.error(error);
     supportTicketsTable.innerHTML = `<tr><td colspan="4">Ticket non disponibili.</td></tr>`;
+  }
+}
+
+async function loadIntegrationHealth(){
+  if(!integrationHealthGrid) return;
+  integrationHealthGrid.innerHTML = `<p class="field-hint">Lettura stato Worker...</p>`;
+  try{
+    const { data:sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    const response = await fetch(`${WORKER_BASE_URL}/api/integrations/status`,{
+      headers:token ? { Authorization:`Bearer ${token}` } : {}
+    });
+    const health = await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(health.error || `Errore ${response.status}`);
+    const items = Object.entries(health.integrations || {});
+    integrationHealthGrid.innerHTML = items.length ? items.map(([key,item])=>`
+      <div class="integration-health-card">
+        <strong>${esc(key.charAt(0).toUpperCase()+key.slice(1))}</strong>
+        <span class="status-pill ${item.configured ? "active" : "draft"}">${item.configured ? "Configurato" : "Da configurare"}</span>
+        <div class="muted-cell">Worker ${esc(health.version || "-")}</div>
+      </div>
+    `).join("") : `<p class="field-hint">Nessuna integrazione rilevata.</p>`;
+    if(health.locales?.length){
+      integrationHealthGrid.insertAdjacentHTML("beforeend",`
+        <div class="integration-health-card">
+          <strong>Lingue</strong>
+          <span class="status-pill active">${esc(health.locales.join(", ").toUpperCase())}</span>
+          <div class="muted-cell">i18n predisposto</div>
+        </div>
+      `);
+    }
+  }catch(error){
+    console.error(error);
+    integrationHealthGrid.innerHTML = `<p class="field-hint">Stato Worker non disponibile. Verifica login admin e deploy Worker.</p>`;
+  }
+}
+
+async function loadSupportedLocales(){
+  if(!supportedLocalesTable) return;
+  try{
+    const { data,error } = await supabase
+      .from("platform_supported_locales")
+      .select("locale,label,active,sort_order")
+      .order("sort_order",{ascending:true});
+    if(error) throw error;
+    const rows = data || [];
+    supportedLocalesTable.innerHTML = rows.length ? rows.map(row=>`
+      <tr>
+        <td><strong>${esc(String(row.locale || "").toUpperCase())}</strong></td>
+        <td>${esc(row.label)}</td>
+        <td>${row.active ? "Sì" : "No"}</td>
+        <td>${fmt(row.sort_order)}</td>
+      </tr>
+    `).join("") : `<tr><td colspan="4">Applica sql/khamakey-integrations-i18n-v66.sql su Supabase.</td></tr>`;
+  }catch(error){
+    console.error(error);
+    supportedLocalesTable.innerHTML = `<tr><td colspan="4">Lingue non disponibili (SQL v66).</td></tr>`;
   }
 }
 
@@ -2469,6 +2964,7 @@ async function loadAdminSession(){
     loadAgents(),
     loadCommissions(),
     loadCommissionRules(),
+    loadMomentCatalog(),
     loadProducts(),
     loadStockMovements(),
     loadPlatformOrders(),
@@ -2477,6 +2973,8 @@ async function loadAdminSession(){
     loadTicketCategories(),
     loadSupportTickets(),
     loadIntegrations(),
+    loadIntegrationHealth(),
+    loadSupportedLocales(),
     loadPaymentTransactions(),
     loadWebhookEvents()
   ]);
@@ -2593,6 +3091,22 @@ integrationsTable.addEventListener("click",event=>{
   if(button) editIntegration(button.dataset.integrationEdit);
 });
 
+document.getElementById("momentCatalogSyncAll")?.addEventListener("click",syncAllMomentCatalogToShopify);
+document.getElementById("momentCatalogRegisterWebhooks")?.addEventListener("click",registerShopifyOrderWebhooks);
+
+momentCatalogTable?.addEventListener("click",event=>{
+  const editBtn = event.target.closest("[data-moment-catalog-edit]");
+  if(editBtn){
+    editMomentCatalog(editBtn.dataset.momentCatalogEdit);
+    switchTab("momentCatalog");
+    return;
+  }
+  const syncBtn = event.target.closest("[data-moment-catalog-sync]");
+  if(syncBtn){
+    syncMomentCatalogToShopify(syncBtn.dataset.momentCatalogSync);
+  }
+});
+
 document.querySelectorAll("[data-reset-form]").forEach(button=>{
   button.addEventListener("click",()=>{
     const form = document.getElementById(button.dataset.resetForm);
@@ -2606,8 +3120,14 @@ document.querySelectorAll("[data-reset-form]").forEach(button=>{
     if(form.elements.setup_fee) form.elements.setup_fee.value = "0";
     if(form.elements.sort_order) form.elements.sort_order.value = "0";
     if(form.elements.active) form.elements.active.value = "true";
-    if(form.elements.public_visible) form.elements.public_visible.value = "false";
-    const statusNode = form.querySelector(".form-status");
+    if(form.id === "momentCatalogForm"){
+      editingMomentCatalogId = null;
+      if(form.elements.physical_units) form.elements.physical_units.value = "1";
+      if(form.elements.activation_codes) form.elements.activation_codes.value = "1";
+      if(form.elements.publish_shopify) form.elements.publish_shopify.value = "false";
+      if(form.elements.shopify_live) form.elements.shopify_live.value = "false";
+      populateMomentTypeSelects();
+    }
     if(statusNode) setFormStatus(statusNode,"Nuovo inserimento pronto.","ok");
   });
 });
@@ -2736,6 +3256,7 @@ memberForm.addEventListener("submit",saveMember);
 agentForm.addEventListener("submit",saveAgent);
 if(momentForm) momentForm.addEventListener("submit",saveMoment);
 if(momentBatchForm) momentBatchForm.addEventListener("submit",createMomentBatch);
+if(momentCatalogForm) momentCatalogForm.addEventListener("submit",saveMomentCatalog);
 productForm.addEventListener("submit",saveProduct);
 stockForm.addEventListener("submit",saveStockMovement);
 platformOrderForm.addEventListener("submit",savePlatformOrder);
@@ -2745,7 +3266,45 @@ ticketForm.addEventListener("submit",saveTicket);
 planForm.addEventListener("submit",savePlan);
 materialForm.addEventListener("submit",saveMaterial);
 ticketCategoryForm.addEventListener("submit",saveTicketCategory);
+if(refreshIntegrationHealthBtn) refreshIntegrationHealthBtn.addEventListener("click",loadIntegrationHealth);
 integrationForm.addEventListener("submit",saveIntegration);
+
+bindSearchInput(clientSearchInput, refreshClientsTable);
+document.getElementById("clientSearchClear")?.addEventListener("click",()=>{
+  if(clientSearchInput) clientSearchInput.value = "";
+  refreshClientsTable();
+});
+clientFilterCategory?.addEventListener("change",refreshClientsTable);
+
+bindSearchInput(momentCustomerSearchInput, refreshMomentCustomersTable);
+document.getElementById("momentCustomerSearchClear")?.addEventListener("click",()=>{
+  if(momentCustomerSearchInput) momentCustomerSearchInput.value = "";
+  refreshMomentCustomersTable();
+});
+
+bindSearchInput(momentObjectSearchInput, refreshMomentsTable);
+document.getElementById("momentObjectSearchClear")?.addEventListener("click",()=>{
+  if(momentObjectSearchInput) momentObjectSearchInput.value = "";
+  refreshMomentsTable();
+});
+momentFilterType?.addEventListener("change",refreshMomentsTable);
+momentFilterPublished?.addEventListener("change",refreshMomentsTable);
+
+bindSearchInput(agentSearchInput, refreshAgentsTable);
+document.getElementById("agentSearchClear")?.addEventListener("click",()=>{
+  if(agentSearchInput) agentSearchInput.value = "";
+  refreshAgentsTable();
+});
+agentFilterStatus?.addEventListener("change",refreshAgentsTable);
+agentFilterModel?.addEventListener("change",refreshAgentsTable);
+
+bindSearchInput(orderSearchInput, refreshOrdersTable);
+document.getElementById("orderSearchClear")?.addEventListener("click",()=>{
+  if(orderSearchInput) orderSearchInput.value = "";
+  refreshOrdersTable();
+});
+orderFilterStatus?.addEventListener("change",refreshOrdersTable);
+orderFilterType?.addEventListener("change",refreshOrdersTable);
 
 init().catch(error=>{
   console.error(error);

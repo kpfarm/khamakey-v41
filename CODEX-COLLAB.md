@@ -128,7 +128,7 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Stripe webhook / ingest** | Predisposto v103 | handler Stripe in `worker/worker.js`, RPC `ingest_stripe_checkout_event` |
 | **Shopify Moments** | Operativo | webhook ordini, catalogo vendita, sync bozze |
 | **Editor Business — contratto pubblico** | Condiviso | `publicStateFromEditor`, renderer `/p/` nel Worker |
-| **Admin UX / guide** | v104–v105 | `admin-guide.js`, chip filtri — coordinarsi se stesso pannello |
+| **Admin UX / guide** | v106 — menu intenti + modalità semplice | `admin.html`, `admin.js`, `admin.css`, `admin-guide.js` — coordinarsi se stesso pannello |
 
 Quando **nessuno** sta lavorando su un’area, lasciare **libero** o **—** nella colonna Owner.
 

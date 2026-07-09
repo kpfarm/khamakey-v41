@@ -1,7 +1,43 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL } from "./config.js";
 import { exportMomentLabelsPdf } from "./admin-moment-labels.js";
-import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=104";
+import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=106";
+
+const SIMPLE_MODE_KEY = "khamakey_admin_simple_mode";
+
+const TAB_PAGE_TITLES = {
+  dashboard: "Oggi",
+  platformOrders: "Ordini",
+  momentCatalog: "Catalogo online",
+  momentInventory: "Magazzino NFC",
+  nfc: "Spedizioni NFC",
+  billing: "Piani e pagamenti",
+  clients: "Attività Business",
+  momentClients: "Clienti Moments",
+  support: "Supporto",
+  crm: "CRM avanzato",
+  inventory: "Magazzino Business",
+  agents: "Partner e agenti",
+  resellerNetwork: "Rete partner",
+  commissions: "Quanto spetta",
+  integrations: "Collegamenti",
+  staff: "Collaboratori",
+  permissions: "Permessi",
+  plans: "Piani abbonamento",
+  materials: "Materiali"
+};
+
+const SIMPLE_TAB_REDIRECT = {
+  crm: "clients",
+  inventory: "clients",
+  nfc: "platformOrders",
+  billing: "platformOrders",
+  integrations: "dashboard",
+  staff: "dashboard",
+  permissions: "dashboard",
+  plans: "dashboard",
+  materials: "dashboard"
+};
 
 const ADMIN_EMAILS = new Set([
   "kristianperelli@gmail.com",
@@ -39,6 +75,7 @@ const PERMISSIONS = [
 const PUBLIC_BASE_URL = WORKER_BASE_URL;
 const LOCAL_PAGES_BASE = location.protocol === "file:" ? "." : location.origin;
 const shell = document.getElementById("adminShell");
+const simpleModeToggle = document.getElementById("simpleModeToggle");
 const sidebar = document.getElementById("adminSidebar");
 const topbar = document.getElementById("adminTopbar");
 const gate = document.getElementById("adminGate");
@@ -302,6 +339,7 @@ function showAdmin(user,member){
   adminLoginForm.hidden = true;
   content.hidden = false;
   populateMomentTypeSelects();
+  applySimpleMode();
   const label = member?.role ? `${user.email} · ${member.role}` : user.email;
   adminEmail.textContent = label || "Admin";
 }
@@ -433,7 +471,7 @@ function renderAgentOptions(selectedId=""){
 
 function renderAgentHierarchySelects(selectedParentId=""){
   const editingId = String(agentForm?.elements?.agent_id?.value || "").trim();
-  const parentOptions = `<option value="">Nessuno — radice rete</option>` + agentRows
+  const parentOptions = `<option value="">Nessuno — è il capo</option>` + agentRows
     .filter(row=>row.id !== editingId && !isAgentDescendant(editingId, row.id))
     .map(row=>`<option value="${esc(row.id)}" ${row.id === selectedParentId ? "selected" : ""}>${esc(agentLabel(row))}</option>`)
     .join("");
@@ -497,7 +535,49 @@ function togglePanelGuide(forceCollapsed){
   if(panelGuideToggleTop) panelGuideToggleTop.textContent = collapsed ? "Mostra guida" : "Guida sezione";
 }
 
+function isSimpleMode(){
+  try{
+    const stored = localStorage.getItem(SIMPLE_MODE_KEY);
+    if(stored === null) return true;
+    return stored !== "false";
+  }catch{
+    return true;
+  }
+}
+
+function setSimpleMode(enabled){
+  try{
+    localStorage.setItem(SIMPLE_MODE_KEY, enabled ? "true" : "false");
+  }catch{ /* ignore */ }
+  applySimpleMode();
+}
+
+function applySimpleMode(){
+  const simple = isSimpleMode();
+  shell?.classList.toggle("simple-mode", simple);
+  if(simpleModeToggle){
+    simpleModeToggle.setAttribute("aria-pressed", simple ? "true" : "false");
+    simpleModeToggle.textContent = simple ? "Modalità semplice" : "Modalità avanzata";
+    simpleModeToggle.title = simple ? "Nasconde opzioni tecniche — clicca per espandere" : "Mostra tutte le opzioni tecniche";
+  }
+}
+
+function simpleTierLabel(level){
+  if(!level || level === 1) return "Vendita diretta";
+  if(level === 2) return "Dal suo team";
+  if(level === 3) return "Dal team del team";
+  return `Livello ${level}`;
+}
+
+function isAdvancedTab(tab){
+  const button = document.querySelector(`[data-admin-tab="${tab}"]`);
+  return Boolean(button?.hasAttribute("data-advanced-only"));
+}
+
 function switchTab(tab){
+  if(isSimpleMode() && isAdvancedTab(tab)){
+    tab = SIMPLE_TAB_REDIRECT[tab] || "dashboard";
+  }
   document.querySelectorAll("[data-admin-tab]").forEach(button=>{
     button.classList.toggle("active",button.dataset.adminTab === tab);
   });
@@ -507,7 +587,7 @@ function switchTab(tab){
   const active = document.querySelector(`[data-admin-tab="${tab}"]`);
   const group = active?.closest("[data-nav-group]");
   if(group) group.classList.add("open");
-  adminTitle.textContent = active?.textContent || "Admin";
+  adminTitle.textContent = TAB_PAGE_TITLES[tab] || active?.textContent || "Admin";
   renderPanelGuide(tab, guideElements);
   if(panelGuide && !panelGuide.hidden){
     panelGuide.classList.toggle("collapsed", isGuideCollapsed());
@@ -1260,7 +1340,7 @@ async function loadCommissions(){
       <tr>
         <td><strong>${esc(row.platform_agents?.contact_name || row.platform_agents?.email || row.agent_id)}</strong></td>
         <td>${esc(row.event_type)}</td>
-        <td>${esc(TIER_LEVEL_LABELS[row.tier_level] || (row.tier_level ? `L${row.tier_level}` : "L1"))}</td>
+        <td>${esc(isSimpleMode() ? simpleTierLabel(row.tier_level) : (TIER_LEVEL_LABELS[row.tier_level] || (row.tier_level ? `L${row.tier_level}` : "Vendita diretta")))}</td>
         <td>${money(row.amount)}</td>
         <td>${money(row.commission_amount)}</td>
         <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
@@ -3515,6 +3595,14 @@ async function init(){
 
 document.querySelectorAll("[data-admin-tab]").forEach(button=>{
   button.addEventListener("click",()=>switchTab(button.dataset.adminTab));
+});
+
+simpleModeToggle?.addEventListener("click",()=>{
+  setSimpleMode(!isSimpleMode());
+  const activeTab = document.querySelector("[data-admin-tab].active")?.dataset.adminTab || "dashboard";
+  if(isSimpleMode() && isAdvancedTab(activeTab)){
+    switchTab(SIMPLE_TAB_REDIRECT[activeTab] || "dashboard");
+  }
 });
 
 document.querySelectorAll("[data-nav-toggle]").forEach(button=>{

@@ -9,11 +9,11 @@ export const COMMON_STATUS_LEGEND = [
 
 export const PANEL_GUIDES = {
   dashboard: {
-    subtitle: "La tua bacheca: numeri importanti e cosa fare adesso.",
+    subtitle: "La tua bacheca: cosa fare oggi, in ordine di priorità.",
     steps: [
-      "Controlla gli alert colorati — indicano le priorità del giorno.",
-      "Clicca su un alert per aprire subito la sezione giusta.",
-      "Usa il menu a sinistra per clienti, ordini, magazzino o Shopify."
+      "Clicca un pulsante colorato per iniziare (ordini, clienti, rete partner…).",
+      "Leggi gli alert — rosso = urgente, giallo = presto, verde = tutto ok.",
+      "Non sai dove andare? Resta qui e segui i suggerimenti."
     ],
     legend: [
       { pill: "alert-danger", label: "Rosso — urgente, intervenire subito" },
@@ -115,29 +115,28 @@ export const PANEL_GUIDES = {
     tip: "Stock basso compare anche negli alert della Dashboard."
   },
   agents: {
-    subtitle: "Agenti, rivenditori e punti autorizzati con rete a grado e provvigioni.",
+    subtitle: "Partner che vendono per KhamaKey o portano nuovi clienti.",
     steps: [
-      "Crea agente con email, tipo (agente / rivenditore / punto autorizzato) e codice referral.",
-      "Collega l'upline per formare la rete: quando un downline vende, l'upline prende L2/L3.",
-      "Assegna tier, bonus % extra e listino B2B dedicato.",
-      "Consulta albero rete e consegne nella tab Rete rivenditori."
+      "Scrivi nome ed email — bastano quelli per iniziare.",
+      "Scegli che tipo è (agente, rivenditore, punto autorizzato).",
+      "Se ha un capo in rete, selezionalo in «Chi lo segue?».",
+      "Salva — il codice invito si crea da solo se lo lasci vuoto."
     ],
     legend: COMMON_STATUS_LEGEND,
-    tip: "Applica SQL v68 su Supabase per gerarchia, listini e storico consegne."
+    tip: "In modalità semplice vedi solo i campi essenziali. Attiva «Modalità avanzata» per tier e listini."
   },
   resellerNetwork: {
-    subtitle: "Rete piramidale, regole provvigioni a grado, listini B2B e prodotti consegnati.",
+    subtitle: "Chi segue chi — e cosa abbiamo consegnato ai partner.",
     steps: [
-      "Visualizza l'albero agenti → rivenditori → punti autorizzati.",
-      "Configura regole L1/L2/L3 per tier (standard, premium, partner).",
-      "Crea listini rivenditori con prezzi B2B per SKU.",
-      "Registra consegne NFC/materiali e filtra per agente."
+      "Guarda l'albero: chi è sotto a chi nella rete.",
+      "Registra le consegne (card NFC, materiali) nella sezione in basso.",
+      "Per cambiare le regole % per tutti, passa a modalità avanzata."
     ],
     legend: [
-      { pill: "active", label: "Agente attivo in rete" },
-      { pill: "pending", label: "Provvigione in attesa (tab Provvigioni)" }
+      { pill: "active", label: "Partner attivo" },
+      { pill: "pending", label: "Soldi ancora da pagare" }
     ],
-    tip: "Le provvigioni multilivello si generano con RPC distribute_network_commissions quando un ordine/pagamento è collegato a un agente downline."
+    tip: "Se Mario segue Lucia, quando Mario vende anche Lucia guadagna una parte."
   },
   staff: {
     subtitle: "Invita collaboratori e limita cosa possono fare.",
@@ -177,14 +176,14 @@ export const PANEL_GUIDES = {
     tip: "Per nuovi prezzi contatta chi gestisce Stripe."
   },
   commissions: {
-    subtitle: "Regole e movimenti provvigioni agenti con grado L1/L2/L3.",
+    subtitle: "Quanto spetta a ogni partner — cosa pagare e cosa è già saldato.",
     steps: [
-      "L1 = vendita diretta dell'agente. L2/L3 = upline quando vende un downline.",
-      "Le regole tier si configurano in Rete rivenditori.",
-      "Filtra per stato pending per vedere cosa pagare."
+      "Giallo = ancora da pagare al partner.",
+      "Verde = già saldato.",
+      "«Vendita diretta» = l'ha venduto lui. «Dal suo team» = l'ha venduto qualcuno che segue."
     ],
-    legend: [{ pill: "pending", label: "Da approvare/pagare" }, { pill: "paid completed", label: "Saldato" }],
-    tip: "Hook automatico su Stripe/Shopify in arrivo — oggi puoi simulare con RPC distribute_network_commissions."
+    legend: [{ pill: "pending", label: "Da pagare" }, { pill: "paid completed", label: "Già pagato" }],
+    tip: "Prima di pagare, controlla sempre con l'amministrazione."
   },
   support: {
     subtitle: "Ticket assistenza clienti Business e Moments.",

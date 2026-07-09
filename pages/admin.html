@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=105">
+  <link rel="stylesheet" href="admin.css?v=106">
 </head>
 <body>
   <main class="admin-shell locked" id="adminShell">
@@ -17,53 +17,48 @@
         <img src="khamakey-wordmark-dark.png" alt="KhamaKey">
         <span>Admin</span>
       </a>
-      <nav class="admin-nav grouped" aria-label="Navigazione admin">
-        <section class="nav-group open" data-nav-group>
-          <button class="nav-group-toggle" type="button" data-nav-toggle>Controllo</button>
+      <nav class="admin-nav grouped intent-nav" aria-label="Navigazione admin">
+        <section class="nav-group nav-intent open" data-nav-group data-nav-intent="today">
+          <button class="nav-group-toggle" type="button" data-nav-toggle aria-expanded="true">Oggi</button>
           <div class="nav-group-items">
-            <button class="active" data-admin-tab="dashboard">Dashboard</button>
-            <button data-admin-tab="integrations">Integrazioni</button>
+            <button class="active" data-admin-tab="dashboard">Cosa fare oggi</button>
           </div>
         </section>
-        <section class="nav-group open" data-nav-group>
-          <button class="nav-group-toggle" type="button" data-nav-toggle>Business</button>
-          <div class="nav-group-items">
-            <button data-admin-tab="clients">Clienti</button>
-            <button data-admin-tab="crm">CRM</button>
-            <button data-admin-tab="support">Supporto</button>
-            <button data-admin-tab="inventory">Magazzino Business</button>
-          </div>
-        </section>
-        <section class="nav-group open" data-nav-group>
-          <button class="nav-group-toggle" type="button" data-nav-toggle>Moments</button>
-          <div class="nav-group-items">
-            <button data-admin-tab="momentClients">Clienti Moments</button>
-            <button data-admin-tab="momentCatalog">Catalogo vendita</button>
-            <button data-admin-tab="momentInventory">Magazzino NFC Moments</button>
-          </div>
-        </section>
-        <section class="nav-group open" data-nav-group>
-          <button class="nav-group-toggle" type="button" data-nav-toggle>Servizi centrali</button>
+        <section class="nav-group nav-intent" data-nav-group data-nav-intent="sell">
+          <button class="nav-group-toggle" type="button" data-nav-toggle aria-expanded="false">Vendere</button>
           <div class="nav-group-items">
             <button data-admin-tab="platformOrders">Ordini</button>
-            <button data-admin-tab="nfc">NFC / Spedizioni</button>
-            <button data-admin-tab="billing">Piani e fatturazione</button>
-            <button data-admin-tab="commissions">Provvigioni</button>
+            <button data-admin-tab="momentCatalog">Catalogo online</button>
+            <button data-admin-tab="momentInventory">Magazzino NFC</button>
+            <button data-admin-tab="nfc" data-advanced-only>Spedizioni NFC</button>
+            <button data-admin-tab="billing" data-advanced-only>Piani e pagamenti</button>
           </div>
         </section>
-        <section class="nav-group" data-nav-group>
-          <button class="nav-group-toggle" type="button" data-nav-toggle>Team e agenti</button>
+        <section class="nav-group nav-intent" data-nav-group data-nav-intent="clients">
+          <button class="nav-group-toggle" type="button" data-nav-toggle aria-expanded="false">Clienti</button>
           <div class="nav-group-items">
+            <button data-admin-tab="clients">Attività Business</button>
+            <button data-admin-tab="momentClients">Clienti Moments</button>
+            <button data-admin-tab="support">Supporto</button>
+            <button data-admin-tab="crm" data-advanced-only>CRM avanzato</button>
+            <button data-admin-tab="inventory" data-advanced-only>Magazzino Business</button>
+          </div>
+        </section>
+        <section class="nav-group nav-intent" data-nav-group data-nav-intent="network">
+          <button class="nav-group-toggle" type="button" data-nav-toggle aria-expanded="false">Rete partner</button>
+          <div class="nav-group-items">
+            <button data-admin-tab="agents">Partner e agenti</button>
+            <button data-admin-tab="resellerNetwork">Chi segue chi</button>
+            <button data-admin-tab="commissions">Quanto spetta</button>
+          </div>
+        </section>
+        <section class="nav-group nav-intent" data-nav-group data-nav-intent="settings" data-advanced-only>
+          <button class="nav-group-toggle" type="button" data-nav-toggle aria-expanded="false">Impostazioni</button>
+          <div class="nav-group-items">
+            <button data-admin-tab="integrations">Collegamenti (Shopify, email…)</button>
             <button data-admin-tab="staff">Collaboratori</button>
-            <button data-admin-tab="agents">Agenti</button>
-            <button data-admin-tab="resellerNetwork">Rete rivenditori</button>
             <button data-admin-tab="permissions">Permessi</button>
-          </div>
-        </section>
-        <section class="nav-group" data-nav-group>
-          <button class="nav-group-toggle" type="button" data-nav-toggle>Configurazioni</button>
-          <div class="nav-group-items">
-            <button data-admin-tab="plans">Piani</button>
+            <button data-admin-tab="plans">Piani abbonamento</button>
             <button data-admin-tab="materials">Materiali</button>
           </div>
         </section>
@@ -78,6 +73,7 @@
           <p class="admin-subtitle" id="adminSubtitle">Panoramica e priorità del giorno.</p>
         </div>
         <div class="admin-user">
+          <button type="button" class="simple-mode-toggle" id="simpleModeToggle" aria-pressed="true" title="Nasconde opzioni tecniche">Modalità semplice</button>
           <button type="button" class="small-action guide-toggle-top" id="panelGuideToggleTop" title="Mostra o nascondi la guida">Guida sezione</button>
           <span id="adminEmail">Verifica sessione...</span>
           <a href="./" class="ghost-link" target="_blank" rel="noopener">Area Business</a>
@@ -127,15 +123,16 @@
             <h2>Benvenuto — da dove inizi?</h2>
             <p class="field-hint">Scegli il flusso in base al lavoro di oggi. Ogni pulsante apre la sezione giusta con istruzioni passo passo.</p>
             <div class="welcome-actions">
-              <button type="button" class="welcome-chip" data-admin-tab-jump="platformOrders">Ordini da evadere</button>
-              <button type="button" class="welcome-chip" data-admin-tab-jump="momentCatalog">Catalogo Shopify</button>
+              <button type="button" class="welcome-chip welcome-chip-primary" data-admin-tab-jump="platformOrders">Ordini da evadere</button>
               <button type="button" class="welcome-chip" data-admin-tab-jump="momentInventory">Magazzino NFC</button>
               <button type="button" class="welcome-chip" data-admin-tab-jump="momentClients">Clienti Moments</button>
               <button type="button" class="welcome-chip" data-admin-tab-jump="clients">Clienti Business</button>
-              <button type="button" class="welcome-chip" data-admin-tab-jump="integrations">Stato integrazioni</button>
+              <button type="button" class="welcome-chip" data-admin-tab-jump="agents">Rete partner</button>
+              <button type="button" class="welcome-chip" data-admin-tab-jump="momentCatalog">Catalogo online</button>
+              <button type="button" class="welcome-chip" data-advanced-only data-admin-tab-jump="integrations">Collegamenti tecnici</button>
             </div>
           </div>
-          <div class="metric-grid">
+          <div class="metric-grid" data-advanced-only>
             <article><strong id="mClients">0</strong><span>Clienti / attività</span></article>
             <article><strong id="mPublished">0</strong><span>Pagine pubblicate</span></article>
             <article><strong id="mNfc">0</strong><span>Prodotti NFC</span></article>
@@ -521,67 +518,71 @@
 
         <section class="admin-panel" data-panel="agents">
           <div class="admin-card">
-            <h2>Agenti e rivenditori</h2>
-            <p>Registra chi rivende KhamaKey o porta clienti. Ogni agente può avere modello commerciale e percentuale dedicata.</p>
+            <h2>Partner e agenti</h2>
+            <p>Chi vende per KhamaKey o porta nuovi clienti. Compila i campi essenziali — il resto è opzionale.</p>
             <form class="admin-form" id="agentForm">
               <input type="hidden" name="agent_id" value="">
-              <label>Nome referente
-                <input name="contact_name" type="text" placeholder="Nome agente">
+              <label>Nome
+                <input name="contact_name" type="text" placeholder="Es. Mario Rossi">
               </label>
               <label>Email
-                <input name="email" type="email" placeholder="agente@email.it" required>
+                <input name="email" type="email" placeholder="mario@email.it" required>
               </label>
-              <label>Azienda / team
-                <input name="business_name" type="text" placeholder="Nome società">
+              <label>Azienda o negozio
+                <input name="business_name" type="text" placeholder="Nome attività">
               </label>
               <label>Telefono
                 <input name="phone" type="tel" placeholder="+39 ...">
               </label>
-              <label>Tipo
+              <label>Che tipo è?
                 <select name="agent_type">
-                  <option value="agent">Agente commerciale</option>
-                  <option value="reseller">Rivenditore</option>
-                  <option value="authorized_point">Punto autorizzato</option>
+                  <option value="agent">Agente — porta clienti</option>
+                  <option value="reseller">Rivenditore — compra e rivende</option>
+                  <option value="authorized_point">Punto autorizzato — vende sul posto</option>
                 </select>
               </label>
-              <label>Agente / capo rete (upline)
+              <label>Chi lo segue in rete?
                 <select name="parent_agent_id" id="agentParentSelect">
-                  <option value="">Nessuno — radice rete</option>
+                  <option value="">Nessuno — è il capo</option>
                 </select>
               </label>
-              <label>Tier provvigioni
-                <select name="tier_key" id="agentTierSelect">
-                  <option value="standard">Standard</option>
-                  <option value="premium">Premium</option>
-                  <option value="partner">Partner</option>
-                </select>
+              <div data-advanced-only>
+                <label>Livello provvigioni (tier)
+                  <select name="tier_key" id="agentTierSelect">
+                    <option value="standard">Standard</option>
+                    <option value="premium">Premium</option>
+                    <option value="partner">Partner</option>
+                  </select>
+                </label>
+              </div>
+              <label>Codice invito
+                <input name="referral_code" type="text" placeholder="Si crea da solo se vuoto">
               </label>
-              <label>Codice referral
-                <input name="referral_code" type="text" placeholder="AUTO se vuoto">
-              </label>
-              <label>Percentuale diretta (L1)
+              <label>Quanto guadagna (%)
                 <input name="commission_percent" type="number" min="0" max="100" step="0.01" value="10">
               </label>
-              <label>Bonus extra % (admin)
-                <input name="commission_bonus_percent" type="number" min="0" max="100" step="0.01" value="0">
+              <div data-advanced-only>
+                <label>Bonus extra % (solo admin)
+                  <input name="commission_bonus_percent" type="number" min="0" max="100" step="0.01" value="0">
+                </label>
+                <label>Listino prezzi dedicato
+                  <select name="price_list_id" id="agentPriceListSelect">
+                    <option value="">Nessun listino</option>
+                  </select>
+                </label>
+                <label>Modello commerciale
+                  <select name="model">
+                    <option value="referral">Segnalazione — vendiamo noi, lui prende %</option>
+                    <option value="reseller">Rivenditore — acquista e rivende</option>
+                    <option value="hybrid">Ibrido</option>
+                  </select>
+                </label>
+              </div>
+              <label>Zona / territorio
+                <input name="territory" type="text" placeholder="Es. Roma Nord">
               </label>
-              <label>Listino rivenditore
-                <select name="price_list_id" id="agentPriceListSelect">
-                  <option value="">Nessun listino dedicato</option>
-                </select>
-              </label>
-              <label>Modello
-                <select name="model">
-                  <option value="referral">Segnalazione: vendiamo noi, agente prende %</option>
-                  <option value="reseller">Rivenditore: acquista e rivende ai clienti</option>
-                  <option value="hybrid">Ibrido</option>
-                </select>
-              </label>
-              <label>Territorio / zona
-                <input name="territory" type="text" placeholder="Es. Roma Nord, Toscana">
-              </label>
-              <button class="primary-action" type="submit">Salva agente</button>
-              <button class="small-action" type="button" id="agentFormReset">Nuovo agente</button>
+              <button class="primary-action" type="submit">Salva partner</button>
+              <button class="small-action" type="button" id="agentFormReset">Nuovo partner</button>
               <p class="form-status" id="agentFormStatus"></p>
             </form>
             <div class="inventory-toolbar">
@@ -615,8 +616,8 @@
                 <tbody id="agentsTable"><tr><td colspan="7">Caricamento agenti...</td></tr></tbody>
               </table>
             </div>
-            <h3 class="section-title">Codici Moments per agente</h3>
-            <p class="system-note">Consegnati vs attivati per canale. Richiede SQL v61.</p>
+            <h3 class="section-title">Codici NFC consegnati</h3>
+            <p class="system-note">Quanti codici ha ricevuto ogni partner e quanti sono già attivati.</p>
             <div class="inventory-stats" id="momentAgentStats">
               <p class="inventory-stats-empty">Caricamento report agenti...</p>
             </div>
@@ -625,24 +626,23 @@
 
         <section class="admin-panel" data-panel="resellerNetwork">
           <div class="admin-card">
-            <h2>Rete rivenditori</h2>
-            <p>Visualizza la gerarchia agenti → rivenditori → punti autorizzati. Le provvigioni L2 e L3 arrivano all'upline quando un downline vende o affilia un negozio.</p>
-            <p class="system-note">Richiede SQL v68 applicato su Supabase.</p>
+            <h2>Rete partner</h2>
+            <p>Chi segue chi nella rete di vendita. Se Mario segue Lucia, quando Mario vende anche Lucia guadagna una parte.</p>
             <div class="inventory-toolbar">
-              <label class="inventory-search">Radice albero
+              <label class="inventory-search">Parti da
                 <select id="networkRootSelect">
-                  <option value="">Tutte le radici</option>
+                  <option value="">Tutti i capi rete</option>
                 </select>
               </label>
-              <button type="button" class="small-action" id="networkRefreshBtn">Aggiorna albero</button>
+              <button type="button" class="small-action" id="networkRefreshBtn">Aggiorna</button>
             </div>
             <div class="network-tree" id="networkTree">
               <p class="inventory-stats-empty">Caricamento rete...</p>
             </div>
           </div>
-          <div class="admin-card">
-            <h2>Regole provvigioni a grado</h2>
-            <p>Percentuali L1 (vendita diretta), L2 e L3 (upline) per tier e tipo evento. L'admin può dare bonus extra per singolo agente dalla tab Agenti.</p>
+          <div class="admin-card" data-advanced-only>
+            <h2>Regole provvigioni (avanzate)</h2>
+            <p>Percentuali per livello: vendita diretta, capo, capo del capo. Usa solo se devi cambiare le regole per tutti.</p>
             <form class="admin-form" id="tierRuleForm">
               <label>Tier
                 <select name="tier_key" required>
@@ -687,9 +687,9 @@
               </table>
             </div>
           </div>
-          <div class="admin-card">
-            <h2>Listini rivenditori</h2>
-            <p>Prezzi B2B dedicati per rivenditori e punti autorizzati. Collega un listino all'agente dalla tab Agenti.</p>
+          <div class="admin-card" data-advanced-only>
+            <h2>Listini prezzi B2B</h2>
+            <p>Prezzi speciali per rivenditori. Solo per chi gestisce listini personalizzati.</p>
             <form class="admin-form" id="priceListForm">
               <label>Chiave listino
                 <input name="list_key" type="text" placeholder="standard-it" required>
@@ -746,46 +746,48 @@
             </div>
           </div>
           <div class="admin-card">
-            <h2>Prodotti consegnati</h2>
-            <p>Storico consegne NFC e materiali ai rivenditori. Registra manualmente o collega a un ordine piattaforma.</p>
+            <h2>Cosa abbiamo consegnato</h2>
+            <p>Registra card NFC o materiali consegnati a un partner. Così sai sempre chi ha cosa.</p>
             <form class="admin-form" id="deliveryForm">
-              <label>Rivenditore / agente
+              <label>A chi?
                 <select name="agent_id" id="deliveryAgentSelect" required>
-                  <option value="">Seleziona agente</option>
+                  <option value="">Scegli partner</option>
                 </select>
               </label>
-              <label>Tipo consegna
-                <select name="delivery_type">
-                  <option value="product_shipment">Spedizione prodotti</option>
-                  <option value="nfc_batch">Lotto NFC</option>
-                  <option value="stock_transfer">Trasferimento stock</option>
-                </select>
+              <label>Cosa consegniamo?
+                <input name="product_label" type="text" placeholder="Es. 50 card NFC Moments" required>
               </label>
-              <label>SKU
-                <input name="sku" type="text" placeholder="NFC-MOMENT-STD">
-              </label>
-              <label>Descrizione
-                <input name="product_label" type="text" placeholder="50 card NFC Moments">
-              </label>
-              <label>Quantità
+              <label>Quanti pezzi?
                 <input name="quantity" type="number" min="1" value="1" required>
               </label>
-              <label>Prezzo unitario €
-                <input name="unit_price" type="number" min="0" step="0.01">
-              </label>
-              <label>Tracking
-                <input name="tracking_code" type="text" placeholder="Codice corriere">
-              </label>
-              <label>Note
-                <input name="notes" type="text" placeholder="Note consegna">
-              </label>
+              <div data-advanced-only>
+                <label>Tipo consegna
+                  <select name="delivery_type">
+                    <option value="product_shipment">Spedizione prodotti</option>
+                    <option value="nfc_batch">Lotto NFC</option>
+                    <option value="stock_transfer">Trasferimento stock</option>
+                  </select>
+                </label>
+                <label>Codice prodotto
+                  <input name="sku" type="text" placeholder="NFC-MOMENT-STD">
+                </label>
+                <label>Prezzo unitario €
+                  <input name="unit_price" type="number" min="0" step="0.01">
+                </label>
+                <label>Tracking spedizione
+                  <input name="tracking_code" type="text" placeholder="Codice corriere">
+                </label>
+                <label>Note
+                  <input name="notes" type="text" placeholder="Note interne">
+                </label>
+              </div>
               <button class="primary-action" type="submit">Registra consegna</button>
               <p class="form-status" id="deliveryFormStatus"></p>
             </form>
             <div class="inventory-toolbar">
-              <label class="inventory-search">Filtra per agente
+              <label class="inventory-search">Mostra solo
                 <select id="deliveryFilterAgent">
-                  <option value="">Tutti</option>
+                  <option value="">Tutti i partner</option>
                 </select>
               </label>
             </div>
@@ -800,9 +802,9 @@
 
         <section class="admin-panel" data-panel="commissions">
           <div class="admin-card">
-            <h2>Provvigioni</h2>
-            <p>Qui vengono tracciati abbonamenti, ordini NFC, setup e rettifiche manuali collegati agli agenti. Con SQL v68 ogni riga indica il grado L1 (diretto), L2 o L3 (upline).</p>
-            <div class="automation-status">
+            <h2>Quanto spetta ai partner</h2>
+            <p>Elenco soldi da pagare per vendite e abbonamenti. Verde = già pagato · Giallo = ancora da pagare.</p>
+            <div class="automation-status" data-advanced-only>
               <div>
                 <strong>Automazione abbonamenti</strong>
                 <span>Attiva: se un cliente è collegato a un agente e passa a Starter/Business/Premium, viene creata una provvigione in attesa.</span>
@@ -814,12 +816,12 @@
             </div>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Agente</th><th>Evento</th><th>Grado</th><th>Importo</th><th>Provvigione</th><th>Stato</th></tr></thead>
+                <thead><tr><th>Partner</th><th>Motivo</th><th>Chi ha venduto</th><th>Totale</th><th>Spetta</th><th>Stato</th></tr></thead>
                 <tbody id="commissionsTable"><tr><td colspan="6">Caricamento provvigioni...</td></tr></tbody>
               </table>
             </div>
           </div>
-          <div class="admin-card">
+          <div class="admin-card" data-advanced-only>
             <h2>Regole automatiche</h2>
             <p>Le regole definiscono quando creare una provvigione. Gli importi sono a zero finché non colleghiamo prezzi reali, Stripe o listino definitivo.</p>
             <div class="table-wrap">
@@ -1696,6 +1698,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=105"></script>
+  <script type="module" src="admin.js?v=106"></script>
 </body>
 </html>

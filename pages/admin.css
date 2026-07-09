@@ -248,6 +248,19 @@ textarea{width:100%;border:1px solid var(--border);border-radius:10px;background
 .welcome-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .welcome-chip{border:1px solid var(--border);background:white;color:var(--navy);border-radius:999px;padding:9px 14px;font-weight:900;font-size:.76rem;cursor:pointer;transition:border-color .15s,background .15s,color .15s}
 .welcome-chip:hover,.welcome-chip:focus-visible{border-color:var(--green);background:#F0FDF4;color:#166534}
+.nav-group.nav-intent .nav-group-toggle{text-transform:none;letter-spacing:0;font-size:.84rem}
+.nav-group.nav-intent .nav-group-toggle::before{content:"";width:8px;height:8px;border-radius:50%;background:#9FE870;margin-right:8px;box-shadow:0 0 0 3px rgba(159,232,112,.18)}
+.nav-group[data-nav-intent="today"] .nav-group-toggle::before{background:#60A5FA;box-shadow:0 0 0 3px rgba(96,165,250,.18)}
+.nav-group[data-nav-intent="sell"] .nav-group-toggle::before{background:#FBBF24;box-shadow:0 0 0 3px rgba(251,191,36,.18)}
+.nav-group[data-nav-intent="clients"] .nav-group-toggle::before{background:#A78BFA;box-shadow:0 0 0 3px rgba(167,139,250,.18)}
+.nav-group[data-nav-intent="network"] .nav-group-toggle::before{background:#9FE870;box-shadow:0 0 0 3px rgba(159,232,112,.18)}
+.nav-group[data-nav-intent="settings"] .nav-group-toggle::before{background:#94A3B8;box-shadow:0 0 0 3px rgba(148,163,184,.18)}
+.simple-mode-toggle{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:white;border-radius:999px;padding:7px 12px;font-weight:800;font-size:.72rem;cursor:pointer;white-space:nowrap}
+.simple-mode-toggle[aria-pressed="true"]{background:rgba(159,232,112,.18);border-color:rgba(159,232,112,.55);color:#D9F99D}
+.simple-mode-toggle[aria-pressed="false"]{background:rgba(255,255,255,.14)}
+.admin-shell.simple-mode [data-advanced-only]{display:none!important}
+.welcome-chip-primary{background:linear-gradient(180deg,#ECFDF5,#fff);border-color:#86EFAC;color:#166534}
+.welcome-chip-primary:hover,.welcome-chip-primary:focus-visible{background:#DCFCE7;border-color:#4ADE80}
 .filter-chip-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px;padding:10px 12px;border:1px dashed var(--border);border-radius:12px;background:#FAFAFA}
 .filter-chip-label{font-size:.72rem;font-weight:900;color:var(--navy);margin-right:4px}
 .filter-chip{border:1px solid var(--border);background:white;color:var(--navy);border-radius:999px;padding:7px 12px;font-weight:800;font-size:.72rem;cursor:pointer}

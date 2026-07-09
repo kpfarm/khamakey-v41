@@ -241,6 +241,21 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .toast.ok{border-left:3px solid var(--verde);}
 .toast.err{border-left:3px solid var(--red);}
 .khama-launcher{position:fixed;right:16px;bottom:92px;z-index:560;border:0;background:linear-gradient(135deg,var(--verde),var(--azzurro));color:white;border-radius:999px;padding:9px 14px 9px 8px;display:flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-weight:800;font-size:.82rem;box-shadow:0 14px 34px rgba(27,42,94,.22);cursor:pointer;}
+.btn-international,.btn-intl-main{background:linear-gradient(135deg,#2F7F1D,var(--verde));border:0;color:white;font-family:'DM Sans',sans-serif;font-weight:800;font-size:.82rem;padding:10px 16px;border-radius:12px;cursor:pointer;box-shadow:0 10px 24px rgba(47,127,29,.22);display:inline-flex;align-items:center;gap:8px;white-space:nowrap;}
+.btn-international{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);box-shadow:none;font-size:.74rem;padding:7px 12px;border-radius:10px;}
+.btn-international.active,.btn-international:hover{background:rgba(255,255,255,.2);}
+.btn-intl-main{width:100%;justify-content:center;min-height:48px;font-size:.9rem;}
+.intl-hero-card{border:1px solid rgba(76,175,39,.28);background:linear-gradient(145deg,#F8FFF3,#FFFFFF);}
+.intl-lang-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.intl-lang-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;background:#F1F8EC;border:1px solid rgba(76,175,39,.22);font-size:.76rem;font-weight:700;color:var(--navy);}
+.intl-modal{position:fixed;inset:0;z-index:700;display:grid;place-items:center;padding:20px;}
+.intl-modal[hidden]{display:none;}
+.intl-modal-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.58);backdrop-filter:blur(3px);}
+.intl-shell{position:relative;z-index:1;width:min(100%,420px);background:white;border-radius:22px;padding:24px 22px;box-shadow:0 24px 60px rgba(27,42,94,.22);}
+.intl-shell h2{margin:0 0 10px;font-size:1.2rem;color:var(--navy);}
+.intl-shell p{margin:0 0 14px;color:var(--muted);line-height:1.55;}
+.intl-progress-track{height:12px;border-radius:999px;background:#E8EEF5;overflow:hidden;margin:18px 0 10px;}
+.intl-progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--verde),var(--azzurro));border-radius:999px;transition:width .35s ease;}
 .khama-launcher-avatar,.khama-avatar{background:linear-gradient(145deg,#FFFFFF,#F2FBEE);display:grid;place-items:center;overflow:hidden;box-shadow:0 6px 16px rgba(9,16,36,.16);border:1px solid rgba(255,255,255,.78);}
 .khama-launcher-avatar{width:46px;height:36px;border-radius:14px;}
 .khama-avatar{width:62px;height:46px;border-radius:16px;flex:0 0 auto;}
@@ -786,6 +801,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
   .topbar-plan{display:none;}
   .topbar-right{gap:5px;min-width:0;}
   .btn-preview{display:none;}
+  .btn-international{font-size:.66rem;padding:6px 9px;}
   .user-menu-btn{height:38px;padding:4px;border-radius:12px;}
   .user-avatar{width:30px;height:30px;}
   .user-name-short{display:none;}
@@ -925,8 +941,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
   .pub-doc-actions,.pub-wifi-actions{grid-template-columns:1fr;}
 }
 </style>
-<link rel="stylesheet" href="editor-ui.css?v=103">
-<script src="business-categories.js?v=103"></script>
+<link rel="stylesheet" href="editor-ui.css?v=107">
+<script src="business-categories.js?v=107"></script>
 </head>
 <body>
 <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
@@ -970,6 +986,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
     <div class="topbar-plan" id="planBadge">FREE</div>
   </div>
   <div class="topbar-right">
+    <button type="button" class="btn-international" id="btnInternationalTop">🌍 Internazionale</button>
     <a href="#" class="btn-preview" id="btnPreview"><svg class="ui-ico"><use href="#i-eye"/></svg>Anteprima</a>
     <div class="user-menu-wrap">
       <button class="user-menu-btn" id="userMenuBtn"><span class="user-avatar" id="accountAvatar">KK</span><span class="user-name-short">Account</span></button>
@@ -1045,6 +1062,25 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
           <button type="button" onclick="dismissOrderCoach()">Ok, ho capito</button>
         </div>
         <ul class="quick-start-list" id="quickStartList"></ul>
+      </div>
+      <div class="card intl-hero-card" id="intlHeroCard">
+        <div id="intlHeroPending">
+          <div class="card-title">🌍 Pagina internazionale</div>
+          <p class="field-hint">Scrivi sempre in italiano. Un tap e la tua pagina sarà pronta per turisti da tutto il mondo — senza impostazioni tecniche.</p>
+          <button type="button" class="btn-intl-main" id="btnInternationalMain">🌍 Rendi la mia pagina internazionale</button>
+        </div>
+        <div id="intlHeroDone" hidden>
+          <div class="card-title">🌍 La tua pagina ora parla 5 lingue</div>
+          <p class="field-hint">I visitatori vedranno automaticamente la lingua del loro telefono.</p>
+          <div class="intl-lang-badges">
+            <span class="intl-lang-badge">🇮🇹 Italiano</span>
+            <span class="intl-lang-badge">🇬🇧 English</span>
+            <span class="intl-lang-badge">🇫🇷 Français</span>
+            <span class="intl-lang-badge">🇩🇪 Deutsch</span>
+            <span class="intl-lang-badge">🇪🇸 Español</span>
+          </div>
+          <button type="button" class="btn-add-row" id="btnInternationalRefresh" style="margin-top:14px">🔄 Aggiorna traduzioni</button>
+        </div>
       </div>
       <div class="card">
         <div class="card-title"><svg class="ui-ico"><use href="#i-building"/></svg>La tua attività</div>
@@ -1974,15 +2010,26 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
             </select>
           </div>
         </div>
-        <div class="field">
+        <div class="field" id="welcomeLangField">
           <label>Lingue disponibili nella pagina pubblica</label>
-          <div class="field-hint">Il selettore lingua sarà visibile sopra la copertina della pagina pubblica. La traduzione reale dei testi richiederà contenuti per lingua o integrazione AI/backend.</div>
+          <div class="field-hint">Attiva la pagina internazionale dalla sezione Informazioni per tradurre automaticamente i tuoi contenuti.</div>
           <div class="field-row">
             <label class="toggle-row" style="border:0;padding:8px 0"><span>Italiano</span><span class="toggle"><input type="checkbox" id="langIt" checked><span class="toggle-slider"></span></span></label>
             <label class="toggle-row" style="border:0;padding:8px 0"><span>English</span><span class="toggle"><input type="checkbox" id="langEn" checked><span class="toggle-slider"></span></span></label>
             <label class="toggle-row" style="border:0;padding:8px 0"><span>Français</span><span class="toggle"><input type="checkbox" id="langFr"><span class="toggle-slider"></span></span></label>
             <label class="toggle-row" style="border:0;padding:8px 0"><span>Deutsch</span><span class="toggle"><input type="checkbox" id="langDe"><span class="toggle-slider"></span></span></label>
             <label class="toggle-row" style="border:0;padding:8px 0"><span>Español</span><span class="toggle"><input type="checkbox" id="langEs"><span class="toggle-slider"></span></span></label>
+          </div>
+        </div>
+        <div class="field" id="intlStatusField" hidden>
+          <label>Pagina internazionale</label>
+          <div class="field-hint">La pagina è attiva in 5 lingue. I visitatori vedono automaticamente la lingua del telefono.</div>
+          <div class="intl-lang-badges">
+            <span class="intl-lang-badge">🇮🇹 Italiano ✅</span>
+            <span class="intl-lang-badge">🇬🇧 English</span>
+            <span class="intl-lang-badge">🇫🇷 Français</span>
+            <span class="intl-lang-badge">🇩🇪 Deutsch</span>
+            <span class="intl-lang-badge">🇪🇸 Español</span>
           </div>
         </div>
       </div>
@@ -2353,6 +2400,25 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
     <div class="wizard-footer">
       <span class="wizard-small">Il link NFC resta bloccato: cambiano solo contenuti e moduli.</span>
       <button class="wizard-skip" id="wizardSkip" type="button">Salta setup</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGINA INTERNAZIONALE -->
+<div class="intl-modal" id="intlModal" hidden aria-label="Attivazione pagina internazionale">
+  <div class="intl-modal-backdrop" id="intlModalBackdrop"></div>
+  <div class="intl-shell">
+    <div id="intlModalProgress">
+      <h2>Sto preparando le traduzioni...</h2>
+      <div class="intl-progress-track"><div class="intl-progress-bar" id="intlProgressBar"></div></div>
+      <p id="intlProgressLabel">0%</p>
+      <p id="intlProgressSub" class="field-hint">Non chiudere la pagina</p>
+    </div>
+    <div id="intlModalSuccess" hidden>
+      <h2>🌍 La tua pagina ora parla 5 lingue.</h2>
+      <p>I visitatori vedranno automaticamente la lingua del loro telefono.</p>
+      <p><strong>Fatto.</strong></p>
+      <button type="button" class="btn-intl-main" id="intlModalDone">✅ Continua</button>
     </div>
   </div>
 </div>
@@ -5240,6 +5306,7 @@ function changed(){
   renderBlockOrder();
   renderQuickStart();
   schedulePublicPreview();
+  window.dispatchEvent(new CustomEvent('khamakey:intl-dirty'));
   if(window.parent !== window && !cloudHydrating){
     window.parent.postMessage({type:'khamakey:dirty',state:collectState(true)},'*');
   }
@@ -5295,7 +5362,7 @@ function buildPublicSnapshot(){
   const preview = document.getElementById('publicPreview');
   const sprite = document.querySelector('body > svg[aria-hidden="true"]');
   return {
-    version:'103',
+    version:'107',
     className:preview.className,
     style:`--pub-primary:${val('c1')||'#1B2A5E'};--pub-accent:${val('c2')||'#4CAF27'};--pub-page-bg:${val('pubPageBg')||'#F8FAFC'};--pub-block-bg:${val('pubBlockBg')||'#FFFFFF'};--pub-text:${val('pubTextColor')||'#1B2A5E'};--pub-muted:${val('pubMutedColor')||'#64748B'};--pub-title-font:${preview.style.getPropertyValue('--pub-title-font')||"'DM Sans',sans-serif"};--pub-logo-size:${preview.style.getPropertyValue('--pub-logo-size')};--pub-profile-logo-size:${preview.style.getPropertyValue('--pub-profile-logo-size')};--pub-hero-height:${preview.style.getPropertyValue('--pub-hero-height')}`,
     html:`${sprite?.outerHTML||''}${preview.innerHTML}`
@@ -5322,6 +5389,7 @@ function collectState(includePublicSnapshot=false){
     coverSrc:document.getElementById('coverImg')?.dataset.src || '',
     aboutSrc:document.getElementById('aboutImg')?.dataset.src || ''
   };
+  if(window.__khamakeyIntl?.attachI18nToState) Object.assign(state, { i18n: window.__khamakeyIntl.attachI18nToState(state).i18n });
   if(includePublicSnapshot) state.publicSnapshot = buildPublicSnapshot();
   return state;
 }
@@ -5366,6 +5434,7 @@ function applyState(state){
     const missingBlocks = publicBlockOrder.filter(id => !restoredOrder.includes(id));
     publicBlockOrder = [...restoredOrder, ...missingBlocks];
   }
+  window.__khamakeyIntl?.hydrateI18nFromState?.(state);
   uploadedPdfName = '';
   applyImageState('logoImg','logoTxt',state.logoSrc,'Logo caricato');
   applyImageState('coverImg','coverTxt',state.coverSrc,'Copertina caricata');
@@ -5447,6 +5516,7 @@ window.addEventListener('message', event => {
     cloudHydrating = false;
   }
   maybeOpenWizard(false);
+  window.__khamakeyIntl?.hydrateI18nFromState?.(event.data.state || {});
   window.parent.postMessage({type:'khamakey:public-snapshot',state:collectState(true)},'*');
 });
 
@@ -5975,7 +6045,19 @@ updateCategoryHint();
   lastCategoryValue = val('categoria');
 renderPublicPreview();
 if(!restoredState) maybeOpenWizard(false);
+window.__khamakeyEditor = {
+  collectState,
+  applyState,
+  buildPublicSnapshot,
+  changed,
+  showToast,
+  setFieldValue,
+  renderPublicPreview,
+  setPublicLang(value){ publicLang = value; },
+  getPublicLang(){ return publicLang; }
+};
 </script>
-<script type="module" src="editor-media.js?v=103"></script>
+<script type="module" src="editor-international.js?v=107"></script>
+<script type="module" src="editor-media.js?v=107"></script>
 </body>
 </html>

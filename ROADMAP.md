@@ -136,7 +136,7 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 | **D** | Rivenditori — tracciabilità codici e report | in corso |
 | **E** | Shopify Moments — catalogo PIM, webhook ordini, sync | in corso |
 | **F** | Pagamenti (Stripe/PayPal) + email ordini Resend | prossimo |
-| **G** | Catalogo multilingua + pagine pubbliche `?lang=` | pianificato |
+| **G** | Pagina internazionale Business — 1 tap, 5 lingue, auto-detect visitatore | in corso |
 | **H** | Logistica Packlink + marketplace Etsy/Amazon | pianificato |
 
 ### Sprint E — Shopify & canali vendita (2026-07-09)
@@ -218,6 +218,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-09 | Cursor | **v104**: pannello admin user-friendly — guide sezione, chip filtri, legende Shopify/ordini, welcome dashboard |
 | 2026-07-09 | Cursor | **v68 Supabase**: rete rivenditori applicata in produzione (tier, listini, consegne, RPC) |
 | 2026-07-09 | Cursor | **Collab multi-agente**: `CODEX-COLLAB.md` + regola Cursor `.cursor/rules/multi-agent-collab.mdc` |
+| 2026-07-09 | Cursor | **v107 Sprint G1**: pagina internazionale Business — pulsante 1 tap, OpenAI Worker, auto-detect lingua visitatore |
 | 2026-07-09 | Cursor | **v106**: admin UX — menu 4 intenti, modalità semplice, copy umano per rete partner |
 | 2026-07-09 | Cursor | **v103**: email ordine con codici NFC, Stripe Checkout, ingest webhook Stripe |
 | 2026-07-09 | Cursor | **v102**: Integration Hub, Stripe/PayPal/Resend webhook, email ordine, i18n v66 |
@@ -225,3 +226,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-09 | Cursor | **v99 Sprint E**: catalogo vendita Moments, webhook/sync Shopify, bundle NFC, SHOPIFY-SETUP.md |
 | 2026-07-09 | Cursor | **v98**: categorie unificate — setup guidato e select usano stesso catalogo e preset |
 | 2026-07-09 | Cursor | **v97 admin**: ricerca/filtri Clienti, Moments, Ordini, Agenti; template 21 categorie; dashboard alert operativi |
+| 2026-07-09 | Cursor | **KhamaKey OS Fase 1**: `KHAMAKEY_OS/` — MASTER_INDEX, PROJECT_STATE, docs 00–15, AGENTS, regole AI |

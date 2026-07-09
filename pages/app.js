@@ -99,6 +99,20 @@ function publicStateFromEditor(state={}){
     publicState.coverSrc = fields.showCover !== false ? (state.coverSrc || "") : "";
     publicState.aboutSrc = state.aboutSrc || "";
   }
+  if(state.i18n?.enabled && state.i18n?.snapshots && typeof state.i18n.snapshots === "object"){
+    const compactSnapshots = {};
+    Object.entries(state.i18n.snapshots).forEach(([locale, snap]) => {
+      if(!snap || typeof snap !== "object" || !snap.html) return;
+      compactSnapshots[locale] = compactPublicSnapshot(snap,state);
+    });
+    if(Object.keys(compactSnapshots).length){
+      publicState.i18n = {
+        enabled:true,
+        fallback:state.i18n.fallback || "en",
+        snapshots:compactSnapshots
+      };
+    }
+  }
   return publicState;
 }
 
@@ -336,6 +350,7 @@ async function sendStateToEditor(){
     businessId:currentBusiness.id,
     publicUrl:currentNfc?.url || "",
     publicPageUrl:`${PUBLIC_BASE_URL}/p/${currentBusiness.slug}`,
+    workerUrl:PUBLIC_BASE_URL,
     account:accountDataFromUser(currentUser),
     analytics:{}
   },messageOrigin);
@@ -362,7 +377,7 @@ async function loadApplication(){
     currentUser = userData.user;
     currentBusiness = await ensureWorkspace(currentUser);
     userEmail.textContent = currentUser.email || "";
-    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=103`;
+    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=107`;
     if(editorFrame.getAttribute("src") !== editorUrl){
       editorFrame.src = editorUrl;
     }

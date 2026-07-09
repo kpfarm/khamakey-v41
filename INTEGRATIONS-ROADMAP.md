@@ -27,7 +27,7 @@ Supabase (ordini, codici NFC, log webhook, traduzioni)
 | **Resend** | Prenotazioni Business + email ordini | ✅ booking; 🟡 ordine Shopify | ✅ Integration Hub | v66 |
 | **Stripe** | Abbonamenti Business, setup fee | 🟡 webhook stub | ✅ piani + hub | v66 |
 | **PayPal** | Pagamenti alternativi | 🟡 webhook stub | ✅ hub | v66 |
-| **i18n** | IT EN FR DE ES | 🟡 modulo condiviso | ✅ lingue + catalog_i18n | v66 |
+| **i18n** | IT EN FR DE ES | 🟡 Business G1 operativo | ✅ lingue + catalog_i18n | v66 + v69 |
 
 Legenda: ✅ operativo · 🟡 predisposto · ⬜ da fare
 
@@ -51,12 +51,18 @@ Legenda: ✅ operativo · 🟡 predisposto · ⬜ da fare
 - [ ] OAuth app PayPal + webhook IPN/eventi
 - [ ] Stesso flusso ordine → `platform_payment_transactions`
 
-## Sprint G — Catalogo multilingua
+## Sprint G — Pagina internazionale Business (G1)
 
+- [x] SQL v69: `business_page_i18n`, `business_i18n_settings`
+- [x] Worker: `POST /api/business/internationalize` + `sync-translations` (OpenAI)
+- [x] Worker: auto-detect `Accept-Language` su `/p/`
+- [x] Editor: pulsante «Rendi la mia pagina internazionale» + progress + success
+- [x] Editor: sync automatico traduzioni su modifica testo (debounce 12s)
+- [ ] Applicare SQL v69 su Supabase produzione
+- [ ] Configurare `OPENAI_API_KEY` nel Worker
 - [ ] Admin: tab traduzioni per SKU (nome + descrizione per locale)
 - [ ] Sync Shopify: `translations` API o prodotti duplicati per market
 - [ ] Pagina pubblica Moments: `?lang=en` + selettore lingua
-- [ ] Business editor: già predisposto (5 lingue in `editor.html`)
 
 ## Sprint H — Logistica e marketplace
 

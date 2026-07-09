@@ -27,4 +27,6 @@ bucket_name = "khamakey-media"
 # PAYPAL_CLIENT_ID          (Sprint F)
 # PAYPAL_CLIENT_SECRET
 # PAYPAL_WEBHOOK_ID
+# OPENAI_API_KEY          (Sprint G — traduzioni Business)
+# OPENAI_MODEL            (opzionale, default gpt-4o-mini)
 # SUPABASE_SERVICE_ROLE_KEY (opzionale, log webhook in DB)

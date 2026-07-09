@@ -23,10 +23,11 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 17 | `khamakey-integrations-i18n-v66.sql` | Integration Hub, pagamenti, lingue, traduzioni catalogo |
 | 18 | `khamakey-shopify-email-stripe-v67.sql` | Email ordine con codici NFC, ingest Stripe checkout |
 | 19 | `khamakey-reseller-network-v68.sql` | Rete rivenditori a grado, listini B2B, storico consegne, RPC provvigioni multilivello |
+| 20 | `khamakey-business-i18n-v69.sql` | Traduzioni pagine Business (`business_page_i18n`, impostazioni internazionali) |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti.
 
-**Stato produzione (2026-07-09):** v64–v67 applicati; **v68 applicato** (rete rivenditori, listini, consegne).
+**Stato produzione (2026-07-09):** v64–v68 applicati; **v69 da applicare** (traduzioni pagine Business).
 
 ## Supabase SQL Editor
 

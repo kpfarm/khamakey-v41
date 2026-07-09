@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v103-shopify-email-stripe-complete";
+const WORKER_VERSION = "v104-business-i18n";
 
 export default {
   async fetch(request, env, ctx) {
@@ -69,6 +69,12 @@ export default {
       if (url.pathname === "/api/billing/stripe/checkout-session" && request.method === "POST") {
         return handleStripeCheckoutSession(request, env);
       }
+      if (url.pathname === "/api/business/internationalize" && request.method === "POST") {
+        return handleBusinessInternationalize(request, env);
+      }
+      if (url.pathname === "/api/business/sync-translations" && request.method === "POST") {
+        return handleBusinessSyncTranslations(request, env);
+      }
       if (url.pathname === "/health") {
         return json(buildIntegrationsHealth(env));
       }
@@ -111,8 +117,11 @@ async function handlePublicPage(request, env, ctx, slug) {
   const page = rows?.[0];
   if (!page) return html(notFound("Pagina non pubblicata"), 404);
 
+  const locale = resolveVisitorLocale(request, page.state || {});
+  const localizedPage = { ...page, state: localizePublicState(page.state || {}, locale) };
+
   ctx.waitUntil(track(env, request, page.business_id, "page_view", "public_page").catch(() => {}));
-  return html(renderPage(page, new URL(request.url).origin, env), 200, {
+  return html(renderPage(localizedPage, new URL(request.url).origin, env, locale), 200, {
     "Cache-Control": "public, max-age=30, s-maxage=60"
   });
 }
@@ -456,10 +465,10 @@ async function handleMediaServe(request, env, keyPath) {
   return new Response(object.body, { headers });
 }
 
-function renderPage(page, origin, env = {}) {
+function renderPage(page, origin, env = {}, locale = "it") {
   const state = page.state || {};
   const fields = state.fields || {};
-  if (state.publicSnapshot?.html) return renderSnapshotPage(page, origin, env);
+  if (state.publicSnapshot?.html) return renderSnapshotPage(page, origin, env, locale);
   const rawName = String(fields.nome || "").trim();
   const description = String(fields.desc || "").trim();
   const name = rawName || "KhamaKey";
@@ -499,7 +508,7 @@ function renderPage(page, origin, env = {}) {
   ].filter(Boolean).join("");
 
   return `<!doctype html>
-<html lang="it">
+<html lang="${attr(locale)}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -537,7 +546,7 @@ document.querySelectorAll("[data-event]").forEach(el=>el.addEventListener("click
 </body></html>`;
 }
 
-function renderSnapshotPage(page, origin, env = {}) {
+function renderSnapshotPage(page, origin, env = {}, locale = "it") {
   const state = page.state || {};
   const fields = state.fields || {};
   const snapshot = state.publicSnapshot || {};
@@ -546,7 +555,7 @@ function renderSnapshotPage(page, origin, env = {}) {
   const style = String(snapshot.style || "").replace(/[^a-zA-Z0-9:#;().,% _-]/g, "");
   const pagesBase = String(env.PAGES_ASSET_BASE || "https://khamakey-app.pages.dev").replace(/\/$/, "");
   return `<!doctype html>
-<html lang="it">
+<html lang="${attr(locale)}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -2342,6 +2351,321 @@ async function handleShopifyRegisterWebhooks(request, env) {
 }
 
 const SUPPORTED_LOCALES = ["it", "en", "fr", "de", "es"];
+const TARGET_LOCALES = ["en", "fr", "de", "es"];
+const LOCALE_LABELS = {
+  en: "English",
+  fr: "French",
+  de: "German",
+  es: "Spanish"
+};
+
+function openaiConfigured(env) {
+  return Boolean(env.OPENAI_API_KEY);
+}
+
+function parseAcceptLanguage(header = "") {
+  return String(header || "")
+    .split(",")
+    .map(part => {
+      const [tag, weight = "q=1"] = part.trim().split(";");
+      const q = Number(String(weight).replace(/[^\d.]/g, "")) || 1;
+      const code = String(tag || "").trim().toLowerCase().slice(0, 2);
+      return { code, q };
+    })
+    .filter(item => SUPPORTED_LOCALES.includes(item.code))
+    .sort((a, b) => b.q - a.q)
+    .map(item => item.code);
+}
+
+function resolveVisitorLocale(request, state = {}) {
+  const i18n = state.i18n || {};
+  if (!i18n.enabled) return "it";
+  const enabled = TARGET_LOCALES.filter(code => i18n.snapshots?.[code]?.html);
+  if (!enabled.length) return "it";
+  const fallback = enabled.includes(i18n.fallback) ? i18n.fallback : enabled[0];
+  const preferred = parseAcceptLanguage(request.headers.get("Accept-Language"));
+  for (const code of preferred) {
+    if (enabled.includes(code)) return code;
+  }
+  return fallback || "it";
+}
+
+function localizePublicState(state = {}, locale = "it") {
+  if (!state?.i18n?.enabled || locale === "it") return state;
+  const snapshot = state.i18n?.snapshots?.[locale];
+  if (snapshot?.html) return { ...state, publicSnapshot: snapshot };
+  const fallback = state.i18n?.fallback || "en";
+  const fallbackSnapshot = state.i18n?.snapshots?.[fallback];
+  if (fallbackSnapshot?.html) return { ...state, publicSnapshot: fallbackSnapshot };
+  return state;
+}
+
+function hashText(text) {
+  let hash = 0;
+  const value = String(text || "");
+  for (let i = 0; i < value.length; i += 1) {
+    hash = ((hash << 5) - hash) + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return String(hash);
+}
+
+function extractTranslatableStrings(state = {}) {
+  const map = {};
+  const add = (path, value) => {
+    const text = String(value || "").replace(/\s+/g, " ").trim();
+    if (text.length >= 2) map[path] = text;
+  };
+  const fields = state.fields || {};
+  ["nome", "desc", "aboutTitle", "aboutText", "bookingTitle", "bookingDesc", "welcomeTitle", "welcomeIntro"].forEach(key => {
+    add(`fields.${key}`, fields[key]);
+  });
+  const walkCatalog = (prefix, catalogs = []) => {
+    catalogs.forEach((cat, ci) => {
+      add(`${prefix}.${ci}.nome`, cat?.nome);
+      (cat?.voci || cat?.piatti || []).forEach((item, vi) => {
+        add(`${prefix}.${ci}.voci.${vi}.nome`, item?.nome || item?.name);
+        add(`${prefix}.${ci}.voci.${vi}.desc`, item?.desc || item?.description);
+        add(`${prefix}.${ci}.voci.${vi}.ingredienti`, item?.ingredienti || item?.ingredients);
+      });
+    });
+  };
+  walkCatalog("cats", state.cats);
+  walkCatalog("extraCatalogs", state.extraCatalogs);
+  (state.promoItems || []).forEach((item, i) => {
+    add(`promoItems.${i}.title`, item?.title);
+    add(`promoItems.${i}.desc`, item?.desc);
+    add(`promoItems.${i}.label`, item?.label);
+    add(`promoItems.${i}.cta`, item?.cta);
+    add(`promoItems.${i}.note`, item?.note);
+  });
+  (state.eventItems || []).forEach((item, i) => {
+    add(`eventItems.${i}.title`, item?.title);
+    add(`eventItems.${i}.desc`, item?.desc);
+    add(`eventItems.${i}.location`, item?.location);
+  });
+  (state.documentItems || []).forEach((item, i) => {
+    add(`documentItems.${i}.title`, item?.title);
+    add(`documentItems.${i}.desc`, item?.desc);
+  });
+  (state.welcomeQuickItems || []).forEach((item, i) => {
+    add(`welcomeQuickItems.${i}.title`, item?.title);
+    add(`welcomeQuickItems.${i}.text`, item?.text);
+  });
+  (state.welcomePlaces || []).forEach((item, i) => {
+    add(`welcomePlaces.${i}.title`, item?.title);
+    add(`welcomePlaces.${i}.desc`, item?.desc);
+  });
+  (state.welcomeDocs || []).forEach((item, i) => {
+    add(`welcomeDocs.${i}.title`, item?.title);
+    add(`welcomeDocs.${i}.desc`, item?.desc);
+  });
+  return map;
+}
+
+async function translateStringsWithOpenAI(env, strings, targetLocale) {
+  const entries = Object.entries(strings || {});
+  if (!entries.length) return {};
+  if (!openaiConfigured(env)) {
+    throw new Error("Servizio traduzioni non ancora attivo. Riprova tra poco.");
+  }
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.OPENAI_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: String(env.OPENAI_MODEL || "gpt-4o-mini"),
+      temperature: 0.2,
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: `Translate Italian business page content to ${LOCALE_LABELS[targetLocale] || targetLocale}. Return ONLY valid JSON where each key is the input key and each value is the translated string. Keep brand names, prices, phone numbers, emails and URLs unchanged. Use natural tourist-friendly language.`
+        },
+        {
+          role: "user",
+          content: JSON.stringify(Object.fromEntries(entries))
+        }
+      ]
+    })
+  });
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    console.error("OpenAI translate error", targetLocale, response.status, detail.slice(0, 300));
+    throw new Error("Traduzione temporaneamente non disponibile.");
+  }
+  const payload = await response.json();
+  const content = payload?.choices?.[0]?.message?.content || "{}";
+  let parsed = {};
+  try {
+    parsed = JSON.parse(content);
+  } catch (error) {
+    console.error("OpenAI JSON parse error", error, content.slice(0, 300));
+    throw new Error("Risposta traduzione non valida.");
+  }
+  const out = {};
+  entries.forEach(([path]) => {
+    const translated = String(parsed[path] || "").trim();
+    if (translated) out[path] = translated;
+  });
+  return out;
+}
+
+async function supabaseUserRest(env, jwt, path, options = {}) {
+  const headers = {
+    apikey: env.SUPABASE_PUBLISHABLE_KEY,
+    Authorization: `Bearer ${jwt}`,
+    "Content-Type": "application/json",
+    ...(options.headers || {})
+  };
+  return fetch(`${env.SUPABASE_URL}/rest/v1/${path}`, { ...options, headers });
+}
+
+async function verifyBusinessOwner(env, jwt, businessId) {
+  const cleanId = String(businessId || "").trim();
+  if (!cleanId) return false;
+  const response = await supabaseUserRest(env, jwt, `businesses?id=eq.${encodeURIComponent(cleanId)}&select=id`, {
+    method: "GET",
+    headers: { Accept: "application/json" }
+  });
+  if (!response.ok) return false;
+  const rows = await response.json();
+  return Array.isArray(rows) && rows.length > 0;
+}
+
+async function persistBusinessTranslations(env, jwt, businessId, translationsByLocale = {}, sourceStrings = {}) {
+  const rows = [];
+  Object.entries(translationsByLocale).forEach(([locale, map]) => {
+    Object.entries(map || {}).forEach(([fieldPath, translatedText]) => {
+      const sourceText = String(sourceStrings[fieldPath] || "");
+      rows.push({
+        business_id: businessId,
+        locale,
+        field_path: fieldPath,
+        source_text: sourceText,
+        source_hash: hashText(sourceText),
+        translated_text: translatedText,
+        updated_at: new Date().toISOString()
+      });
+    });
+  });
+  if (!rows.length) return;
+  await supabaseUserRest(env, jwt, `business_page_i18n?business_id=eq.${encodeURIComponent(businessId)}`, {
+    method: "DELETE"
+  });
+  const insertResponse = await supabaseUserRest(env, jwt, "business_page_i18n", {
+    method: "POST",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify(rows)
+  });
+  if (!insertResponse.ok) {
+    const detail = await insertResponse.text().catch(() => "");
+    console.warn("business_page_i18n insert skipped", insertResponse.status, detail.slice(0, 200));
+  }
+  await supabaseUserRest(env, jwt, "business_i18n_settings", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({
+      business_id: businessId,
+      enabled: true,
+      fallback_locale: "en",
+      locales: SUPPORTED_LOCALES,
+      updated_at: new Date().toISOString()
+    })
+  });
+}
+
+async function handleBusinessInternationalize(request, env) {
+  try {
+    const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+    if (!jwt) return cors(json({ error: "Accesso non autorizzato." }, 401));
+    const user = await supabaseUser(env, jwt);
+    if (!user?.email) return cors(json({ error: "Sessione non valida." }, 401));
+
+    const body = await request.json();
+    const businessId = String(body?.business_id || "").trim();
+    if (!businessId) return cors(json({ error: "Attività non valida." }, 400));
+    if (!await verifyBusinessOwner(env, jwt, businessId)) {
+      return cors(json({ error: "Non puoi modificare questa attività." }, 403));
+    }
+
+    const strings = body?.strings && typeof body.strings === "object"
+      ? body.strings
+      : extractTranslatableStrings(body?.state || {});
+    const entries = Object.entries(strings);
+    if (!entries.length) {
+      return cors(json({ error: "Aggiungi almeno nome o descrizione prima di attivare le lingue." }, 400));
+    }
+
+    const translations = {};
+    for (const locale of TARGET_LOCALES) {
+      translations[locale] = await translateStringsWithOpenAI(env, strings, locale);
+    }
+    await persistBusinessTranslations(env, jwt, businessId, translations, strings).catch(error => {
+      console.warn("persistBusinessTranslations", error);
+    });
+
+    return cors(json({
+      ok: true,
+      locales: TARGET_LOCALES,
+      translations,
+      stringsCount: entries.length
+    }));
+  } catch (error) {
+    console.error("handleBusinessInternationalize", error);
+    return cors(json({ error: error.message || "Traduzione non riuscita." }, 500));
+  }
+}
+
+async function handleBusinessSyncTranslations(request, env) {
+  try {
+    const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+    if (!jwt) return cors(json({ error: "Accesso non autorizzato." }, 401));
+    const user = await supabaseUser(env, jwt);
+    if (!user?.email) return cors(json({ error: "Sessione non valida." }, 401));
+
+    const body = await request.json();
+    const businessId = String(body?.business_id || "").trim();
+    const strings = body?.strings || {};
+    if (!businessId) return cors(json({ error: "Attività non valida." }, 400));
+    if (!Object.keys(strings).length) return cors(json({ ok: true, translations: {} }));
+    if (!await verifyBusinessOwner(env, jwt, businessId)) {
+      return cors(json({ error: "Non puoi modificare questa attività." }, 403));
+    }
+
+    const translations = {};
+    for (const locale of TARGET_LOCALES) {
+      translations[locale] = await translateStringsWithOpenAI(env, strings, locale);
+    }
+    const rows = [];
+    Object.entries(translations).forEach(([locale, map]) => {
+      Object.entries(map || {}).forEach(([fieldPath, translatedText]) => {
+        rows.push({
+          business_id: businessId,
+          locale,
+          field_path: fieldPath,
+          source_text: String(strings[fieldPath] || ""),
+          source_hash: hashText(strings[fieldPath]),
+          translated_text: translatedText,
+          updated_at: new Date().toISOString()
+        });
+      });
+    });
+    if (rows.length) {
+      await supabaseUserRest(env, jwt, "business_page_i18n", {
+        method: "POST",
+        headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+        body: JSON.stringify(rows)
+      });
+    }
+    return cors(json({ ok: true, translations }));
+  } catch (error) {
+    console.error("handleBusinessSyncTranslations", error);
+    return cors(json({ error: error.message || "Aggiornamento traduzioni non riuscito." }, 500));
+  }
+}
 
 function stripeConfigured(env) {
   return Boolean(env.STRIPE_SECRET_KEY);
@@ -2366,6 +2690,7 @@ function buildIntegrationsHealth(env) {
     version: WORKER_VERSION,
     media: Boolean(env.MEDIA),
     locales: SUPPORTED_LOCALES,
+    openai: { configured: openaiConfigured(env), status: openaiConfigured(env) ? "active" : "not_configured" },
     integrations: {
       shopify: { configured: shopifyConfigured(env), status: shopifyConfigured(env) ? "active" : "not_configured" },
       resend: { configured: resendConfigured(env), status: resendConfigured(env) ? "active" : "not_configured" },

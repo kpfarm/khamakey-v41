@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL } from "./config.js";
 import { exportMomentLabelsPdf } from "./admin-moment-labels.js";
-import { TYPE_LABELS, renderCategorySelect, normalizeMomentType } from "./moment-categories.js";
+import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=104";
 
 const ADMIN_EMAILS = new Set([
   "kristianperelli@gmail.com",
@@ -48,6 +48,23 @@ const adminResetPassword = document.getElementById("adminResetPassword");
 const content = document.getElementById("adminContent");
 const adminEmail = document.getElementById("adminEmail");
 const adminTitle = document.getElementById("adminTitle");
+const adminSubtitle = document.getElementById("adminSubtitle");
+const panelGuide = document.getElementById("panelGuide");
+const panelGuideSubtitle = document.getElementById("panelGuideSubtitle");
+const panelGuideSteps = document.getElementById("panelGuideSteps");
+const panelGuideLegend = document.getElementById("panelGuideLegend");
+const panelGuideTip = document.getElementById("panelGuideTip");
+const panelGuideToggle = document.getElementById("panelGuideToggle");
+const panelGuideToggleTop = document.getElementById("panelGuideToggleTop");
+const guideElements = {
+  panelGuide,
+  adminSubtitle,
+  panelGuideSubtitle,
+  panelGuideSteps,
+  panelGuideLegend,
+  panelGuideTip,
+  panelGuideToggle
+};
 const clientsTable = document.getElementById("clientsTable");
 const momentsTable = document.getElementById("momentsTable");
 const momentForm = document.getElementById("momentForm");
@@ -147,6 +164,27 @@ const memberForm = document.getElementById("memberForm");
 const memberFormStatus = document.getElementById("memberFormStatus");
 const agentForm = document.getElementById("agentForm");
 const agentFormStatus = document.getElementById("agentFormStatus");
+const agentFormReset = document.getElementById("agentFormReset");
+const agentParentSelect = document.getElementById("agentParentSelect");
+const agentPriceListSelect = document.getElementById("agentPriceListSelect");
+const networkTree = document.getElementById("networkTree");
+const networkRootSelect = document.getElementById("networkRootSelect");
+const networkRefreshBtn = document.getElementById("networkRefreshBtn");
+const tierRuleForm = document.getElementById("tierRuleForm");
+const tierRuleFormStatus = document.getElementById("tierRuleFormStatus");
+const tierRulesTable = document.getElementById("tierRulesTable");
+const priceListForm = document.getElementById("priceListForm");
+const priceListFormStatus = document.getElementById("priceListFormStatus");
+const priceListsTable = document.getElementById("priceListsTable");
+const priceListItemForm = document.getElementById("priceListItemForm");
+const priceListItemFormStatus = document.getElementById("priceListItemFormStatus");
+const priceListItemSelect = document.getElementById("priceListItemSelect");
+const priceListItemsTable = document.getElementById("priceListItemsTable");
+const deliveryForm = document.getElementById("deliveryForm");
+const deliveryFormStatus = document.getElementById("deliveryFormStatus");
+const deliveryAgentSelect = document.getElementById("deliveryAgentSelect");
+const deliveryFilterAgent = document.getElementById("deliveryFilterAgent");
+const deliveriesTable = document.getElementById("deliveriesTable");
 const drawer = document.getElementById("clientDrawer");
 const drawerFrame = document.getElementById("drawerPublicFrame");
 const drawerEditorFrame = document.getElementById("drawerEditorFrame");
@@ -179,6 +217,11 @@ let supabase = null;
 let currentMember = null;
 let clientRows = [];
 let agentRows = [];
+let networkRows = [];
+let tierRuleRows = [];
+let priceListRows = [];
+let priceListItemRows = [];
+let deliveryRows = [];
 let productRows = [];
 let momentRows = [];
 let momentCustomerRows = [];
@@ -208,6 +251,18 @@ const SOLD_CHANNEL_LABELS = {
   gift:"Regalo / confezione",
   other:"Altro",
   non_specificato:"Non specificato"
+};
+
+const AGENT_TYPE_LABELS = {
+  agent:"Agente",
+  reseller:"Rivenditore",
+  authorized_point:"Punto autorizzato"
+};
+
+const TIER_LEVEL_LABELS = {
+  1:"L1 diretto",
+  2:"L2 upline",
+  3:"L3 upline"
 };
 
 let supportTicketRows = [];
@@ -336,6 +391,29 @@ function nextOrderCode(prefix="KK"){
   return `${prefix}-${stamp}-${Math.floor(1000 + Math.random() * 9000)}`;
 }
 
+function agentLabel(row){
+  if(!row) return "-";
+  return `${row.contact_name || row.email || "Agente"} · ${row.referral_code || ""}`.trim();
+}
+
+function agentParentLabel(parentId){
+  if(!parentId) return "Radice";
+  const parent = agentRows.find(item=>item.id === parentId);
+  return parent ? agentLabel(parent) : "Upline";
+}
+
+function isAgentDescendant(agentId, potentialAncestorId){
+  if(!agentId || !potentialAncestorId || agentId === potentialAncestorId) return false;
+  let current = agentRows.find(item=>item.id === agentId);
+  const seen = new Set();
+  while(current?.parent_agent_id && !seen.has(current.parent_agent_id)){
+    if(current.parent_agent_id === potentialAncestorId) return true;
+    seen.add(current.parent_agent_id);
+    current = agentRows.find(item=>item.id === current.parent_agent_id);
+  }
+  return false;
+}
+
 function renderAgentOptions(selectedId=""){
   const options = `<option value="">Nessun agente</option>` + agentRows.map(row=>`
     <option value="${esc(row.id)}" ${row.id === selectedId ? "selected" : ""}>${esc(row.contact_name || row.email)} · ${esc(row.referral_code)}</option>
@@ -350,6 +428,36 @@ function renderAgentOptions(selectedId=""){
     <option value="${esc(row.id)}">${esc(row.contact_name || row.email)}</option>
   `).join("");
   populateMomentAgentFilter();
+  renderAgentHierarchySelects(selectedId);
+}
+
+function renderAgentHierarchySelects(selectedParentId=""){
+  const editingId = String(agentForm?.elements?.agent_id?.value || "").trim();
+  const parentOptions = `<option value="">Nessuno — radice rete</option>` + agentRows
+    .filter(row=>row.id !== editingId && !isAgentDescendant(editingId, row.id))
+    .map(row=>`<option value="${esc(row.id)}" ${row.id === selectedParentId ? "selected" : ""}>${esc(agentLabel(row))}</option>`)
+    .join("");
+  if(agentParentSelect) agentParentSelect.innerHTML = parentOptions;
+  const priceListOptions = `<option value="">Nessun listino dedicato</option>` + priceListRows.map(row=>`
+    <option value="${esc(row.id)}" ${row.id === (agentForm?.elements?.price_list_id?.value || "") ? "selected" : ""}>${esc(row.name)} (${esc(row.list_key)})</option>
+  `).join("");
+  if(agentPriceListSelect) agentPriceListSelect.innerHTML = priceListOptions;
+  const agentOnlyOptions = `<option value="">Seleziona agente</option>` + agentRows.map(row=>`
+    <option value="${esc(row.id)}">${esc(agentLabel(row))}</option>
+  `).join("");
+  if(deliveryAgentSelect) deliveryAgentSelect.innerHTML = agentOnlyOptions;
+  if(deliveryFilterAgent) deliveryFilterAgent.innerHTML = `<option value="">Tutti</option>` + agentRows.map(row=>`
+    <option value="${esc(row.id)}">${esc(agentLabel(row))}</option>
+  `).join("");
+  const rootOptions = `<option value="">Tutte le radici</option>` + agentRows
+    .filter(row=>!row.parent_agent_id)
+    .map(row=>`<option value="${esc(row.id)}">${esc(agentLabel(row))}</option>`)
+    .join("");
+  if(networkRootSelect) networkRootSelect.innerHTML = rootOptions;
+  const listItemOptions = `<option value="">Seleziona listino</option>` + priceListRows.map(row=>`
+    <option value="${esc(row.id)}">${esc(row.name)}</option>
+  `).join("");
+  if(priceListItemSelect) priceListItemSelect.innerHTML = listItemOptions;
 }
 
 function soldChannelLabel(value){
@@ -377,6 +485,18 @@ function renderPermissions(){
   `).join("");
 }
 
+function togglePanelGuide(forceCollapsed){
+  const collapsed = typeof forceCollapsed === "boolean" ? forceCollapsed : !isGuideCollapsed();
+  setGuideCollapsed(collapsed);
+  if(panelGuide) panelGuide.classList.toggle("collapsed", collapsed);
+  const label = collapsed ? "Mostra guida" : "Nascondi guida";
+  if(panelGuideToggle){
+    panelGuideToggle.textContent = label;
+    panelGuideToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+  }
+  if(panelGuideToggleTop) panelGuideToggleTop.textContent = collapsed ? "Mostra guida" : "Guida sezione";
+}
+
 function switchTab(tab){
   document.querySelectorAll("[data-admin-tab]").forEach(button=>{
     button.classList.toggle("active",button.dataset.adminTab === tab);
@@ -388,6 +508,13 @@ function switchTab(tab){
   const group = active?.closest("[data-nav-group]");
   if(group) group.classList.add("open");
   adminTitle.textContent = active?.textContent || "Admin";
+  renderPanelGuide(tab, guideElements);
+  if(panelGuide && !panelGuide.hidden){
+    panelGuide.classList.toggle("collapsed", isGuideCollapsed());
+  }
+  try{
+    history.replaceState(null, "", `#${tab}`);
+  }catch{ /* ignore */ }
 }
 
 async function safeCount(table,filter){
@@ -1081,7 +1208,7 @@ async function loadAgents(){
   try{
     const { data,error } = await supabase
       .from("platform_agents")
-      .select("id,business_name,contact_name,email,referral_code,commission_percent,model,status")
+      .select("id,business_name,contact_name,email,phone,referral_code,commission_percent,commission_bonus_percent,model,status,agent_type,parent_agent_id,tier_key,price_list_id,territory")
       .order("created_at",{ascending:false});
     if(error) throw error;
     agentRows = data || [];
@@ -1090,7 +1217,7 @@ async function loadAgents(){
     if(momentProductRows.length) refreshMomentTable();
   }catch(error){
     console.error(error);
-    agentsTable.innerHTML = `<tr><td colspan="6">Agenti non disponibili. Verifica permessi agents.read.</td></tr>`;
+    agentsTable.innerHTML = `<tr><td colspan="7">Agenti non disponibili. Verifica permessi agents.read.</td></tr>`;
   }
 }
 
@@ -1101,26 +1228,30 @@ function refreshAgentsTable(){
   const rows = agentRows.filter(row=>{
     if(status && row.status !== status) return false;
     if(model && row.model !== model) return false;
-    return haystackIncludes(row, search, ["contact_name","business_name","email","referral_code","model"]);
+    return haystackIncludes(row, search, ["contact_name","business_name","email","referral_code","model","agent_type","territory"]);
   });
   if(agentTableCount) agentTableCount.textContent = `${fmt(rows.length)} agenti`;
   agentsTable.innerHTML = rows.length ? rows.map(row=>`
     <tr>
       <td><strong>${esc(row.contact_name || row.email)}</strong><div class="muted-cell">${esc(row.business_name || row.email)}</div></td>
+      <td>${esc(AGENT_TYPE_LABELS[row.agent_type] || row.agent_type || "agent")}</td>
       <td>${esc(row.referral_code)}</td>
-      <td>${esc(row.model)}</td>
-      <td>${fmt(row.commission_percent)}%</td>
+      <td class="muted-cell">${esc(agentParentLabel(row.parent_agent_id))}${agentDownlineCount(row.id) ? ` · ${fmt(agentDownlineCount(row.id))} downline` : ""}</td>
+      <td>${fmt(Number(row.commission_percent || 0) + Number(row.commission_bonus_percent || 0))}%</td>
       <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
-      <td><button class="small-action" type="button" data-agent-edit="${esc(row.id)}">Modifica</button></td>
+      <td>
+        <button class="small-action" type="button" data-agent-edit="${esc(row.id)}">Modifica</button>
+        <button class="small-action" type="button" data-agent-network="${esc(row.id)}">Rete</button>
+      </td>
     </tr>
-  `).join("") : `<tr><td colspan="6">${agentRows.length ? "Nessun agente corrisponde ai filtri." : "Nessun agente registrato."}</td></tr>`;
+  `).join("") : `<tr><td colspan="7">${agentRows.length ? "Nessun agente corrisponde ai filtri." : "Nessun agente registrato."}</td></tr>`;
 }
 
 async function loadCommissions(){
   try{
     const { data,error } = await supabase
       .from("platform_commission_events")
-      .select("id,agent_id,event_type,amount,commission_amount,status,platform_agents(contact_name,email,referral_code)")
+      .select("id,agent_id,event_type,amount,commission_amount,status,tier_level,source_agent_id,platform_agents(contact_name,email,referral_code)")
       .order("created_at",{ascending:false})
       .limit(50);
     if(error) throw error;
@@ -1129,14 +1260,15 @@ async function loadCommissions(){
       <tr>
         <td><strong>${esc(row.platform_agents?.contact_name || row.platform_agents?.email || row.agent_id)}</strong></td>
         <td>${esc(row.event_type)}</td>
+        <td>${esc(TIER_LEVEL_LABELS[row.tier_level] || (row.tier_level ? `L${row.tier_level}` : "L1"))}</td>
         <td>${money(row.amount)}</td>
         <td>${money(row.commission_amount)}</td>
         <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
       </tr>
-    `).join("") : `<tr><td colspan="5">Nessuna provvigione registrata.</td></tr>`;
+    `).join("") : `<tr><td colspan="6">Nessuna provvigione registrata.</td></tr>`;
   }catch(error){
     console.error(error);
-    commissionsTable.innerHTML = `<tr><td colspan="5">Provvigioni non disponibili. Verifica permessi commissions.read.</td></tr>`;
+    commissionsTable.innerHTML = `<tr><td colspan="6">Provvigioni non disponibili. Verifica permessi commissions.read.</td></tr>`;
   }
 }
 
@@ -1165,14 +1297,175 @@ async function loadCommissionRules(){
   }
 }
 
-function momentShopifyStoreLabel(row){
-  if(!row.publish_shopify) return "—";
+async function loadNetworkTree(){
+  if(!networkTree) return;
+  try{
+    const rootId = networkRootSelect?.value || null;
+    const { data,error } = await supabase.rpc("get_agent_network_tree",{
+      p_root_agent_id:rootId || null
+    });
+    if(error) throw error;
+    networkRows = data || [];
+    renderNetworkTree();
+  }catch(error){
+    console.error(error);
+    networkTree.innerHTML = `<p class="inventory-stats-empty">Rete non disponibile. Applica SQL v68 su Supabase.</p>`;
+  }
+}
+
+function renderNetworkTree(){
+  if(!networkTree) return;
+  if(!networkRows.length){
+    networkTree.innerHTML = `<p class="inventory-stats-empty">Nessun agente in rete. Crea agenti radice dalla tab Agenti.</p>`;
+    return;
+  }
+  networkTree.innerHTML = networkRows.map(row=>{
+    const indent = Math.min(row.depth || 0, 8) * 18;
+    const bonus = Number(row.commission_bonus_percent || 0);
+    const l1 = Number(row.commission_percent || 0) + bonus;
+    return `
+      <article class="network-node" style="margin-left:${indent}px">
+        <div class="network-node-head">
+          <strong>${esc(row.contact_name || row.email)}</strong>
+          <span class="status-pill ${esc(row.status)}">${esc(AGENT_TYPE_LABELS[row.agent_type] || row.agent_type || "agent")}</span>
+        </div>
+        <div class="network-node-meta muted-cell">
+          ${esc(row.referral_code)} · tier ${esc(row.tier_key || "standard")} · L1 ${fmt(l1)}%
+          ${bonus ? ` (+${fmt(bonus)}% bonus)` : ""}
+          · ${fmt(row.downline_count || 0)} downline
+        </div>
+        <div class="network-node-actions">
+          <button class="small-action" type="button" data-agent-edit="${esc(row.agent_id)}">Modifica</button>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+async function loadTierRules(){
+  if(!tierRulesTable) return;
+  try{
+    const { data,error } = await supabase
+      .from("platform_commission_tier_rules")
+      .select("id,tier_key,product_area,event_type,level_1_percent,level_2_percent,level_3_percent,active,notes")
+      .order("tier_key",{ascending:true})
+      .order("event_type",{ascending:true});
+    if(error) throw error;
+    tierRuleRows = data || [];
+    tierRulesTable.innerHTML = tierRuleRows.length ? tierRuleRows.map(row=>`
+      <tr>
+        <td><strong>${esc(row.tier_key)}</strong></td>
+        <td>${esc(row.product_area)}</td>
+        <td>${esc(row.event_type)}</td>
+        <td>${fmt(row.level_1_percent)}%</td>
+        <td>${fmt(row.level_2_percent)}%</td>
+        <td>${fmt(row.level_3_percent)}%</td>
+        <td><span class="status-pill ${row.active ? "" : "disabled"}">${row.active ? "attiva" : "disattiva"}</span></td>
+      </tr>
+    `).join("") : `<tr><td colspan="7">Nessuna regola tier. Applica SQL v68.</td></tr>`;
+  }catch(error){
+    console.error(error);
+    tierRulesTable.innerHTML = `<tr><td colspan="7">Regole tier non disponibili. Applica SQL v68.</td></tr>`;
+  }
+}
+
+async function loadPriceLists(){
+  if(!priceListsTable) return;
+  try{
+    const { data,error } = await supabase
+      .from("platform_reseller_price_lists")
+      .select("id,list_key,name,product_area,currency,active,notes")
+      .order("name",{ascending:true});
+    if(error) throw error;
+    priceListRows = data || [];
+    renderAgentHierarchySelects(agentForm?.elements?.parent_agent_id?.value || "");
+    const { data:items,error:itemsError } = await supabase
+      .from("platform_reseller_price_list_items")
+      .select("id,price_list_id,sku,product_name,unit_price,min_qty,platform_reseller_price_lists(name,list_key)")
+      .order("sku",{ascending:true});
+    if(itemsError) throw itemsError;
+    priceListItemRows = items || [];
+    refreshPriceListsTable();
+    refreshPriceListItemsTable();
+  }catch(error){
+    console.error(error);
+    priceListsTable.innerHTML = `<tr><td colspan="5">Listini non disponibili. Applica SQL v68.</td></tr>`;
+    if(priceListItemsTable) priceListItemsTable.innerHTML = `<tr><td colspan="5">Listini non disponibili.</td></tr>`;
+  }
+}
+
+function refreshPriceListsTable(){
+  if(!priceListsTable) return;
+  priceListsTable.innerHTML = priceListRows.length ? priceListRows.map(row=>{
+    const count = priceListItemRows.filter(item=>item.price_list_id === row.id).length;
+    return `
+      <tr>
+        <td><strong>${esc(row.name)}</strong><div class="muted-cell">${esc(row.list_key)}</div></td>
+        <td>${esc(row.product_area)}</td>
+        <td>${esc(row.currency || "EUR")}</td>
+        <td><span class="status-pill ${row.active ? "" : "disabled"}">${row.active ? "attivo" : "disattivo"}</span></td>
+        <td>${fmt(count)} righe</td>
+      </tr>
+    `;
+  }).join("") : `<tr><td colspan="5">Nessun listino creato.</td></tr>`;
+}
+
+function refreshPriceListItemsTable(){
+  if(!priceListItemsTable) return;
+  const selectedList = priceListItemSelect?.value || "";
+  const rows = selectedList
+    ? priceListItemRows.filter(item=>item.price_list_id === selectedList)
+    : priceListItemRows;
+  priceListItemsTable.innerHTML = rows.length ? rows.map(row=>`
+    <tr>
+      <td>${esc(row.platform_reseller_price_lists?.name || row.price_list_id)}</td>
+      <td>${esc(row.sku)}</td>
+      <td>${esc(row.product_name || "-")}</td>
+      <td>${money(row.unit_price)}</td>
+      <td>${fmt(row.min_qty || 1)}</td>
+    </tr>
+  `).join("") : `<tr><td colspan="5">${priceListRows.length ? "Nessuna riga per il listino selezionato." : "Crea un listino per iniziare."}</td></tr>`;
+}
+
+async function loadDeliveries(){
+  if(!deliveriesTable) return;
+  try{
+    const filterAgent = deliveryFilterAgent?.value || null;
+    const { data,error } = await supabase.rpc("get_agent_delivery_history",{
+      p_agent_id:filterAgent || null,
+      p_limit:100
+    });
+    if(error) throw error;
+    deliveryRows = data || [];
+    refreshDeliveriesTable();
+  }catch(error){
+    console.error(error);
+    deliveriesTable.innerHTML = `<tr><td colspan="6">Storico consegne non disponibile. Applica SQL v68.</td></tr>`;
+  }
+}
+
+function refreshDeliveriesTable(){
+  if(!deliveriesTable) return;
+  deliveriesTable.innerHTML = deliveryRows.length ? deliveryRows.map(row=>`
+    <tr>
+      <td>${dateShort(row.delivered_at)}</td>
+      <td><strong>${esc(row.agent_name)}</strong></td>
+      <td>${esc(row.product_label || row.sku || "-")}</td>
+      <td>${fmt(row.quantity)}</td>
+      <td>${esc(row.delivery_type)}</td>
+      <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
+    </tr>
+  `).join("") : `<tr><td colspan="6">Nessuna consegna registrata.</td></tr>`;
+}
+
+function momentShopifyStorePill(row){
+  if(!row.publish_shopify) return `<span class="muted-cell">Non su Shopify</span>`;
   const description = String(row.description || "").trim();
   const imageUrl = String(row.image_url || "").trim();
   const ready = description.length >= 20 && imageUrl;
-  if(row.shopify_live && ready) return "Online";
-  if(row.shopify_live && !ready) return "In attesa contenuti";
-  return "Bozza Shopify";
+  if(row.shopify_live && ready) return `<span class="status-pill active">Online</span>`;
+  if(row.shopify_live && !ready) return `<span class="status-pill pending">In attesa contenuti</span>`;
+  return `<span class="status-pill draft">Bozza Shopify</span>`;
 }
 
 async function loadMomentCatalog(){
@@ -1200,7 +1493,7 @@ async function loadMomentCatalog(){
           <td><strong>${money(row.sale_price)}</strong><div class="muted-cell">Costo ${money(row.unit_cost)}</div></td>
           <td>${fmt(row.physical_units)}</td>
           <td>${fmt(row.activation_codes)}</td>
-          <td>${esc(momentShopifyStoreLabel(row))}</td>
+          <td>${momentShopifyStorePill(row)}</td>
           <td><span class="status-pill ${esc(syncClass)}">${esc(syncLabel)}</span>${row.sync_error ? `<div class="muted-cell">${esc(row.sync_error)}</div>` : ""}</td>
           <td>
             <button class="small-action" type="button" data-moment-catalog-edit="${esc(row.id)}">Modifica</button>
@@ -2300,18 +2593,44 @@ async function applyMomentBulk(action={}){
   await Promise.all([loadMomentProducts(),loadMomentInventoryStats(),loadMomentAgentInventoryStats()]);
 }
 
+function resetAgentForm(){
+  if(!agentForm) return;
+  agentForm.reset();
+  if(agentForm.elements.agent_id) agentForm.elements.agent_id.value = "";
+  if(agentForm.elements.commission_percent) agentForm.elements.commission_percent.value = "10";
+  if(agentForm.elements.commission_bonus_percent) agentForm.elements.commission_bonus_percent.value = "0";
+  renderAgentHierarchySelects("");
+  setFormStatus(agentFormStatus,"");
+}
+
 function editAgent(id){
   const row = agentRows.find(item=>item.id === id);
   if(!row) return;
   const form = document.getElementById("agentForm");
+  if(form.elements.agent_id) form.elements.agent_id.value = row.id || "";
   form.elements.contact_name.value = row.contact_name || "";
   form.elements.email.value = row.email || "";
   form.elements.business_name.value = row.business_name || "";
   form.elements.phone.value = row.phone || "";
   form.elements.referral_code.value = row.referral_code || "";
   form.elements.commission_percent.value = row.commission_percent ?? 10;
+  if(form.elements.commission_bonus_percent) form.elements.commission_bonus_percent.value = row.commission_bonus_percent ?? 0;
+  if(form.elements.agent_type) form.elements.agent_type.value = row.agent_type || "agent";
+  if(form.elements.tier_key) form.elements.tier_key.value = row.tier_key || "standard";
+  if(form.elements.territory) form.elements.territory.value = row.territory || "";
   form.elements.model.value = row.model || "referral";
+  renderAgentHierarchySelects(row.parent_agent_id || "");
+  if(form.elements.parent_agent_id) form.elements.parent_agent_id.value = row.parent_agent_id || "";
+  if(form.elements.price_list_id) form.elements.price_list_id.value = row.price_list_id || "";
   focusForm(form,agentFormStatus,"Agente caricato nel form. Modifica e salva.");
+}
+
+function openAgentNetwork(id){
+  if(networkRootSelect){
+    networkRootSelect.value = id || "";
+  }
+  switchTab("resellerNetwork");
+  loadNetworkTree();
 }
 
 function syncNfcOrderFieldsVisibility(){
@@ -2457,10 +2776,16 @@ async function saveAgent(event){
     return;
   }
   const form = event.currentTarget;
+  const agentId = String(form.elements.agent_id?.value || "").trim();
   const email = String(form.elements.email.value || "").trim().toLowerCase();
   const businessName = String(form.elements.business_name.value || "").trim();
   const contactName = String(form.elements.contact_name.value || "").trim();
   const referralCode = String(form.elements.referral_code.value || "").trim().toUpperCase() || referralFrom(email,businessName || contactName);
+  const parentAgentId = String(form.elements.parent_agent_id?.value || "").trim() || null;
+  if(agentId && parentAgentId && (agentId === parentAgentId || isAgentDescendant(parentAgentId, agentId))){
+    setFormStatus(agentFormStatus,"L'upline non può essere lo stesso agente o un suo downline.","error");
+    return;
+  }
   setFormStatus(agentFormStatus,"Salvataggio agente...");
   const memberPayload = {
     email,
@@ -2487,21 +2812,154 @@ async function saveAgent(event){
     phone:String(form.elements.phone.value || "").trim() || null,
     referral_code:referralCode,
     commission_percent:Number(form.elements.commission_percent.value || 0),
+    commission_bonus_percent:Number(form.elements.commission_bonus_percent?.value || 0),
+    agent_type:form.elements.agent_type?.value || "agent",
+    parent_agent_id:parentAgentId,
+    tier_key:form.elements.tier_key?.value || "standard",
+    price_list_id:String(form.elements.price_list_id?.value || "").trim() || null,
+    territory:String(form.elements.territory?.value || "").trim() || null,
     model:form.elements.model.value,
     status:"active"
   };
+  if(agentId) payload.id = agentId;
   const { error } = await supabase
     .from("platform_agents")
-    .upsert(payload,{onConflict:"referral_code"});
+    .upsert(payload, agentId ? {onConflict:"id"} : {onConflict:"referral_code"});
   if(error){
     console.error(error);
     setFormStatus(agentFormStatus,error.message || "Errore salvataggio agente.","error");
     return;
   }
-  form.reset();
-  form.elements.commission_percent.value = "10";
+  resetAgentForm();
   setFormStatus(agentFormStatus,"Agente salvato.","ok");
-  await Promise.all([loadAgents(),loadMembers(),loadDashboard()]);
+  await Promise.all([loadAgents(),loadMembers(),loadDashboard(),loadNetworkTree(),loadPriceLists()]);
+}
+
+function agentDownlineCount(agentId){
+  return agentRows.filter(row=>row.parent_agent_id === agentId).length;
+}
+
+async function saveTierRule(event){
+  event.preventDefault();
+  if(!hasPermission("commissions.write")){
+    setFormStatus(tierRuleFormStatus,"Non hai il permesso commissions.write.","error");
+    return;
+  }
+  const form = event.currentTarget;
+  const payload = {
+    tier_key:form.elements.tier_key.value,
+    product_area:form.elements.product_area.value,
+    event_type:form.elements.event_type.value,
+    level_1_percent:Number(form.elements.level_1_percent.value || 0),
+    level_2_percent:Number(form.elements.level_2_percent.value || 0),
+    level_3_percent:Number(form.elements.level_3_percent.value || 0),
+    notes:String(form.elements.notes.value || "").trim() || null,
+    active:true
+  };
+  setFormStatus(tierRuleFormStatus,"Salvataggio regola tier...");
+  const { error } = await supabase
+    .from("platform_commission_tier_rules")
+    .upsert(payload,{onConflict:"tier_key,product_area,event_type"});
+  if(error){
+    console.error(error);
+    setFormStatus(tierRuleFormStatus,error.message || "Errore salvataggio regola tier.","error");
+    return;
+  }
+  form.elements.notes.value = "";
+  setFormStatus(tierRuleFormStatus,"Regola tier salvata.","ok");
+  await loadTierRules();
+}
+
+async function savePriceList(event){
+  event.preventDefault();
+  if(!hasPermission("agents.write")){
+    setFormStatus(priceListFormStatus,"Non hai il permesso agents.write.","error");
+    return;
+  }
+  const form = event.currentTarget;
+  const payload = {
+    list_key:String(form.elements.list_key.value || "").trim().toLowerCase(),
+    name:String(form.elements.name.value || "").trim(),
+    product_area:form.elements.product_area.value,
+    currency:String(form.elements.currency.value || "EUR").trim().toUpperCase(),
+    active:true
+  };
+  setFormStatus(priceListFormStatus,"Salvataggio listino...");
+  const { error } = await supabase
+    .from("platform_reseller_price_lists")
+    .upsert(payload,{onConflict:"list_key"});
+  if(error){
+    console.error(error);
+    setFormStatus(priceListFormStatus,error.message || "Errore salvataggio listino.","error");
+    return;
+  }
+  form.reset();
+  if(form.elements.currency) form.elements.currency.value = "EUR";
+  setFormStatus(priceListFormStatus,"Listino salvato.","ok");
+  await Promise.all([loadPriceLists(),loadAgents()]);
+}
+
+async function savePriceListItem(event){
+  event.preventDefault();
+  if(!hasPermission("agents.write")){
+    setFormStatus(priceListItemFormStatus,"Non hai il permesso agents.write.","error");
+    return;
+  }
+  const form = event.currentTarget;
+  const payload = {
+    price_list_id:form.elements.price_list_id.value,
+    sku:String(form.elements.sku.value || "").trim().toUpperCase(),
+    product_name:String(form.elements.product_name.value || "").trim() || null,
+    unit_price:Number(form.elements.unit_price.value || 0),
+    min_qty:Math.max(1,Number(form.elements.min_qty.value || 1))
+  };
+  if(!payload.price_list_id) return setFormStatus(priceListItemFormStatus,"Seleziona un listino.","error");
+  setFormStatus(priceListItemFormStatus,"Salvataggio riga listino...");
+  const { error } = await supabase
+    .from("platform_reseller_price_list_items")
+    .upsert(payload,{onConflict:"price_list_id,sku"});
+  if(error){
+    console.error(error);
+    setFormStatus(priceListItemFormStatus,error.message || "Errore salvataggio riga.","error");
+    return;
+  }
+  form.elements.sku.value = "";
+  form.elements.product_name.value = "";
+  form.elements.unit_price.value = "0";
+  form.elements.min_qty.value = "1";
+  setFormStatus(priceListItemFormStatus,"Riga listino salvata.","ok");
+  await loadPriceLists();
+}
+
+async function saveDelivery(event){
+  event.preventDefault();
+  if(!hasPermission("agents.write") && !hasPermission("shipping.write")){
+    setFormStatus(deliveryFormStatus,"Permesso agents.write o shipping.write richiesto.","error");
+    return;
+  }
+  const form = event.currentTarget;
+  const agentId = form.elements.agent_id.value;
+  if(!agentId) return setFormStatus(deliveryFormStatus,"Seleziona un agente.","error");
+  setFormStatus(deliveryFormStatus,"Registrazione consegna...");
+  const { error } = await supabase.rpc("record_agent_delivery",{
+    p_agent_id:agentId,
+    p_delivery_type:form.elements.delivery_type.value,
+    p_sku:String(form.elements.sku.value || "").trim() || null,
+    p_product_label:String(form.elements.product_label.value || "").trim() || null,
+    p_quantity:Number(form.elements.quantity.value || 1),
+    p_unit_price:form.elements.unit_price.value ? Number(form.elements.unit_price.value) : null,
+    p_tracking_code:String(form.elements.tracking_code.value || "").trim() || null,
+    p_notes:String(form.elements.notes.value || "").trim() || null
+  });
+  if(error){
+    console.error(error);
+    setFormStatus(deliveryFormStatus,error.message || "Errore registrazione consegna.","error");
+    return;
+  }
+  form.reset();
+  if(form.elements.quantity) form.elements.quantity.value = "1";
+  setFormStatus(deliveryFormStatus,"Consegna registrata.","ok");
+  await loadDeliveries();
 }
 
 async function saveMoment(event){
@@ -3010,6 +3468,10 @@ async function loadAdminSession(){
     loadAgents(),
     loadCommissions(),
     loadCommissionRules(),
+    loadTierRules(),
+    loadPriceLists(),
+    loadNetworkTree(),
+    loadDeliveries(),
     loadMomentCatalog(),
     loadProducts(),
     loadStockMovements(),
@@ -3024,6 +3486,13 @@ async function loadAdminSession(){
     loadPaymentTransactions(),
     loadWebhookEvents()
   ]);
+  renderAgentHierarchySelects("");
+  const hashTab = String(location.hash || "").replace(/^#/, "").trim();
+  if(hashTab && document.querySelector(`[data-panel="${hashTab}"]`)){
+    switchTab(hashTab);
+  }else{
+    renderPanelGuide("dashboard", guideElements);
+  }
 }
 
 async function init(){
@@ -3231,6 +3700,33 @@ document.querySelectorAll("[data-admin-tab-jump]").forEach(button=>{
   button.addEventListener("click",()=>switchTab(button.dataset.adminTabJump));
 });
 
+panelGuideToggle?.addEventListener("click",()=>togglePanelGuide());
+panelGuideToggleTop?.addEventListener("click",()=>togglePanelGuide());
+
+document.getElementById("orderQuickFilters")?.addEventListener("click",event=>{
+  const chip = event.target.closest("[data-order-quick]");
+  if(!chip || !orderFilterStatus || !orderFilterType) return;
+  orderFilterStatus.value = chip.dataset.orderQuickStatus || "";
+  orderFilterType.value = chip.dataset.orderQuickType || "";
+  chip.closest(".filter-chip-bar")?.querySelectorAll(".filter-chip").forEach(node=>{
+    node.classList.toggle("active", node === chip);
+  });
+  refreshOrdersTable();
+});
+
+document.getElementById("momentInventoryQuickFilters")?.addEventListener("click",event=>{
+  const chip = event.target.closest("[data-moment-quick]");
+  if(!chip) return;
+  if(momentFilterStatus) momentFilterStatus.value = chip.dataset.momentQuickStatus || "";
+  if(momentFilterOrder && chip.dataset.momentQuickOrder !== undefined){
+    momentFilterOrder.value = chip.dataset.momentQuickOrder || "";
+  }
+  chip.closest(".filter-chip-bar")?.querySelectorAll(".filter-chip").forEach(node=>{
+    node.classList.toggle("active", node === chip);
+  });
+  refreshMomentTable();
+});
+
 if(momentSearchInput){
   let searchTimer = null;
   momentSearchInput.addEventListener("input",()=>{
@@ -3244,7 +3740,10 @@ momentSearchClear?.addEventListener("click",()=>{
 });
 
 [momentFilterLine,momentFilterBatch,momentFilterStatus,momentFilterAgent,momentFilterChannel,momentFilterOrder].forEach(node=>{
-  if(node) node.addEventListener("change",refreshMomentTable);
+  if(node) node.addEventListener("change",()=>{
+    syncMomentQuickChips();
+    refreshMomentTable();
+  });
 });
 
 momentSelectAll?.addEventListener("change",event=>{
@@ -3296,9 +3795,33 @@ momentLabelsSelected?.addEventListener("click",async event=>{
 });
 
 agentsTable?.addEventListener("click",event=>{
-  const button = event.target.closest("[data-agent-edit]");
-  if(button) editAgent(button.dataset.agentEdit);
+  const editButton = event.target.closest("[data-agent-edit]");
+  if(editButton){
+    editAgent(editButton.dataset.agentEdit);
+    switchTab("agents");
+    return;
+  }
+  const networkButton = event.target.closest("[data-agent-network]");
+  if(networkButton) openAgentNetwork(networkButton.dataset.agentNetwork);
 });
+
+networkTree?.addEventListener("click",event=>{
+  const editButton = event.target.closest("[data-agent-edit]");
+  if(editButton){
+    editAgent(editButton.dataset.agentEdit);
+    switchTab("agents");
+  }
+});
+
+networkRefreshBtn?.addEventListener("click",loadNetworkTree);
+networkRootSelect?.addEventListener("change",loadNetworkTree);
+deliveryFilterAgent?.addEventListener("change",loadDeliveries);
+priceListItemSelect?.addEventListener("change",refreshPriceListItemsTable);
+agentFormReset?.addEventListener("click",resetAgentForm);
+if(tierRuleForm) tierRuleForm.addEventListener("submit",saveTierRule);
+if(priceListForm) priceListForm.addEventListener("submit",savePriceList);
+if(priceListItemForm) priceListItemForm.addEventListener("submit",savePriceListItem);
+if(deliveryForm) deliveryForm.addEventListener("submit",saveDelivery);
 
 platformOrderForm?.elements?.order_type?.addEventListener("change",syncNfcOrderFieldsVisibility);
 syncNfcOrderFieldsVisibility();
@@ -3354,8 +3877,47 @@ document.getElementById("orderSearchClear")?.addEventListener("click",()=>{
   if(orderSearchInput) orderSearchInput.value = "";
   refreshOrdersTable();
 });
-orderFilterStatus?.addEventListener("change",refreshOrdersTable);
-orderFilterType?.addEventListener("change",refreshOrdersTable);
+orderFilterStatus?.addEventListener("change",()=>{
+  syncOrderQuickChips();
+  refreshOrdersTable();
+});
+orderFilterType?.addEventListener("change",()=>{
+  syncOrderQuickChips();
+  refreshOrdersTable();
+});
+
+function syncOrderQuickChips(){
+  const bar = document.getElementById("orderQuickFilters");
+  if(!bar) return;
+  const type = orderFilterType?.value || "";
+  const status = orderFilterStatus?.value || "";
+  bar.querySelectorAll(".filter-chip").forEach(chip=>{
+    const match = (chip.dataset.orderQuickType || "") === type
+      && (chip.dataset.orderQuickStatus || "") === status;
+    chip.classList.toggle("active", match);
+  });
+}
+
+function syncMomentQuickChips(){
+  const bar = document.getElementById("momentInventoryQuickFilters");
+  if(!bar) return;
+  const status = momentFilterStatus?.value || "";
+  const order = momentFilterOrder?.value || "";
+  const extra = !!(momentFilterLine?.value || momentFilterBatch?.value || momentFilterChannel?.value || momentFilterAgent?.value);
+  bar.querySelectorAll(".filter-chip").forEach(chip=>{
+    const chipStatus = chip.dataset.momentQuickStatus || "";
+    const chipOrder = chip.dataset.momentQuickOrder;
+    let match = false;
+    if(chipOrder === undefined && !chipStatus){
+      match = !status && !order && !extra;
+    }else if(chipOrder !== undefined){
+      match = !extra && order === chipOrder && !status;
+    }else{
+      match = !extra && status === chipStatus && !order;
+    }
+    chip.classList.toggle("active", match);
+  });
+}
 
 init().catch(error=>{
   console.error(error);

@@ -105,6 +105,9 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 
 - [ ] Portale rivenditori Business (brief personalizzazione + ordine)
 - [x] SQL v61: `sold_channel`, allocazione codici Moments a agenti
+- [x] SQL v68: rete agenti a grado (L1/L2/L3), listini B2B, storico consegne, admin Rete rivenditori
+- [ ] Hook provvigioni multilivello su Stripe checkout e ingest Shopify
+- [ ] Portale self-service rivenditori (`reseller.html`)
 - [ ] Hub spedizioni centralizzato con automazione corriere
 - [ ] Supporto unificato + CRM Moments
 
@@ -152,6 +155,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 - [x] v101: prodotti Shopify in bozza finché incompleti (`shopify_live`)
 - [x] v102: Integration Hub, webhook Stripe/PayPal/Resend, i18n base
 - [x] v103: email ordine con codici NFC, Stripe Checkout + webhook ingest
+- [x] v104: admin UX — guide contestuali, filtri rapidi, legende, onboarding dashboard
 - [x] Applicare SQL v66 + v67 su Supabase produzione
 - [ ] Configurare RESEND_API_KEY + STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET nel Worker
 - [ ] Packlink / tracking spedizioni in admin — fase E4
@@ -195,6 +199,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 - [x] Admin: ricerca, filtri, modifica singola, bulk, drawer ordine/codice
 - [x] Admin Sprint E: ricerca/filtri Clienti, Moments, Ordini, Agenti + alert dashboard
 - [x] Agenti: modifica da tabella
+- [x] SQL v68 + admin: rete rivenditori a grado, listini, consegne
 - [ ] Portale rivenditori self-service (fase successiva)
 
 ---
@@ -210,6 +215,8 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-06 | kpfarm | Push GitHub: github.com/kpfarm/khamakey-v41 |
 | 2026-07-06 | Cursor | SQL v44 applicato su Supabase (bucket khamakey-media + RLS) |
 | 2026-07-08 | Cursor | Moments v89–v90: template tutte categorie, Altre sezioni complete, guide per tipo, onboarding |
+| 2026-07-09 | Cursor | **v104**: pannello admin user-friendly — guide sezione, chip filtri, legende Shopify/ordini, welcome dashboard |
+| 2026-07-09 | Cursor | **v105**: rete rivenditori a grado — SQL v68, tab Rete rivenditori, listini B2B, storico consegne |
 | 2026-07-09 | Cursor | **v103**: email ordine con codici NFC, Stripe Checkout, ingest webhook Stripe |
 | 2026-07-09 | Cursor | **v102**: Integration Hub, Stripe/PayPal/Resend webhook, email ordine, i18n v66 |
 | 2026-07-09 | Cursor | **v101 Sprint E**: Shopify sync in bozza finché prodotto incompleto; flag `shopify_live` in admin |

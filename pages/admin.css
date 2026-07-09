@@ -93,6 +93,11 @@ tr:last-child td{border-bottom:0}
 .admin-form.moment-batch-form button{grid-column:1/-1}
 .inventory-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:14px 0 18px}
 .inventory-stats-empty{margin:0;color:var(--muted);font-size:.82rem;line-height:1.45}
+.network-tree{display:flex;flex-direction:column;gap:10px;margin:14px 0 6px}
+.network-node{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01))}
+.network-node-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.network-node-meta{font-size:.82rem;line-height:1.45}
+.network-node-actions{margin-top:8px}
 .inventory-stat-card{border:1px solid var(--border);border-radius:14px;background:#fff;padding:14px;display:grid;gap:10px}
 .inventory-stat-head strong{display:block;color:var(--navy);font-size:.92rem}
 .inventory-stat-head span{display:block;color:var(--muted);font-size:.74rem;margin-top:2px}
@@ -220,3 +225,37 @@ textarea{width:100%;border:1px solid var(--border);border-radius:10px;background
 .integration-health-card strong{display:block;font-size:.95rem;margin-bottom:4px}
 .integration-health-card .status-pill{margin-top:8px}
 .integration-health-card .muted-cell{font-size:.78rem;margin-top:6px}
+
+.admin-subtitle{margin:6px 0 0;color:var(--muted);font-size:.88rem;line-height:1.45;max-width:52ch}
+.guide-toggle-top{white-space:nowrap}
+.panel-guide{margin:0 0 18px;border:1px solid #BFDBFE;border-radius:16px;background:linear-gradient(180deg,#EFF6FF 0%,#fff 100%);overflow:hidden;box-shadow:0 8px 24px rgba(27,42,94,.06)}
+.panel-guide.collapsed .panel-guide-body{display:none}
+.panel-guide-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid #DBEAFE}
+.panel-guide-head strong{display:block;color:var(--navy);font-size:.92rem;margin-bottom:4px}
+.panel-guide-head p{margin:0;color:var(--muted);font-size:.78rem;line-height:1.4}
+.panel-guide-body{padding:14px 16px 16px}
+.guide-steps{margin:0 0 14px;padding-left:1.2rem;display:grid;gap:8px}
+.guide-steps li{color:var(--text);font-size:.82rem;line-height:1.45;padding-left:4px}
+.guide-steps li::marker{color:var(--green);font-weight:900}
+.panel-legend{margin:0 0 12px}
+.legend-title{margin:0 0 8px;font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--navy)}
+.legend-list{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.legend-list li{display:flex;align-items:center;gap:10px;font-size:.78rem;color:var(--muted);line-height:1.35}
+.legend-list .status-pill{flex-shrink:0;font-size:.62rem}
+.guide-tip{margin:0;padding:10px 12px;border-radius:10px;background:#F0FDF4;border:1px solid #BBF7D0;color:#166534;font-size:.78rem;line-height:1.45}
+.guide-tip strong{color:#14532D}
+.panel-welcome{background:linear-gradient(135deg,#fff 0%,#F0FDF4 100%);border-color:#BBF7D0}
+.welcome-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.welcome-chip{border:1px solid var(--border);background:white;color:var(--navy);border-radius:999px;padding:9px 14px;font-weight:900;font-size:.76rem;cursor:pointer;transition:border-color .15s,background .15s,color .15s}
+.welcome-chip:hover,.welcome-chip:focus-visible{border-color:var(--green);background:#F0FDF4;color:#166534}
+.filter-chip-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px;padding:10px 12px;border:1px dashed var(--border);border-radius:12px;background:#FAFAFA}
+.filter-chip-label{font-size:.72rem;font-weight:900;color:var(--navy);margin-right:4px}
+.filter-chip{border:1px solid var(--border);background:white;color:var(--navy);border-radius:999px;padding:7px 12px;font-weight:800;font-size:.72rem;cursor:pointer}
+.filter-chip:hover{border-color:var(--cyan)}
+.filter-chip.active{background:var(--navy);color:white;border-color:var(--navy)}
+.gate-hint{margin-top:10px;text-align:left}
+.nav-group-items button{position:relative}
+.filter-hint{font-size:.72rem;color:var(--muted);margin:-6px 0 12px;line-height:1.4}
+.table-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 12px;padding:10px 14px;border:1px solid var(--border);border-radius:12px;background:#F8FAFC;font-size:.74rem;color:var(--muted)}
+.legend-title-inline{font-weight:800;color:var(--navy);margin-right:4px}
+.table-legend .status-pill{font-size:.68rem;padding:3px 8px}

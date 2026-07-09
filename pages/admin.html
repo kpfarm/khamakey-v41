@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=103">
+  <link rel="stylesheet" href="admin.css?v=105">
 </head>
 <body>
   <main class="admin-shell locked" id="adminShell">
@@ -56,6 +56,7 @@
           <div class="nav-group-items">
             <button data-admin-tab="staff">Collaboratori</button>
             <button data-admin-tab="agents">Agenti</button>
+            <button data-admin-tab="resellerNetwork">Rete rivenditori</button>
             <button data-admin-tab="permissions">Permessi</button>
           </div>
         </section>
@@ -74,8 +75,10 @@
         <div>
           <p class="eyebrow">Gestionale interno</p>
           <h1 id="adminTitle">Dashboard</h1>
+          <p class="admin-subtitle" id="adminSubtitle">Panoramica e priorità del giorno.</p>
         </div>
         <div class="admin-user">
+          <button type="button" class="small-action guide-toggle-top" id="panelGuideToggleTop" title="Mostra o nascondi la guida">Guida sezione</button>
           <span id="adminEmail">Verifica sessione...</span>
           <a href="./" class="ghost-link" target="_blank" rel="noopener">Area Business</a>
           <a href="./moments.html" class="ghost-link" target="_blank" rel="noopener">Area Moments</a>
@@ -87,6 +90,7 @@
         <img src="khamakey-wordmark-dark.png" alt="KhamaKey">
         <h2>Controllo accesso admin</h2>
         <p id="adminGateText">Sto verificando sessione e autorizzazioni.</p>
+        <p class="field-hint gate-hint">Accesso riservato al team KhamaKey. Usa l’email e la password che ti ha fornito l’amministratore.</p>
         <form class="admin-login-form" id="adminLoginForm" hidden>
           <label>Email admin
             <input id="adminLoginEmail" type="email" autocomplete="email" required>
@@ -103,7 +107,34 @@
       </section>
 
       <div id="adminContent" hidden>
+        <aside class="panel-guide" id="panelGuide" aria-label="Guida sezione">
+          <div class="panel-guide-head">
+            <div>
+              <strong>Come usare questa sezione</strong>
+              <p id="panelGuideSubtitle">—</p>
+            </div>
+            <button type="button" class="small-action" id="panelGuideToggle" aria-expanded="true">Nascondi guida</button>
+          </div>
+          <div class="panel-guide-body" id="panelGuideBody">
+            <ol class="guide-steps" id="panelGuideSteps"></ol>
+            <div class="panel-legend" id="panelGuideLegend"></div>
+            <p class="guide-tip" id="panelGuideTip"></p>
+          </div>
+        </aside>
+
         <section class="admin-panel active" data-panel="dashboard">
+          <div class="admin-card panel-welcome">
+            <h2>Benvenuto — da dove inizi?</h2>
+            <p class="field-hint">Scegli il flusso in base al lavoro di oggi. Ogni pulsante apre la sezione giusta con istruzioni passo passo.</p>
+            <div class="welcome-actions">
+              <button type="button" class="welcome-chip" data-admin-tab-jump="platformOrders">Ordini da evadere</button>
+              <button type="button" class="welcome-chip" data-admin-tab-jump="momentCatalog">Catalogo Shopify</button>
+              <button type="button" class="welcome-chip" data-admin-tab-jump="momentInventory">Magazzino NFC</button>
+              <button type="button" class="welcome-chip" data-admin-tab-jump="momentClients">Clienti Moments</button>
+              <button type="button" class="welcome-chip" data-admin-tab-jump="clients">Clienti Business</button>
+              <button type="button" class="welcome-chip" data-admin-tab-jump="integrations">Stato integrazioni</button>
+            </div>
+          </div>
           <div class="metric-grid">
             <article><strong id="mClients">0</strong><span>Clienti / attività</span></article>
             <article><strong id="mPublished">0</strong><span>Pagine pubblicate</span></article>
@@ -157,7 +188,7 @@
         <section class="admin-panel" data-panel="staff">
           <div class="admin-card">
             <h2>Collaboratori</h2>
-            <p>Invita collaboratori KhamaKey e assegna permessi per assistenza, spedizioni, CRM, pagine clienti o accesso completo.</p>
+            <p class="field-hint">Invita chi lavora con te e limita cosa può vedere o modificare. In dubbio, dai permessi minimi — si possono aggiungere dopo.</p>
             <form class="admin-form" id="memberForm">
               <label>Nome
                 <input name="full_name" type="text" placeholder="Es. Mario Rossi">
@@ -303,12 +334,14 @@
                   <option value="true">Sì — sync bozza al salvataggio</option>
                 </select>
               </label>
+              <p class="field-hint wide-field">Con <strong>Sì</strong> il prodotto viene creato su Shopify come bozza — i clienti non lo vedono ancora.</p>
               <label>Visibile nel negozio
                 <select name="shopify_live">
                   <option value="false">No — bozza (non in vendita)</option>
                   <option value="true">Sì — pubblica online (serve foto + descrizione)</option>
                 </select>
               </label>
+              <p class="field-hint wide-field">Attiva solo quando foto e descrizione (min. 20 caratteri) sono pronte — altrimenti resta in attesa.</p>
               <label>Stato
                 <select name="status">
                   <option value="active">Attivo</option>
@@ -326,6 +359,13 @@
               <button class="ghost-button" type="button" data-reset-form="momentCatalogForm">Nuovo prodotto</button>
               <p class="form-status" id="momentCatalogFormStatus"></p>
             </form>
+            <div class="table-legend" aria-label="Legenda colonna Shopify">
+              <span class="legend-title-inline">Legenda Shopify:</span>
+              <span class="status-pill draft">Bozza</span> non in vendita
+              <span class="status-pill pending">In attesa</span> manca foto/descrizione
+              <span class="status-pill active">Online</span> visibile nel negozio
+              <span class="status-pill error">Errore</span> sync da ripetere
+            </div>
             <div class="table-wrap">
               <table>
                 <thead><tr><th>Prodotto</th><th>SKU</th><th>Prezzo</th><th>Fisici</th><th>Codici</th><th>Shopify</th><th>Sync</th><th>Azioni</th></tr></thead>
@@ -387,7 +427,14 @@
               </label>
               <button type="button" class="small-action" id="momentSearchClear">Pulisci</button>
             </div>
-
+            <div class="filter-chip-bar" id="momentInventoryQuickFilters" aria-label="Filtri rapidi magazzino">
+              <span class="filter-chip-label">Vista rapida</span>
+              <button type="button" class="filter-chip active" data-moment-quick data-moment-quick-status="">Tutti</button>
+              <button type="button" class="filter-chip" data-moment-quick data-moment-quick-status="available">Solo disponibili</button>
+              <button type="button" class="filter-chip" data-moment-quick data-moment-quick-status="claimed">Già attivati</button>
+              <button type="button" class="filter-chip" data-moment-quick data-moment-quick-order="__none__">Senza ordine</button>
+            </div>
+            <p class="filter-hint">Per filtri più precisi (lotto, agente, canale) usa i menu sotto. Seleziona più righe per azioni in blocco.</p>
             <div class="inventory-filters inventory-filters-4" id="momentInventoryFilters">
               <label>Linea
                 <select id="momentFilterLine"><option value="">Tutte</option></select>
@@ -477,6 +524,7 @@
             <h2>Agenti e rivenditori</h2>
             <p>Registra chi rivende KhamaKey o porta clienti. Ogni agente può avere modello commerciale e percentuale dedicata.</p>
             <form class="admin-form" id="agentForm">
+              <input type="hidden" name="agent_id" value="">
               <label>Nome referente
                 <input name="contact_name" type="text" placeholder="Nome agente">
               </label>
@@ -489,11 +537,38 @@
               <label>Telefono
                 <input name="phone" type="tel" placeholder="+39 ...">
               </label>
+              <label>Tipo
+                <select name="agent_type">
+                  <option value="agent">Agente commerciale</option>
+                  <option value="reseller">Rivenditore</option>
+                  <option value="authorized_point">Punto autorizzato</option>
+                </select>
+              </label>
+              <label>Agente / capo rete (upline)
+                <select name="parent_agent_id" id="agentParentSelect">
+                  <option value="">Nessuno — radice rete</option>
+                </select>
+              </label>
+              <label>Tier provvigioni
+                <select name="tier_key" id="agentTierSelect">
+                  <option value="standard">Standard</option>
+                  <option value="premium">Premium</option>
+                  <option value="partner">Partner</option>
+                </select>
+              </label>
               <label>Codice referral
                 <input name="referral_code" type="text" placeholder="AUTO se vuoto">
               </label>
-              <label>Percentuale
+              <label>Percentuale diretta (L1)
                 <input name="commission_percent" type="number" min="0" max="100" step="0.01" value="10">
+              </label>
+              <label>Bonus extra % (admin)
+                <input name="commission_bonus_percent" type="number" min="0" max="100" step="0.01" value="0">
+              </label>
+              <label>Listino rivenditore
+                <select name="price_list_id" id="agentPriceListSelect">
+                  <option value="">Nessun listino dedicato</option>
+                </select>
               </label>
               <label>Modello
                 <select name="model">
@@ -502,7 +577,11 @@
                   <option value="hybrid">Ibrido</option>
                 </select>
               </label>
+              <label>Territorio / zona
+                <input name="territory" type="text" placeholder="Es. Roma Nord, Toscana">
+              </label>
               <button class="primary-action" type="submit">Salva agente</button>
+              <button class="small-action" type="button" id="agentFormReset">Nuovo agente</button>
               <p class="form-status" id="agentFormStatus"></p>
             </form>
             <div class="inventory-toolbar">
@@ -532,8 +611,8 @@
             <p class="inventory-table-meta"><span id="agentTableCount">0 agenti</span></p>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Agente</th><th>Codice</th><th>Modello</th><th>%</th><th>Stato</th><th>Azioni</th></tr></thead>
-                <tbody id="agentsTable"><tr><td colspan="6">Caricamento agenti...</td></tr></tbody>
+                <thead><tr><th>Agente</th><th>Tipo</th><th>Codice</th><th>Rete</th><th>% L1</th><th>Stato</th><th>Azioni</th></tr></thead>
+                <tbody id="agentsTable"><tr><td colspan="7">Caricamento agenti...</td></tr></tbody>
               </table>
             </div>
             <h3 class="section-title">Codici Moments per agente</h3>
@@ -544,10 +623,185 @@
           </div>
         </section>
 
+        <section class="admin-panel" data-panel="resellerNetwork">
+          <div class="admin-card">
+            <h2>Rete rivenditori</h2>
+            <p>Visualizza la gerarchia agenti → rivenditori → punti autorizzati. Le provvigioni L2 e L3 arrivano all'upline quando un downline vende o affilia un negozio.</p>
+            <p class="system-note">Richiede SQL v68 applicato su Supabase.</p>
+            <div class="inventory-toolbar">
+              <label class="inventory-search">Radice albero
+                <select id="networkRootSelect">
+                  <option value="">Tutte le radici</option>
+                </select>
+              </label>
+              <button type="button" class="small-action" id="networkRefreshBtn">Aggiorna albero</button>
+            </div>
+            <div class="network-tree" id="networkTree">
+              <p class="inventory-stats-empty">Caricamento rete...</p>
+            </div>
+          </div>
+          <div class="admin-card">
+            <h2>Regole provvigioni a grado</h2>
+            <p>Percentuali L1 (vendita diretta), L2 e L3 (upline) per tier e tipo evento. L'admin può dare bonus extra per singolo agente dalla tab Agenti.</p>
+            <form class="admin-form" id="tierRuleForm">
+              <label>Tier
+                <select name="tier_key" required>
+                  <option value="standard">Standard</option>
+                  <option value="premium">Premium</option>
+                  <option value="partner">Partner</option>
+                </select>
+              </label>
+              <label>Area prodotto
+                <select name="product_area">
+                  <option value="all">Tutte</option>
+                  <option value="business">Business</option>
+                  <option value="moments">Moments</option>
+                </select>
+              </label>
+              <label>Tipo evento
+                <select name="event_type" required>
+                  <option value="subscription">Abbonamento</option>
+                  <option value="nfc_order">Ordine NFC</option>
+                  <option value="setup">Setup / onboarding</option>
+                </select>
+              </label>
+              <label>L1 % (diretto)
+                <input name="level_1_percent" type="number" min="0" max="100" step="0.01" value="10" required>
+              </label>
+              <label>L2 % (upline)
+                <input name="level_2_percent" type="number" min="0" max="100" step="0.01" value="3">
+              </label>
+              <label>L3 % (upline superiore)
+                <input name="level_3_percent" type="number" min="0" max="100" step="0.01" value="1">
+              </label>
+              <label>Note
+                <input name="notes" type="text" placeholder="Note interne">
+              </label>
+              <button class="primary-action" type="submit">Salva regola tier</button>
+              <p class="form-status" id="tierRuleFormStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Tier</th><th>Area</th><th>Evento</th><th>L1</th><th>L2</th><th>L3</th><th>Stato</th></tr></thead>
+                <tbody id="tierRulesTable"><tr><td colspan="7">Caricamento regole tier...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="admin-card">
+            <h2>Listini rivenditori</h2>
+            <p>Prezzi B2B dedicati per rivenditori e punti autorizzati. Collega un listino all'agente dalla tab Agenti.</p>
+            <form class="admin-form" id="priceListForm">
+              <label>Chiave listino
+                <input name="list_key" type="text" placeholder="standard-it" required>
+              </label>
+              <label>Nome
+                <input name="name" type="text" placeholder="Listino standard Italia" required>
+              </label>
+              <label>Area
+                <select name="product_area">
+                  <option value="all">Tutte</option>
+                  <option value="business">Business</option>
+                  <option value="moments">Moments</option>
+                </select>
+              </label>
+              <label>Valuta
+                <input name="currency" type="text" value="EUR" maxlength="3">
+              </label>
+              <button class="primary-action" type="submit">Crea listino</button>
+              <p class="form-status" id="priceListFormStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Listino</th><th>Area</th><th>Valuta</th><th>Stato</th><th>Righe</th></tr></thead>
+                <tbody id="priceListsTable"><tr><td colspan="5">Caricamento listini...</td></tr></tbody>
+              </table>
+            </div>
+            <h3 class="section-title">Righe listino</h3>
+            <form class="admin-form" id="priceListItemForm">
+              <label>Listino
+                <select name="price_list_id" id="priceListItemSelect" required>
+                  <option value="">Seleziona listino</option>
+                </select>
+              </label>
+              <label>SKU
+                <input name="sku" type="text" placeholder="NFC-MOMENT-STD" required>
+              </label>
+              <label>Nome prodotto
+                <input name="product_name" type="text" placeholder="Moments NFC standard">
+              </label>
+              <label>Prezzo unitario €
+                <input name="unit_price" type="number" min="0" step="0.01" value="0" required>
+              </label>
+              <label>Qty minima
+                <input name="min_qty" type="number" min="1" value="1">
+              </label>
+              <button class="primary-action" type="submit">Aggiungi riga</button>
+              <p class="form-status" id="priceListItemFormStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Listino</th><th>SKU</th><th>Prodotto</th><th>Prezzo</th><th>Min</th></tr></thead>
+                <tbody id="priceListItemsTable"><tr><td colspan="5">Seleziona o crea un listino.</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="admin-card">
+            <h2>Prodotti consegnati</h2>
+            <p>Storico consegne NFC e materiali ai rivenditori. Registra manualmente o collega a un ordine piattaforma.</p>
+            <form class="admin-form" id="deliveryForm">
+              <label>Rivenditore / agente
+                <select name="agent_id" id="deliveryAgentSelect" required>
+                  <option value="">Seleziona agente</option>
+                </select>
+              </label>
+              <label>Tipo consegna
+                <select name="delivery_type">
+                  <option value="product_shipment">Spedizione prodotti</option>
+                  <option value="nfc_batch">Lotto NFC</option>
+                  <option value="stock_transfer">Trasferimento stock</option>
+                </select>
+              </label>
+              <label>SKU
+                <input name="sku" type="text" placeholder="NFC-MOMENT-STD">
+              </label>
+              <label>Descrizione
+                <input name="product_label" type="text" placeholder="50 card NFC Moments">
+              </label>
+              <label>Quantità
+                <input name="quantity" type="number" min="1" value="1" required>
+              </label>
+              <label>Prezzo unitario €
+                <input name="unit_price" type="number" min="0" step="0.01">
+              </label>
+              <label>Tracking
+                <input name="tracking_code" type="text" placeholder="Codice corriere">
+              </label>
+              <label>Note
+                <input name="notes" type="text" placeholder="Note consegna">
+              </label>
+              <button class="primary-action" type="submit">Registra consegna</button>
+              <p class="form-status" id="deliveryFormStatus"></p>
+            </form>
+            <div class="inventory-toolbar">
+              <label class="inventory-search">Filtra per agente
+                <select id="deliveryFilterAgent">
+                  <option value="">Tutti</option>
+                </select>
+              </label>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Data</th><th>Agente</th><th>Prodotto</th><th>Qty</th><th>Tipo</th><th>Stato</th></tr></thead>
+                <tbody id="deliveriesTable"><tr><td colspan="6">Caricamento consegne...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
         <section class="admin-panel" data-panel="commissions">
           <div class="admin-card">
             <h2>Provvigioni</h2>
-            <p>Qui vengono tracciati abbonamenti, ordini NFC, setup e rettifiche manuali collegati agli agenti.</p>
+            <p>Qui vengono tracciati abbonamenti, ordini NFC, setup e rettifiche manuali collegati agli agenti. Con SQL v68 ogni riga indica il grado L1 (diretto), L2 o L3 (upline).</p>
             <div class="automation-status">
               <div>
                 <strong>Automazione abbonamenti</strong>
@@ -560,8 +814,8 @@
             </div>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Agente</th><th>Evento</th><th>Importo</th><th>Provvigione</th><th>Stato</th></tr></thead>
-                <tbody id="commissionsTable"><tr><td colspan="5">Caricamento provvigioni...</td></tr></tbody>
+                <thead><tr><th>Agente</th><th>Evento</th><th>Grado</th><th>Importo</th><th>Provvigione</th><th>Stato</th></tr></thead>
+                <tbody id="commissionsTable"><tr><td colspan="6">Caricamento provvigioni...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -757,6 +1011,15 @@
               </label>
               <button type="button" class="small-action" id="orderSearchClear">Pulisci</button>
             </div>
+            <div class="filter-chip-bar" id="orderQuickFilters" aria-label="Filtri rapidi ordini">
+              <span class="filter-chip-label">Vista rapida</span>
+              <button type="button" class="filter-chip active" data-order-quick data-order-quick-type="" data-order-quick-status="">Tutti</button>
+              <button type="button" class="filter-chip" data-order-quick data-order-quick-type="" data-order-quick-status="pending">Da evadere</button>
+              <button type="button" class="filter-chip" data-order-quick data-order-quick-type="" data-order-quick-status="paid">Pagati</button>
+              <button type="button" class="filter-chip" data-order-quick data-order-quick-type="ecommerce" data-order-quick-status="">Shopify</button>
+              <button type="button" class="filter-chip" data-order-quick data-order-quick-type="subscription" data-order-quick-status="">Abbonamenti</button>
+            </div>
+            <p class="filter-hint">Usa <strong>Vista rapida</strong> per filtri con un clic, oppure affina con Tipo e Stato sotto.</p>
             <div class="inventory-filters inventory-filters-2">
               <label>Tipo
                 <select id="orderFilterType">
@@ -989,7 +1252,8 @@
         <section class="admin-panel" data-panel="integrations">
           <div class="admin-card">
             <h2>Integration Hub</h2>
-            <p>Stato dei collegamenti esterni. Le chiavi segrete restano su Cloudflare Worker — vedi <code>INTEGRATIONS-ROADMAP.md</code>.</p>
+            <p class="system-note"><strong>Per collaboratori</strong> — qui vedi se Shopify, email e pagamenti funzionano. Le password le configura solo il team tecnico su Cloudflare.</p>
+            <p class="field-hint">Verde = collegato · Grigio = da configurare · Clicca <strong>Aggiorna stato Worker</strong> per ricontrollare.</p>
             <div class="integration-health-actions">
               <button type="button" class="small-action primary-outline" id="refreshIntegrationHealth">Aggiorna stato Worker</button>
             </div>
@@ -1432,6 +1696,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=103"></script>
+  <script type="module" src="admin.js?v=105"></script>
 </body>
 </html>

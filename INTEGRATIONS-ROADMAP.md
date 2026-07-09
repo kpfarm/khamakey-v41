@@ -42,7 +42,9 @@ Legenda: ✅ operativo · 🟡 predisposto · ⬜ da fare
 ### F2 Stripe Business
 - [x] Webhook `checkout.session.completed` → `ingest_stripe_checkout_event`
 - [x] `POST /api/billing/stripe/checkout-session` da Admin → Piani
-- [ ] `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` nel Worker
+- [ ] `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` nel Worker — **account personale temp OK** (vedi `STRIPE-PERSONAL-SETUP.md`)
+- [ ] Price ID in Admin → Piani (da Stripe personale test)
+- [ ] Hook provvigioni rete su ingest Stripe (v69)
 - [ ] Payment Link da landing khamakey.it
 
 ### F3 PayPal (opzionale)

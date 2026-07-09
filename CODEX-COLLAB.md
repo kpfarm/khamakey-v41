@@ -71,3 +71,24 @@ Aggiornare lo skill Codex: usare `pages/` al posto di `khamakey-test-app` e `wor
 ## Comunicazione tra sessioni
 
 Lasciare note brevi in `ROADMAP.md` sotto **Log sessioni** con data, autore (Cursor/Codex) e cosa è stato fatto.
+
+## Lock attivi (2026-07-09)
+
+Evitare conflitti tra agenti Cursor/Codex che lavorano sullo stesso repo:
+
+| Area | Owner / stato | Non toccare senza coordinamento |
+|------|----------------|----------------------------------|
+| **Rete rivenditori v68** | Cursor — applicato Supabase + admin v105 | `sql/khamakey-reseller-network-v68.sql`, tab Rete rivenditori |
+| **Stripe secrets Worker** | Da configurare (account personale temp) | `wrangler secret put STRIPE_*` — vedi `STRIPE-PERSONAL-SETUP.md` |
+| **Stripe webhook / ingest** | Predisposto v103, hook provvigioni v69 pianificato | `worker/worker.js` handler Stripe, `ingest_stripe_checkout_event` |
+| **Shopify Moments** | Operativo | webhook Shopify, catalogo vendita |
+| **Editor Business public contract** | Codex/Cursor condiviso | `publicStateFromEditor`, renderer Worker NFC |
+
+### Messaggio tipo per nuova sessione agente
+
+```text
+Progetto: khamakey-v41-consolidated
+Task: [es. configurare Stripe personale test]
+Lock: non modificare admin rete rivenditori / SQL v68
+Riferimenti: STRIPE-PERSONAL-SETUP.md, ROADMAP Sprint F
+```

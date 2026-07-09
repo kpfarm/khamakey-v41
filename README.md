@@ -1,5 +1,8 @@
 # KhamaKey v41 — progetto consolidato
 
+> **KhamaKey OS** — il cervello condiviso del progetto è in [`KHAMAKEY_OS/`](KHAMAKEY_OS/MASTER_INDEX.md).  
+> Ogni sessione AI inizia da `KHAMAKEY_OS/MASTER_INDEX.md` → `PROJECT_STATE.md`.
+
 Versione unificata del progetto KhamaKey (Cloudflare Pages + Worker + Supabase), basata su:
 
 - **Pages v40** — app editor, admin, moments, prodotti magazzino
@@ -11,9 +14,10 @@ Gli artefatti originali in `outputs/` **non sono stati modificati**.
 
 ```text
 khamakey-v41-consolidated/
+├── KHAMAKEY_OS/    Sistema operativo del progetto (docs, regole AI, stato)
 ├── pages/          Frontend statico (Cloudflare Pages: khamakey-app)
 ├── worker/         Cloudflare Worker (khamakey-nfc)
-├── sql/            Migrazioni Supabase v37 → v40
+├── sql/            Migrazioni Supabase v37 → v68
 └── README.md
 ```
 

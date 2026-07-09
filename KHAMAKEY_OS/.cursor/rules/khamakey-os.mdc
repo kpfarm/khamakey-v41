@@ -1,0 +1,31 @@
+---
+description: KhamaKey OS — regole per agenti Cursor sul sistema operativo del progetto
+alwaysApply: true
+---
+
+# KhamaKey OS — Cursor
+
+## Inizio sessione (obbligatorio)
+
+1. Leggi `KHAMAKEY_OS/MASTER_INDEX.md`
+2. Leggi `KHAMAKEY_OS/PROJECT_STATE.md`
+3. Leggi `CODEX-COLLAB.md` (lock attivi)
+4. Leggi il doc in `KHAMAKEY_OS/docs/` relativo al task
+
+## Dopo modifica significativa
+
+1. Aggiorna il doc in `KHAMAKEY_OS/docs/` dell'area toccata
+2. Aggiorna `KHAMAKEY_OS/PROJECT_STATE.md` se cambiano versioni o priorità
+3. Aggiungi riga in `KHAMAKEY_OS/CHANGELOG.md` e `KHAMAKEY_OS/docs/13-roadmap.md`
+
+## Regola 4 punti (pagina pubblica)
+
+Campo nuovo su `/p/` o `/m/` → aggiorna: editor UI, anteprima, `publicStateFromEditor()`, `worker.js`.
+
+## Versioning
+
+Allinea `?v=NN` su Pages + `WORKER_VERSION` su Worker. Prossima release: v107.
+
+## Commit
+
+Solo se richiesto esplicitamente dall'utente. Altrimenti aggiorna solo la documentazione.

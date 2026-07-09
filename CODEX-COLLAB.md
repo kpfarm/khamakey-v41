@@ -42,9 +42,11 @@ git status
 
 Poi leggere, in ordine:
 
-1. **`CODEX-COLLAB.md`** → sezione **Lock attivi**
-2. **`ROADMAP.md`** → ultime righe della tabella log + sprint in corso
-3. Eventuale guida di dominio (`STRIPE-PERSONAL-SETUP.md`, `SHOPIFY-SETUP.md`, `INTEGRATIONS-ROADMAP.md`)
+1. **`KHAMAKEY_OS/MASTER_INDEX.md`** → punto di ingresso OS
+2. **`KHAMAKEY_OS/PROJECT_STATE.md`** → stato live (versioni, priorità)
+3. **`CODEX-COLLAB.md`** → sezione **Lock attivi**
+4. **`ROADMAP.md`** o **`KHAMAKEY_OS/docs/13-roadmap.md`** → log sessioni
+5. Doc di dominio in **`KHAMAKEY_OS/docs/`** o legacy (`STRIPE-PERSONAL-SETUP.md`, ecc.)
 
 ### Prendere un lock (se tocchi area sensibile)
 
@@ -85,16 +87,17 @@ Repo: github.com/kpfarm/khamakey-v41 (branch main)
 
 Prima di iniziare:
 - git pull origin main
+- leggi KHAMAKEY_OS/MASTER_INDEX.md
+- leggi KHAMAKEY_OS/PROJECT_STATE.md
 - leggi CODEX-COLLAB.md (lock attivi)
-- leggi ROADMAP.md (ultime righe log)
 
 Task di questa sessione: [descrivi in 1-2 frasi]
 
 Non toccare: [es. worker.js Stripe, admin rete rivenditori, sql v68]
 
-File probabili: [es. pages/admin.js, STRIPE-PERSONAL-SETUP.md]
+File probabili: [es. pages/admin.js, KHAMAKEY_OS/docs/05-admin.md]
 
-A fine sessione: aggiorna ROADMAP, commit + push, rilascia lock se preso.
+A fine sessione: aggiorna KHAMAKEY_OS/docs/, PROJECT_STATE, CHANGELOG, commit + push, rilascia lock se preso.
 ```
 
 Più il messaggio è specifico, meno rischio che un altro agente lavori sulle stesse righe.
@@ -206,7 +209,12 @@ In dubbio: **un agente per file condiviso per volta**, oppure branch feature + P
 
 | Documento | Contenuto |
 |-----------|-----------|
-| `ROADMAP.md` | Sprint, checklist, log sessioni |
+| `KHAMAKEY_OS/MASTER_INDEX.md` | Punto di ingresso OS — ordine lettura |
+| `KHAMAKEY_OS/PROJECT_STATE.md` | Stato live: versioni, sprint, priorità |
+| `KHAMAKEY_OS/AGENTS.md` | Regole condivise tutte le AI |
+| `KHAMAKEY_OS/docs/` | Manuale ufficiale 00–15 |
+| `ROADMAP.md` | Sprint, checklist, log sessioni (legacy) |
+| `CODEX-COLLAB.md` | Lock, regola 4 punti, convenzioni |
 | `INTEGRATIONS-ROADMAP.md` | Stripe, PayPal, Resend, i18n |
 | `STRIPE-PERSONAL-SETUP.md` | Setup Stripe temporaneo |
 | `SHOPIFY-SETUP.md` | Catalogo e webhook Shopify |

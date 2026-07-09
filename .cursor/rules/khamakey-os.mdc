@@ -1,0 +1,19 @@
+---
+description: KhamaKey OS — leggi il cervello del progetto prima di ogni modifica
+alwaysApply: true
+---
+
+# KhamaKey OS
+
+Prima di modificare codice o documentazione:
+
+1. `KHAMAKEY_OS/MASTER_INDEX.md`
+2. `KHAMAKEY_OS/PROJECT_STATE.md`
+3. `CODEX-COLLAB.md` (lock attivi)
+4. `KHAMAKEY_OS/docs/` — doc dell'area del task
+
+Dopo modifica significativa: aggiorna `KHAMAKEY_OS/docs/`, `PROJECT_STATE.md`, `CHANGELOG.md`.
+
+Regola 4 punti pagina pubblica: editor UI → anteprima → `publicStateFromEditor()` → `worker.js`.
+
+Dettaglio completo: `KHAMAKEY_OS/AGENTS.md`

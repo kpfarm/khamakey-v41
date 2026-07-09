@@ -831,7 +831,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
   .pub-doc-actions,.pub-wifi-actions{grid-template-columns:1fr;}
 }
 </style>
-<link rel="stylesheet" href="editor-ui.css?v=95">
+<link rel="stylesheet" href="editor-ui.css?v=96">
 </head>
 <body>
 <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
@@ -4938,7 +4938,7 @@ function buildPublicSnapshot(){
   const preview = document.getElementById('publicPreview');
   const sprite = document.querySelector('body > svg[aria-hidden="true"]');
   return {
-    version:'95',
+    version:'96',
     className:preview.className,
     style:`--pub-primary:${val('c1')||'#1B2A5E'};--pub-accent:${val('c2')||'#4CAF27'};--pub-page-bg:${val('pubPageBg')||'#F8FAFC'};--pub-block-bg:${val('pubBlockBg')||'#FFFFFF'};--pub-text:${val('pubTextColor')||'#1B2A5E'};--pub-muted:${val('pubMutedColor')||'#64748B'};--pub-logo-size:${preview.style.getPropertyValue('--pub-logo-size')};--pub-hero-height:${preview.style.getPropertyValue('--pub-hero-height')}`,
     html:`${sprite?.outerHTML||''}${preview.innerHTML}`
@@ -5520,6 +5520,6 @@ updateActionConfigVisibility();
 renderPublicPreview();
 if(!restoredState) maybeOpenWizard(false);
 </script>
-<script type="module" src="editor-media.js?v=95"></script>
+<script type="module" src="editor-media.js?v=96"></script>
 </body>
 </html>

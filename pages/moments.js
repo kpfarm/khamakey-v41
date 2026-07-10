@@ -584,6 +584,9 @@ function setNavGroup(groupId){
   document.querySelectorAll("#momentsGrpNav .grp-btn").forEach(button=>{
     button.classList.toggle("active",button.dataset.navGroup === groupId);
   });
+  if(groupId === "account" && !["overview","objects","privacy"].includes(activeEditorPanel)){
+    setEditorPanel("overview");
+  }
   renderSubNav(groupId);
   syncEditorProgress();
 }
@@ -2892,6 +2895,15 @@ async function saveMoment(event,row){
     setEditorPanel(panel);
     const formAfter = document.getElementById("momentEditorForm");
     if(formAfter) schedulePreviewUpdate(formAfter,{immediate:true,force:true});
+    bindMomentDashboard({
+      supabase,
+      eventId:row.id,
+      publicUrl:`${PUBLIC_BASE_URL}/m/${encodeURIComponent(row.slug)}`,
+      published:publicVisible,
+      slug:row.slug,
+      state,
+      copyText
+    });
   }catch(error){
     console.error(error);
     const msg = String(error?.message || "").includes("Load failed")

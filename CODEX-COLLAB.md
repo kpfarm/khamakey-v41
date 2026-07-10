@@ -132,7 +132,7 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Shopify Moments** | Operativo | webhook ordini, catalogo vendita, sync bozze |
 | **Editor Business — contratto pubblico** | Condiviso | `publicStateFromEditor`, renderer `/p/` nel Worker |
 | **Admin UX / guide** | v106 — menu intenti + modalità semplice | `admin.html`, `admin.js`, `admin.css`, `admin-guide.js` — coordinarsi se stesso pannello |
-| **Moments editor** | **libero** — v110 deploy notte 2026-07-10 | `moments.js`, `moments.html`, `moment-*.js`, SQL v70–v73, Worker `/m/` |
+| **Moments editor** | **Cursor** — coordinamento UX v111 (2026-07-10) | `moments.js`, `moments.html`, `moment-*.js` — non toccare senza lock |
 
 Quando **nessuno** sta lavorando su un’area, lasciare **libero** o **—** nella colonna Owner.
 

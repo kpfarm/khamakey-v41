@@ -9,6 +9,16 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **v110 Moments dashboard** — riepilogo organizzatore in editor (RSVP, guestbook, checklist)
+- **v110 Letter unlock email** — notifica apertura lettera al futuro (cron + SQL v73)
+- **v109 Moments anniversaries** — email promemoria annuale + toggle in Pubblica
+  - SQL `khamakey-moments-guestbook-v71.sql`
+  - Worker `GET/POST /api/moment/guestbook` + sezione pubblica
+  - Editor — pannello approva/rifiuta messaggi
+- **v107 Moments RSVP backend** — raccolta risposte strutturata
+  - SQL `khamakey-moments-rsvp-v70.sql` — tabella + RPC `submit_moment_rsvp` / `list_my_moment_rsvp`
+  - Worker `POST /api/moment/rsvp` — salvataggio ibrido (DB + WhatsApp)
+  - Editor — pannello «Risposte ricevute» con riepilogo, tabella, export CSV
 - **KhamaKey OS** — sistema operativo del progetto (`KHAMAKEY_OS/`)
   - `MASTER_INDEX.md` — punto di ingresso unico per tutte le AI
   - `PROJECT_STATE.md` — stato live del progetto

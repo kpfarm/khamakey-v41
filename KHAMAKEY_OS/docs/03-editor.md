@@ -93,5 +93,6 @@ python3 ~/.codex/skills/khamakey-release-workflow/scripts/sync_public_css.py pag
 - [ ] Più automazioni prenotazione (coda, promemoria)
 - [ ] Sincronizzazione ordine blocchi editor ↔ Supabase
 - [ ] UX catalogo (varianti, allergeni, disponibilità)
-- [ ] Tabella risposte RSVP (backend)
+- [x] Tabella risposte RSVP (backend v70 + pannello editor)
+- [x] Libro degli ospiti con moderazione (v108)
 - [ ] Smoke test wizard 5 settori

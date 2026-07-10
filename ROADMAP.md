@@ -48,10 +48,10 @@ Flusso: rivenditore compila brief personalizzazione → ordine produzione KhamaK
 
 ## Fase 2 — Editor business
 
-- [ ] Wizard onboarding nuova attività (settore → preset blocchi)
+- [x] Wizard onboarding nuova attività (settore → preset blocchi → 3 passaggi nome/WhatsApp/catalogo)
 - [ ] Più automazioni prenotazione (coda approvazione, promemoria)
 - [ ] Sincronizzazione ordine blocchi editor ↔ stato salvato Supabase
-- [ ] Migliorare UX catalogo (varianti, allergeni, disponibilità)
+- [x] Migliorare UX catalogo (varianti, allergeni, disponibilità — modalità semplice v110)
 - [ ] Anteprima tablet/desktop più fedele al worker
 
 ## Fase 2b — Editor Moments (parità UX Business)
@@ -180,7 +180,8 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 - [x] Messaggi RSVP personalizzati per tipo evento
 - [x] Voci RSVP configurabili + voci personalizzate
 - [x] Sistema colori elegante (moduli bianchi, accento solo hero)
-- [ ] Tabella risposte RSVP (fase successiva — richiede backend)
+- [x] Tabella risposte RSVP (backend + pannello editor v107)
+- [x] Libro degli ospiti con moderazione (v108)
 
 ### Sprint C — checklist
 
@@ -226,4 +227,9 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-09 | Cursor | **v99 Sprint E**: catalogo vendita Moments, webhook/sync Shopify, bundle NFC, SHOPIFY-SETUP.md |
 | 2026-07-09 | Cursor | **v98**: categorie unificate — setup guidato e select usano stesso catalogo e preset |
 | 2026-07-09 | Cursor | **v97 admin**: ricerca/filtri Clienti, Moments, Ordini, Agenti; template 21 categorie; dashboard alert operativi |
-| 2026-07-09 | Cursor | **KhamaKey OS Fase 1**: `KHAMAKEY_OS/` — MASTER_INDEX, PROJECT_STATE, docs 00–15, AGENTS, regole AI |
+| 2026-07-10 | Cursor | **v110 Moments**: dashboard organizzatore, email lettera al futuro, SQL v73, deploy Worker+Pages |
+| 2026-07-10 | Cursor | **v109**: anniversari Moments — cron Worker, email Resend, toggle editor |
+| 2026-07-10 | Cursor | **Deploy prod**: SQL v70/v71, Worker v108, Pages moments v108 |
+| 2026-07-10 | Cursor | **v111**: rimosso pagamento online/link statici; wizard 3 passaggi post-categoria; coach catalogo |
+| 2026-07-10 | Cursor | **v110**: catalogo semplificato (quick add, tag rapidi, avanzate in accordion) + tutorial animato ordini NFC |
+| 2026-07-10 | Cursor | **v109**: editor Business — barra «Pagina pronta», Apri pagina finale, logo/copertina semplificati, conferma salvataggio cloud |

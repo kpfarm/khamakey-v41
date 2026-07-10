@@ -25,6 +25,7 @@ const RSVP_INVITE_EMOJI = {
 };
 
 import { rsvpGuestPreviewLines, readRsvpFieldsFromForm } from "./moment-rsvp-fields.js";
+import { renderRsvpResponsesShell } from "./moment-rsvp-responses.js";
 
 function esc(value){
   return String(value ?? "").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
@@ -85,13 +86,14 @@ export function renderRsvpSharePanel({ publicUrl, momentType, section = {}, page
     <details class="rsvp-admin-summary">
       <summary>Riepilogo organizzatore</summary>
       <ul class="rsvp-admin-list">
-        <li>Le risposte arrivano sul tuo <strong>WhatsApp</strong> — non servono altri strumenti.</li>
+        <li>Le risposte arrivano sul tuo <strong>WhatsApp</strong> e vengono salvate anche nel riepilogo sotto.</li>
         <li>Consiglio: crea un'etichetta o chat «RSVP · ${esc(eventName || pageTitle || "evento")}» per tenere tutto in ordine.</li>
         <li>Modulo attivo: nome, presenza${fieldKeys.length ? `, ${fieldKeys.length} voce/i extra` : ""}${customCount ? `, ${customCount} voce/i personalizzata/e` : ""}.</li>
       </ul>
       <p class="field-hint">Anteprima messaggio che riceverai:</p>
       <pre class="rsvp-preview-msg" id="rsvpGuestPreview">${esc(guestPreview)}</pre>
     </details>
+    ${renderRsvpResponsesShell()}
   </div>`;
 }
 

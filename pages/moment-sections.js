@@ -9,6 +9,7 @@ export const SECTION_ORDER_DEFAULT = [
   "dedication",
   "timeline",
   "rsvp",
+  "guestbook",
   "gallery",
   "promises",
   "dreams",
@@ -27,6 +28,7 @@ export const DEFAULT_SECTIONS = {
   dedication:{ enabled:false, title:"Una dedica per te", body:"", recipient:"", signature:"", images:[] },
   timeline:{ enabled:false, title:"Tappe & luoghi", body:"", items:[], images:[] },
   rsvp:{ enabled:false, title:"Conferma presenza", body:"Compila il modulo e invia la risposta su WhatsApp.", whatsapp_number:"", event_name:"", ask_guests:true, ask_notes:true, field_keys:["guests","notes"], custom_fields:[], images:[] },
+  guestbook:{ enabled:false, title:"Libro degli ospiti", body:"Lascia un pensiero — apparirà dopo l'approvazione dell'organizzatore.", images:[] },
   gallery:{ enabled:false, title:"I nostri ricordi", body:"", images:[], media:[] },
   promises:{ enabled:false, title:"Le nostre promesse", body:"", images:[] },
   places:{ enabled:false, title:"Luoghi del cuore", body:"", images:[] },
@@ -46,6 +48,7 @@ export const SECTION_LABELS = {
   dedication:"Dedica",
   timeline:"Tappe & luoghi",
   rsvp:"RSVP invitati",
+  guestbook:"Libro degli ospiti",
   gallery:"Foto & video",
   promises:"Promesse",
   places:"Luoghi del cuore",
@@ -65,14 +68,16 @@ export const SECTION_SUBTITLES = {
   dedication:"Una lettera con la tua firma",
   timeline:"Date, luoghi e foto del percorso",
   rsvp:"Gli invitati confermano via WhatsApp",
+  guestbook:"Messaggi degli invitati con moderazione",
   gallery:"Aggiungi foto, video e audio",
   promises:"Lista di promesse con emoji",
   places:"I posti che contano per voi",
   dreams:"Sogni da realizzare insieme",
     countdown:"Quanto manca all'evento",
     rsvp:"Inserisci il tuo WhatsApp — gli invitati compilano e inviano un messaggio pronto.",
+    guestbook:"Gli invitati lasciano un messaggio; tu approvi prima che appaia in pagina.",
     music:"Canzone o video preferito",
-  letter_future:"Messaggio da aprire in futuro",
+    letter_future:"Messaggio da aprire in futuro — riceverai un'email il giorno dell'apertura.",
   rituals:"Piccole abitudini quotidiane",
   pet:"Il tuo amico a quattro zampe",
   numbers:"Numeri simbolo (giorni, km…)",
@@ -85,6 +90,7 @@ export const SECTION_ICONS = {
   dedication:"💌",
   timeline:"🗺️",
   rsvp:"📲",
+  guestbook:"📖",
   gallery:"📸",
   promises:"💍",
   places:"📍",
@@ -135,6 +141,7 @@ export function contentNavItems(order = SECTION_ORDER_DEFAULT, momentType = "fre
 
 export function accountNavItems(){
   return [
+    { id:"overview", label:"Riepilogo", icon:"📊" },
     { id:"objects", label:"Pagine", icon:"◉" },
     { id:"privacy", label:"Pubblica", icon:"🔒" }
   ];
@@ -146,6 +153,7 @@ function shortNavLabel(key){
     dedication:"Dedica",
     timeline:"Tappe",
     rsvp:"RSVP",
+    guestbook:"Ospiti",
     gallery:"Foto & video",
     promises:"Promesse",
     places:"Luoghi",
@@ -229,6 +237,8 @@ export function sectionHasContent(key, section){
       return normalizeMediaList(section).length > 0;
     case "rsvp":
       return Boolean(String(section.whatsapp_number || "").replace(/\D/g, ""));
+    case "guestbook":
+      return Boolean(section?.enabled);
     case "promises":
     case "dreams":
     case "rituals":
@@ -384,13 +394,14 @@ export function sectionFillGuide(key){
     dreams:"Lista desideri. Prefix «✓ ·» se già realizzato.",
     countdown:"Scegli data e ora — compare il timer live. Puoi aggiungere anche una foto.",
     music:"Spotify, YouTube o audio caricato — puoi usarne uno o tutti. Incolla solo link pubblici (Spotify/YouTube), non link di file caricati.",
-    letter_future:"Scrivi la lettera, scegli la data di apertura e opzionalmente allega foto, video o audio.",
+    letter_future:"Scrivi la lettera, scegli la data di apertura e opzionalmente allega foto, video o audio. Riceverai un'email il giorno dell'apertura.",
     rituals:"Abitudini vostre, una riga ciascuna. Es. «☕ · Caffè insieme ogni mattina».",
     pet:"Nome, emoji e foto del vostro compagno a quattro zampe.",
     numbers:"Statistiche simboliche. Es. «365 · giorni insieme», «12 · viaggi fatti».",
     quote:"Solo la citazione e l'autore — testo grande in pagina.",
     signature:"Chiusura finale con i vostri nomi.",
-    rsvp:"Inserisci il tuo numero WhatsApp (39…). Gli invitati compilano il modulo e inviano un messaggio pronto."
+    rsvp:"Inserisci il tuo numero WhatsApp (39…). Gli invitati compilano il modulo e inviano un messaggio pronto.",
+    guestbook:"Attiva la sezione e scrivi un invito. Gli ospiti lasciano messaggi che approvi dall'editor."
   };
   return guides[key] || "Compila i campi sotto, attiva la sezione e clicca Salva.";
 }

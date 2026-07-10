@@ -100,6 +100,9 @@ import {
   primarySectionsForType
 } from "./moment-editor-kit.js";
 import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
+import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
+import { renderGuestbookModerationShell, bindGuestbookModerationPanel } from "./moment-guestbook-kit.js";
+import { renderMomentDashboardShell, bindMomentDashboard } from "./moment-editor-dashboard.js";
 import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js";
 
 const auth = document.getElementById("momentsAuth");
@@ -118,6 +121,7 @@ const userMenuBtn = document.getElementById("momentsUserMenuBtn");
 const PUBLIC_BASE_URL = WORKER_BASE_URL;
 
 const EDITOR_PANELS = {
+  overview:{title:"Riepilogo",subtitle:"Stato pagina, link e statistiche RSVP / libro ospiti"},
   objects:{title:"Le tue pagine",subtitle:"Scegli quale pagina modificare"},
   cover:{title:"Copertina",subtitle:"Titolo, foto e messaggio — la prima cosa che si vede"},
   styling:{title:"Colori",subtitle:"Scegli lo stile — colori classici, molto contrasto"},
@@ -609,7 +613,7 @@ function renderSubNav(groupId, formNode){
 function syncMobileNav(panelId){
   const groupForPanel = panelId === "counter" || panelId.startsWith("section-") ? "content"
     : ["cover","styling","order"].includes(panelId) ? "design"
-    : ["objects","privacy"].includes(panelId) ? "account"
+    : ["overview","objects","privacy"].includes(panelId) ? "account"
     : activeNavGroup;
   if(groupForPanel !== activeNavGroup){
     activeNavGroup = groupForPanel;
@@ -687,6 +691,13 @@ function renderActivationFormHtml(formId = "editorActivationForm",statusId = "ed
     <button type="submit" class="primary">Attiva oggetto</button>
   </form>
   <p class="status" id="${statusId}"></p>`;
+}
+
+function renderOverviewPanel(row, state, publicUrl){
+  return `<div class="editor-panel ${activeEditorPanel === "overview" ? "active" : ""}" data-editor-panel="overview">
+    ${renderSectionHeader(EDITOR_PANELS.overview.title,EDITOR_PANELS.overview.subtitle)}
+    ${renderMomentDashboardShell({ publicUrl, published:row.public_visible, slug:row.slug })}
+  </div>`;
 }
 
 function renderObjectsPanel(){
@@ -1077,8 +1088,11 @@ function renderEditorSidebar(activePanel, momentType = currentMomentType, pinned
     </button>`).join("")}${extrasBtn}`;
   return `<nav class="editor-sidebar" aria-label="Sezioni editor">
     <div class="editor-sidebar-group">Account</div>
+    <button type="button" class="editor-nav-item ${activePanel === "overview" ? "active" : ""}" data-editor-panel="overview">
+      <span class="editor-nav-icon">📊</span>Riepilogo
+    </button>
     <button type="button" class="editor-nav-item ${activePanel === "objects" ? "active" : ""}" data-editor-panel="objects">
-      <span class="editor-nav-icon">◉</span>Oggetti & Account
+      <span class="editor-nav-icon">◉</span>Pagine
     </button>
     <div class="editor-sidebar-group">Design</div>
     <button type="button" class="editor-nav-item ${activePanel === "cover" ? "active" : ""}" data-editor-panel="cover">
@@ -1517,6 +1531,7 @@ function renderSectionPanels(state, shareMeta = {}){
           published:shareMeta.published !== false
         })
       : "";
+    const guestbookModeration = key === "guestbook" ? renderGuestbookModerationShell() : "";
     return `<div class="editor-panel ${activeEditorPanel === panelId ? "active" : ""}" data-editor-panel="${esc(panelId)}" data-section-panel-key="${esc(key)}" ${hidden ? "hidden" : ""}>
       ${renderSectionHeader(sectionLabelForType(state.type, key),sectionSubtitleForType(state.type, key))}
       ${mutedNav ? `<p class="field-hint extras-hint">Sezione extra — attivala con l'interruttore sotto o da <strong>Altre sezioni</strong>.</p>` : ""}
@@ -1524,12 +1539,14 @@ function renderSectionPanels(state, shareMeta = {}){
       <div class="section-editor-stack ${enabledOn ? "" : "is-muted"}" data-section-stack="${esc(key)}">
         ${sectionEditor(key,section,true)}
         ${rsvpShare}
+        ${guestbookModeration}
       </div>
     </div>`;
   }).join("");
 }
 
-function renderPrivacyPanel(row){
+function renderPrivacyPanel(row, state = {}){
+  const anniversaryEmails = state.anniversary_emails !== false;
   const savedPin = getRememberedPin(row.id);
   const pinHintBlock = savedPin ? `
     <div class="pin-reminder-card">
@@ -1566,6 +1583,14 @@ function renderPrivacyPanel(row){
       </label>
       <label>Nuovo PIN<input name="access_pin" inputmode="numeric" autocomplete="new-password" placeholder="Es. 1234 — lascia vuoto per non cambiare"></label>
       <p class="field-hint">Chi avvicina il tag NFC dovrà inserire questo PIN per aprire la pagina.</p>
+    </div>
+    <div class="editor-card smart-card">
+      <p class="ecard-title">💫 Ricordi nel tempo</p>
+      <label class="smart-toggle">
+        <input type="checkbox" name="anniversary_emails" ${anniversaryEmails ? "checked" : ""}>
+        <span><strong>Email anniversario</strong><small>Ogni anno, alla data dell'evento o del contatore «insieme da», ti inviamo un promemoria con il link alla pagina.</small></span>
+      </label>
+      <p class="field-hint">Usa la data evento, «insieme da» o la data del countdown se attivi.</p>
     </div>
   </div>`;
 }
@@ -1830,6 +1855,7 @@ function renderDetail(id){
       <div class="editor-layout">
         ${renderEditorSidebar(activeEditorPanel, state.type, state.pinned_sections || [], Object.fromEntries(Object.entries(state.sections || {}).map(([k,v])=>[k, Boolean(v?.enabled)])))}
         <div class="editor-main">
+          ${renderOverviewPanel(row, state, publicUrl)}
           ${renderObjectsPanel()}
           <form id="momentEditorForm" class="editor-form-inner">
             <input type="hidden" name="pinned_sections" id="pinnedSectionsInput" value="${esc((state.pinned_sections || []).join(","))}">
@@ -1842,7 +1868,7 @@ function renderDetail(id){
             ${renderGalleryFileInput("gallery")}
             ${renderJourneyFileInput()}
             ${renderLetterFileInput()}
-            ${renderPrivacyPanel(row)}
+            ${renderPrivacyPanel(row, state)}
             <p class="status editor-form-status" id="editorStatus"></p>
           </form>
         </div>
@@ -1959,6 +1985,17 @@ function renderDetail(id){
     published:row.public_visible,
     copyText,
     sharePageUrl
+  });
+  bindRsvpResponsesPanel({ supabase, eventId:row.id });
+  bindGuestbookModerationPanel({ supabase, eventId:row.id });
+  bindMomentDashboard({
+    supabase,
+    eventId:row.id,
+    publicUrl,
+    published:row.public_visible,
+    slug:row.slug,
+    state,
+    copyText
   });
   bindRsvpFieldsEditor(editorForm,()=>{
     markEditorDirty(editorForm);
@@ -2495,8 +2532,8 @@ function sectionEditor(key,section,standalone=false){
     <label>Nome firma<input name="section_${esc(key)}_sign_name" value="${esc(section.sign_name || "")}" placeholder="Es. Marco & Giulia"></label>
     <label>Sottotitolo<input name="section_${esc(key)}_sign_subtitle" value="${esc(section.sign_subtitle || "")}" placeholder="Es. Per sempre"></label>` : "";
   const bodyLabel = key === "quote" ? "Citazione" : key === "dedication" || key === "letter_future" ? "Testo della lettera" : key === "pet" ? "Racconto" : "Contenuto";
-  const bodyField = key === "timeline" || key === "gallery" || key === "countdown" || key === "rsvp"
-    ? (key === "countdown" || key === "rsvp" ? `<details class="design-advanced editor-card"><summary>Testo extra (facoltativo)</summary><label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(section.body || "")}</textarea></label></details>` : "")
+  const bodyField = key === "timeline" || key === "gallery" || key === "countdown" || key === "rsvp" || key === "guestbook"
+    ? (key === "countdown" || key === "rsvp" || key === "guestbook" ? `<details class="design-advanced editor-card"><summary>Testo extra (facoltativo)</summary><label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(section.body || "")}</textarea></label></details>` : "")
     : `<label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(section.body || "")}</textarea></label>`;
   const titleField = key !== "quote" && key !== "signature"
     ? `<label>Titolo sezione<input name="section_${esc(key)}_title" value="${esc(section.title || "")}" placeholder="Es. ${esc(DEFAULT_SECTIONS[key]?.title || SECTION_LABELS[key] || "")}"><span class="field-hint">Compare nel menu della pagina e come titolo della sezione.</span></label>`
@@ -2527,6 +2564,9 @@ function sectionEditor(key,section,standalone=false){
     }
     if(key === "rsvp"){
       return `<div class="editor-card"><p class="ecard-title">${icon} RSVP invitati</p><p class="field-hint">${esc(guide)}</p>${titleField}${rsvpFields}${bodyField}</div>`;
+    }
+    if(key === "guestbook"){
+      return `<div class="editor-card"><p class="ecard-title"><span class="step-badge">1</span> ${icon} Libro degli ospiti</p><p class="field-hint">${esc(guide)}</p>${titleField}<label>Invito agli ospiti<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(section.body || "")}</textarea></label></div>`;
     }
     return `<div class="editor-card"><p class="ecard-title">${icon} ${esc(guide.split(".")[0])}</p>${fields.replace(galleryField,"").replace(journeyField,"")}</div>`;
   }
@@ -2635,6 +2675,7 @@ function readFormState(formNode){
     show_together_counter:form.get("show_together_counter") === "on",
     together_since:String(form.get("together_since") || "").trim(),
     show_counter_hms:form.get("show_counter_hms") === "on",
+    anniversary_emails:form.get("anniversary_emails") === "on",
     theme:String(form.get("page_theme") || "classic"),
     sectionOrder:[...sectionOrder],
     pinned_sections:String(form.get("pinned_sections") || "").split(",").map(value=>value.trim()).filter(Boolean),

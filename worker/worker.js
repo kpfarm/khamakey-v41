@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v104-business-i18n";
+const WORKER_VERSION = "v110-moment-editor-dashboard";
 
 export default {
   async fetch(request, env, ctx) {
@@ -41,6 +41,15 @@ export default {
       }
       if (url.pathname === "/api/moment/preview" && request.method === "POST") {
         return handleMomentPreview(request, env);
+      }
+      if (url.pathname === "/api/moment/rsvp" && request.method === "POST") {
+        return handleMomentRsvp(request, env);
+      }
+      if (url.pathname === "/api/moment/guestbook" && request.method === "GET") {
+        return handleMomentGuestbookList(request, env, url);
+      }
+      if (url.pathname === "/api/moment/guestbook" && request.method === "POST") {
+        return handleMomentGuestbookSubmit(request, env);
       }
       if (url.pathname.startsWith("/cdn/")) {
         return handleMediaServe(request, env, url.pathname.slice(5));
@@ -78,6 +87,9 @@ export default {
       if (url.pathname === "/health") {
         return json(buildIntegrationsHealth(env));
       }
+      if (url.pathname === "/api/cron/moment-anniversaries" && request.method === "POST") {
+        return handleMomentAnniversariesCron(request, env);
+      }
       return html(notFound("Pagina non trovata"), 404);
     } catch (error) {
       console.error(error);
@@ -86,6 +98,12 @@ export default {
       }
       return html(notFound("Errore temporaneo"), 500);
     }
+  },
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(Promise.all([
+      runMomentAnniversaryJob(env).catch(error => console.error("moment anniversaries cron", error)),
+      runMomentLetterUnlockJob(env).catch(error => console.error("moment letter unlock cron", error))
+    ]));
   }
 };
 
@@ -217,6 +235,93 @@ async function handleBooking(request, env) {
 
   await track(env, request, businessId, "click_booking", "public_page", { channel: "resend", resend_id: resendId }).catch(() => {});
   return cors(json({ ok: true, sent: Boolean(resendId) }));
+}
+
+async function handleMomentRsvp(request, env) {
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object") return cors(json({ error: "Richiesta non valida" }, 400));
+
+  const slug = String(body.slug || "").trim();
+  const pin = String(body.pin || "").trim();
+  const values = sanitizeRsvpValues(body.values || {});
+  if (!slug || !values.name || !values.attending) {
+    return cors(json({ error: "Nome e presenza sono obbligatori" }, 400));
+  }
+
+  const pinHash = pin ? await momentPinHash(slug, pin) : null;
+  const rows = await rpc(env, "get_public_moment", { p_slug: slug, p_pin_hash: pinHash });
+  const page = rows?.[0];
+  if (!page || !page.pin_valid) {
+    return cors(json({ error: "Pagina non valida" }, 404));
+  }
+
+  const ingestKey = env.WEBHOOK_INGEST_KEY || env.ANALYTICS_INGEST_KEY;
+  if (!ingestKey) return cors(json({ error: "Servizio RSVP non configurato" }, 503));
+
+  try {
+    const result = await rpc(env, "submit_moment_rsvp", {
+      p_slug: slug,
+      p_values: values,
+      p_ingest_key: ingestKey,
+      p_user_agent: request.headers.get("user-agent") || ""
+    });
+    return cors(json({ ok: true, id: result?.id || null }));
+  } catch (error) {
+    console.error("submit_moment_rsvp", error);
+    return cors(json({ error: "Salvataggio RSVP non riuscito" }, 500));
+  }
+}
+
+async function handleMomentGuestbookList(request, env, url) {
+  const slug = String(url.searchParams.get("slug") || "").trim();
+  const pin = String(url.searchParams.get("pin") || "").trim();
+  if (!slug) return cors(json({ error: "Slug obbligatorio" }, 400));
+
+  const pinHash = pin ? await momentPinHash(slug, pin) : null;
+  const rows = await rpc(env, "get_public_moment", { p_slug: slug, p_pin_hash: pinHash });
+  const page = rows?.[0];
+  if (!page || !page.pin_valid) return cors(json({ error: "Pagina non valida" }, 404));
+
+  try {
+    const messages = await rpc(env, "list_public_moment_guestbook", { p_slug: slug });
+    return cors(json({ ok: true, messages: Array.isArray(messages) ? messages : [] }));
+  } catch (error) {
+    console.error("list_public_moment_guestbook", error);
+    return cors(json({ error: "Caricamento messaggi non riuscito" }, 500));
+  }
+}
+
+async function handleMomentGuestbookSubmit(request, env) {
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object") return cors(json({ error: "Richiesta non valida" }, 400));
+
+  const slug = String(body.slug || "").trim();
+  const pin = String(body.pin || "").trim();
+  const values = sanitizeGuestbookValues(body.values || {});
+  if (!slug || !values.name || !values.message) {
+    return cors(json({ error: "Nome e messaggio sono obbligatori" }, 400));
+  }
+
+  const pinHash = pin ? await momentPinHash(slug, pin) : null;
+  const rows = await rpc(env, "get_public_moment", { p_slug: slug, p_pin_hash: pinHash });
+  const page = rows?.[0];
+  if (!page || !page.pin_valid) return cors(json({ error: "Pagina non valida" }, 404));
+
+  const ingestKey = env.WEBHOOK_INGEST_KEY || env.ANALYTICS_INGEST_KEY;
+  if (!ingestKey) return cors(json({ error: "Servizio non configurato" }, 503));
+
+  try {
+    const result = await rpc(env, "submit_moment_guestbook", {
+      p_slug: slug,
+      p_values: values,
+      p_ingest_key: ingestKey,
+      p_user_agent: request.headers.get("user-agent") || ""
+    });
+    return cors(json({ ok: true, id: result?.id || null, status: result?.status || "pending" }));
+  } catch (error) {
+    console.error("submit_moment_guestbook", error);
+    return cors(json({ error: "Invio messaggio non riuscito" }, 500));
+  }
 }
 
 async function track(env, request, businessId, eventType, source, metadata = {}) {
@@ -617,7 +722,7 @@ function renderMomentPage(page, origin) {
   const fonts = resolveMomentFontPair(state.fontPair);
   const heroStyle = ["classico", "profilo", "romantico", "intimo", "fullscreen"].includes(state.heroStyle) ? state.heroStyle : "classico";
   const sections = resolveMomentSections(state);
-  const defaultOrder = ["intro","dedication","timeline","rsvp","gallery","promises","dreams","countdown","music","letter_future","rituals","pet","numbers","quote","signature"];
+  const defaultOrder = ["intro","dedication","timeline","rsvp","guestbook","gallery","promises","dreams","countdown","music","letter_future","rituals","pet","numbers","quote","signature"];
   const rawOrder = Array.isArray(state.sectionOrder) && state.sectionOrder.length ? state.sectionOrder : defaultOrder;
   const legacyMap = { schedule:"timeline", location:"places", places:null, message:"dedication", details:"intro", contacts:null };
   const mapped = [...new Set(rawOrder.map(key => legacyMap[key] ?? key).filter(key => key && key !== "places" && sections[key]))];
@@ -629,7 +734,7 @@ function renderMomentPage(page, origin) {
   const counterHtml = renderTogetherCounter(state, colors);
   const momentType = String(state.type || page.moment_type || "free").trim().toLowerCase();
   const sectionHtml = ordered.length
-    ? ordered.map(({ key, section }) => `<div class="moment-section-anchor" id="moment-section-${escapeHtml(key)}">${renderMomentSection(key, section, colors, momentType, fonts)}</div>`).join("")
+    ? ordered.map(({ key, section }) => `<div class="moment-section-anchor" id="moment-section-${escapeHtml(key)}">${renderMomentSection(key, section, colors, momentType, fonts, page.slug || "")}</div>`).join("")
     : `<div class="moment-card moment-card-empty rv"><strong>Pagina in preparazione</strong><p>Il proprietario sta ancora scegliendo i contenuti da mostrare.</p></div>`;
   const navHtml = renderMomentNav(title, ordered, hasCounter);
   const decorHtml = renderMomentDecor(state);
@@ -671,7 +776,7 @@ ${profileBlock}
 <button type="button" class="moment-lightbox-nav moment-lightbox-next" id="momentLightboxNext" aria-label="Successivo">›</button>
 <button type="button" class="moment-lightbox-close" id="momentLightboxClose" aria-label="Chiudi">×</button>
 <div class="moment-lightbox-card"><div id="momentLightboxMedia"></div><p class="moment-lightbox-counter" id="momentLightboxCounter"></p><h3 class="moment-lightbox-title" id="momentLightboxTitle"></h3><p class="moment-lightbox-desc" id="momentLightboxDesc"></p></div></div>
-<script>${momentPageScript(state, ordered, hasCounter)}</script>
+<script>${momentPageScript(state, ordered, hasCounter, page.slug || "")}</script>
 </body></html>`;
 }
 
@@ -689,6 +794,7 @@ const MOMENT_NAV_LABELS = {
   dedication:"Dedica",
   timeline:"Programma",
   rsvp:"RSVP",
+  guestbook:"Ospiti",
   gallery:"Foto",
   promises:"Promesse",
   dreams:"Sogni",
@@ -869,6 +975,7 @@ function resolveMomentSections(state) {
     dedication:{enabled:false,title:"",body:"",recipient:"",signature:"",images:[]},
     timeline:{enabled:false,title:"",body:"",items:[],images:[]},
     rsvp:{enabled:false,title:"",body:"",whatsapp_number:"",event_name:"",ask_guests:true,ask_notes:true,images:[]},
+    guestbook:{enabled:false,title:"",body:"",images:[]},
     gallery:{enabled:false,title:"",body:"",images:[]},
     promises:{enabled:false,title:"",body:"",images:[]},
     places:{enabled:false,title:"",body:"",images:[]},
@@ -933,6 +1040,8 @@ function momentSectionHasContent(key, section) {
       return normalizeMomentMedia(section).length > 0;
     case "rsvp":
       return Boolean(normalizeWhatsAppDigits(section.whatsapp_number));
+    case "guestbook":
+      return Boolean(section?.enabled);
     case "promises":
     case "dreams":
     case "rituals":
@@ -1070,7 +1179,8 @@ function renderTogetherCounter(state, colors) {
 <div class="moment-counter-grid">${grid}</div></section>`;
 }
 
-function momentPageScript(state, ordered = [], hasCounter = false) {
+function momentPageScript(state, ordered = [], hasCounter = false, slug = "") {
+  const momentSlug = String(slug || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   const navItems = buildMomentNavItems(ordered, hasCounter);
   const navIds = navItems.map(item => item.id);
   const navScript = navIds.length >= 2 ? `
@@ -1216,15 +1326,79 @@ document.querySelectorAll("[data-rsvp-form]").forEach(function(form){
     if(fd.get("rsvp_notes"))lines.push("📝 Note: "+fd.get("rsvp_notes"));
     if(fd.get("rsvp_phone"))lines.push("📞 Tel.: "+fd.get("rsvp_phone"));
     if(fd.get("rsvp_email"))lines.push("✉️ Email: "+fd.get("rsvp_email"));
+    var customPayload={};
     try{
       var custom=JSON.parse(card.getAttribute("data-rsvp-custom")||"[]");
       custom.forEach(function(field){
         var val=fd.get("rsvp_custom_"+field.id);
-        if(val)lines.push(field.label+": "+val);
+        if(val){lines.push(field.label+": "+val);customPayload[field.id]=val;}
       });
-    }catch(e){}
+    }catch(err){}
+    var pin=new URLSearchParams(location.search).get("pin")||"";
+    var payload={
+      slug:"${momentSlug}",
+      pin:pin,
+      values:{
+        name:String(fd.get("rsvp_name")||"").trim(),
+        attending:String(fd.get("rsvp_attending")||"").trim(),
+        guests:fd.get("rsvp_guests")?String(fd.get("rsvp_guests")).trim():"",
+        notes:fd.get("rsvp_notes")?String(fd.get("rsvp_notes")).trim():"",
+        phone:fd.get("rsvp_phone")?String(fd.get("rsvp_phone")).trim():"",
+        email:fd.get("rsvp_email")?String(fd.get("rsvp_email")).trim():"",
+        custom:customPayload,
+        source:"public_page"
+      }
+    };
+    fetch("/api/moment/rsvp",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).catch(function(){});
     window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(lines.join("\\n")),"_blank","noopener");
   });
+});
+document.querySelectorAll("[data-guestbook-slug]").forEach(function(section){
+  var slug=section.getAttribute("data-guestbook-slug")||"";
+  var list=section.querySelector("[data-guestbook-list]");
+  var status=section.querySelector("[data-guestbook-status]");
+  var form=section.querySelector("[data-guestbook-form]");
+  if(!slug||!list)return;
+  function escText(value){return String(value||"").replace(/[&<>"']/g,function(ch){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch];});}
+  function formatDate(value){try{return new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(value));}catch(e){return "";}}
+  function paintMessages(messages){
+    if(!messages||!messages.length){list.innerHTML='<p class="moment-guestbook-empty">Sii il primo a lasciare un pensiero.</p>';return;}
+    list.innerHTML=messages.map(function(item){
+      return '<article class="moment-guestbook-card"><p class="moment-guestbook-quote">“'+escText(item.message)+'”</p><p class="moment-guestbook-author">— '+escText(item.guest_name)+(item.created_at?' · '+escText(formatDate(item.created_at)):"")+'</p></article>';
+    }).join("");
+  }
+  function loadMessages(){
+    var pin=new URLSearchParams(location.search).get("pin")||"";
+    var url="/api/moment/guestbook?slug="+encodeURIComponent(slug)+(pin?"&pin="+encodeURIComponent(pin):"");
+    fetch(url).then(function(res){return res.json();}).then(function(data){if(data&&data.ok)paintMessages(data.messages||[]);}).catch(function(){});
+  }
+  loadMessages();
+  if(form){
+    form.addEventListener("submit",function(e){
+      e.preventDefault();
+      var fd=new FormData(form);
+      var pin=new URLSearchParams(location.search).get("pin")||"";
+      var payload={
+        slug:slug,
+        pin:pin,
+        values:{
+          name:String(fd.get("guestbook_name")||"").trim(),
+          message:String(fd.get("guestbook_message")||"").trim()
+        }
+      };
+      if(status){status.hidden=false;status.textContent="Invio in corso…";status.className="moment-guestbook-status";}
+      fetch("/api/moment/guestbook",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+        .then(function(res){return res.json().then(function(data){return {ok:res.ok,data:data};});})
+        .then(function(result){
+          if(!result.ok)throw new Error((result.data&&result.data.error)||"Invio non riuscito");
+          form.reset();
+          if(status){status.textContent="Grazie! Il messaggio è in attesa di approvazione.";status.className="moment-guestbook-status ok";}
+        })
+        .catch(function(err){
+          if(status){status.textContent=err.message||"Invio non riuscito. Riprova.";status.className="moment-guestbook-status error";}
+        });
+    });
+  }
 });
 var lb=document.getElementById("momentLightbox");
 if(lb){
@@ -1419,6 +1593,19 @@ body.nav-open{overflow:hidden}
 .moment-rsvp-attending input[type=radio]{width:18px;height:18px;margin:0;flex-shrink:0;accent-color:${c.ink}}
 .moment-card-head strong{color:${c.ink}}
 .moment-rsvp-submit{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:14px 18px;background:#25D366;color:#fff;font-family:${f.ui};font-weight:800;font-size:.95rem;cursor:pointer;box-shadow:0 10px 24px rgba(37,211,102,.25)}
+.moment-guestbook-intro{margin:0 0 16px;line-height:1.75;color:${c.ink};font-size:1.02rem;font-weight:500;opacity:.88}
+.moment-guestbook-form{display:grid;gap:16px;margin-top:4px;padding:18px;border-radius:18px;background:${c.cardSoft};border:1px solid ${c.line}}
+.moment-guestbook-form label{display:grid;gap:8px;font-family:${f.ui};font-size:.88rem;font-weight:700;color:${c.ink}}
+.moment-guestbook-form input,.moment-guestbook-form textarea{width:100%;border:1px solid ${c.lineStrong};border-radius:12px;padding:13px 14px;font:inherit;background:#FFFFFF;color:${c.ink};font-size:1rem;line-height:1.4}
+.moment-guestbook-submit{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:14px 18px;background:${c.ink};color:#fff;font-family:${f.ui};font-weight:800;font-size:.95rem;cursor:pointer;box-shadow:0 10px 24px rgba(15,23,42,.16)}
+.moment-guestbook-status{margin:12px 0 0;padding:10px 12px;border-radius:12px;font-size:.86rem;line-height:1.45}
+.moment-guestbook-status.ok{background:#ECFDF3;border:1px solid #A7F3D0;color:#166534}
+.moment-guestbook-status.error{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B}
+.moment-guestbook-list{display:grid;gap:12px;margin-top:18px}
+.moment-guestbook-empty{margin:0;padding:14px;border-radius:14px;background:${c.cardSoft};border:1px dashed ${c.line};color:${c.muted};font-size:.92rem;text-align:center}
+.moment-guestbook-card{padding:18px 16px;border-radius:16px;background:#FFFFFF;border:1px solid ${c.line};box-shadow:none}
+.moment-guestbook-quote{margin:0 0 10px;font-family:${f.display};font-size:clamp(1.15rem,4.8vw,1.45rem);line-height:1.45;color:${c.ink}}
+.moment-guestbook-author{margin:0;font-family:${f.ui};font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:${c.muted}}
 .moment-card-head .moment-card-icon{font-size:1.15rem;line-height:1;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:${c.cardSoft};border:1px solid ${c.line};flex-shrink:0;color:${c.ink}}
 .moment-countdown-grid{display:flex;justify-content:center;gap:0}
 .moment-countdown-unit{flex:1;max-width:100px;padding:0 14px}
@@ -1455,6 +1642,7 @@ const MOMENT_SECTION_ICONS = {
   dedication: "💌",
   timeline: "🗺️",
   rsvp: "📲",
+  guestbook: "📖",
   gallery: "📸",
   promises: "💍",
   places: "📍",
@@ -1564,7 +1752,7 @@ function rsvpWhatsAppIntro(momentType, eventName) {
   return hooks[type] || `Ciao! ${emoji} RSVP · ${label}`;
 }
 
-function renderMomentSection(key, section, colors, momentType = "free", fonts = null) {
+function renderMomentSection(key, section, colors, momentType = "free", fonts = null, slug = "") {
   const images = Array.isArray(section.images) ? section.images.filter(url => safeUrl(url) !== "#").slice(0, 24) : [];
   const icon = MOMENT_SECTION_ICONS[key] || "•";
   const head = (title) => `<div class="moment-card-head"><span class="moment-card-icon">${icon}</span><strong>${escapeHtml(title || "Sezione")}</strong></div>`;
@@ -1597,6 +1785,11 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     const rsvpIntro = rsvpWhatsAppIntro(momentType, eventName);
     const customAttr = attr(JSON.stringify(customFields.map(field => ({ id: field.id, label: field.label }))));
     return `<article class="${rv} moment-rsvp" data-rsvp-wa="${attr(wa)}" data-rsvp-event="${attr(eventName)}" data-rsvp-intro="${attr(rsvpIntro)}" data-rsvp-custom="${customAttr}">${head(section.title || "Conferma presenza")}${eventBadge}${section.body ? `<p class="moment-rsvp-intro">${escapeHtml(section.body)}</p>` : ""}<form class="moment-rsvp-form" data-rsvp-form><label>Nome e cognome<input type="text" name="rsvp_name" required placeholder="Es. Marco Rossi" autocomplete="name"></label><fieldset class="moment-rsvp-attending"><legend>Vieni?</legend><label><input type="radio" name="rsvp_attending" value="Sì, ci sarò" checked> Sì, ci sarò</label><label><input type="radio" name="rsvp_attending" value="No, non posso"> No, non posso</label><label><input type="radio" name="rsvp_attending" value="Forse"> Forse</label></fieldset>${optionalFields}<button type="submit" class="moment-rsvp-submit">Invia su WhatsApp</button></form></article>`;
+  }
+
+  if (key === "guestbook") {
+    const pageSlug = String(slug || "").trim();
+    return `<article class="${rv} moment-guestbook" data-guestbook-slug="${attr(pageSlug)}">${head(section.title || "Libro degli ospiti")}${section.body ? `<p class="moment-guestbook-intro">${escapeHtml(section.body)}</p>` : ""}<form class="moment-guestbook-form" data-guestbook-form><label>Il tuo nome<input type="text" name="guestbook_name" required placeholder="Es. Laura Bianchi" autocomplete="name"></label><label>Il tuo messaggio<textarea name="guestbook_message" rows="4" required placeholder="Scrivi un pensiero, un augurio o un ricordo…"></textarea></label><button type="submit" class="moment-guestbook-submit">Invia messaggio</button></form><p class="moment-guestbook-status" data-guestbook-status hidden></p><div class="moment-guestbook-list" data-guestbook-list aria-live="polite"></div></article>`;
   }
 
   if (key === "timeline") {
@@ -1879,6 +2072,33 @@ function sanitizeBookingValues(values) {
     output[key] = String(values[key] || "").trim().slice(0, key === "notes" ? 1200 : 160);
   }
   return output;
+}
+
+function sanitizeRsvpValues(values) {
+  const custom = values.custom && typeof values.custom === "object" ? values.custom : {};
+  const safeCustom = {};
+  for (const [key, value] of Object.entries(custom)) {
+    const safeKey = String(key || "").trim().slice(0, 40);
+    if (!safeKey) continue;
+    safeCustom[safeKey] = String(value || "").trim().slice(0, 400);
+  }
+  return {
+    name: String(values.name || "").trim().slice(0, 160),
+    attending: String(values.attending || "").trim().slice(0, 80),
+    guests: String(values.guests || "").trim().slice(0, 8),
+    notes: String(values.notes || "").trim().slice(0, 1200),
+    phone: String(values.phone || "").trim().slice(0, 40),
+    email: String(values.email || "").trim().slice(0, 160),
+    custom: safeCustom,
+    source: String(values.source || "public_page").trim().slice(0, 40)
+  };
+}
+
+function sanitizeGuestbookValues(values) {
+  return {
+    name: String(values.name || "").trim().slice(0, 160),
+    message: String(values.message || "").trim().slice(0, 1200)
+  };
 }
 
 function validEmail(value) {
@@ -3037,6 +3257,164 @@ async function handleResendWebhook(request, env) {
   const externalId = payload?.data?.email_id || payload?.created_at || null;
   await logWebhookEvent(env, "resend", eventType, externalId ? String(externalId) : null, payload, "processed");
   return json({ ok: true, received: true });
+}
+
+async function handleMomentAnniversariesCron(request, env) {
+  const ingestKey = env.WEBHOOK_INGEST_KEY || env.ANALYTICS_INGEST_KEY;
+  const headerKey = request.headers.get("x-khamakey-cron-key") || "";
+  const body = request.method === "POST" ? await request.json().catch(() => ({})) : {};
+  const provided = String(body.ingest_key || headerKey || "").trim();
+  if (!ingestKey || provided !== ingestKey) {
+    return json({ error: "Non autorizzato" }, 401);
+  }
+  const result = await runMomentAnniversaryJob(env, body.day || null);
+  const letter = await runMomentLetterUnlockJob(env, body.day || null);
+  return json({ anniversaries: result, letter_unlock: letter });
+}
+
+async function runMomentAnniversaryJob(env, dayOverride = null) {
+  const ingestKey = env.WEBHOOK_INGEST_KEY || env.ANALYTICS_INGEST_KEY;
+  if (!ingestKey) return { ok: false, error: "ingest_key_missing" };
+  if (!env.RESEND_API_KEY) return { ok: false, error: "resend_not_configured" };
+
+  const day = dayOverride || new Date().toISOString().slice(0, 10);
+  const due = await rpc(env, "due_moment_anniversaries", {
+    p_day: day,
+    p_ingest_key: ingestKey
+  }).catch(error => {
+    console.error("due_moment_anniversaries", error);
+    return null;
+  });
+  const rows = Array.isArray(due) ? due : [];
+  const origin = env.WORKER_PUBLIC_BASE || "https://khamakey-nfc.khamakey-nfc.workers.dev";
+  let sent = 0;
+  let failed = 0;
+
+  for (const row of rows) {
+    try {
+      const years = Number(row.years) || 1;
+      const title = String(row.title || "Il tuo Moment").trim();
+      const slug = String(row.slug || "").trim();
+      const pageUrl = slug ? `${origin}/m/${encodeURIComponent(slug)}` : origin;
+      const yearLabel = years === 1 ? "1 anno" : `${years} anni`;
+      const anchor = String(row.anchor_label || "Questo giorno").trim();
+      const email = String(row.owner_email || "").trim();
+      if (!email) continue;
+
+      const subject = `💫 ${yearLabel} fa — ${title}`;
+      const text = [
+        `Ciao,`,
+        ``,
+        `Oggi ricorre ${yearLabel} da «${anchor}» per la tua pagina KhamaKey Moments «${title}».`,
+        ``,
+        `Rileggi il ricordo o aggiungi qualcosa di nuovo:`,
+        pageUrl,
+        ``,
+        `— KhamaKey Moments`
+      ].join("\n");
+      const html = `<div style="font-family:Georgia,serif;color:#172036;line-height:1.6;max-width:560px">
+        <p>Ciao,</p>
+        <p>Oggi ricorre <strong>${escapeHtml(yearLabel)}</strong> da «${escapeHtml(anchor)}» per la tua pagina <strong>${escapeHtml(title)}</strong>.</p>
+        <p><a href="${attr(pageUrl)}" style="display:inline-block;background:#1b2a5e;color:#fff;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:700">Apri il tuo Moment</a></p>
+        <p style="color:#64748b;font-size:14px">Puoi disattivare questi promemoria da editor → Pubblica → Email anniversario.</p>
+      </div>`;
+
+      const mail = await sendResendEmail(env, {
+        to: email,
+        subject,
+        html,
+        text,
+        tags: [{ name: "type", value: "moment_anniversary" }]
+      });
+
+      await rpc(env, "record_moment_anniversary_send", {
+        p_event_id: row.event_id,
+        p_anchor_type: row.anchor_type,
+        p_years: years,
+        p_owner_email: email,
+        p_ingest_key: ingestKey,
+        p_resend_id: mail?.id || null
+      });
+      sent += 1;
+    } catch (error) {
+      failed += 1;
+      console.error("moment anniversary send", row?.event_id, error);
+    }
+  }
+
+  return { ok: true, day, due: rows.length, sent, failed };
+}
+
+async function runMomentLetterUnlockJob(env, dayOverride = null) {
+  const ingestKey = env.WEBHOOK_INGEST_KEY || env.ANALYTICS_INGEST_KEY;
+  if (!ingestKey) return { ok: false, error: "ingest_key_missing" };
+  if (!env.RESEND_API_KEY) return { ok: false, error: "resend_not_configured" };
+
+  const day = dayOverride || new Date().toISOString().slice(0, 10);
+  const due = await rpc(env, "due_moment_letter_unlocks", {
+    p_day: day,
+    p_ingest_key: ingestKey
+  }).catch(error => {
+    console.error("due_moment_letter_unlocks", error);
+    return null;
+  });
+  const rows = Array.isArray(due) ? due : [];
+  const origin = env.WORKER_PUBLIC_BASE || "https://khamakey-nfc.khamakey-nfc.workers.dev";
+  let sent = 0;
+  let failed = 0;
+
+  for (const row of rows) {
+    try {
+      const title = String(row.title || "Il tuo Moment").trim();
+      const slug = String(row.slug || "").trim();
+      const pageUrl = slug ? `${origin}/m/${encodeURIComponent(slug)}#moment-section-letter_future` : origin;
+      const email = String(row.owner_email || "").trim();
+      const when = formatUnlockDate(row.unlock_date) || "oggi";
+      const recipient = String(row.recipient || "").trim();
+      if (!email) continue;
+
+      const subject = `🔓 La tua lettera al futuro si apre — ${title}`;
+      const text = [
+        `Ciao,`,
+        ``,
+        `Oggi (${when}) si apre la lettera al futuro della pagina «${title}».`,
+        recipient ? `Destinatario: ${recipient}` : "",
+        ``,
+        `Apri il momento e rileggi il messaggio:`,
+        pageUrl,
+        ``,
+        `— KhamaKey Moments`
+      ].filter(Boolean).join("\n");
+      const html = `<div style="font-family:Georgia,serif;color:#172036;line-height:1.6;max-width:560px">
+        <p>Ciao,</p>
+        <p>Oggi <strong>${escapeHtml(when)}</strong> si apre la <strong>lettera al futuro</strong> di «${escapeHtml(title)}».</p>
+        ${recipient ? `<p>Destinatario: <em>${escapeHtml(recipient)}</em></p>` : ""}
+        <p><a href="${attr(pageUrl)}" style="display:inline-block;background:#1b2a5e;color:#fff;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:700">Apri la lettera</a></p>
+      </div>`;
+
+      const mail = await sendResendEmail(env, {
+        to: email,
+        subject,
+        html,
+        text,
+        tags: [{ name: "type", value: "moment_letter_unlock" }]
+      });
+
+      await rpc(env, "record_moment_letter_unlock_send", {
+        p_event_id: row.event_id,
+        p_unlock_date: row.unlock_date,
+        p_owner_email: email,
+        p_ingest_key: ingestKey,
+        p_resend_id: mail?.id || null
+      });
+      sent += 1;
+    } catch (error) {
+      failed += 1;
+      console.error("moment letter unlock send", row?.event_id, error);
+    }
+  }
+
+  return { ok: true, day, due: rows.length, sent, failed };
 }
 
 async function sendResendEmail(env, { to, subject, html, text, tags = [] }) {

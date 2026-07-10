@@ -31,7 +31,8 @@
 
 - [x] Upload R2, galleria swipe, scroll reveal
 - [x] RSVP configurabile, lettera speciale
-- [ ] Tabella risposte RSVP (backend)
+- [x] Tabella risposte RSVP (backend v70 + editor v107)
+- [x] Libro degli ospiti con moderazione (v108)
 
 ## Sprint C — Wizard Business ✅
 
@@ -71,7 +72,8 @@
 | 2026-07-09 | Cursor | CODEX-COLLAB.md + regole multi-agente |
 | 2026-07-09 | Cursor | v106 admin UX menu intenti |
 | 2026-07-09 | Cursor | v103 Stripe + email ordini |
-| 2026-07-09 | Cursor | **KhamaKey OS** — Fase 1 struttura + docs |
+| 2026-07-10 | Cursor | **v108**: libro degli ospiti Moments con moderazione |
+| 2026-07-09 | Cursor | **v107**: RSVP backend + pannello risposte editor |
 
 ---
 

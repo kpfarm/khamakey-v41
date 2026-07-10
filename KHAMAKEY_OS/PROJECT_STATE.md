@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-09**
+> Ultimo aggiornamento: **2026-07-10**
 
 ---
 
@@ -11,10 +11,10 @@
 |------------|----------|------|
 | **Admin** | v106 | Menu 4 intenti, modalità semplice, guide contestuali |
 | **Editor Business** | v103 | Wizard settore, upload media, prenotazioni email |
-| **Moments editor** | v93 | Sidebar sezioni, temi, galleria R2 |
-| **Worker NFC** | v103 | `WORKER_VERSION = v103-shopify-email-stripe-complete` |
-| **SQL Supabase** | v68 | Rete rivenditori applicata in produzione |
-| **Prossima release** | **v107** | Incrementare `?v=` + `WORKER_VERSION` insieme |
+| **Moments editor** | v110 | Dashboard organizzatore + RSVP/guestbook stats |
+| **Worker NFC** | v110 | `WORKER_VERSION = v110-moment-editor-dashboard` + cron letter unlock |
+| **SQL Supabase** | v73 | RSVP, guestbook, anniversari, letter unlock |
+| **Prossima release Moments** | **v111** | Incrementare `?v=` su moments.html + `WORKER_VERSION` insieme |
 
 ---
 
@@ -62,7 +62,7 @@
 |------|-------|----------|
 | Stripe secrets in produzione | Predisposto, secrets da configurare | Alta |
 | Portale rivenditori self-service | Da costruire (`reseller.html`) | Media |
-| Tabella risposte RSVP backend | Richiede schema + API | Media |
+| Tabella risposte RSVP backend | Completato v70 — applicare SQL in prod | Alta |
 | Catalogo multilingua completo | Admin predisposto, sync Shopify parziale | Media |
 | Smoke test wizard 5 settori | Checklist aperta | Bassa |
 | **KhamaKey OS** (questo sistema) | Fase 1 — struttura creata | Alta |

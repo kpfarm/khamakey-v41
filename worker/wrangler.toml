@@ -30,3 +30,7 @@ bucket_name = "khamakey-media"
 # OPENAI_API_KEY          (Sprint G — traduzioni Business)
 # OPENAI_MODEL            (opzionale, default gpt-4o-mini)
 # SUPABASE_SERVICE_ROLE_KEY (opzionale, log webhook in DB)
+# WEBHOOK_INGEST_KEY (RSVP, guestbook, anniversari, webhook Shopify)
+
+[triggers]
+crons = ["0 7 * * *"]

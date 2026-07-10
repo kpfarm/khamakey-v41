@@ -12,6 +12,7 @@ const BASE_SECTION_LABELS = {
   dedication:"Dedica",
   timeline:"Tappe & luoghi",
   rsvp:"RSVP invitati",
+  guestbook:"Libro degli ospiti",
   gallery:"Foto & video",
   promises:"Promesse",
   dreams:"Sogni insieme",
@@ -30,12 +31,13 @@ const BASE_SECTION_SUBTITLES = {
   dedication:"Una lettera con la tua firma",
   timeline:"Date, luoghi e foto del percorso",
   rsvp:"Gli invitati confermano via WhatsApp",
+  guestbook:"Messaggi degli invitati con moderazione",
   gallery:"Aggiungi foto, video e audio",
   promises:"Lista di promesse con emoji",
   dreams:"Sogni da realizzare insieme",
   countdown:"Quanto manca all'evento",
   music:"Canzone o video preferito",
-  letter_future:"Messaggio da aprire in futuro",
+  letter_future:"Messaggio da aprire in futuro — riceverai un'email il giorno dell'apertura.",
   rituals:"Piccole abitudini quotidiane",
   pet:"Il tuo amico a quattro zampe",
   numbers:"Numeri simbolo (giorni, km…)",
@@ -270,15 +272,15 @@ const TYPE_VOCAB = {
     subtitles:{ dedication:"Parole per San Valentino", music:"Canzone romantica della coppia" }
   },
   wedding:{
-    labels:{ timeline:"Programma del giorno", promises:"Le nostre promesse", gallery:"Le nostre foto", rsvp:"Conferma presenza", letter_future:"Lettera al futuro", quote:"Citazione nuziale", rituals:"Tradizioni" },
-    subtitles:{ timeline:"Cerimonia, ricevimento e festa", rsvp:"Gli invitati rispondono su WhatsApp", letter_future:"Parole da rileggere negli anni" }
+    labels:{ timeline:"Programma del giorno", promises:"Le nostre promesse", gallery:"Le nostre foto", rsvp:"Conferma presenza", guestbook:"Libro degli ospiti", letter_future:"Lettera al futuro", quote:"Citazione nuziale", rituals:"Tradizioni" },
+    subtitles:{ timeline:"Cerimonia, ricevimento e festa", rsvp:"Gli invitati rispondono su WhatsApp", guestbook:"Messaggi degli invitati con moderazione", letter_future:"Parole da rileggere negli anni" }
   },
   party:{
-    labels:{ timeline:"Programma festa", music:"Playlist", rsvp:"Conferma presenza", dedication:"Ringraziamento", quote:"Citazione", countdown:"Countdown festa" },
+    labels:{ timeline:"Programma festa", music:"Playlist", rsvp:"Conferma presenza", guestbook:"Libro degli ospiti", dedication:"Ringraziamento", quote:"Citazione", countdown:"Countdown festa" },
     subtitles:{ timeline:"Orari e momenti della serata", music:"Brani per ballare e festeggiare" }
   },
   birthday:{
-    labels:{ dedication:"Auguri di compleanno", countdown:"Quanto manca alla festa", rsvp:"Conferma presenza", letter_future:"Auguri da rileggere", music:"Playlist compleanno", quote:"Citazione", rituals:"Tradizioni" },
+    labels:{ dedication:"Auguri di compleanno", countdown:"Quanto manca alla festa", rsvp:"Conferma presenza", guestbook:"Auguri degli amici", letter_future:"Auguri da rileggere", music:"Playlist compleanno", quote:"Citazione", rituals:"Tradizioni" },
     subtitles:{ dedication:"Messaggio per il festeggiato", countdown:"Timer verso il grande giorno" }
   },
   christmas:{

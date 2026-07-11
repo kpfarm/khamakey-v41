@@ -33,6 +33,7 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 27 | `khamakey-rate-limit-v76.sql` | `check_rate_limit()` generico (Postgres, zero infra nuova) usato dal Worker su RSVP, guestbook, prenotazioni, upload media, traduzioni OpenAI |
 | 28 | `khamakey-rate-limit-cleanup-v77.sql` | `cleanup_rate_limit_tables()` — pulizia righe scadute da `moment_pin_attempts`/`platform_rate_limits`, agganciata al cron giornaliero esistente nel Worker |
 | 29 | `khamakey-pin-ambiguity-fix-v78.sql` | **Fix urgente**: `get_public_moment` falliva (HTTP 500) su ogni evento con PIN attivo per ambiguità colonna `slug` tra output e tabella `moment_pin_attempts`. Applicato in produzione 2026-07-11, verificato con smoke test su evento reale |
+| 30 | `khamakey-locales-rls-fix-v79.sql` | Abilita RLS su `platform_supported_locales` (trovato da advisory sicurezza Supabase, mancava dalla creazione tabella) |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 

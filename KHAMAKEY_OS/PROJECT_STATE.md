@@ -21,9 +21,13 @@ Audit di sicurezza (Claude Code) + follow-up (Codex, Antigravity). Tutto committ
 - Firma webhook verificata per Resend (Svix) e PayPal (verify-webhook-signature); confronto chiave cron reso a tempo costante.
 - CSP + HSTS aggiunte sia su `pages/_headers` sia sulle pagine pubbliche renderizzate dal Worker (`html()`), verificate live via header HTTP reali dopo il deploy.
 
-### ⚠️ Trovato ma non ancora risolto: `platform_supported_locales` senza RLS
+### ✅ Risolto: `platform_supported_locales` senza RLS
 
-L'advisory di sicurezza di Supabase segnala che `platform_supported_locales` (lingue it/en/fr/de/es) **non ha Row Level Security attiva** — chiunque con la anon key può leggere e scrivere su questa tabella senza restrizioni. Impatto basso (dati non sensibili, 5 righe di config), ma da chiudere. SQL di fix pronta, in attesa di conferma utente prima di applicarla (vedi conversazione 2026-07-11).
+Trovato dall'advisory di sicurezza di Supabase (non da nessun audit precedente): la tabella lingue (it/en/fr/de/es) non aveva RLS attiva — chiunque con la anon key poteva leggere/scrivere senza restrizioni. Applicata `alter table ... enable row level security` + policy `select`/`all` per `authenticated` (stesso pattern già usato per `platform_integrations`). Verificato: l'advisory di sicurezza Supabase non segnala più questa tabella dopo il fix. Unico consumer noto è `pages/admin.js` (autenticato) — nessuna regressione attesa.
+
+### 📋 Backlog sicurezza non urgente (da linter Supabase, non ancora triagiato)
+
+`get_advisors` segnala ~72 WARN aggiuntivi, in gran parte rumore atteso per un'app con API pubbliche (es. "SECURITY DEFINER callable senza login" su funzioni come `get_public_moment`/`submit_moment_rsvp`, che sono *intenzionalmente* pubbliche). Da rivedere con calma prima di agire, non sono critici: "Function Search Path Mutable", "RLS Policy Always True" (verificare quali sono intenzionali), "Public Bucket Allows Listing", "Leaked Password Protection Disabled" (impostazione Auth, non schema).
 
 ### Secrets Worker ancora da impostare (non bloccanti)
 

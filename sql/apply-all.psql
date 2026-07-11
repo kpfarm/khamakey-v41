@@ -59,3 +59,5 @@
 \i khamakey-rate-limit-cleanup-v77.sql
 \echo 'v78 fix urgente ambiguita colonna slug in get_public_moment'
 \i khamakey-pin-ambiguity-fix-v78.sql
+\echo 'v79 fix RLS mancante su platform_supported_locales'
+\i khamakey-locales-rls-fix-v79.sql

@@ -77,6 +77,54 @@ Prima di modificare file lockati:
 
 ---
 
+## Allineamento branch e conflitti (regole dopo l'incidente 2026-07-11)
+
+Il 2026-07-11 si è scoperto che il lavoro da v112 a v118 **più** tutto l'hardening di sicurezza esisteva solo come working tree non committata, su un branch (`cursor/moments-editor-v110`) fermo da giorni e mai allineato a `main`. Nessun conflitto reale, ma solo fortuna: se quella cartella si fosse persa, sarebbe sparito tutto. Da qui queste regole, vincolanti per ogni agente (Cursor, Codex, Claude):
+
+### Regola d'oro: mai chiudere una sessione con modifiche non committate
+
+Non esistono eccezioni per "task ancora in corso" — si committa comunque, anche a metà, con un messaggio che dice esplicitamente `WIP` o `non testato`. Working tree non salvata = lavoro che non esiste per gli altri agenti e a rischio perdita.
+
+### Un solo branch vivo: `main`
+
+- Task piccoli/sequenziali (la maggioranza): commit diretti su `main`.
+- Task lunghi o rischiosi che richiedono un branch separato: il branch va **fuso o fast-forwardato su `main` prima di chiudere la sessione**, non lasciato lì "per dopo". Se non si fa in tempo entro la sessione, scriverlo esplicitamente in `PROJECT_STATE.md` con la data, così la sessione successiva sa che deve riconciliare.
+
+### Inizio sessione — controllo allineamento (aggiunta al workflow esistente)
+
+Prima di leggere qualunque doc, verificare la relazione col branch principale:
+
+```bash
+git fetch origin
+git status
+git rev-list --left-right --count origin/main...HEAD
+```
+
+Leggere il risultato: `0  0` = allineato, procedi. `0  N` = sei avanti di N commit non pushati, valuta se pusharli subito. `N  0` = sei indietro, fai `git pull` prima di toccare qualsiasi file. `N  M` (entrambi diversi da zero) = **divergenza reale** — vedi sotto.
+
+### Se emerge un conflitto o una divergenza reale
+
+Quando `git pull`/merge segnala conflitto, o `git rev-list` mostra commit diversi su entrambi i lati:
+
+1. **Fermarsi. Non risolvere alla cieca, non forzare (`--force`, `-X ours/theirs` senza guardare), non scegliere in automatico "la versione più recente".**
+2. Mostrare all'utente i file in conflitto e un riassunto di cosa cambia in ciascuna versione.
+3. Chiedere come vuole risolvere — specialmente su `worker.js`, `sql/`, `pages/editor.html` (file grandi, tante mani).
+4. Solo dopo la conferma, applicare il merge e ricommittare.
+
+### Checklist deploy (SQL → Worker → Pages, mai al contrario)
+
+Prima di ogni deploy in produzione, confermare in quest'ordine:
+
+1. SQL applicata su Supabase (verificare, non assumere)
+2. Secrets Worker aggiornati se servono (`wrangler secret put ...`)
+3. `wrangler deploy` (Worker) — solo se cambia il renderer NFC/API
+4. `wrangler pages deploy` (Pages)
+5. Smoke test: `/p/`, `/m/`, `/k/`, RSVP, guestbook, PIN gate
+
+Se un agente non può completare uno di questi passaggi (manca un accesso, una credenziale), **scriverlo esplicitamente in `PROJECT_STATE.md`** invece di saltarlo in silenzio.
+
+---
+
 ## Aprire una nuova chat Cursor (template per l’utente)
 
 Copia-incolla questo messaggio all’inizio di ogni nuova chat agente:

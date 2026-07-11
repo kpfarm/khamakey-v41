@@ -15,6 +15,12 @@ Mentre questo lavoro era in corso, un agente concorrente (Antigravity) ha allarg
 
 Da questo episodio: formalizzate in `CODEX-COLLAB.md` e `AGENTS.md` due **regole assolute** vincolanti per ogni agente presente e futuro — mai cancellare dati utente, mai indebolire un controllo di sicurezza esistente come effetto collaterale. Leggere prima di toccare `worker.js`, `sql/`, `pages/_headers`.
 
+### 🔴 IDOR confermato e risolto: `verifyBusinessOwner`/`verifyMediaScope` (2026-07-11, Claude Code)
+
+L'audit iniziale aveva segnalato questo come "da verificare" (non avevamo accesso a Supabase per controllare le RLS reali). Con l'accesso diretto, confermato **sfruttabile**: `businesses` ha una policy `select` pubblica per qualunque riga con `pubblicato = true` ("Pagine pubbliche B2B visibili a tutti"). `verifyBusinessOwner` e il ramo `scope=business` di `verifyMediaScope` (`worker/worker.js`) controllavano solo "la riga è visibile", non "è la mia riga" — quindi **qualunque utente autenticato poteva far scattare traduzioni OpenAI (costo reale) o caricare/cancellare media su un'attività pubblicata di un altro cliente**, semplicemente passando il suo `business_id`.
+
+Fix: entrambe le funzioni ora filtrano esplicitamente `profile_id=eq.<uid del chiamante>` nella query, con fallback a `verifyPlatformAdmin` per lo staff. Nessuna modifica SQL necessaria (la RLS sulla scrittura era già corretta — il bug era solo nel controllo applicativo nel Worker). Deployato. **Non testato end-to-end con due account reali** (nessuna credenziale di test disponibile in sessione) — verificato a livello di query/RLS, consigliato un test manuale con due utenti veri se si vuole conferma completa.
+
 ### 🔴 Incidente in produzione, risolto in giornata
 
 `get_public_moment` (v75, versione Codex) aveva un bug reale: colonna `slug` ambigua tra output della funzione e tabella `moment_pin_attempts` → **HTTP 500 su ogni pagina Moments con PIN attivo** (RSVP, guestbook, page view inclusi), dal momento in cui v75 è stata applicata stamattina fino alla scoperta via smoke test nel pomeriggio. Fix: `sql/khamakey-pin-ambiguity-fix-v78.sql` (`#variable_conflict use_column`), applicato e verificato — pagina PIN-gated ora risponde 401 con form PIN, nessun contenuto trapelato, RSVP risponde 404 corretto invece di 500. **Lezione**: da ora, ogni migrazione che tocca `get_public_moment` o simili va testata con uno slug reale prima di considerarla chiusa, non solo con `execute_sql` su input sintetici.

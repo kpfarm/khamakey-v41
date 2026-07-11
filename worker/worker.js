@@ -781,6 +781,7 @@ function renderMomentPage(page, origin) {
   const coverUrl = safeUrl(state.cover_url || "") !== "#" ? safeUrl(state.cover_url || "") : "";
   const profileUrl = safeUrl(state.profile_photo || "") !== "#" ? safeUrl(state.profile_photo || "") : "";
   const colors = resolveMomentPalette(state);
+  const paletteKey = state.colorPalette || (state.theme === "celebration" ? "corallo" : state.theme === "minimal" ? "neve" : state.theme === "memorial" ? "perla" : "classic");
   const fonts = resolveMomentFontPair(state.fontPair);
   const heroStyle = ["classico", "profilo", "romantico", "intimo", "fullscreen"].includes(state.heroStyle) ? state.heroStyle : "classico";
   const sections = resolveMomentSections(state);
@@ -823,7 +824,7 @@ ${ogImage ? `<meta property="og:image" content="${attr(ogImage)}">` : ""}
 <link href="https://fonts.googleapis.com/css2?${fonts.google}&display=swap" rel="stylesheet">
 <style>${momentPageCss(colors, fonts)}</style></head>
 <body>${navHtml}
-<main class="moment-page hero-${attr(heroStyle)}${navClass}">
+<main class="moment-page hero-${attr(heroStyle)}${navClass} moment-type-${attr(momentType)} moment-palette-${attr(paletteKey)}">
 ${decorHtml}
 <section class="moment-hero" id="moment-hero">${heroCover}<div class="moment-hero-overlay"></div><div class="moment-hero-content hero-in">
 ${pill ? `<span class="moment-pill">${escapeHtml(pill)}</span>` : `<small>KhamaKey Moments</small>`}
@@ -1709,7 +1710,40 @@ body.nav-open{overflow:hidden}
 .moment-media-card-audio{min-height:88px}
 .moment-footer{text-align:center;color:${c.mu};font-family:${f.ui};font-size:12px;padding:16px 20px max(28px,env(safe-area-inset-bottom))}
 @media(prefers-reduced-motion:reduce){.hero-in,.rv{opacity:1;transform:none;transition:none}.rv.on .moment-journey-item,.rv.on .moment-promise,.rv.on .moment-ritual,.rv.on .moment-number,.rv.on .moment-dream{animation:none}.moment-sealed-icon,.moment-decor-item{animation:none}.moment-decor{display:none}}
-@media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:24px;box-shadow:0 24px 70px rgba(17,32,65,.08);background:${c.surface}}.moment-content{padding:20px 20px 36px}.moment-gallery-scroll img,.moment-gallery-scroll .moment-gallery-figure img{width:260px;height:320px}}`;
+@media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:24px;box-shadow:0 24px 70px rgba(17,32,65,.08);background:${c.surface}}.moment-content{padding:20px 20px 36px}.moment-gallery-scroll img,.moment-gallery-scroll .moment-gallery-figure img{width:260px;height:320px}}
+
+.moment-card-icon{color:${c.go}!important}
+.moment-countdown-unit b{color:${c.go}!important;font-style:normal!important;font-weight:700!important}
+.moment-countdown-label{color:${c.go}!important}
+.moment-signature-name{color:${c.go}!important}
+.moment-rsvp-submit{background:${c.go}!important;color:#fff!important;box-shadow:0 8px 20px rgba(15,23,42,.08)!important}
+.moment-rsvp-submit:hover{background:${c.g2}!important;filter:brightness(1.08)!important}
+.moment-guestbook-submit{background:${c.go}!important;color:#fff!important}
+.moment-guestbook-submit:hover{background:${c.g2}!important}
+.moment-dream.done .moment-dream-mark{background:${c.go}!important;border-color:${c.go}!important}
+.moment-place{background:${c.surface}!important;border-color:${c.lineStrong}!important;color:${c.ink}!important}
+.moment-place-icon{color:${c.go}!important}
+
+.moment-type-travel .moment-hero h1,
+.moment-type-travel .moment-hero p,
+.moment-palette-terracotta .moment-hero h1,
+.moment-palette-terracotta .moment-hero p{
+  text-shadow:none!important
+}
+
+.moment-type-travel .moment-card,
+.moment-palette-terracotta .moment-card,
+.moment-type-travel .moment-counter,
+.moment-palette-terracotta .moment-counter,
+.moment-type-travel .moment-countdown,
+.moment-palette-terracotta .moment-countdown,
+.moment-type-travel .moment-quote-wrap,
+.moment-palette-terracotta .moment-quote-wrap,
+.moment-type-travel .moment-signature,
+.moment-palette-terracotta .moment-signature{
+  border:1.5px solid ${c.lineStrong}!important;
+  box-shadow:0 8px 24px -6px rgba(17,32,65,.05)!important
+}`;
 }
 
 const MOMENT_SECTION_ICONS = {

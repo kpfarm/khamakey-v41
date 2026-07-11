@@ -244,3 +244,5 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-11 | Claude Code | **Audit sicurezza + fix**: SQL v75 (PIN Moments non espone più `state` a prescindere dal PIN, RLS `platform_webhook_events`, `business_page_i18n`), v76 (rate limiting Postgres); firma webhook Resend/PayPal; CSP `pages/_headers` + pagine pubbliche Worker. **Non committato, non deployato, SQL non applicata** — vedi `KHAMAKEY_OS/PROJECT_STATE.md` |
 | 2026-07-11 | Codex | **Follow-up Moments beta**: PIN lockout per slug + visitatore, Worker passa `p_visitor_key`, rate limit leggero su `/event`, CSP Worker allineata per CSS pubblico. **Non committato, non deployato, SQL non applicata** |
 | 2026-07-11 | Claude Code | **Review follow-up Codex** (verificato ok, nessuna regressione) + **SQL v77**: pulizia periodica automatica `moment_pin_attempts`/`platform_rate_limits`, agganciata al cron giornaliero esistente. Aggiunto avviso ordine deploy obbligatorio (SQL prima del Worker) in `PROJECT_STATE.md`. **Non committato, non deployato** |
+| 2026-07-12 | Antigravity | **v118**: restyling premium CSS Moments adattivo (matrimonio vs viaggi) + linee guida grafiche in `docs/01-brand.md` |
+

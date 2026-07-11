@@ -8,6 +8,14 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **Linee Guida Grafiche Moments (2026-07-12, Antigravity)**
+  - Documentate le linee guida grafiche nel file di brand (`KHAMAKEY_OS/docs/01-brand.md`) ed inserito riferimento in `AGENTS.md` per l'allineamento degli agenti.
+
+### Changed
+- **Restyling Premium CSS Moments (2026-07-12, Antigravity)**
+  - Aggiornata `momentPageCss` in `worker/worker.js` (Worker NFC v118) per implementare un design adattivo premium guidato dai parametri del tema (Wedding/Amore vs Travel/Modern), con card glassmorphic, ombre morbide, focus ottimizzati ed effetti di hover.
+
 ### Security
 - **Follow-up Moments (2026-07-11, Codex)** — non ancora committato/deployato
   - PIN Moments: lockout spostato da solo slug a slug + visitatore, per evitare blocchi globali della pagina evento

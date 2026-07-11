@@ -48,6 +48,10 @@ Per **Moments**, aggiungere anche:
 - `pages/moments.js` (editor utente)
 - `worker/worker.js` → `renderMomentPage`
 
+## Linee guida grafiche (Moments)
+- Le modifiche grafiche su Moments devono seguire il **Design System Adattivo** descritto in [`docs/01-brand.md`](docs/01-brand.md).
+- Non hardcodare stili specifici per un solo tipo di evento; usa le variabili e le classi dinamiche per mantenere il design flessibile tra tutte le categorie.
+
 ---
 
 ## Divisione aree

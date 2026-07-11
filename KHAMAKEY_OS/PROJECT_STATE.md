@@ -50,7 +50,7 @@ Cosa contengono (in ordine di severità):
 | **Admin** | v106 | Menu 4 intenti, modalità semplice, guide contestuali |
 | **Editor Business** | **v117** | Analytics affidabili (RPC v74), order_sent, consenso cookie click |
 | **Moments editor** | v110+ | Dashboard organizzatore — **agente dedicato** |
-| **Worker NFC** | **v117** | Tracking order_sent + consenso cookie pagina pubblica |
+| **Worker NFC** | **v118** | Restyling premium CSS Moments adattivo (matrimonio vs viaggi) |
 | **SQL Supabase** | **v77 (in coda, non applicato)** | v75 hardening PIN/RLS/i18n, v76 rate limiting, v77 pulizia periodica — vedi nota sopra |
 | **Prossima release Business** | **v118** | `editor.html` + `index.html` `?v=` + `buildPublicSnapshot().version` |
 

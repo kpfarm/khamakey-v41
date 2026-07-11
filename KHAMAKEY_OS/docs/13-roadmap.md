@@ -74,6 +74,7 @@
 | 2026-07-09 | Cursor | v103 Stripe + email ordini |
 | 2026-07-10 | Cursor | **v108**: libro degli ospiti Moments con moderazione |
 | 2026-07-09 | Cursor | **v107**: RSVP backend + pannello risposte editor |
+| 2026-07-12 | Antigravity | **v118**: restyling premium CSS Moments adattivo + linee guida grafiche |
 
 ---
 

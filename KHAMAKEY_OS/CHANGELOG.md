@@ -22,7 +22,7 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ### Changed
 - **Restyling Premium CSS Moments (2026-07-12, Antigravity)**
-  - Aggiornata `momentPageCss` in `worker/worker.js` (Worker NFC v118) per implementare un design adattivo premium guidato dai parametri del tema (Wedding/Amore vs Travel/Modern), con card glassmorphic, ombre morbide, focus ottimizzati ed effetti di hover.
+  - Aggiornata `momentPageCss` in `worker/worker.js` (Worker NFC v119) per implementare un design adattivo premium guidato dai parametri del tema (Wedding/Amore vs Travel/Modern), con card glassmorphic, ombre morbide, focus ottimizzati ed effetti di hover.
 
 ### Security
 - **Follow-up Moments (2026-07-11, Codex)** — non ancora committato/deployato

@@ -1,6 +1,13 @@
 # KhamaKey — Regole per agenti AI
 
-> Valido per **Cursor**, **Codex**, **Claude Code** e qualsiasi altro agente sul progetto.
+> Valido per **Cursor**, **Codex**, **Claude Code**, **Antigravity** e qualsiasi altro agente sul progetto, presente o futuro.
+
+## 🔒 Le due regole che vengono prima di tutto
+
+1. **Mai cancellare o perdere dati utente** — nessuna migrazione, refactor o pulizia tocca dati reali (pagine, eventi, ordini, messaggi, media, clienti) senza conferma esplicita dell'utente umano.
+2. **Mai indebolire un controllo di sicurezza esistente** (CSP, RLS, rate limit, verifica firma webhook) come effetto collaterale di un altro task. Ogni cambiamento deve dare un beneficio reale o risolvere un bug — mai il contrario, nemmeno "temporaneamente per far funzionare qualcos'altro".
+
+Dettaglio completo, esempi ed eccezioni dichiarate: [`../CODEX-COLLAB.md`](../CODEX-COLLAB.md) → sezione "Regole assolute".
 
 ---
 
@@ -117,6 +124,8 @@ Secrets **solo** su Cloudflare (`wrangler secret put`), mai nel codice.
 | Due agenti su `worker.js` | Sequenziale o lock |
 | Ignorare documentazione | Aggiorna `docs/` dopo modifica |
 | Usare cartelle v34–v40 | Solo `khamakey-v41-consolidated` |
+| Allargare una CSP/RLS con wildcard per far passare un errore | Aggiungere l'origine/permesso esatto e minimo, documentando perché |
+| `delete`/`drop` su dati utente per "ripulire" | Chiedere conferma prima, sempre |
 
 ---
 

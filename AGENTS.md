@@ -2,6 +2,8 @@
 
 This project uses `KHAMAKEY_OS/` as the operating vault for all AI agents.
 
+**Absolute rules (no exceptions, for every agent — Cursor, Codex, Claude, Antigravity, anything future):** never delete or lose user data; never weaken an existing security control (CSP, RLS, rate limiting, webhook signature checks) as a side effect of an unrelated change. Full detail in `CODEX-COLLAB.md` → "Regole assolute".
+
 Before changing code or documentation, read these files in order:
 
 1. `KHAMAKEY_OS/MASTER_INDEX.md`

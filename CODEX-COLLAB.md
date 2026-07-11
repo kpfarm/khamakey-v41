@@ -1,6 +1,51 @@
 # Collaborazione multi-agente su KhamaKey v41
 
-Come lavorare **più chat Cursor**, **Codex** e **umani** sullo stesso repo senza sovrascriversi a vicenda.
+Come lavorare **più chat Cursor**, **Codex**, **Antigravity**, altri agenti AI e **umani** sullo stesso repo senza sovrascriversi a vicenda e senza compromettere il sistema.
+
+---
+
+## 🔒 Regole assolute — vincolanti per ogni agente, senza eccezioni
+
+Queste regole valgono per Cursor, Codex, Claude, Antigravity e qualunque altro agente AI che si aggiunga in futuro a questo progetto. Non sono suggerimenti: se un cambiamento le viola, va fermato e corretto, non discusso dopo.
+
+### 1. Mai cancellare o perdere dati utente
+
+**Nessuna modifica, migrazione o refactor può cancellare dati inseriti dagli utenti** — pagine Business, eventi Moments, ordini, messaggi guestbook, risposte RSVP, media caricati, clienti, contatti. Questo include:
+- Vietato `drop table`/`drop column` su tabelle con dati reali senza backup esplicito e conferma dell'utente umano
+- Vietato `delete`/`truncate` non filtrato o con filtro troppo ampio
+- Le migrazioni devono essere additive quando toccano dati utente: aggiungi colonne/tabelle, non rimuovere quelle esistenti, salvo istruzione esplicita dell'utente
+- **Eccezione dichiarata**: tabelle di sola infrastruttura tecnica create per essere pulite periodicamente (es. `moment_pin_attempts`, `platform_rate_limits` — contatori di rate-limiting, non contenuto utente) possono avere cleanup automatico, ma solo se lo scopo di pulizia periodica è documentato nel file SQL stesso fin dalla creazione della tabella
+
+In caso di dubbio se qualcosa sia "dato utente": trattalo come tale e chiedi conferma prima di toccarlo.
+
+### 2. Mai indebolire la sicurezza — ogni cambiamento deve dare beneficio, mai crearlo o toglierlo
+
+Un cambiamento è accettabile solo se **risolve un problema reale o aggiunge un beneficio esplicitamente richiesto**. Non è mai accettabile se, come effetto collaterale, indebolisce una protezione già esistente:
+
+- **CSP**: se un asset esterno serve, aggiungi l'origine esatta e specifica (`https://cdn-specifico.com`). **Mai usare wildcard come `https:` o `*`** per "far passare" un errore — quello annulla la protezione per chiunque altro. Se non sai quale origine ti serve davvero, fermati e documenta la necessità invece di allargare la policy.
+- **RLS**: mai disabilitare Row Level Security su una tabella esistente, mai sostituire una policy restrittiva con `using (true)` per comodità.
+- **Verifica firme webhook, rate limiting, RPC di sicurezza** (`get_public_moment`, `check_rate_limit`, ecc.): non toccare la logica di verifica senza motivo esplicito; se serve un fix, mantieni lo stesso livello di protezione o aumentalo, mai il contrario.
+- Se un controllo di sicurezza sta bloccando un lavoro legittimo, la soluzione è **restringere la richiesta al minimo necessario e documentato**, non allargare il controllo.
+
+**Prima di modificare `worker.js` (CSP, auth, rate limit), `sql/*.sql` (RLS, funzioni SECURITY DEFINER) o `pages/_headers`**: leggi la sezione "Security hardening" in `KHAMAKEY_OS/PROJECT_STATE.md`. Se la tua modifica tocca uno di questi controlli, scrivi nel commit **perché** — non basta che funzioni, deve essere chiaro cosa e perché è cambiato.
+
+### 3. Se un controllo di sicurezza ti blocca, non aggirarlo in silenzio
+
+Se una CSP, una RLS, un rate limit o una verifica firma ti impedisce di completare un task: fermati, scrivi nel commit (o segnala all'utente) qual è il blocco esatto e quale origine/permesso minimo ti servirebbe. Non allargare la policy "per provare" e non commitare la versione allargata senza spiegazione — è successo il 2026-07-11 (CSP allargata a `https:` wildcard su `worker.js`/`pages/_headers` senza commit, poi corretta) ed è esattamente il comportamento da evitare.
+
+---
+
+## Ingresso di un nuovo agente nel progetto (onboarding)
+
+Quando un agente nuovo (umano o AI) inizia a lavorare su questo repo per la prima volta:
+
+1. Legge, in ordine: questo file (soprattutto le **Regole assolute** sopra) → `KHAMAKEY_OS/PROJECT_STATE.md` → `KHAMAKEY_OS/MASTER_INDEX.md` → `ROADMAP.md`
+2. Fa `git fetch origin && git status && git rev-list --left-right --count origin/main...HEAD` prima di toccare qualunque file (vedi sezione "Allineamento branch" sotto)
+3. Se il suo task tocca un'area con lock attivo (tabella sotto): coordina prima di modificare
+4. Ogni suo commit deve poter essere spiegato in una frase: cosa cambia e perché — se non lo sa dire, non è pronto per committare
+5. A fine sessione: commit + push (mai lavoro non salvato), aggiorna `ROADMAP.md` e `PROJECT_STATE.md` con cosa ha fatto
+
+Questo vale anche per agenti "di design" (es. Antigravity) che normalmente toccano solo CSS/asset grafici: se il loro lavoro tocca `worker.js`, `pages/_headers` o qualunque file con logica di sicurezza, si applicano comunque le **Regole assolute** sopra.
 
 ---
 

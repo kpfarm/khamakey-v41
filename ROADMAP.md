@@ -52,9 +52,11 @@ Flusso: rivenditore compila brief personalizzazione → ordine produzione KhamaK
 - [ ] Più automazioni prenotazione (coda approvazione, promemoria)
 - [ ] Sincronizzazione ordine blocchi editor ↔ stato salvato Supabase
 - [x] Migliorare UX catalogo (varianti, allergeni, disponibilità — modalità semplice v110)
-- [ ] Anteprima tablet/desktop più fedele al worker
+- [x] Anteprima tablet/desktop più fedele al worker (dock + modal device switch v113)
 
 ## Fase 2b — Editor Moments (parità UX Business)
+
+> **Ownership:** aggiornamenti Moments a carico di agente dedicato. Questo track resta in roadmap ma non è in scope del lavoro Business corrente.
 
 Obiettivo: stessa semplicità percepita dell'editor Business, adattata al contesto "pagina ricordo / evento".
 
@@ -230,6 +232,15 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-10 | Cursor | **v110 Moments**: dashboard organizzatore, email lettera al futuro, SQL v73, deploy Worker+Pages |
 | 2026-07-10 | Cursor | **v109**: anniversari Moments — cron Worker, email Resend, toggle editor |
 | 2026-07-10 | Cursor | **Deploy prod**: SQL v70/v71, Worker v108, Pages moments v108 |
+| 2026-07-10 | Cursor (Business) | **v117**: fix analytics (`dispositivo` + RPC v74), order_sent, consenso cookie click, UI refresh |
+| 2026-07-10 | Cursor (Business) | **v116**: wizard collaudo NFC guidato (apri → prova → chip pronto) |
+| 2026-07-10 | Cursor (Business) | **v115**: guida Google Maps, collaudo in checklist, prova prenotazione |
+| 2026-07-10 | Cursor | **v114**: guida recensioni in Azioni, checklist prenotazioni, prova prenotazione, QR/ordine in save bar |
+| 2026-07-10 | Cursor | **v113**: anteprima dock smartphone/tablet, prenotazioni semplificate, prova ordine con carrello demo |
+| 2026-07-10 | Cursor | **v112**: QR scaricabile, guida recensioni Google, pulsante «Prova ordine» |
 | 2026-07-10 | Cursor | **v111**: rimosso pagamento online/link statici; wizard 3 passaggi post-categoria; coach catalogo |
 | 2026-07-10 | Cursor | **v110**: catalogo semplificato (quick add, tag rapidi, avanzate in accordion) + tutorial animato ordini NFC |
 | 2026-07-10 | Cursor | **v109**: editor Business — barra «Pagina pronta», Apri pagina finale, logo/copertina semplificati, conferma salvataggio cloud |
+| 2026-07-11 | Claude Code | **Audit sicurezza + fix**: SQL v75 (PIN Moments non espone più `state` a prescindere dal PIN, RLS `platform_webhook_events`, `business_page_i18n`), v76 (rate limiting Postgres); firma webhook Resend/PayPal; CSP `pages/_headers` + pagine pubbliche Worker. **Non committato, non deployato, SQL non applicata** — vedi `KHAMAKEY_OS/PROJECT_STATE.md` |
+| 2026-07-11 | Codex | **Follow-up Moments beta**: PIN lockout per slug + visitatore, Worker passa `p_visitor_key`, rate limit leggero su `/event`, CSP Worker allineata per CSS pubblico. **Non committato, non deployato, SQL non applicata** |
+| 2026-07-11 | Claude Code | **Review follow-up Codex** (verificato ok, nessuna regressione) + **SQL v77**: pulizia periodica automatica `moment_pin_attempts`/`platform_rate_limits`, agganciata al cron giornaliero esistente. Aggiunto avviso ordine deploy obbligatorio (SQL prima del Worker) in `PROJECT_STATE.md`. **Non committato, non deployato** |

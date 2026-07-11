@@ -29,3 +29,31 @@
 \i khamakey-moments-fulfillment-v62.sql
 \echo 'v63 admin business rls'
 \i khamakey-admin-business-rls-v63.sql
+\echo 'v64 sales channels'
+\i khamakey-moments-sales-channels-v64.sql
+\echo 'v65 shopify live flag'
+\i khamakey-moment-catalog-shopify-live-v65.sql
+\echo 'v66 integrations i18n'
+\i khamakey-integrations-i18n-v66.sql
+\echo 'v67 shopify email stripe'
+\i khamakey-shopify-email-stripe-v67.sql
+\echo 'v68 reseller network'
+\i khamakey-reseller-network-v68.sql
+\echo 'v69 business i18n'
+\i khamakey-business-i18n-v69.sql
+\echo 'v70 rsvp'
+\i khamakey-moments-rsvp-v70.sql
+\echo 'v71 guestbook'
+\i khamakey-moments-guestbook-v71.sql
+\echo 'v72 anniversaries'
+\i khamakey-moments-anniversaries-v72.sql
+\echo 'v73 letter unlock'
+\i khamakey-moments-letter-unlock-v73.sql
+\echo 'v74 business analytics rpc'
+\i khamakey-business-analytics-v74.sql
+\echo 'v75 security hardening (pin, rls webhook events, i18n pubblico)'
+\i khamakey-security-hardening-v75.sql
+\echo 'v76 rate limiting generico'
+\i khamakey-rate-limit-v76.sql
+\echo 'v77 pulizia periodica rate limiting'
+\i khamakey-rate-limit-cleanup-v77.sql

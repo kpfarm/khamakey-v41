@@ -19,6 +19,7 @@ bucket_name = "khamakey-media"
 # VISITOR_SALT
 # RESEND_API_KEY          (opzionale, per prenotazioni email)
 # RESEND_FROM_EMAIL       (opzionale)
+# RESEND_WEBHOOK_SECRET   (whsec_... dalla dashboard Resend — verifica firma webhook Svix)
 # SHOPIFY_SHOP_DOMAIN     (es. dj0wgt-0g.myshopify.com)
 # SHOPIFY_CLIENT_ID       (Dev dashboard → Credenziali)
 # SHOPIFY_CLIENT_SECRET   (shpss_... — anche per webhook HMAC)
@@ -27,6 +28,7 @@ bucket_name = "khamakey-media"
 # PAYPAL_CLIENT_ID          (Sprint F)
 # PAYPAL_CLIENT_SECRET
 # PAYPAL_WEBHOOK_ID
+# PAYPAL_ENV               (opzionale: "sandbox" in test, default live)
 # OPENAI_API_KEY          (Sprint G — traduzioni Business)
 # OPENAI_MODEL            (opzionale, default gpt-4o-mini)
 # SUPABASE_SERVICE_ROLE_KEY (opzionale, log webhook in DB)

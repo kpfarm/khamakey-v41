@@ -24,10 +24,20 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 18 | `khamakey-shopify-email-stripe-v67.sql` | Email ordine con codici NFC, ingest Stripe checkout |
 | 19 | `khamakey-reseller-network-v68.sql` | Rete rivenditori a grado, listini B2B, storico consegne, RPC provvigioni multilivello |
 | 20 | `khamakey-business-i18n-v69.sql` | Traduzioni pagine Business (`business_page_i18n`, impostazioni internazionali) |
+| 21 | `khamakey-moments-rsvp-v70.sql` | RSVP Moments: raccolta risposte strutturata |
+| 22 | `khamakey-moments-guestbook-v71.sql` | Libro degli ospiti Moments |
+| 23 | `khamakey-moments-anniversaries-v72.sql` | Anniversari Moments (email automatiche) |
+| 24 | `khamakey-moments-letter-unlock-v73.sql` | Notifica apertura lettera al futuro |
+| 25 | `khamakey-business-analytics-v74.sql` | RPC `get_business_analytics` per editor Business (conteggi aggregati) |
+| 26 | `khamakey-security-hardening-v75.sql` | Fix audit: `get_public_moment` non espone più `state` con PIN errato/assente, rate limit tentativi PIN per slug + visitatore, RLS su `platform_webhook_events`, `business_page_i18n` pubblico solo per aziende con i18n abilitato |
+| 27 | `khamakey-rate-limit-v76.sql` | `check_rate_limit()` generico (Postgres, zero infra nuova) usato dal Worker su RSVP, guestbook, prenotazioni, upload media, traduzioni OpenAI |
+| 28 | `khamakey-rate-limit-cleanup-v77.sql` | `cleanup_rate_limit_tables()` — pulizia righe scadute da `moment_pin_attempts`/`platform_rate_limits`, agganciata al cron giornaliero esistente nel Worker |
 
-Se hai già applicato versioni precedenti, esegui solo i file mancanti.
+Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 
-**Stato produzione (2026-07-09):** v64–v68 applicati; **v69 da applicare** (traduzioni pagine Business).
+**`khamakey-integrations-i18n-v66-production.sql` non è nella sequenza.** È una patch storica applicata a mano nel SQL Editor di Supabase quando su produzione `platform_integrations`/`platform_payment_transactions` risultavano già create fuori sequenza. `khamakey-integrations-i18n-v66.sql` è già completo e idempotente (crea quelle tabelle solo se assenti) e la copre interamente: non serve applicare entrambe. Il file `-production` resta nel repo solo come traccia storica — non eseguirlo di nuovo.
+
+**Stato produzione (2026-07-11):** `apply-all.psql` ora include l'intera catena v37→v74 (mancavano v64–v73). Resta da confermare direttamente su Supabase quali versioni risultano già applicate al progetto `cuxlwaocjqwzluycznyp` — questo file non ha visibilità sullo schema live.
 
 ## Supabase SQL Editor
 

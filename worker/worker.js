@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v110-moment-editor-dashboard";
+const WORKER_VERSION = "v117-business-analytics";
 
 export default {
   async fetch(request, env, ctx) {
@@ -102,7 +102,8 @@ export default {
   async scheduled(event, env, ctx) {
     ctx.waitUntil(Promise.all([
       runMomentAnniversaryJob(env).catch(error => console.error("moment anniversaries cron", error)),
-      runMomentLetterUnlockJob(env).catch(error => console.error("moment letter unlock cron", error))
+      runMomentLetterUnlockJob(env).catch(error => console.error("moment letter unlock cron", error)),
+      runRateLimitCleanupJob(env).catch(error => console.error("rate limit cleanup cron", error))
     ]));
   }
 };
@@ -147,9 +148,11 @@ async function handlePublicPage(request, env, ctx, slug) {
 async function handleMomentPage(request, env, ctx, slug) {
   const url = new URL(request.url);
   const pin = String(url.searchParams.get("pin") || "");
+  const momentVisitor = await visitorId(request, env.VISITOR_SALT || "khamakey");
   const rows = await rpc(env, "get_public_moment", {
     p_slug: slug,
-    p_pin_hash: pin ? await momentPinHash(slug, pin) : null
+    p_pin_hash: pin ? await momentPinHash(slug, pin) : null,
+    p_visitor_key: momentVisitor
   });
   const page = rows?.[0];
   if (!page) {
@@ -178,6 +181,10 @@ async function handleEvent(request, env) {
   if (!ALLOWED_EVENTS.has(eventType) || !businessId) {
     return cors(json({ error: "Evento non valido" }, 400));
   }
+  const eventVisitor = await visitorId(request, env.VISITOR_SALT || "khamakey");
+  if (!await checkRateLimit(env, `event:${businessId}:${eventVisitor}`, 120, 15)) {
+    return tooManyRequests();
+  }
   await track(env, request, businessId, eventType, String(body.source || "public_page"), body.metadata || {});
   return cors(json({ ok: true }));
 }
@@ -202,6 +209,11 @@ async function handleBooking(request, env) {
   const fields = state.fields || {};
   const recipient = validEmail(fields.email) ? String(fields.email).trim() : "";
   if (!recipient) return cors(json({ error: "Email attività non configurata" }, 400));
+
+  const bookingVisitor = await visitorId(request, env.VISITOR_SALT || "khamakey");
+  if (!await checkRateLimit(env, `booking:${businessId}:${bookingVisitor}`, 5, 15)) {
+    return tooManyRequests();
+  }
 
   let resendId = "";
   if (env.RESEND_API_KEY) {
@@ -249,7 +261,8 @@ async function handleMomentRsvp(request, env) {
   }
 
   const pinHash = pin ? await momentPinHash(slug, pin) : null;
-  const rows = await rpc(env, "get_public_moment", { p_slug: slug, p_pin_hash: pinHash });
+  const rsvpVisitor = await visitorId(request, env.VISITOR_SALT || "khamakey");
+  const rows = await rpc(env, "get_public_moment", { p_slug: slug, p_pin_hash: pinHash, p_visitor_key: rsvpVisitor });
   const page = rows?.[0];
   if (!page || !page.pin_valid) {
     return cors(json({ error: "Pagina non valida" }, 404));
@@ -257,6 +270,10 @@ async function handleMomentRsvp(request, env) {
 
   const ingestKey = env.WEBHOOK_INGEST_KEY || env.ANALYTICS_INGEST_KEY;
   if (!ingestKey) return cors(json({ error: "Servizio RSVP non configurato" }, 503));
+
+  if (!await checkRateLimit(env, `rsvp:${slug}:${rsvpVisitor}`, 5, 15)) {
+    return tooManyRequests();
+  }
 
   try {
     const result = await rpc(env, "submit_moment_rsvp", {
@@ -278,7 +295,8 @@ async function handleMomentGuestbookList(request, env, url) {
   if (!slug) return cors(json({ error: "Slug obbligatorio" }, 400));
 
   const pinHash = pin ? await momentPinHash(slug, pin) : null;
-  const rows = await rpc(env, "get_public_moment", { p_slug: slug, p_pin_hash: pinHash });
+  const guestbookVisitor = await visitorId(request, env.VISITOR_SALT || "khamakey");
+  const rows = await rpc(env, "get_public_moment", { p_slug: slug, p_pin_hash: pinHash, p_visitor_key: guestbookVisitor });
   const page = rows?.[0];
   if (!page || !page.pin_valid) return cors(json({ error: "Pagina non valida" }, 404));
 
@@ -303,12 +321,17 @@ async function handleMomentGuestbookSubmit(request, env) {
   }
 
   const pinHash = pin ? await momentPinHash(slug, pin) : null;
-  const rows = await rpc(env, "get_public_moment", { p_slug: slug, p_pin_hash: pinHash });
+  const guestbookVisitor = await visitorId(request, env.VISITOR_SALT || "khamakey");
+  const rows = await rpc(env, "get_public_moment", { p_slug: slug, p_pin_hash: pinHash, p_visitor_key: guestbookVisitor });
   const page = rows?.[0];
   if (!page || !page.pin_valid) return cors(json({ error: "Pagina non valida" }, 404));
 
   const ingestKey = env.WEBHOOK_INGEST_KEY || env.ANALYTICS_INGEST_KEY;
   if (!ingestKey) return cors(json({ error: "Servizio non configurato" }, 503));
+
+  if (!await checkRateLimit(env, `guestbook:${slug}:${guestbookVisitor}`, 5, 15)) {
+    return tooManyRequests();
+  }
 
   try {
     const result = await rpc(env, "submit_moment_guestbook", {
@@ -354,6 +377,27 @@ async function rpc(env, name, body) {
   if (!response.ok) throw new Error(`Supabase RPC ${name}: ${response.status}`);
   const text = await response.text();
   return text ? JSON.parse(text) : null;
+}
+
+// Rate limiting su Postgres (check_rate_limit, sql/khamakey-rate-limit-v76.sql): niente infra nuova.
+// Fail-open: se il limiter stesso non risponde, non blocchiamo il servizio per questo.
+async function checkRateLimit(env, key, maxAttempts, windowMinutes, lockMinutes) {
+  try {
+    const allowed = await rpc(env, "check_rate_limit", {
+      p_key: key,
+      p_max_attempts: maxAttempts,
+      p_window_minutes: windowMinutes,
+      p_lock_minutes: lockMinutes ?? null
+    });
+    return allowed !== false;
+  } catch (error) {
+    console.error("check_rate_limit", error);
+    return true;
+  }
+}
+
+function tooManyRequests() {
+  return cors(json({ error: "Troppe richieste. Riprova tra qualche minuto." }, 429));
 }
 
 const MEDIA_LIMITS = {
@@ -473,6 +517,9 @@ async function handleMediaUpload(request, env) {
     if (!jwt) return cors(json({ error: "Accesso non autorizzato." }, 401));
     const user = await supabaseUser(env, jwt);
     if (!user?.email) return cors(json({ error: "Sessione non valida." }, 401));
+    if (!await checkRateLimit(env, `media-upload:${user.email}`, 30, 60)) {
+      return tooManyRequests();
+    }
 
     const form = await request.formData();
     const file = form.get("file");
@@ -659,6 +706,7 @@ function renderSnapshotPage(page, origin, env = {}, locale = "it") {
   const className = String(snapshot.className || "phone-preview-inner").replace(/[^a-zA-Z0-9 _-]/g, "");
   const style = String(snapshot.style || "").replace(/[^a-zA-Z0-9:#;().,% _-]/g, "");
   const pagesBase = String(env.PAGES_ASSET_BASE || "https://khamakey-app.pages.dev").replace(/\/$/, "");
+  const showCookieBanner = fields.tCookie !== false;
   return `<!doctype html>
 <html lang="${attr(locale)}">
 <head>
@@ -674,11 +722,25 @@ const businessId=${JSON.stringify(page.business_id)};
 const pageSlug=${JSON.stringify(page.slug || "")};
 const eventUrl=${JSON.stringify(origin + "/event")};
 const bookingUrl=${JSON.stringify(origin + "/booking")};
-const eventForElement=el=>el.closest(".brand-action-whatsapp")?"click_whatsapp":el.closest(".brand-action-call")?"click_phone":el.closest(".brand-action-maps")?"click_maps":el.closest(".brand-action-google")?"click_reviews":el.closest("[data-booking-submit]")?"click_booking":el.closest("[data-add-cart]")?"add_to_cart":el.closest("[data-product-detail]")?"click_catalog":"";
+const showCookieBanner=${JSON.stringify(showCookieBanner)};
+const consentKey="kk_analytics_"+businessId;
+function analyticsAllowed(){
+  if(!showCookieBanner) return true;
+  try{return localStorage.getItem(consentKey)==="1";}catch(e){return false;}
+}
+function trackEvent(type){
+  if(!type||!analyticsAllowed()) return;
+  fetch(eventUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({business_id:businessId,event_type:type,source:"public_page"})}).catch(()=>{});
+}
+const eventForElement=el=>el.closest(".brand-action-whatsapp")?"click_whatsapp":el.closest(".brand-action-call")?"click_phone":el.closest(".brand-action-maps")?"click_maps":el.closest(".brand-action-google")?"click_reviews":el.closest("[data-booking-submit]")?"click_booking":el.closest("[data-add-cart]")?"add_to_cart":el.closest("[data-product-detail]")?"click_catalog":el.closest("[data-send-order]")?"order_sent":"";
 document.addEventListener("click",event=>{
   const jump=event.target.closest("[data-jump]");
   if(jump){document.getElementById(jump.dataset.jump)?.scrollIntoView({behavior:"smooth"});return}
-  if(event.target.closest("[data-cookie-accept]")){event.target.closest("[data-cookie-box]")?.remove();return}
+  if(event.target.closest("[data-cookie-accept]")){
+    try{localStorage.setItem(consentKey,"1");}catch(e){}
+    event.target.closest("[data-cookie-box]")?.remove();
+    return;
+  }
   const booking=event.target.closest("[data-booking-submit]");
   if(booking&&booking.dataset.bookingChannel==="resend"){
     event.preventDefault();
@@ -696,7 +758,7 @@ document.addEventListener("click",event=>{
     return;
   }
   const type=eventForElement(event.target);
-  if(type) fetch(eventUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({business_id:businessId,event_type:type,source:"public_page"})}).catch(()=>{});
+  if(type) trackEvent(type);
 });
 </script>
 </body>
@@ -1239,6 +1301,10 @@ function momentPageScript(state, ordered = [], hasCounter = false, slug = "") {
   syncNavState();
 })();` : "";
   return `(function(){
+var momentPin=(new URLSearchParams(location.search).get("pin")||"").trim();
+if(momentPin&&history.replaceState){
+  try{history.replaceState(null,"",location.pathname+location.hash);}catch(e){}
+}
 var reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 ${navScript}
 function reveal(node,delay){if(!node)return;setTimeout(function(){node.classList.add("on")},delay||0);}
@@ -1334,7 +1400,7 @@ document.querySelectorAll("[data-rsvp-form]").forEach(function(form){
         if(val){lines.push(field.label+": "+val);customPayload[field.id]=val;}
       });
     }catch(err){}
-    var pin=new URLSearchParams(location.search).get("pin")||"";
+    var pin=momentPin;
     var payload={
       slug:"${momentSlug}",
       pin:pin,
@@ -1368,7 +1434,7 @@ document.querySelectorAll("[data-guestbook-slug]").forEach(function(section){
     }).join("");
   }
   function loadMessages(){
-    var pin=new URLSearchParams(location.search).get("pin")||"";
+    var pin=momentPin;
     var url="/api/moment/guestbook?slug="+encodeURIComponent(slug)+(pin?"&pin="+encodeURIComponent(pin):"");
     fetch(url).then(function(res){return res.json();}).then(function(data){if(data&&data.ok)paintMessages(data.messages||[]);}).catch(function(){});
   }
@@ -1377,7 +1443,7 @@ document.querySelectorAll("[data-guestbook-slug]").forEach(function(section){
     form.addEventListener("submit",function(e){
       e.preventDefault();
       var fd=new FormData(form);
-      var pin=new URLSearchParams(location.search).get("pin")||"";
+      var pin=momentPin;
       var payload={
         slug:slug,
         pin:pin,
@@ -2040,8 +2106,37 @@ function cors(response) {
   return new Response(response.body, { status: response.status, headers });
 }
 
+// Pagine pubbliche renderizzate dal Worker (/p/, /m/): stessa famiglia di header di
+// pages/_headers, con una CSP dedicata (qui non serve esm.sh, servono gli embed YouTube/Spotify).
+const PUBLIC_PAGE_CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://khamakey-app.pages.dev",
+  "font-src 'self' https://fonts.gstatic.com",
+  "img-src 'self' data: blob: https://img.youtube.com",
+  "media-src 'self' blob:",
+  "connect-src 'self'",
+  "frame-src https://www.youtube.com https://open.spotify.com",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'self'",
+  "upgrade-insecure-requests"
+].join("; ");
+
 function html(body, status = 200, extra = {}) {
-  return new Response(body, { status, headers: { "Content-Type": "text/html;charset=utf-8", ...extra } });
+  return new Response(body, {
+    status,
+    headers: {
+      "Content-Type": "text/html;charset=utf-8",
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "X-Frame-Options": "SAMEORIGIN",
+      "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+      "Content-Security-Policy": PUBLIC_PAGE_CSP,
+      ...extra
+    }
+  });
 }
 
 function json(body, status = 200) {
@@ -2810,6 +2905,9 @@ async function handleBusinessInternationalize(request, env) {
     if (!await verifyBusinessOwner(env, jwt, businessId)) {
       return cors(json({ error: "Non puoi modificare questa attività." }, 403));
     }
+    if (!await checkRateLimit(env, `i18n:${businessId}`, 10, 60)) {
+      return tooManyRequests();
+    }
 
     const strings = body?.strings && typeof body.strings === "object"
       ? body.strings
@@ -2897,6 +2995,10 @@ function stripeWebhookConfigured(env) {
 
 function paypalConfigured(env) {
   return Boolean(env.PAYPAL_CLIENT_ID && env.PAYPAL_CLIENT_SECRET);
+}
+
+function paypalWebhookConfigured(env) {
+  return Boolean(env.PAYPAL_CLIENT_ID && env.PAYPAL_CLIENT_SECRET && env.PAYPAL_WEBHOOK_ID);
 }
 
 function resendConfigured(env) {
@@ -3129,6 +3231,90 @@ async function verifyStripeWebhook(rawBody, signatureHeader, secret) {
   return signatures.some(sig => timingSafeEqual(sig, expected));
 }
 
+// PayPal non firma con un semplice HMAC locale: la verifica richiede una chiamata autenticata
+// alla sua stessa API (verify-webhook-signature). https://developer.paypal.com/api/rest/webhooks/
+function paypalApiBase(env) {
+  return env.PAYPAL_ENV === "sandbox" ? "https://api-m.sandbox.paypal.com" : "https://api-m.paypal.com";
+}
+
+async function paypalAccessToken(env) {
+  const response = await fetch(`${paypalApiBase(env)}/v1/oauth2/token`, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${btoa(`${env.PAYPAL_CLIENT_ID}:${env.PAYPAL_CLIENT_SECRET}`)}`,
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: "grant_type=client_credentials"
+  });
+  if (!response.ok) throw new Error(`PayPal oauth ${response.status}`);
+  const data = await response.json();
+  return data.access_token;
+}
+
+async function verifyPayPalWebhook(request, webhookEvent, env) {
+  if (!env.PAYPAL_WEBHOOK_ID) return false;
+  const transmissionId = request.headers.get("paypal-transmission-id") || "";
+  const transmissionTime = request.headers.get("paypal-transmission-time") || "";
+  const certUrl = request.headers.get("paypal-cert-url") || "";
+  const authAlgo = request.headers.get("paypal-auth-algo") || "";
+  const transmissionSig = request.headers.get("paypal-transmission-sig") || "";
+  if (!transmissionId || !transmissionTime || !certUrl || !authAlgo || !transmissionSig) return false;
+
+  const accessToken = await paypalAccessToken(env);
+  const response = await fetch(`${paypalApiBase(env)}/v1/notifications/verify-webhook-signature`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      transmission_id: transmissionId,
+      transmission_time: transmissionTime,
+      cert_url: certUrl,
+      auth_algo: authAlgo,
+      transmission_sig: transmissionSig,
+      webhook_id: env.PAYPAL_WEBHOOK_ID,
+      webhook_event: webhookEvent
+    })
+  });
+  if (!response.ok) return false;
+  const result = await response.json().catch(() => ({}));
+  return result?.verification_status === "SUCCESS";
+}
+
+// Resend firma i webhook con lo standard Svix: svix-id/svix-timestamp/svix-signature.
+// https://resend.com/docs/dashboard/webhooks/verify-webhooks-requests
+async function verifyResendWebhook(request, rawBody, secret) {
+  if (!secret) return false;
+  const svixId = request.headers.get("svix-id") || "";
+  const svixTimestamp = request.headers.get("svix-timestamp") || "";
+  const svixSignature = request.headers.get("svix-signature") || "";
+  if (!svixId || !svixTimestamp || !svixSignature) return false;
+
+  const timestamp = Number(svixTimestamp);
+  const age = Math.floor(Date.now() / 1000) - timestamp;
+  if (!Number.isFinite(age) || age > 300 || age < -300) return false;
+
+  const secretBody = secret.startsWith("whsec_") ? secret.slice(6) : secret;
+  const secretBytes = Uint8Array.from(atob(secretBody), char => char.charCodeAt(0));
+  const key = await crypto.subtle.importKey(
+    "raw",
+    secretBytes,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signedContent = `${svixId}.${svixTimestamp}.${rawBody}`;
+  const digest = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(signedContent));
+  const expected = btoa(String.fromCharCode(...new Uint8Array(digest)));
+
+  const provided = svixSignature
+    .split(" ")
+    .map(part => part.split(",")[1])
+    .filter(Boolean);
+  return provided.some(sig => timingSafeEqual(sig, expected));
+}
+
 function shouldSendMomentOrderEmail(result, payload) {
   if (!result?.ok) return false;
   if (result.activation_email_sent) return false;
@@ -3234,22 +3420,37 @@ async function handlePayPalWebhook(request, env) {
     return json({ error: "JSON non valido." }, 400);
   }
 
-  const eventType = payload?.event_type || payload?.event_type || "unknown";
+  const eventType = payload?.event_type || "unknown";
   const externalId = payload?.id || payload?.resource?.id || null;
 
-  if (!paypalConfigured(env)) {
-    await logWebhookEvent(env, "paypal", eventType, externalId, { note: "paypal not configured" }, "skipped");
-    return json({ ok: true, skipped: true, reason: "paypal_not_configured" });
+  if (!paypalWebhookConfigured(env)) {
+    await logWebhookEvent(env, "paypal", eventType, externalId, { note: "paypal webhook not configured" }, "skipped");
+    return json({ ok: true, skipped: true, reason: "paypal_webhook_not_configured" });
   }
+
+  let verified = false;
+  try {
+    verified = await verifyPayPalWebhook(request, payload, env);
+  } catch (error) {
+    console.error("verifyPayPalWebhook", error);
+  }
+  if (!verified) return json({ error: "Firma PayPal non valida." }, 401);
 
   await logWebhookEvent(env, "paypal", eventType, externalId, payload, "received");
   return json({ ok: true, received: true, type: eventType });
 }
 
 async function handleResendWebhook(request, env) {
+  if (!env.RESEND_WEBHOOK_SECRET) {
+    return json({ error: "RESEND_WEBHOOK_SECRET non configurata nel Worker." }, 503);
+  }
+  const rawBody = await request.text();
+  if (!await verifyResendWebhook(request, rawBody, env.RESEND_WEBHOOK_SECRET)) {
+    return json({ error: "Firma webhook non valida." }, 401);
+  }
   let payload = {};
   try {
-    payload = await request.json();
+    payload = JSON.parse(rawBody);
   } catch {
     return json({ error: "JSON non valido." }, 400);
   }
@@ -3264,12 +3465,13 @@ async function handleMomentAnniversariesCron(request, env) {
   const headerKey = request.headers.get("x-khamakey-cron-key") || "";
   const body = request.method === "POST" ? await request.json().catch(() => ({})) : {};
   const provided = String(body.ingest_key || headerKey || "").trim();
-  if (!ingestKey || provided !== ingestKey) {
+  if (!ingestKey || !timingSafeEqual(provided, ingestKey)) {
     return json({ error: "Non autorizzato" }, 401);
   }
   const result = await runMomentAnniversaryJob(env, body.day || null);
   const letter = await runMomentLetterUnlockJob(env, body.day || null);
-  return json({ anniversaries: result, letter_unlock: letter });
+  const cleanup = await runRateLimitCleanupJob(env);
+  return json({ anniversaries: result, letter_unlock: letter, rate_limit_cleanup: cleanup });
 }
 
 async function runMomentAnniversaryJob(env, dayOverride = null) {
@@ -3415,6 +3617,12 @@ async function runMomentLetterUnlockJob(env, dayOverride = null) {
   }
 
   return { ok: true, day, due: rows.length, sent, failed };
+}
+
+async function runRateLimitCleanupJob(env) {
+  const ingestKey = env.WEBHOOK_INGEST_KEY || env.ANALYTICS_INGEST_KEY;
+  if (!ingestKey) return { ok: false, error: "ingest_key_missing" };
+  return rpc(env, "cleanup_rate_limit_tables", { p_ingest_key: ingestKey });
 }
 
 async function sendResendEmail(env, { to, subject, html, text, tags = [] }) {

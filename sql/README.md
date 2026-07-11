@@ -32,6 +32,7 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 26 | `khamakey-security-hardening-v75.sql` | Fix audit: `get_public_moment` non espone più `state` con PIN errato/assente, rate limit tentativi PIN per slug + visitatore, RLS su `platform_webhook_events`, `business_page_i18n` pubblico solo per aziende con i18n abilitato |
 | 27 | `khamakey-rate-limit-v76.sql` | `check_rate_limit()` generico (Postgres, zero infra nuova) usato dal Worker su RSVP, guestbook, prenotazioni, upload media, traduzioni OpenAI |
 | 28 | `khamakey-rate-limit-cleanup-v77.sql` | `cleanup_rate_limit_tables()` — pulizia righe scadute da `moment_pin_attempts`/`platform_rate_limits`, agganciata al cron giornaliero esistente nel Worker |
+| 29 | `khamakey-pin-ambiguity-fix-v78.sql` | **Fix urgente**: `get_public_moment` falliva (HTTP 500) su ogni evento con PIN attivo per ambiguità colonna `slug` tra output e tabella `moment_pin_attempts`. Applicato in produzione 2026-07-11, verificato con smoke test su evento reale |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 

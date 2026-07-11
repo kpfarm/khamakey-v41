@@ -1,33 +1,33 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-11** (security hardening — vedi sotto, **NON ANCORA DEPLOYATO**)
+> Ultimo aggiornamento: **2026-07-11** (security hardening — **DEPLOYATO e verificato in produzione**)
 
 ---
 
-## ⚠️ Modifiche non deployate (2026-07-11, Claude Code + follow-up Codex)
+## ✅ Security hardening deployato (2026-07-11)
 
-Audit di sicurezza + fix applicati **solo ai file del repo**: nessun `git commit`, nessun `wrangler deploy`, nessuna SQL applicata su Supabase. Prima che Codex/Cursor tocchino `worker/worker.js`, `sql/`, `pages/_headers`, leggere questo.
+Audit di sicurezza (Claude Code) + follow-up (Codex, Antigravity). Tutto committato su `main`, SQL v37→v78 applicata su Supabase (`cuxlwaocjqwzluycznyp`), Worker deployato (`v118-moments-premium-css`). Verificato con smoke test su un evento reale, non solo assunto.
 
-### 🔴 ORDINE DI DEPLOY OBBLIGATORIO — non invertire
+### 🔴 Incidente in produzione, risolto in giornata
 
-Il `worker.js` attuale chiama `get_public_moment` passando **sempre 3 argomenti** (incluso `p_visitor_key`, aggiunto da Codex in v75). Su Supabase **non è applicato nulla** di v75/v76 al momento.
+`get_public_moment` (v75, versione Codex) aveva un bug reale: colonna `slug` ambigua tra output della funzione e tabella `moment_pin_attempts` → **HTTP 500 su ogni pagina Moments con PIN attivo** (RSVP, guestbook, page view inclusi), dal momento in cui v75 è stata applicata stamattina fino alla scoperta via smoke test nel pomeriggio. Fix: `sql/khamakey-pin-ambiguity-fix-v78.sql` (`#variable_conflict use_column`), applicato e verificato — pagina PIN-gated ora risponde 401 con form PIN, nessun contenuto trapelato, RSVP risponde 404 corretto invece di 500. **Lezione**: da ora, ogni migrazione che tocca `get_public_moment` o simili va testata con uno slug reale prima di considerarla chiusa, non solo con `execute_sql` su input sintetici.
 
-1. **Prima**: `sql/apply-all.psql` su Supabase (include v75 con la funzione a 3 argomenti + wrapper compatibile a 2)
-2. **Poi**: `wrangler deploy` del Worker da `worker/`
+### Cosa contiene l'hardening (in ordine di severità)
 
-Se si deploya il Worker **prima** della SQL, ogni pagina Moments pubblica (`/m/`, RSVP, guestbook, PIN gate) smette di rispondere fino a quando la SQL non viene applicata — l'RPC a 3 argomenti non esisterebbe ancora lato database. Verificare anche i secret Worker nuovi prima del deploy: `RESEND_WEBHOOK_SECRET`, opzionale `PAYPAL_ENV`.
-
-File modificati: `sql/apply-all.psql`, `sql/README.md`, `sql/khamakey-security-hardening-v75.sql` (nuovo, poi rifinito da Codex — lockout PIN per slug+visitatore), `sql/khamakey-rate-limit-v76.sql` (nuovo), `sql/khamakey-rate-limit-cleanup-v77.sql` (nuovo, Claude Code), `worker/worker.js`, `worker/wrangler.toml`, `worker/.env.example`, `pages/_headers`.
-
-Cosa contengono (in ordine di severità):
 - **`get_public_moment` non restituisce più `state`/titolo/indirizzo se il PIN è errato o assente** — prima li restituiva sempre, il PIN era solo un flag lato client. Nessun PIN esistente invalidato (stesso schema hash).
-- Rate limit lockout su tentativi PIN Moments per slug + visitatore (20/15min), su RSVP/guestbook/prenotazioni (5/15min), upload media (30/h), analytics pubblici (120/15min), traduzioni OpenAI (10/h) — tutto via Postgres, zero infra nuova. Pulizia automatica giornaliera (v77) agganciata al cron esistente, così le tabelle di rate-limit non crescono senza limite.
+- Rate limit lockout su tentativi PIN Moments per slug + visitatore (20/15min), su RSVP/guestbook/prenotazioni (5/15min), upload media (30/h), analytics pubblici (120/15min), traduzioni OpenAI (10/h) — tutto via Postgres, zero infra nuova. Pulizia automatica giornaliera (v77) agganciata al cron esistente.
 - RLS abilitata su `platform_webhook_events` (mancava); `business_page_i18n` pubblico ristretto alle sole aziende con i18n abilitato.
 - Firma webhook verificata per Resend (Svix) e PayPal (verify-webhook-signature); confronto chiave cron reso a tempo costante.
-- CSP aggiunta sia su `pages/_headers` sia sulle pagine pubbliche renderizzate dal Worker (`html()`), che prima non avevano alcun header di sicurezza.
+- CSP + HSTS aggiunte sia su `pages/_headers` sia sulle pagine pubbliche renderizzate dal Worker (`html()`), verificate live via header HTTP reali dopo il deploy.
 
-**Prima di deployare**, impostare i nuovi secret Worker: `RESEND_WEBHOOK_SECRET` (dashboard Resend), opzionale `PAYPAL_ENV=sandbox` in test. Poi: `sql/apply-all.psql` su Supabase (v75+v76 sono in coda, idempotenti) e `wrangler deploy` da `worker/`.
+### ⚠️ Trovato ma non ancora risolto: `platform_supported_locales` senza RLS
+
+L'advisory di sicurezza di Supabase segnala che `platform_supported_locales` (lingue it/en/fr/de/es) **non ha Row Level Security attiva** — chiunque con la anon key può leggere e scrivere su questa tabella senza restrizioni. Impatto basso (dati non sensibili, 5 righe di config), ma da chiudere. SQL di fix pronta, in attesa di conferma utente prima di applicarla (vedi conversazione 2026-07-11).
+
+### Secrets Worker ancora da impostare (non bloccanti)
+
+`RESEND_WEBHOOK_SECRET` (dashboard Resend → webhook → signing secret), opzionale `PAYPAL_ENV=sandbox` in test. Finché mancano, i relativi endpoint rispondono 503 invece di accettare payload non verificati (comportamento sicuro di default).
 
 ---
 
@@ -50,8 +50,8 @@ Cosa contengono (in ordine di severità):
 | **Admin** | v106 | Menu 4 intenti, modalità semplice, guide contestuali |
 | **Editor Business** | **v117** | Analytics affidabili (RPC v74), order_sent, consenso cookie click |
 | **Moments editor** | v110+ | Dashboard organizzatore — **agente dedicato** |
-| **Worker NFC** | **v118** | Restyling premium CSS Moments adattivo (matrimonio vs viaggi) |
-| **SQL Supabase** | **v77 (in coda, non applicato)** | v75 hardening PIN/RLS/i18n, v76 rate limiting, v77 pulizia periodica — vedi nota sopra |
+| **Worker NFC** | **v118** | Deployato — restyling CSS Moments + security hardening, verificato live |
+| **SQL Supabase** | **v78 (applicata e verificata)** | v75-v77 hardening/rate-limit, v78 fix urgente ambiguità colonna — vedi nota sopra |
 | **Prossima release Business** | **v118** | `editor.html` + `index.html` `?v=` + `buildPublicSnapshot().version` |
 
 ---
@@ -115,9 +115,8 @@ Cosa contengono (in ordine di severità):
 | 2 | `RESEND_API_KEY` da verificare in prod | Email ordini potrebbero non partire | `wrangler secret put` |
 | 3 | Documentazione sparsa tra chat e file root | Perdita contesto tra sessioni AI | **KhamaKey OS** (in corso) |
 | 4 | Skill Codex punta a path vecchi | Rischio deploy su cartella sbagliata | Specificare sempre root v41 |
-| 5 | SQL v75/v76 (security hardening) non applicate su Supabase | Fix PIN/RLS/rate-limit non attivi in prod | Eseguire `sql/apply-all.psql` |
-| 6 | `worker.js` modificato (PIN, rate limit, CSP, webhook) non deployato | Repo diverso da produzione live; **richiede v75 a 3 argomenti già applicata su Supabase, altrimenti rompe `/m/`, RSVP, guestbook** | SQL prima (`apply-all.psql`), poi `wrangler deploy`, dopo aver impostato `RESEND_WEBHOOK_SECRET` |
-| 7 | Modifiche 2026-07-11 non committate su git | Perse se qualcuno sovrascrive la working tree | Commit + push prima di far partire un altro agente |
+| 5 | `platform_supported_locales` senza RLS | Chiunque con anon key può leggere/scrivere la tabella lingue | SQL di fix pronta, in attesa di conferma utente |
+| 6 | `RESEND_WEBHOOK_SECRET` non ancora impostato | Webhook Resend risponde 503 finché non configurato (sicuro, non urgente) | `wrangler secret put RESEND_WEBHOOK_SECRET` |
 
 ---
 

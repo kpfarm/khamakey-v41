@@ -7,7 +7,13 @@
 
 ## ✅ Security hardening deployato (2026-07-11)
 
-Audit di sicurezza (Claude Code) + follow-up (Codex, Antigravity). Tutto committato su `main`, SQL v37→v78 applicata su Supabase (`cuxlwaocjqwzluycznyp`), Worker deployato (`v118-moments-premium-css`). Verificato con smoke test su un evento reale, non solo assunto.
+Audit di sicurezza (Claude Code) + follow-up (Codex, Antigravity). Tutto committato su `main`, SQL v37→v79 applicata su Supabase (`cuxlwaocjqwzluycznyp`), Worker + Pages deployati. Verificato con smoke test su un evento reale, non solo assunto.
+
+### ⚠️ Episodio CSP con agente concorrente (2026-07-11, risolto)
+
+Mentre questo lavoro era in corso, un agente concorrente (Antigravity) ha allargato `img-src`/`media-src` a wildcard `https:` in `worker.js`/`pages/_headers` per far passare un errore di caricamento immagini, committando direttamente (`ebaa1aa`). Investigato invece di annullare alla cieca: query sui dati reali (`business_public_pages`, `moment_pages`) ha confermato che alcune pagine hanno foto caricate su Supabase Storage prima della migrazione a R2 — motivo legittimo. Fix corretto: aggiunto solo `cuxlwaocjqwzluycznyp.supabase.co` (dominio specifico, verificato, commentato nel codice), rimosso il wildcard. Deployato e verificato.
+
+Da questo episodio: formalizzate in `CODEX-COLLAB.md` e `AGENTS.md` due **regole assolute** vincolanti per ogni agente presente e futuro — mai cancellare dati utente, mai indebolire un controllo di sicurezza esistente come effetto collaterale. Leggere prima di toccare `worker.js`, `sql/`, `pages/_headers`.
 
 ### 🔴 Incidente in produzione, risolto in giornata
 
@@ -55,7 +61,7 @@ Trovato dall'advisory di sicurezza di Supabase (non da nessun audit precedente):
 | **Editor Business** | **v117** | Analytics affidabili (RPC v74), order_sent, consenso cookie click |
 | **Moments editor** | v110+ | Dashboard organizzatore — **agente dedicato** |
 | **Worker NFC** | **v118** | Deployato — restyling CSS Moments + security hardening, verificato live |
-| **SQL Supabase** | **v78 (applicata e verificata)** | v75-v77 hardening/rate-limit, v78 fix urgente ambiguità colonna — vedi nota sopra |
+| **SQL Supabase** | **v79 (applicata e verificata)** | v75-v77 hardening/rate-limit, v78 fix urgente ambiguità colonna, v79 RLS locales — vedi nota sopra |
 | **Prossima release Business** | **v118** | `editor.html` + `index.html` `?v=` + `buildPublicSnapshot().version` |
 
 ---

@@ -1734,7 +1734,210 @@ body.nav-open{overflow:hidden}
   border:1.5px solid ${c.lineStrong}!important;
   box-shadow:0 8px 24px -6px rgba(17,32,65,.05)!important;
   background:rgba(255,255,255,.82)!important
-}`;
+}
+
+/* ==================== CATEGORY TEMPLATE OVERRIDES ==================== */
+
+/* 1. WEDDING / LOVE / ANNIVERSARY: Classico ed elegante */
+.moment-type-wedding .moment-card,
+.moment-type-love .moment-card,
+.moment-type-anniversary .moment-card,
+.moment-type-wedding .moment-counter,
+.moment-type-love .moment-counter,
+.moment-type-wedding .moment-countdown,
+.moment-type-love .moment-countdown,
+.moment-type-wedding .moment-quote-wrap,
+.moment-type-love .moment-quote-wrap,
+.moment-type-wedding .moment-signature,
+.moment-type-love .moment-signature {
+  border: 1px solid ${c.lineStrong}!important;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.7), 0 16px 36px -12px rgba(17,32,65,.08), inset 0 1px 0 rgba(255,255,255,.9)!important;
+}
+.moment-type-wedding .moment-letter,
+.moment-type-love .moment-letter,
+.moment-type-anniversary .moment-letter {
+  background: rgba(255, 248, 248, 0.88)!important;
+  border-radius: 20px!important;
+  border: 1px solid rgba(255, 182, 193, 0.4)!important;
+  border-left: 4px solid ${c.go}!important;
+  padding: 28px 24px!important;
+}
+.moment-type-wedding .moment-letter-heart,
+.moment-type-love .moment-letter-heart {
+  color: ${c.go}!important;
+  opacity: 0.22!important;
+  transform: scale(1.3);
+}
+
+/* 2. TRAVEL & ADVENTURE: Polaroid Scrapbook & Boarding Pass */
+.moment-type-travel .moment-journey-item,
+.moment-type-adventure .moment-journey-item {
+  background: #ffffff !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
+  padding: 12px 12px 24px 12px !important;
+  box-shadow: 0 10px 24px -8px rgba(0,0,0,0.12) !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  transition: transform 0.3s cubic-bezier(.21,1.02,.43,1.01);
+}
+.moment-type-travel .moment-journey-item:nth-child(odd),
+.moment-type-adventure .moment-journey-item:nth-child(odd) {
+  transform: rotate(-1.5deg);
+}
+.moment-type-travel .moment-journey-item:nth-child(even),
+.moment-type-adventure .moment-journey-item:nth-child(even) {
+  transform: rotate(1.8deg);
+}
+.moment-type-travel .moment-journey-item:hover,
+.moment-type-adventure .moment-journey-item:hover {
+  transform: translateY(-4px) rotate(0deg) scale(1.02) !important;
+  z-index: 2;
+  box-shadow: 0 16px 36px -10px rgba(0,0,0,0.18) !important;
+}
+.moment-type-travel .moment-journey-photo,
+.moment-type-adventure .moment-journey-photo {
+  width: 100% !important;
+  height: 200px !important;
+  object-fit: cover !important;
+  border-radius: 2px !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(0,0,0,0.05) !important;
+}
+.moment-type-travel .moment-journey-item::before,
+.moment-type-adventure .moment-journey-item::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: -24px !important;
+  width: 2px !important;
+  height: 24px !important;
+  border-left: 2px dashed ${c.go}88 !important;
+  background: transparent !important;
+}
+.moment-type-travel .moment-journey-item:first-child::before,
+.moment-type-adventure .moment-journey-item:first-child::before {
+  display: none !important;
+}
+.moment-type-travel .moment-journey-place,
+.moment-type-adventure .moment-journey-place {
+  font-family: ${f.display} !important;
+  font-weight: 700 !important;
+  font-size: 1.15rem !important;
+}
+.moment-type-travel .moment-place,
+.moment-type-adventure .moment-place {
+  border-radius: 6px !important;
+  border: 1px dashed ${c.go} !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  position: relative;
+  overflow: hidden;
+}
+.moment-type-travel .moment-place::after,
+.moment-type-adventure .moment-place::after {
+  content: "";
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background: ${c.surface};
+  border-radius: 50%;
+  border: 1px solid ${c.lineStrong};
+}
+
+/* 3. BABY & KIDS: Cloudland & Playful cloud-shapes */
+.moment-type-baby .moment-card,
+.moment-type-kids .moment-card,
+.moment-type-child .moment-card,
+.moment-type-baby .moment-counter,
+.moment-type-kids .moment-counter,
+.moment-type-baby .moment-countdown,
+.moment-type-kids .moment-countdown,
+.moment-type-baby .moment-quote-wrap,
+.moment-type-kids .moment-quote-wrap,
+.moment-type-baby .moment-signature,
+.moment-type-kids .moment-signature,
+.moment-type-baby .moment-rsvp-form,
+.moment-type-kids .moment-rsvp-form,
+.moment-type-baby .moment-guestbook-form,
+.moment-type-kids .moment-guestbook-form {
+  border-radius: 36px !important;
+  border: 2px dashed ${c.go}66 !important;
+  background: rgba(255,255,255,0.85) !important;
+  box-shadow: 0 16px 36px -12px ${c.go}12 !important;
+}
+.moment-type-baby .moment-card-icon,
+.moment-type-kids .moment-card-icon {
+  animation: kidsFloat 4s ease-in-out infinite;
+  background: ${c.go}18 !important;
+  border-radius: 50% !important;
+  border: 0 !important;
+}
+@keyframes kidsFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+.moment-type-baby input, .moment-type-baby textarea,
+.moment-type-kids input, .moment-type-kids textarea {
+  border-radius: 20px !important;
+}
+
+/* 4. BIRTHDAY & PARTY: Neon Glow & Confetti Shadows */
+.moment-type-birthday .moment-card,
+.moment-type-party .moment-card,
+.moment-type-graduation .moment-card,
+.moment-type-birthday .moment-counter,
+.moment-type-party .moment-counter,
+.moment-type-birthday .moment-countdown,
+.moment-type-party .moment-countdown,
+.moment-type-birthday .moment-quote-wrap,
+.moment-type-party .moment-quote-wrap,
+.moment-type-birthday .moment-signature,
+.moment-type-party .moment-signature {
+  box-shadow: 0 16px 40px -10px ${c.go}33, inset 0 1px 0 rgba(255,255,255,0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+}
+.moment-type-birthday .moment-countdown,
+.moment-type-party .moment-countdown {
+  animation: partyPulse 3.5s infinite alternate;
+}
+@keyframes partyPulse {
+  0% { box-shadow: 0 16px 40px -10px ${c.go}24, inset 0 1px 0 rgba(255,255,255,0.7) !important; }
+  100% { box-shadow: 0 16px 48px -4px ${c.go}44, inset 0 1px 0 rgba(255,255,255,0.7) !important; }
+}
+
+/* 5. MEMORIAL / REMEMBRANCE: Dignified Quiet Serenity */
+.moment-type-memorial .moment-card,
+.moment-type-remembrance .moment-card,
+.moment-type-memorial .moment-counter,
+.moment-type-remembrance .moment-counter,
+.moment-type-memorial .moment-countdown,
+.moment-type-remembrance .moment-countdown,
+.moment-type-memorial .moment-quote-wrap,
+.moment-type-remembrance .moment-quote-wrap,
+.moment-type-memorial .moment-signature,
+.moment-type-remembrance .moment-signature {
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.03) !important;
+  border: 1px solid ${c.line} !important;
+  border-radius: 12px !important;
+}
+.moment-type-memorial *, .moment-type-remembrance * {
+  animation: none !important;
+  text-shadow: none !important;
+}
+.moment-type-memorial .moment-card-icon,
+.moment-type-remembrance .moment-card-icon {
+  color: ${c.muted} !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+`;
 }
 
 const MOMENT_SECTION_ICONS = {

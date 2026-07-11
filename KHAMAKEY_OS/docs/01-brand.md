@@ -48,6 +48,12 @@ Per preservare l'estetica premium senza alterare la struttura HTML, le modifiche
 4.  **Bottoni e Campi di Input**:
     *   I campi di input non usano l'outline blu nativo del browser. All'attivazione (focus), mostrano un bordo coordinato con il colore di accento (`c.go`) e un anello di selezione sfumato (`box-shadow: 0 0 0 4px ${c.go}24`).
     *   Tutti i bottoni principali (`.moment-rsvp-submit`, `.moment-guestbook-submit`) hanno transizioni all'hover morbide (`transition: transform 0.28s cubic-bezier(.21,1.02,.43,1.01), box-shadow 0.28s cubic-bezier(.21,1.02,.43,1.01)`): si sollevano di `2px` con un lieve ingrandimento (`scale(1.01)`) e proiettano un'ombra luminosa del loro stesso colore di accento (`box-shadow: 0 14px 28px -4px ${c.go}44!important`).
+5.  **Stili Specifici per Categoria di Evento**:
+    *   *Wedding/Amore* (`wedding`, `love`): Le schede hanno un doppio bordo simulato da box-shadow bianche e oro per dare l'effetto di partecipazioni di pregio. Le lettere e le dediche hanno sfondi caldi color pesca.
+    *   *Travel/Adventure* (`travel`): Le tappe diventano polaroid asimmetriche inclinate alternatamente (`rotate(-1.5deg)` e `rotate(1.8deg)`). La linea della timeline diventa tratteggiata. Bottoni e posizioni geografiche assumono la forma di etichette da valigia (luggage tags).
+    *   *Baby/Kids* (`baby`, `kids`): Le card hanno angoli amplissimi (`border-radius: 36px`) e bordi a cucitura tratteggiata. Le icone oscillano dolcemente in verticale con un'animazione float.
+    *   *Birthday/Party* (`birthday`, `party`): Le card proiettano ombre neon del colore d'accento del tema per un'atmosfera festiva. Il conto alla rovescia pulsa gradualmente di intensità luminosa.
+    *   *Memorial/Remembrance* (`memorial`): Design rigidamente minimalista con sfondi solidi opachi, angoli ridotti a 12px, e assenza totale di animazioni e bagliori per rispetto dell'evento.
 
 ## Brand KhamaKey Business
 

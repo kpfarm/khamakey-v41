@@ -66,7 +66,7 @@ Trovato dall'advisory di sicurezza di Supabase (non da nessun audit precedente):
 | **Admin** | v106 | Menu 4 intenti, modalità semplice, guide contestuali |
 | **Editor Business** | **v117** | Analytics affidabili (RPC v74), order_sent, consenso cookie click |
 | **Moments editor** | v110+ | Dashboard organizzatore — **agente dedicato** |
-| **Worker NFC** | **v119** | Deployato — estetica premium glassmorphism + Ken Burns + glow hover, deployato |
+| **Worker NFC** | **v120** | Deployato — stili e layout dedicati per categoria di evento (Wedding, Travel polaroid, Baby cloud, Birthday neon, Memorial) |
 | **SQL Supabase** | **v79 (applicata e verificata)** | v75-v77 hardening/rate-limit, v78 fix urgente ambiguità colonna, v79 RLS locales — vedi nota sopra |
 | **Prossima release Business** | **v118** | `editor.html` + `index.html` `?v=` + `buildPublicSnapshot().version` |
 

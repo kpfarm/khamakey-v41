@@ -81,7 +81,11 @@ html.editor-embedded body{
   :not(.editor-embedded) .editor-preview-head span{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:800;color:var(--navy,#1B2A5E);}
   :not(.editor-embedded) .editor-preview-head small{display:block;font-size:.64rem;font-weight:700;color:var(--muted,#64748B);margin-top:2px;}
   :not(.editor-embedded) .editor-preview-expand{border:1px solid var(--border,#E2E8F0);background:white;color:var(--navy,#1B2A5E);border-radius:999px;padding:7px 12px;font:700 .7rem 'DM Sans',sans-serif;cursor:pointer;}
+  :not(.editor-embedded) .dock-device-switch{display:flex;gap:5px;margin-bottom:10px;flex-shrink:0;}
+  :not(.editor-embedded) .dock-device-btn{border:1px solid var(--border,#E2E8F0);background:white;color:var(--muted,#64748B);border-radius:999px;padding:5px 10px;font:800 .64rem 'DM Sans',sans-serif;cursor:pointer;}
+  :not(.editor-embedded) .dock-device-btn.active{border-color:rgba(76,175,39,.45);background:#F8FFF5;color:var(--verde-dark,#2E7D32);}
   :not(.editor-embedded) .editor-dock-frame{margin:0 auto;zoom:.68;transform-origin:top center;flex:1;min-height:0;overflow:auto;}
+  :not(.editor-embedded) .editor-dock-frame.device-ipad-portrait{zoom:.42;width:768px;}
   :not(.editor-embedded) .editor-dock-frame .phone-preview-inner{height:min(780px,100%);border-radius:28px;box-shadow:0 24px 60px rgba(9,16,36,.16);}
   :not(.editor-embedded) .preview-fab{display:none!important;}
 }

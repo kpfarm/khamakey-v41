@@ -461,12 +461,12 @@ html,body{margin:0;min-height:100%;background:#EEF2F7;font-family:'DM Sans',sans
 .pub-profile-has-logo .pub-profile-copy{flex:1;min-width:0;padding:0;}
 .pub-profile-title-only .pub-profile-copy{width:100%;padding:0;}
 .hero-layout-social .pub-profile-copy h2{
-  font-family:var(--pub-title-font,'DM Sans',sans-serif)!important;font-size:1.42rem!important;
+  font-family:var(--pub-title-font,'DM Sans',sans-serif)!important;font-size:calc(1.42rem * var(--pub-title-scale,1))!important;
   line-height:1.12;color:var(--pub-text,var(--navy))!important;
   text-shadow:none!important;margin:0 0 4px;text-align:left;font-weight:800!important;letter-spacing:-.02em;
 }
 .pub-profile-title-only .pub-profile-copy h2{
-  font-size:1.72rem!important;text-align:center!important;
+  font-size:calc(1.72rem * var(--pub-title-scale,1))!important;text-align:center!important;
 }
 .hero-layout-social .pub-profile-copy p{
   font-size:.82rem;line-height:1.45;
@@ -495,7 +495,7 @@ html,body{margin:0;min-height:100%;background:#EEF2F7;font-family:'DM Sans',sans
   border:3px solid rgba(255,255,255,.82);
 }
 .pub-hero-brand h2{
-  font-family:var(--pub-title-font,'DM Sans',sans-serif)!important;font-size:1.78rem!important;
+  font-family:var(--pub-title-font,'DM Sans',sans-serif)!important;font-size:calc(1.78rem * var(--pub-title-scale,1))!important;
   line-height:1.08;margin:0 0 8px;font-weight:800;color:white;
   text-shadow:0 2px 12px rgba(0,0,0,.2);
 }

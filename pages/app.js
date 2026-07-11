@@ -273,16 +273,39 @@ async function ensureWorkspace(user){
   return workspaceBusiness;
 }
 
-async function getAnalytics(){
-  if(!currentBusiness) return {};
-  const { data,error } = await supabase
-    .from("analytics_events")
-    .select("tipo,visitor_id,device,source,created_at")
-    .eq("business_id",currentBusiness.id)
-    .order("created_at",{ascending:false})
-    .limit(1000);
-  if(error) throw error;
-  const rows = data || [];
+const ANALYTICS_INTERACTION_TYPES = [
+  "click_whatsapp","click_phone","click_maps","click_reviews",
+  "click_booking","click_catalog","add_to_cart","order_sent"
+];
+
+function normalizeAnalyticsPayload(payload={}){
+  const data = typeof payload === "string" ? JSON.parse(payload) : payload;
+  const devices = data.devices && typeof data.devices === "object" && !Array.isArray(data.devices)
+    ? data.devices
+    : {};
+  const sources = data.sources && typeof data.sources === "object" && !Array.isArray(data.sources)
+    ? data.sources
+    : {};
+  const lastEvents = Array.isArray(data.lastEvents)
+    ? data.lastEvents
+    : Array.isArray(data.last_events)
+      ? data.last_events
+      : [];
+  return {
+    ...data,
+    devices,
+    sources,
+    lastEvents:lastEvents.map(row=>({
+      type:row.type || row.tipo || "",
+      device:row.device || row.dispositivo || "",
+      source:row.source || "",
+      created_at:row.created_at || ""
+    })),
+    updatedAt:data.updatedAt || data.updated_at || new Date().toISOString()
+  };
+}
+
+function buildAnalyticsFromRows(rows=[]){
   const now = Date.now();
   const days30 = 30 * 24 * 60 * 60 * 1000;
   const recentRows = rows.filter(row => {
@@ -292,19 +315,20 @@ async function getAnalytics(){
   const count = (type,list=rows) => list.filter(row=>row.tipo===type).length;
   const uniqueVisitors = list => new Set(list.filter(row=>row.tipo==="page_view").map(row=>row.visitor_id).filter(Boolean)).size;
   const deviceCounts = rows.reduce((acc,row)=>{
-    const key = row.device || "unknown";
+    if(row.tipo !== "page_view") return acc;
+    const key = row.dispositivo || "unknown";
     acc[key] = (acc[key] || 0) + 1;
     return acc;
   },{});
   const sourceCounts = rows.reduce((acc,row)=>{
+    if(!["page_view","nfc_tap"].includes(row.tipo)) return acc;
     const key = row.source || "unknown";
     acc[key] = (acc[key] || 0) + 1;
     return acc;
   },{});
-  const interactions = ["click_whatsapp","click_phone","click_maps","click_reviews","click_booking","click_catalog","add_to_cart","order_sent"]
-    .reduce((sum,type)=>sum + count(type),0);
+  const interactions = ANALYTICS_INTERACTION_TYPES.reduce((sum,type)=>sum + count(type),0);
   const visits = uniqueVisitors(rows);
-  return {
+  return normalizeAnalyticsPayload({
     nfc:count("nfc_tap"),
     pageViews:count("page_view"),
     visits,
@@ -329,17 +353,37 @@ async function getAnalytics(){
       booking:count("click_booking",recentRows),
       catalog:count("click_catalog",recentRows),
       addToCart:count("add_to_cart",recentRows),
-      orders:count("order_sent",recentRows)
+      orders:count("order_sent",recentRows),
+      interactions:ANALYTICS_INTERACTION_TYPES.reduce((sum,type)=>sum + count(type,recentRows),0)
     },
     devices:deviceCounts,
     sources:sourceCounts,
     lastEvents:rows.slice(0,12).map(row=>({
       type:row.tipo,
-      device:row.device || "",
+      device:row.dispositivo || "",
       source:row.source || "",
       created_at:row.created_at || ""
     }))
-  };
+  });
+}
+
+async function getAnalytics(){
+  if(!currentBusiness) return {};
+  const { data:rpcData,error:rpcError } = await supabase.rpc("get_business_analytics",{
+    p_business_id:currentBusiness.id
+  });
+  if(!rpcError && rpcData){
+    return normalizeAnalyticsPayload(rpcData);
+  }
+  if(rpcError) console.warn("get_business_analytics RPC non disponibile, uso fallback client",rpcError);
+  const { data,error } = await supabase
+    .from("analytics_events")
+    .select("tipo,visitor_id,dispositivo,source,created_at")
+    .eq("business_id",currentBusiness.id)
+    .order("created_at",{ascending:false})
+    .limit(1000);
+  if(error) throw error;
+  return buildAnalyticsFromRows(data || []);
 }
 
 async function sendStateToEditor(){
@@ -361,9 +405,15 @@ async function refreshAnalytics(){
   if(!currentBusiness || !editorFrame.contentWindow) return;
   try{
     const analytics = await getAnalytics();
-    editorFrame.contentWindow.postMessage({type:"khamakey:analytics",analytics},messageOrigin);
+    editorFrame.contentWindow.postMessage({type:"khamakey:analytics",analytics,ok:true},messageOrigin);
   }catch(error){
     console.error(error);
+    editorFrame.contentWindow.postMessage({
+      type:"khamakey:analytics",
+      analytics:{},
+      ok:false,
+      error:error?.message || "Analytics non disponibili"
+    },messageOrigin);
   }
 }
 
@@ -377,7 +427,7 @@ async function loadApplication(){
     currentUser = userData.user;
     currentBusiness = await ensureWorkspace(currentUser);
     userEmail.textContent = currentUser.email || "";
-    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=107`;
+    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=117`;
     if(editorFrame.getAttribute("src") !== editorUrl){
       editorFrame.src = editorUrl;
     }
@@ -434,6 +484,9 @@ function queueSave(state,immediate=false){
   saveTimer = setTimeout(async()=>{
     try{
       await saveDraft(pendingState);
+      if(editorFrame.contentWindow){
+        editorFrame.contentWindow.postMessage({type:"khamakey:save-ok"},messageOrigin);
+      }
     }catch(error){
       console.error(error);
     }
@@ -549,6 +602,7 @@ window.addEventListener("message",event=>{
   if(event.data?.type === "khamakey:save") queueSave(event.data.state,true);
   if(event.data?.type === "khamakey:public-snapshot") queueSave(event.data.state,true);
   if(event.data?.type === "khamakey:logout") supabase.auth.signOut();
+  if(event.data?.type === "khamakey:refresh-analytics") refreshAnalytics();
 });
 setInterval(refreshAnalytics,15000);
 

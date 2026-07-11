@@ -167,6 +167,53 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .btn-icon:hover{opacity:1;}
 .btn-add-row{display:flex;align-items:center;gap:6px;background:none;border:1.5px dashed var(--border-strong);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;width:100%;justify-content:center;transition:border-color .2s,color .2s;margin-top:6px;}
 .btn-add-row:hover{border-color:var(--verde);color:var(--verde-dark);}
+.catalog-type-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.catalog-type-pill{border:1.5px solid var(--border-strong);background:var(--surface);color:var(--text);border-radius:999px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:800;cursor:pointer;transition:border-color .2s,background .2s,color .2s;}
+.catalog-type-pill:hover{border-color:var(--verde);color:var(--verde-dark);}
+.catalog-type-pill.active{border-color:var(--verde);background:var(--verde-light);color:var(--verde-dark);}
+.catalog-quick-add{display:grid;grid-template-columns:1fr 110px auto;gap:8px;align-items:center;margin-bottom:14px;padding:12px;border-radius:12px;border:1px dashed rgba(76,175,39,.35);background:linear-gradient(180deg,#F8FFF5,#fff);}
+.catalog-quick-add input{border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:.84rem;background:white;}
+.catalog-quick-add button{border:0;background:var(--verde-dark);color:white;border-radius:9px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:900;cursor:pointer;white-space:nowrap;}
+.catalog-empty{text-align:center;padding:18px 14px;border-radius:12px;border:1px dashed var(--border-strong);background:var(--bg);margin-bottom:12px;}
+.catalog-empty strong{display:block;color:var(--navy);font-size:.86rem;margin-bottom:6px;}
+.catalog-empty span{font-size:.76rem;color:var(--muted);line-height:1.45;}
+.menu-row-simple{grid-template-columns:1fr 88px 32px;}
+.menu-row-simple .menu-row-main{gap:6px;}
+.menu-row-desc{font-size:.76rem!important;color:var(--muted)!important;border-bottom:1px solid var(--border)!important;padding-bottom:4px!important;}
+.catalog-quick-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.catalog-tag{border:1px solid var(--border);background:white;color:var(--muted);border-radius:999px;padding:4px 9px;font-family:'DM Sans',sans-serif;font-size:.66rem;font-weight:800;cursor:pointer;transition:border-color .15s,background .15s,color .15s;}
+.catalog-tag.active{border-color:rgba(76,175,39,.45);background:var(--verde-light);color:var(--verde-dark);}
+.menu-row-extra summary{font-size:.7rem;font-weight:800;color:var(--muted);cursor:pointer;list-style:none;}
+.menu-row-extra summary::-webkit-details-marker{display:none;}
+.menu-row-advanced{display:grid;grid-template-columns:70px 1fr;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.menu-row-advanced .menu-row-main{grid-column:2;}
+.catalog-advanced-wrap{margin-top:12px;}
+.catalog-advanced-wrap>summary{font-size:.8rem;font-weight:800;color:var(--navy);cursor:pointer;padding:10px 0;}
+.catalog-advanced-wrap>summary::-webkit-details-marker{display:none;}
+.catalog-advanced-body{display:grid;gap:12px;margin-top:4px;}
+.order-flow-demo{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center;margin:10px 0 12px;}
+.ofd-phone{width:120px;height:210px;border-radius:22px;border:3px solid var(--navy);background:linear-gradient(180deg,#1B2A5E,#0f1733);padding:8px 6px 10px;box-shadow:0 14px 28px rgba(27,42,94,.22);position:relative;overflow:hidden;}
+.ofd-notch{position:absolute;top:5px;left:50%;transform:translateX(-50%);width:42px;height:5px;border-radius:999px;background:rgba(255,255,255,.22);}
+.ofd-screen{position:relative;height:100%;border-radius:14px;background:#F4F7FB;overflow:hidden;}
+.ofd-scene{position:absolute;inset:0;padding:10px 8px;display:grid;align-content:start;gap:6px;opacity:0;transform:translateY(8px);animation:ofdScene 9s infinite;}
+.ofd-scene-2{animation-delay:3s;}
+.ofd-scene-3{animation-delay:6s;}
+.ofd-chip{height:22px;border-radius:8px;background:white;border:1px solid #E5EAF1;}
+.ofd-chip.wide{width:78%;}
+.ofd-chip.green{background:linear-gradient(90deg,var(--verde),var(--verde-dark));border:0;}
+.ofd-chip.cart{background:#E8F5E9;border-color:rgba(76,175,39,.3);}
+.ofd-wa{display:inline-flex;align-items:center;gap:4px;align-self:end;margin-top:auto;padding:6px 8px;border-radius:999px;background:#25D366;color:white;font-size:.52rem;font-weight:900;}
+@keyframes ofdScene{0%,28%{opacity:1;transform:translateY(0);}33%,100%{opacity:0;transform:translateY(-6px);}}
+.ofd-labels{display:grid;gap:6px;}
+.ofd-label{font-size:.7rem;font-weight:800;color:#64748B;padding:6px 10px;border-radius:10px;border:1px solid transparent;animation:ofdLabel 9s infinite;}
+.ofd-label-2{animation-delay:3s;}
+.ofd-label-3{animation-delay:6s;}
+@keyframes ofdLabel{0%,28%{color:var(--navy);border-color:rgba(76,175,39,.35);background:#F8FFF5;}33%,100%{color:#64748B;border-color:transparent;background:transparent;}}
+.pub-order-guide.pub-order-guide-animated .step-num{animation:pubStepPulse 2.4s ease-in-out infinite;}
+.pub-order-guide.pub-order-guide-animated span:nth-child(1) .step-num{animation-delay:0s;}
+.pub-order-guide.pub-order-guide-animated span:nth-child(3) .step-num{animation-delay:.8s;}
+.pub-order-guide.pub-order-guide-animated span:nth-child(5) .step-num{animation-delay:1.6s;}
+@keyframes pubStepPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);box-shadow:0 0 0 4px rgba(76,175,39,.18);}}
 .media-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
 .media-remove{border:1px solid #F3C8C8;background:#FFF5F5;color:var(--red);border-radius:9px;padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
 .media-remove .ui-ico{width:15px;height:15px;}
@@ -306,6 +353,30 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .wizard-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;border-top:1px solid #E8EEF5;padding-top:14px;}
 .wizard-small{font-size:.74rem;color:var(--muted);}
 .wizard-skip{border:1px solid #DDE5EF;background:white;color:var(--navy);border-radius:12px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-weight:900;cursor:pointer;}
+.setup-flow-modal{position:fixed;inset:0;background:rgba(9,16,36,.72);z-index:700;display:none;align-items:center;justify-content:center;padding:18px;}
+.setup-flow-modal.open{display:flex;}
+.setup-flow-shell{width:min(520px,100%);background:white;border-radius:22px;box-shadow:0 28px 90px rgba(9,16,36,.34);padding:22px;position:relative;}
+.setup-flow-steps{display:flex;gap:6px;margin-bottom:16px;}
+.setup-flow-step{flex:1;text-align:center;font-size:.66rem;font-weight:900;color:var(--muted);padding:8px 6px;border-radius:10px;background:#F4F7FB;border:1px solid #E5EAF1;}
+.setup-flow-step.active{color:var(--verde-dark);background:var(--verde-light);border-color:rgba(76,175,39,.35);}
+.setup-flow-step.done{color:var(--navy);background:#EEF4FF;}
+.setup-flow-shell h2{font-family:'DM Sans',sans-serif;font-size:1.35rem;line-height:1.15;color:var(--navy);margin:0 0 6px;}
+.setup-flow-shell p{color:var(--muted);font-size:.82rem;line-height:1.5;margin:0 0 16px;}
+.setup-flow-field{margin-bottom:14px;}
+.setup-flow-field label{display:block;font-size:.72rem;font-weight:800;color:var(--navy);margin-bottom:6px;}
+.setup-flow-field input{width:100%;border:1.5px solid #E1E7EF;border-radius:12px;padding:11px 13px;font-family:'DM Sans',sans-serif;font-size:.9rem;}
+.setup-flow-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+.setup-flow-primary{border:0;background:var(--verde-dark);color:white;border-radius:12px;padding:11px 16px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:900;cursor:pointer;}
+.setup-flow-secondary{border:1px solid #DDE5EF;background:white;color:var(--navy);border-radius:12px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:800;cursor:pointer;}
+.setup-flow-skip{margin-top:10px;font-size:.72rem;color:var(--muted);text-align:center;}
+.setup-flow-skip button{border:0;background:none;color:var(--navy);font-weight:800;cursor:pointer;text-decoration:underline;font-family:'DM Sans',sans-serif;}
+.collaudo-flow-kicker{font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--verde-dark);margin-bottom:6px;}
+.catalog-coach{margin:0 0 12px;padding:12px;border-radius:14px;border:1px solid rgba(27,42,94,.1);background:linear-gradient(135deg,#EEF4FF,#F8FFF5);}
+.catalog-coach strong{display:block;color:var(--navy);font-size:.8rem;margin-bottom:6px;}
+.catalog-coach-mini{display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:center;}
+.catalog-coach-mini .ofd-phone{width:72px;height:128px;border-width:2px;padding:6px 4px 8px;}
+.catalog-coach-mini .ofd-screen{border-radius:10px;}
+.catalog-coach-mini p{margin:0;font-size:.72rem;line-height:1.4;color:#64748B;}
 
 /* ═══ PREVIEW PUBBLICA ═══ */
 .preview-modal{position:fixed;inset:0;background:rgba(9,16,36,.58);z-index:700;display:none;align-items:center;justify-content:center;padding:18px;}
@@ -404,15 +475,15 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .pub-logo-float{width:var(--pub-profile-logo-size,calc(var(--pub-logo-size,76px) * 1.35));height:var(--pub-profile-logo-size,calc(var(--pub-logo-size,76px) * 1.35));margin:0;border-radius:22%;border:3px solid var(--pub-block-bg,#fff);box-shadow:0 8px 22px rgba(0,0,0,.14);flex:0 0 auto;}
 .pub-profile-has-logo .pub-profile-copy{flex:1;min-width:0;padding:0;}
 .pub-profile-title-only .pub-profile-copy{width:100%;padding:0;}
-.hero-layout-social .pub-profile-copy h2{font-family:var(--pub-title-font,'DM Sans',sans-serif)!important;font-size:1.42rem!important;line-height:1.12;color:var(--pub-text,var(--navy))!important;text-shadow:none!important;margin:0 0 4px;text-align:left;font-weight:800!important;letter-spacing:-.02em;}
-.pub-profile-title-only .pub-profile-copy h2{font-size:1.72rem!important;text-align:center!important;}
+.hero-layout-social .pub-profile-copy h2{font-family:var(--pub-title-font,'DM Sans',sans-serif)!important;font-size:calc(1.42rem * var(--pub-title-scale,1))!important;line-height:1.12;color:var(--pub-text,var(--navy))!important;text-shadow:none!important;margin:0 0 4px;text-align:left;font-weight:800!important;letter-spacing:-.02em;}
+.pub-profile-title-only .pub-profile-copy h2{font-size:calc(1.72rem * var(--pub-title-scale,1))!important;text-align:center!important;}
 .hero-layout-social .pub-profile-copy p{font-size:.82rem;line-height:1.45;color:var(--pub-muted,#64748B)!important;opacity:1;text-shadow:none!important;max-width:none;text-align:left;font-weight:500;}
 .pub-profile-title-only .pub-profile-copy p{text-align:center!important;max-width:320px;margin:0 auto;}
 .hero-layout-social .pub-profile-copy .pub-hero-eyebrow{margin-bottom:8px;border-color:rgba(27,42,94,.1);background:rgba(27,42,94,.05);color:var(--pub-primary,var(--navy));}
 .pub-hero-brand{min-height:auto;padding:32px 20px 28px;align-items:center;justify-content:center;text-align:center;}
 .pub-hero-brand .pub-brand-stack{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;width:100%;max-width:360px;gap:0;}
 .pub-logo-hero{width:calc(var(--pub-logo-size,76px) * 1.9);height:calc(var(--pub-logo-size,76px) * 1.9);margin:0 0 14px;border-radius:24%;border:3px solid rgba(255,255,255,.82);}
-.pub-hero-brand h2{font-family:var(--pub-title-font,'DM Sans',sans-serif)!important;font-size:1.78rem!important;line-height:1.08;margin:0 0 8px;font-weight:800;color:white;text-shadow:0 2px 12px rgba(0,0,0,.2);}
+.pub-hero-brand h2{font-family:var(--pub-title-font,'DM Sans',sans-serif)!important;font-size:calc(1.78rem * var(--pub-title-scale,1))!important;line-height:1.08;margin:0 0 8px;font-weight:800;color:white;text-shadow:0 2px 12px rgba(0,0,0,.2);}
 .pub-hero-brand p{font-size:.88rem;line-height:1.46;opacity:.92;max-width:300px;margin:0 auto;font-weight:500;color:white;}
 .pub-hero-brand .pub-brand-category{margin-top:4px;margin-bottom:8px;}
 .phone-preview-inner.hero-soft .pub-hero-brand{color:var(--navy);background:linear-gradient(145deg,#fff,#EEF8EA);}
@@ -455,6 +526,10 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .simple-color-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .simple-color-btn{display:flex;flex-direction:column;gap:8px;border:1px solid #E5EAF1;background:#F8FAFC;border-radius:12px;padding:12px;font-size:.78rem;font-weight:800;color:var(--navy);cursor:pointer;}
 .simple-color-btn input[type=color]{width:100%;height:44px;border:0;padding:0;background:transparent;cursor:pointer;}
+.size-preset-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
+.size-preset-btn{border:2px solid #E5EAF1;background:#F8FAFC;color:var(--navy);border-radius:999px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:800;cursor:pointer;min-width:72px;text-align:center;}
+.size-preset-btn.active{border-color:var(--verde);background:#F2FBEE;box-shadow:0 0 0 2px rgba(76,175,39,.12);}
+.size-preset-block{margin-top:14px;}
 .pub-map-card{border:1px solid #DDE5EF;background:white;border-radius:18px;overflow:hidden;margin-top:12px;box-shadow:0 8px 24px rgba(27,42,94,.06);}
 .pub-map-frame{position:relative;background:#EEF2F7;aspect-ratio:16/9;overflow:hidden;}
 .pub-map-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
@@ -678,6 +753,21 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .privacy-simple-row{display:flex;align-items:flex-start;gap:8px;font-size:.78rem;line-height:1.4;color:#334155;}
 .privacy-simple-row .ui-ico{width:16px;height:16px;color:var(--verde-dark);flex:0 0 auto;margin-top:1px;}
 .quick-start-item button{border:0;background:transparent;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer;width:100%;}
+.page-ready-head{border:1px solid rgba(76,175,39,.28);background:linear-gradient(180deg,#F8FFF5,#fff);border-radius:14px;padding:12px 14px;margin-bottom:12px;}
+.page-ready-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.page-ready-top strong{font-size:.88rem;color:var(--navy);}
+.page-ready-top span{font-size:.74rem;font-weight:800;color:var(--verde-dark);}
+.page-ready-bar{height:8px;border-radius:999px;background:#E8EEF5;overflow:hidden;margin-bottom:10px;}
+.page-ready-bar span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--verde),var(--verde-dark));transition:width .25s;}
+.page-ready-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.page-collaudo-hint{margin-top:10px;padding:10px 12px;border-radius:10px;background:#EEF4FF;border:1px solid rgba(27,42,94,.1);font-size:.72rem;line-height:1.45;color:var(--navy);}
+.page-collaudo-hint strong{display:block;margin-bottom:4px;font-size:.76rem;}
+.page-collaudo-hint button{border:0;background:none;color:var(--verde-dark);font-weight:800;cursor:pointer;text-decoration:underline;font-family:'DM Sans',sans-serif;padding:0;margin-left:4px;}
+.btn-page-open{border:0;background:var(--verde-dark);color:white;border-radius:10px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.btn-page-open:disabled{opacity:.45;cursor:not-allowed;}
+.save-actions{display:flex;align-items:center;gap:8px;}
+.btn-save-outline{border:1px solid rgba(255,255,255,.35);background:transparent;color:white;border-radius:8px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;}
+.btn-save-outline:disabled{opacity:.45;cursor:not-allowed;}
 .order-coach{margin:0 0 14px;padding:12px 14px;border-radius:14px;border:1px solid rgba(27,42,94,.12);background:linear-gradient(135deg,#EEF4FF,#F8FFF5);}
 .order-coach strong{display:block;color:var(--navy);font-size:.84rem;margin-bottom:4px;}
 .order-coach p{margin:0 0 10px;font-size:.76rem;line-height:1.45;color:#64748B;}
@@ -741,6 +831,12 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .account-public-card strong{display:block;font-family:'DM Sans',sans-serif;font-size:.92rem;color:var(--navy);margin-bottom:4px;}
 .account-public-card p{font-size:.78rem;color:var(--muted);margin:0 0 12px;line-height:1.45;}
 .account-public-actions{display:flex;flex-wrap:wrap;gap:8px;}
+.field-help-details{margin-top:8px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--bg);}
+.field-help-details summary{font-size:.74rem;font-weight:800;color:var(--navy);cursor:pointer;list-style:none;}
+.field-help-details summary::-webkit-details-marker{display:none;}
+.field-help-list{margin:10px 0 0;padding-left:18px;font-size:.74rem;line-height:1.55;color:var(--muted);}
+.field-help-list li{margin-bottom:6px;}
+.btn-qr-download{border:0;background:var(--navy);color:white;border-radius:10px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
 .account-close{position:absolute;top:14px;right:14px;background:white;border:0;border-radius:999px;width:38px;height:38px;cursor:pointer;box-shadow:var(--shadow-md);display:grid;place-items:center;color:var(--navy);}
 .billing-card{border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;background:#F8FAFC;}
 .billing-card strong{display:block;font-size:.82rem;color:var(--text);margin-bottom:4px;}
@@ -838,6 +934,10 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
   .menu-row input,.menu-row textarea{font-size:16px;}
   .menu-row textarea{font-size:.9rem;}
   .menu-row-price{grid-column:2/3;text-align:left;font-size:16px!important;}
+  .catalog-quick-add{grid-template-columns:1fr;gap:8px;}
+  .catalog-quick-add button{width:100%;}
+  .order-flow-demo{grid-template-columns:1fr;}
+  .ofd-phone{margin:0 auto;}
   .field-row{grid-template-columns:1fr;}
   .color-row{align-items:stretch;}
   .color-row input[type=text]{min-width:0;}
@@ -941,8 +1041,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
   .pub-doc-actions,.pub-wifi-actions{grid-template-columns:1fr;}
 }
 </style>
-<link rel="stylesheet" href="editor-ui.css?v=107">
-<script src="business-categories.js?v=107"></script>
+<link rel="stylesheet" href="editor-ui.css?v=117">
+<script src="business-categories.js?v=117"></script>
 </head>
 <body>
 <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
@@ -1057,10 +1157,23 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
       <div class="card quick-start-card">
         <div class="card-title"><svg class="ui-ico"><use href="#i-target"/></svg>Checklist rapida</div>
         <div class="order-coach" id="orderCoach" hidden>
-          <strong>La tua pagina in 3 mosse</strong>
-          <p>1. WhatsApp · 2. Una voce nel catalogo · 3. Salva. Poi tocca l’oggetto NFC e prova l’ordine.</p>
+          <strong>Come ordinano i tuoi clienti</strong>
+          <div class="order-flow-demo" aria-hidden="true">
+            <div class="ofd-phone"><span class="ofd-notch"></span><div class="ofd-screen">
+              <div class="ofd-scene ofd-scene-1"><span class="ofd-chip wide"></span><span class="ofd-chip"></span><span class="ofd-chip"></span><span class="ofd-chip green"></span></div>
+              <div class="ofd-scene ofd-scene-2"><span class="ofd-chip cart"></span><span class="ofd-chip"></span><span class="ofd-chip wide green"></span></div>
+              <div class="ofd-scene ofd-scene-3"><span class="ofd-chip"></span><span class="ofd-chip wide"></span><span class="ofd-wa">WhatsApp ✓</span></div>
+            </div></div>
+            <div class="ofd-labels">
+              <span class="ofd-label ofd-label-1">1 · Scegli dal catalogo</span>
+              <span class="ofd-label ofd-label-2">2 · Aggiungi al carrello</span>
+              <span class="ofd-label ofd-label-3">3 · Invia su WhatsApp</span>
+            </div>
+          </div>
+          <p>Il cliente tocca l’oggetto NFC, sceglie le voci e ti manda la richiesta pronta. Tu rispondi e confermi.</p>
           <button type="button" onclick="dismissOrderCoach()">Ok, ho capito</button>
         </div>
+        <div class="page-ready-head" id="pageReadyHead"></div>
         <ul class="quick-start-list" id="quickStartList"></ul>
       </div>
       <div class="card intl-hero-card" id="intlHeroCard">
@@ -1107,6 +1220,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
             <div class="media-actions">
               <button class="media-remove" type="button" id="copyPublicUrl"><svg class="ui-ico"><use href="#i-copy"/></svg>Copia link NFC</button>
               <button class="media-remove" type="button" id="openPublicUrl"><svg class="ui-ico"><use href="#i-eye"/></svg>Apri pagina</button>
+              <button class="btn-qr-download" type="button" id="downloadPublicQr"><svg class="ui-ico"><use href="#i-zap"/></svg>Scarica QR</button>
             </div>
             <input type="hidden" id="slug" value="tuonome">
             <div class="link-flow">
@@ -1144,26 +1258,28 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
           <label class="toggle"><input type="checkbox" id="showLogo" checked><span class="toggle-slider"></span></label>
         </div>
         <div class="field" style="margin-top:16px">
-          <label>Dimensione logo nella pagina pubblica</label>
-          <select id="pubLogoSize">
+          <label>Dimensione logo (avanzata)</label>
+          <select id="pubLogoSize" onchange="syncDisplaySizeFromFields()">
             <option value="small">Piccolo</option>
             <option value="medium" selected>Medio</option>
             <option value="large">Grande</option>
           </select>
+          <div class="field-hint">Per scegliere in modo semplice usa i pulsanti «Grandezza logo» in Colori e aspetto.</div>
         </div>
-        <div class="field">
-          <label>Adattamento logo</label>
-          <select id="pubLogoFit">
-            <option value="contain" selected>Mostra il logo intero</option>
-            <option value="cover">Riempi il riquadro</option>
-          </select>
-          <div class="field-hint">Usa “logo intero” per marchi e immagini verticali; “riempi” può tagliare i bordi.</div>
-        </div>
-        <div class="field">
-          <label for="pubLogoScale">Regolazione dimensione: <strong id="pubLogoScaleValue">100%</strong></label>
-          <input id="pubLogoScale" type="range" min="60" max="160" step="5" value="100" oninput="document.getElementById('pubLogoScaleValue').textContent=this.value+'%'">
-          <div class="field-hint">Riduci o ingrandisci il logo rispetto alla dimensione standard scelta.</div>
-        </div>
+        <details class="brand-advanced" style="margin-top:10px">
+          <summary>Altre opzioni logo</summary>
+          <div class="field" style="margin-top:12px">
+            <label>Adattamento logo</label>
+            <select id="pubLogoFit">
+              <option value="contain" selected>Mostra il logo intero</option>
+              <option value="cover">Riempi il riquadro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="pubLogoScale">Regolazione fine: <strong id="pubLogoScaleValue">100%</strong></label>
+            <input id="pubLogoScale" type="range" min="60" max="160" step="5" value="100" oninput="document.getElementById('pubLogoScaleValue').textContent=this.value+'%';syncDisplaySizeFromFields()">
+          </div>
+        </details>
         <div class="media-actions">
           <button class="media-remove" type="button" onclick="removeLogo()"><svg class="ui-ico"><use href="#i-trash"/></svg>Elimina logo</button>
         </div>
@@ -1192,46 +1308,49 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
               <option value="contain">Mostra immagine intera</option>
             </select>
           </div>
-          <div class="field">
-            <label>Tipo foto copertina</label>
-            <select id="pubCoverOrientation">
-              <option value="auto" selected>Automatico (rileva dal file)</option>
-              <option value="landscape">Orizzontale</option>
-              <option value="portrait">Verticale</option>
-            </select>
-          </div>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Posizione immagine</label>
-            <select id="pubCoverPosition">
-              <option value="top">In alto</option>
-              <option value="center" selected>Al centro</option>
-              <option value="bottom">In basso</option>
-            </select>
+        <div class="field-hint">Grandezza copertina: pulsanti Bassa/Media/Alta in «Colori e aspetto». Foto verticali → «immagine intera».</div>
+        <details class="brand-advanced" style="margin-top:10px">
+          <summary>Regolazioni avanzate copertina</summary>
+          <div class="field-row" style="margin-top:12px">
+            <div class="field">
+              <label>Tipo foto copertina</label>
+              <select id="pubCoverOrientation">
+                <option value="auto" selected>Automatico (rileva dal file)</option>
+                <option value="landscape">Orizzontale</option>
+                <option value="portrait">Verticale</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Posizione immagine</label>
+              <select id="pubCoverPosition">
+                <option value="top">In alto</option>
+                <option value="center" selected>Al centro</option>
+                <option value="bottom">In basso</option>
+              </select>
+            </div>
           </div>
-          <div class="field">
-            <label for="pubHeroHeight">Altezza copertina: <strong id="pubHeroHeightValue">340 px</strong></label>
-            <input id="pubHeroHeight" type="range" min="240" max="560" step="10" value="340" oninput="document.getElementById('pubHeroHeightValue').textContent=this.value+' px'">
+          <div class="field-row">
+            <div class="field">
+              <label for="pubHeroHeight">Altezza copertina: <strong id="pubHeroHeightValue">340 px</strong></label>
+              <input id="pubHeroHeight" type="range" min="240" max="560" step="10" value="340" oninput="document.getElementById('pubHeroHeightValue').textContent=this.value+' px';syncDisplaySizeFromFields()">
+            </div>
+            <div class="field">
+              <label for="pubCoverZoom">Zoom immagine: <strong id="pubCoverZoomValue">100%</strong></label>
+              <input id="pubCoverZoom" type="range" min="100" max="200" step="5" value="100" oninput="document.getElementById('pubCoverZoomValue').textContent=this.value+'%'">
+            </div>
           </div>
-        </div>
-        <div class="field-hint">Foto orizzontali: «riempi l’area». Foto verticali: «immagine intera» + tipo verticale per più spazio in altezza.</div>
-        <div class="field-row" style="margin-top:16px">
-          <div class="field">
-            <label for="pubCoverZoom">Zoom immagine: <strong id="pubCoverZoomValue">100%</strong></label>
-            <input id="pubCoverZoom" type="range" min="100" max="200" step="5" value="100" oninput="document.getElementById('pubCoverZoomValue').textContent=this.value+'%'">
+          <div class="field-row">
+            <div class="field">
+              <label for="pubCoverPositionX">Posizione orizzontale: <strong id="pubCoverPositionXValue">50%</strong></label>
+              <input id="pubCoverPositionX" type="range" min="0" max="100" step="5" value="50" oninput="document.getElementById('pubCoverPositionXValue').textContent=this.value+'%'">
+            </div>
+            <div class="field">
+              <label for="pubCoverPositionY">Posizione verticale: <strong id="pubCoverPositionYValue">50%</strong></label>
+              <input id="pubCoverPositionY" type="range" min="0" max="100" step="5" value="50" oninput="document.getElementById('pubCoverPositionYValue').textContent=this.value+'%'">
+            </div>
           </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label for="pubCoverPositionX">Posizione orizzontale: <strong id="pubCoverPositionXValue">50%</strong></label>
-            <input id="pubCoverPositionX" type="range" min="0" max="100" step="5" value="50" oninput="document.getElementById('pubCoverPositionXValue').textContent=this.value+'%'">
-          </div>
-          <div class="field">
-            <label for="pubCoverPositionY">Posizione verticale: <strong id="pubCoverPositionYValue">50%</strong></label>
-            <input id="pubCoverPositionY" type="range" min="0" max="100" step="5" value="50" oninput="document.getElementById('pubCoverPositionYValue').textContent=this.value+'%'">
-          </div>
-        </div>
+        </details>
         <div class="toggle-row">
           <div>
             <div class="toggle-label">Mostra nome attività nella hero</div>
@@ -1272,6 +1391,34 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
             <option value="simple" selected>Normale e leggibile</option>
             <option value="soft">Più morbido</option>
           </select>
+        </div>
+        <div class="size-preset-block">
+          <label class="simple-label">Grandezza logo</label>
+          <div class="size-preset-row" id="logoSizePresets">
+            <button type="button" class="size-preset-btn" data-logo-size="s" onclick="applyDisplaySize('logo','s')">Piccolo</button>
+            <button type="button" class="size-preset-btn active" data-logo-size="m" onclick="applyDisplaySize('logo','m')">Medio</button>
+            <button type="button" class="size-preset-btn" data-logo-size="l" onclick="applyDisplaySize('logo','l')">Grande</button>
+            <button type="button" class="size-preset-btn" data-logo-size="xl" onclick="applyDisplaySize('logo','xl')">Extra</button>
+          </div>
+          <input type="hidden" id="pubLogoDisplaySize" value="m">
+        </div>
+        <div class="size-preset-block">
+          <label class="simple-label">Grandezza titolo</label>
+          <div class="size-preset-row" id="titleSizePresets">
+            <button type="button" class="size-preset-btn active" data-title-size="normal" onclick="applyDisplaySize('title','normal')">Normale</button>
+            <button type="button" class="size-preset-btn" data-title-size="large" onclick="applyDisplaySize('title','large')">Grande</button>
+            <button type="button" class="size-preset-btn" data-title-size="xl" onclick="applyDisplaySize('title','xl')">Molto grande</button>
+          </div>
+          <input type="hidden" id="pubTitleSize" value="normal">
+        </div>
+        <div class="size-preset-block">
+          <label class="simple-label">Grandezza copertina</label>
+          <div class="size-preset-row" id="coverSizePresets">
+            <button type="button" class="size-preset-btn" data-cover-size="short" onclick="applyDisplaySize('cover','short')">Bassa</button>
+            <button type="button" class="size-preset-btn active" data-cover-size="medium" onclick="applyDisplaySize('cover','medium')">Media</button>
+            <button type="button" class="size-preset-btn" data-cover-size="tall" onclick="applyDisplaySize('cover','tall')">Alta</button>
+          </div>
+          <input type="hidden" id="pubCoverDisplaySize" value="medium">
         </div>
         <details class="brand-advanced">
           <summary>Altre opzioni colori e stile</summary>
@@ -1382,12 +1529,29 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         </div>
         <div class="field">
           <label>Link Google Maps</label>
-          <div class="field-hint">Da Google Maps → Condividi → Copia link</div>
           <input type="url" id="maps" placeholder="https://maps.google.com/...">
+          <details class="field-help-details">
+            <summary>Come copiare il link Google Maps</summary>
+            <ol class="field-help-list">
+              <li>Apri <strong>Google Maps</strong> e cerca la tua attività.</li>
+              <li>Tocca <strong>Condividi</strong> sulla scheda del locale.</li>
+              <li>Copia il link (es. <code>maps.app.goo.gl/...</code>).</li>
+              <li>Incollalo qui e attiva il pulsante Indicazioni in Azioni rapide.</li>
+            </ol>
+          </details>
         </div>
         <div class="field">
           <label>Link Recensioni Google</label>
           <input type="url" id="recensioni" placeholder="https://g.page/r/...">
+          <details class="field-help-details">
+            <summary>Come trovare il link recensioni Google</summary>
+            <ol class="field-help-list">
+              <li>Apri <strong>Google Maps</strong> e cerca la tua attività.</li>
+              <li>Tocca la scheda e scegli <strong>Recensioni</strong> → <strong>Condividi</strong>.</li>
+              <li>Copia il link (di solito inizia con <code>g.page/r/</code>).</li>
+              <li>Incollalo qui e attiva il pulsante Recensioni in Azioni rapide.</li>
+            </ol>
+          </details>
         </div>
       </div>
       <div class="card">
@@ -1436,6 +1600,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
           <div><div class="toggle-label">Mostra guida «Scegli → Carrello → WhatsApp»</div><div class="toggle-sub">Aiuta chi usa l’oggetto NFC per la prima volta</div></div>
           <label class="toggle"><input type="checkbox" id="showPublicOrderGuide" checked><span class="toggle-slider"></span></label>
         </div>
+        <button type="button" class="btn-add-row" id="tryOrderFlowBtn" style="margin-top:10px"><svg class="ui-ico"><use href="#i-eye"/></svg>Prova flusso ordine</button>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
           <button class="btn-add-row" type="button" onclick="applyOrderSimpleSetup()">Attiva tutto automaticamente</button>
           <button class="btn-add-row" type="button" onclick="goTo('menu')">Vai al catalogo</button>
@@ -1473,8 +1638,16 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         <div class="action-config" data-action-config="aIndicazioni">
           <div class="field">
             <label>Link Google Maps</label>
-            <div class="field-hint">Da Google Maps → Condividi → Copia link. Se vuoto, il pulsante porta alla sezione contatti.</div>
+            <div class="field-hint">Se vuoto, il pulsante porta alla sezione contatti.</div>
             <input type="url" data-sync-field="maps" placeholder="https://maps.google.com/...">
+            <details class="field-help-details">
+              <summary>Come copiare il link Google Maps</summary>
+              <ol class="field-help-list">
+                <li>Apri <strong>Google Maps</strong> e cerca la tua attività.</li>
+                <li>Tocca <strong>Condividi</strong> sulla scheda del locale.</li>
+                <li>Copia il link e incollalo qui.</li>
+              </ol>
+            </details>
           </div>
         </div>
         <div class="toggle-row">
@@ -1486,6 +1659,15 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
             <label>Link recensioni Google</label>
             <div class="field-hint">Inserisci il link diretto per lasciare una recensione.</div>
             <input type="url" data-sync-field="recensioni" placeholder="https://g.page/r/...">
+            <details class="field-help-details">
+              <summary>Come trovare il link recensioni Google</summary>
+              <ol class="field-help-list">
+                <li>Apri <strong>Google Maps</strong> e cerca la tua attività.</li>
+                <li>Tocca la scheda → <strong>Recensioni</strong> → <strong>Condividi</strong>.</li>
+                <li>Copia il link (di solito inizia con <code>g.page/r/</code>).</li>
+                <li>Incollalo qui e lascia attivo il pulsante Recensioni.</li>
+              </ol>
+            </details>
           </div>
         </div>
         <div class="toggle-row">
@@ -1510,8 +1692,10 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
           <div class="field-hint">Usa lo stesso numero WhatsApp indicato sopra. Ogni prodotto genera un messaggio già compilato.</div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-title"><svg class="ui-ico"><use href="#i-calendar"/></svg>Modulo prenotazione</div>
+      <div class="card order-ready-card">
+        <div class="card-title"><svg class="ui-ico"><use href="#i-calendar"/></svg>Prenotazioni</div>
+        <p class="field-hint" style="margin:0 0 12px;line-height:1.5">Richiesta, non conferma automatica: il cliente propone data/ora e tu rispondi. Di default via WhatsApp.</p>
+        <div class="order-ready-status" id="bookingReadyStatus"></div>
         <div class="field-row">
           <div class="field">
             <label>Titolo modulo</label>
@@ -1529,93 +1713,74 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
           </div>
         </div>
         <div class="field">
-          <label>Testo descrittivo</label>
+          <label>Testo per i clienti</label>
           <textarea id="bookingDesc" rows="2" placeholder="Scrivi cosa può richiedere il cliente...">Scegli una fascia disponibile e inviaci la richiesta. Ti confermeremo appena possibile.</textarea>
         </div>
         <div class="field-hint" style="font-size:.82rem;margin:0 0 12px;line-height:1.5">
-          Le fasce orarie disponibili si impostano nella sezione Orari. Il cliente potrà scegliere solo quelle fasce nel modulo pubblico.
+          Le fasce orarie si creano in <button type="button" class="btn-add-row" style="display:inline-flex;width:auto;margin:0;padding:4px 10px" onclick="setEditorHub('contenuti');goTo('orari')">Orari</button>. Attiva il pulsante Prenota in Home actions sopra.
         </div>
         <div class="toggle-row">
-          <div><div class="toggle-label">Richiedi data</div><div class="toggle-sub">Il cliente sceglie il giorno della prenotazione</div></div>
+          <div><div class="toggle-label">Richiedi data</div><div class="toggle-sub">Il cliente sceglie il giorno</div></div>
           <label class="toggle"><input type="checkbox" id="bookingUseDate" checked><span class="toggle-slider"></span></label>
         </div>
         <div class="toggle-row">
-          <div><div class="toggle-label">Richiedi fascia oraria</div><div class="toggle-sub">Usa le fasce create nella sezione Orari</div></div>
+          <div><div class="toggle-label">Richiedi fascia oraria</div><div class="toggle-sub">Usa le fasce create in Orari</div></div>
           <label class="toggle"><input type="checkbox" id="bookingUseSlot" checked><span class="toggle-slider"></span></label>
         </div>
-        <div class="toggle-row" style="margin-bottom:16px">
-          <div><div class="toggle-label">Numero persone / partecipanti</div><div class="toggle-sub">Utile per tavoli, eventi, visite o consulenze</div></div>
+        <div class="toggle-row" style="margin-bottom:12px">
+          <div><div class="toggle-label">Numero persone</div><div class="toggle-sub">Utile per tavoli, eventi o consulenze</div></div>
           <label class="toggle"><input type="checkbox" id="bookingUsePeople" checked><span class="toggle-slider"></span></label>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Invio richiesta</label>
-            <select id="bookingChannel">
-              <option value="whatsapp">WhatsApp</option>
-              <option value="email">Email (mailto)</option>
-              <option value="resend">Email automatica KhamaKey</option>
-            </select>
-            <div class="field-hint">«Email automatica» invia la richiesta all’email dell’attività tramite Cloudflare Worker + Resend. Richiede email attività configurata e Resend attivo sul worker.</div>
+        <details class="catalog-advanced-wrap">
+          <summary>Canale invio e opzioni avanzate</summary>
+          <div class="catalog-advanced-body">
+            <div class="field-row">
+              <div class="field">
+                <label>Invio richiesta</label>
+                <select id="bookingChannel">
+                  <option value="whatsapp">WhatsApp (consigliato)</option>
+                  <option value="email">Email (mailto)</option>
+                  <option value="resend">Email automatica KhamaKey</option>
+                </select>
+                <div class="field-hint">«Email automatica» richiede email attività + Resend attivo sul worker.</div>
+              </div>
+              <div class="field">
+                <label>Campi richiesti</label>
+                <select id="bookingRequired">
+                  <option value="nome_tel">Nome + telefono</option>
+                  <option value="nome_tel_email">Nome + telefono + email</option>
+                  <option value="completo">Dati completi + note</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Gestione richieste</label>
+                <select id="bookingAutomation">
+                  <option value="manual">Manuale: conferma da WhatsApp/email</option>
+                  <option value="request">Richiesta da approvare (notifica email)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Calendario Google</label>
+                <input type="email" id="bookingCalendarId" placeholder="Opzione futura" disabled>
+              </div>
+            </div>
           </div>
-          <div class="field">
-            <label>Campi richiesti</label>
-            <select id="bookingRequired">
-              <option value="nome_tel">Nome + telefono</option>
-              <option value="nome_tel_email">Nome + telefono + email</option>
-              <option value="completo">Dati completi + note</option>
-            </select>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Gestione calendario</label>
-            <select id="bookingAutomation">
-              <option value="manual">Manuale: conferma da WhatsApp/email</option>
-              <option value="request">Richiesta da approvare (notifica email)</option>
-            </select>
-            <div class="field-hint">Con «Email automatica KhamaKey» + approvazione manuale, la richiesta arriva già strutturata nella casella dell’attività. Il calendario Google resta in roadmap.</div>
-          </div>
-          <div class="field">
-            <label>Calendario Google</label>
-            <input type="email" id="bookingCalendarId" placeholder="Opzione futura" disabled>
-            <div class="field-hint">Non attivo in questa fase.</div>
-          </div>
-        </div>
+        </details>
+        <button type="button" class="btn-add-row" id="tryBookingFlowBtn" style="margin-top:10px"><svg class="ui-ico"><use href="#i-eye"/></svg>Prova prenotazione</button>
       </div>
       <div class="card">
-        <div class="card-title"><svg class="ui-ico"><use href="#i-list"/></svg>Carrello (opzioni extra)</div>
-        <div class="field-hint" style="margin-bottom:12px">Il flusso base è già attivo sopra. Qui puoi solo rifinire pagamento e carrello.</div>
+        <div class="card-title"><svg class="ui-ico"><use href="#i-list"/></svg>Carrello</div>
+        <div class="field-hint" style="margin-bottom:12px">Il cliente compone la richiesta e la invia su WhatsApp. Non è un pagamento automatico: tu confermi disponibilità, importo e modalità.</div>
         <div class="toggle-row">
           <div><div class="toggle-label">Carrello attivo</div><div class="toggle-sub">Più prodotti prima di inviare su WhatsApp</div></div>
           <label class="toggle"><input type="checkbox" id="tCart" checked><span class="toggle-slider"></span></label>
         </div>
         <div class="toggle-row">
-          <div><div class="toggle-label">Pagamento in contanti</div><div class="toggle-sub">Opzione nel checkout (ritiro o consegna)</div></div>
+          <div><div class="toggle-label">Opzione «contanti» nel messaggio</div><div class="toggle-sub">Il cliente può indicare la preferenza; il pagamento si concorda dopo</div></div>
           <label class="toggle"><input type="checkbox" id="payCash" checked><span class="toggle-slider"></span></label>
         </div>
-        <details class="cart-pay-advanced">
-          <summary>Pagamento online avanzato (opzionale)</summary>
-          <div class="toggle-row" style="margin-top:10px">
-            <div><div class="toggle-label">Mostra pulsante pagamento online</div><div class="toggle-sub">Solo se hai un link Stripe/SumUp/PayPal del tuo conto</div></div>
-            <label class="toggle"><input type="checkbox" id="payCard"><span class="toggle-slider"></span></label>
-          </div>
-          <div class="field-row" style="margin-top:12px">
-            <div class="field">
-              <label>Provider pagamento</label>
-              <select id="payProvider">
-                <option value="link">Link pagamento cliente</option>
-                <option value="stripe">Stripe</option>
-                <option value="sumup">SumUp</option>
-                <option value="nexi">Nexi</option>
-                <option value="paypal">PayPal</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Link pagamento</label>
-              <input type="url" id="payLink" placeholder="https://pay.tuocliente.it/...">
-            </div>
-          </div>
-        </details>
       </div>
       <div class="card">
         <div class="card-title"><svg class="ui-ico"><use href="#i-chart"/></svg>Tracciamento automatico</div>
@@ -1675,116 +1840,142 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         <div class="section-title" id="catalogTitle">Catalogo / listino</div>
         <div class="section-sub" id="catalogSub">Prodotti, servizi, menu, camere, trattamenti o listini</div>
       </div>
-      <div class="card">
-        <div class="card-title"><svg class="ui-ico"><use href="#i-settings"/></svg>Tipo contenuto</div>
-        <div class="field">
-          <label>Cosa vuoi mostrare?</label>
-          <select id="catalogType" onchange="updateCatalogLabels();renderCats();renderExtraCatalogs();changed()">
-            <option value="menu">Menu ristorante</option>
-            <option value="listino">Listino prezzi</option>
-            <option value="prodotti">Catalogo prodotti</option>
-            <option value="servizi">Servizi</option>
-            <option value="camere">Camere / suite</option>
-            <option value="trattamenti">Trattamenti</option>
-            <option value="pacchetti">Pacchetti / offerte</option>
-            <option value="immobili">Immobili / portfolio</option>
-          </select>
+      <div class="card catalog-simple-card">
+        <div class="card-title"><svg class="ui-ico"><use href="#i-list"/></svg>Le tue voci</div>
+        <div class="field-hint" id="catalogHint">Nome e prezzo bastano per partire. Descrizione e tag sono facoltativi.</div>
+        <div class="catalog-type-pills" id="catalogTypePills">
+          <button type="button" class="catalog-type-pill active" data-catalog-quick-type="menu" onclick="setCatalogQuickType('menu')">Menu</button>
+          <button type="button" class="catalog-type-pill" data-catalog-quick-type="prodotti" onclick="setCatalogQuickType('prodotti')">Prodotti</button>
+          <button type="button" class="catalog-type-pill" data-catalog-quick-type="servizi" onclick="setCatalogQuickType('servizi')">Servizi</button>
         </div>
-        <div class="toggle-row">
+        <div class="toggle-row" style="margin-bottom:12px">
           <div>
             <div class="toggle-label">Mostra prezzi</div>
-            <div class="toggle-sub">Disattiva per usare il catalogo come portfolio, vetrina prodotti o scheda servizi senza listino</div>
+            <div class="toggle-sub">Disattiva per vetrina senza listino</div>
           </div>
           <label class="toggle"><input type="checkbox" id="showCatalogPrices" checked><span class="toggle-slider"></span></label>
         </div>
-      </div>
-      <div class="card">
-        <div class="card-title" id="catalogPdfTitle"><svg class="ui-ico"><use href="#i-file"/></svg>File PDF / allegato</div>
-        <div class="field">
-          <label id="catalogPdfLabel">Carica PDF</label>
-          <input type="file" id="menuPdf" accept=".pdf" style="padding:8px;" onchange="onPdfUpload(this)">
-          <div class="field-hint" id="menuPdfStatus" style="margin-top:6px">Nessun PDF caricato</div>
-          <div class="media-actions">
-            <button class="media-remove" type="button" onclick="removeCatalogPdf()"><svg class="ui-ico"><use href="#i-trash"/></svg>Rimuovi PDF</button>
+        <div class="catalog-empty" id="catalogEmptyState">
+          <strong>Aggiungi la prima voce</strong>
+          <span>Scrivi nome e prezzo qui sotto. I clienti la vedranno subito sulla pagina NFC.</span>
+        </div>
+        <div class="catalog-coach" id="catalogCoach" hidden>
+          <strong>Come funziona per i clienti</strong>
+          <div class="catalog-coach-mini">
+            <div class="ofd-phone"><span class="ofd-notch"></span><div class="ofd-screen"><div class="ofd-scene ofd-scene-1" style="animation-duration:6s"><span class="ofd-chip wide"></span><span class="ofd-chip green"></span><span class="ofd-wa" style="font-size:.46rem">WhatsApp</span></div></div></div>
+            <p>Tocca NFC → sceglie dal catalogo → invia richiesta su WhatsApp. Tu confermi prezzo e disponibilità.</p>
           </div>
         </div>
-      </div>
-      <div class="card">
-        <div class="card-title" id="catalogEditorTitle"><svg class="ui-ico"><use href="#i-list"/></svg>Catalogo modificabile</div>
-        <div class="field-hint" id="catalogHint">Crea categorie e aggiungi tutte le voci che vuoi. Ogni voce puo avere prezzo, nota o descrizione.</div>
+        <div class="catalog-quick-add">
+          <input type="text" id="catalogQuickName" placeholder="Nome prodotto, piatto o servizio" onkeydown="if(event.key==='Enter')quickAddCatalogItem()">
+          <input type="text" id="catalogQuickPrice" placeholder="€ 12,00" onkeydown="if(event.key==='Enter')quickAddCatalogItem()">
+          <button type="button" onclick="quickAddCatalogItem()">Aggiungi</button>
+        </div>
         <div id="menuCats"></div>
-        <button class="btn-add-row" id="addCatBtn" onclick="addCat()">＋ Aggiungi categoria</button>
+        <button class="btn-add-row" id="addCatBtn" onclick="addCat()" hidden>＋ Aggiungi sezione</button>
       </div>
-      <div class="card">
-        <div class="card-title"><svg class="ui-ico"><use href="#i-copy"/></svg>Cataloghi duplicabili</div>
-        <div class="field-hint" style="font-size:.82rem;line-height:1.5">
-          Aggiungi moduli separati per carta vini, pacchetti, camere, servizi, listini o prodotti. Ogni modulo apparirà come blocco indipendente nella pagina pubblica.
-        </div>
-        <div id="extraCatalogs"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-          <button class="btn-add-row" type="button" onclick="addExtraCatalog()">＋ Aggiungi catalogo</button>
-          <button class="btn-add-row" type="button" onclick="duplicateMainCatalog()">Duplica catalogo principale</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title"><svg class="ui-ico"><use href="#i-lock"/></svg>Testi legali avanzati</div>
-        <div class="field-hint" style="font-size:.82rem;line-height:1.5;margin-bottom:14px">
-          La configurazione base è in Azioni rapide. Qui puoi solo personalizzare recesso, digitali e link condizioni.
-        </div>
-        <div class="toggle-row" style="margin-bottom:14px">
-          <div>
-            <div class="toggle-label">Mostra informazioni nel checkout</div>
-            <div class="toggle-sub">Consigliato: il cliente legge e accetta prima di inviare</div>
-          </div>
-          <label class="toggle"><input type="checkbox" id="showSaleTerms" checked><span class="toggle-slider"></span></label>
-        </div>
-        <div class="toggle-row" style="margin-bottom:14px">
-          <div>
-            <div class="toggle-label">Richiedi consenso privacy prima dell’invio</div>
-            <div class="toggle-sub">Per trattare nome, telefono e note della richiesta</div>
-          </div>
-          <label class="toggle"><input type="checkbox" id="requireOrderConsent" checked><span class="toggle-slider"></span></label>
-        </div>
-        <select id="saleProductType" hidden aria-hidden="true">
-          <option value="services">Servizi / prenotazioni</option>
-          <option value="physical">Prodotti fisici</option>
-          <option value="digital">File / contenuti digitali</option>
-          <option value="both">Fisici + digitali</option>
-        </select>
-        <details class="legal-advanced" open>
-          <summary>Testi recesso e condizioni (modificabili)</summary>
-          <div class="field-row" style="margin-top:12px">
+      <details class="catalog-advanced-wrap">
+        <summary>Opzioni avanzate (PDF, sezioni extra, settori speciali)</summary>
+        <div class="catalog-advanced-body">
+          <div class="card">
+            <div class="card-title"><svg class="ui-ico"><use href="#i-settings"/></svg>Tipo contenuto</div>
             <div class="field">
-              <label>Tipo vendita</label>
-              <select id="saleProductTypeVisible" onchange="syncOrderBusinessType(true)">
-                <option value="services">Servizi / prenotazioni</option>
-                <option value="physical">Prodotti fisici</option>
-                <option value="digital">File / contenuti digitali</option>
-                <option value="both">Fisici + digitali</option>
+              <label>Settore o formato catalogo</label>
+              <select id="catalogType" onchange="updateCatalogLabels();renderCats();renderExtraCatalogs();changed()">
+                <option value="menu">Menu ristorante</option>
+                <option value="listino">Listino prezzi</option>
+                <option value="prodotti">Catalogo prodotti</option>
+                <option value="servizi">Servizi</option>
+                <option value="camere">Camere / suite</option>
+                <option value="trattamenti">Trattamenti</option>
+                <option value="pacchetti">Pacchetti / offerte</option>
+                <option value="immobili">Immobili / portfolio</option>
               </select>
             </div>
+          </div>
+          <div class="card">
+            <div class="card-title" id="catalogPdfTitle"><svg class="ui-ico"><use href="#i-file"/></svg>File PDF / allegato</div>
             <div class="field">
-              <label>Link condizioni di vendita</label>
-              <input type="url" id="salesTermsUrl" placeholder="https://tuosito.it/condizioni-vendita">
+              <label id="catalogPdfLabel">Carica PDF</label>
+              <input type="file" id="menuPdf" accept=".pdf" style="padding:8px;" onchange="onPdfUpload(this)">
+              <div class="field-hint" id="menuPdfStatus" style="margin-top:6px">Nessun PDF caricato</div>
+              <div class="media-actions">
+                <button class="media-remove" type="button" onclick="removeCatalogPdf()"><svg class="ui-ico"><use href="#i-trash"/></svg>Rimuovi PDF</button>
+              </div>
             </div>
           </div>
-          <div class="field">
-            <label>Recesso prodotti fisici</label>
-            <textarea id="physicalReturnText" rows="3">Per gli acquisti a distanza di prodotti fisici, il consumatore può esercitare il diritto di recesso entro 14 giorni dalla consegna, salvo eccezioni previste dalla legge.</textarea>
-          </div>
-          <div class="field">
-            <label>File e contenuti digitali</label>
-            <textarea id="digitalReturnText" rows="3">Per file o contenuti digitali forniti subito dopo l’ordine, l’accesso immediato richiede consenso espresso e accettazione della perdita del diritto di recesso, quando previsto dalla normativa applicabile.</textarea>
-          </div>
-          <div class="toggle-row">
-            <div>
-              <div class="toggle-label">Richiedi consenso per contenuti digitali</div>
-              <div class="toggle-sub">Solo se vendi file scaricabili subito dopo la richiesta</div>
+          <div class="card">
+            <div class="card-title" id="catalogEditorTitle"><svg class="ui-ico"><use href="#i-copy"/></svg>Cataloghi duplicabili</div>
+            <div class="field-hint" style="font-size:.82rem;line-height:1.5">
+              Moduli separati per carta vini, pacchetti, camere o listini aggiuntivi.
             </div>
-            <label class="toggle"><input type="checkbox" id="requireDigitalConsent" checked><span class="toggle-slider"></span></label>
+            <div id="extraCatalogs"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+              <button class="btn-add-row" type="button" onclick="addExtraCatalog()">＋ Aggiungi catalogo</button>
+              <button class="btn-add-row" type="button" onclick="duplicateMainCatalog()">Duplica catalogo principale</button>
+            </div>
           </div>
-        </details>
-      </div>
+          <div class="card">
+            <div class="card-title"><svg class="ui-ico"><use href="#i-lock"/></svg>Testi legali avanzati</div>
+            <div class="field-hint" style="font-size:.82rem;line-height:1.5;margin-bottom:14px">
+              La configurazione base è in Azioni rapide. Qui puoi personalizzare recesso, digitali e link condizioni.
+            </div>
+            <div class="toggle-row" style="margin-bottom:14px">
+              <div>
+                <div class="toggle-label">Mostra informazioni nel checkout</div>
+                <div class="toggle-sub">Consigliato: il cliente legge e accetta prima di inviare</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="showSaleTerms" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row" style="margin-bottom:14px">
+              <div>
+                <div class="toggle-label">Richiedi consenso privacy prima dell’invio</div>
+                <div class="toggle-sub">Per trattare nome, telefono e note della richiesta</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="requireOrderConsent" checked><span class="toggle-slider"></span></label>
+            </div>
+            <select id="saleProductType" hidden aria-hidden="true">
+              <option value="services">Servizi / prenotazioni</option>
+              <option value="physical">Prodotti fisici</option>
+              <option value="digital">File / contenuti digitali</option>
+              <option value="both">Fisici + digitali</option>
+            </select>
+            <details class="legal-advanced" open>
+              <summary>Testi recesso e condizioni (modificabili)</summary>
+              <div class="field-row" style="margin-top:12px">
+                <div class="field">
+                  <label>Tipo vendita</label>
+                  <select id="saleProductTypeVisible" onchange="syncOrderBusinessType(true)">
+                    <option value="services">Servizi / prenotazioni</option>
+                    <option value="physical">Prodotti fisici</option>
+                    <option value="digital">File / contenuti digitali</option>
+                    <option value="both">Fisici + digitali</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Link condizioni di vendita</label>
+                  <input type="url" id="salesTermsUrl" placeholder="https://tuosito.it/condizioni-vendita">
+                </div>
+              </div>
+              <div class="field">
+                <label>Recesso prodotti fisici</label>
+                <textarea id="physicalReturnText" rows="3">Per gli acquisti a distanza di prodotti fisici, il consumatore può esercitare il diritto di recesso entro 14 giorni dalla consegna, salvo eccezioni previste dalla legge.</textarea>
+              </div>
+              <div class="field">
+                <label>File e contenuti digitali</label>
+                <textarea id="digitalReturnText" rows="3">Per file o contenuti digitali forniti subito dopo l’ordine, l’accesso immediato richiede consenso espresso e accettazione della perdita del diritto di recesso, quando previsto dalla normativa applicabile.</textarea>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Richiedi consenso per contenuti digitali</div>
+                  <div class="toggle-sub">Solo se vendi file scaricabili subito dopo la richiesta</div>
+                </div>
+                <label class="toggle"><input type="checkbox" id="requireDigitalConsent" checked><span class="toggle-slider"></span></label>
+              </div>
+            </details>
+          </div>
+        </div>
+      </details>
     </div>
 
     <!-- GALLERIA -->
@@ -2148,7 +2339,11 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
     <div class="section" id="s-stats">
       <div class="section-header">
         <div class="section-title">Analytics</div>
-        <div class="section-sub">Tap NFC e azioni reali della pagina pubblica</div>
+        <div class="section-sub">Tap NFC e azioni reali della pagina pubblica — i dati non vengono modificati dal salvataggio editor</div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="field-hint" id="statsStatus" style="margin:0;font-size:.78rem;line-height:1.5">Caricamento dati dal cloud…</div>
+        <button type="button" class="btn-generate" id="statsRefreshBtn" style="margin-top:10px"><svg class="ui-ico"><use href="#i-chart"/></svg>Aggiorna analytics</button>
       </div>
       <div class="stats-grid">
         <div class="stat-card">
@@ -2234,7 +2429,11 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
       <div><span>Anteprima live</span><small>Aggiornamento automatico mentre modifichi</small></div>
       <button type="button" class="editor-preview-expand" id="dockPreviewExpand">Schermo intero</button>
     </div>
-    <div class="phone-preview device-phone editor-dock-frame">
+    <div class="dock-device-switch" aria-label="Dispositivo anteprima dock">
+      <button type="button" class="dock-device-btn active" data-dock-device="phone">Smartphone</button>
+      <button type="button" class="dock-device-btn" data-dock-device="ipad-portrait">Tablet</button>
+    </div>
+    <div class="phone-preview device-phone editor-dock-frame" id="dockPreviewFrame">
       <div class="phone-preview-inner public-page-root" id="publicPreviewDock"></div>
     </div>
   </aside>
@@ -2271,6 +2470,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
           <div class="account-public-actions">
             <button type="button" class="btn-generate" id="accountOpenPublicPage"><svg class="ui-ico"><use href="#i-eye"/></svg>Apri pagina finale</button>
             <button type="button" class="media-remove" id="accountCopyPublicUrl"><svg class="ui-ico"><use href="#i-copy"/></svg>Copia link NFC</button>
+            <button type="button" class="btn-qr-download" id="accountDownloadQr"><svg class="ui-ico"><use href="#i-zap"/></svg>Scarica QR</button>
           </div>
         </div>
       </section>
@@ -2380,8 +2580,13 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 
 <!-- SAVE BAR -->
 <div class="save-bar" id="saveBar">
-  <div class="save-msg">Hai <strong>modifiche non salvate</strong></div>
-  <button class="btn-save" onclick="save()"><svg class="ui-ico"><use href="#i-save"/></svg>Salva</button>
+  <div class="save-msg" id="saveBarMsg">Hai <strong>modifiche non salvate</strong></div>
+  <div class="save-actions">
+    <button class="btn-save-outline" id="saveBarQr" type="button" onclick="downloadPublicPageQr()"><svg class="ui-ico"><use href="#i-zap"/></svg>QR</button>
+    <button class="btn-save-outline" id="saveBarTryOrder" type="button" onclick="tryOrderFlow()"><svg class="ui-ico"><use href="#i-list"/></svg>Prova ordine</button>
+    <button class="btn-save-outline" id="saveBarOpenPage" type="button" onclick="openLivePageFromBar()"><svg class="ui-ico"><use href="#i-eye"/></svg>Apri pagina</button>
+    <button class="btn-save" onclick="save()"><svg class="ui-ico"><use href="#i-save"/></svg>Salva</button>
+  </div>
 </div>
 
 <!-- TOAST -->
@@ -2401,6 +2606,33 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
       <span class="wizard-small">Il link NFC resta bloccato: cambiano solo contenuti e moduli.</span>
       <button class="wizard-skip" id="wizardSkip" type="button">Salta setup</button>
     </div>
+  </div>
+</div>
+
+<!-- SETUP 3 PASSAGGI (post-categoria) -->
+<div class="setup-flow-modal" id="setupFlowModal" aria-label="Completa la pagina in 3 passaggi">
+  <div class="setup-flow-shell">
+    <div class="setup-flow-steps">
+      <span class="setup-flow-step active" data-setup-step-label="1">1 · Nome</span>
+      <span class="setup-flow-step" data-setup-step-label="2">2 · WhatsApp</span>
+      <span class="setup-flow-step" data-setup-step-label="3">3 · Catalogo</span>
+    </div>
+    <div id="setupFlowPanel"></div>
+    <div class="setup-flow-skip"><button type="button" id="setupFlowSkip">Salta per ora</button></div>
+  </div>
+</div>
+
+<!-- COLLAUDO NFC (post-salvataggio) -->
+<div class="setup-flow-modal" id="collaudoFlowModal" aria-label="Collaudo pagina NFC">
+  <div class="setup-flow-shell">
+    <div class="collaudo-flow-kicker">Business · collaudo finale</div>
+    <div class="setup-flow-steps">
+      <span class="setup-flow-step active" data-collaudo-step-label="1">1 · Apri</span>
+      <span class="setup-flow-step" data-collaudo-step-label="2">2 · Prova</span>
+      <span class="setup-flow-step" data-collaudo-step-label="3">3 · Pronto</span>
+    </div>
+    <div id="collaudoFlowPanel"></div>
+    <div class="setup-flow-skip"><button type="button" id="collaudoFlowSkip">Salta collaudo</button></div>
   </div>
 </div>
 
@@ -2553,6 +2785,10 @@ function goTo(id) {
   document.getElementById('s-'+id).classList.add('active');
   document.querySelectorAll('[data-s="'+id+'"]').forEach(i => i.classList.add('active'));
   window.scrollTo({top:0,behavior:'smooth'});
+  if(id === 'stats') requestAnalyticsRefresh();
+}
+function requestAnalyticsRefresh(){
+  window.parent.postMessage({type:'khamakey:refresh-analytics'},'*');
 }
 
 const EDITOR_HUBS = {
@@ -2720,6 +2956,7 @@ function renderSlots(){
   list.innerHTML = bookingSlots.length
     ? bookingSlots.map((slot,i)=>`<span class="slot-chip">${esc(slot)}<button type="button" onclick="bookingSlots.splice(${i},1);renderSlots();changed()">×</button></span>`).join('')
     : '<div class="empty-slots">Nessuna fascia disponibile. Genera almeno un orario.</div>';
+  renderBookingReadyStatus();
 }
 
 function generateSlots(){
@@ -2800,16 +3037,95 @@ const CATALOG_DETAIL_FIELDS = {
 };
 const CATALOG_DETAIL_KEYS = [...new Set(Object.values(CATALOG_DETAIL_FIELDS).flat().map(([key])=>key))];
 function catalogDetailFields(){return CATALOG_DETAIL_FIELDS[val('catalogType')||'menu'] || CATALOG_DETAIL_FIELDS.prodotti;}
+const CATALOG_QUICK_TAGS = {
+  menu:[
+    {label:'Vegetariano',key:'diet',value:'Vegetariano'},
+    {label:'Vegano',key:'diet',value:'Vegano'},
+    {label:'Senza glutine',key:'gluten',value:'Senza glutine'},
+    {label:'Piccante',key:'diet',value:'Piccante'}
+  ],
+  prodotti:[
+    {label:'Disponibile',key:'availability',value:'Disponibile'},
+    {label:'Su ordinazione',key:'availability',value:'Su ordinazione'},
+    {label:'Esaurito',key:'availability',value:'Esaurito'}
+  ],
+  servizi:[
+    {label:'Su appuntamento',key:'duration',value:'Su appuntamento'},
+    {label:'Materiale incluso',key:'included',value:'Materiale incluso'}
+  ],
+  listino:[
+    {label:'Promo',key:'conditions',value:'Promo'},
+    {label:'Su richiesta',key:'conditions',value:'Su richiesta'}
+  ]
+};
+function catalogQuickTags(){return CATALOG_QUICK_TAGS[val('catalogType')||'menu'] || CATALOG_QUICK_TAGS.prodotti;}
+function itemHasQuickTag(item,tag){
+  return String(item[tag.key]||'').toLowerCase().includes(String(tag.value).toLowerCase());
+}
+function toggleCatalogQuickTag(ci,pi,key,value){
+  const item = cats[ci].voci[pi];
+  const cur = String(item[key]||'');
+  if(cur.toLowerCase().includes(String(value).toLowerCase())){
+    item[key] = cur.replace(new RegExp(value,'ig'),'').replace(/,\s*,/g,',').replace(/^,\s*|,\s*$/g,'').trim();
+  } else {
+    item[key] = cur ? `${cur}, ${value}` : value;
+  }
+  renderCats();
+  changed();
+}
+function catalogQuickTagsHtml(item,ci,pi){
+  const tags = catalogQuickTags();
+  if(!tags.length) return '';
+  return `<div class="catalog-quick-tags">${tags.map(tag=>{
+    const active = itemHasQuickTag(item,tag);
+    return `<button type="button" class="catalog-tag ${active?'active':''}" onclick="toggleCatalogQuickTag(${ci},${pi},'${tag.key}',${JSON.stringify(tag.value)})">${esc(tag.label)}</button>`;
+  }).join('')}</div>`;
+}
+function catalogHasItems(){
+  return cats.some(cat=>normalizeCat(cat).voci.some(v=>String(v.nome||'').trim()));
+}
+function renderCatalogEmptyState(){
+  const el = document.getElementById('catalogEmptyState');
+  const coach = document.getElementById('catalogCoach');
+  const empty = !catalogHasItems();
+  if(el) el.hidden = !empty;
+  if(coach) coach.hidden = !empty;
+}
+function setCatalogQuickType(type){
+  setFieldValue('catalogType',type);
+  updateCatalogLabels();
+  renderCats();
+  renderExtraCatalogs();
+  changed();
+}
+function syncCatalogTypePills(){
+  const type = val('catalogType')||'menu';
+  const quick = ['menu','prodotti','servizi'].includes(type) ? type : '';
+  document.querySelectorAll('[data-catalog-quick-type]').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.catalogQuickType === quick);
+  });
+}
+function quickAddCatalogItem(){
+  const nameEl = document.getElementById('catalogQuickName');
+  const priceEl = document.getElementById('catalogQuickPrice');
+  const nome = String(nameEl?.value||'').trim();
+  const prezzo = String(priceEl?.value||'').trim();
+  if(!nome) return showToast('Scrivi almeno il nome','err');
+  if(!cats.length) cats.push({id:Date.now(),nome:'Sezione principale',voci:[]});
+  cats[0].voci.push(normalizeItem({nome,desc:'',prezzo,img:''}));
+  if(nameEl) nameEl.value = '';
+  if(priceEl) priceEl.value = '';
+  renderCats();
+  changed();
+  showToast('Voce aggiunta','ok');
+}
 function catalogExtraFieldsHtml(item,path){
   return catalogDetailFields().map(([key,label,placeholder]) => (
     `<textarea placeholder="${esc(label)}: ${esc(placeholder)}" oninput="${path}.${key}=this.value;changed()">${esc(item[key]||'')}</textarea>`
   )).join('');
 }
 let cats = [
-  {id:1,nome:'Sezione principale',voci:[
-    {nome:'Prodotto o servizio principale',desc:'Descrizione breve, dettagli o informazioni utili.',prezzo:'€ 0,00',img:'',allergeni:'',gluten:'',diet:''},
-    {nome:'Seconda proposta',desc:'Puoi usare questa voce per prodotti, servizi, camere, trattamenti o piatti.',prezzo:'€ 0,00',img:'',allergeni:'',gluten:'',diet:''}
-  ]}
+  {id:1,nome:'Sezione principale',voci:[]}
 ];
 function addCat() {
   cats.push({id:Date.now(),nome:'Nuova sezione',voci:[]});
@@ -2891,8 +3207,13 @@ function updateCatalogLabels(){
   document.getElementById('catalogSub').textContent=cfg.sub;
   document.getElementById('catalogPdfTitle').innerHTML=ico('i-file')+esc(cfg.title)+' PDF / allegato';
   document.getElementById('catalogPdfLabel').textContent='Carica '+cfg.title.toLowerCase()+' PDF';
-  document.getElementById('catalogEditorTitle').innerHTML=ico('i-list')+esc(cfg.title)+' modificabile';
-  document.getElementById('addCatBtn').textContent='＋ Aggiungi sezione';
+  const addCatBtn = document.getElementById('addCatBtn');
+  if(addCatBtn){
+    addCatBtn.textContent='＋ Aggiungi sezione';
+    addCatBtn.hidden = cats.length <= 1;
+  }
+  syncCatalogTypePills();
+  renderCatalogEmptyState();
   document.querySelectorAll('[data-catalog-action]').forEach(btn=>btn.textContent=cfg.add);
   document.querySelectorAll('[data-cat-placeholder]').forEach(input=>input.placeholder=cfg.cat);
   document.querySelectorAll('[data-item-placeholder]').forEach(input=>input.placeholder=cfg.item);
@@ -2903,32 +3224,42 @@ function renderCats() {
   const c = document.getElementById('menuCats');
   if(!c) return;
   c.innerHTML = '';
+  const hideCatHeader = cats.length <= 1;
   cats.forEach((rawCat,ci) => {
     const cat=normalizeCat(rawCat), cfg=catalogCfg();
     const d = document.createElement('div');
     d.className = 'menu-cat';
-    d.innerHTML = `<div class="menu-cat-hd">
+    d.innerHTML = `${hideCatHeader ? '' : `<div class="menu-cat-hd">
         <input data-cat-placeholder value="${esc(cat.nome)}" placeholder="${esc(cfg.cat)}" oninput="cats[${ci}].nome=this.value;changed()" onclick="event.stopPropagation()">
         <button class="btn-icon" onclick="cats.splice(${ci},1);renderCats();changed()" aria-label="Elimina sezione">${ico('i-trash')}</button>
-      </div>
-      <div class="menu-cat-body">
-        ${cat.voci.map((p,pi)=>`<div class="menu-row">
-          <button type="button" class="menu-img-btn" onclick="document.getElementById('itemImg${ci}_${pi}').click()" aria-label="Carica immagine prodotto">
-            ${p.img ? `<img src="${esc(p.img)}" alt="">` : ico('i-camera')}
-          </button>
-          <input type="file" id="itemImg${ci}_${pi}" accept="image/*" style="display:none" onchange="setItemImage(this,${ci},${pi})">
+      </div>`}
+      <div class="menu-cat-body" ${hideCatHeader ? 'style="border-top:0;padding-top:0"' : ''}>
+        ${cat.voci.map((p,pi)=>`<div class="menu-row menu-row-simple">
           <div class="menu-row-main">
-            <input data-item-placeholder value="${esc(p.nome)}" placeholder="${esc(cfg.item)}" oninput="cats[${ci}].voci[${pi}].nome=this.value;changed()">
-            <textarea placeholder="Descrizione, dettagli, ingredienti, inclusioni..." oninput="cats[${ci}].voci[${pi}].desc=this.value;changed()">${esc(p.desc||'')}</textarea>
-            ${catalogExtraFieldsHtml(p,`cats[${ci}].voci[${pi}]`)}
+            <input data-item-placeholder value="${esc(p.nome)}" placeholder="${esc(cfg.item)}" oninput="cats[${ci}].voci[${pi}].nome=this.value;renderCatalogEmptyState();changed()">
+            <input class="menu-row-desc" value="${esc(p.desc||'')}" placeholder="Descrizione facoltativa" oninput="cats[${ci}].voci[${pi}].desc=this.value;changed()">
+            ${catalogQuickTagsHtml(p,ci,pi)}
+            <details class="menu-row-extra">
+              <summary>Foto e dettagli avanzati</summary>
+              <div class="menu-row-advanced">
+                <button type="button" class="menu-img-btn" onclick="document.getElementById('itemImg${ci}_${pi}').click()" aria-label="Carica immagine prodotto">
+                  ${p.img ? `<img src="${esc(p.img)}" alt="">` : ico('i-camera')}
+                </button>
+                <input type="file" id="itemImg${ci}_${pi}" accept="image/*" style="display:none" onchange="setItemImage(this,${ci},${pi})">
+                <div class="menu-row-main">${catalogExtraFieldsHtml(p,`cats[${ci}].voci[${pi}]`)}</div>
+              </div>
+            </details>
           </div>
           <input class="menu-row-price" data-price-placeholder value="${esc(p.prezzo)}" placeholder="${esc(cfg.price)}" oninput="cats[${ci}].voci[${pi}].prezzo=this.value;changed()">
-          <button class="btn-icon" onclick="cats[${ci}].voci.splice(${pi},1);renderCats();changed()">✕</button>
+          <button class="btn-icon" onclick="cats[${ci}].voci.splice(${pi},1);renderCats();changed()" aria-label="Elimina voce">✕</button>
         </div>`).join('')}
         <button class="btn-add-row" data-catalog-action onclick="cats[${ci}].voci.push(normalizeItem({nome:'',desc:'',prezzo:'',img:''}));renderCats();changed()">${esc(cfg.add)}</button>
       </div>`;
     c.appendChild(d);
   });
+  const addCatBtn = document.getElementById('addCatBtn');
+  if(addCatBtn) addCatBtn.hidden = cats.length <= 1;
+  renderCatalogEmptyState();
 }
 renderCats();
 updateCatalogLabels();
@@ -4141,7 +4472,7 @@ function cartItemPayload(item,fallbackName){
   };
 }
 
-function addCartItem(ci,pi){
+function addCartItem(ci,pi,{silent=false}={}){
   const item = catalogItem(ci,pi);
   if(!item) return;
   const key = cartKey(ci,pi,item);
@@ -4150,7 +4481,7 @@ function addCartItem(ci,pi){
   else publicCart.push({...cartItemPayload(item,catalogCfg().item),key});
   checkoutOpen = true;
   renderPublicPreview();
-  showToast(tt('itemAdded'),'ok');
+  if(!silent) showToast(tt('itemAdded'),'ok');
 }
 
 function extraCatalogItem(ei,pi){
@@ -4387,7 +4718,7 @@ function orderConsentAccepted(){
 
 function renderPublicOrderGuide(){
   if(!checked('tCart') || !checked('showPublicOrderGuide')) return '';
-  return `<div class="pub-order-guide" aria-label="Come ordinare">
+  return `<div class="pub-order-guide pub-order-guide-animated" aria-label="Come ordinare">
     <span><span class="step-num">1</span>${esc(tt('orderGuide1'))}</span>
     →
     <span><span class="step-num">2</span>${esc(tt('orderGuide2'))}</span>
@@ -4421,7 +4752,6 @@ function applyOrderSimpleSetup(options={}){
   setFieldValue('tCookie',true);
   setFieldValue('useExternalPrivacy',false);
   setFieldValue('payCash',true);
-  setFieldValue('payCard',false);
   if(!String(val('orderRequestLegalText')||'').trim()){
     setFieldValue('orderRequestLegalText','La richiesta inviata via WhatsApp non è un acquisto concluso. L’attività ti risponderà per confermare disponibilità, importo finale e modalità di pagamento.');
   }
@@ -4431,6 +4761,88 @@ function applyOrderSimpleSetup(options={}){
   renderPrivacySimpleStatus();
   changed();
   if(options.toast !== false) showToast('Ordini WhatsApp pronti. Aggiungi voci al catalogo e salva.','ok');
+}
+function pageReadyChecks(){
+  const hasLogoAsset = !!(document.getElementById('logoImg')?.dataset.src);
+  const hasCoverAsset = !!(document.getElementById('coverImg')?.dataset.src);
+  const hasVisual = (checked('showLogo') && hasLogoAsset) || (checked('showCover') && hasCoverAsset) || (checked('showHeroName') && !!String(val('nome')||'').trim());
+  return [
+    {ok:!!String(val('nome')||'').trim(), label:'Nome attività', go:'info'},
+    {ok:!!String(val('wa')||'').trim(), label:'WhatsApp', go:'azioni'},
+    {ok:hasVisual, label:'Logo o copertina', go:'brand'},
+    {ok:!!String(val('tel')||'').trim() || !!String(val('maps')||'').trim() || !!String(val('indirizzo')||'').trim(), label:'Contatti', go:'contatti'},
+    {ok:cats.some(cat=>normalizeCat(cat).voci.some(v=>String(v.nome||v.desc||'').trim())), label:'Catalogo', go:'menu'},
+    {ok:!dirty, label:'Salvato nel cloud', go:null}
+  ];
+}
+function renderPageReadyHead(){
+  const host = document.getElementById('pageReadyHead');
+  if(!host) return;
+  const checks = pageReadyChecks();
+  const done = checks.filter(item=>item.ok).length;
+  const total = checks.length;
+  const pct = Math.round((done / total) * 100);
+  const canOpen = !dirty && !!cloudPublicPageUrl && checks.slice(0,5).every(item=>item.ok);
+  const canTryBooking = canOpen && checked('aPrenota') && bookingReadyChecks().every(item=>item.ok);
+  host.innerHTML = `
+    <div class="page-ready-top"><strong>Pagina pronta</strong><span>${done}/${total} · ${pct}%</span></div>
+    <div class="page-ready-bar"><span style="width:${pct}%"></span></div>
+    <div class="page-ready-actions">
+      <button type="button" class="btn-page-open" id="pageReadyOpenBtn" ${canOpen ? '' : 'disabled'} onclick="openLivePageFromBar()"><svg class="ui-ico"><use href="#i-eye"/></svg>Apri pagina finale</button>
+      <button type="button" class="btn-add-row" onclick="downloadPublicPageQr()" ${canOpen ? '' : 'disabled'}>Scarica QR</button>
+      ${canOpen ? `<button type="button" class="btn-add-row" onclick="tryOrderFlow()">Prova ordine</button>` : ''}
+      ${canTryBooking ? `<button type="button" class="btn-add-row" onclick="tryBookingFlow()">Prova prenotazione</button>` : ''}
+      ${dirty ? `<button type="button" class="btn-add-row" onclick="save()">Salva ora</button>` : ''}
+    </div>
+    ${canOpen ? `<div class="page-collaudo-hint"><strong>Collaudo finale</strong>Apri dal telefono (NFC o QR scaricato), prova ordine${checked('aPrenota') ? ' e prenotazione' : ''} come un cliente reale. <button type="button" onclick="openCollaudoWizard()">Avvia collaudo guidato</button></div>` : ''}`;
+}
+function openLivePageFromBar(){
+  if(dirty) return showToast('Salva prima le modifiche','err');
+  if(!cloudPublicPageUrl) return showToast('Pagina non ancora disponibile. Salva e riprova.','err');
+  window.open(cloudPublicPageUrl,'_blank','noopener');
+}
+function publicUrlForShare(){
+  return cloudPublicPageUrl || cloudPublicUrl || '';
+}
+async function downloadPublicPageQr(){
+  if(dirty) return showToast('Salva prima le modifiche','err');
+  const url = publicUrlForShare();
+  if(!url) return showToast('Salva la pagina per generare il QR','err');
+  try {
+    const QRCode = (await import('https://esm.sh/qrcode@1.5.3')).default;
+    const dataUrl = await QRCode.toDataURL(url, {
+      width: 720,
+      margin: 2,
+      color: { dark: '#1B2A5E', light: '#FFFFFF' }
+    });
+    const a = document.createElement('a');
+    a.download = `khamakey-qr-${slugifyPublicName(val('nome') || 'pagina')}.png`;
+    a.href = dataUrl;
+    a.click();
+    showToast('QR scaricato. Usalo in vetrina, social o stampa.','ok');
+  } catch {
+    showToast('Impossibile generare il QR ora','err');
+  }
+}
+function tryOrderFlow(){
+  if(!String(val('wa')||'').trim()) return showToast('Inserisci prima il numero WhatsApp','err');
+  if(!catalogHasItems()) return showToast('Aggiungi almeno una voce al catalogo','err');
+  if(!checked('tCart')) setFieldValue('tCart',true);
+  if(!checked('aOrdinaWa')) setFieldValue('aOrdinaWa',true);
+  let added = false;
+  for(let ci=0; ci<cats.length && !added; ci++){
+    const cat = normalizeCat(cats[ci]);
+    for(let pi=0; pi<cat.voci.length; pi++){
+      if(String(cat.voci[pi].nome||'').trim()){
+        addCartItem(ci,pi,{silent:true});
+        added = true;
+        break;
+      }
+    }
+  }
+  changed();
+  openPreview();
+  showToast(added ? 'Prima voce nel carrello. Controlla e invia su WhatsApp.' : 'Aggiungi una voce al carrello e prova «Invia su WhatsApp»','ok');
 }
 function orderReadyChecks(){
   return [
@@ -4454,6 +4866,42 @@ function renderOrderReadyStatus(){
     goTo(target);
   }));
 }
+function bookingChannelReady(){
+  const channel = val('bookingChannel') || 'whatsapp';
+  if(channel === 'whatsapp') return !!String(val('wa')||'').trim();
+  return !!String(val('email')||'').trim();
+}
+function bookingReadyChecks(){
+  return [
+    {ok:checked('aPrenota'), label:'Pulsante Prenota', go:'azioni'},
+    {ok:bookingChannelReady(), label:val('bookingChannel')==='whatsapp'?'WhatsApp':'Email attività', go:val('bookingChannel')==='whatsapp'?'azioni':'contatti'},
+    {ok:!checked('bookingUseSlot') || bookingSlots.length > 0, label:'Fasce orario', go:'orari'},
+    {ok:!!String(val('bookingTitle')||'').trim(), label:'Titolo modulo', go:'azioni'}
+  ];
+}
+function renderBookingReadyStatus(){
+  const host = document.getElementById('bookingReadyStatus');
+  if(!host) return;
+  host.innerHTML = bookingReadyChecks().map(item=>`<span class="order-ready-pill ${item.ok?'ok':''}">${item.ok?'✓':'○'} ${item.go ? `<button type="button" data-booking-go="${esc(item.go)}">${esc(item.label)}</button>` : esc(item.label)}</span>`).join('');
+  host.querySelectorAll('[data-booking-go]').forEach(btn=>btn.addEventListener('click',()=>{
+    const target = btn.dataset.bookingGo;
+    if(target === 'orari') setEditorHub('contenuti');
+    else if(target === 'azioni' || target === 'contatti') setEditorHub('setup');
+    goTo(target);
+  }));
+}
+function tryBookingFlow(){
+  if(!checked('aPrenota')) setFieldValue('aPrenota',true);
+  if(!bookingChannelReady()){
+    const channel = val('bookingChannel') || 'whatsapp';
+    return showToast(channel === 'whatsapp' ? 'Inserisci il numero WhatsApp' : 'Inserisci l’email dell’attività in Contatti','err');
+  }
+  if(checked('bookingUseSlot') && !bookingSlots.length) return showToast('Aggiungi almeno una fascia in Orari','err');
+  changed();
+  openPreview();
+  setTimeout(()=>document.getElementById('preview-booking')?.scrollIntoView({behavior:'smooth',block:'start'}), 200);
+  showToast('Compila il modulo prenotazione e invia la richiesta di prova','ok');
+}
 function renderPrivacySimpleStatus(){
   const host = document.getElementById('privacySimpleStatus');
   if(!host) return;
@@ -4464,7 +4912,70 @@ function renderPrivacySimpleStatus(){
   ];
   host.innerHTML = rows.map(row=>`<div class="privacy-simple-row">${row.ok ? '✓' : '○'}<span>${esc(row.text)}</span></div>`).join('');
 }
-const ORDER_COACH_KEY = 'khamakey_order_coach_v1';
+const ORDER_COACH_KEY = 'khamakey_order_coach_v2';
+const COLLAUDO_KEY = BUSINESS_STORAGE_KEY ? `khamakey-collaudo-done-${BUSINESS_STORAGE_KEY}` : 'khamakey-collaudo-done';
+let collaudoFlowStep = 1;
+function isPageCollaudoReady(){
+  return pageReadyChecks().every(item=>item.ok) && !!cloudPublicPageUrl;
+}
+function openCollaudoWizard(step){
+  collaudoFlowStep = step || 1;
+  renderCollaudoFlowPanel();
+  document.getElementById('collaudoFlowModal')?.classList.add('open');
+}
+function closeCollaudoWizard(markDone=false){
+  if(markDone) storageSet(COLLAUDO_KEY,'1');
+  document.getElementById('collaudoFlowModal')?.classList.remove('open');
+}
+function maybeOpenCollaudoWizard(){
+  if(storageGet(COLLAUDO_KEY) === '1') return;
+  if(!isPageCollaudoReady()) return;
+  setTimeout(()=>openCollaudoWizard(), 600);
+}
+function renderCollaudoFlowPanel(){
+  const host = document.getElementById('collaudoFlowPanel');
+  if(!host) return;
+  document.querySelectorAll('[data-collaudo-step-label]').forEach(el=>{
+    const step = Number(el.dataset.collaudoStepLabel);
+    el.classList.toggle('active', step === collaudoFlowStep);
+    el.classList.toggle('done', step < collaudoFlowStep);
+  });
+  const hasBooking = checked('aPrenota') && bookingReadyChecks().every(item=>item.ok);
+  if(collaudoFlowStep === 1){
+    host.innerHTML = `<h2>Apri la pagina dal telefono</h2><p>Usa il link NFC, oppure scarica il QR e scansionalo con la fotocamera.</p>
+      <div class="setup-flow-actions">
+        <button type="button" class="setup-flow-primary" onclick="openLivePageFromBar()">Apri pagina finale</button>
+        <button type="button" class="setup-flow-secondary" onclick="downloadPublicPageQr()">Scarica QR</button>
+      </div>
+      <div class="setup-flow-actions"><button type="button" class="setup-flow-primary" id="collaudoNext1">Avanti</button></div>`;
+    document.getElementById('collaudoNext1')?.addEventListener('click',()=>{ collaudoFlowStep = 2; renderCollaudoFlowPanel(); });
+    return;
+  }
+  if(collaudoFlowStep === 2){
+    host.innerHTML = `<h2>Prova come un cliente</h2><p>Simula ordine WhatsApp${hasBooking ? ' e prenotazione' : ''}. Non è un pagamento reale.</p>
+      <div class="setup-flow-actions">
+        <button type="button" class="setup-flow-primary" onclick="tryOrderFlow()">Prova ordine</button>
+        ${hasBooking ? `<button type="button" class="setup-flow-secondary" onclick="tryBookingFlow()">Prova prenotazione</button>` : ''}
+      </div>
+      <div class="setup-flow-actions">
+        <button type="button" class="setup-flow-secondary" id="collaudoBack2">Indietro</button>
+        <button type="button" class="setup-flow-primary" id="collaudoNext2">Avanti</button>
+      </div>`;
+    document.getElementById('collaudoBack2')?.addEventListener('click',()=>{ collaudoFlowStep = 1; renderCollaudoFlowPanel(); });
+    document.getElementById('collaudoNext2')?.addEventListener('click',()=>{ collaudoFlowStep = 3; renderCollaudoFlowPanel(); });
+    return;
+  }
+  host.innerHTML = `<h2>Pagina pronta per il chip NFC</h2><p>Hai salvato, aperto e testato il flusso cliente. Ora puoi programmare l’oggetto KhamaKey con il link bloccato.</p>
+    <div class="setup-flow-actions">
+      <button type="button" class="setup-flow-secondary" id="collaudoBack3">Indietro</button>
+      <button type="button" class="setup-flow-primary" id="collaudoFinish">Collaudo completato</button>
+    </div>`;
+  document.getElementById('collaudoBack3')?.addEventListener('click',()=>{ collaudoFlowStep = 2; renderCollaudoFlowPanel(); });
+  document.getElementById('collaudoFinish')?.addEventListener('click',()=>{
+    closeCollaudoWizard(true);
+    showToast('Collaudo registrato. La pagina è pronta per il chip NFC.','ok');
+  });
+}
 function maybeShowOrderCoach(){
   const coach = document.getElementById('orderCoach');
   if(!coach || storageGet(ORDER_COACH_KEY) === '1') return;
@@ -4483,6 +4994,7 @@ function renderQuickStart(){
     {done:!!String(val('nome') || '').trim(), title:'Nome attività', sub:'Come ti vedono i clienti', go:'info'},
     {done:!!String(val('wa') || '').trim(), title:'Numero WhatsApp', sub:'Per ricevere richieste e ordini', go:'azioni'},
     {done:!!String(val('categoria') || '').trim(), title:'Categoria', sub:'Attiva moduli adatti al tuo settore', go:'info'},
+    {done:(checked('showLogo') && document.getElementById('logoImg')?.dataset.src) || (checked('showCover') && document.getElementById('coverImg')?.dataset.src), title:'Logo o copertina', sub:'Dai un volto alla pagina', go:'brand'},
     {done:cats.some(cat=>normalizeCat(cat).voci.some(v=>String(v.nome||v.desc||'').trim())), title:'Almeno 1 voce nel catalogo', sub:'Prodotti, servizi o menu', go:'menu'},
     {done:!dirty, title:'Salva la pagina', sub:dirty ? 'Hai modifiche da salvare' : 'Ultima versione salvata', go:null}
   ];
@@ -4490,13 +5002,16 @@ function renderQuickStart(){
   list.querySelectorAll('[data-quick-go]').forEach(btn=>btn.addEventListener('click',()=>{
     const target = btn.dataset.quickGo;
     if(target === 'menu') setEditorHub('contenuti');
-    else if(target === 'azioni' || target === 'contatti') setEditorHub('setup');
+    else if(target === 'azioni' || target === 'contatti' || target === 'brand') setEditorHub('setup');
     else if(target === 'tracking') setEditorHub('dati');
     goTo(target);
   }));
+  renderPageReadyHead();
   renderOrderReadyStatus();
+  renderBookingReadyStatus();
   renderPrivacySimpleStatus();
   maybeShowOrderCoach();
+  updateSaveBarOpenState();
 }
 
 function digitalConsentRequired(){
@@ -4603,11 +5118,9 @@ function renderBookingBlock(){
 
 function renderCheckout(){
   if(!checked('tCart') || !checkoutOpen) return publicCart.length ? `<div class="pub-cart"><div class="pub-cart-bar"><div><div class="pub-cart-title">${publicCart.length} ${esc(tt('cartItems'))}</div><div class="pub-cart-sub">${formatCartTotal()}</div></div><button class="pub-cart-btn" data-cart-open>${esc(tt('cartGo'))} →</button></div></div>` : '';
-  const paymentOptions = [
-    checked('payCash') ? `<option value="${esc(tt('cash'))}">${esc(tt('cash'))}</option>` : '',
-    checked('payCard') && val('payLink') ? `<option value="${esc(tt('cardOnline'))}">${esc(tt('cardOnline'))}</option>` : ''
-  ].join('') || `<option value="${esc(tt('undefined'))}">${esc(tt('undefined'))}</option>`;
-  const payLink = val('payLink');
+  const paymentOptions = checked('payCash')
+    ? `<option value="${esc(tt('cash'))}">${esc(tt('cash'))}</option><option value="${esc(tt('undefined'))}">${esc(tt('undefined'))}</option>`
+    : `<option value="${esc(tt('undefined'))}">${esc(tt('undefined'))}</option>`;
   const coupon = appliedCoupon();
   const discount = cartDiscountAmount();
   const couponMessage = couponStatus === 'ok' && coupon
@@ -4645,7 +5158,6 @@ function renderCheckout(){
       <textarea class="full" data-checkout="notes" placeholder="${esc(tt('orderNotes'))}"></textarea>
     </div>
     <div class="checkout-actions">
-      ${checked('payCard') && payLink ? `<a class="checkout-pay" href="${esc(safeUrl(payLink))}" target="_blank" rel="noopener">${esc(tt('payOnline'))} ${esc(val('payProvider')||'link')}</a>` : ''}
       <a class="checkout-send" data-send-order href="${esc(checkoutWhatsAppUrl())}">${brandIco('whatsapp')}${esc(tt('sendOrder'))}<span class="checkout-send-note">${esc(tt('sendOrderNote'))}</span></a>
     </div>
   </div>`;
@@ -4707,6 +5219,67 @@ function applyColorTheme(theme){
 }
 function markThemeCustom(){
   document.querySelectorAll('.theme-preset').forEach(btn=>btn.classList.remove('active'));
+  changed();
+}
+const LOGO_DISPLAY_MAP = {
+  s:{size:'small',scale:88,label:'s'},
+  m:{size:'medium',scale:100,label:'m'},
+  l:{size:'large',scale:112,label:'l'},
+  xl:{size:'large',scale:145,label:'xl'}
+};
+const COVER_DISPLAY_HEIGHT = {short:280,medium:340,tall:440};
+const TITLE_SIZE_SCALE = {normal:1,large:1.15,xl:1.32};
+function syncSizePresetButtons(){
+  const logoKey = inferLogoDisplaySize();
+  document.querySelectorAll('[data-logo-size]').forEach(btn=>btn.classList.toggle('active',btn.dataset.logoSize===logoKey));
+  const logoHidden = document.getElementById('pubLogoDisplaySize');
+  if(logoHidden) logoHidden.value = logoKey;
+  const titleKey = ['normal','large','xl'].includes(val('pubTitleSize')) ? val('pubTitleSize') : 'normal';
+  document.querySelectorAll('[data-title-size]').forEach(btn=>btn.classList.toggle('active',btn.dataset.titleSize===titleKey));
+  const coverKey = inferCoverDisplaySize();
+  document.querySelectorAll('[data-cover-size]').forEach(btn=>btn.classList.toggle('active',btn.dataset.coverSize===coverKey));
+  const coverHidden = document.getElementById('pubCoverDisplaySize');
+  if(coverHidden) coverHidden.value = coverKey;
+}
+function inferLogoDisplaySize(){
+  const size = val('pubLogoSize') || 'medium';
+  const scale = Number(val('pubLogoScale')) || 100;
+  if(size === 'small' || scale <= 92) return 's';
+  if(scale >= 135 || (size === 'large' && scale >= 125)) return 'xl';
+  if(size === 'large' || scale >= 108) return 'l';
+  return 'm';
+}
+function inferCoverDisplaySize(){
+  const h = Number(val('pubHeroHeight')) || 340;
+  if(h <= 300) return 'short';
+  if(h >= 400) return 'tall';
+  return 'medium';
+}
+function applyDisplaySize(kind,value){
+  if(kind === 'logo'){
+    const map = LOGO_DISPLAY_MAP[value] || LOGO_DISPLAY_MAP.m;
+    setFieldValue('pubLogoDisplaySize',value);
+    setFieldValue('pubLogoSize',map.size);
+    setFieldValue('pubLogoScale',map.scale);
+    const scaleOut = document.getElementById('pubLogoScaleValue');
+    if(scaleOut) scaleOut.textContent = `${map.scale}%`;
+  }
+  if(kind === 'title'){
+    setFieldValue('pubTitleSize',['normal','large','xl'].includes(value) ? value : 'normal');
+  }
+  if(kind === 'cover'){
+    const key = ['short','medium','tall'].includes(value) ? value : 'medium';
+    setFieldValue('pubCoverDisplaySize',key);
+    const height = COVER_DISPLAY_HEIGHT[key];
+    setFieldValue('pubHeroHeight',height);
+    const heightOut = document.getElementById('pubHeroHeightValue');
+    if(heightOut) heightOut.textContent = `${height} px`;
+  }
+  syncSizePresetButtons();
+  changed();
+}
+function syncDisplaySizeFromFields(){
+  syncSizePresetButtons();
   changed();
 }
 
@@ -4773,8 +5346,10 @@ function renderPublicPreview(){
   const actionStyle = ['icons','cards'].includes(val('pubActionStyle')) ? val('pubActionStyle') : 'icons';
   const coverOrient = coverOrientationClass();
   const titleFont = ['simple','soft'].includes(val('pubTitleFont')) ? val('pubTitleFont') : 'simple';
-  preview.className = `phone-preview-inner public-page-root hero-${val('pubHeroStyle')||'premium'} cards-${val('pubCardStyle')||'soft'} buttons-${val('pubButtonStyle')||'pill'} pub-logo-size-${logoSize} logo-fit-${logoFit} cover-fit-${coverFit} cover-pos-${coverPosition} hero-layout-${heroLayout} actions-style-${actionStyle} title-font-${titleFont}${coverSrc && coverOrient ? ' '+coverOrient : ''}`;
+  const titleSize = ['normal','large','xl'].includes(val('pubTitleSize')) ? val('pubTitleSize') : 'normal';
+  preview.className = `phone-preview-inner public-page-root hero-${val('pubHeroStyle')||'premium'} cards-${val('pubCardStyle')||'soft'} buttons-${val('pubButtonStyle')||'pill'} pub-logo-size-${logoSize} logo-fit-${logoFit} cover-fit-${coverFit} cover-pos-${coverPosition} hero-layout-${heroLayout} actions-style-${actionStyle} title-font-${titleFont} title-size-${titleSize}${coverSrc && coverOrient ? ' '+coverOrient : ''}`;
   preview.style.setProperty('--pub-title-font', titleFont === 'soft' ? "'DM Sans',sans-serif" : "'DM Sans',sans-serif");
+  preview.style.setProperty('--pub-title-scale', String(TITLE_SIZE_SCALE[titleSize] || 1));
   const logoPx = Math.round(logoBaseSize*logoScale/100);
   preview.style.setProperty('--pub-logo-size',`${logoPx}px`);
   preview.style.setProperty('--pub-profile-logo-size',`${Math.round(logoPx * (heroLayout === 'social' ? 1.35 : 1))}px`);
@@ -5206,9 +5781,9 @@ function updWifi(){
     </div>
   </div>
   <div class="card">
-    <div class="card-title">${ico('i-trending')}Analytics avanzate</div>
+    <div class="card-title">${ico('i-trending')}Come leggere i dati</div>
     <div class="field-hint" style="font-size:.82rem;line-height:1.55;margin:0">
-      Le visite e i click principali sono tracciati dal backend. Le viste avanzate saranno completate nella fase analytics.
+      I numeri arrivano da Supabase e non entrano nel salvataggio della pagina. Tap NFC e visite sono registrati dal Worker; click e ordini partono dalla pagina pubblica dopo il consenso cookie (se attivo).
     </div>
   </div>`;
 })();
@@ -5218,7 +5793,7 @@ let dirty = false;
 let cloudHydrating = false;
 let cloudPublicUrl = '';
 let cloudPublicPageUrl = '';
-function applyCloudAnalytics(analytics = {}){
+function applyCloudAnalytics(analytics = {}, meta = {}){
   const statValues = {
     stTap:analytics.nfc,
     stVisite:analytics.visits,
@@ -5251,6 +5826,23 @@ function applyCloudAnalytics(analytics = {}){
   renderAnalyticsBreakdown('statsDevices',analytics.devices,deviceLabel);
   renderAnalyticsBreakdown('statsSources',analytics.sources,sourceLabel);
   renderAnalyticsEvents(analytics.lastEvents || []);
+  const statusEl = document.getElementById('statsStatus');
+  if(statusEl){
+    if(meta.ok === false){
+      statusEl.textContent = meta.error || 'Impossibile caricare le analytics dal cloud. Riprova tra qualche secondo.';
+      statusEl.style.color = 'var(--red)';
+      return;
+    }
+    const updatedAt = analytics.updatedAt ? new Date(analytics.updatedAt) : new Date();
+    const stamp = Number.isFinite(updatedAt.getTime())
+      ? updatedAt.toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})
+      : 'adesso';
+    const totalEvents = Number(analytics.pageViews || 0) + Number(analytics.nfc || 0) + Number(analytics.interactions || 0);
+    statusEl.style.color = '';
+    statusEl.textContent = totalEvents
+      ? `Dati cloud aggiornati alle ${stamp}. Salvataggio editor: non modifica questi numeri.`
+      : `Nessun evento ancora registrato. Apri la pagina pubblica o prova un tap NFC, poi aggiorna. Ultimo controllo: ${stamp}.`;
+  }
 }
 function formatAnalyticsNumber(value){
   return Number.isFinite(Number(value)) ? Number(value).toLocaleString('it-IT') : '0';
@@ -5298,9 +5890,104 @@ const STORAGE_KEY = 'khamakey-editor-preferito-v5-state';
 const BUSINESS_STORAGE_KEY = new URLSearchParams(location.search).get('business');
 const SCOPED_STORAGE_KEY = BUSINESS_STORAGE_KEY ? `${STORAGE_KEY}-${BUSINESS_STORAGE_KEY}` : STORAGE_KEY;
 const WIZARD_KEY = BUSINESS_STORAGE_KEY ? `khamakey-editor-wizard-done-${BUSINESS_STORAGE_KEY}` : 'khamakey-editor-wizard-done';
+const SETUP_FLOW_KEY = BUSINESS_STORAGE_KEY ? `khamakey-editor-setup-flow-${BUSINESS_STORAGE_KEY}` : 'khamakey-editor-setup-flow';
+let setupFlowStep = 1;
+function hasUsableBusinessName(){
+  const name = String(val('nome')||'').trim();
+  return Boolean(name) && !/^(azienda|attività|attivita|business|la mia attività)$/i.test(name);
+}
+function shouldOpenSetupFlow(){
+  if(storageGet(SETUP_FLOW_KEY) === '1') return false;
+  return !hasUsableBusinessName() || !String(val('wa')||'').trim() || !catalogHasItems();
+}
+function setupFlowStartStep(){
+  if(!hasUsableBusinessName()) return 1;
+  if(!String(val('wa')||'').trim()) return 2;
+  if(!catalogHasItems()) return 3;
+  return 1;
+}
+function renderSetupFlowPanel(){
+  const host = document.getElementById('setupFlowPanel');
+  if(!host) return;
+  document.querySelectorAll('[data-setup-step-label]').forEach(el=>{
+    const step = Number(el.dataset.setupStepLabel);
+    el.classList.toggle('active', step === setupFlowStep);
+    el.classList.toggle('done', step < setupFlowStep);
+  });
+  if(setupFlowStep === 1){
+    host.innerHTML = `<h2>Come ti vedono i clienti</h2><p>Il nome compare sulla pagina NFC e nel messaggio WhatsApp.</p>
+      <div class="setup-flow-field"><label>Nome attività</label><input type="text" id="setupFlowNome" value="${esc(val('nome')||'')}" placeholder="es. Ristorante La Piazza"></div>
+      <div class="setup-flow-actions"><button type="button" class="setup-flow-primary" id="setupFlowNext1">Avanti</button></div>`;
+    document.getElementById('setupFlowNext1')?.addEventListener('click',()=>{
+      const nome = String(document.getElementById('setupFlowNome')?.value||'').trim();
+      if(!nome) return showToast('Inserisci il nome attività','err');
+      setFieldValue('nome',nome);
+      changed();
+      setupFlowStep = 2;
+      renderSetupFlowPanel();
+    });
+    return;
+  }
+  if(setupFlowStep === 2){
+    host.innerHTML = `<h2>Dove arrivano le richieste</h2><p>Il cliente invia il carrello su WhatsApp. Non è un pagamento automatico.</p>
+      <div class="setup-flow-field"><label>Numero WhatsApp</label><input type="tel" id="setupFlowWa" value="${esc(val('wa')||'')}" placeholder="+39 333 1234567"></div>
+      <div class="setup-flow-actions">
+        <button type="button" class="setup-flow-secondary" id="setupFlowBack2">Indietro</button>
+        <button type="button" class="setup-flow-primary" id="setupFlowNext2">Avanti</button>
+      </div>`;
+    document.getElementById('setupFlowBack2')?.addEventListener('click',()=>{ setupFlowStep = 1; renderSetupFlowPanel(); });
+    document.getElementById('setupFlowNext2')?.addEventListener('click',()=>{
+      const wa = String(document.getElementById('setupFlowWa')?.value||'').trim();
+      if(!wa) return showToast('Inserisci il numero WhatsApp','err');
+      setFieldValue('wa',wa);
+      setFieldValue('aWhatsApp',true);
+      setFieldValue('aOrdinaWa',true);
+      changed();
+      setupFlowStep = 3;
+      renderSetupFlowPanel();
+    });
+    return;
+  }
+  host.innerHTML = `<h2>La prima voce del catalogo</h2><p>Nome e prezzo bastano. Puoi aggiungerne altre dopo.</p>
+    <div class="setup-flow-field"><label>Nome prodotto o servizio</label><input type="text" id="setupFlowItem" placeholder="es. Margherita / Taglio uomo"></div>
+    <div class="setup-flow-field"><label>Prezzo (facoltativo)</label><input type="text" id="setupFlowPrice" placeholder="€ 12,00"></div>
+    <div class="setup-flow-actions">
+      <button type="button" class="setup-flow-secondary" id="setupFlowBack3">Indietro</button>
+      <button type="button" class="setup-flow-primary" id="setupFlowFinish">Fine e salva</button>
+    </div>`;
+  document.getElementById('setupFlowBack3')?.addEventListener('click',()=>{ setupFlowStep = 2; renderSetupFlowPanel(); });
+  document.getElementById('setupFlowFinish')?.addEventListener('click',()=>{
+    const nome = String(document.getElementById('setupFlowItem')?.value||'').trim();
+    const prezzo = String(document.getElementById('setupFlowPrice')?.value||'').trim();
+    if(!nome) return showToast('Aggiungi almeno una voce','err');
+    if(!cats.length) cats.push({id:Date.now(),nome:'Sezione principale',voci:[]});
+    cats[0].voci.push(normalizeItem({nome,desc:'',prezzo,img:''}));
+    renderCats();
+    changed();
+    finishSetupFlow(true);
+  });
+}
+function openSetupFlow(step){
+  setupFlowStep = step || setupFlowStartStep();
+  renderSetupFlowPanel();
+  document.getElementById('setupFlowModal')?.classList.add('open');
+}
+function closeSetupFlow(){
+  document.getElementById('setupFlowModal')?.classList.remove('open');
+}
+function finishSetupFlow(saveNow=true){
+  storageSet(SETUP_FLOW_KEY,'1');
+  closeSetupFlow();
+  renderQuickStart();
+  if(saveNow) save();
+  showToast('Pagina pronta. Tocca Salva se hai altre modifiche.','ok');
+  setEditorHub('contenuti');
+  goTo('menu');
+}
 function changed(){
   dirty=true;
   document.getElementById('saveBar').classList.add('visible');
+  updateSaveBarOpenState();
   syncActionInputsFromFields();
   updateActionConfigVisibility();
   renderBlockOrder();
@@ -5335,7 +6022,19 @@ function save(){
   dirty=false;
   document.getElementById('saveBar').classList.remove('visible');
   renderQuickStart();
-  showToast(window.parent === window ? 'Salvato in questo browser' : 'Salvataggio cloud richiesto','ok');
+  updateSaveBarOpenState();
+  showToast(window.parent === window ? 'Salvato in questo browser' : 'Salvataggio cloud in corso…','ok');
+}
+function updateSaveBarOpenState(){
+  const btn = document.getElementById('saveBarOpenPage');
+  const qrBtn = document.getElementById('saveBarQr');
+  const tryBtn = document.getElementById('saveBarTryOrder');
+  const canOpen = !dirty && !!cloudPublicPageUrl;
+  const canShare = !dirty && !!publicUrlForShare();
+  const canTry = catalogHasItems() && !!String(val('wa')||'').trim();
+  if(btn) btn.disabled = !canOpen;
+  if(qrBtn) qrBtn.disabled = !canShare;
+  if(tryBtn) tryBtn.disabled = !canTry;
 }
 function showToast(msg,type='ok'){
   const t=document.getElementById('toast');
@@ -5362,9 +6061,9 @@ function buildPublicSnapshot(){
   const preview = document.getElementById('publicPreview');
   const sprite = document.querySelector('body > svg[aria-hidden="true"]');
   return {
-    version:'107',
+    version:'117',
     className:preview.className,
-    style:`--pub-primary:${val('c1')||'#1B2A5E'};--pub-accent:${val('c2')||'#4CAF27'};--pub-page-bg:${val('pubPageBg')||'#F8FAFC'};--pub-block-bg:${val('pubBlockBg')||'#FFFFFF'};--pub-text:${val('pubTextColor')||'#1B2A5E'};--pub-muted:${val('pubMutedColor')||'#64748B'};--pub-title-font:${preview.style.getPropertyValue('--pub-title-font')||"'DM Sans',sans-serif"};--pub-logo-size:${preview.style.getPropertyValue('--pub-logo-size')};--pub-profile-logo-size:${preview.style.getPropertyValue('--pub-profile-logo-size')};--pub-hero-height:${preview.style.getPropertyValue('--pub-hero-height')}`,
+    style:`--pub-primary:${val('c1')||'#1B2A5E'};--pub-accent:${val('c2')||'#4CAF27'};--pub-page-bg:${val('pubPageBg')||'#F8FAFC'};--pub-block-bg:${val('pubBlockBg')||'#FFFFFF'};--pub-text:${val('pubTextColor')||'#1B2A5E'};--pub-muted:${val('pubMutedColor')||'#64748B'};--pub-title-font:${preview.style.getPropertyValue('--pub-title-font')||"'DM Sans',sans-serif"};--pub-title-scale:${preview.style.getPropertyValue('--pub-title-scale')||'1'};--pub-logo-size:${preview.style.getPropertyValue('--pub-logo-size')};--pub-profile-logo-size:${preview.style.getPropertyValue('--pub-profile-logo-size')};--pub-hero-height:${preview.style.getPropertyValue('--pub-hero-height')}`,
     html:`${sprite?.outerHTML||''}${preview.innerHTML}`
   };
 }
@@ -5458,6 +6157,7 @@ function applyState(state){
   updWifi();
   lastCategoryValue = val('categoria');
   updateCategoryHint();
+  syncSizePresetButtons();
 }
 function persistLocalState(){
   const ok = storageSet(SCOPED_STORAGE_KEY, JSON.stringify(collectState()));
@@ -5481,7 +6181,7 @@ window.addEventListener('message', event => {
   const validOrigin = location.protocol === 'file:' ? event.origin === 'null' : event.origin === location.origin;
   if(!validOrigin || event.source !== window.parent) return;
   if(event.data?.type === 'khamakey:analytics') {
-    applyCloudAnalytics(event.data.analytics);
+    applyCloudAnalytics(event.data.analytics,{ok:event.data.ok !== false,error:event.data.error || ''});
     return;
   }
   if(event.data?.type === 'khamakey:open-preview') {
@@ -5492,6 +6192,15 @@ window.addEventListener('message', event => {
     openAccount(event.data.tab || 'profile');
     return;
   }
+  if(event.data?.type === 'khamakey:save-ok') {
+    dirty = false;
+    document.getElementById('saveBar')?.classList.remove('visible');
+    renderQuickStart();
+    updateSaveBarOpenState();
+    showToast('Pagina salvata nel cloud. Puoi aprirla con «Apri pagina».','ok');
+    maybeOpenCollaudoWizard();
+    return;
+  }
   if(event.data?.type !== 'khamakey:load-state') return;
   if(event.data.businessId) window.__khamakeyBusinessId = event.data.businessId;
   if(window.__khamakeyMedia?.setBusinessId) window.__khamakeyMedia.setBusinessId(event.data.businessId || '');
@@ -5500,6 +6209,7 @@ window.addEventListener('message', event => {
   cloudPublicPageUrl = event.data.publicPageUrl || cloudPublicPageUrl;
   const publicUrlShow = document.getElementById('publicUrlShow');
   if(publicUrlShow) publicUrlShow.textContent = cloudPublicUrl || 'Collegamento in preparazione...';
+  updateSaveBarOpenState();
   applyCloudAnalytics(event.data.analytics);
   if(!event.data.state || Object.keys(event.data.state).length === 0) {
     maybeOpenWizard(true);
@@ -5520,6 +6230,11 @@ window.addEventListener('message', event => {
   window.parent.postMessage({type:'khamakey:public-snapshot',state:collectState(true)},'*');
 });
 
+document.getElementById('statsRefreshBtn')?.addEventListener('click', requestAnalyticsRefresh);
+document.getElementById('downloadPublicQr')?.addEventListener('click', downloadPublicPageQr);
+document.getElementById('accountDownloadQr')?.addEventListener('click', downloadPublicPageQr);
+document.getElementById('tryOrderFlowBtn')?.addEventListener('click', tryOrderFlow);
+document.getElementById('tryBookingFlowBtn')?.addEventListener('click', tryBookingFlow);
 document.getElementById('copyPublicUrl')?.addEventListener('click', async () => {
   if(!cloudPublicUrl) return showToast('Link NFC non ancora disponibile','err');
   try {
@@ -5632,14 +6347,20 @@ function applyCategoryPreset(categoryValue, options = {}){
   renderEventsEditor();
   renderBlockOrder();
   changed();
+  const label = cat?.label || value;
+  const openFlow = options.setupFlow !== false && shouldOpenSetupFlow();
   if(options.fromWizard !== false){
     storageSet(WIZARD_KEY,'1');
     wizardModal.classList.remove('open');
   }
-  if(options.save !== false) save();
-  const label = cat?.label || value;
-  if(options.toast !== false) showToast(`Configurazione «${label}» applicata. Catalogo e contenuti già inseriti restano; puoi adattarli o rimuoverli.`,'ok');
-  if(options.fromWizard) document.getElementById('s-info')?.scrollIntoView({behavior:'smooth',block:'start'});
+  if(openFlow){
+    openSetupFlow();
+    if(options.toast !== false) showToast(`«${label}» selezionato. Completa i 3 passaggi.`,'ok');
+  } else {
+    if(options.save !== false) save();
+    if(options.toast !== false) showToast(`Configurazione «${label}» applicata. Catalogo e contenuti già inseriti restano; puoi adattarli o rimuoverli.`,'ok');
+    if(options.fromWizard) document.getElementById('s-info')?.scrollIntoView({behavior:'smooth',block:'start'});
+  }
 }
 function renderCategorySelect(){
   const sel = document.getElementById('categoria');
@@ -5713,11 +6434,22 @@ document.getElementById('categoria')?.addEventListener('change',e=>{
   if(shouldConfirmCategoryPreset()) { e.target.value = lastCategoryValue; return; }
   lastCategoryValue = value;
   applyCategoryPreset(value,{fromWizard:false});
-  document.getElementById('s-info')?.scrollIntoView({behavior:'smooth',block:'start'});
+  if(!document.getElementById('setupFlowModal')?.classList.contains('open')) document.getElementById('s-info')?.scrollIntoView({behavior:'smooth',block:'start'});
 });
 document.getElementById('wizardClose').onclick = () => closeWizard();
 document.getElementById('wizardSkip').onclick = () => closeWizard();
 wizardModal.addEventListener('click',e=>{ if(e.target.id === 'wizardModal') closeWizard(); });
+document.getElementById('collaudoFlowSkip')?.addEventListener('click',()=>{
+  storageSet(COLLAUDO_KEY,'1');
+  closeCollaudoWizard();
+});
+document.getElementById('collaudoFlowModal')?.addEventListener('click',e=>{ if(e.target.id === 'collaudoFlowModal') closeCollaudoWizard(); });
+document.getElementById('setupFlowSkip')?.addEventListener('click',()=>{
+  storageSet(SETUP_FLOW_KEY,'1');
+  closeSetupFlow();
+  showToast('Puoi completare nome, WhatsApp e catalogo quando vuoi dalla checklist.','ok');
+});
+document.getElementById('setupFlowModal')?.addEventListener('click',e=>{ if(e.target.id === 'setupFlowModal') closeSetupFlow(); });
 
 // ══ KHAMA ASSISTANT ══
 const khamaPanel = document.getElementById('khamaPanel');
@@ -5790,7 +6522,6 @@ function khamaLinkIssues(){
     ['maps','Link indicazioni'],
     ['recensioni','Link recensioni'],
     ['sito','Sito web'],
-    ['payLink','Link pagamento'],
     ['externalPrivacyUrl','Privacy esterna'],
     ['ytUrl','Video YouTube'],
     ['ig','Instagram'],
@@ -5988,18 +6719,31 @@ function openPreview(e){
   renderPublicPreview();
   document.getElementById('previewModal').classList.add('open');
 }
+const PREVIEW_DEVICE_KEY = 'khamakey_preview_device_v1';
 function setPreviewDevice(device='phone'){
   const allowed = ['phone','ipad-portrait','ipad-landscape','desktop'];
   const selected = allowed.includes(device) ? device : 'phone';
-  const frame = document.getElementById('phonePreviewFrame');
-  allowed.forEach(name=>frame.classList.toggle(`device-${name}`,selected === name));
+  storageSet(PREVIEW_DEVICE_KEY, selected);
+  const applyDevice = el=>{
+    if(!el) return;
+    allowed.forEach(name=>el.classList.toggle(`device-${name}`, selected === name));
+  };
+  applyDevice(document.getElementById('phonePreviewFrame'));
+  applyDevice(document.getElementById('dockPreviewFrame'));
   document.querySelectorAll('[data-preview-device]').forEach(btn=>{
     btn.classList.toggle('active',btn.dataset.previewDevice === selected);
+  });
+  document.querySelectorAll('[data-dock-device]').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.dockDevice === selected);
   });
 }
 document.querySelectorAll('[data-preview-device]').forEach(btn=>{
   btn.addEventListener('click',()=>setPreviewDevice(btn.dataset.previewDevice));
 });
+document.querySelectorAll('[data-dock-device]').forEach(btn=>{
+  btn.addEventListener('click',()=>setPreviewDevice(btn.dataset.dockDevice));
+});
+setPreviewDevice(storageGet(PREVIEW_DEVICE_KEY) || 'phone');
 document.getElementById('btnPreview').onclick = openPreview;
 document.getElementById('previewFab').onclick = openPreview;
 document.getElementById('dockPreviewExpand')?.addEventListener('click',openPreview);
@@ -6044,7 +6788,11 @@ updateCategoryHint();
   syncOrderBusinessType();
   lastCategoryValue = val('categoria');
 renderPublicPreview();
+updateSaveBarOpenState();
 if(!restoredState) maybeOpenWizard(false);
+setTimeout(()=>{
+  if(!document.getElementById('wizardModal')?.classList.contains('open') && val('categoria') && shouldOpenSetupFlow()) openSetupFlow();
+}, 350);
 window.__khamakeyEditor = {
   collectState,
   applyState,
@@ -6057,7 +6805,7 @@ window.__khamakeyEditor = {
   getPublicLang(){ return publicLang; }
 };
 </script>
-<script type="module" src="editor-international.js?v=107"></script>
-<script type="module" src="editor-media.js?v=107"></script>
+<script type="module" src="editor-international.js?v=117"></script>
+<script type="module" src="editor-media.js?v=117"></script>
 </body>
 </html>

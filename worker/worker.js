@@ -2117,13 +2117,16 @@ function cors(response) {
 
 // Pagine pubbliche renderizzate dal Worker (/p/, /m/): stessa famiglia di header di
 // pages/_headers, con una CSP dedicata (qui non serve esm.sh, servono gli embed YouTube/Spotify).
+// cuxlwaocjqwzluycznyp.supabase.co in img-src/media-src: pagine più vecchie hanno foto caricate
+// direttamente su Supabase Storage prima della migrazione a R2 (verificato via query sui dati
+// reali il 2026-07-11 — NON un wildcard, solo questo dominio specifico. Non allargare a "https:".)
 const PUBLIC_PAGE_CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://khamakey-app.pages.dev",
   "font-src 'self' https://fonts.gstatic.com",
-  "img-src 'self' data: blob: https://img.youtube.com",
-  "media-src 'self' blob:",
+  "img-src 'self' data: blob: https://img.youtube.com https://cuxlwaocjqwzluycznyp.supabase.co",
+  "media-src 'self' blob: https://cuxlwaocjqwzluycznyp.supabase.co",
   "connect-src 'self'",
   "frame-src https://www.youtube.com https://open.spotify.com",
   "object-src 'none'",

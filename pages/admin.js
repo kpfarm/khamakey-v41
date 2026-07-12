@@ -153,6 +153,11 @@ const membersTable = document.getElementById("membersTable");
 const agentsTable = document.getElementById("agentsTable");
 const commissionsTable = document.getElementById("commissionsTable");
 const commissionRulesTable = document.getElementById("commissionRulesTable");
+const commissionSearchInput = document.getElementById("commissionSearchInput");
+const commissionSearchClear = document.getElementById("commissionSearchClear");
+const commissionRefreshBtn = document.getElementById("commissionRefreshBtn");
+const commissionFilterStatus = document.getElementById("commissionFilterStatus");
+const commissionTableCount = document.getElementById("commissionTableCount");
 const productsTable = document.getElementById("productsTable");
 const stockMovementsTable = document.getElementById("stockMovementsTable");
 const platformOrdersTable = document.getElementById("platformOrdersTable");
@@ -1546,28 +1551,92 @@ function refreshAgentsTable(){
   `).join("") : `<tr><td colspan="7">${agentRows.length ? "Nessun agente corrisponde ai filtri." : "Nessun agente registrato."}</td></tr>`;
 }
 
+let commissionRows = [];
+const COMMISSION_STATUS_LABELS = { pending:"Da pagare", approved:"Approvata", paid:"Pagata", cancelled:"Annullata" };
+function commissionStatusLabel(s){ return COMMISSION_STATUS_LABELS[s] || (s || "-"); }
+
 async function loadCommissions(){
   try{
     const { data,error } = await supabase
       .from("platform_commission_events")
-      .select("id,agent_id,event_type,amount,commission_amount,status,tier_level,source_agent_id,platform_agents(contact_name,email,referral_code)")
+      .select("id,agent_id,event_type,amount,commission_amount,status,tier_level,source_type,source_agent_id,rule_snapshot,created_at,platform_agents(contact_name,email,referral_code)")
       .order("created_at",{ascending:false})
-      .limit(50);
+      .limit(200);
     if(error) throw error;
-    const rows = data || [];
-    commissionsTable.innerHTML = rows.length ? rows.map(row=>`
-      <tr>
-        <td><strong>${esc(row.platform_agents?.contact_name || row.platform_agents?.email || row.agent_id)}</strong></td>
-        <td>${esc(row.event_type)}</td>
-        <td>${esc(isSimpleMode() ? simpleTierLabel(row.tier_level) : (TIER_LEVEL_LABELS[row.tier_level] || (row.tier_level ? `L${row.tier_level}` : "Vendita diretta")))}</td>
-        <td>${money(row.amount)}</td>
-        <td>${money(row.commission_amount)}</td>
-        <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
-      </tr>
-    `).join("") : `<tr><td colspan="6">Nessuna provvigione registrata.</td></tr>`;
+    commissionRows = data || [];
+    updateCommissionStats();
+    refreshCommissionsTable();
   }catch(error){
     console.error(error);
-    commissionsTable.innerHTML = `<tr><td colspan="6">Provvigioni non disponibili. Verifica permessi commissions.read.</td></tr>`;
+    commissionsTable.innerHTML = `<tr><td colspan="8">Provvigioni non disponibili. Verifica permessi commissions.read.</td></tr>`;
+  }
+}
+
+function updateCommissionStats(){
+  const sumBy = status => commissionRows.filter(r=>r.status===status).reduce((acc,r)=>acc + Number(r.commission_amount || 0),0);
+  const set = (id,val)=>{ const n = document.getElementById(id); if(n) n.textContent = val; };
+  set("commissionStatPending", money(sumBy("pending")));
+  set("commissionStatApproved", money(sumBy("approved")));
+  set("commissionStatPaid", money(sumBy("paid")));
+  set("commissionStatCount", fmt(commissionRows.length));
+}
+
+function refreshCommissionsTable(){
+  const search = String(commissionSearchInput?.value || "").trim().toLowerCase();
+  const status = commissionFilterStatus?.value || "";
+  const canWrite = hasPermission("commissions.write");
+  const rows = commissionRows.filter(row=>{
+    if(status && row.status !== status) return false;
+    if(search){
+      const orderCode = row.rule_snapshot?.order_code || "";
+      const hay = [row.platform_agents?.contact_name, row.platform_agents?.email, row.event_type, orderCode].join(" ").toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+  if(commissionTableCount) commissionTableCount.textContent = `${fmt(rows.length)} voci`;
+  commissionsTable.innerHTML = rows.length ? rows.map(row=>{
+    const orderCode = row.rule_snapshot?.order_code || "";
+    const actions = canWrite ? commissionActionButtons(row) : "";
+    return `<tr>
+      <td><strong>${esc(row.platform_agents?.contact_name || row.platform_agents?.email || row.agent_id)}</strong></td>
+      <td>${esc(row.event_type)}</td>
+      <td>${esc(isSimpleMode() ? simpleTierLabel(row.tier_level) : (TIER_LEVEL_LABELS[row.tier_level] || (row.tier_level ? `L${row.tier_level}` : "Vendita diretta")))}</td>
+      <td>${orderCode ? `<span class="muted-cell">${esc(orderCode)}</span>` : "-"}</td>
+      <td>${money(row.amount)}</td>
+      <td><strong>${money(row.commission_amount)}</strong></td>
+      <td><span class="status-pill ${esc(row.status)}">${esc(commissionStatusLabel(row.status))}</span></td>
+      <td><div class="row-actions">${actions || "-"}</div></td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="8">Nessuna provvigione in questo stato.</td></tr>`;
+}
+
+function commissionActionButtons(row){
+  const id = esc(row.id);
+  const btn = (status,label)=>`<button type="button" data-commission-set="${id}" data-commission-status="${status}">${label}</button>`;
+  if(row.status === "pending") return btn("approved","Approva") + btn("paid","Segna pagata") + btn("cancelled","Annulla");
+  if(row.status === "approved") return btn("paid","Segna pagata") + btn("cancelled","Annulla");
+  if(row.status === "paid") return btn("pending","Riporta in attesa");
+  if(row.status === "cancelled") return btn("pending","Ripristina");
+  return "";
+}
+
+async function setCommissionStatus(id,status){
+  if(!hasPermission("commissions.write")) return;
+  const row = commissionRows.find(r=>r.id === id);
+  if(!row) return;
+  const prev = row.status;
+  row.status = status; // ottimistico
+  updateCommissionStats();
+  refreshCommissionsTable();
+  try{
+    const { error } = await supabase.from("platform_commission_events").update({ status }).eq("id",id);
+    if(error) throw error;
+  }catch(error){
+    console.error("setCommissionStatus",error);
+    row.status = prev; // rollback in caso di errore
+    updateCommissionStats();
+    refreshCommissionsTable();
   }
 }
 
@@ -3902,6 +3971,16 @@ if(crmTable) crmTable.addEventListener("click",event=>{
 if(crmNotesList) crmNotesList.addEventListener("click",event=>{
   const delBtn = event.target.closest("[data-crm-note-del]");
   if(delBtn) deleteCrmNote(delBtn.dataset.crmNoteDel);
+});
+
+// Gestione provvigioni wiring (v85 complemento)
+if(commissionSearchInput) commissionSearchInput.addEventListener("input",refreshCommissionsTable);
+if(commissionSearchClear) commissionSearchClear.addEventListener("click",()=>{ commissionSearchInput.value=""; refreshCommissionsTable(); });
+if(commissionRefreshBtn) commissionRefreshBtn.addEventListener("click",loadCommissions);
+if(commissionFilterStatus) commissionFilterStatus.addEventListener("change",refreshCommissionsTable);
+if(commissionsTable) commissionsTable.addEventListener("click",event=>{
+  const btn = event.target.closest("[data-commission-set]");
+  if(btn) setCommissionStatus(btn.dataset.commissionSet, btn.dataset.commissionStatus);
 });
 
 platformOrdersTable.addEventListener("click",event=>{

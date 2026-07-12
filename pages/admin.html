@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=122">
+  <link rel="stylesheet" href="admin.css?v=125">
 </head>
 <body>
   <main class="admin-shell locked" id="adminShell">
@@ -810,14 +810,39 @@
                 <span>Attiva: se un cliente è collegato a un agente e passa a Starter/Business/Premium, viene creata una provvigione in attesa.</span>
               </div>
               <div>
-                <strong>Ordini NFC</strong>
-                <span>Preparata ma non agganciata agli ordini catalogo pubblici, per evitare commissioni errate.</span>
+                <strong>Ordini NFC e catalogo</strong>
+                <span>Attiva: ogni ordine con un agente collegato genera automaticamente le provvigioni multilivello (L1/L2/L3) in stato «da pagare».</span>
               </div>
             </div>
+            <div class="inventory-stat-grid" id="commissionStats">
+              <div><span>Da pagare</span><strong id="commissionStatPending">—</strong></div>
+              <div><span>Approvate</span><strong id="commissionStatApproved">—</strong></div>
+              <div><span>Pagate</span><strong id="commissionStatPaid">—</strong></div>
+              <div><span>Voci totali</span><strong id="commissionStatCount">0</strong></div>
+            </div>
+            <div class="inventory-toolbar">
+              <label class="inventory-search">Cerca partner o ordine
+                <input type="search" id="commissionSearchInput" placeholder="Es. nome agente, codice ordine...">
+              </label>
+              <button type="button" class="small-action" id="commissionSearchClear">Pulisci</button>
+              <button type="button" class="small-action" id="commissionRefreshBtn">Aggiorna</button>
+            </div>
+            <div class="inventory-filters inventory-filters-2">
+              <label>Stato
+                <select id="commissionFilterStatus">
+                  <option value="">Tutti</option>
+                  <option value="pending" selected>Da pagare</option>
+                  <option value="approved">Approvate</option>
+                  <option value="paid">Pagate</option>
+                  <option value="cancelled">Annullate</option>
+                </select>
+              </label>
+            </div>
+            <p class="inventory-table-meta"><span id="commissionTableCount">0 voci</span></p>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Partner</th><th>Motivo</th><th>Chi ha venduto</th><th>Totale</th><th>Spetta</th><th>Stato</th></tr></thead>
-                <tbody id="commissionsTable"><tr><td colspan="6">Caricamento provvigioni...</td></tr></tbody>
+                <thead><tr><th>Partner</th><th>Motivo</th><th>Livello</th><th>Ordine</th><th>Totale</th><th>Spetta</th><th>Stato</th><th>Azioni</th></tr></thead>
+                <tbody id="commissionsTable"><tr><td colspan="8">Caricamento provvigioni...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -1793,6 +1818,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=122"></script>
+  <script type="module" src="admin.js?v=125"></script>
 </body>
 </html>

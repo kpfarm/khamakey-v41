@@ -290,3 +290,5 @@ textarea{width:100%;border:1px solid var(--border);border-radius:10px;background
 .crm-status-pill.attivo{background:#D1FADF;color:#027A48}
 .crm-status-pill.perso{background:#F2F4F7;color:#667085}
 .crm-follow-due{color:#B42318;font-weight:800}
+
+.status-pill.approved{background:#EFF8FF;color:#175CD3}

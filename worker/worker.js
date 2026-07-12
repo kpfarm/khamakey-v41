@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v118-moments-premium-css";
+const WORKER_VERSION = "v123-openai-batch-translations";
 
 export default {
   async fetch(request, env, ctx) {
@@ -3233,12 +3233,15 @@ function extractTranslatableStrings(state = {}) {
   return map;
 }
 
-async function translateStringsWithOpenAI(env, strings, targetLocale) {
+// Traduce verso TUTTE le lingue richieste in UNA sola chiamata OpenAI (invece di una per lingua):
+// stesso risultato, −75% di chiamate a pagamento. Ritorna { locale: { fieldPath: testo } }.
+async function translateStringsAllLocales(env, strings, locales) {
   const entries = Object.entries(strings || {});
-  if (!entries.length) return {};
+  if (!entries.length || !locales.length) return {};
   if (!openaiConfigured(env)) {
     throw new Error("Servizio traduzioni non ancora attivo. Riprova tra poco.");
   }
+  const localeList = locales.map(l => `${l} (${LOCALE_LABELS[l] || l})`).join(", ");
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -3252,7 +3255,7 @@ async function translateStringsWithOpenAI(env, strings, targetLocale) {
       messages: [
         {
           role: "system",
-          content: `Translate Italian business page content to ${LOCALE_LABELS[targetLocale] || targetLocale}. Return ONLY valid JSON where each key is the input key and each value is the translated string. Keep brand names, prices, phone numbers, emails and URLs unchanged. Use natural tourist-friendly language.`
+          content: `Translate the given Italian business page fields into these languages: ${localeList}. Return ONLY valid JSON shaped as { "<localeCode>": { "<fieldKey>": "<translation>" } } covering every requested locale code and every field key. Keep brand names, prices, phone numbers, emails and URLs unchanged. Use natural tourist-friendly language.`
         },
         {
           role: "user",
@@ -3263,7 +3266,7 @@ async function translateStringsWithOpenAI(env, strings, targetLocale) {
   });
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
-    console.error("OpenAI translate error", targetLocale, response.status, detail.slice(0, 300));
+    console.error("OpenAI translate-all error", response.status, detail.slice(0, 300));
     throw new Error("Traduzione temporaneamente non disponibile.");
   }
   const payload = await response.json();
@@ -3272,15 +3275,20 @@ async function translateStringsWithOpenAI(env, strings, targetLocale) {
   try {
     parsed = JSON.parse(content);
   } catch (error) {
-    console.error("OpenAI JSON parse error", error, content.slice(0, 300));
+    console.error("OpenAI JSON parse error (all locales)", error, content.slice(0, 300));
     throw new Error("Risposta traduzione non valida.");
   }
-  const out = {};
-  entries.forEach(([path]) => {
-    const translated = String(parsed[path] || "").trim();
-    if (translated) out[path] = translated;
-  });
-  return out;
+  const result = {};
+  for (const locale of locales) {
+    const localeMap = parsed[locale] && typeof parsed[locale] === "object" ? parsed[locale] : {};
+    const out = {};
+    entries.forEach(([path]) => {
+      const translated = String(localeMap[path] || "").trim();
+      if (translated) out[path] = translated;
+    });
+    result[locale] = out;
+  }
+  return result;
 }
 
 async function supabaseUserRest(env, jwt, path, options = {}) {
@@ -3379,10 +3387,7 @@ async function handleBusinessInternationalize(request, env) {
       return cors(json({ error: "Aggiungi almeno nome o descrizione prima di attivare le lingue." }, 400));
     }
 
-    const translations = {};
-    for (const locale of TARGET_LOCALES) {
-      translations[locale] = await translateStringsWithOpenAI(env, strings, locale);
-    }
+    const translations = await translateStringsAllLocales(env, strings, TARGET_LOCALES);
     await persistBusinessTranslations(env, jwt, businessId, translations, strings).catch(error => {
       console.warn("persistBusinessTranslations", error);
     });
@@ -3415,10 +3420,7 @@ async function handleBusinessSyncTranslations(request, env) {
       return cors(json({ error: "Non puoi modificare questa attività." }, 403));
     }
 
-    const translations = {};
-    for (const locale of TARGET_LOCALES) {
-      translations[locale] = await translateStringsWithOpenAI(env, strings, locale);
-    }
+    const translations = await translateStringsAllLocales(env, strings, TARGET_LOCALES);
     const rows = [];
     Object.entries(translations).forEach(([locale, map]) => {
       Object.entries(map || {}).forEach(([fieldPath, translatedText]) => {

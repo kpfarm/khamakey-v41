@@ -817,17 +817,25 @@ function renderMomentPage(page, origin) {
   const ogImage = coverUrl || profileUrl || "";
   const navClass = navHtml ? " has-nav" : "";
   const isTravel = momentType === "travel";
-  const bottomNavHtml = isTravel
-    ? `<nav class="moment-bottom-nav">
-<a href="#moment-hero" class="active" data-bottom-sec="moment-hero">🏠</a>
-<a href="#moment-section-timeline" data-bottom-sec="moment-section-timeline">🧭</a>
-<button class="plus-btn" id="btnAddMemory" aria-label="Aggiungi ricordo">＋</button>
-<a href="#moment-section-dreams" data-bottom-sec="moment-section-dreams">🔖</a>
-<a href="#moment-section-rsvp" data-bottom-sec="moment-section-rsvp">👤</a>
-</nav>`
+  const visibleSectionKeys = new Set(ordered.map(({ key }) => key));
+  const travelNavCandidates = [
+    { id: "moment-section-timeline", key: "timeline", icon: "🧭", label: "Tappe" },
+    { id: "moment-section-gallery", key: "gallery", icon: "🖼️", label: "Foto" },
+    { id: "moment-section-dreams", key: "dreams", icon: "🔖", label: "Lista" },
+    { id: "moment-section-rsvp", key: "rsvp", icon: "👤", label: "RSVP" }
+  ].filter(item => visibleSectionKeys.has(item.key));
+  const canAddMemory = isTravel && visibleSectionKeys.has("guestbook");
+  const travelNavLinks = [
+    `<a href="#moment-hero" class="active" data-bottom-sec="moment-hero" aria-label="Inizio">🏠</a>`,
+    ...travelNavCandidates.slice(0, 2).map(item => `<a href="#${attr(item.id)}" data-bottom-sec="${attr(item.id)}" aria-label="${attr(item.label)}">${item.icon}</a>`),
+    canAddMemory ? `<button class="plus-btn" id="btnAddMemory" aria-label="Aggiungi ricordo">＋</button>` : "",
+    ...travelNavCandidates.slice(2, 4).map(item => `<a href="#${attr(item.id)}" data-bottom-sec="${attr(item.id)}" aria-label="${attr(item.label)}">${item.icon}</a>`)
+  ].filter(Boolean);
+  const bottomNavHtml = isTravel && travelNavLinks.length > 1
+    ? `<nav class="moment-bottom-nav">${travelNavLinks.join("")}</nav>`
     : "";
 
-  const memoryModalHtml = isTravel
+  const memoryModalHtml = canAddMemory
     ? `<dialog class="moment-memory-modal" id="momentMemoryModal">
 <div class="moment-memory-modal-content">
 <button class="moment-memory-modal-close" id="btnCloseMemoryModal">×</button>
@@ -1513,15 +1521,17 @@ document.querySelectorAll("[data-guestbook-slug]").forEach(function(section){
   var btnClose = document.getElementById("btnCloseMemoryModal");
   if(btnAdd && modal){
     btnAdd.addEventListener("click", function(){
-      modal.showModal();
+      if(typeof modal.showModal === "function") modal.showModal();
+      else modal.setAttribute("open", "");
     });
   }
   if(btnClose && modal){
     btnClose.addEventListener("click", function(){
-      modal.close();
+      if(typeof modal.close === "function") modal.close();
+      else modal.removeAttribute("open");
     });
   }
-  
+
   // Close on clicking backdrop
   if(modal){
     modal.addEventListener("click", function(e){
@@ -1529,7 +1539,8 @@ document.querySelectorAll("[data-guestbook-slug]").forEach(function(section){
       var isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
         rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
       if (!isInDialog) {
-        modal.close();
+        if(typeof modal.close === "function") modal.close();
+        else modal.removeAttribute("open");
       }
     });
   }
@@ -1569,7 +1580,8 @@ document.querySelectorAll("[data-guestbook-slug]").forEach(function(section){
         }
         // Success feedback and close modal
         setTimeout(function(){
-          modal.close();
+          if(typeof modal.close === "function") modal.close();
+          else modal.removeAttribute("open");
           if(modalStatus) modalStatus.hidden = true;
           // Refresh page's guestbook list if present
           document.querySelectorAll("[data-guestbook-slug]").forEach(function(sec){
@@ -1609,11 +1621,13 @@ document.querySelectorAll("[data-guestbook-slug]").forEach(function(section){
     function syncBottomNav(){
       var y = window.pageYOffset || window.scrollY || 0;
       var current = "moment-hero";
-      var bottomIds = ["moment-hero", "moment-section-timeline", "moment-section-dreams", "moment-section-rsvp"];
+      var bottomIds = Array.prototype.map.call(bottomNavLinks, function(a){
+        return a.getAttribute("data-bottom-sec");
+      }).filter(Boolean);
       var windowH = window.innerHeight;
       var docH = document.documentElement.scrollHeight;
       if(y + windowH >= docH - 24) {
-        current = "moment-section-rsvp";
+        current = bottomIds[bottomIds.length - 1] || current;
       } else {
         bottomIds.forEach(function(id){
           var node = document.getElementById(id);
@@ -2046,7 +2060,7 @@ main.moment-type-travel {
 }
 
 /* High contrast deep charcoal for titles */
-.moment-type-travel h1, 
+.moment-type-travel h1,
 .moment-type-travel .moment-card-title,
 .moment-type-travel .moment-card-head strong {
   color: #0f172a !important;

@@ -27,7 +27,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ### Changed
 - **Restyling Premium CSS Moments (2026-07-12, Antigravity)**
-  - Aggiornata `momentPageCss` in `worker/worker.js` (Worker NFC v120) per implementare un design adattivo premium guidato sia dai parametri generali del tema che dalla categoria specifica dell'evento (es. Polaroid ruotate per Travel, card soffici e icone oscillanti per Baby, ombre neon glow per Birthday, ed estremo minimalismo opaco per Memorial).
+  - Aggiornata `momentPageCss` in `worker/worker.js` (Worker NFC v121) per implementare un design adattivo premium guidato sia dai parametri generali del tema che dalla categoria specifica dell'evento (es. Polaroid ruotate per Travel, card soffici e icone oscillanti per Baby, ombre neon glow per Birthday, ed estremo minimalismo opaco per Memorial).
+  - Risolto il problema del Lightbox e delle frecce visibili sopra la Hero, assicurando che il contatore "Insieme da" sia visibile e formattato correttamente.
+  - Migliorati gli spazi generali delle sezioni, incrementato il contrasto del testo a 0.96 per una leggibilità ottimale, e ottimizzate le icone (badge 3D con ombre) e gli elementi accessori (washi tape sulle polaroid, mappe in stile boarding pass, cornici dei player musicali e bottoni con effetto shine animato).
 
 ### Security
 - **Follow-up Moments (2026-07-11, Codex)** — non ancora committato/deployato

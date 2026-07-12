@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v124-openai-incremental-translations";
+const WORKER_VERSION = "v125-travel-scrapbook-overhaul";
 
 export default {
   async fetch(request, env, ctx) {
@@ -816,6 +816,37 @@ function renderMomentPage(page, origin) {
     ? `<img class="moment-profile" src="${attr(profileUrl)}" alt="">` : "";
   const ogImage = coverUrl || profileUrl || "";
   const navClass = navHtml ? " has-nav" : "";
+  const isTravel = momentType === "travel";
+  const bottomNavHtml = isTravel
+    ? `<nav class="moment-bottom-nav">
+<a href="#moment-hero" class="active" data-bottom-sec="moment-hero">🏠</a>
+<a href="#moment-section-timeline" data-bottom-sec="moment-section-timeline">🧭</a>
+<button class="plus-btn" id="btnAddMemory" aria-label="Aggiungi ricordo">＋</button>
+<a href="#moment-section-dreams" data-bottom-sec="moment-section-dreams">🔖</a>
+<a href="#moment-section-rsvp" data-bottom-sec="moment-section-rsvp">👤</a>
+</nav>`
+    : "";
+
+  const memoryModalHtml = isTravel
+    ? `<dialog class="moment-memory-modal" id="momentMemoryModal">
+<div class="moment-memory-modal-content">
+<button class="moment-memory-modal-close" id="btnCloseMemoryModal">×</button>
+<h3>Condividi un Ricordo</h3>
+<p>Lascia un pensiero o un augurio nel libro dei ricordi del viaggio.</p>
+<form class="moment-guestbook-form" id="modalGuestbookForm">
+<label>Il tuo nome
+<input type="text" name="guestbook_name" required placeholder="Es. Alessandro Rossi" autocomplete="name">
+</label>
+<label>Il tuo messaggio / ricordo
+<textarea name="guestbook_message" rows="4" required placeholder="Scrivi il tuo ricordo o dedica del viaggio..."></textarea>
+</label>
+<button type="submit" class="moment-guestbook-submit">Invia Ricordo</button>
+</form>
+<p class="moment-guestbook-status" id="modalGuestbookStatus" hidden></p>
+</div>
+</dialog>`
+    : "";
+
   return `<!doctype html>
 <html lang="it">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -844,6 +875,8 @@ ${profileBlock}
 <button type="button" class="moment-lightbox-nav moment-lightbox-next" id="momentLightboxNext" aria-label="Successivo">›</button>
 <button type="button" class="moment-lightbox-close" id="momentLightboxClose" aria-label="Chiudi">×</button>
 <div class="moment-lightbox-card"><div id="momentLightboxMedia"></div><p class="moment-lightbox-counter" id="momentLightboxCounter"></p><h3 class="moment-lightbox-title" id="momentLightboxTitle"></h3><p class="moment-lightbox-desc" id="momentLightboxDesc"></p></div></div>
+${bottomNavHtml}
+${memoryModalHtml}
 <script>${momentPageScript(state, ordered, hasCounter, page.slug || "")}</script>
 </body></html>`;
 }
@@ -1472,6 +1505,132 @@ document.querySelectorAll("[data-guestbook-slug]").forEach(function(section){
     });
   }
 });
+
+// Travel bottom-nav and modal dialog script
+(function(){
+  var btnAdd = document.getElementById("btnAddMemory");
+  var modal = document.getElementById("momentMemoryModal");
+  var btnClose = document.getElementById("btnCloseMemoryModal");
+  if(btnAdd && modal){
+    btnAdd.addEventListener("click", function(){
+      modal.showModal();
+    });
+  }
+  if(btnClose && modal){
+    btnClose.addEventListener("click", function(){
+      modal.close();
+    });
+  }
+  
+  // Close on clicking backdrop
+  if(modal){
+    modal.addEventListener("click", function(e){
+      var rect = modal.getBoundingClientRect();
+      var isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
+        rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
+      if (!isInDialog) {
+        modal.close();
+      }
+    });
+  }
+
+  // Handle modal guestbook submission
+  var modalForm = document.getElementById("modalGuestbookForm");
+  var modalStatus = document.getElementById("modalGuestbookStatus");
+  if(modalForm){
+    modalForm.addEventListener("submit", function(e){
+      e.preventDefault();
+      var fd = new FormData(modalForm);
+      var payload = {
+        slug: "${momentSlug}",
+        pin: momentPin,
+        values: {
+          name: String(fd.get("guestbook_name") || "").trim(),
+          message: String(fd.get("guestbook_message") || "").trim()
+        }
+      };
+      if(modalStatus){
+        modalStatus.hidden = false;
+        modalStatus.textContent = "Invio in corso…";
+        modalStatus.className = "moment-guestbook-status";
+      }
+      fetch("/api/moment/guestbook", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+      })
+      .then(function(res){ return res.json().then(function(data){ return {ok: res.ok, data: data}; }); })
+      .then(function(result){
+        if(!result.ok) throw new Error((result.data && result.data.error) || "Invio non riuscito");
+        modalForm.reset();
+        if(modalStatus){
+          modalStatus.textContent = "Grazie! Il messaggio è in attesa di approvazione.";
+          modalStatus.className = "moment-guestbook-status ok";
+        }
+        // Success feedback and close modal
+        setTimeout(function(){
+          modal.close();
+          if(modalStatus) modalStatus.hidden = true;
+          // Refresh page's guestbook list if present
+          document.querySelectorAll("[data-guestbook-slug]").forEach(function(sec){
+            var list = sec.querySelector("[data-guestbook-list]");
+            var slug = sec.getAttribute("data-guestbook-slug") || "";
+            if(slug && list) {
+              var url = "/api/moment/guestbook?slug=" + encodeURIComponent(slug) + (momentPin ? "&pin=" + encodeURIComponent(momentPin) : "");
+              fetch(url).then(function(res){ return res.json(); }).then(function(data){
+                if(data && data.ok) {
+                  function escText(v){return String(v||"").replace(/[&<>"']/g,function(ch){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch];});}
+                  function formatDate(v){try{return new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(v));}catch(e){return "";}}
+                  if(!data.messages || !data.messages.length){
+                    list.innerHTML = '<p class="moment-guestbook-empty">Sii il primo a lasciare un pensiero.</p>';
+                  } else {
+                    list.innerHTML = data.messages.map(function(item){
+                      return '<article class="moment-guestbook-card"><p class="moment-guestbook-quote">“'+escText(item.message)+'”</p><p class="moment-guestbook-author">— '+escText(item.guest_name)+(item.created_at?' · '+escText(formatDate(item.created_at)):"")+'</p></article>';
+                    }).join("");
+                  }
+                }
+              });
+            }
+          });
+        }, 1500);
+      })
+      .catch(function(err){
+        if(modalStatus){
+          modalStatus.textContent = err.message || "Invio non riuscito. Riprova.";
+          modalStatus.className = "moment-guestbook-status error";
+        }
+      });
+    });
+  }
+
+  // Active Bottom Nav link sync on scroll
+  var bottomNavLinks = document.querySelectorAll(".moment-bottom-nav a");
+  if(bottomNavLinks.length){
+    function syncBottomNav(){
+      var y = window.pageYOffset || window.scrollY || 0;
+      var current = "moment-hero";
+      var bottomIds = ["moment-hero", "moment-section-timeline", "moment-section-dreams", "moment-section-rsvp"];
+      var windowH = window.innerHeight;
+      var docH = document.documentElement.scrollHeight;
+      if(y + windowH >= docH - 24) {
+        current = "moment-section-rsvp";
+      } else {
+        bottomIds.forEach(function(id){
+          var node = document.getElementById(id);
+          if(node && node.getBoundingClientRect().top + y - (windowH * 0.35) <= y) {
+            current = id;
+          }
+        });
+      }
+      bottomNavLinks.forEach(function(a){
+        a.classList.toggle("active", a.getAttribute("data-bottom-sec") === current);
+      });
+    }
+    window.addEventListener("scroll", syncBottomNav, {passive:true});
+    syncBottomNav();
+  }
+})();
+
 var lb=document.getElementById("momentLightbox");
 if(lb){
 var media=[];document.querySelectorAll(".moment-gallery-data").forEach(function(node){try{media=media.concat(JSON.parse(node.textContent||"[]"));}catch(e){}});
@@ -1872,35 +2031,119 @@ body.nav-open{overflow:hidden}
   transform: scale(1.3);
 }
 
-/* 2. TRAVEL & ADVENTURE: Polaroid Scrapbook & Boarding Pass */
+/* 2. TRAVEL & ADVENTURE: Web-App layout, bottom nav, dialog and high contrast */
 main.moment-type-travel {
-  background-color: #f6f1e5 !important;
-  background-image: radial-gradient(rgba(170, 150, 130, 0.18) 1.5px, transparent 1.5px) !important;
+  background-color: #faf8f3 !important;
+  background-image: radial-gradient(rgba(190, 70, 31, 0.12) 1.5px, transparent 1.5px) !important;
   background-size: 20px 20px !important;
   background-position: 0 0 !important;
+  padding-bottom: 96px !important; /* Space for sticky bottom nav */
 }
 
-.moment-type-travel .moment-hero h1,
-.moment-type-travel .moment-hero p,
-.moment-palette-terracotta .moment-hero h1,
-.moment-palette-terracotta .moment-hero p {
-  text-shadow: none !important;
+/* Page global fonts override for travel */
+.moment-type-travel, .moment-type-travel * {
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
+/* High contrast deep charcoal for titles */
+.moment-type-travel h1, 
+.moment-type-travel .moment-card-title,
+.moment-type-travel .moment-card-head strong {
+  color: #0f172a !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+
+.moment-type-travel .moment-card-title {
+  font-weight: 800 !important;
+  font-size: 1rem !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.moment-type-travel .moment-card-title::after {
+  content: "" !important;
+  flex-grow: 1 !important;
+  height: 1px !important;
+  background: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Dynamic Hero Section */
+.moment-type-travel .moment-hero {
+  position: relative !important;
+  height: 380px !important;
+  border-radius: 0 0 32px 32px !important;
+  overflow: hidden !important;
+  margin-bottom: 20px !important;
+  box-shadow: 0 20px 40px rgba(139, 69, 19, 0.12) !important;
+}
+
+.moment-type-travel .moment-hero-content {
+  position: absolute !important;
+  bottom: 32px !important;
+  left: 20px !important;
+  right: 20px !important;
+  color: #ffffff !important;
+  text-align: left !important;
+  z-index: 5 !important;
+}
+
+.moment-type-travel .moment-hero h1 {
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 2.1rem !important;
+  margin-bottom: 8px !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: uppercase !important;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.5) !important;
+  color: #ffffff !important;
+}
+
+.moment-type-travel .moment-hero p {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 0.95rem !important;
+  opacity: 0.95 !important;
+  line-height: 1.4 !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.4) !important;
+  color: #ffffff !important;
+}
+
+/* Card layout overrides for Travel */
 .moment-type-travel .moment-card,
 .moment-type-travel .moment-counter,
 .moment-type-travel .moment-countdown,
 .moment-type-travel .moment-quote-wrap,
 .moment-type-travel .moment-signature {
-  background: #fafafa !important;
-  border: 1px solid rgba(0,0,0,0.06) !important;
-  box-shadow: 0 8px 24px -6px rgba(17,32,65,0.08) !important;
-  border-radius: 12px !important; /* Slightly sharper, notebook-like corners */
+  background: #ffffff !important;
+  border-radius: 28px !important;
+  padding: 24px !important;
+  margin-bottom: 20px !important;
+  box-shadow: 0 16px 36px -12px rgba(139, 69, 19, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
 }
 
+/* Counter & Countdown styling */
+.moment-type-travel .moment-counter-label,
+.moment-type-travel .moment-countdown-label {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  color: #be461f !important;
+  text-transform: uppercase !important;
+}
+.moment-type-travel .moment-counter-unit b,
+.moment-type-travel .moment-countdown-unit b {
+  color: #be461f !important;
+}
+
+/* Timeline Polaroid overrides */
 .moment-type-travel .moment-journey-item {
   background: #fdfcf9 !important;
-  border: 1px solid rgba(0,0,0,0.06) !important;
+  border: 1.5px solid rgba(139, 69, 19, 0.08) !important;
   padding: 14px 14px 38px 14px !important; /* Thick bottom border */
   box-shadow: 0 12px 28px -6px rgba(17,32,65,0.18) !important;
   border-radius: 2px !important; /* Sharp corners like raw paper polaroid */
@@ -1949,7 +2192,7 @@ main.moment-type-travel {
   top: -24px !important;
   width: 2px !important;
   height: 24px !important;
-  border-left: 2px dashed ${c.go}77 !important;
+  border-left: 2px dashed #be461f88 !important;
   background: transparent !important;
 }
 .moment-type-travel .moment-journey-item:first-child::before {
@@ -1998,7 +2241,7 @@ main.moment-type-travel {
   font-family: 'Special Elite', monospace !important;
   font-size: 1.05rem !important;
   font-weight: 600 !important;
-  color: ${c.ink} !important;
+  color: #0f172a !important;
   margin-top: 4px !important;
 }
 
@@ -2006,8 +2249,8 @@ main.moment-type-travel {
 .moment-type-travel .moment-card-head .moment-card-icon,
 .moment-type-travel .moment-card-icon {
   background: transparent !important;
-  border: 3px double ${c.go}bb !important;
-  color: ${c.go}bb !important;
+  border: 3px double #be461fbb !important;
+  color: #be461fbb !important;
   width: 56px !important;
   height: 56px !important;
   border-radius: 50% !important;
@@ -2031,7 +2274,7 @@ main.moment-type-travel {
 /* Geocodifica a Boarding Pass (Mappe) */
 .moment-type-travel .moment-place {
   background: #ffffff !important;
-  border: 1px dashed ${c.lineStrong} !important;
+  border: 1px dashed rgba(139, 69, 19, 0.15) !important;
   border-radius: 12px !important;
   padding: 16px 20px !important;
   position: relative !important;
@@ -2048,9 +2291,9 @@ main.moment-type-travel {
   top: 50% !important;
   width: 14px !important;
   height: 14px !important;
-  background: #f6f1e5 !important; /* matches grid paper background */
+  background: #faf8f3 !important; /* matches grid paper background */
   border-radius: 50% !important;
-  border: 1px solid ${c.lineStrong} !important;
+  border: 1px solid rgba(139, 69, 19, 0.15) !important;
   z-index: 2 !important;
 }
 .moment-type-travel .moment-place::before {
@@ -2061,6 +2304,217 @@ main.moment-type-travel {
   right: -7px !important;
   transform: translateY(-50%) !important;
 }
+
+/* Dreams Bucket List Checklist overrides */
+.moment-type-travel .moment-dreams {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin-top: 16px !important;
+}
+
+.moment-type-travel .moment-dream {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 14px 18px !important;
+  background: #faf7f2 !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(0,0,0,0.02) !important;
+  border-bottom: 1px solid rgba(0,0,0,0.02) !important;
+  transition: background 0.2s !important;
+}
+
+.moment-type-travel .moment-dream-text {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 0.95rem !important;
+  color: #374151 !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  opacity: 1 !important;
+}
+
+.moment-type-travel .moment-dream.done .moment-dream-text {
+  color: #9ca3af !important;
+  text-decoration: line-through !important;
+  opacity: 0.6 !important;
+}
+
+.moment-type-travel .moment-dream-mark {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 6px !important;
+  border: 2px solid #e5e7eb !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 0.75rem !important;
+  font-weight: bold !important;
+  background: #ffffff !important;
+  color: transparent !important;
+  transition: all 0.2s !important;
+  order: 2 !important; /* Move checklist boxes to the right like mockup */
+}
+
+.moment-type-travel .moment-dream.done .moment-dream-mark {
+  background: #be461f !important;
+  color: #ffffff !important;
+  border: 0 !important;
+}
+
+/* Gallery layout in 2-column grid override */
+.moment-type-travel .moment-gallery {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.moment-type-travel .moment-gallery img {
+  border-radius: 16px !important;
+  aspect-ratio: 1 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04) !important;
+}
+
+/* Primary/Secondary Buttons */
+.moment-type-travel .moment-rsvp-submit,
+.moment-type-travel .moment-guestbook-submit,
+.moment-type-travel .btn-primary-travel {
+  background: #be461f !important;
+  box-shadow: 0 8px 24px rgba(190, 70, 31, 0.25) !important;
+  border-radius: 16px !important;
+  padding: 15px !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+/* Floating Bottom Navigation Bar */
+.moment-bottom-nav {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: calc(100% - 32px) !important;
+  max-width: 398px !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  border-radius: 30px !important;
+  display: flex !important;
+  justify-content: space-around !important;
+  align-items: center !important;
+  padding: 10px 16px !important;
+  box-shadow: 0 16px 40px rgba(139, 69, 19, 0.12) !important;
+  z-index: 1000 !important;
+}
+
+.moment-bottom-nav a {
+  color: #9ca3af !important;
+  font-size: 1.4rem !important;
+  text-decoration: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  transition: all 0.25s ease !important;
+}
+
+.moment-bottom-nav a.active {
+  color: #be461f !important;
+}
+
+.moment-bottom-nav button.plus-btn {
+  background: #3c594c !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 16px rgba(60, 89, 76, 0.3) !important;
+  border: 0 !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  font-size: 1.4rem !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.25s ease !important;
+}
+
+.moment-bottom-nav button.plus-btn:hover {
+  transform: scale(1.05) !important;
+}
+
+/* Add Memory Modal Dialog */
+.moment-memory-modal {
+  border: 0 !important;
+  border-radius: 28px !important;
+  padding: 24px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25) !important;
+  max-width: min(90vw, 420px) !important;
+  width: 100% !important;
+  margin: auto !important;
+  outline: none !important;
+}
+
+.moment-memory-modal::backdrop {
+  background: rgba(15, 23, 42, 0.4) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+
+.moment-memory-modal-content {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+.moment-memory-modal-close {
+  position: absolute !important;
+  top: -8px !important;
+  right: -8px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: #f3f4f6 !important;
+  border: 0 !important;
+  color: #374151 !important;
+  font-size: 1.25rem !important;
+  cursor: pointer !important;
+  display: grid !important;
+  place-items: center !important;
+}
+
+.moment-memory-modal h3 {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  margin-bottom: 4px !important;
+}
+
+.moment-memory-modal p {
+  font-size: 0.9rem !important;
+  color: #4b5563 !important;
+  line-height: 1.4 !important;
+}
+
+.moment-memory-modal input,
+.moment-memory-modal textarea {
+  width: 100% !important;
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  padding: 12px !important;
+  margin-top: 6px !important;
+}
+
+
 
 /* 3. BABY & KIDS: Cloudland & Playful cloud-shapes */
 .moment-type-baby .moment-card,

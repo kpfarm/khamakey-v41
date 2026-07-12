@@ -60,7 +60,15 @@ function renderMessageCard(row){
         <button type="button" class="primary guestbook-approve-btn" data-guestbook-approve="${esc(row.message_id)}">Approva</button>
         <button type="button" class="ghost guestbook-reject-btn" data-guestbook-reject="${esc(row.message_id)}">Rifiuta</button>
       </div>`
-    : `<p class="guestbook-card-status ${esc(row.status)}">${esc(statusLabel(row.status))}${row.moderated_at ? ` · ${esc(formatWhen(row.moderated_at))}` : ""}</p>`;
+    : row.status === "approved"
+    ? `<div class="guestbook-card-actions">
+        <span class="guestbook-card-status approved">Approvato${row.moderated_at ? ` · ${esc(formatWhen(row.moderated_at))}` : ""}</span>
+        <button type="button" class="ghost guestbook-reject-btn" data-guestbook-reject="${esc(row.message_id)}">Rifiuta</button>
+      </div>`
+    : `<div class="guestbook-card-actions">
+        <span class="guestbook-card-status rejected">Rifiutato${row.moderated_at ? ` · ${esc(formatWhen(row.moderated_at))}` : ""}</span>
+        <button type="button" class="primary guestbook-approve-btn" data-guestbook-approve="${esc(row.message_id)}">Approva</button>
+      </div>`;
   return `<article class="guestbook-card ${esc(row.status)}" data-guestbook-card="${esc(row.message_id)}">
     <div class="guestbook-card-head">
       <strong>${esc(row.guest_name)}</strong>

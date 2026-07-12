@@ -81,7 +81,7 @@ Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_lead
 | **Admin** | v106 | Menu 4 intenti, modalità semplice, guide contestuali |
 | **Editor Business** | **v117** | Analytics affidabili (RPC v74), order_sent, consenso cookie click |
 | **Moments editor** | v110+ | Dashboard organizzatore — **agente dedicato** |
-| **Worker NFC** | **v122** | Deployato — restyling premium focalizzato su categoria Viaggi (Travel Scrapbook: washi tape polaroid, timbri passaporto, boarding pass mappe, font Caveat/Special Elite e sfondo griglia vintage) |
+| **Worker NFC** | **v125** | Deployato — Overhaul completo template Viaggi (Travel Web-App: barra inferiore, popup Add Memory reale connesso a API guestbook, contrasti bilanciati carbone/terracotta e Hero animata/cinematica). Include v124 OpenAI incremental translations. |
 | **SQL Supabase** | **v83 (applicata e verificata)** | v75-v79 hardening/rate-limit, v80-v83 triage linter (6 problemi reali risolti) — vedi nota sopra |
 | **Prossima release Business** | **v118** | `editor.html` + `index.html` `?v=` + `buildPublicSnapshot().version` |
 

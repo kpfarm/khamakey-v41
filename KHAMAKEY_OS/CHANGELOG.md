@@ -8,6 +8,14 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **Overhaul completo template Viaggi (2026-07-12, Antigravity)** — deployato (Worker v125)
+  - **Layout stile Web-App**: introdotta una barra di navigazione inferiore fluttuante (`🏠 🧭 ＋ 🔖 👤`) con indicatore di sezione attiva in JS coordinato allo scorrimento.
+  - **Pulsante Add Memory (`＋`) interattivo**: il tasto centrale apre un modale nativo `<dialog>` sfocato. Il form interno effettua una POST reale a `/api/moment/guestbook` collegandosi direttamente al database dei ricordi.
+  - **Contrasti e Leggibilità Premium**: sfondo pagina convertito a crema soft (`#faf8f3`) per risaltare le card bianche; testi principali ricolorati in carbone `#0f172a` per contrasto AAA; accento terracotta in `#be461f` per massima leggibilità.
+  - **Hero Cinematico e Animato**: implementata l'animazione Ken Burns per lo zoom lento dell'immagine di copertina, e parallasse basata su scroll.
+  - **Triage e Fix Moderazione Ricordi (moments.html)**: aggiunti i pulsanti "Approva" / "Rifiuta" direttamente nei messaggi già moderati nel pannello organizzatore per permettere all'utente di correggere decisioni errate (es. ri-approvare un caricamento rifiutato per errore).
+
 ### Changed
 - **Costo API OpenAI ridotto ~90% (2026-07-12, Claude Code)** — deployato (Worker v124)
   - **Batching (v123)**: le traduzioni facevano 1 chiamata OpenAI per lingua (4 per attivazione). Ora una sola chiamata batch per tutte le lingue.

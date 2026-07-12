@@ -39,6 +39,7 @@ Se una CSP, una RLS, un rate limit o una verifica firma ti impedisce di completa
 
 Quando un agente nuovo (umano o AI) inizia a lavorare su questo repo per la prima volta:
 
+0. Legge `KHAMAKEY_OS/00-START-HERE.md` e completa il bootstrap/handshake prima di fare qualunque altra cosa.
 1. Legge, in ordine: questo file (soprattutto le **Regole assolute** sopra) → `KHAMAKEY_OS/PROJECT_STATE.md` → `KHAMAKEY_OS/MASTER_INDEX.md` → `ROADMAP.md`
 2. Fa `git fetch origin && git status && git rev-list --left-right --count origin/main...HEAD` prima di toccare qualunque file (vedi sezione "Allineamento branch" sotto)
 3. Se il suo task tocca un'area con lock attivo (tabella sotto): coordina prima di modificare
@@ -46,6 +47,12 @@ Quando un agente nuovo (umano o AI) inizia a lavorare su questo repo per la prim
 5. A fine sessione: commit + push (mai lavoro non salvato), aggiorna `ROADMAP.md` e `PROJECT_STATE.md` con cosa ha fatto
 
 Questo vale anche per agenti "di design" (es. Antigravity) che normalmente toccano solo CSS/asset grafici: se il loro lavoro tocca `worker.js`, `pages/_headers` o qualunque file con logica di sicurezza, si applicano comunque le **Regole assolute** sopra.
+
+Frase breve da usare con qualunque agente:
+
+```text
+Leggi KHAMAKEY_OS/00-START-HERE.md e segui il bootstrap prima di fare qualsiasi cosa.
+```
 
 ---
 

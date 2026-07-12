@@ -42,12 +42,14 @@ All'inizio di ogni sessione, incolla il prompt da [`prompts/session-start.md`](p
 ## Flusso di lavoro AI
 
 ```text
-1. Leggi MASTER_INDEX.md
-2. Leggi PROJECT_STATE.md
-3. Leggi AGENTS.md
-4. Leggi il doc in docs/ relativo al tuo task
-5. Modifica il codice (../pages/, ../worker/, ../sql/)
-6. Aggiorna docs/ + PROJECT_STATE.md + CHANGELOG.md
+1. Leggi 00-START-HERE.md
+2. Completa il bootstrap e l'handshake
+3. Leggi MASTER_INDEX.md
+4. Leggi PROJECT_STATE.md
+5. Leggi AGENTS.md
+6. Leggi il doc in docs/ relativo al tuo task
+7. Modifica il codice (../pages/, ../worker/, ../sql/)
+8. Aggiorna docs/ + PROJECT_STATE.md + CHANGELOG.md
 ```
 
 ---
@@ -68,6 +70,7 @@ All'inizio di ogni sessione, incolla il prompt da [`prompts/session-start.md`](p
 
 ```text
 KHAMAKEY_OS/
+├── 00-START-HERE.md     ← primo file per qualunque agente
 ├── MASTER_INDEX.md       ← inizia sempre da qui
 ├── PROJECT_STATE.md      ← stato live
 ├── README.md             ← questo file

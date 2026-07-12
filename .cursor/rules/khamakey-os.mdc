@@ -7,10 +7,11 @@ alwaysApply: true
 
 Prima di modificare codice o documentazione:
 
-1. `KHAMAKEY_OS/MASTER_INDEX.md`
-2. `KHAMAKEY_OS/PROJECT_STATE.md`
-3. `CODEX-COLLAB.md` (lock attivi)
-4. `KHAMAKEY_OS/docs/` — doc dell'area del task
+1. `KHAMAKEY_OS/00-START-HERE.md` — bootstrap + handshake
+2. `KHAMAKEY_OS/MASTER_INDEX.md`
+3. `KHAMAKEY_OS/PROJECT_STATE.md`
+4. `CODEX-COLLAB.md` (lock attivi)
+5. `KHAMAKEY_OS/docs/` — doc dell'area del task
 
 Dopo modifica significativa: aggiorna `KHAMAKEY_OS/docs/`, `PROJECT_STATE.md`, `CHANGELOG.md`.
 

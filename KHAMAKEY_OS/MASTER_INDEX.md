@@ -7,7 +7,7 @@
 
 ## Ordine di lettura obbligatorio
 
-Prima di modificare codice o documentazione, leggi **in questo ordine**:
+Prima di modificare codice o documentazione, leggi prima [`00-START-HERE.md`](00-START-HERE.md), poi continua **in questo ordine**:
 
 | # | File / cartella | Scopo |
 |---|-----------------|-------|

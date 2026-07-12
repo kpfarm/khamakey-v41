@@ -9,10 +9,11 @@ Prima di **qualsiasi modifica**, leggere `CODEX-COLLAB.md` (lock attivi + area d
 
 ## Inizio sessione (obbligatorio)
 
-1. `git pull origin main`
-2. Leggere `ROADMAP.md` (ultime righe log) e sezione **Lock attivi** in `CODEX-COLLAB.md`
-3. Se tocchi un'area lockata: chiedere all'utente o aggiornare il lock con nome task + data
-4. Scope minimo: non refactorare file fuori dal task
+1. Leggere `KHAMAKEY_OS/00-START-HERE.md` e completare bootstrap + handshake
+2. `git pull origin main`
+3. Leggere `ROADMAP.md` (ultime righe log) e sezione **Lock attivi** in `CODEX-COLLAB.md`
+4. Se tocchi un'area lockata: chiedere all'utente o aggiornare il lock con nome task + data
+5. Scope minimo: non refactorare file fuori dal task
 
 ## Fine sessione (obbligatorio)
 

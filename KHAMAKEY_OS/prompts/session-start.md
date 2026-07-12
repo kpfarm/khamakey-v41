@@ -14,12 +14,14 @@ Root:
 /Users/user/Documents/Codex/2026-07-04/files-mentioned-by-the-user-khamakey/outputs/khamakey-v41-consolidated
 
 Prima di iniziare:
-1. git pull origin main
-2. Leggi KHAMAKEY_OS/MASTER_INDEX.md
-3. Leggi KHAMAKEY_OS/PROJECT_STATE.md
-4. Leggi KHAMAKEY_OS/AGENTS.md
-5. Leggi CODEX-COLLAB.md (lock attivi)
-6. Leggi il doc in KHAMAKEY_OS/docs/ relativo al task
+1. Leggi KHAMAKEY_OS/00-START-HERE.md
+2. Completa bootstrap e handshake
+3. git pull origin main
+4. Leggi KHAMAKEY_OS/MASTER_INDEX.md
+5. Leggi KHAMAKEY_OS/PROJECT_STATE.md
+6. Leggi KHAMAKEY_OS/AGENTS.md
+7. Leggi CODEX-COLLAB.md (lock attivi)
+8. Leggi il doc in KHAMAKEY_OS/docs/ relativo al task
 
 Task di questa sessione: [descrivi in 1-2 frasi]
 
@@ -39,7 +41,7 @@ A fine sessione:
 ## Template breve (task piccolo)
 
 ```text
-KhamaKey v41 — leggi KHAMAKEY_OS/PROJECT_STATE.md + AGENTS.md
+KhamaKey v41 — leggi KHAMAKEY_OS/00-START-HERE.md e completa il bootstrap
 Task: [descrizione]
 Non toccare: [aree lockate]
 ```

@@ -2,6 +2,10 @@
 
 > Valido per **Cursor**, **Codex**, **Claude Code**, **Antigravity** e qualsiasi altro agente sul progetto, presente o futuro.
 
+## 00 — Bootstrap obbligatorio
+
+Ogni agente deve leggere [`00-START-HERE.md`](00-START-HERE.md) e completare l'handshake prima di fare qualsiasi cosa. Questo evita di lavorare da memoria, da chat vecchie o da documentazione stale.
+
 ## 🔒 Le due regole che vengono prima di tutto
 
 1. **Mai cancellare o perdere dati utente** — nessuna migrazione, refactor o pulizia tocca dati reali (pagine, eventi, ordini, messaggi, media, clienti) senza conferma esplicita dell'utente umano.

@@ -233,7 +233,9 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Editor Business — contratto pubblico** | Condiviso | `publicStateFromEditor`, renderer `/p/` nel Worker |
 | **Admin UX / guide** | v106 — menu intenti + modalità semplice | `admin.html`, `admin.js`, `admin.css`, `admin-guide.js` — coordinarsi se stesso pannello |
 | **Moments editor** | **Cursor** — coordinamento UX v111 (2026-07-10) | `moments.js`, `moments.html`, `moment-*.js` — non toccare senza lock |
-| **Security hardening (audit 2026-07-11)** | **Claude Code — completato ma NON committato/deployato** | `worker/worker.js` (PIN, rate limit, CSP, webhook Resend/PayPal), `sql/khamakey-security-hardening-v75.sql`, `sql/khamakey-rate-limit-v76.sql`, `pages/_headers` — leggi `KHAMAKEY_OS/PROJECT_STATE.md` prima di toccare questi file o di applicare SQL/deploy |
+| **Security hardening (audit 2026-07-11)** | Completato e deployato (vedi `PROJECT_STATE.md`) | Le regole assolute su CSP/RLS/dati restano vincolanti per tutti |
+| **`worker/worker.js` — CSS/tema Moments** | **Antigravity** (in corso, moments premium theming) | Chi altri deve toccare `worker.js` si coordina prima: è il file più conteso |
+| **Admin — CRM + provvigioni + backend** | **Claude Code** (2026-07-12) | `pages/admin.html`, `admin.js`, `admin.css` + `sql/` RPC. NON tocca `worker.js` per lasciare campo ad Antigravity |
 
 Quando **nessuno** sta lavorando su un’area, lasciare **libero** o **—** nella colonna Owner.
 

@@ -9,6 +9,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Gestione provvigioni nell'admin (2026-07-12, Claude Code)** — deployato (admin v125)
+  - Complemento del trigger v85: le provvigioni `pending` generate sugli ordini ora sono gestibili nel pannello «Quanto spetta». Riepilogo (da pagare / approvate / pagate / voci), filtro per stato (default: da pagare), ricerca per agente/ordine, colonna Ordine e azioni per riga (Approva → Segna pagata → Annulla) con transizioni contestuali e update ottimistico + rollback.
+  - Aggiornamento stato via update diretto (RLS `commissions.write` esistente, nessuna RPC nuova). Solo `pages/admin.*` — `worker.js` non toccato (lasciato ad Antigravity).
+  - Verificato end-to-end a livello DB: ordine test 100€ → L1 10€ + L2 2€ (regole standard), idempotenza confermata, dati test rimossi.
 - **Overhaul completo template Viaggi (2026-07-12, Antigravity)** — deployato (Worker v125)
   - **Layout stile Web-App**: introdotta una barra di navigazione inferiore fluttuante (`🏠 🧭 ＋ 🔖 👤`) con indicatore di sezione attiva in JS coordinato allo scorrimento.
   - **Pulsante Add Memory (`＋`) interattivo**: il tasto centrale apre un modale nativo `<dialog>` sfocato. Il form interno effettua una POST reale a `/api/moment/guestbook` collegandosi direttamente al database dei ricordi.

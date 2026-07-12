@@ -61,3 +61,5 @@
 \i khamakey-pin-ambiguity-fix-v78.sql
 \echo 'v79 fix RLS mancante su platform_supported_locales'
 \i khamakey-locales-rls-fix-v79.sql
+\echo 'v80-v83 fix da triage completo security advisor Supabase'
+\i khamakey-security-linter-fixes-v80-v83.sql

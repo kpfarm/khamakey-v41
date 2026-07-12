@@ -37,9 +37,20 @@ Fix: entrambe le funzioni ora filtrano esplicitamente `profile_id=eq.<uid del ch
 
 Trovato dall'advisory di sicurezza di Supabase (non da nessun audit precedente): la tabella lingue (it/en/fr/de/es) non aveva RLS attiva — chiunque con la anon key poteva leggere/scrivere senza restrizioni. Applicata `alter table ... enable row level security` + policy `select`/`all` per `authenticated` (stesso pattern già usato per `platform_integrations`). Verificato: l'advisory di sicurezza Supabase non segnala più questa tabella dopo il fix. Unico consumer noto è `pages/admin.js` (autenticato) — nessuna regressione attesa.
 
-### 📋 Backlog sicurezza non urgente (da linter Supabase, non ancora triagiato)
+### ✅ Triage completo linter Supabase (78 avvisi) — 6 problemi reali trovati e risolti
 
-`get_advisors` segnala ~72 WARN aggiuntivi, in gran parte rumore atteso per un'app con API pubbliche (es. "SECURITY DEFINER callable senza login" su funzioni come `get_public_moment`/`submit_moment_rsvp`, che sono *intenzionalmente* pubbliche). Da rivedere con calma prima di agire, non sono critici: "Function Search Path Mutable", "RLS Policy Always True" (verificare quali sono intenzionali), "Public Bucket Allows Listing", "Leaked Password Protection Disabled" (impostazione Auth, non schema).
+Delle 78 segnalazioni, ~68 erano rumore atteso (funzioni SECURITY DEFINER pubbliche *per design* — `get_public_moment`, `submit_moment_rsvp`, ecc. — o già protette internamente con controllo permessi/ingest-key, verificato leggendo il codice di ognuna). Trovati **6 problemi reali**, tutti corretti in `sql/khamakey-security-linter-fixes-v80-v83.sql`:
+
+- **`get_moment_customer_stats` — il più grave**: nessun controllo permessi, callable da qualunque utente autenticato (non solo staff). Esponeva **email e attività di tutti i clienti Moments**. Usata solo da `pages/admin.js`.
+- **`get_agent_delivery_history`**: eseguibile perfino da **anon** (nessun login), senza controlli. Con l'argomento di default restituiva fino a 500 consegne di tutti gli agenti (prezzi, tracking, note).
+- **`get_agent_network_tree`, `get_moment_agent_inventory_stats`, `get_moment_product_inventory_stats`**: stesso problema di `get_moment_customer_stats` — nessun controllo permessi, solo "autenticato" bastava.
+- **Bucket Storage `khamakey-media` (legacy)**: policy che permetteva di **elencare tutti i file** di tutte le aziende/eventi. Rimossa — verificato che il download diretto via URL nota continua a funzionare (bucket pubblico, non passa da RLS), solo l'enumerazione è bloccata.
+- **`get_order_activation_codes`, `resolve_agent_commission_percent`**: verificato che non sono chiamate da nessun file reale — accesso revocato del tutto, nessun uso perso.
+- Più: `search_path` fissato su `_moment_type_valid` (hardening minore, nessun rischio pratico).
+
+Tutti i fix aggiungono un controllo permessi (stesso pattern `current_user_has_platform_permission` già usato altrove) o revocano accesso a funzioni non usate — **nessuna funzionalità esistente per lo staff è stata toccata**, verificato testando che la funzione blocchi correttamente una chiamata senza permessi validi.
+
+Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_leads` (form pubblico insert-only, nessuna lettura possibile — intenzionale), 6 tabelle "RLS enabled no policy" (`moment_pin_attempts`/`platform_rate_limits` di proposito, il resto è cruft legacy pre-v37 già completamente bloccato). Non ancora fatto: **"Leaked Password Protection Disabled"** — impostazione Auth da abilitare manualmente in Dashboard Supabase → Authentication → Policies (nessun tool disponibile per farlo via SQL/MCP).
 
 ### Secrets Worker ancora da impostare (non bloccanti)
 
@@ -67,7 +78,7 @@ Trovato dall'advisory di sicurezza di Supabase (non da nessun audit precedente):
 | **Editor Business** | **v117** | Analytics affidabili (RPC v74), order_sent, consenso cookie click |
 | **Moments editor** | v110+ | Dashboard organizzatore — **agente dedicato** |
 | **Worker NFC** | **v120** | Deployato — stili e layout dedicati per categoria di evento (Wedding, Travel polaroid, Baby cloud, Birthday neon, Memorial) |
-| **SQL Supabase** | **v79 (applicata e verificata)** | v75-v77 hardening/rate-limit, v78 fix urgente ambiguità colonna, v79 RLS locales — vedi nota sopra |
+| **SQL Supabase** | **v83 (applicata e verificata)** | v75-v79 hardening/rate-limit, v80-v83 triage linter (6 problemi reali risolti) — vedi nota sopra |
 | **Prossima release Business** | **v118** | `editor.html` + `index.html` `?v=` + `buildPublicSnapshot().version` |
 
 ---

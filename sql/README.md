@@ -34,6 +34,7 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 28 | `khamakey-rate-limit-cleanup-v77.sql` | `cleanup_rate_limit_tables()` — pulizia righe scadute da `moment_pin_attempts`/`platform_rate_limits`, agganciata al cron giornaliero esistente nel Worker |
 | 29 | `khamakey-pin-ambiguity-fix-v78.sql` | **Fix urgente**: `get_public_moment` falliva (HTTP 500) su ogni evento con PIN attivo per ambiguità colonna `slug` tra output e tabella `moment_pin_attempts`. Applicato in produzione 2026-07-11, verificato con smoke test su evento reale |
 | 30 | `khamakey-locales-rls-fix-v79.sql` | Abilita RLS su `platform_supported_locales` (trovato da advisory sicurezza Supabase, mancava dalla creazione tabella) |
+| 31 | `khamakey-security-linter-fixes-v80-v83.sql` | Triage completo linter Supabase: blocca enumerazione bucket Storage legacy, `search_path` su `_moment_type_valid`, permessi mancanti su `get_agent_delivery_history` + 4 funzioni statistiche admin (`get_moment_customer_stats` esponeva email di tutti i clienti), revocato accesso a 2 funzioni inutilizzate |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 

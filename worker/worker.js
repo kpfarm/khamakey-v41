@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v123-openai-batch-translations";
+const WORKER_VERSION = "v124-openai-incremental-translations";
 
 export default {
   async fetch(request, env, ctx) {
@@ -3320,35 +3320,89 @@ async function verifyBusinessOwner(env, jwt, businessId) {
   return Boolean(await verifyPlatformAdmin(env, jwt));
 }
 
-async function persistBusinessTranslations(env, jwt, businessId, translationsByLocale = {}, sourceStrings = {}) {
+// Traduzioni già salvate, indicizzate come existing[locale][fieldPath] = { hash, text }.
+async function fetchExistingBusinessTranslations(env, jwt, businessId) {
+  const response = await supabaseUserRest(
+    env,
+    jwt,
+    `business_page_i18n?business_id=eq.${encodeURIComponent(businessId)}&select=locale,field_path,source_hash,translated_text`,
+    { method: "GET", headers: { Accept: "application/json" } }
+  );
+  if (!response.ok) return {};
+  const rows = await response.json().catch(() => []);
+  const map = {};
+  (Array.isArray(rows) ? rows : []).forEach(row => {
+    if (!row?.locale || !row?.field_path) return;
+    map[row.locale] = map[row.locale] || {};
+    map[row.locale][row.field_path] = {
+      hash: String(row.source_hash || ""),
+      text: String(row.translated_text || "")
+    };
+  });
+  return map;
+}
+
+// Risparmio: traduce SOLO i campi cambiati o mancanti (confronto source_hash), in una sola
+// chiamata batch. Ritorna le traduzioni complete (fresche + esistenti riusate) e le sole righe
+// nuove da salvare. Se nulla è cambiato, zero chiamate OpenAI.
+async function buildIncrementalTranslations(env, jwt, businessId, strings, locales) {
+  const existing = await fetchExistingBusinessTranslations(env, jwt, businessId);
+  const fields = Object.keys(strings);
+  const currentHash = {};
+  fields.forEach(field => { currentHash[field] = hashText(strings[field]); });
+
+  // Un campo va (ri)tradotto se per QUALCHE lingua manca o l'hash della sorgente è diverso.
+  const staleFields = fields.filter(field =>
+    locales.some(locale => (existing[locale]?.[field]?.hash || "") !== currentHash[field])
+  );
+
+  let fresh = {};
+  if (staleFields.length) {
+    const staleStrings = {};
+    staleFields.forEach(field => { staleStrings[field] = strings[field]; });
+    fresh = await translateStringsAllLocales(env, staleStrings, locales);
+  }
+
+  const translations = {};
   const rows = [];
-  Object.entries(translationsByLocale).forEach(([locale, map]) => {
-    Object.entries(map || {}).forEach(([fieldPath, translatedText]) => {
-      const sourceText = String(sourceStrings[fieldPath] || "");
-      rows.push({
-        business_id: businessId,
-        locale,
-        field_path: fieldPath,
-        source_text: sourceText,
-        source_hash: hashText(sourceText),
-        translated_text: translatedText,
-        updated_at: new Date().toISOString()
-      });
-    });
-  });
+  const nowIso = new Date().toISOString();
+  for (const locale of locales) {
+    translations[locale] = {};
+    for (const field of fields) {
+      const freshText = fresh[locale]?.[field];
+      if (freshText) {
+        translations[locale][field] = freshText;
+        rows.push({
+          business_id: businessId,
+          locale,
+          field_path: field,
+          source_text: String(strings[field] || ""),
+          source_hash: currentHash[field],
+          translated_text: freshText,
+          updated_at: nowIso
+        });
+      } else if (existing[locale]?.[field]?.text) {
+        translations[locale][field] = existing[locale][field].text;
+      }
+    }
+  }
+  return { translations, rows, translatedFields: staleFields.length, skippedFields: fields.length - staleFields.length };
+}
+
+async function upsertBusinessTranslationRows(env, jwt, rows) {
   if (!rows.length) return;
-  await supabaseUserRest(env, jwt, `business_page_i18n?business_id=eq.${encodeURIComponent(businessId)}`, {
-    method: "DELETE"
-  });
-  const insertResponse = await supabaseUserRest(env, jwt, "business_page_i18n", {
+  const response = await supabaseUserRest(env, jwt, "business_page_i18n", {
     method: "POST",
-    headers: { Prefer: "return=minimal" },
+    headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
     body: JSON.stringify(rows)
   });
-  if (!insertResponse.ok) {
-    const detail = await insertResponse.text().catch(() => "");
-    console.warn("business_page_i18n insert skipped", insertResponse.status, detail.slice(0, 200));
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    console.warn("business_page_i18n upsert skipped", response.status, detail.slice(0, 200));
   }
+}
+
+async function enableBusinessI18nSettings(env, jwt, businessId) {
   await supabaseUserRest(env, jwt, "business_i18n_settings", {
     method: "POST",
     headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
@@ -3387,16 +3441,18 @@ async function handleBusinessInternationalize(request, env) {
       return cors(json({ error: "Aggiungi almeno nome o descrizione prima di attivare le lingue." }, 400));
     }
 
-    const translations = await translateStringsAllLocales(env, strings, TARGET_LOCALES);
-    await persistBusinessTranslations(env, jwt, businessId, translations, strings).catch(error => {
-      console.warn("persistBusinessTranslations", error);
-    });
+    const { translations, rows, translatedFields, skippedFields } =
+      await buildIncrementalTranslations(env, jwt, businessId, strings, TARGET_LOCALES);
+    await upsertBusinessTranslationRows(env, jwt, rows).catch(error => console.warn("upsert i18n", error));
+    await enableBusinessI18nSettings(env, jwt, businessId).catch(error => console.warn("enable i18n", error));
 
     return cors(json({
       ok: true,
       locales: TARGET_LOCALES,
       translations,
-      stringsCount: entries.length
+      stringsCount: entries.length,
+      translatedFields,
+      skippedFields
     }));
   } catch (error) {
     console.error("handleBusinessInternationalize", error);
@@ -3420,29 +3476,10 @@ async function handleBusinessSyncTranslations(request, env) {
       return cors(json({ error: "Non puoi modificare questa attività." }, 403));
     }
 
-    const translations = await translateStringsAllLocales(env, strings, TARGET_LOCALES);
-    const rows = [];
-    Object.entries(translations).forEach(([locale, map]) => {
-      Object.entries(map || {}).forEach(([fieldPath, translatedText]) => {
-        rows.push({
-          business_id: businessId,
-          locale,
-          field_path: fieldPath,
-          source_text: String(strings[fieldPath] || ""),
-          source_hash: hashText(strings[fieldPath]),
-          translated_text: translatedText,
-          updated_at: new Date().toISOString()
-        });
-      });
-    });
-    if (rows.length) {
-      await supabaseUserRest(env, jwt, "business_page_i18n", {
-        method: "POST",
-        headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
-        body: JSON.stringify(rows)
-      });
-    }
-    return cors(json({ ok: true, translations }));
+    const { translations, rows, translatedFields, skippedFields } =
+      await buildIncrementalTranslations(env, jwt, businessId, strings, TARGET_LOCALES);
+    await upsertBusinessTranslationRows(env, jwt, rows);
+    return cors(json({ ok: true, translations, translatedFields, skippedFields }));
   } catch (error) {
     console.error("handleBusinessSyncTranslations", error);
     return cors(json({ error: error.message || "Aggiornamento traduzioni non riuscito." }, 500));

@@ -63,3 +63,5 @@
 \i khamakey-locales-rls-fix-v79.sql
 \echo 'v80-v83 fix da triage completo security advisor Supabase'
 \i khamakey-security-linter-fixes-v80-v83.sql
+\echo 'v84 CRM: RPC pipeline clienti su tabelle esistenti'
+\i khamakey-crm-v84.sql

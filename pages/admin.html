@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=106">
+  <link rel="stylesheet" href="admin.css?v=122">
 </head>
 <body>
   <main class="admin-shell locked" id="adminShell">
@@ -1113,8 +1113,103 @@
 
         <section class="admin-panel" data-panel="crm">
           <div class="admin-card">
-            <h2>CRM</h2>
-            <p>Pipeline clienti, stato onboarding, note commerciali e follow-up.</p>
+            <h2>CRM — pipeline clienti</h2>
+            <p>Stato onboarding, priorità, follow-up e note commerciali per ogni attività Business. I dati sono gli stessi delle schede cliente: qui li gestisci come pipeline.</p>
+            <div class="inventory-stat-grid" id="crmStats">
+              <div><span>Clienti</span><strong id="crmStatTotal">0</strong></div>
+              <div><span>Follow-up in scadenza</span><strong id="crmStatFollow">0</strong></div>
+              <div><span>Priorità alta</span><strong id="crmStatHigh">0</strong></div>
+              <div><span>Da contattare</span><strong id="crmStatNew">0</strong></div>
+            </div>
+            <div class="inventory-toolbar">
+              <label class="inventory-search">Cerca cliente
+                <input type="search" id="crmSearchInput" placeholder="Es. nome attività, slug, tag...">
+              </label>
+              <button type="button" class="small-action" id="crmSearchClear">Pulisci</button>
+              <button type="button" class="small-action" id="crmRefreshBtn">Aggiorna</button>
+            </div>
+            <div class="inventory-filters inventory-filters-2">
+              <label>Stato
+                <select id="crmFilterStatus"><option value="">Tutti</option></select>
+              </label>
+              <label>Priorità
+                <select id="crmFilterPriority">
+                  <option value="">Tutte</option>
+                  <option value="alta">Alta</option>
+                  <option value="media">Media</option>
+                  <option value="bassa">Bassa</option>
+                </select>
+              </label>
+            </div>
+            <p class="inventory-table-meta"><span id="crmTableCount">0 clienti</span></p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Cliente</th><th>Stato</th><th>Priorità</th><th>Prossimo follow-up</th><th>Note</th><th>Azioni</th></tr></thead>
+                <tbody id="crmTable"><tr><td colspan="6">Caricamento pipeline...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="admin-card" id="crmEditorCard" hidden>
+            <h3 class="section-title" id="crmEditorTitle">Scheda cliente</h3>
+            <form class="admin-form" id="crmRecordForm">
+              <input type="hidden" name="business_id" id="crmRecordBusinessId">
+              <label>Stato onboarding
+                <select name="onboarding_status" id="crmRecordStatus">
+                  <option value="nuovo">Nuovo — da contattare</option>
+                  <option value="contattato">Contattato</option>
+                  <option value="in_onboarding">In onboarding</option>
+                  <option value="attivo">Attivo</option>
+                  <option value="a_rischio">A rischio</option>
+                  <option value="perso">Perso</option>
+                </select>
+              </label>
+              <label>Priorità
+                <select name="priority" id="crmRecordPriority">
+                  <option value="alta">Alta</option>
+                  <option value="media" selected>Media</option>
+                  <option value="bassa">Bassa</option>
+                </select>
+              </label>
+              <label>Agente assegnato
+                <select name="assigned_agent_id" id="crmRecordAgent"><option value="">Nessuno</option></select>
+              </label>
+              <label>Prossimo follow-up
+                <input type="datetime-local" name="next_follow_up_at" id="crmRecordFollowUp">
+              </label>
+              <label>Tag (separati da virgola)
+                <input type="text" name="tags" id="crmRecordTags" placeholder="Es. ristorante, milano, priorità estate">
+              </label>
+              <label>Nota interna sintetica
+                <textarea name="admin_notes" id="crmRecordNotes" rows="2" placeholder="Riepilogo veloce sul cliente"></textarea>
+              </label>
+              <button class="primary-action" type="submit">Salva scheda</button>
+              <p class="form-status" id="crmRecordStatusMsg"></p>
+            </form>
+
+            <h3 class="section-title">Timeline note</h3>
+            <form class="admin-form" id="crmNoteForm">
+              <label>Nuova nota / attività
+                <textarea name="body" id="crmNoteBody" rows="2" placeholder="Es. Chiamata fatta: interessato al piano Pro, richiama a settembre" required></textarea>
+              </label>
+              <div class="inventory-filters inventory-filters-2">
+                <label>Tipo
+                  <select name="note_type" id="crmNoteType">
+                    <option value="nota">Nota</option>
+                    <option value="chiamata">Chiamata</option>
+                    <option value="email">Email</option>
+                    <option value="incontro">Incontro</option>
+                    <option value="promemoria">Promemoria</option>
+                  </select>
+                </label>
+                <label class="crm-pin-label">Fissa in alto
+                  <input type="checkbox" name="pinned" id="crmNotePinned">
+                </label>
+              </div>
+              <button class="primary-action" type="submit">Aggiungi nota</button>
+              <p class="form-status" id="crmNoteStatusMsg"></p>
+            </form>
+            <div id="crmNotesList" class="crm-notes-list"><p class="inventory-table-meta">Nessuna nota ancora.</p></div>
           </div>
         </section>
 
@@ -1698,6 +1793,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=106"></script>
+  <script type="module" src="admin.js?v=122"></script>
 </body>
 </html>

@@ -272,3 +272,21 @@ textarea{width:100%;border:1px solid var(--border);border-radius:10px;background
 .table-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 12px;padding:10px 14px;border:1px solid var(--border);border-radius:12px;background:#F8FAFC;font-size:.74rem;color:var(--muted)}
 .legend-title-inline{font-weight:800;color:var(--navy);margin-right:4px}
 .table-legend .status-pill{font-size:.68rem;padding:3px 8px}
+
+/* CRM — timeline note + badge stato pipeline (v84) */
+.crm-notes-list{display:grid;gap:8px;margin-top:12px}
+.crm-note{border:1px solid var(--border);border-radius:12px;background:#fff;padding:12px 14px}
+.crm-note.pinned{border-color:var(--navy);background:#F8FAFC}
+.crm-note-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.crm-note-type{font-size:.64rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:var(--navy);background:var(--soft);border-radius:20px;padding:2px 9px}
+.crm-note-meta{font-size:.7rem;color:var(--muted);font-weight:700}
+.crm-note-body{font-size:.86rem;color:var(--navy);line-height:1.5;white-space:pre-wrap}
+.crm-note-actions{margin-left:auto}
+.crm-note-actions button{font-size:.68rem;color:var(--red);background:none;border:0;cursor:pointer;padding:2px 4px}
+.crm-pin-label{flex-direction:row;align-items:center;gap:8px}
+.crm-pin-label input{width:auto;margin:0}
+.crm-status-pill{display:inline-block;font-size:.66rem;font-weight:900;text-transform:uppercase;letter-spacing:.03em;padding:3px 9px;border-radius:20px;background:var(--soft);color:var(--navy)}
+.crm-status-pill.alta,.crm-status-pill.a_rischio{background:#FEE4E2;color:#B42318}
+.crm-status-pill.attivo{background:#D1FADF;color:#027A48}
+.crm-status-pill.perso{background:#F2F4F7;color:#667085}
+.crm-follow-due{color:#B42318;font-weight:800}

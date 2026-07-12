@@ -758,6 +758,225 @@ function refreshClientsTable(){
   `).join("") : `<tr><td colspan="4">${clientRows.length ? "Nessun cliente corrisponde ai filtri." : "Nessun cliente trovato o permessi database non ancora configurati."}</td></tr>`;
 }
 
+// ---------------------------------------------------------------------------
+// CRM — pipeline clienti (v84). Costruito su platform_client_records/notes via RPC.
+// ---------------------------------------------------------------------------
+let crmRows = [];
+let crmCurrentBusinessId = "";
+const crmTable = document.getElementById("crmTable");
+const crmTableCount = document.getElementById("crmTableCount");
+const crmSearchInput = document.getElementById("crmSearchInput");
+const crmSearchClear = document.getElementById("crmSearchClear");
+const crmRefreshBtn = document.getElementById("crmRefreshBtn");
+const crmFilterStatus = document.getElementById("crmFilterStatus");
+const crmFilterPriority = document.getElementById("crmFilterPriority");
+const crmEditorCard = document.getElementById("crmEditorCard");
+const crmEditorTitle = document.getElementById("crmEditorTitle");
+const crmRecordForm = document.getElementById("crmRecordForm");
+const crmRecordBusinessId = document.getElementById("crmRecordBusinessId");
+const crmRecordStatus = document.getElementById("crmRecordStatus");
+const crmRecordPriority = document.getElementById("crmRecordPriority");
+const crmRecordAgent = document.getElementById("crmRecordAgent");
+const crmRecordFollowUp = document.getElementById("crmRecordFollowUp");
+const crmRecordTags = document.getElementById("crmRecordTags");
+const crmRecordNotes = document.getElementById("crmRecordNotes");
+const crmRecordStatusMsg = document.getElementById("crmRecordStatusMsg");
+const crmNoteForm = document.getElementById("crmNoteForm");
+const crmNoteBody = document.getElementById("crmNoteBody");
+const crmNoteType = document.getElementById("crmNoteType");
+const crmNotePinned = document.getElementById("crmNotePinned");
+const crmNoteStatusMsg = document.getElementById("crmNoteStatusMsg");
+const crmNotesList = document.getElementById("crmNotesList");
+
+const CRM_STATUS_LABELS = {
+  nuovo:"Nuovo", new:"Nuovo", contattato:"Contattato", in_onboarding:"In onboarding",
+  attivo:"Attivo", active:"Attivo", a_rischio:"A rischio", perso:"Perso"
+};
+const CRM_PRIORITY_LABELS = { alta:"Alta", media:"Media", normal:"Media", bassa:"Bassa" };
+
+function crmStatusLabel(v){ return CRM_STATUS_LABELS[v] || (v || "Nuovo"); }
+function crmPriorityLabel(v){ return CRM_PRIORITY_LABELS[v] || (v || "Media"); }
+function crmPriorityKey(v){ return v === "alta" ? "alta" : v === "bassa" ? "bassa" : "media"; }
+
+async function loadCrm(){
+  if(!crmTable) return;
+  if(!hasPermission("crm.read") && !hasPermission("crm.write")){
+    crmTable.innerHTML = `<tr><td colspan="6">Serve il permesso crm.read per vedere la pipeline.</td></tr>`;
+    return;
+  }
+  try{
+    const { data,error } = await supabase.rpc("list_crm_clients");
+    if(error) throw error;
+    crmRows = data || [];
+    populateCrmStatusFilter();
+    refreshCrmTable();
+    updateCrmStats();
+  }catch(error){
+    console.error(error);
+    crmTable.innerHTML = `<tr><td colspan="6">CRM non disponibile: ${esc(error?.message || "errore")}. Applica SQL v84.</td></tr>`;
+  }
+}
+
+function populateCrmStatusFilter(){
+  if(!crmFilterStatus) return;
+  const current = crmFilterStatus.value;
+  const statuses = [...new Set(crmRows.map(r=>r.onboarding_status).filter(Boolean))];
+  crmFilterStatus.innerHTML = `<option value="">Tutti</option>` + statuses.map(s=>`
+    <option value="${esc(s)}" ${s === current ? "selected" : ""}>${esc(crmStatusLabel(s))}</option>
+  `).join("");
+}
+
+function updateCrmStats(){
+  const now = Date.now();
+  const soon = now + 7 * 24 * 3600 * 1000;
+  const total = crmRows.length;
+  const follow = crmRows.filter(r=>r.next_follow_up_at && new Date(r.next_follow_up_at).getTime() <= soon).length;
+  const high = crmRows.filter(r=>crmPriorityKey(r.priority) === "alta").length;
+  const fresh = crmRows.filter(r=>["nuovo","new","contattato"].includes(String(r.onboarding_status))).length;
+  const set = (id,v)=>{ const n = document.getElementById(id); if(n) n.textContent = fmt(v); };
+  set("crmStatTotal",total); set("crmStatFollow",follow); set("crmStatHigh",high); set("crmStatNew",fresh);
+}
+
+function refreshCrmTable(){
+  if(!crmTable) return;
+  const search = String(crmSearchInput?.value || "").trim().toLowerCase();
+  const status = crmFilterStatus?.value || "";
+  const priority = crmFilterPriority?.value || "";
+  const now = Date.now();
+  const rows = crmRows.filter(r=>{
+    if(status && String(r.onboarding_status) !== status) return false;
+    if(priority && crmPriorityKey(r.priority) !== priority) return false;
+    if(search){
+      const hay = [r.business_name, r.slug, r.categoria, (r.tags || []).join(" ")].join(" ").toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+  if(crmTableCount) crmTableCount.textContent = `${fmt(rows.length)} clienti`;
+  crmTable.innerHTML = rows.length ? rows.map(r=>{
+    const due = r.next_follow_up_at && new Date(r.next_follow_up_at).getTime() <= now;
+    const pk = crmPriorityKey(r.priority);
+    const sk = String(r.onboarding_status || "nuovo");
+    return `<tr>
+      <td><strong>${esc(r.business_name)}</strong>${r.tags && r.tags.length ? `<br><span class="crm-note-meta">${esc(r.tags.join(" · "))}</span>` : ""}</td>
+      <td><span class="crm-status-pill ${esc(sk)}">${esc(crmStatusLabel(sk))}</span></td>
+      <td><span class="crm-status-pill ${esc(pk)}">${esc(crmPriorityLabel(r.priority))}</span></td>
+      <td>${r.next_follow_up_at ? `<span class="${due ? "crm-follow-due" : ""}">${esc(dateShort(r.next_follow_up_at))}</span>` : "-"}</td>
+      <td>${fmt(r.note_count || 0)}</td>
+      <td><div class="row-actions"><button type="button" data-crm-open="${esc(r.business_id)}">Apri scheda</button></div></td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="6">${crmRows.length ? "Nessun cliente corrisponde ai filtri." : "Nessun cliente."}</td></tr>`;
+}
+
+function populateCrmAgentSelect(selected){
+  if(!crmRecordAgent) return;
+  crmRecordAgent.innerHTML = `<option value="">Nessuno</option>` + agentRows.map(a=>`
+    <option value="${esc(a.id)}" ${a.id === selected ? "selected" : ""}>${esc(a.contact_name || a.email || a.id)}</option>
+  `).join("");
+}
+
+async function openCrmClient(businessId){
+  const row = crmRows.find(r=>r.business_id === businessId);
+  if(!row) return;
+  crmCurrentBusinessId = businessId;
+  crmEditorCard.hidden = false;
+  crmEditorTitle.textContent = `Scheda — ${row.business_name}`;
+  crmRecordBusinessId.value = businessId;
+  // se lo stato reale non è tra le opzioni (es. valore legacy), aggiungilo al volo
+  const sk = String(row.onboarding_status || "nuovo");
+  if(![...crmRecordStatus.options].some(o=>o.value === sk)){
+    crmRecordStatus.add(new Option(crmStatusLabel(sk), sk));
+  }
+  crmRecordStatus.value = sk;
+  crmRecordPriority.value = crmPriorityKey(row.priority);
+  populateCrmAgentSelect(row.assigned_agent_id || "");
+  crmRecordFollowUp.value = row.next_follow_up_at ? toDateTimeLocal(row.next_follow_up_at) : "";
+  crmRecordTags.value = (row.tags || []).join(", ");
+  crmRecordNotes.value = row.admin_notes || "";
+  setFormStatus(crmRecordStatusMsg,"");
+  setFormStatus(crmNoteStatusMsg,"");
+  crmEditorCard.scrollIntoView({behavior:"smooth",block:"start"});
+  await loadCrmNotes(businessId);
+}
+
+async function saveCrmRecord(event){
+  event.preventDefault();
+  if(!hasPermission("crm.write")) return setFormStatus(crmRecordStatusMsg,"Serve il permesso crm.write.","error");
+  const tags = crmRecordTags.value.split(",").map(t=>t.trim()).filter(Boolean);
+  setFormStatus(crmRecordStatusMsg,"Salvataggio...");
+  try{
+    const { error } = await supabase.rpc("save_crm_client",{
+      p_business_id: crmRecordBusinessId.value,
+      p_onboarding_status: crmRecordStatus.value,
+      p_priority: crmRecordPriority.value,
+      p_assigned_agent_id: crmRecordAgent.value || null,
+      p_next_follow_up_at: crmRecordFollowUp.value ? new Date(crmRecordFollowUp.value).toISOString() : null,
+      p_tags: tags,
+      p_admin_notes: crmRecordNotes.value
+    });
+    if(error) throw error;
+    setFormStatus(crmRecordStatusMsg,"Scheda salvata.","ok");
+    await loadCrm();
+  }catch(error){
+    setFormStatus(crmRecordStatusMsg,error.message || "Errore salvataggio.","error");
+  }
+}
+
+async function loadCrmNotes(businessId){
+  if(!crmNotesList) return;
+  try{
+    const { data,error } = await supabase.rpc("list_crm_notes",{ p_business_id: businessId });
+    if(error) throw error;
+    const notes = data || [];
+    crmNotesList.innerHTML = notes.length ? notes.map(n=>`
+      <div class="crm-note ${n.pinned ? "pinned" : ""}">
+        <div class="crm-note-head">
+          <span class="crm-note-type">${esc(n.note_type || "nota")}</span>
+          ${n.pinned ? `<span class="crm-note-type">📌 fissata</span>` : ""}
+          <span class="crm-note-meta">${esc(n.author_name || "Team")} · ${esc(dateShort(n.created_at))}</span>
+          <div class="crm-note-actions"><button type="button" data-crm-note-del="${esc(n.id)}">Elimina</button></div>
+        </div>
+        <div class="crm-note-body">${esc(n.body)}</div>
+      </div>
+    `).join("") : `<p class="inventory-table-meta">Nessuna nota ancora.</p>`;
+  }catch(error){
+    crmNotesList.innerHTML = `<p class="inventory-table-meta">Note non disponibili: ${esc(error?.message || "errore")}</p>`;
+  }
+}
+
+async function addCrmNote(event){
+  event.preventDefault();
+  if(!crmCurrentBusinessId) return;
+  if(!hasPermission("crm.write")) return setFormStatus(crmNoteStatusMsg,"Serve il permesso crm.write.","error");
+  setFormStatus(crmNoteStatusMsg,"Salvataggio nota...");
+  try{
+    const { error } = await supabase.rpc("add_crm_note",{
+      p_business_id: crmCurrentBusinessId,
+      p_body: crmNoteBody.value,
+      p_note_type: crmNoteType.value,
+      p_pinned: crmNotePinned.checked
+    });
+    if(error) throw error;
+    crmNoteBody.value = "";
+    crmNotePinned.checked = false;
+    setFormStatus(crmNoteStatusMsg,"Nota aggiunta.","ok");
+    await Promise.all([loadCrmNotes(crmCurrentBusinessId), loadCrm()]);
+  }catch(error){
+    setFormStatus(crmNoteStatusMsg,error.message || "Errore nota.","error");
+  }
+}
+
+async function deleteCrmNote(noteId){
+  if(!hasPermission("crm.write")) return;
+  try{
+    const { error } = await supabase.rpc("delete_crm_note",{ p_note_id: noteId });
+    if(error) throw error;
+    await Promise.all([loadCrmNotes(crmCurrentBusinessId), loadCrm()]);
+  }catch(error){
+    console.error("delete_crm_note",error);
+  }
+}
+
 async function loadMomentCustomers(){
   if(!momentCustomersTable) return;
   try{
@@ -3539,6 +3758,7 @@ async function loadAdminSession(){
   await Promise.all([
     loadDashboard(),
     loadClients(),
+    loadCrm(),
     loadMoments(),
     loadMomentCustomers(),
     loadMomentProducts(),
@@ -3666,6 +3886,23 @@ momentsTable.addEventListener("click",event=>{
 });
 
 if(momentProvisionForm) momentProvisionForm.addEventListener("submit",provisionMomentCustomer);
+
+// CRM wiring (v84)
+if(crmRecordForm) crmRecordForm.addEventListener("submit",saveCrmRecord);
+if(crmNoteForm) crmNoteForm.addEventListener("submit",addCrmNote);
+if(crmSearchInput) crmSearchInput.addEventListener("input",refreshCrmTable);
+if(crmSearchClear) crmSearchClear.addEventListener("click",()=>{ crmSearchInput.value = ""; refreshCrmTable(); });
+if(crmRefreshBtn) crmRefreshBtn.addEventListener("click",loadCrm);
+if(crmFilterStatus) crmFilterStatus.addEventListener("change",refreshCrmTable);
+if(crmFilterPriority) crmFilterPriority.addEventListener("change",refreshCrmTable);
+if(crmTable) crmTable.addEventListener("click",event=>{
+  const openBtn = event.target.closest("[data-crm-open]");
+  if(openBtn) openCrmClient(openBtn.dataset.crmOpen);
+});
+if(crmNotesList) crmNotesList.addEventListener("click",event=>{
+  const delBtn = event.target.closest("[data-crm-note-del]");
+  if(delBtn) deleteCrmNote(delBtn.dataset.crmNoteDel);
+});
 
 platformOrdersTable.addEventListener("click",event=>{
   const saveBtn = event.target.closest("[data-order-save]");

@@ -9,10 +9,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Changed
-- **Costo API OpenAI −75% (2026-07-12, Claude Code)** — deployato (Worker v123)
-  - Le traduzioni pagine Business facevano 1 chiamata OpenAI per ogni lingua (en/fr/de/es = 4 chiamate per attivazione). Ora una sola chiamata batch traduce tutte le lingue insieme. Stesso risultato, un quarto delle chiamate a pagamento.
-  - Nota: OpenAI è attualmente **non configurato** in produzione (nessun costo oggi) — ottimizzazione pronta per quando verrà attivato. Rate limit 10/ora per attività già attivo.
-  - Follow-up individuato: `business_page_i18n.source_hash` è salvato ma mai riletto → la sync ritraduce anche campi identici. Usarlo per tradurre solo i campi cambiati ridurrebbe ulteriormente il costo.
+- **Costo API OpenAI ridotto ~90% (2026-07-12, Claude Code)** — deployato (Worker v124)
+  - **Batching (v123)**: le traduzioni facevano 1 chiamata OpenAI per lingua (4 per attivazione). Ora una sola chiamata batch per tutte le lingue.
+  - **Incrementale (v124)**: `source_hash` (salvato ma mai riletto) ora viene confrontato → si ritraducono solo i campi nuovi o modificati; gli invariati riusano la traduzione già salvata. Se nulla è cambiato, **zero chiamate OpenAI**.
+  - Combinati: da ~4×N_campi chiamate a 1 chiamata sui soli campi cambiati. Esempio (1 campo su 10 modificato): da 40 traduzioni a ~4.
+  - Refactor: `persistBusinessTranslations` (delete+insert) → `buildIncrementalTranslations` + `upsertBusinessTranslationRows` (merge) + `enableBusinessI18nSettings`. Risposta espone `translatedFields`/`skippedFields`.
+  - Nota: OpenAI **non configurato** in produzione (nessun costo oggi) — ottimizzazione pronta per l'attivazione. Rate limit 10/ora per attività già attivo.
+  - Episodio: durante questa modifica un salvataggio concorrente su `worker.js` ha azzerato le modifiche non committate una volta → rifatte e committate subito. Conferma pratica della regola "commit immediato su file condivisi" in `CODEX-COLLAB.md`.
 
 ### Added
 - **Provvigioni automatiche su ordini (2026-07-12, Claude Code)** — applicato su Supabase

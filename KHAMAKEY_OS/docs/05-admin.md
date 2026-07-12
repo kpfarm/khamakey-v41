@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v106** (menu 4 intenti, modalità semplice).
+Versione attuale: **v125** (menu 4 intenti, modalità semplice, CRM operativo, gestione provvigioni).
 
 ---
 
@@ -25,13 +25,19 @@ Versione attuale: **v106** (menu 4 intenti, modalità semplice).
 
 ---
 
-## UX v106
+## UX v106+
 
 - **Menu 4 intenti**: Vendere, Gestire, Configurare, Analizzare
 - **Modalità semplice**: nasconde complessità per task quotidiani
 - **Guide contestuali**: `admin-guide.js` — pannello help per sezione
 - **Chip filtri**: ricerca e filtri su Clienti, Moments, Ordini, Agenti
 - **Copy umano**: testi comprensibili per rete partner
+
+## CRM e provvigioni
+
+- **CRM v84**: pipeline clienti con stato onboarding, priorita, follow-up, agente assegnato, tag e note timeline.
+- **Provvigioni v85/v125**: il trigger SQL su `platform_orders` crea provvigioni `pending`; l'Admin mostra riepilogo, ricerca, filtro per stato e azioni contestuali `Approva`, `Segna pagata`, `Annulla`.
+- Verifica live 2026-07-12: `platform_commission_events` ha RLS attiva, policy `commissions.read`/`commissions.write` e stati ammessi `pending`, `approved`, `paid`, `cancelled`.
 
 ---
 

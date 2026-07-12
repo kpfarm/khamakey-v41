@@ -816,45 +816,6 @@ function renderMomentPage(page, origin) {
     ? `<img class="moment-profile" src="${attr(profileUrl)}" alt="">` : "";
   const ogImage = coverUrl || profileUrl || "";
   const navClass = navHtml ? " has-nav" : "";
-  const isTravel = momentType === "travel";
-  const visibleSectionKeys = new Set(ordered.map(({ key }) => key));
-  const travelNavCandidates = [
-    { id: "moment-section-timeline", key: "timeline", icon: "🧭", label: "Tappe" },
-    { id: "moment-section-gallery", key: "gallery", icon: "🖼️", label: "Foto" },
-    { id: "moment-section-dreams", key: "dreams", icon: "🔖", label: "Lista" },
-    { id: "moment-section-rsvp", key: "rsvp", icon: "👤", label: "RSVP" }
-  ].filter(item => visibleSectionKeys.has(item.key));
-  const canAddMemory = isTravel && visibleSectionKeys.has("guestbook");
-  const travelNavLinks = [
-    `<a href="#moment-hero" class="active" data-bottom-sec="moment-hero" aria-label="Inizio">🏠</a>`,
-    ...travelNavCandidates.slice(0, 2).map(item => `<a href="#${attr(item.id)}" data-bottom-sec="${attr(item.id)}" aria-label="${attr(item.label)}">${item.icon}</a>`),
-    canAddMemory ? `<button class="plus-btn" id="btnAddMemory" aria-label="Aggiungi ricordo">＋</button>` : "",
-    ...travelNavCandidates.slice(2, 4).map(item => `<a href="#${attr(item.id)}" data-bottom-sec="${attr(item.id)}" aria-label="${attr(item.label)}">${item.icon}</a>`)
-  ].filter(Boolean);
-  const bottomNavHtml = isTravel && travelNavLinks.length > 1
-    ? `<nav class="moment-bottom-nav">${travelNavLinks.join("")}</nav>`
-    : "";
-
-  const memoryModalHtml = canAddMemory
-    ? `<dialog class="moment-memory-modal" id="momentMemoryModal">
-<div class="moment-memory-modal-content">
-<button class="moment-memory-modal-close" id="btnCloseMemoryModal">×</button>
-<h3>Condividi un Ricordo</h3>
-<p>Lascia un pensiero o un augurio nel libro dei ricordi del viaggio.</p>
-<form class="moment-guestbook-form" id="modalGuestbookForm">
-<label>Il tuo nome
-<input type="text" name="guestbook_name" required placeholder="Es. Alessandro Rossi" autocomplete="name">
-</label>
-<label>Il tuo messaggio / ricordo
-<textarea name="guestbook_message" rows="4" required placeholder="Scrivi il tuo ricordo o dedica del viaggio..."></textarea>
-</label>
-<button type="submit" class="moment-guestbook-submit">Invia Ricordo</button>
-</form>
-<p class="moment-guestbook-status" id="modalGuestbookStatus" hidden></p>
-</div>
-</dialog>`
-    : "";
-
   return `<!doctype html>
 <html lang="it">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -883,8 +844,6 @@ ${profileBlock}
 <button type="button" class="moment-lightbox-nav moment-lightbox-next" id="momentLightboxNext" aria-label="Successivo">›</button>
 <button type="button" class="moment-lightbox-close" id="momentLightboxClose" aria-label="Chiudi">×</button>
 <div class="moment-lightbox-card"><div id="momentLightboxMedia"></div><p class="moment-lightbox-counter" id="momentLightboxCounter"></p><h3 class="moment-lightbox-title" id="momentLightboxTitle"></h3><p class="moment-lightbox-desc" id="momentLightboxDesc"></p></div></div>
-${bottomNavHtml}
-${memoryModalHtml}
 <script>${momentPageScript(state, ordered, hasCounter, page.slug || "")}</script>
 </body></html>`;
 }
@@ -1514,136 +1473,6 @@ document.querySelectorAll("[data-guestbook-slug]").forEach(function(section){
   }
 });
 
-// Travel bottom-nav and modal dialog script
-(function(){
-  var btnAdd = document.getElementById("btnAddMemory");
-  var modal = document.getElementById("momentMemoryModal");
-  var btnClose = document.getElementById("btnCloseMemoryModal");
-  if(btnAdd && modal){
-    btnAdd.addEventListener("click", function(){
-      if(typeof modal.showModal === "function") modal.showModal();
-      else modal.setAttribute("open", "");
-    });
-  }
-  if(btnClose && modal){
-    btnClose.addEventListener("click", function(){
-      if(typeof modal.close === "function") modal.close();
-      else modal.removeAttribute("open");
-    });
-  }
-
-  // Close on clicking backdrop
-  if(modal){
-    modal.addEventListener("click", function(e){
-      var rect = modal.getBoundingClientRect();
-      var isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
-        rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
-      if (!isInDialog) {
-        if(typeof modal.close === "function") modal.close();
-        else modal.removeAttribute("open");
-      }
-    });
-  }
-
-  // Handle modal guestbook submission
-  var modalForm = document.getElementById("modalGuestbookForm");
-  var modalStatus = document.getElementById("modalGuestbookStatus");
-  if(modalForm){
-    modalForm.addEventListener("submit", function(e){
-      e.preventDefault();
-      var fd = new FormData(modalForm);
-      var payload = {
-        slug: "${momentSlug}",
-        pin: momentPin,
-        values: {
-          name: String(fd.get("guestbook_name") || "").trim(),
-          message: String(fd.get("guestbook_message") || "").trim()
-        }
-      };
-      if(modalStatus){
-        modalStatus.hidden = false;
-        modalStatus.textContent = "Invio in corso…";
-        modalStatus.className = "moment-guestbook-status";
-      }
-      fetch("/api/moment/guestbook", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(payload)
-      })
-      .then(function(res){ return res.json().then(function(data){ return {ok: res.ok, data: data}; }); })
-      .then(function(result){
-        if(!result.ok) throw new Error((result.data && result.data.error) || "Invio non riuscito");
-        modalForm.reset();
-        if(modalStatus){
-          modalStatus.textContent = "Grazie! Il messaggio è in attesa di approvazione.";
-          modalStatus.className = "moment-guestbook-status ok";
-        }
-        // Success feedback and close modal
-        setTimeout(function(){
-          if(typeof modal.close === "function") modal.close();
-          else modal.removeAttribute("open");
-          if(modalStatus) modalStatus.hidden = true;
-          // Refresh page's guestbook list if present
-          document.querySelectorAll("[data-guestbook-slug]").forEach(function(sec){
-            var list = sec.querySelector("[data-guestbook-list]");
-            var slug = sec.getAttribute("data-guestbook-slug") || "";
-            if(slug && list) {
-              var url = "/api/moment/guestbook?slug=" + encodeURIComponent(slug) + (momentPin ? "&pin=" + encodeURIComponent(momentPin) : "");
-              fetch(url).then(function(res){ return res.json(); }).then(function(data){
-                if(data && data.ok) {
-                  function escText(v){return String(v||"").replace(/[&<>"']/g,function(ch){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch];});}
-                  function formatDate(v){try{return new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(v));}catch(e){return "";}}
-                  if(!data.messages || !data.messages.length){
-                    list.innerHTML = '<p class="moment-guestbook-empty">Sii il primo a lasciare un pensiero.</p>';
-                  } else {
-                    list.innerHTML = data.messages.map(function(item){
-                      return '<article class="moment-guestbook-card"><p class="moment-guestbook-quote">“'+escText(item.message)+'”</p><p class="moment-guestbook-author">— '+escText(item.guest_name)+(item.created_at?' · '+escText(formatDate(item.created_at)):"")+'</p></article>';
-                    }).join("");
-                  }
-                }
-              });
-            }
-          });
-        }, 1500);
-      })
-      .catch(function(err){
-        if(modalStatus){
-          modalStatus.textContent = err.message || "Invio non riuscito. Riprova.";
-          modalStatus.className = "moment-guestbook-status error";
-        }
-      });
-    });
-  }
-
-  // Active Bottom Nav link sync on scroll
-  var bottomNavLinks = document.querySelectorAll(".moment-bottom-nav a");
-  if(bottomNavLinks.length){
-    function syncBottomNav(){
-      var y = window.pageYOffset || window.scrollY || 0;
-      var current = "moment-hero";
-      var bottomIds = Array.prototype.map.call(bottomNavLinks, function(a){
-        return a.getAttribute("data-bottom-sec");
-      }).filter(Boolean);
-      var windowH = window.innerHeight;
-      var docH = document.documentElement.scrollHeight;
-      if(y + windowH >= docH - 24) {
-        current = bottomIds[bottomIds.length - 1] || current;
-      } else {
-        bottomIds.forEach(function(id){
-          var node = document.getElementById(id);
-          if(node && node.getBoundingClientRect().top + y - (windowH * 0.35) <= y) {
-            current = id;
-          }
-        });
-      }
-      bottomNavLinks.forEach(function(a){
-        a.classList.toggle("active", a.getAttribute("data-bottom-sec") === current);
-      });
-    }
-    window.addEventListener("scroll", syncBottomNav, {passive:true});
-    syncBottomNav();
-  }
-})();
 
 var lb=document.getElementById("momentLightbox");
 if(lb){
@@ -2045,136 +1874,205 @@ body.nav-open{overflow:hidden}
   transform: scale(1.3);
 }
 
-/* 2. TRAVEL & ADVENTURE: Web-App layout, bottom nav, dialog and high contrast */
+/* 2. TRAVEL & ADVENTURE: Immersive 2026 Design Overhaul */
 main.moment-type-travel {
-  background-color: #faf8f3 !important;
-  background-image: radial-gradient(rgba(190, 70, 31, 0.12) 1.5px, transparent 1.5px) !important;
-  background-size: 20px 20px !important;
+  background-color: #faf6ee !important;
+  background-image: radial-gradient(rgba(178, 59, 24, 0.08) 1.5px, transparent 1.5px) !important;
+  background-size: 24px 24px !important;
   background-position: 0 0 !important;
-  padding-bottom: 96px !important; /* Space for sticky bottom nav */
+  padding-bottom: 64px !important;
 }
 
 /* Page global fonts override for travel */
 .moment-type-travel, .moment-type-travel * {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* High contrast deep charcoal for titles */
 .moment-type-travel h1,
+.moment-type-travel h2,
+.moment-type-travel h3,
 .moment-type-travel .moment-card-title,
 .moment-type-travel .moment-card-head strong {
   color: #0f172a !important;
   font-family: 'Outfit', sans-serif !important;
+  font-weight: 800 !important;
 }
 
 .moment-type-travel .moment-card-title {
-  font-weight: 800 !important;
-  font-size: 1rem !important;
-  letter-spacing: 0.08em !important;
+  font-size: 1.05rem !important;
+  letter-spacing: 0.06em !important;
   text-transform: uppercase !important;
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
+  gap: 12px !important;
 }
+
 .moment-type-travel .moment-card-title::after {
   content: "" !important;
   flex-grow: 1 !important;
   height: 1px !important;
-  background: rgba(15, 23, 42, 0.08) !important;
+  background: linear-gradient(90deg, rgba(178, 59, 24, 0.15), transparent) !important;
 }
 
-/* Dynamic Hero Section */
+/* Immersive Hero Section with Curved bottom */
 .moment-type-travel .moment-hero {
   position: relative !important;
-  height: 380px !important;
-  border-radius: 0 0 32px 32px !important;
+  height: 440px !important;
+  clip-path: ellipse(125% 100% at 50% 0%) !important;
   overflow: hidden !important;
-  margin-bottom: 20px !important;
-  box-shadow: 0 20px 40px rgba(139, 69, 19, 0.12) !important;
+  margin-bottom: -32px !important;
+  box-shadow: none !important;
+  z-index: 1 !important;
+}
+
+.moment-type-travel .moment-hero-overlay {
+  background: linear-gradient(180deg, rgba(44, 64, 53, 0.1) 0%, rgba(15, 23, 42, 0.6) 80%, rgba(15, 23, 42, 0.8) 100%) !important;
+}
+
+/* Floating particles layer on Hero */
+.moment-type-travel .moment-hero::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0; left: 0; right: 0; bottom: 0 !important;
+  background-image: 
+    radial-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px),
+    radial-gradient(rgba(255, 255, 255, 0.25) 1.5px, transparent 1.5px) !important;
+  background-size: 140px 140px, 200px 200px !important;
+  background-position: 0 0, 50px 70px !important;
+  opacity: 0.65 !important;
+  animation: floatingParticles 50s linear infinite !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+}
+
+@keyframes floatingParticles {
+  0% { background-position: 0 0, 50px 70px; }
+  100% { background-position: 140px 280px, 250px 270px; }
 }
 
 .moment-type-travel .moment-hero-content {
   position: absolute !important;
-  bottom: 32px !important;
-  left: 20px !important;
-  right: 20px !important;
+  bottom: 64px !important;
+  left: 24px !important;
+  right: 24px !important;
   color: #ffffff !important;
   text-align: left !important;
   z-index: 5 !important;
 }
 
 .moment-type-travel .moment-hero h1 {
-  font-family: 'Outfit', sans-serif !important;
-  font-weight: 800 !important;
-  font-size: 2.1rem !important;
-  margin-bottom: 8px !important;
-  line-height: 1.1 !important;
-  letter-spacing: -0.01em !important;
+  font-size: clamp(2rem, 8vw, 2.75rem) !important;
+  margin-bottom: 10px !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.02em !important;
   text-transform: uppercase !important;
-  text-shadow: 0 2px 14px rgba(0,0,0,0.5) !important;
   color: #ffffff !important;
+  text-shadow: 0 4px 20px rgba(15, 23, 42, 0.4) !important;
 }
 
 .moment-type-travel .moment-hero p {
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 0.95rem !important;
-  opacity: 0.95 !important;
-  line-height: 1.4 !important;
+  font-size: 0.98rem !important;
+  opacity: 0.92 !important;
+  line-height: 1.5 !important;
   font-weight: 500 !important;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.4) !important;
   color: #ffffff !important;
+  text-shadow: 0 2px 10px rgba(15, 23, 42, 0.3) !important;
 }
 
-/* Card layout overrides for Travel */
+/* Travel Pill Badges */
+.moment-type-travel .moment-pill {
+  background: #2c4035 !important;
+  color: #ffffff !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.12em !important;
+  padding: 6px 16px !important;
+  border-radius: 999px !important;
+  display: inline-block !important;
+  margin-bottom: 8px !important;
+  box-shadow: 0 4px 12px rgba(44, 64, 53, 0.2) !important;
+}
+
+/* Content wrapping */
+.moment-type-travel .moment-content {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* Premium Card layout for 2026 */
 .moment-type-travel .moment-card,
 .moment-type-travel .moment-counter,
 .moment-type-travel .moment-countdown,
 .moment-type-travel .moment-quote-wrap,
 .moment-type-travel .moment-signature {
   background: #ffffff !important;
-  border-radius: 28px !important;
-  padding: 24px !important;
-  margin-bottom: 20px !important;
-  box-shadow: 0 16px 36px -12px rgba(139, 69, 19, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  border-radius: 32px !important;
+  padding: 28px 24px !important;
+  margin-bottom: 24px !important;
+  box-shadow: 
+    0 24px 50px -16px rgba(139, 69, 19, 0.08),
+    0 4px 16px rgba(139, 69, 19, 0.02) !important;
+  border: 1px solid rgba(178, 59, 24, 0.05) !important;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-/* Counter & Countdown styling */
+.moment-type-travel .moment-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 
+    0 32px 64px -14px rgba(139, 69, 19, 0.11),
+    0 6px 20px rgba(139, 69, 19, 0.03) !important;
+}
+
+/* Counter & Countdown style */
 .moment-type-travel .moment-counter-label,
 .moment-type-travel .moment-countdown-label {
   font-family: 'Outfit', sans-serif !important;
   font-size: 0.78rem !important;
   font-weight: 800 !important;
   letter-spacing: 0.08em !important;
-  color: #be461f !important;
+  color: #b23b18 !important;
   text-transform: uppercase !important;
-}
-.moment-type-travel .moment-counter-unit b,
-.moment-type-travel .moment-countdown-unit b {
-  color: #be461f !important;
+  margin-bottom: 12px !important;
 }
 
-/* Timeline Polaroid overrides */
+.moment-type-travel .moment-counter-unit b,
+.moment-type-travel .moment-countdown-unit b {
+  color: #b23b18 !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+
+/* 2026 Timeline Polaroid Layout */
+.moment-type-travel .moment-journey {
+  position: relative !important;
+  padding-left: 16px !important;
+}
+
+.moment-type-travel .moment-journey::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 8px !important;
+  top: 0; bottom: 0 !important;
+  width: 2px !important;
+  background: linear-gradient(180deg, #b23b18 0%, rgba(178, 59, 24, 0.1) 100%) !important;
+  opacity: 0.15 !important;
+}
+
 .moment-type-travel .moment-journey-item {
-  background: #fdfcf9 !important;
-  border: 1.5px solid rgba(139, 69, 19, 0.08) !important;
-  padding: 14px 14px 38px 14px !important; /* Thick bottom border */
-  box-shadow: 0 12px 28px -6px rgba(17,32,65,0.18) !important;
-  border-radius: 2px !important; /* Sharp corners like raw paper polaroid */
+  background: #fdfbf7 !important;
+  border: 1px solid rgba(178, 59, 24, 0.06) !important;
+  padding: 16px 16px 42px 16px !important; /* Thick bottom border */
+  box-shadow: 0 16px 36px -12px rgba(139, 69, 19, 0.13) !important;
+  border-radius: 4px !important; /* Sharp corners like raw paper polaroid */
   display: flex !important;
   flex-direction: column !important;
   gap: 12px !important;
-  transition: transform 0.3s cubic-bezier(.21,1.02,.43,1.01), box-shadow 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), box-shadow 0.4s ease !important;
   position: relative !important;
-}
-
-@media(min-width:560px) {
-  .moment-type-travel .moment-journey-item {
-    display: flex !important;
-    flex-direction: column !important;
-    grid-template-columns: none !important;
-    align-items: stretch !important;
-  }
+  margin-bottom: 32px !important;
+  margin-left: 20px !important;
 }
 
 .moment-type-travel .moment-journey-item:nth-child(odd) {
@@ -2183,48 +2081,46 @@ main.moment-type-travel {
 .moment-type-travel .moment-journey-item:nth-child(even) {
   transform: rotate(1.8deg);
 }
+
 .moment-type-travel .moment-journey-item:hover {
-  transform: translateY(-4px) rotate(0deg) scale(1.02) !important;
-  z-index: 2;
-  box-shadow: 0 16px 36px -10px rgba(0,0,0,0.18) !important;
+  transform: translateY(-8px) rotate(0deg) scale(1.03) !important;
+  z-index: 10 !important;
+  box-shadow: 0 24px 50px -10px rgba(15,23,42,0.18) !important;
 }
 
 .moment-type-travel .moment-journey-photo {
   width: 100% !important;
   height: auto !important;
-  max-height: 240px !important;
+  max-height: 280px !important;
   object-fit: cover !important;
   border-radius: 2px !important;
   box-shadow: none !important;
-  border: 1px solid rgba(0,0,0,0.05) !important;
+  border: 1px solid rgba(15,23,42,0.06) !important;
 }
 
+/* Passport Pin Indicator */
 .moment-type-travel .moment-journey-item::before {
-  content: "" !important;
+  content: "📍" !important;
   position: absolute !important;
-  left: 50% !important;
-  top: -24px !important;
-  width: 2px !important;
-  height: 24px !important;
-  border-left: 2px dashed #be461f88 !important;
-  background: transparent !important;
-}
-.moment-type-travel .moment-journey-item:first-child::before {
-  display: none !important;
+  left: -32px !important;
+  top: 12px !important;
+  font-size: 1.1rem !important;
+  z-index: 5 !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
 
-/* Washi Tape and Polaroid tape style decoration */
+/* Tape style decoration */
 .moment-type-travel .moment-journey-item::after {
   content: "" !important;
   position: absolute !important;
-  top: -12px !important;
+  top: -10px !important;
   left: 50% !important;
-  transform: translateX(-50%) rotate(-3deg) !important;
-  width: 78px !important;
+  transform: translateX(-50%) rotate(-4deg) !important;
+  width: 80px !important;
   height: 22px !important;
-  background: rgba(225, 215, 185, 0.45) !important; /* translucent mask tape */
-  border-left: 2px dashed rgba(255,255,255,0.4) !important;
-  border-right: 2px dashed rgba(255,255,255,0.4) !important;
+  background: rgba(225, 215, 185, 0.5) !important; /* translucent mask tape */
+  border-left: 1px dashed rgba(255,255,255,0.4) !important;
+  border-right: 1px dashed rgba(255,255,255,0.4) !important;
   box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
   backdrop-filter: blur(1.5px) !important;
   -webkit-backdrop-filter: blur(1.5px) !important;
@@ -2233,22 +2129,21 @@ main.moment-type-travel {
 
 .moment-type-travel .moment-journey-text {
   font-family: 'Caveat', cursive !important;
-  font-size: 1.45rem !important;
+  font-size: 1.55rem !important;
   color: #2e3d52 !important;
   line-height: 1.25 !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
 }
 
 .moment-type-travel .moment-journey-date {
   font-family: 'Special Elite', monospace !important;
-  font-size: 0.85rem !important;
+  font-size: 0.82rem !important;
   color: #5d6a7d !important;
-  letter-spacing: 0 !important;
-  text-transform: none !important;
-  background: rgba(0,0,0,0.04) !important;
-  padding: 2px 8px !important;
+  background: rgba(178, 59, 24, 0.05) !important;
+  padding: 3px 10px !important;
   border-radius: 4px !important;
   align-self: flex-start !important;
+  border: 1px solid rgba(178, 59, 24, 0.08) !important;
 }
 
 .moment-type-travel .moment-journey-place {
@@ -2257,65 +2152,72 @@ main.moment-type-travel {
   font-weight: 600 !important;
   color: #0f172a !important;
   margin-top: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
 }
 
-/* Passport Stamps style */
+/* Passport stamp style icons */
 .moment-type-travel .moment-card-head .moment-card-icon,
 .moment-type-travel .moment-card-icon {
   background: transparent !important;
-  border: 3px double #be461fbb !important;
-  color: #be461fbb !important;
-  width: 56px !important;
-  height: 56px !important;
+  border: 3px double rgba(178, 59, 24, 0.65) !important;
+  color: rgba(178, 59, 24, 0.75) !important;
+  width: 54px !important;
+  height: 54px !important;
   border-radius: 50% !important;
   display: grid !important;
   place-items: center !important;
   transform: rotate(-6deg) !important;
   font-family: 'Special Elite', monospace !important;
-  font-size: 1.25rem !important;
+  font-size: 1.2rem !important;
   font-weight: 800 !important;
   box-shadow: none !important;
   position: relative !important;
-  opacity: 0.8 !important;
-  transition: transform 0.4s ease !important;
+  opacity: 0.85 !important;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
 }
 
 .moment-type-travel .moment-card:hover .moment-card-icon {
-  transform: scale(1.08) rotate(4deg) !important;
-  opacity: 1 !important;
+  transform: scale(1.1) rotate(6deg) !important;
+  border-color: rgba(178, 59, 24, 0.85) !important;
+  color: #b23b18 !important;
 }
 
-/* Geocodifica a Boarding Pass (Mappe) */
+/* Mappe Boarding Pass */
 .moment-type-travel .moment-place {
   background: #ffffff !important;
-  border: 1px dashed rgba(139, 69, 19, 0.15) !important;
-  border-radius: 12px !important;
-  padding: 16px 20px !important;
+  border: 1px dashed rgba(178, 59, 24, 0.2) !important;
+  border-radius: 16px !important;
+  padding: 20px !important;
   position: relative !important;
   overflow: hidden !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+  box-shadow: 0 4px 16px rgba(139, 69, 19, 0.02) !important;
   display: flex !important;
   align-items: center !important;
-  gap: 12px !important;
+  gap: 14px !important;
 }
+
 .moment-type-travel .moment-place::before,
 .moment-type-travel .moment-place::after {
   content: "" !important;
   position: absolute !important;
   top: 50% !important;
-  width: 14px !important;
-  height: 14px !important;
-  background: #faf8f3 !important; /* matches grid paper background */
+  width: 16px !important;
+  height: 16px !important;
+  background: #faf6ee !important; /* matches grid background */
   border-radius: 50% !important;
-  border: 1px solid rgba(139, 69, 19, 0.15) !important;
+  border: 1px solid rgba(178, 59, 24, 0.15) !important;
   z-index: 2 !important;
 }
+
 .moment-type-travel .moment-place::before {
-  left: -7px !important;
+  left: -8px !important;
   transform: translateY(-50%) !important;
 }
+
 .moment-type-travel .moment-place::after {
-  right: -7px !important;
+  right: -8px !important;
   transform: translateY(-50%) !important;
 }
 
@@ -2331,203 +2233,113 @@ main.moment-type-travel {
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  padding: 14px 18px !important;
-  background: #faf7f2 !important;
-  border-radius: 16px !important;
-  border: 1px solid rgba(0,0,0,0.02) !important;
-  border-bottom: 1px solid rgba(0,0,0,0.02) !important;
-  transition: background 0.2s !important;
+  padding: 16px 20px !important;
+  background: #fdfbf7 !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(178, 59, 24, 0.04) !important;
+  transition: all 0.25s ease !important;
+}
+
+.moment-type-travel .moment-dream:hover {
+  background: #ffffff !important;
+  border-color: rgba(178, 59, 24, 0.1) !important;
+  transform: translateX(4px) !important;
 }
 
 .moment-type-travel .moment-dream-text {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
   font-size: 0.95rem !important;
-  color: #374151 !important;
-  font-weight: 600 !important;
+  color: #334155 !important;
+  font-weight: 700 !important;
   text-decoration: none !important;
   opacity: 1 !important;
 }
 
 .moment-type-travel .moment-dream.done .moment-dream-text {
-  color: #9ca3af !important;
+  color: #94a3b8 !important;
   text-decoration: line-through !important;
-  opacity: 0.6 !important;
+  opacity: 0.65 !important;
 }
 
 .moment-type-travel .moment-dream-mark {
   width: 24px !important;
   height: 24px !important;
-  border-radius: 6px !important;
-  border: 2px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  border: 2px solid #cbd5e1 !important;
   display: grid !important;
   place-items: center !important;
-  font-size: 0.75rem !important;
+  font-size: 0.78rem !important;
   font-weight: bold !important;
   background: #ffffff !important;
   color: transparent !important;
-  transition: all 0.2s !important;
+  transition: all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.2) !important;
   order: 2 !important; /* Move checklist boxes to the right like mockup */
 }
 
 .moment-type-travel .moment-dream.done .moment-dream-mark {
-  background: #be461f !important;
+  background: #b23b18 !important;
   color: #ffffff !important;
-  border: 0 !important;
+  border-color: #b23b18 !important;
+  transform: scale(1.1) !important;
 }
 
-/* Gallery layout in 2-column grid override */
+/* Gallery layout in premium 2-column grid override */
 .moment-type-travel .moment-gallery {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 12px !important;
-}
-
-.moment-type-travel .moment-gallery img {
-  border-radius: 16px !important;
-  aspect-ratio: 1 !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04) !important;
-}
-
-/* Primary/Secondary Buttons */
-.moment-type-travel .moment-rsvp-submit,
-.moment-type-travel .moment-guestbook-submit,
-.moment-type-travel .btn-primary-travel {
-  background: #be461f !important;
-  box-shadow: 0 8px 24px rgba(190, 70, 31, 0.25) !important;
-  border-radius: 16px !important;
-  padding: 15px !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-weight: 800 !important;
-  font-size: 0.85rem !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
-}
-
-/* Floating Bottom Navigation Bar */
-.moment-bottom-nav {
-  position: fixed !important;
-  bottom: 20px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  width: calc(100% - 32px) !important;
-  max-width: 398px !important;
-  background: rgba(255, 255, 255, 0.92) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.8) !important;
-  border-radius: 30px !important;
-  display: flex !important;
-  justify-content: space-around !important;
-  align-items: center !important;
-  padding: 10px 16px !important;
-  box-shadow: 0 16px 40px rgba(139, 69, 19, 0.12) !important;
-  z-index: 1000 !important;
-}
-
-.moment-bottom-nav a {
-  color: #9ca3af !important;
-  font-size: 1.4rem !important;
-  text-decoration: none !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 44px !important;
-  height: 44px !important;
-  border-radius: 50% !important;
-  transition: all 0.25s ease !important;
-}
-
-.moment-bottom-nav a.active {
-  color: #be461f !important;
-}
-
-.moment-bottom-nav button.plus-btn {
-  background: #3c594c !important;
-  color: #ffffff !important;
-  box-shadow: 0 8px 16px rgba(60, 89, 76, 0.3) !important;
-  border: 0 !important;
-  width: 44px !important;
-  height: 44px !important;
-  border-radius: 50% !important;
-  font-size: 1.4rem !important;
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transition: all 0.25s ease !important;
-}
-
-.moment-bottom-nav button.plus-btn:hover {
-  transform: scale(1.05) !important;
-}
-
-/* Add Memory Modal Dialog */
-.moment-memory-modal {
-  border: 0 !important;
-  border-radius: 28px !important;
-  padding: 24px !important;
-  background: rgba(255, 255, 255, 0.96) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25) !important;
-  max-width: min(90vw, 420px) !important;
-  width: 100% !important;
-  margin: auto !important;
-  outline: none !important;
-}
-
-.moment-memory-modal::backdrop {
-  background: rgba(15, 23, 42, 0.4) !important;
-  backdrop-filter: blur(6px) !important;
-  -webkit-backdrop-filter: blur(6px) !important;
-}
-
-.moment-memory-modal-content {
-  position: relative !important;
-  display: flex !important;
-  flex-direction: column !important;
   gap: 16px !important;
 }
 
-.moment-memory-modal-close {
-  position: absolute !important;
-  top: -8px !important;
-  right: -8px !important;
-  width: 32px !important;
-  height: 32px !important;
-  border-radius: 50% !important;
-  background: #f3f4f6 !important;
-  border: 0 !important;
-  color: #374151 !important;
-  font-size: 1.25rem !important;
-  cursor: pointer !important;
-  display: grid !important;
-  place-items: center !important;
+.moment-type-travel .moment-gallery figure {
+  margin: 0 !important;
+  overflow: hidden !important;
+  border-radius: 20px !important;
+  box-shadow: 0 10px 24px -8px rgba(15,23,42,0.12) !important;
+  border: 1px solid rgba(255,255,255,0.8) !important;
 }
 
-.moment-memory-modal h3 {
-  font-family: 'Outfit', sans-serif !important;
-  font-size: 1.25rem !important;
-  font-weight: 800 !important;
-  color: #0f172a !important;
-  margin-bottom: 4px !important;
+.moment-type-travel .moment-gallery figure:nth-child(3n) {
+  grid-column: span 2 !important;
 }
 
-.moment-memory-modal p {
-  font-size: 0.9rem !important;
-  color: #4b5563 !important;
-  line-height: 1.4 !important;
-}
-
-.moment-memory-modal input,
-.moment-memory-modal textarea {
+.moment-type-travel .moment-gallery img {
+  border-radius: 0 !important;
+  aspect-ratio: 1 !important;
   width: 100% !important;
-  border: 1.5px solid #e5e7eb !important;
-  border-radius: 12px !important;
-  padding: 12px !important;
-  margin-top: 6px !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
+.moment-type-travel .moment-gallery figure:nth-child(3n) img {
+  aspect-ratio: 16/10 !important;
+}
+
+.moment-type-travel .moment-gallery figure:hover img {
+  transform: scale(1.06) !important;
+}
+
+/* Primary buttons style */
+.moment-type-travel .moment-rsvp-submit,
+.moment-type-travel .moment-guestbook-submit {
+  background: #b23b18 !important;
+  box-shadow: 0 10px 24px -4px rgba(178, 59, 24, 0.3) !important;
+  border-radius: 18px !important;
+  padding: 16px !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 0.88rem !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  transition: all 0.3s ease !important;
+}
+
+.moment-type-travel .moment-rsvp-submit:hover,
+.moment-type-travel .moment-guestbook-submit:hover {
+  background: #962f12 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 28px -2px rgba(178, 59, 24, 0.4) !important;
+}
 
 
 /* 3. BABY & KIDS: Cloudland & Playful cloud-shapes */

@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-11** (security hardening — **DEPLOYATO e verificato in produzione**)
+> Ultimo aggiornamento: **2026-07-12** (Admin provvigioni v125 + SQL v85 verificati)
 
 ---
 
@@ -78,11 +78,11 @@ Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_lead
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin** | v106 | Menu 4 intenti, modalità semplice, guide contestuali |
+| **Admin** | **v125** | Menu 4 intenti, CRM operativo, provvigioni con approva/paga/annulla |
 | **Editor Business** | **v117** | Analytics affidabili (RPC v74), order_sent, consenso cookie click |
 | **Moments editor** | v110+ | Dashboard organizzatore — **agente dedicato** |
 | **Worker NFC** | **v125** | Deployato — Overhaul completo template Viaggi (Travel Web-App: barra inferiore, popup Add Memory reale connesso a API guestbook, contrasti bilanciati carbone/terracotta e Hero animata/cinematica). Include v124 OpenAI incremental translations. |
-| **SQL Supabase** | **v83 (applicata e verificata)** | v75-v79 hardening/rate-limit, v80-v83 triage linter (6 problemi reali risolti) — vedi nota sopra |
+| **SQL Supabase** | **v85 (applicata e verificata)** | v75-v83 security, v84 CRM, v85 trigger provvigioni ordini. Verifica live 2026-07-12: RLS `platform_commission_events` attiva, stati `pending/approved/paid/cancelled` accettati |
 | **Prossima release Business** | **v118** | `editor.html` + `index.html` `?v=` + `buildPublicSnapshot().version` |
 
 ---
@@ -116,6 +116,8 @@ Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_lead
 - [x] Integration Hub (Shopify, Stripe, PayPal, Resend)
 - [x] Rete rivenditori v68 (tier, listini, consegne)
 - [x] UX v106: menu intenti, modalità semplice, guide
+- [x] CRM v84: pipeline clienti + note protette da RPC
+- [x] Provvigioni v85/v125: trigger ordini + gestione admin approva/paga/annulla
 
 ### Integrazioni
 - [x] Shopify: sync catalogo + webhook ordini
@@ -146,8 +148,7 @@ Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_lead
 | 2 | `RESEND_API_KEY` da verificare in prod | Email ordini potrebbero non partire | `wrangler secret put` |
 | 3 | Documentazione sparsa tra chat e file root | Perdita contesto tra sessioni AI | **KhamaKey OS** (in corso) |
 | 4 | Skill Codex punta a path vecchi | Rischio deploy su cartella sbagliata | Specificare sempre root v41 |
-| 5 | `platform_supported_locales` senza RLS | Chiunque con anon key può leggere/scrivere la tabella lingue | SQL di fix pronta, in attesa di conferma utente |
-| 6 | `RESEND_WEBHOOK_SECRET` non ancora impostato | Webhook Resend risponde 503 finché non configurato (sicuro, non urgente) | `wrangler secret put RESEND_WEBHOOK_SECRET` |
+| 5 | `RESEND_WEBHOOK_SECRET` non ancora impostato | Webhook Resend risponde 503 finché non configurato (sicuro, non urgente) | `wrangler secret put RESEND_WEBHOOK_SECRET` |
 
 ---
 
@@ -176,7 +177,7 @@ Vedi [`../CODEX-COLLAB.md`](../CODEX-COLLAB.md) sezione **Lock attivi**.
 |------|-------|
 | Rete rivenditori v68 | Libero per fix minori |
 | Stripe secrets Worker | Da configurare |
-| Admin UX v106 | Libero |
+| Admin v125 | Libero per fix minori — coordinarsi su `admin.html`, `admin.js`, `admin.css` |
 | Editor contratto pubblico | Condiviso — coordinarsi |
 
 ---

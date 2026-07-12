@@ -231,7 +231,7 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Stripe webhook / ingest** | Predisposto v103 | handler Stripe in `worker/worker.js`, RPC `ingest_stripe_checkout_event` |
 | **Shopify Moments** | Operativo | webhook ordini, catalogo vendita, sync bozze |
 | **Editor Business — contratto pubblico** | Condiviso | `publicStateFromEditor`, renderer `/p/` nel Worker |
-| **Admin UX / guide** | v106 — menu intenti + modalità semplice | `admin.html`, `admin.js`, `admin.css`, `admin-guide.js` — coordinarsi se stesso pannello |
+| **Admin UX / guide** | v125 — CRM + provvigioni operative | `admin.html`, `admin.js`, `admin.css`, `admin-guide.js` — coordinarsi se stesso pannello |
 | **Moments editor** | **Cursor** — coordinamento UX v111 (2026-07-10) | `moments.js`, `moments.html`, `moment-*.js` — non toccare senza lock |
 | **Security hardening (audit 2026-07-11)** | Completato e deployato (vedi `PROJECT_STATE.md`) | Le regole assolute su CSP/RLS/dati restano vincolanti per tutti |
 | **`worker/worker.js` — CSS/tema Moments** | **Antigravity** (in corso, moments premium theming) | Chi altri deve toccare `worker.js` si coordina prima: è il file più conteso |
@@ -290,8 +290,8 @@ Percorsi skill: `pages/` (non `khamakey-test-app`), `worker/` (non `khamakey-clo
 ## Convenzioni versione
 
 - Un solo contatore release piattaforma: `?v=NN` su HTML/JS
-- Admin attuale: **v105** — prossima release piattaforma: **v106**
-- Worker: `WORKER_VERSION` in `worker/worker.js` (attuale v103)
+- Admin attuale: **v125**
+- Worker: `WORKER_VERSION` in `worker/worker.js` (attuale v125)
 - Dettaglio completo: `.cursor/rules/git-commit-workflow.mdc`
 
 ---

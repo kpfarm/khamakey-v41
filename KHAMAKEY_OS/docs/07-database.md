@@ -4,7 +4,7 @@
 
 Progetto: `cuxlwaocjqwzluycznyp`
 
-Migrazioni in `sql/` — versionate da v37 a **v68**.
+Migrazioni in `sql/` — versionate da v37 a **v85**.
 
 ---
 
@@ -32,6 +32,14 @@ Eseguire **in ordine** i file non ancora applicati. Vedi [`../../sql/README.md`]
 | v66 | `khamakey-integrations-i18n-v66.sql` | Integrazioni + i18n |
 | v67 | `khamakey-shopify-email-stripe-v67.sql` | Email ordini + Stripe |
 | v68 | `khamakey-reseller-network-v68.sql` | Rete rivenditori |
+| v69 | `khamakey-business-i18n-v69.sql` | Traduzioni pagine Business |
+| v70 | `khamakey-moments-rsvp-v70.sql` | RSVP Moments strutturato |
+| v71 | `khamakey-moments-guestbook-v71.sql` | Guestbook Moments |
+| v72-v73 | anniversari + letter unlock | Automazioni Moments |
+| v74 | `khamakey-business-analytics-v74.sql` | Analytics Business |
+| v75-v83 | hardening sicurezza | PIN, rate limit, CSP/RLS, linter Supabase |
+| v84 | `khamakey-crm-v84.sql` | CRM admin su tabelle esistenti |
+| v85 | `khamakey-order-commissions-v85.sql` | Trigger provvigioni automatiche su ordini |
 
 ---
 
@@ -47,6 +55,7 @@ Eseguire **in ordine** i file non ancora applicati. Vedi [`../../sql/README.md`]
 | `platform_moment_catalog` | Catalogo vendita |
 | `platform_agents` | Rivenditori / agenti |
 | `platform_payment_transactions` | Transazioni pagamento |
+| `platform_commission_events` | Provvigioni generate da ordini/abbonamenti |
 
 ---
 
@@ -65,6 +74,7 @@ Eseguire **in ordine** i file non ancora applicati. Vedi [`../../sql/README.md`]
 | `activate_moment_code` | Attivazione codice NFC (5 parametri) |
 | `ingest_stripe_checkout_event` | Webhook Stripe |
 | Funzioni rete v68 | Assegnazione, listini, consegne |
+| `apply_order_commissions` | Trigger interno v85 per creare provvigioni da `platform_orders` |
 
 ---
 

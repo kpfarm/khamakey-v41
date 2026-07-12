@@ -8,6 +8,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **Costo API OpenAI −75% (2026-07-12, Claude Code)** — deployato (Worker v123)
+  - Le traduzioni pagine Business facevano 1 chiamata OpenAI per ogni lingua (en/fr/de/es = 4 chiamate per attivazione). Ora una sola chiamata batch traduce tutte le lingue insieme. Stesso risultato, un quarto delle chiamate a pagamento.
+  - Nota: OpenAI è attualmente **non configurato** in produzione (nessun costo oggi) — ottimizzazione pronta per quando verrà attivato. Rate limit 10/ora per attività già attivo.
+  - Follow-up individuato: `business_page_i18n.source_hash` è salvato ma mai riletto → la sync ritraduce anche campi identici. Usarlo per tradurre solo i campi cambiati ridurrebbe ulteriormente il costo.
+
 ### Added
 - **Provvigioni automatiche su ordini (2026-07-12, Claude Code)** — applicato su Supabase
   - La rete rivenditori (v68) e la distribuzione multilivello esistevano ma **nessun ordine generava provvigioni** (0 record in `platform_commission_events`): la funzione andava chiamata a mano e aveva un gate di permesso incompatibile col flusso ingest.

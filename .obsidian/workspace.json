@@ -1,0 +1,214 @@
+{
+  "main": {
+    "id": "a356913a71f7edce",
+    "type": "split",
+    "children": [
+      {
+        "id": "ab6b61eb6f0908e3",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "776f004e4fec35e9",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Vista grafo"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "309205ae3c1b9ef2",
+    "type": "split",
+    "children": [
+      {
+        "id": "2d01cf19f1240fd3",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8a406a67e4fa14fa",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Esplora risorse"
+            }
+          },
+          {
+            "id": "b0dde123273a25f7",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Ricerca"
+            }
+          },
+          {
+            "id": "f7eb1eab038bccef",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Segnalibri"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "258d00851d7aa079",
+    "type": "split",
+    "children": [
+      {
+        "id": "f6f96201c3f29ff2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1dd903c1615b91bf",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Riferimenti"
+            }
+          },
+          {
+            "id": "28fe8fc42fcf2986",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Collegamenti in uscita"
+            }
+          },
+          {
+            "id": "f1b266289d619149",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etichette"
+            }
+          },
+          {
+            "id": "3e6bce15c4cc098d",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Tutte le proprietà"
+            }
+          },
+          {
+            "id": "e036bc0dd9fa315a",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Struttura"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Apri selezione rapida": false,
+      "graph:Apri vista grafo": false,
+      "canvas:Crea nuova lavagna": false,
+      "daily-notes:Apri nota del giorno": false,
+      "templates:Inserisci modello": false,
+      "command-palette:Apri riquadro comandi": false,
+      "bases:Crea nuova Base": false
+    }
+  },
+  "active": "776f004e4fec35e9",
+  "lastOpenFiles": [
+    "KHAMAKEY_OS/PROJECT_STATE.md.tmp.62123.38dae12c06b9",
+    "pages/_headers.tmp.62123.f309c159aba3",
+    "worker/worker.js.tmp.62123.9535411076bf",
+    "KHAMAKEY_OS/AGENTS.md.tmp.62123.375e6d612b0f",
+    "sql/khamakey-locales-rls-fix-v79.sql",
+    "KHAMAKEY_OS/assets/brand/moments-proposal-e-script.png",
+    "KHAMAKEY_OS/assets/brand/moments-proposal-d-serif.png",
+    "KHAMAKEY_OS/assets/brand/moments-proposal-c-logo.png",
+    "KHAMAKEY_OS/assets/brand/moments-proposal-b-logo.png",
+    "KHAMAKEY_OS/assets/brand/moments-proposal-a-logo.png",
+    "KHAMAKEY_OS/assets/brand/khamakey-business-palette.jpg",
+    "KHAMAKEY_OS/assets/brand/khamakey-business-logo.png",
+    "KHAMAKEY_OS/assets/brand",
+    "sql/khamakey-pin-ambiguity-fix-v78.sql",
+    "sql/khamakey-rate-limit-v76.sql",
+    "sql/khamakey-security-hardening-v75.sql",
+    "AGENTS.md",
+    "2026-07-11.md",
+    "CHAT-EXPORT-2026-07-06.md",
+    "CLAUDE.md",
+    "KHAMAKEY_OS/docs/03-editor.md",
+    "KHAMAKEY_OS/docs/06-rivenditori.md",
+    "KHAMAKEY_OS/docs/01-brand.md",
+    "pages/khamakey-favicon.png",
+    "pages/README.md",
+    "pages/khamakey-wordmark.png",
+    "pages/khamakey-wordmark-dark.png",
+    "README.md",
+    "INTEGRATIONS-ROADMAP.md",
+    "KHAMAKEY_OS/MASTER_INDEX.md",
+    "KHAMAKEY_OS/CLAUDE.md",
+    "KHAMAKEY_OS/AGENTS.md"
+  ]
+}

@@ -33,7 +33,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ### Changed
 - **Restyling Premium CSS Moments (2026-07-12, Antigravity)**
-  - Aggiornata `momentPageCss` in `worker/worker.js` (Worker NFC v121) per implementare un design adattivo premium guidato sia dai parametri generali del tema che dalla categoria specifica dell'evento (es. Polaroid ruotate per Travel, card soffici e icone oscillanti per Baby, ombre neon glow per Birthday, ed estremo minimalismo opaco per Memorial).
+  - Aggiornata `momentPageCss` in `worker/worker.js` (Worker NFC v122) per implementare un design adattivo premium guidato sia dai parametri generali del tema che dalla categoria specifica dell'evento.
+  - **Focalizzazione categoria Viaggi (Travel Scrapbook)**: Ridisegnate le tappe del viaggio in autentiche foto Polaroid con cornici asimmetriche, washi tape traslucido superiore, font calligrafico `'Caveat'` per le descrizioni, font da macchina da scrivere `'Special Elite'` per le date/luoghi, icone card ristilizzate come timbri circolari da passaporto e link mappa in stile "Boarding Pass" (biglietto d'imbarco) con fori di strappo e linea tratteggiata su sfondo a griglia vintage punteggiata.
   - Risolto il problema del Lightbox e delle frecce visibili sopra la Hero, assicurando che il contatore "Insieme da" sia visibile e formattato correttamente.
   - Migliorati gli spazi generali delle sezioni, incrementato il contrasto del testo a 0.96 per una leggibilità ottimale, e ottimizzate le icone (badge 3D con ombre) e gli elementi accessori (washi tape sulle polaroid, mappe in stile boarding pass, cornici dei player musicali e bottoni con effetto shine animato).
 

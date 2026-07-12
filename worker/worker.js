@@ -1492,7 +1492,8 @@ document.addEventListener("keydown",function(e){if(!lb.classList.contains("open"
 function momentPageCss(colors, fonts) {
   const c = colors;
   const f = fonts || resolveMomentFontPair("classic");
-  return `*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:72px}
+  return `@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Special+Elite&family=Shadows+Into+Light&display=swap');
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:72px}
 body{margin:0;font-family:${f.body};background:linear-gradient(180deg,${c.surface} 0%,${c.surface} 60%,${c.bl}18 100%)!important;color:${c.ink};-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 #moment-hero,.moment-section-anchor,#moment-section-counter{scroll-margin-top:72px}
 .moment-nav-backdrop{position:fixed;inset:0;background:rgba(12,16,24,.22);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:38}
@@ -1509,10 +1510,10 @@ body.nav-open{overflow:hidden}
 .moment-nav.scrolled .moment-nav-burger{border-color:rgba(15,23,42,.12);background:rgba(255,255,255,.92)}
 .moment-nav.scrolled .moment-nav-burger span{background:#334155}
 .moment-nav-links{display:none;list-style:none;margin:0;padding:0;gap:2px;align-items:center}
-.moment-nav-links a{display:inline-flex;align-items:center;min-height:32px;padding:0 9px;border-radius:999px;font-family:${f.ui};font-size:.64rem;font-weight:700;color:${c.mu};text-decoration:none;letter-spacing:.03em;transition:color .15s,background .15s}
-.moment-nav-links a.active,.moment-nav-links a:hover{color:${c.in};background:rgba(15,23,42,.06)}
+.moment-nav-links a{display:inline-flex;align-items:center;min-height:32px;padding:0 9px;border-radius:999px;font-family:${f.ui};font-size:.64rem;font-weight:700;color:${c.muted};text-decoration:none;letter-spacing:.03em;transition:color .15s,background .15s}
+.moment-nav-links a.active,.moment-nav-links a:hover{color:${c.ink};background:rgba(15,23,42,.06)}
 .moment-nav-burger{width:38px;height:38px;border:1px solid ${c.line};border-radius:999px;background:rgba(255,255,255,.8);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-content:center;gap:4px;cursor:pointer;padding:0;transition:background .2s,border-color .2s}
-.moment-nav-burger span{display:block;width:16px;height:1.5px;background:${c.in};border-radius:999px;opacity:.88}
+.moment-nav-burger span{display:block;width:16px;height:1.5px;background:${c.ink};border-radius:999px;opacity:.88}
 .moment-nav-sheet{position:fixed;left:10px;right:10px;bottom:10px;max-height:min(52vh,380px);background:rgba(255,255,255,.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid ${c.lineStrong};border-radius:20px;transform:translateY(105%);transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:39;padding:0 16px max(16px,env(safe-area-inset-bottom));box-shadow:0 10px 40px rgba(17,32,65,.12);overflow:auto}
 .moment-nav-sheet.open{transform:translateY(0)}
 .moment-nav-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 4px 12px;border-bottom:1px solid ${c.line};margin-bottom:8px}
@@ -1717,7 +1718,7 @@ body.nav-open{overflow:hidden}
 .moment-rsvp-form input::placeholder,.moment-rsvp-form textarea::placeholder,.moment-guestbook-form input::placeholder,.moment-guestbook-form textarea::placeholder{color:${c.muted};opacity:1;-webkit-text-fill-color:${c.muted}}
 .moment-rsvp-form input:focus,.moment-rsvp-form textarea:focus,.moment-guestbook-form input:focus,.moment-guestbook-form textarea:focus{outline:0;border-color:${c.go};box-shadow:0 0 0 4px ${c.go}24}
 .moment-rsvp-attending{border:0;padding:0;margin:0;display:grid;gap:10px}
-.moment-rsvp-attending legend{font-family:${f.ui};font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:${c.muted};margin-bottom:6px}
+.moment-rsvp-attending legend{font-family:${f.ui};font-size:.78rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:${c.muted};margin-bottom:6px}
 .moment-rsvp-attending label{font-weight:600;display:flex;align-items:center;gap:10px;color:${c.ink};font-size:.95rem}
 .moment-rsvp-attending input[type=radio]{width:18px;height:18px;margin:0;flex-shrink:0;accent-color:${c.go}}
 .moment-card-head strong{color:${c.ink}}
@@ -1830,35 +1831,13 @@ body.nav-open{overflow:hidden}
 .moment-gallery-group-items{display:grid;gap:12px}
 .moment-media-list{display:grid;gap:12px}
 .moment-gallery-figure{margin:0;display:grid;gap:6px;justify-items:center}
-.moment-gallery-caption{font-family:${f.ui};font-size:.72rem;font-weight:700;color:${c.in};text-align:center;max-width:240px;line-height:1.35}
+.moment-gallery-caption{font-family:${f.ui};font-size:.72rem;font-weight:700;color:${c.ink};text-align:center;max-width:240px;line-height:1.35}
 .moment-media-list .moment-media-card{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:76px;padding:12px;background:${c.cardSoft};border:1px solid ${c.line};border-radius:14px;box-shadow:none;transition:border-color .2s,background .2s}
 .moment-media-list .moment-media-card:hover{background:${c.surface};border-color:${c.lineStrong}}
 .moment-media-card-audio{min-height:88px}
-.moment-footer{text-align:center;color:${c.mu};font-family:${f.ui};font-size:12px;padding:16px 20px max(28px,env(safe-area-inset-bottom))}
+.moment-footer{text-align:center;color:${c.muted};font-family:${f.ui};font-size:12px;padding:16px 20px max(28px,env(safe-area-inset-bottom))}
 @media(prefers-reduced-motion:reduce){.hero-in,.rv{opacity:1;transform:none;transition:none}.rv.on .moment-journey-item,.rv.on .moment-promise,.rv.on .moment-ritual,.rv.on .moment-number,.rv.on .moment-dream{animation:none}.moment-sealed-icon,.moment-decor-item{animation:none}.moment-decor{display:none}}
 @media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:24px;box-shadow:0 24px 70px rgba(17,32,65,.08);background:${c.surface}}.moment-content{padding:20px 20px 36px}.moment-gallery-scroll img,.moment-gallery-scroll .moment-gallery-figure img{width:260px;height:320px}}
-
-.moment-type-travel .moment-hero h1,
-.moment-type-travel .moment-hero p,
-.moment-palette-terracotta .moment-hero h1,
-.moment-palette-terracotta .moment-hero p{
-  text-shadow:none!important
-}
-
-.moment-type-travel .moment-card,
-.moment-palette-terracotta .moment-card,
-.moment-type-travel .moment-counter,
-.moment-palette-terracotta .moment-counter,
-.moment-type-travel .moment-countdown,
-.moment-palette-terracotta .moment-countdown,
-.moment-type-travel .moment-quote-wrap,
-.moment-palette-terracotta .moment-quote-wrap,
-.moment-type-travel .moment-signature,
-.moment-palette-terracotta .moment-signature{
-  border:1.5px solid ${c.lineStrong}!important;
-  box-shadow:0 8px 24px -6px rgba(17,32,65,.05)!important;
-  background:rgba(255,255,255,.82)!important
-}
 
 /* ==================== CATEGORY TEMPLATE OVERRIDES ==================== */
 
@@ -1894,99 +1873,193 @@ body.nav-open{overflow:hidden}
 }
 
 /* 2. TRAVEL & ADVENTURE: Polaroid Scrapbook & Boarding Pass */
-.moment-type-travel .moment-journey-item,
-.moment-type-adventure .moment-journey-item {
-  background: #ffffff !important;
-  border: 1px solid rgba(0,0,0,0.08) !important;
-  padding: 16px 12px 24px 12px !important;
-  box-shadow: 0 10px 24px -8px rgba(0,0,0,0.12) !important;
-  border-radius: 4px !important;
+main.moment-type-travel {
+  background-color: #f6f1e5 !important;
+  background-image: radial-gradient(rgba(170, 150, 130, 0.18) 1.5px, transparent 1.5px) !important;
+  background-size: 20px 20px !important;
+  background-position: 0 0 !important;
+}
+
+.moment-type-travel .moment-hero h1,
+.moment-type-travel .moment-hero p,
+.moment-palette-terracotta .moment-hero h1,
+.moment-palette-terracotta .moment-hero p {
+  text-shadow: none !important;
+}
+
+.moment-type-travel .moment-card,
+.moment-type-travel .moment-counter,
+.moment-type-travel .moment-countdown,
+.moment-type-travel .moment-quote-wrap,
+.moment-type-travel .moment-signature {
+  background: #fafafa !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  box-shadow: 0 8px 24px -6px rgba(17,32,65,0.08) !important;
+  border-radius: 12px !important; /* Slightly sharper, notebook-like corners */
+}
+
+.moment-type-travel .moment-journey-item {
+  background: #fdfcf9 !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  padding: 14px 14px 38px 14px !important; /* Thick bottom border */
+  box-shadow: 0 12px 28px -6px rgba(17,32,65,0.18) !important;
+  border-radius: 2px !important; /* Sharp corners like raw paper polaroid */
   display: flex !important;
   flex-direction: column !important;
   gap: 12px !important;
-  transition: transform 0.3s cubic-bezier(.21,1.02,.43,1.01);
+  transition: transform 0.3s cubic-bezier(.21,1.02,.43,1.01), box-shadow 0.3s ease;
+  position: relative !important;
 }
-.moment-type-travel .moment-journey-item:nth-child(odd),
-.moment-type-adventure .moment-journey-item:nth-child(odd) {
+
+@media(min-width:560px) {
+  .moment-type-travel .moment-journey-item {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    align-items: stretch !important;
+  }
+}
+
+.moment-type-travel .moment-journey-item:nth-child(odd) {
   transform: rotate(-1.5deg);
 }
-.moment-type-travel .moment-journey-item:nth-child(even),
-.moment-type-adventure .moment-journey-item:nth-child(even) {
+.moment-type-travel .moment-journey-item:nth-child(even) {
   transform: rotate(1.8deg);
 }
-.moment-type-travel .moment-journey-item:hover,
-.moment-type-adventure .moment-journey-item:hover {
+.moment-type-travel .moment-journey-item:hover {
   transform: translateY(-4px) rotate(0deg) scale(1.02) !important;
   z-index: 2;
   box-shadow: 0 16px 36px -10px rgba(0,0,0,0.18) !important;
 }
-.moment-type-travel .moment-journey-photo,
-.moment-type-adventure .moment-journey-photo {
+
+.moment-type-travel .moment-journey-photo {
   width: 100% !important;
-  height: 200px !important;
+  height: auto !important;
+  max-height: 240px !important;
   object-fit: cover !important;
   border-radius: 2px !important;
   box-shadow: none !important;
   border: 1px solid rgba(0,0,0,0.05) !important;
 }
-.moment-type-travel .moment-journey-item::before,
-.moment-type-adventure .moment-journey-item::before {
+
+.moment-type-travel .moment-journey-item::before {
   content: "" !important;
   position: absolute !important;
   left: 50% !important;
   top: -24px !important;
   width: 2px !important;
   height: 24px !important;
-  border-left: 2px dashed ${c.go}88 !important;
+  border-left: 2px dashed ${c.go}77 !important;
   background: transparent !important;
 }
-.moment-type-travel .moment-journey-item:first-child::before,
-.moment-type-adventure .moment-journey-item:first-child::before {
+.moment-type-travel .moment-journey-item:first-child::before {
   display: none !important;
 }
-.moment-type-travel .moment-journey-place,
-.moment-type-adventure .moment-journey-place {
-  font-family: ${f.display} !important;
-  font-weight: 700 !important;
-  font-size: 1.15rem !important;
-}
-.moment-type-travel .moment-place,
-.moment-type-adventure .moment-place {
-  border-radius: 6px !important;
-  border: 1px dashed ${c.go} !important;
-  background: rgba(255, 255, 255, 0.9) !important;
-  position: relative;
-  overflow: hidden;
-}
-.moment-type-travel .moment-place::after,
-.moment-type-adventure .moment-place::after {
-  content: "";
-  position: absolute;
-  right: -8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  background: ${c.surface};
-  border-radius: 50%;
-  border: 1px solid ${c.lineStrong};
+
+/* Washi Tape and Polaroid tape style decoration */
+.moment-type-travel .moment-journey-item::after {
+  content: "" !important;
+  position: absolute !important;
+  top: -12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) rotate(-3deg) !important;
+  width: 78px !important;
+  height: 22px !important;
+  background: rgba(225, 215, 185, 0.45) !important; /* translucent mask tape */
+  border-left: 2px dashed rgba(255,255,255,0.4) !important;
+  border-right: 2px dashed rgba(255,255,255,0.4) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+  backdrop-filter: blur(1.5px) !important;
+  -webkit-backdrop-filter: blur(1.5px) !important;
+  z-index: 3 !important;
 }
 
-/* Washi Tape and Polaroid pin style decoration */
-.moment-type-travel .moment-journey-item::after,
-.moment-type-adventure .moment-journey-item::after {
-  content: "";
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-2deg);
-  width: 70px;
-  height: 18px;
-  background: rgba(255, 255, 255, 0.42);
-  border: 1px solid rgba(0,0,0,0.03);
-  backdrop-filter: blur(2px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-  z-index: 3;
+.moment-type-travel .moment-journey-text {
+  font-family: 'Caveat', cursive !important;
+  font-size: 1.45rem !important;
+  color: #2e3d52 !important;
+  line-height: 1.25 !important;
+  font-weight: 500 !important;
+}
+
+.moment-type-travel .moment-journey-date {
+  font-family: 'Special Elite', monospace !important;
+  font-size: 0.85rem !important;
+  color: #5d6a7d !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  background: rgba(0,0,0,0.04) !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  align-self: flex-start !important;
+}
+
+.moment-type-travel .moment-journey-place {
+  font-family: 'Special Elite', monospace !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  color: ${c.ink} !important;
+  margin-top: 4px !important;
+}
+
+/* Passport Stamps style */
+.moment-type-travel .moment-card-head .moment-card-icon,
+.moment-type-travel .moment-card-icon {
+  background: transparent !important;
+  border: 3px double ${c.go}bb !important;
+  color: ${c.go}bb !important;
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  transform: rotate(-6deg) !important;
+  font-family: 'Special Elite', monospace !important;
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+  position: relative !important;
+  opacity: 0.8 !important;
+  transition: transform 0.4s ease !important;
+}
+
+.moment-type-travel .moment-card:hover .moment-card-icon {
+  transform: scale(1.08) rotate(4deg) !important;
+  opacity: 1 !important;
+}
+
+/* Geocodifica a Boarding Pass (Mappe) */
+.moment-type-travel .moment-place {
+  background: #ffffff !important;
+  border: 1px dashed ${c.lineStrong} !important;
+  border-radius: 12px !important;
+  padding: 16px 20px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+.moment-type-travel .moment-place::before,
+.moment-type-travel .moment-place::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  width: 14px !important;
+  height: 14px !important;
+  background: #f6f1e5 !important; /* matches grid paper background */
+  border-radius: 50% !important;
+  border: 1px solid ${c.lineStrong} !important;
+  z-index: 2 !important;
+}
+.moment-type-travel .moment-place::before {
+  left: -7px !important;
+  transform: translateY(-50%) !important;
+}
+.moment-type-travel .moment-place::after {
+  right: -7px !important;
+  transform: translateY(-50%) !important;
 }
 
 /* 3. BABY & KIDS: Cloudland & Playful cloud-shapes */

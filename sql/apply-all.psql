@@ -65,3 +65,5 @@
 \i khamakey-security-linter-fixes-v80-v83.sql
 \echo 'v84 CRM: RPC pipeline clienti su tabelle esistenti'
 \i khamakey-crm-v84.sql
+\echo 'v85 provvigioni automatiche su ordini (trigger)'
+\i khamakey-order-commissions-v85.sql

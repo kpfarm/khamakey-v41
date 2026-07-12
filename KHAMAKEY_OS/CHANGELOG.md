@@ -9,6 +9,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Provvigioni automatiche su ordini (2026-07-12, Claude Code)** — applicato su Supabase
+  - La rete rivenditori (v68) e la distribuzione multilivello esistevano ma **nessun ordine generava provvigioni** (0 record in `platform_commission_events`): la funzione andava chiamata a mano e aveva un gate di permesso incompatibile col flusso ingest.
+  - Ora un **trigger su `platform_orders`** (`sql/khamakey-order-commissions-v85.sql`) distribuisce automaticamente le provvigioni multilivello (L1/L2/L3) alla creazione dell'ordine o all'assegnazione di un agente. Copre ogni percorso (Shopify, Stripe, admin) con un solo hook, senza toccare `worker.js`.
+  - **Idempotente** (`source_type='order'`, mai due volte lo stesso ordine) e **fail-safe** (un errore nelle provvigioni non blocca mai la creazione dell'ordine).
+  - Testato con dati sintetici poi rimossi: ordine €100 tier standard → L1 10% (€10), L2 upline 2% (€2); ri-trigger non duplica. Il test ha scovato che `commission_amount` è colonna generata (`round(amount*commission_percent/100,2)`) — corretto prima del deploy.
+
+### Added
 - **CRM — pipeline clienti (2026-07-12, Claude Code)** — applicato + deployato
   - La sezione admin «CRM» era un segnaposto vuoto. Ora è un pannello funzionante: pipeline con stato onboarding, priorità, agente assegnato, follow-up datato, tag e timeline note per attività.
   - Costruito **sopra le tabelle esistenti** `platform_client_records`/`platform_client_notes` (nessuna tabella nuova, nessun dato toccato) via RPC in `sql/khamakey-crm-v84.sql`, protette da permessi `crm.read`/`crm.write`.

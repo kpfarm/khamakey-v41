@@ -108,7 +108,7 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 - [ ] Portale rivenditori Business (brief personalizzazione + ordine)
 - [x] SQL v61: `sold_channel`, allocazione codici Moments a agenti
 - [x] SQL v68: rete agenti a grado (L1/L2/L3), listini B2B, storico consegne, admin Rete rivenditori
-- [ ] Hook provvigioni multilivello su Stripe checkout e ingest Shopify
+- [x] Hook provvigioni multilivello su ordini Shopify/Stripe/admin (SQL v85 + Admin v125)
 - [ ] Portale self-service rivenditori (`reseller.html`)
 - [ ] Hub spedizioni centralizzato con automazione corriere
 - [ ] Supporto unificato + CRM Moments
@@ -223,6 +223,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-09 | Cursor | **Collab multi-agente**: `CODEX-COLLAB.md` + regola Cursor `.cursor/rules/multi-agent-collab.mdc` |
 | 2026-07-09 | Cursor | **v107 Sprint G1**: pagina internazionale Business — pulsante 1 tap, OpenAI Worker, auto-detect lingua visitatore |
 | 2026-07-09 | Cursor | **v106**: admin UX — menu 4 intenti, modalità semplice, copy umano per rete partner |
+| 2026-07-12 | Claude/Codex | **v84-v85/v125**: CRM admin, trigger provvigioni ordini, gestione approva/paga in Admin |
 | 2026-07-09 | Cursor | **v103**: email ordine con codici NFC, Stripe Checkout, ingest webhook Stripe |
 | 2026-07-09 | Cursor | **v102**: Integration Hub, Stripe/PayPal/Resend webhook, email ordine, i18n v66 |
 | 2026-07-09 | Cursor | **v101 Sprint E**: Shopify sync in bozza finché prodotto incompleto; flag `shopify_live` in admin |
@@ -245,4 +246,3 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-11 | Codex | **Follow-up Moments beta**: PIN lockout per slug + visitatore, Worker passa `p_visitor_key`, rate limit leggero su `/event`, CSP Worker allineata per CSS pubblico. **Non committato, non deployato, SQL non applicata** |
 | 2026-07-11 | Claude Code | **Review follow-up Codex** (verificato ok, nessuna regressione) + **SQL v77**: pulizia periodica automatica `moment_pin_attempts`/`platform_rate_limits`, agganciata al cron giornaliero esistente. Aggiunto avviso ordine deploy obbligatorio (SQL prima del Worker) in `PROJECT_STATE.md`. **Non committato, non deployato** |
 | 2026-07-12 | Antigravity | **v118**: restyling premium CSS Moments adattivo (matrimonio vs viaggi) + linee guida grafiche in `docs/01-brand.md` |
-

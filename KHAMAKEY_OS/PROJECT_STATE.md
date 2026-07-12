@@ -52,6 +52,10 @@ Tutti i fix aggiungono un controllo permessi (stesso pattern `current_user_has_p
 
 Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_leads` (form pubblico insert-only, nessuna lettura possibile — intenzionale), 6 tabelle "RLS enabled no policy" (`moment_pin_attempts`/`platform_rate_limits` di proposito, il resto è cruft legacy pre-v37 già completamente bloccato). Non ancora fatto: **"Leaked Password Protection Disabled"** — impostazione Auth da abilitare manualmente in Dashboard Supabase → Authentication → Policies (nessun tool disponibile per farlo via SQL/MCP).
 
+### 📋 Backlog performance (non urgente — nessun problema reale a questa scala)
+
+`get_advisors(type=performance)` segnala 177 avvisi: 48 foreign key senza indice, 67 "Multiple Permissive Policies", 27 "Auth RLS Initialization Plan", 35 indici mai usati. Verificato: la maggior parte delle tabelle ha 0-5 righe oggi, quindi l'impatto pratico è nullo — sistemarli tutti ora significherebbe riscrivere ~140 oggetti per un beneficio che non esiste ancora. Da rivedere quando il traffico cresce, priorità: indici sulle FK di Business/Moments/ordini (additivo, zero rischio) prima di toccare le policy RLS (più delicato, da fare come lavoro mirato a parte).
+
 ### Secrets Worker ancora da impostare (non bloccanti)
 
 `RESEND_WEBHOOK_SECRET` (dashboard Resend → webhook → signing secret), opzionale `PAYPAL_ENV=sandbox` in test. Finché mancano, i relativi endpoint rispondono 503 invece di accettare payload non verificati (comportamento sicuro di default).

@@ -76,9 +76,11 @@
 | 2026-07-10 | Cursor | **v108**: libro degli ospiti Moments con moderazione |
 | 2026-07-09 | Cursor | **v107**: RSVP backend + pannello risposte editor |
 | 2026-07-12 | Antigravity | **v118**: restyling premium CSS Moments adattivo + linee guida grafiche |
+| 2026-07-13 | Antigravity | **Visual & Sales Copy**: generati asset grafici per Moments ("Love" keyring) e Business, creato catalogo copy e doc di vendita docs/16-sales-copy-love.md |
 | 2026-07-12 | Claude/Codex | **v84-v85/v125**: CRM admin, trigger provvigioni ordini, gestione approva/paga in Admin |
 | 2026-07-13 | Codex | **v88**: claim sicuro primo accesso rivenditori, senza fallback email insicuro |
 | 2026-07-13 | Codex | **Moments v112 / Worker v126**: etichetta personalizzabile del contatore («Insieme da» → testo utente) |
+| 2026-07-13 | Codex | **Admin v126**: magazzino NFC Moments con generazione da SKU, link `/k/` e `/m/` separati, data e tracciabilita' |
 
 ---
 

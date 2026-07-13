@@ -112,6 +112,7 @@ const momentProvisionStatus = document.getElementById("momentProvisionStatus");
 const momentCustomersTable = document.getElementById("momentCustomersTable");
 const momentBatchForm = document.getElementById("momentBatchForm");
 const momentBatchStatus = document.getElementById("momentBatchStatus");
+const momentBatchCatalog = document.getElementById("momentBatchCatalog");
 const momentInventoryStats = document.getElementById("momentInventoryStats");
 const momentFilterLine = document.getElementById("momentFilterLine");
 const momentFilterBatch = document.getElementById("momentFilterBatch");
@@ -1193,7 +1194,39 @@ function renderDashboardAlerts(stats){
 }
 
 function momentNfcUrl(row){
-  return row?.public_slug ? `${PUBLIC_BASE_URL}/m/${row.public_slug}` : "";
+  const code = String(row?.code || row?.out_code || "").trim();
+  return code ? `${PUBLIC_BASE_URL}/k/${encodeURIComponent(code)}` : "";
+}
+
+function momentActivationUrl(row){
+  return row?.public_slug ? `${PUBLIC_BASE_URL}/m/${encodeURIComponent(row.public_slug)}` : "";
+}
+
+function catalogLabel(row){
+  if(!row) return "";
+  return `${row.sku} · ${row.name} · ${productLineLabel(row.product_line)} · ${momentTemplateLabel(row.product_type)}`;
+}
+
+function populateMomentBatchCatalogSelect(){
+  if(!momentBatchCatalog) return;
+  const current = momentBatchCatalog.value;
+  const active = momentCatalogRows.filter(row=>row.status === "active");
+  momentBatchCatalog.innerHTML = `<option value="">Manuale — scegli linea e template sotto</option>` + active.map(row=>`
+    <option value="${esc(row.id)}" ${row.id === current ? "selected" : ""}>${esc(catalogLabel(row))}</option>
+  `).join("");
+}
+
+function applyMomentBatchCatalog(){
+  if(!momentBatchForm || !momentBatchCatalog) return;
+  const row = momentCatalogRows.find(item=>item.id === momentBatchCatalog.value);
+  if(!row) return;
+  momentBatchForm.elements.product_line.value = row.product_line || "portachiavi";
+  momentBatchForm.elements.product_type.value = normalizeMomentType(row.product_type || "free");
+  momentBatchForm.elements.prefix.value = String(row.sku || "MOMENT").replace(/[^A-Z0-9]/gi,"").toUpperCase().slice(0,12) || "MOMENT";
+  if(!String(momentBatchForm.elements.batch_label.value || "").trim()){
+    const today = new Date().toISOString().slice(0,10);
+    momentBatchForm.elements.batch_label.value = `${row.sku} · ${today}`;
+  }
 }
 
 function csvCell(value){
@@ -1209,6 +1242,7 @@ function momentExportRows(rows,filenameStem="khamakey-moments"){
   const header = [
     "Codice attivazione",
     "Link NFC",
+    "Link attivazione",
     "Codice confezione",
     "Slug pagina",
     "Linea prodotto",
@@ -1226,6 +1260,7 @@ function momentExportRows(rows,filenameStem="khamakey-moments"){
     lines.push([
       row.code,
       momentNfcUrl(row),
+      momentActivationUrl(row),
       row.code,
       row.public_slug || "",
       productLineLabel(row.product_line || "non_specificato"),
@@ -1343,18 +1378,24 @@ function toggleMomentCodeSelection(code,checked){
 function renderMomentProductsTable(rows){
   if(!momentProductsTable) return;
   momentProductsTable.innerHTML = rows.length ? rows.map(row=>{
-    const publicUrl = row.public_slug ? `${PUBLIC_BASE_URL}/m/${row.public_slug}` : "";
+    const nfcUrl = momentNfcUrl(row);
+    const activationUrl = momentActivationUrl(row);
     const claimed = row.status === "claimed";
     const checked = selectedMomentCodes.has(row.code) ? "checked" : "";
+    const trace = [
+      soldChannelLabel(row.sold_channel || "non_specificato"),
+      agentLabelById(row.assigned_agent_id),
+      row.platform_order_id ? orderLabelById(row.platform_order_id) : ""
+    ].filter(value=>value && value !== "-" && value !== "Non specificato").join(" · ") || "-";
     return `<tr>
       <td>${claimed ? "" : `<input type="checkbox" data-moment-select="${esc(row.code)}" ${checked} aria-label="Seleziona ${esc(row.code)}">`}</td>
       <td><strong>${esc(row.code)}</strong><div class="muted-cell">${esc(momentTemplateLabel(row.product_type))}</div></td>
-      <td>${publicUrl ? `<a href="${esc(publicUrl)}" target="_blank" rel="noopener">${esc(row.public_slug)}</a>` : "-"}</td>
+      <td>${nfcUrl ? `<a href="${esc(nfcUrl)}" target="_blank" rel="noopener">/k/${esc(row.code)}</a>` : "-"}</td>
+      <td>${activationUrl ? `<a href="${esc(activationUrl)}" target="_blank" rel="noopener">/m/${esc(row.public_slug)}</a>` : "-"}</td>
       <td>${esc(productLineLabel(row.product_line || "non_specificato"))}</td>
       <td>${esc(row.batch_label || "-")}</td>
-      <td>${esc(soldChannelLabel(row.sold_channel || "non_specificato"))}</td>
-      <td>${esc(agentLabelById(row.assigned_agent_id))}</td>
-      <td>${row.platform_order_id ? `<button type="button" class="link-button" data-order-open="${esc(row.platform_order_id)}">${esc(orderLabelById(row.platform_order_id))}</button>` : "-"}</td>
+      <td>${esc(row.created_at ? dateShort(row.created_at) : "-")}</td>
+      <td>${row.platform_order_id ? `<button type="button" class="link-button" data-order-open="${esc(row.platform_order_id)}">${esc(trace)}</button>` : esc(trace)}</td>
       <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
       <td>${esc(row.claimed_by_email || "-")}</td>
       <td><button class="small-action" type="button" data-code-edit="${esc(row.code)}">Modifica</button></td>
@@ -1434,7 +1475,7 @@ async function loadMomentProducts(){
   try{
     const { data,error } = await supabase
       .from("moment_activation_codes")
-      .select("code,status,public_slug,product_type,product_line,batch_label,claimed_by_email,claimed_at,created_at,sold_channel,assigned_agent_id,platform_order_id")
+      .select("code,status,public_slug,product_type,product_line,batch_label,product_label,public_url,claimed_by_email,claimed_at,created_at,sold_channel,assigned_agent_id,platform_order_id")
       .order("created_at",{ascending:false})
       .limit(2000);
     if(error) throw error;
@@ -1846,6 +1887,7 @@ async function loadMomentCatalog(){
       .order("name",{ascending:true});
     if(error) throw error;
     momentCatalogRows = data || [];
+    populateMomentBatchCatalogSelect();
     momentCatalogTable.innerHTML = momentCatalogRows.length ? momentCatalogRows.map(row=>{
       const syncLabel = {
         draft:"Bozza",
@@ -2764,7 +2806,9 @@ function openCodeDrawer(code){
   renderAgentOptions(row.assigned_agent_id || "");
   document.getElementById("codeEditBatch").value = row.batch_label || "";
   document.getElementById("codeEditOrder").value = row.platform_order_id ? orderLabelById(row.platform_order_id) : "";
-  document.getElementById("codeEditPublicUrl").value = row.public_slug ? `${PUBLIC_BASE_URL}/m/${row.public_slug}` : "";
+  document.getElementById("codeEditPublicUrl").value = momentActivationUrl(row);
+  document.getElementById("codeEditNfcUrl").value = momentNfcUrl(row);
+  document.getElementById("codeEditActivationUrl").value = momentActivationUrl(row);
   setFormStatus(codeEditFormStatus,"");
   codeDrawer.classList.add("open");
   codeDrawer.setAttribute("aria-hidden","false");
@@ -3417,9 +3461,12 @@ async function createMomentBatch(event){
     return;
   }
   const form = event.currentTarget;
+  const catalog = momentCatalogRows.find(item=>item.id === form.elements.catalog_id?.value);
   const quantity = Math.min(500,Math.max(1,Number(form.elements.quantity.value || 1)));
-  const prefix = String(form.elements.prefix.value || "MOMENT").trim().toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,12) || "MOMENT";
-  const productLine = String(form.elements.product_line.value || "").trim();
+  const prefixSource = catalog?.sku || form.elements.prefix.value || "MOMENT";
+  const prefix = String(prefixSource).trim().toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,12) || "MOMENT";
+  const productLine = String(catalog?.product_line || form.elements.product_line.value || "").trim();
+  const productType = normalizeMomentType(catalog?.product_type || form.elements.product_type.value);
   const batchLabel = String(form.elements.batch_label.value || "").trim();
   if(!productLine || !batchLabel){
     setFormStatus(momentBatchStatus,"Seleziona la linea oggetto e inserisci un nome lotto.","error");
@@ -3429,7 +3476,7 @@ async function createMomentBatch(event){
   const { data,error } = await supabase.rpc("create_moment_product_batch",{
     p_quantity:quantity,
     p_prefix:prefix,
-    p_product_type:form.elements.product_type.value,
+    p_product_type:productType,
     p_batch_label:batchLabel,
     p_product_line:productLine
   });
@@ -3444,7 +3491,7 @@ async function createMomentBatch(event){
     const exportRows = rows.map(row=>({
       code:row.out_code || row.code,
       public_slug:row.public_slug,
-      product_type:row.product_type,
+      product_type:row.product_type || productType,
       product_line:row.product_line || productLine,
       batch_label:row.batch_label || batchLabel,
       status:"available",
@@ -4052,9 +4099,15 @@ document.querySelectorAll("[data-reset-form]").forEach(button=>{
       if(form.elements.shopify_live) form.elements.shopify_live.value = "false";
       populateMomentTypeSelects();
     }
+    if(form.id === "momentBatchForm"){
+      populateMomentTypeSelects();
+      populateMomentBatchCatalogSelect();
+    }
     if(statusNode) setFormStatus(statusNode,"Nuovo inserimento pronto.","ok");
   });
 });
+
+momentBatchCatalog?.addEventListener("change",applyMomentBatchCatalog);
 
 document.querySelectorAll("[data-client-drawer-close]").forEach(button=>{
   button.addEventListener("click",closeClientDrawer);

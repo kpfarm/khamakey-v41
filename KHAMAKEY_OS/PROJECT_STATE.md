@@ -78,7 +78,7 @@ Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_lead
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin** | **v125** | Menu 4 intenti, CRM operativo, provvigioni con approva/paga/annulla |
+| **Admin** | **v126** | Preparato — Magazzino NFC Moments piu' chiaro: generazione stock da SKU/modello, link NFC `/k/`, link attivazione `/m/`, data creazione e tracciabilita'. |
 | **Editor Business** | **v117** | Analytics affidabili (RPC v74), order_sent, consenso cookie click |
 | **Moments editor** | **v112** | Preparato — il contatore Moments ha etichetta personalizzabile salvata in `counter_label`. |
 | **Worker NFC** | **v126** | Preparato — renderer Moments usa `counter_label` con fallback «Insieme da». |

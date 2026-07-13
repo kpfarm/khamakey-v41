@@ -9,6 +9,14 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Visual & Copy Content per KhamaKey "Love" & Business (2026-07-13, Antigravity)** — creato
+  - Generati asset grafici promozionali in qualità fotografica premium per la linea Moments (portachiavi a cuore "Love" in noce e oro) e per la linea Business (tavolo ristorante con espositore NFC).
+  - Creato il documento di vendita e copywriting [`16-sales-copy-love.md`](docs/16-sales-copy-love.md) nel vault, contenente testi persuasivi per e-commerce, landing page, inserzioni Facebook/TikTok, bullet points Amazon e script per video virali su TikTok/Reels.
+  - Creato un catalogo centralizzato dei contenuti visivi in `marketing_assets_catalog.md` con le immagini incorporate e il copy integrato.
+- **Admin v126 — Magazzino NFC Moments piu' operativo (2026-07-13, Codex)** — preparato
+  - La generazione stock puo' partire da un modello/SKU del catalogo Moments: Admin compila linea oggetto, template e prefisso.
+  - La tabella codici distingue link NFC fisico `/k/<codice>` e link attivazione/pagina `/m/<slug>`, aggiungendo data creazione e tracciabilita' canale/agente/ordine.
+  - Corretto `momentNfcUrl()`: CSV/PDF etichette ora puntano al link NFC `/k/<codice>`, non al link pagina `/m/<slug>`.
 - **Etichetta personalizzata contatore Moments (2026-07-13, Codex)** — preparato (Moments v112, Worker v126)
   - Il pannello Contatore ora salva `counter_label`, così l'utente può sostituire il testo pubblico fisso «Insieme da» con frasi personalizzate come «Ti sopporto da».
   - Il Worker usa l'etichetta salvata nella pagina pubblica e mantiene «Insieme da» come fallback per le pagine già esistenti.

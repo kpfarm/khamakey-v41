@@ -385,6 +385,11 @@
             <details class="admin-details">
               <summary>Genera nuovo stock in magazzino</summary>
               <form class="admin-form compact-form moment-batch-form" id="momentBatchForm">
+                <label class="wide-field">Modello oggetto / SKU
+                  <select name="catalog_id" id="momentBatchCatalog">
+                    <option value="">Manuale — scegli linea e template sotto</option>
+                  </select>
+                </label>
                 <label>Linea oggetto fisico
                   <select name="product_line" required>
                     <option value="orsetto">Orsetto NFC</option>
@@ -408,7 +413,7 @@
                 <label class="wide-field">Nome lotto / produzione
                   <input name="batch_label" type="text" placeholder="Es. Orsetti blu - luglio 2026" required>
                 </label>
-                <p class="field-hint wide-field">I codici nascono <strong>disponibili</strong> in magazzino. Agente e canale si assegnano dopo, singolarmente o in blocco.</p>
+                <p class="field-hint wide-field">Se scegli un modello/SKU, Admin compila linea oggetto, template e prefisso. I codici nascono <strong>disponibili</strong> in magazzino: agente, ordine e tracciabilita' si assegnano dopo.</p>
                 <button class="primary-action" type="submit">Genera stock NFC</button>
                 <p class="form-status" id="momentBatchStatus"></p>
               </form>
@@ -508,7 +513,7 @@
               <table>
                 <thead><tr>
                   <th><input type="checkbox" id="momentSelectAll" aria-label="Seleziona tutti"></th>
-                  <th>Codice</th><th>Link</th><th>Linea</th><th>Lotto</th><th>Canale</th><th>Agente</th><th>Ordine</th><th>Stato</th><th>Cliente</th><th>Azioni</th>
+                  <th>Codice</th><th>Link NFC</th><th>Attivazione</th><th>Linea</th><th>Lotto</th><th>Creato</th><th>Tracciabilita'</th><th>Stato</th><th>Cliente</th><th>Azioni</th>
                 </tr></thead>
                 <tbody id="momentProductsTable"><tr><td colspan="11">Caricamento prodotti...</td></tr></tbody>
               </table>
@@ -1731,6 +1736,12 @@
           <label class="wide-field">Link pubblico
             <input type="text" id="codeEditPublicUrl" readonly>
           </label>
+          <label class="wide-field">Link NFC fisico
+            <input type="text" id="codeEditNfcUrl" readonly>
+          </label>
+          <label class="wide-field">Link attivazione / pagina
+            <input type="text" id="codeEditActivationUrl" readonly>
+          </label>
           <button class="primary-action" type="submit">Salva modifiche</button>
           <button class="small-action" type="button" id="codeEditUnlinkOrder">Scollega ordine</button>
           <p class="form-status" id="codeEditFormStatus"></p>
@@ -1818,6 +1829,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=125"></script>
+  <script type="module" src="admin.js?v=126"></script>
 </body>
 </html>

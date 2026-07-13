@@ -847,6 +847,8 @@ function renderMomentPage(page, origin) {
     }
   }
 
+  const extraTypeClass = momentType === "valentine" ? " moment-type-love" : "";
+
   return `<!doctype html>
 <html lang="it">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -860,7 +862,7 @@ ${ogImage ? `<meta property="og:image" content="${attr(ogImage)}">` : ""}
 <link href="https://fonts.googleapis.com/css2?${fonts.google}&display=swap" rel="stylesheet">
 <style>${momentPageCss(colors, fonts)}</style></head>
 <body>${navHtml}
-<main class="moment-page hero-${attr(heroStyle)}${navClass} moment-type-${attr(momentType)} moment-palette-${attr(paletteKey)} moment-cut-${attr(heroCut)}">
+<main class="moment-page hero-${attr(heroStyle)}${navClass} moment-type-${attr(momentType)}${extraTypeClass} moment-palette-${attr(paletteKey)} moment-cut-${attr(heroCut)}">
 ${decorHtml}
 <section class="moment-hero" id="moment-hero">${heroCover}<div class="moment-hero-overlay"></div><div class="moment-hero-content hero-in">
 ${pill ? `<span class="moment-pill">${escapeHtml(pill)}</span>` : `<small>KhamaKey Moments</small>`}
@@ -2810,6 +2812,46 @@ main.moment-type-portfolio .moment-signature {
   border-radius: 24px 8px 24px 8px !important;
   border: 1.5px solid color-mix(in srgb, ${c.go} 6%, transparent) !important;
   box-shadow: 0 16px 36px -12px color-mix(in srgb, ${c.go} 8%, rgba(0,0,0,0.03)) !important;
+}
+
+/* 11. CHRISTMAS (Warm Festive Glow) */
+main.moment-type-christmas {
+  background: 
+    radial-gradient(circle at 10% 20%, color-mix(in srgb, ${c.go} 12%, transparent) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, color-mix(in srgb, ${c.go} 15%, transparent) 0%, transparent 50%),
+    linear-gradient(180deg, ${c.surface} 0%, ${c.bl} 100%) !important;
+  padding-bottom: 80px !important;
+}
+main.moment-type-christmas .moment-card,
+main.moment-type-christmas .moment-counter,
+main.moment-type-christmas .moment-countdown,
+main.moment-type-christmas .moment-quote-wrap,
+main.moment-type-christmas .moment-signature {
+  background: rgba(255, 255, 255, 0.90) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 20px 40px -10px color-mix(in srgb, ${c.go} 12%, rgba(0,0,0,0.04)) !important;
+}
+
+/* 12. GENERAL EVENT (Sophisticated Minimalist) */
+main.moment-type-free {
+  background: 
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, ${c.go} 4%, transparent) 0%, transparent 45%),
+    radial-gradient(circle at 80% 80%, color-mix(in srgb, ${c.go} 6%, transparent) 0%, transparent 45%),
+    linear-gradient(180deg, ${c.surface} 0%, ${c.bl} 100%) !important;
+  padding-bottom: 80px !important;
+}
+main.moment-type-free .moment-card,
+main.moment-type-free .moment-counter,
+main.moment-type-free .moment-countdown,
+main.moment-type-free .moment-quote-wrap,
+main.moment-type-free .moment-signature {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  border: 1px solid ${c.line} !important;
+  box-shadow: 0 8px 24px -6px rgba(0,0,0,0.03) !important;
 }
 `;
 }

@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-13** (Portale rivenditori v88 claim primo accesso preparato)
+> Ultimo aggiornamento: **2026-07-14** (Admin v128 console supporto + ticket utente)
 
 ---
 
@@ -80,12 +80,12 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin** | **v127** | Preparato — Magazzino NFC Moments operativo in un'unica schermata: creazione modello/SKU, generazione stock visibile, filtri per SKU/modello e data creazione, ricerca codice/link/cliente. |
-| **Editor Business** | **v117** | Analytics affidabili (RPC v74), order_sent, consenso cookie click |
-| **Moments editor** | **v112** | Preparato — il contatore Moments ha etichetta personalizzabile salvata in `counter_label`. |
-| **Worker NFC** | **v126** | Preparato — renderer Moments usa `counter_label` con fallback «Insieme da». |
-| **SQL Supabase** | **v88 (preparata, da applicare)** | v75-v83 security, v84 CRM, v85 trigger provvigioni ordini, v86 portale rivenditori, v87 hardening accesso agente solo via `member_id`, v88 claim sicuro primo accesso rivenditore |
-| **Prossima release Business** | **v118** | `editor.html` + `index.html` `?v=` + `buildPublicSnapshot().version` |
+| **Admin** | **v128** | Preparato — Console supporto operativa con ricerca, filtri, gestione stato/priorita' ticket e note interne; magazzino NFC Moments v127 resta operativo. |
+| **Editor Business** | **v118** | Preparato — tab Assistenza nell'account editor, ticket collegati a business/profilo e inviati alla console Admin. |
+| **Moments editor** | **v114** | Raccordo fondo copertina configurabile (heroCut) + Assistenza v113. |
+| **Worker NFC** | **v127** | Supporto a heroCut, unificazione di tutti i 21 sfondi premium e contrasto dinamico footer. |
+| **SQL Supabase** | **v89 (applicata)** | v75-v83 security, v84 CRM, v85 trigger provvigioni ordini, v86 portale rivenditori, v87 hardening accesso agente solo via `member_id`, v88 claim sicuro primo accesso rivenditore, v89 RLS ticket utente |
+| **Prossima release Business** | **v119** | Da definire dopo collaudo supporto/account |
 
 ---
 
@@ -120,6 +120,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 - [x] UX v106: menu intenti, modalità semplice, guide
 - [x] CRM v84: pipeline clienti + note protette da RPC
 - [x] Provvigioni v85/v125: trigger ordini + gestione admin approva/paga/annulla
+- [x] Supporto v128/v89: console ticket operativa e apertura ticket da Business/Moments editor con RLS cliente
 
 ### Integrazioni
 - [x] Shopify: sync catalogo + webhook ordini

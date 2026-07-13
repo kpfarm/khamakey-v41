@@ -11,6 +11,7 @@
 | Wizard | Setup guidato per settore (5 template) | Wizard post-attivazione (3 step) |
 | Media | Upload R2 via Worker | Upload R2 via Worker |
 | Temi | Palette colore Business | `moment-themes.js` (4 temi base) |
+| Supporto | Ticket dalla tab Account | Ticket da menu Account + scheda Account |
 
 ---
 
@@ -30,6 +31,11 @@
 - 5 template per settore (ristorante, hotel, negozio…)
 - Chiave wizard per attività (non globale)
 - Salvataggio cloud automatico dopo template
+
+### Supporto
+- Il modal Account contiene la tab `Assistenza`.
+- L'iframe invia la richiesta a `pages/app.js`, che salva in `platform_support_tickets` con `business_id`, `profile_id`, `source='business_editor'` e stato `open`.
+- Il form mostra conferma solo dopo inserimento Supabase riuscito.
 
 ### Contratto pagina pubblica (4 punti)
 
@@ -52,6 +58,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 - Privacy (PIN opzionale)
 - Lettera / messaggio speciale
 - Contatore con etichetta personalizzabile (es. «Insieme da», «Ti sopporto da»)
+- Supporto operativo: menu account `Assistenza` e form ticket nella scheda Account, con `source='moments_editor'`.
 
 ### Categorie evento
 21 categorie con template bilanciati (v89–v90):
@@ -59,10 +66,12 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 - «Altre sezioni» con tutte le sezioni adattate per tipo
 
 ### Temi visivi
-Definiti in `moment-themes.js`:
+Definiti in `moment-themes.js` e `worker.js`:
 - Tipografia serif, scroll reveal, galleria swipe
 - 11 palette + 3 varianti atmosfera
-- Stili hero, pillola, contatore «insieme da»
+- Raccordo fondo copertina (heroCut) configurabile dall'editor: Dritto classico, Divisore con icona, Taglio ad arco, Taglio diagonale
+- Sfondo sfumato chiaro-scuro globale con auree radiali luminose in tutti i 21 template
+- Stili grafici premium coordinati per tutti i gruppi di categorie (Amore, Viaggi, Bambini, Feste, Famiglia, Pet, Polaroid/Ricordi, Cerimonie, Collage/Amicizia, Natale, Minimal/Generale)
 
 ---
 

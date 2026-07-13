@@ -9,6 +9,16 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Admin v128 + Supporto operativo (2026-07-14, Codex)** — preparato/applicato
+  - La tab Admin `Supporto` e' diventata console operativa: ricerca, filtri stato/priorita', viste rapide, gestione stato/priorita' ticket e nota interna sulla timeline cliente.
+  - Business editor v118: tab `Assistenza` nel modal Account; il ticket viene salvato dal parent `pages/app.js` con `business_id`, `profile_id`, `source='business_editor'`.
+  - Moments editor v113: voce menu `Assistenza` e form ticket nella scheda Account con `source='moments_editor'`.
+  - SQL v89 applicata su Supabase: policy RLS additiva per consentire agli utenti autenticati di creare/leggere solo ticket propri, senza modificare le policy staff `support.read/write`.
+- **Unificazione Sfondi Premium, Raccordi Hero e Template Moments (2026-07-13, Antigravity)** — deployato (Worker v127, Moments v113)
+  - Creato il raccordo fondo copertina configurabile dall'editor (`heroCut`: dritto, divisore, arco, diagonale) con supporto retrocompatibile per le pagine esistenti.
+  - Uniformati gli sfondi di tutti i 21 template di Moments in modo che sfumino da chiaro a scuro con bagliore radiale coordinato.
+  - Creati gli stili premium specifici per le categorie: Famiglia & Genitori (`family`, `mom`, `dad`), Animali (`pet`), Ricordi (`memory`, `photo` - stile Polaroid), Cerimonie (`communion`, `baptism`), Amicizia & Portfolio (`friendship`, `portfolio`), Natale (`christmas`) ed Evento Generale (`free`).
+  - Risolto definitivamente il problema del contrasto del testo nel footer `.moment-footer` su tutti i temi e sfondi tramite colore dinamico calcolato con `color-mix` sul colore di inchiostro e colore scuro del tema.
 - **Audit Admin e piano miglioramento (2026-07-14, Codex)** — preparato
   - Creato `docs/18-admin-audit.md` con stato sezione per sezione, verifiche codice/Supabase/live, gap P0-P2 e piano dettagliato.
   - Evidenziate sezioni parziali: NFC/Spedizioni, Supporto, Billing, Partner/Provvigioni senza dati reali, sicurezza RPC da audit dedicato.

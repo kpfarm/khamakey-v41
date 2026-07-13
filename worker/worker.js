@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v125-travel-scrapbook-overhaul";
+const WORKER_VERSION = "v126-moments-counter-label";
 
 export default {
   async fetch(request, env, ctx) {
@@ -816,6 +816,24 @@ function renderMomentPage(page, origin) {
     ? `<img class="moment-profile" src="${attr(profileUrl)}" alt="">` : "";
   const ogImage = coverUrl || profileUrl || "";
   const navClass = navHtml ? " has-nav" : "";
+
+  let dividerHtml = "";
+  if (state.momentType === "travel") {
+    dividerHtml = `
+      <div class="moment-hero-divider" aria-hidden="true">
+        <span class="moment-divider-line"></span>
+        <span class="moment-divider-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
+        <span class="moment-divider-line"></span>
+      </div>`;
+  } else if (state.momentType === "love" || state.momentType === "anniversary" || state.momentType === "wedding") {
+    dividerHtml = `
+      <div class="moment-hero-divider" aria-hidden="true">
+        <span class="moment-divider-line"></span>
+        <span class="moment-divider-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+        <span class="moment-divider-line"></span>
+      </div>`;
+  }
+
   return `<!doctype html>
 <html lang="it">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -836,6 +854,7 @@ ${pill ? `<span class="moment-pill">${escapeHtml(pill)}</span>` : `<small>KhamaK
 ${profileBlock}
 <h1>${escapeHtml(title)}</h1>${description ? `<p>${escapeHtml(description)}</p>` : ""}
 </div></section>
+${dividerHtml}
 <section class="moment-content">${counterHtml}${sectionHtml}</section>
 <footer class="moment-footer">Creato con cura · KhamaKey Moments</footer>
 </main>
@@ -1234,6 +1253,7 @@ function renderTogetherCounter(state, colors) {
   const date = String(state.together_since).slice(0, 10);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return "";
   const live = Boolean(state.show_counter_hms);
+  const label = String(state.counter_label || "").trim() || "Insieme da";
   const grid = live
     ? `<span class="moment-counter-unit"><b data-unit="days">0</b><small>giorni</small></span>
 <span class="moment-counter-unit"><b data-unit="hours">0</b><small>ore</small></span>
@@ -1243,7 +1263,7 @@ function renderTogetherCounter(state, colors) {
 <span class="moment-counter-unit"><b data-unit="months">0</b><small>mesi</small></span>
 <span class="moment-counter-unit"><b data-unit="days">0</b><small>giorni</small></span>`;
   return `<section class="moment-counter rv" id="moment-section-counter" data-since="${attr(date)}" data-hms="${live ? "1" : "0"}">
-<div class="moment-counter-label">Insieme da</div>
+<div class="moment-counter-label">${escapeHtml(label)}</div>
 <div class="moment-counter-grid">${grid}</div></section>`;
 }
 
@@ -1870,25 +1890,18 @@ main.moment-type-anniversary {
   height: 80vh !important;
   max-height: 660px !important;
   min-height: 420px !important;
-  margin-bottom: -60px !important; /* Overlap: tira le sezioni verso l'alto */
+  margin-bottom: 24px !important; /* Taglio dritto netto */
   z-index: 1 !important;
   display: flex !important;
   align-items: flex-end !important;
-  padding-bottom: 120px !important; /* Spazio extra per compensare l'overlap */
+  padding-bottom: 80px !important;
 }
 
 .moment-type-love .moment-hero-overlay,
 .moment-type-wedding .moment-hero-overlay,
 .moment-type-anniversary .moment-hero-overlay {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.45) 55%, rgba(15, 23, 42, 0.7) 80%, ${colors.surface} 100%) !important;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.45) 60%, rgba(15, 23, 42, 0.82) 100%) !important;
   z-index: 2 !important;
-}
-
-.moment-type-love .moment-content,
-.moment-type-wedding .moment-content,
-.moment-type-anniversary .moment-content {
-  position: relative !important;
-  z-index: 5 !important;
 }
 
 .moment-type-love .moment-hero h1,
@@ -2081,22 +2094,17 @@ main.moment-type-travel {
   min-height: 440px !important;
   clip-path: none !important;
   overflow: hidden !important;
-  margin-bottom: -60px !important; /* Overlap: tira le sezioni verso l'alto */
+  margin-bottom: 24px !important; /* Taglio dritto netto: distacco standard */
   z-index: 1 !important;
   display: flex !important;
   align-items: flex-end !important;
-  padding-bottom: 120px !important; /* Spazio extra per compensare l'overlap */
+  padding-bottom: 80px !important;
   box-shadow: none !important;
 }
 
 .moment-type-travel .moment-hero-overlay {
-  background: linear-gradient(180deg, rgba(16, 11, 38, 0.1) 0%, rgba(16, 11, 38, 0.4) 55%, rgba(16, 11, 38, 0.75) 80%, ${colors.surface} 100%) !important;
+  background: linear-gradient(180deg, rgba(16, 11, 38, 0.1) 0%, rgba(16, 11, 38, 0.4) 60%, rgba(16, 11, 38, 0.85) 100%) !important;
   z-index: 2 !important;
-}
-
-.moment-type-travel .moment-content {
-  position: relative !important;
-  z-index: 5 !important;
 }
 
 
@@ -2501,6 +2509,40 @@ main.moment-type-travel {
   color: #ffffff !important;
   border-color: ${colors.go} !important;
   transform: scale(1.08) !important;
+}
+
+
+
+/* Global Hero Divider for Continuity */
+.moment-hero-divider {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  max-width: 600px !important;
+  margin: 32px auto 8px auto !important;
+  padding: 0 24px !important;
+  box-sizing: border-box !important;
+}
+.moment-divider-line {
+  flex-grow: 1 !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, ${colors.go} 25%, transparent) 50%, transparent) !important;
+}
+.moment-divider-icon {
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 16px !important;
+  color: ${colors.go} !important;
+  opacity: 0.75 !important;
+}
+.moment-divider-icon svg {
+  width: 18px !important;
+  height: 18px !important;
+  display: block !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
 }
 
 

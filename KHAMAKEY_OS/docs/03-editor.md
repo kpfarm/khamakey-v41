@@ -51,6 +51,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 - RSVP configurabile per tipo evento
 - Privacy (PIN opzionale)
 - Lettera / messaggio speciale
+- Contatore con etichetta personalizzabile (es. «Insieme da», «Ti sopporto da»)
 
 ### Categorie evento
 21 categorie con template bilanciati (v89–v90):

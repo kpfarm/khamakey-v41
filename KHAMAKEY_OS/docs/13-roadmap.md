@@ -78,6 +78,7 @@
 | 2026-07-12 | Antigravity | **v118**: restyling premium CSS Moments adattivo + linee guida grafiche |
 | 2026-07-12 | Claude/Codex | **v84-v85/v125**: CRM admin, trigger provvigioni ordini, gestione approva/paga in Admin |
 | 2026-07-13 | Codex | **v88**: claim sicuro primo accesso rivenditori, senza fallback email insicuro |
+| 2026-07-13 | Codex | **Moments v112 / Worker v126**: etichetta personalizzabile del contatore («Insieme da» → testo utente) |
 
 ---
 

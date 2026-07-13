@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Etichetta personalizzata contatore Moments (2026-07-13, Codex)** — preparato (Moments v112, Worker v126)
+  - Il pannello Contatore ora salva `counter_label`, così l'utente può sostituire il testo pubblico fisso «Insieme da» con frasi personalizzate come «Ti sopporto da».
+  - Il Worker usa l'etichetta salvata nella pagina pubblica e mantiene «Insieme da» come fallback per le pagine già esistenti.
 - **Claim sicuro primo accesso rivenditori (2026-07-13, Codex)** — preparato (`reseller.js`, SQL v88)
   - Completa l'hardening v87 senza riaprire il fallback email: `claim_my_agent_profile()` collega l'utente autenticato solo a un profilo agente gia' creato dall'admin, attivo, con stessa email confermata e non gia' assegnato.
   - Il portale rivenditori chiama il claim prima di leggere `get_my_agent_profile`, poi continua a mostrare dati solo tramite `current_agent_id()`.

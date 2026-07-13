@@ -80,8 +80,8 @@ Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_lead
 |------------|----------|------|
 | **Admin** | **v125** | Menu 4 intenti, CRM operativo, provvigioni con approva/paga/annulla |
 | **Editor Business** | **v117** | Analytics affidabili (RPC v74), order_sent, consenso cookie click |
-| **Moments editor** | v110+ | Dashboard organizzatore — **agente dedicato** |
-| **Worker NFC** | **v125** | Deployato — Overhaul completo template Viaggi (Travel Story) ed Amore (Ethereal Glassmorphism, cuori ed icone SVG animate, sfocature fluttuanti di sfondo), rimozione emoji mobili e riprogettazione palette colore globali. |
+| **Moments editor** | **v112** | Preparato — il contatore Moments ha etichetta personalizzabile salvata in `counter_label`. |
+| **Worker NFC** | **v126** | Preparato — renderer Moments usa `counter_label` con fallback «Insieme da». |
 | **SQL Supabase** | **v88 (preparata, da applicare)** | v75-v83 security, v84 CRM, v85 trigger provvigioni ordini, v86 portale rivenditori, v87 hardening accesso agente solo via `member_id`, v88 claim sicuro primo accesso rivenditore |
 | **Prossima release Business** | **v118** | `editor.html` + `index.html` `?v=` + `buildPublicSnapshot().version` |
 

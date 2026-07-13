@@ -386,6 +386,7 @@ function mergedState(row){
     pageDecor:PAGE_DECOR_PRESETS[state.pageDecor] ? state.pageDecor : "none",
     show_together_counter:Boolean(state.show_together_counter),
     together_since:state.together_since || "",
+    counter_label:state.counter_label || "",
     show_counter_hms:Boolean(state.show_counter_hms),
     sectionOrder:normalizeSectionOrder(state.sectionOrder),
     pinned_sections:Array.isArray(state.pinned_sections) ? state.pinned_sections.filter(Boolean) : [],
@@ -1460,6 +1461,7 @@ function renderCounterPanel(state){
     <div class="section-editor-stack ${state.show_together_counter ? "" : "is-muted"}">
       <div class="editor-card smart-card">
         <p class="ecard-title"><span class="step-badge">1</span> Da quale data?</p>
+        <label>Testo sopra il contatore<input name="counter_label" value="${esc(state.counter_label || "")}" placeholder="Es. Insieme da, Ti sopporto da"></label>
         <label>Data speciale<input type="date" name="together_since" value="${esc(state.together_since || "")}"></label>
         <p class="field-hint">Es. primo appuntamento, matrimonio o inizio viaggio.</p>
       </div>
@@ -2677,6 +2679,7 @@ function readFormState(formNode){
     pageDecor:String(form.get("page_decor") || "none"),
     show_together_counter:form.get("show_together_counter") === "on",
     together_since:String(form.get("together_since") || "").trim(),
+    counter_label:String(form.get("counter_label") || "").trim(),
     show_counter_hms:form.get("show_counter_hms") === "on",
     anniversary_emails:form.get("anniversary_emails") === "on",
     theme:String(form.get("page_theme") || "classic"),

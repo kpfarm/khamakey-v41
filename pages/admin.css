@@ -89,7 +89,8 @@ tr:last-child td{border-bottom:0}
 .admin-form button{justify-self:start}
 .admin-form.compact-form{grid-template-columns:repeat(3,minmax(0,1fr))}
 .admin-form.moment-batch-form{grid-template-columns:repeat(3,minmax(0,1fr))}
-.admin-form.compact-form .form-status,.admin-form.moment-batch-form .form-status{grid-column:1/-1}
+.admin-form.moment-sku-form{grid-template-columns:repeat(3,minmax(0,1fr))}
+.admin-form.compact-form .form-status,.admin-form.moment-batch-form .form-status,.admin-form.moment-sku-form .form-status{grid-column:1/-1}
 .admin-form.moment-batch-form button{grid-column:1/-1}
 .inventory-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:14px 0 18px}
 .inventory-stats-empty{margin:0;color:var(--muted);font-size:.82rem;line-height:1.45}
@@ -141,6 +142,7 @@ tr:last-child td{border-bottom:0}
 .nfc-order-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .nfc-order-fields[hidden]{display:none!important}
 .inventory-filters label{display:grid;gap:6px;font-size:.72rem;font-weight:900;color:var(--navy)}
+.inventory-filters input,.inventory-filters select{width:100%;border:1px solid var(--border);border-radius:9px;background:white;color:var(--text);padding:7px 9px;font:inherit;font-size:.78rem}
 .system-note{margin:0 0 16px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:#F8FAFC;color:var(--text);font-size:.82rem;line-height:1.5}
 .system-note strong{color:var(--navy)}
 .section-title{margin:22px 0 10px;font-family:"Syne",sans-serif;color:var(--navy);font-size:1.05rem}

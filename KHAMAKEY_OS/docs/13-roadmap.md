@@ -82,6 +82,7 @@
 | 2026-07-13 | Codex | **Moments v112 / Worker v126**: etichetta personalizzabile del contatore («Insieme da» → testo utente) |
 | 2026-07-13 | Codex | **Admin v126**: magazzino NFC Moments con generazione da SKU, link `/k/` e `/m/` separati, data e tracciabilita' |
 | 2026-07-13 | Codex | **Creative Engine**: normalizzato output Antigravity in `assets/marketing/`, creato manifest asset e protocollo condiviso |
+| 2026-07-13 | Codex | **Admin v127**: Magazzino NFC Moments con creazione SKU in sezione, generazione stock aperta e filtri per SKU/data |
 
 ---
 

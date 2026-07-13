@@ -9,6 +9,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Admin v127 — Magazzino NFC Moments usabile per test e stock (2026-07-13, Codex)** — preparato
+  - In `Magazzino NFC` aggiunto mini-form per creare modello/SKU direttamente dalla sezione stock, senza dover passare dal catalogo completo.
+  - Il form `Genera nuovo stock` e' aperto di default e usa subito lo SKU creato/selezionato.
+  - Aggiunti filtri per SKU/modello e data creazione, oltre a ricerca su codice, link NFC `/k/`, link pagina `/m/`, lotto e cliente.
 - **Creative Engine Antigravity + stoccaggio asset marketing (2026-07-13, Codex)** — preparato
   - Importati nel vault gli asset Antigravity per Moments, Business e Love in `KHAMAKEY_OS/assets/marketing/`.
   - Creati manifest e protocollo operativo (`asset-manifest.md`, `docs/17-creative-engine-antigravity.md`) per rendere Antigravity il motore creativo condiviso.

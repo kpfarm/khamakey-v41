@@ -110,6 +110,8 @@ const momentBusinessSelect = document.getElementById("momentBusinessSelect");
 const momentProvisionForm = document.getElementById("momentProvisionForm");
 const momentProvisionStatus = document.getElementById("momentProvisionStatus");
 const momentCustomersTable = document.getElementById("momentCustomersTable");
+const momentQuickCatalogForm = document.getElementById("momentQuickCatalogForm");
+const momentQuickCatalogStatus = document.getElementById("momentQuickCatalogStatus");
 const momentBatchForm = document.getElementById("momentBatchForm");
 const momentBatchStatus = document.getElementById("momentBatchStatus");
 const momentBatchCatalog = document.getElementById("momentBatchCatalog");
@@ -117,6 +119,9 @@ const momentInventoryStats = document.getElementById("momentInventoryStats");
 const momentFilterLine = document.getElementById("momentFilterLine");
 const momentFilterBatch = document.getElementById("momentFilterBatch");
 const momentFilterStatus = document.getElementById("momentFilterStatus");
+const momentFilterSku = document.getElementById("momentFilterSku");
+const momentFilterDateFrom = document.getElementById("momentFilterDateFrom");
+const momentFilterDateTo = document.getElementById("momentFilterDateTo");
 const momentFilterAgent = document.getElementById("momentFilterAgent");
 const momentFilterChannel = document.getElementById("momentFilterChannel");
 const momentFilterOrder = document.getElementById("momentFilterOrder");
@@ -1207,6 +1212,10 @@ function catalogLabel(row){
   return `${row.sku} · ${row.name} · ${productLineLabel(row.product_line)} · ${momentTemplateLabel(row.product_type)}`;
 }
 
+function normalizedSku(value){
+  return String(value || "").replace(/[^A-Z0-9]/gi,"").toUpperCase();
+}
+
 function populateMomentBatchCatalogSelect(){
   if(!momentBatchCatalog) return;
   const current = momentBatchCatalog.value;
@@ -1315,6 +1324,9 @@ function getMomentProductFilters(){
     line:momentFilterLine?.value || "",
     batch:momentFilterBatch?.value || "",
     status:momentFilterStatus?.value || "",
+    sku:momentFilterSku?.value || "",
+    dateFrom:momentFilterDateFrom?.value || "",
+    dateTo:momentFilterDateTo?.value || "",
     agent:momentFilterAgent?.value || "",
     channel:momentFilterChannel?.value || "",
     order:momentFilterOrder?.value || "",
@@ -1324,19 +1336,47 @@ function getMomentProductFilters(){
 
 function momentRowMatchesSearch(row,search){
   if(!search) return true;
+  const nfcUrl = momentNfcUrl(row);
+  const activationUrl = momentActivationUrl(row);
   const haystack = [
     row.code,
     row.public_slug,
+    nfcUrl,
+    activationUrl,
     row.claimed_by_email,
     row.batch_label,
+    row.product_label,
     row.product_line,
     orderLabelById(row.platform_order_id)
   ].filter(Boolean).join(" ").toLowerCase();
   return haystack.includes(search);
 }
 
+function momentCatalogMatchesCode(row,catalogId){
+  if(!catalogId) return true;
+  const catalog = momentCatalogRows.find(item=>item.id === catalogId);
+  if(!catalog) return false;
+  const sku = normalizedSku(catalog.sku);
+  const code = normalizedSku(row.code);
+  const label = normalizedSku(`${row.product_label || ""} ${row.batch_label || ""}`);
+  return Boolean(sku && (code.startsWith(sku) || label.includes(sku)));
+}
+
+function momentRowMatchesCreatedDate(row,from,to){
+  if(!from && !to) return true;
+  if(!row.created_at) return false;
+  const day = String(row.created_at).slice(0,10);
+  if(from && day < from) return false;
+  if(to && day > to) return false;
+  return true;
+}
+
+function catalogForMomentCode(row){
+  return momentCatalogRows.find(catalog=>momentCatalogMatchesCode(row,catalog.id)) || null;
+}
+
 function filteredMomentProducts(){
-  const { line,batch,status,agent,channel,order,search } = getMomentProductFilters();
+  const { line,batch,status,sku,dateFrom,dateTo,agent,channel,order,search } = getMomentProductFilters();
   return momentProductRows.filter(row=>{
     const rowLine = row.product_line || "non_specificato";
     const rowBatch = row.batch_label || "senza_lotto";
@@ -1345,6 +1385,8 @@ function filteredMomentProducts(){
     if(line && rowLine !== line) return false;
     if(batch && rowBatch !== batch) return false;
     if(status && row.status !== status) return false;
+    if(!momentCatalogMatchesCode(row,sku)) return false;
+    if(!momentRowMatchesCreatedDate(row,dateFrom,dateTo)) return false;
     if(agent === "__none__" && rowAgent) return false;
     if(agent && agent !== "__none__" && rowAgent !== agent) return false;
     if(channel === "__none__" && rowChannel) return false;
@@ -1380,6 +1422,7 @@ function renderMomentProductsTable(rows){
   momentProductsTable.innerHTML = rows.length ? rows.map(row=>{
     const nfcUrl = momentNfcUrl(row);
     const activationUrl = momentActivationUrl(row);
+    const catalog = catalogForMomentCode(row);
     const claimed = row.status === "claimed";
     const checked = selectedMomentCodes.has(row.code) ? "checked" : "";
     const trace = [
@@ -1389,7 +1432,7 @@ function renderMomentProductsTable(rows){
     ].filter(value=>value && value !== "-" && value !== "Non specificato").join(" · ") || "-";
     return `<tr>
       <td>${claimed ? "" : `<input type="checkbox" data-moment-select="${esc(row.code)}" ${checked} aria-label="Seleziona ${esc(row.code)}">`}</td>
-      <td><strong>${esc(row.code)}</strong><div class="muted-cell">${esc(momentTemplateLabel(row.product_type))}</div></td>
+      <td><strong>${esc(row.code)}</strong><div class="muted-cell">${esc(catalog ? `${catalog.sku} · ${catalog.name}` : (row.product_label || momentTemplateLabel(row.product_type)))}</div></td>
       <td>${nfcUrl ? `<a href="${esc(nfcUrl)}" target="_blank" rel="noopener">/k/${esc(row.code)}</a>` : "-"}</td>
       <td>${activationUrl ? `<a href="${esc(activationUrl)}" target="_blank" rel="noopener">/m/${esc(row.public_slug)}</a>` : "-"}</td>
       <td>${esc(productLineLabel(row.product_line || "non_specificato"))}</td>
@@ -1407,6 +1450,7 @@ function populateMomentFilters(){
   if(!momentFilterLine || !momentFilterBatch) return;
   const lineValue = momentFilterLine.value;
   const batchValue = momentFilterBatch.value;
+  const skuValue = momentFilterSku?.value || "";
   const lines = [...new Set(momentProductRows.map(row=>row.product_line || "non_specificato"))].sort();
   const batches = [...new Set(momentProductRows.map(row=>row.batch_label || "senza_lotto"))].sort();
   momentFilterLine.innerHTML = `<option value="">Tutte le linee</option>` + lines.map(value=>`
@@ -1415,6 +1459,12 @@ function populateMomentFilters(){
   momentFilterBatch.innerHTML = `<option value="">Tutti i lotti</option>` + batches.map(value=>`
     <option value="${esc(value)}" ${value === batchValue ? "selected" : ""}>${esc(value === "senza_lotto" ? "Senza lotto" : value)}</option>
   `).join("");
+  if(momentFilterSku){
+    const active = momentCatalogRows.filter(row=>row.status === "active");
+    momentFilterSku.innerHTML = `<option value="">Tutti gli SKU/modelli</option>` + active.map(row=>`
+      <option value="${esc(row.id)}" ${row.id === skuValue ? "selected" : ""}>${esc(row.sku)} · ${esc(row.name)}</option>
+    `).join("");
+  }
   populateMomentAgentFilter();
 }
 
@@ -1888,6 +1938,8 @@ async function loadMomentCatalog(){
     if(error) throw error;
     momentCatalogRows = data || [];
     populateMomentBatchCatalogSelect();
+    populateMomentFilters();
+    refreshMomentTable();
     momentCatalogTable.innerHTML = momentCatalogRows.length ? momentCatalogRows.map(row=>{
       const syncLabel = {
         draft:"Bozza",
@@ -2084,6 +2136,63 @@ async function saveMomentCatalog(event){
   if((payload.publish_shopify || payload.shopify_live) && catalogId){
     await syncMomentCatalogToShopify(catalogId);
   }
+}
+
+async function saveQuickMomentCatalog(event){
+  event.preventDefault();
+  if(!hasPermission("inventory.write")){
+    setFormStatus(momentQuickCatalogStatus,"Non hai il permesso inventory.write.","error");
+    return;
+  }
+  const form = event.currentTarget;
+  const sku = String(form.elements.sku.value || "").trim().toUpperCase();
+  const name = String(form.elements.name.value || "").trim();
+  if(!sku || !name){
+    setFormStatus(momentQuickCatalogStatus,"Inserisci SKU e nome modello.","error");
+    return;
+  }
+  const payload = {
+    sku,
+    name,
+    description:null,
+    product_line:form.elements.product_line.value,
+    product_type:normalizeMomentType(form.elements.product_type.value),
+    sale_price:Number(form.elements.sale_price.value || 0),
+    unit_cost:Number(form.elements.unit_cost.value || 0),
+    physical_units:Math.max(1,Number(form.elements.physical_units.value || 1)),
+    activation_codes:Math.max(1,Number(form.elements.activation_codes.value || 1)),
+    image_url:null,
+    publish_shopify:false,
+    shopify_live:false,
+    status:form.elements.status.value || "active",
+    sync_status:"draft",
+    updated_at:new Date().toISOString()
+  };
+  setFormStatus(momentQuickCatalogStatus,"Creazione modello/SKU...");
+  const { data,error } = await supabase
+    .from("platform_moment_catalog")
+    .insert(payload)
+    .select("id")
+    .single();
+  if(error){
+    console.error(error);
+    const duplicate = String(error.message || "").toLowerCase().includes("duplicate");
+    setFormStatus(momentQuickCatalogStatus,duplicate ? "SKU già esistente: apri il catalogo completo per modificarlo." : (error.message || "Creazione SKU non riuscita."),"error");
+    return;
+  }
+  form.reset();
+  form.elements.sale_price.value = "0";
+  form.elements.unit_cost.value = "0";
+  form.elements.physical_units.value = "1";
+  form.elements.activation_codes.value = "1";
+  form.elements.status.value = "active";
+  populateMomentTypeSelects();
+  await loadMomentCatalog();
+  if(data?.id && momentBatchCatalog){
+    momentBatchCatalog.value = data.id;
+    applyMomentBatchCatalog();
+  }
+  setFormStatus(momentQuickCatalogStatus,`Modello ${sku} creato. Ora puoi generare lo stock NFC sotto.`,"ok");
 }
 
 async function loadProducts(){
@@ -4193,10 +4302,20 @@ if(momentSearchInput){
 }
 momentSearchClear?.addEventListener("click",()=>{
   if(momentSearchInput) momentSearchInput.value = "";
+  if(momentFilterLine) momentFilterLine.value = "";
+  if(momentFilterBatch) momentFilterBatch.value = "";
+  if(momentFilterStatus) momentFilterStatus.value = "";
+  if(momentFilterSku) momentFilterSku.value = "";
+  if(momentFilterDateFrom) momentFilterDateFrom.value = "";
+  if(momentFilterDateTo) momentFilterDateTo.value = "";
+  if(momentFilterAgent) momentFilterAgent.value = "";
+  if(momentFilterChannel) momentFilterChannel.value = "";
+  if(momentFilterOrder) momentFilterOrder.value = "";
+  syncMomentQuickChips();
   refreshMomentTable();
 });
 
-[momentFilterLine,momentFilterBatch,momentFilterStatus,momentFilterAgent,momentFilterChannel,momentFilterOrder].forEach(node=>{
+[momentFilterLine,momentFilterBatch,momentFilterStatus,momentFilterSku,momentFilterDateFrom,momentFilterDateTo,momentFilterAgent,momentFilterChannel,momentFilterOrder].forEach(node=>{
   if(node) node.addEventListener("change",()=>{
     syncMomentQuickChips();
     refreshMomentTable();
@@ -4286,6 +4405,7 @@ syncNfcOrderFieldsVisibility();
 memberForm.addEventListener("submit",saveMember);
 agentForm.addEventListener("submit",saveAgent);
 if(momentForm) momentForm.addEventListener("submit",saveMoment);
+if(momentQuickCatalogForm) momentQuickCatalogForm.addEventListener("submit",saveQuickMomentCatalog);
 if(momentBatchForm) momentBatchForm.addEventListener("submit",createMomentBatch);
 if(momentCatalogForm) momentCatalogForm.addEventListener("submit",saveMomentCatalog);
 productForm.addEventListener("submit",saveProduct);

@@ -377,12 +377,61 @@
             <h2>Magazzino NFC Moments</h2>
             <p class="system-note"><strong>Pronta consegna</strong> — genera stock in magazzino <em>prima</em> di avere rivenditori o ordini. Quando arriva un ordine, selezioni i codici disponibili e li assegni ad agente / cliente.</p>
             <ol class="admin-workflow-steps">
-              <li><strong>Genera stock</strong><span>Crea il lotto (orsetti, card…)</span></li>
-              <li><strong>Stampa</strong><span>Scarica PDF etichette e programma NFC</span></li>
-              <li><strong>Ordine</strong><span>Assegna codici al rivenditore o cliente</span></li>
+              <li><strong>1. Crea modello/SKU</strong><span>Definisci oggetto, template e codici per vendita</span></li>
+              <li><strong>2. Genera stock</strong><span>Crea codici fisici disponibili in magazzino</span></li>
+              <li><strong>3. Testa account</strong><span>Assegna codice, editor Moments e pagina NFC</span></li>
             </ol>
 
-            <details class="admin-details">
+            <details class="admin-details" open>
+              <summary>Crea modello oggetto / SKU</summary>
+              <form class="admin-form compact-form moment-sku-form" id="momentQuickCatalogForm">
+                <label>SKU
+                  <input name="sku" type="text" placeholder="MOM-LOVE-KEYRING" required>
+                </label>
+                <label>Nome modello
+                  <input name="name" type="text" placeholder="KhamaKey Love — Portachiavi" required>
+                </label>
+                <label>Linea oggetto
+                  <select name="product_line">
+                    <option value="portachiavi">Portachiavi NFC</option>
+                    <option value="orsetto">Orsetto NFC</option>
+                    <option value="card">Card NFC</option>
+                    <option value="magnete">Magnete NFC</option>
+                    <option value="tag">Tag / tessera NFC</option>
+                    <option value="confezione">Confezione regalo</option>
+                    <option value="altro">Altro</option>
+                  </select>
+                </label>
+                <label>Template pagina
+                  <select name="product_type" data-moment-type-select data-default-value="anniversary"></select>
+                </label>
+                <label>Prezzo vendita €
+                  <input name="sale_price" type="number" min="0" step="0.01" value="0">
+                </label>
+                <label>Costo unitario €
+                  <input name="unit_cost" type="number" min="0" step="0.01" value="0">
+                </label>
+                <label>Fisici spediti
+                  <input name="physical_units" type="number" min="1" step="1" value="1">
+                </label>
+                <label>Codici NFC
+                  <input name="activation_codes" type="number" min="1" step="1" value="1">
+                </label>
+                <label>Stato
+                  <select name="status">
+                    <option value="active">Attivo</option>
+                    <option value="hidden">Nascosto</option>
+                    <option value="archived">Archiviato</option>
+                  </select>
+                </label>
+                <p class="field-hint wide-field">Questo crea il modello prodotto interno. Dopo il salvataggio lo trovi nel menu sotto per generare lo stock NFC. La pubblicazione Shopify resta gestita nella sezione Catalogo vendita.</p>
+                <button class="primary-action" type="submit">Crea modello/SKU</button>
+                <button class="ghost-button" type="button" data-admin-tab-jump="momentCatalog">Apri catalogo completo</button>
+                <p class="form-status" id="momentQuickCatalogStatus"></p>
+              </form>
+            </details>
+
+            <details class="admin-details" open>
               <summary>Genera nuovo stock in magazzino</summary>
               <form class="admin-form compact-form moment-batch-form" id="momentBatchForm">
                 <label class="wide-field">Modello oggetto / SKU
@@ -424,8 +473,8 @@
             </div>
 
             <div class="inventory-toolbar">
-              <label class="inventory-search">Cerca codice, link o cliente
-                <input type="search" id="momentSearchInput" placeholder="Es. MOMENT, /m/slug, email@...">
+              <label class="inventory-search">Cerca codice, link, SKU, lotto o cliente
+                <input type="search" id="momentSearchInput" placeholder="Es. SKU, MOMENT, /k/codice, /m/slug, email@...">
               </label>
               <button type="button" class="small-action" id="momentSearchClear">Pulisci</button>
             </div>
@@ -452,6 +501,15 @@
                   <option value="paused">In pausa</option>
                   <option value="archived">Archiviati</option>
                 </select>
+              </label>
+              <label>SKU / modello
+                <select id="momentFilterSku"><option value="">Tutti</option></select>
+              </label>
+              <label>Creato dal
+                <input type="date" id="momentFilterDateFrom">
+              </label>
+              <label>Creato al
+                <input type="date" id="momentFilterDateTo">
               </label>
               <label>Canale
                 <select id="momentFilterChannel">
@@ -1829,6 +1887,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=126"></script>
+  <script type="module" src="admin.js?v=127"></script>
 </body>
 </html>

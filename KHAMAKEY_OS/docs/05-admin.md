@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v126** (menu 4 intenti, modalità semplice, CRM operativo, gestione provvigioni, magazzino NFC Moments con link/tracciabilita' espliciti).
+Versione attuale: **v127** (menu 4 intenti, modalità semplice, CRM operativo, gestione provvigioni, magazzino NFC Moments con creazione SKU, generazione stock e filtri operativi).
 
 ---
 
@@ -39,9 +39,12 @@ Versione attuale: **v126** (menu 4 intenti, modalità semplice, CRM operativo, g
 - **Provvigioni v85/v125**: il trigger SQL su `platform_orders` crea provvigioni `pending`; l'Admin mostra riepilogo, ricerca, filtro per stato e azioni contestuali `Approva`, `Segna pagata`, `Annulla`.
 - Verifica live 2026-07-12: `platform_commission_events` ha RLS attiva, policy `commissions.read`/`commissions.write` e stati ammessi `pending`, `approved`, `paid`, `cancelled`.
 
-## Magazzino Moments v126
+## Magazzino Moments v127
 
+- In `Magazzino NFC` l'admin puo' creare un modello/SKU senza uscire dalla sezione: SKU, nome, linea oggetto, template, prezzo/costo e quantita' fisiche/codici.
 - Generazione stock da modello/SKU del catalogo Moments oppure manuale.
+- Il form di generazione stock e' aperto e visibile: non e' piu' nascosto dietro un passaggio ambiguo.
+- I filtri includono linea, lotto, stato, SKU/modello, data creazione, canale, agente e ordine.
 - In tabella sono distinti: codice attivazione, link NFC fisico `/k/<codice>`, link attivazione/pagina `/m/<slug>`, data creazione e tracciabilita' canale/agente/ordine.
 - Export CSV/PDF etichette usa il link NFC fisico `/k/<codice>`, non il link pagina `/m/<slug>`.
 

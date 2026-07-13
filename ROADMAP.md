@@ -249,3 +249,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-13 | Codex | **v88**: claim sicuro primo accesso rivenditori, senza fallback email insicuro |
 | 2026-07-13 | Antigravity | **Visual & Sales Copy**: generati asset grafici per Moments ("Love" keyring) e Business, creato catalogo copy e doc di vendita docs/16-sales-copy-love.md |
 | 2026-07-13 | Codex | **Creative Engine**: normalizzato output Antigravity in `KHAMAKEY_OS/assets/marketing/`, creato manifest asset e protocollo condiviso |
+| 2026-07-13 | Codex | **Admin v127**: Magazzino NFC Moments con creazione SKU in sezione, generazione stock aperta e filtri per SKU/data |

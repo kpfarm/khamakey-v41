@@ -67,3 +67,5 @@
 \i khamakey-crm-v84.sql
 \echo 'v85 provvigioni automatiche su ordini (trigger)'
 \i khamakey-order-commissions-v85.sql
+\echo 'v86 portale self-service rivenditori (RPC solo-i-miei-dati)'
+\i khamakey-reseller-portal-v86.sql

@@ -1876,10 +1876,9 @@ body.nav-open{overflow:hidden}
 
 /* 2. TRAVEL & ADVENTURE: Immersive 2026 Design Overhaul */
 main.moment-type-travel {
-  background-color: #faf6ee !important;
-  background-image: radial-gradient(rgba(178, 59, 24, 0.08) 1.5px, transparent 1.5px) !important;
-  background-size: 24px 24px !important;
-  background-position: 0 0 !important;
+  background: 
+    radial-gradient(rgba(178, 59, 24, 0.09) 1.5px, transparent 1.5px) 0 0 / 24px 24px,
+    linear-gradient(180deg, #100b26 0%, #1e1b4b 160px, #faf6ee 620px, #fdfbf7 100%) !important;
   padding-bottom: 64px !important;
 }
 
@@ -2182,6 +2181,25 @@ main.moment-type-travel {
   transform: scale(1.1) rotate(6deg) !important;
   border-color: rgba(178, 59, 24, 0.85) !important;
   color: #b23b18 !important;
+}
+
+.moment-type-travel .travel-icon-svg {
+  width: 24px !important;
+  height: 24px !important;
+  stroke: #b23b18 !important;
+  stroke-width: 2px !important;
+  transition: transform 0.3s ease, stroke 0.3s ease !important;
+  animation: floatingIcon 3s ease-in-out infinite alternate !important;
+  display: block !important;
+}
+
+.moment-type-travel .moment-card:hover .travel-icon-svg {
+  stroke: #962f12 !important;
+}
+
+@keyframes floatingIcon {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(-3px) rotate(3deg); }
 }
 
 /* Mappe Boarding Pass */
@@ -2552,7 +2570,24 @@ function rsvpWhatsAppIntro(momentType, eventName) {
 
 function renderMomentSection(key, section, colors, momentType = "free", fonts = null, slug = "") {
   const images = Array.isArray(section.images) ? section.images.filter(url => safeUrl(url) !== "#").slice(0, 24) : [];
-  const icon = MOMENT_SECTION_ICONS[key] || "•";
+  let icon = MOMENT_SECTION_ICONS[key] || "•";
+  if (momentType === "travel") {
+    const travelSvgs = {
+      intro: `<svg class="travel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`, // Shield / Badge
+      dedication: `<svg class="travel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2H2v20h20V2z"/><path d="M22 2L12 13 2 2"/></svg>`, // Envelope Letter
+      timeline: `<svg class="travel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`, // Compass navigation
+      rsvp: `<svg class="travel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`, // Boarding ticket stub calendar
+      guestbook: `<svg class="travel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`, // Book/Journal
+      gallery: `<svg class="travel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`, // Polaroid Camera Outline
+      promises: `<svg class="travel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`, // Heart/Promises
+      dreams: `<svg class="travel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`, // Star / Dream
+      countdown: `<svg class="travel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`, // Map scale or clock
+      music: `<svg class="travel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>` // Music note
+    };
+    if (travelSvgs[key]) {
+      icon = travelSvgs[key];
+    }
+  }
   const head = (title) => `<div class="moment-card-head"><span class="moment-card-icon">${icon}</span><strong>${escapeHtml(title || "Sezione")}</strong></div>`;
   const rv = `moment-card moment-card-${escapeHtml(key)} rv`;
 

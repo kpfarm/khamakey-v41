@@ -81,7 +81,7 @@ Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_lead
 | **Admin** | **v125** | Menu 4 intenti, CRM operativo, provvigioni con approva/paga/annulla |
 | **Editor Business** | **v117** | Analytics affidabili (RPC v74), order_sent, consenso cookie click |
 | **Moments editor** | v110+ | Dashboard organizzatore — **agente dedicato** |
-| **Worker NFC** | **v125** | Deployato — Overhaul completo template Viaggi (Travel Web-App: barra inferiore, popup Add Memory reale connesso a API guestbook, contrasti bilanciati carbone/terracotta e Hero animata/cinematica). Include v124 OpenAI incremental translations. |
+| **Worker NFC** | **v125** | Deployato — Overhaul completo template Viaggi 2026 (Travel Immersive: icone vettoriali SVG animate custom, sfondo gradiente cangiante tramonto-alba, griglia asimmetrica, contrasti carbone/terracotta e Hero animata/cinematica). Include v124 OpenAI. |
 | **SQL Supabase** | **v85 (applicata e verificata)** | v75-v83 security, v84 CRM, v85 trigger provvigioni ordini. Verifica live 2026-07-12: RLS `platform_commission_events` attiva, stati `pending/approved/paid/cancelled` accettati |
 | **Prossima release Business** | **v118** | `editor.html` + `index.html` `?v=` + `buildPublicSnapshot().version` |
 

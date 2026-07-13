@@ -13,12 +13,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Complemento del trigger v85: le provvigioni `pending` generate sugli ordini ora sono gestibili nel pannello «Quanto spetta». Riepilogo (da pagare / approvate / pagate / voci), filtro per stato (default: da pagare), ricerca per agente/ordine, colonna Ordine e azioni per riga (Approva → Segna pagata → Annulla) con transizioni contestuali e update ottimistico + rollback.
   - Aggiornamento stato via update diretto (RLS `commissions.write` esistente, nessuna RPC nuova). Solo `pages/admin.*` — `worker.js` non toccato (lasciato ad Antigravity).
   - Verificato end-to-end a livello DB: ordine test 100€ → L1 10€ + L2 2€ (regole standard), idempotenza confermata, dati test rimossi.
-- **Overhaul completo template Viaggi (2026-07-12, Antigravity)** — deployato (Worker v125)
-  - **Layout stile Web-App**: introdotta una barra di navigazione inferiore fluttuante (`🏠 🧭 ＋ 🔖 👤`) con indicatore di sezione attiva in JS coordinato allo scorrimento.
-  - **Pulsante Add Memory (`＋`) interattivo**: il tasto centrale apre un modale nativo `<dialog>` sfocato. Il form interno effettua una POST reale a `/api/moment/guestbook` collegandosi direttamente al database dei ricordi.
-  - **Contrasti e Leggibilità Premium**: sfondo pagina convertito a crema soft (`#faf8f3`) per risaltare le card bianche; testi principali ricolorati in carbone `#0f172a` per contrasto AAA; accento terracotta in `#be461f` per massima leggibilità.
-  - **Hero Cinematico e Animato**: implementata l'animazione Ken Burns per lo zoom lento dell'immagine di copertina, e parallasse basata su scroll.
-  - **Triage e Fix Moderazione Ricordi (moments.html)**: aggiunti i pulsanti "Approva" / "Rifiuta" direttamente nei messaggi già moderati nel pannello organizzatore per permettere all'utente di correggere decisioni errate (es. ri-approvare un caricamento rifiutato per errore).
+- **Overhaul completo template Viaggi 2026 (2026-07-12, Antigravity)** — deployato (Worker v125)
+  - **Sfondo Gradiente Dinamico ("Sunset to Dawn")**: Introdotto uno sfondo cangiante che sfuma da un blu indaco intenso del tramonto nella parte superiore, fino a crema sabbia dorata `#faf6ee` ed alba a fondo pagina, sormontato da una griglia a punti terracotta.
+  - **Icone Vettoriali SVG Animate Custom**: Sostituite le emoji generiche con icone SVG lineari fatte a mano (es. bussola, mongolfiera, macchina fotografica, boarding ticket) inserite all'interno di un anello in stile timbro postale che oscilla lentamente.
+  - **Hero Immersiva con Floating Particles**: Copertina estesa a `440px` ad altezza variabile con taglio curvo ed un effetto stellato/particellare animato in CSS che fluttua costantemente.
+  - **Layout & Mosaico Galleria**: Organizzazione asimmetrica a mosaico per le foto e didascalie Polaroid rialzate con effetto 3D. Rimossa la barra inferiore ed il modale per mantenere intatto il menu superiore standard.
 
 ### Changed
 - **Costo API OpenAI ridotto ~90% (2026-07-12, Claude Code)** — deployato (Worker v124)

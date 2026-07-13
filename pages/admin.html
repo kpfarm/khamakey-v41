@@ -144,6 +144,44 @@
             <article><strong id="mPendingCommissions">0</strong><span>Provvigioni pending</span></article>
             <article><strong id="mMoments">0</strong><span>Moments / eventi</span></article>
           </div>
+          <div class="admin-card dashboard-ops-card" data-advanced-only>
+            <div class="dashboard-card-head">
+              <div>
+                <h2>Andamento operativo</h2>
+                <p class="field-hint">Ordini, evasione e incassi stimati dagli ordini registrati nel pannello.</p>
+              </div>
+              <button type="button" class="small-action primary-outline" data-admin-tab-jump="platformOrders">Apri ordini</button>
+            </div>
+            <div class="dashboard-kpi-row">
+              <article><strong id="dOrders7">0</strong><span>Ordini ricevuti 7 giorni</span></article>
+              <article><strong id="dFulfillment">0</strong><span>Ordini da evadere</span></article>
+              <article><strong id="dRevenue30">0 €</strong><span>Incassi stimati 30 giorni</span></article>
+              <article><strong id="dAvgOrder">0 €</strong><span>Valore medio ordine</span></article>
+            </div>
+            <div class="dashboard-chart-grid">
+              <article class="dashboard-chart-card">
+                <div class="chart-title">
+                  <strong>Ordini ricevuti</strong>
+                  <span>Ultimi 7 giorni</span>
+                </div>
+                <div class="dashboard-bars" id="dashboardOrdersChart" aria-label="Grafico ordini ultimi 7 giorni"></div>
+              </article>
+              <article class="dashboard-chart-card">
+                <div class="chart-title">
+                  <strong>Incassi stimati</strong>
+                  <span>Ultime 4 settimane</span>
+                </div>
+                <div class="dashboard-bars money-bars" id="dashboardRevenueChart" aria-label="Grafico incassi ultime 4 settimane"></div>
+              </article>
+              <article class="dashboard-chart-card dashboard-status-chart">
+                <div class="chart-title">
+                  <strong>Stato ordini</strong>
+                  <span>Pipeline attuale</span>
+                </div>
+                <div class="dashboard-status-list" id="dashboardStatusChart"></div>
+              </article>
+            </div>
+          </div>
           <div class="admin-card">
             <h2>Priorità operative</h2>
             <p class="field-hint">Alert in tempo reale — clicca per aprire la sezione correlata.</p>

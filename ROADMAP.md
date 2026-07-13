@@ -252,3 +252,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-13 | Codex | **Admin v127**: Magazzino NFC Moments con creazione SKU in sezione, generazione stock aperta e filtri per SKU/data |
 | 2026-07-13 | Codex | **Collaborazione agenti**: rafforzato bootstrap/passaggio consegne e creato prompt per nuovi agenti |
 | 2026-07-14 | Codex | **Audit Admin**: creato `KHAMAKEY_OS/docs/18-admin-audit.md` con stato funzioni, gap e piano miglioramento |
+| 2026-07-14 | Codex | **Admin v128 / Business v118 / Moments v114 / SQL v89**: console supporto operativa e ticket assistenza apribili da editor account |

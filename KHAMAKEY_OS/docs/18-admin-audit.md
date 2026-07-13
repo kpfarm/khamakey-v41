@@ -23,7 +23,7 @@ Stato generale:
 | Partner/agenti | Parziale | CRUD agente e rete presenti; database live ha 0 agenti, quindi flusso non collaudato con dati reali. |
 | Provvigioni | Parziale | Trigger e UI presenti; database live ha 0 provvigioni, quindi serve test reale ordine + agente. |
 | CRM | Buono/parziale | Pipeline e note via RPC presenti; manca calendario/reminder operativo e azioni rapide. |
-| Supporto | Parziale | Categorie e creazione ticket da scheda cliente; la tab globale ticket e' quasi solo lettura. |
+| Supporto | Buono base dopo v128 | Console globale con ricerca, filtri, gestione stato/priorita' e note interne; ticket apribili da Business/Moments editor. Restano assegnazione responsabile e risposta cliente. |
 | Billing/Piani | Parziale | Piani CRUD e checkout Stripe cablati; secrets/price ID producono il vero stato operativo. |
 | Integrazioni | Parziale | Stato Worker, lingue, transazioni, webhook e record integrazione; non gestisce secrets per scelta corretta. |
 | Materiali | Buono base | CRUD materiali presente; manca collegamento diretto a portale agenti/cliente. |
@@ -136,9 +136,9 @@ Non e' stato fatto un test browser autenticato con credenziali admin in questa s
      - stampa etichette per lotto/ordine;
      - storico consegne.
 
-6. **Supporto globale quasi solo lettura**
-   - La tab Supporto mostra ticket e categorie.
-   - Manca gestione stato ticket dalla tab globale: assegna, rispondi, chiudi, priorita, note.
+6. **Supporto globale operativo base, non ancora completo**
+   - Risolto in v128/v89: tab Supporto con filtri, gestione stato/priorita', note interne e ticket creati da editor Business/Moments.
+   - Restano: assegnazione responsabile, risposta cliente/email, storico conversazione e SLA.
 
 7. **Partner/agenti non collaudati con dati reali**
    - Database live: `platform_agents = 0`.
@@ -237,11 +237,8 @@ Obiettivo: supporto e follow-up realmente utilizzabili ogni giorno.
 Azioni:
 
 1. Tab Supporto con gestione ticket completa:
-   - apri drawer ticket;
-   - cambia stato/priorita;
-   - assegna responsabile;
-   - aggiungi nota;
-   - chiudi/riapri.
+   - fatto v128: filtri, ricerca, cambio stato/priorita', nota interna, chiudi/riapri;
+   - da fare: assegna responsabile, risposta cliente/email, cronologia conversazione.
 2. CRM con vista follow-up:
    - oggi;
    - settimana;

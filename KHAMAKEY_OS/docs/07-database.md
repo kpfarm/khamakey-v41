@@ -4,7 +4,7 @@
 
 Progetto: `cuxlwaocjqwzluycznyp`
 
-Migrazioni in `sql/` — versionate da v37 a **v85**.
+Migrazioni in `sql/` — versionate da v37 a **v89**.
 
 ---
 
@@ -40,6 +40,8 @@ Eseguire **in ordine** i file non ancora applicati. Vedi [`../../sql/README.md`]
 | v75-v83 | hardening sicurezza | PIN, rate limit, CSP/RLS, linter Supabase |
 | v84 | `khamakey-crm-v84.sql` | CRM admin su tabelle esistenti |
 | v85 | `khamakey-order-commissions-v85.sql` | Trigger provvigioni automatiche su ordini |
+| v86-v88 | portale rivenditori | Self-service, hardening `member_id`, claim primo accesso |
+| v89 | `khamakey-support-customer-tickets-v89.sql` | Policy RLS per ticket supporto creati da utenti autenticati |
 
 ---
 
@@ -56,6 +58,7 @@ Eseguire **in ordine** i file non ancora applicati. Vedi [`../../sql/README.md`]
 | `platform_agents` | Rivenditori / agenti |
 | `platform_payment_transactions` | Transazioni pagamento |
 | `platform_commission_events` | Provvigioni generate da ordini/abbonamenti |
+| `platform_support_tickets` | Ticket supporto da Admin, Business editor e Moments editor |
 
 ---
 
@@ -63,6 +66,7 @@ Eseguire **in ordine** i file non ancora applicati. Vedi [`../../sql/README.md`]
 
 - Admin: `admin.full`, `moments.read/write`, `inventory.read/write`
 - Clienti: accesso solo ai propri dati
+- Supporto: staff via `support.read/write`; clienti possono creare/leggere solo ticket con `profile_id = auth.uid()` (SQL v89)
 - Worker: service role via secrets
 
 ---

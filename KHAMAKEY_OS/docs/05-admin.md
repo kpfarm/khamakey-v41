@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v127** (menu 4 intenti, modalità semplice, CRM operativo, gestione provvigioni, magazzino NFC Moments con creazione SKU, generazione stock e filtri operativi).
+Versione attuale: **v128** (menu 4 intenti, modalità semplice, CRM operativo, gestione provvigioni, magazzino NFC Moments con creazione SKU/stock e console supporto operativa).
 
 ---
 
@@ -22,6 +22,14 @@ Versione attuale: **v127** (menu 4 intenti, modalità semplice, CRM operativo, g
 | **Agenti / Rete** | Rivenditori, tier, listini |
 | **Integration Hub** | Shopify, Stripe, PayPal, Resend |
 | **Piani** | Abbonamenti Business (Stripe) |
+
+## Console supporto v128
+
+- La tab `Supporto` e' ora una console operativa: ricerca, filtri stato/priorita', viste rapide e conteggio ticket visibili.
+- Ogni ticket puo' essere gestito dalla tab globale con cambio stato (`open`, `in_progress`, `waiting_customer`, `resolved`, `closed`) e priorita'.
+- L'admin puo' aggiungere una nota interna durante l'aggiornamento del ticket; se il ticket e' collegato a una Business, la nota finisce nella timeline cliente.
+- Restano attive le categorie ticket modificabili e la creazione ticket dalla scheda cliente.
+- I ticket creati da Business editor e Moments editor confluiscono nella stessa tab globale.
 
 ---
 
@@ -89,4 +97,5 @@ Admin: ricerca, filtri, modifica singola, bulk, drawer ordine/codice.
 - [ ] Portale rivenditori self-service
 - [ ] Tab traduzioni catalogo per SKU
 - [ ] Dashboard analytics avanzata
-- [ ] Gestione ticket supporto unificato
+- [x] Gestione ticket supporto unificato base (v128)
+- [ ] Assegnazione responsabile ticket e risposta cliente via email

@@ -24,6 +24,7 @@ Tag NFC /k/{code} → redirect a /p/{slug}
 - Pubblicazione bozza/live
 - Upload media (logo, galleria)
 - Prenotazioni con notifica email
+- Aprire ticket assistenza dall'area Account dell'editor; il ticket entra nella console Admin Supporto
 
 ---
 
@@ -59,6 +60,12 @@ Pagina live su /m/{slug} (PIN opzionale)
 | **Offline** | Lotto a rivenditore → vendita sul posto → attivazione |
 
 Tracciabilità: `sold_channel`, `assigned_agent_id` su `moment_activation_codes`.
+
+### Supporto cliente
+
+- Business: nel modal Account dell'editor e' presente la tab `Assistenza`. Il form invia il ticket tramite `pages/app.js`, collegandolo a `business_id` e profilo autenticato.
+- Moments: menu account `Assistenza` porta alla scheda Account dell'editor, dove l'utente puo' aprire un ticket collegato al proprio profilo.
+- SQL v89 consente agli utenti autenticati di creare/leggere solo ticket con `profile_id = auth.uid()`; lo staff continua a usare `support.read`/`support.write`.
 
 ---
 

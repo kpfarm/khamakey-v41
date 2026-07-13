@@ -111,8 +111,8 @@ Dopo modifiche significative:
 
 - Un solo contatore release: `?v=NN` su HTML/JS
 - Allineare `WORKER_VERSION` in `worker/worker.js` quando cambia il renderer
-- Admin attuale: **v106** — prossima: **v107**
-- Worker attuale: **v103**
+- Admin attuale: **v128** — prossima: **v129**
+- Worker attuale: **v126**
 
 ```bash
 # Release checklist

@@ -446,6 +446,16 @@ function bindGlobalAppChrome(){
       }
     });
   }
+  const supportBtn = document.getElementById("momentsMenuSupport");
+  if(supportBtn && supportBtn.dataset.bound !== "1"){
+    supportBtn.dataset.bound = "1";
+    supportBtn.addEventListener("click",()=>{
+      userMenu?.classList.remove("open");
+      activeNavGroup = "account";
+      setEditorPanel("objects");
+      document.getElementById("momentSupportForm")?.scrollIntoView({behavior:"smooth",block:"center"});
+    });
+  }
 }
 
 function navItemsForGroup(groupId, formNode){
@@ -725,7 +735,57 @@ function renderObjectsPanel(){
       <p>${esc(currentUser?.email || "")}</p>
       <button type="button" class="ghost" id="editorLogout">Esci dall'account</button>
     </div>
+    <div class="editor-card account-card">
+      <p class="eyebrow">Assistenza</p>
+      <p>Apri un ticket al team KhamaKey se qualcosa non funziona o serve supporto sulla pagina.</p>
+      <form class="support-inline-form" id="momentSupportForm">
+        <label>Oggetto<input name="subject" type="text" placeholder="Es. Non riesco a pubblicare" required></label>
+        <label>Priorità
+          <select name="priority">
+            <option value="normal">Normale</option>
+            <option value="high">Alta</option>
+            <option value="urgent">Urgente</option>
+            <option value="low">Bassa</option>
+          </select>
+        </label>
+        <label>Dettagli<textarea name="description" rows="4" placeholder="Scrivi cosa succede e cosa stavi facendo." required></textarea></label>
+        <button type="submit" class="primary">Invia ticket</button>
+        <p class="status" id="momentSupportStatus" aria-live="polite"></p>
+      </form>
+    </div>
   </div>`;
+}
+
+async function submitMomentSupportTicket(event,row){
+  event.preventDefault();
+  const status = document.getElementById("momentSupportStatus");
+  if(!currentUser) return setStatus(status,"Accedi per aprire un ticket.","error");
+  const form = event.currentTarget;
+  const subject = String(form.elements.subject.value || "").trim();
+  const description = String(form.elements.description.value || "").trim();
+  const priority = form.elements.priority.value || "normal";
+  if(!subject || !description) return setStatus(status,"Compila oggetto e dettagli.","error");
+  setStatus(status,"Invio ticket...");
+  const detail = [
+    description,
+    row?.slug ? `Pagina Moments: ${row.slug}` : "",
+    row?.id ? `ID evento: ${row.id}` : ""
+  ].filter(Boolean).join("\n\n");
+  const { error } = await supabase.from("platform_support_tickets").insert({
+    profile_id:currentUser.id,
+    subject,
+    priority,
+    description:detail,
+    status:"open",
+    source:"moments_editor"
+  });
+  if(error){
+    console.error(error);
+    setStatus(status,error.message || "Ticket non inviato.","error");
+    return;
+  }
+  form.reset();
+  setStatus(status,"Ticket inviato. Lo troviamo nella console supporto.","ok");
 }
 
 function renderEmptyState(message = "",prefillCode = ""){
@@ -1911,6 +1971,7 @@ function renderDetail(id){
   savedEditorSnapshot = JSON.stringify(readFormState(editorForm));
   updateSaveStatus(true);
   editorForm.addEventListener("submit",event=>saveMoment(event,row));
+  document.getElementById("momentSupportForm")?.addEventListener("submit",event=>submitMomentSupportTicket(event,row));
   editorForm.addEventListener("input",event=>{
     markEditorDirty(editorForm);
     const coverField = event.target?.name === "cover_url" || event.target?.name?.startsWith("cover_focus") || event.target?.name === "cover_zoom";

@@ -1161,12 +1161,75 @@
 
         <section class="admin-panel" data-panel="support">
           <div class="admin-card">
-            <h2>Supporto</h2>
-            <p>Ticket assistenza globali. Puoi creare ticket dalla scheda cliente o gestire categorie modificabili qui sotto.</p>
+            <h2>Console supporto</h2>
+            <p>Ticket assistenza globali: filtra, assegna priorità e cambia stato senza aprire la scheda cliente.</p>
+            <div class="inventory-toolbar">
+              <label class="inventory-search">Cerca ticket
+                <input type="search" id="supportSearchInput" placeholder="Oggetto, cliente, descrizione...">
+              </label>
+              <label>Stato
+                <select id="supportStatusFilter">
+                  <option value="">Tutti</option>
+                  <option value="open">Aperti</option>
+                  <option value="in_progress">In lavorazione</option>
+                  <option value="waiting_customer">In attesa cliente</option>
+                  <option value="resolved">Risolti</option>
+                  <option value="closed">Chiusi</option>
+                </select>
+              </label>
+              <label>Priorità
+                <select id="supportPriorityFilter">
+                  <option value="">Tutte</option>
+                  <option value="low">Bassa</option>
+                  <option value="normal">Normale</option>
+                  <option value="high">Alta</option>
+                  <option value="urgent">Urgente</option>
+                </select>
+              </label>
+              <button class="small-action" type="button" id="supportFilterClear">Pulisci</button>
+            </div>
+            <div class="filter-chip-bar" id="supportQuickFilters">
+              <span class="filter-chip-label">Vista rapida</span>
+              <button type="button" class="filter-chip active" data-support-quick-status="">Tutti</button>
+              <button type="button" class="filter-chip" data-support-quick-status="open">Aperti</button>
+              <button type="button" class="filter-chip" data-support-quick-status="in_progress">In lavorazione</button>
+              <button type="button" class="filter-chip" data-support-quick-status="waiting_customer">Attesa cliente</button>
+              <button type="button" class="filter-chip" data-support-quick-status="closed">Chiusi</button>
+            </div>
+            <div class="inventory-meta"><strong id="supportVisibleCount">0 ticket visibili</strong></div>
+            <form class="admin-form compact-form" id="supportTicketEditForm" hidden>
+              <input type="hidden" name="ticket_id">
+              <label>Ticket
+                <input name="ticket_title" type="text" readonly>
+              </label>
+              <label>Stato
+                <select name="status">
+                  <option value="open">Aperto</option>
+                  <option value="in_progress">In lavorazione</option>
+                  <option value="waiting_customer">In attesa cliente</option>
+                  <option value="resolved">Risolto</option>
+                  <option value="closed">Chiuso</option>
+                </select>
+              </label>
+              <label>Priorità
+                <select name="priority">
+                  <option value="low">Bassa</option>
+                  <option value="normal">Normale</option>
+                  <option value="high">Alta</option>
+                  <option value="urgent">Urgente</option>
+                </select>
+              </label>
+              <label>Nota interna
+                <input name="internal_note" type="text" placeholder="Es. chiamato cliente, in attesa materiale...">
+              </label>
+              <button class="primary-action" type="submit">Aggiorna ticket</button>
+              <button class="small-action" type="button" id="supportTicketEditCancel">Annulla</button>
+              <p class="form-status" id="supportTicketEditStatus"></p>
+            </form>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Ticket</th><th>Cliente</th><th>Priorità</th><th>Stato</th></tr></thead>
-                <tbody id="supportTicketsTable"><tr><td colspan="4">Caricamento ticket...</td></tr></tbody>
+                <thead><tr><th>Ticket</th><th>Cliente</th><th>Priorità</th><th>Stato</th><th>Origine</th><th>Azioni</th></tr></thead>
+                <tbody id="supportTicketsTable"><tr><td colspan="6">Caricamento ticket...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -1887,6 +1950,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=127"></script>
+  <script type="module" src="admin.js?v=128"></script>
 </body>
 </html>

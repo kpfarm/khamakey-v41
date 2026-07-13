@@ -417,6 +417,31 @@ async function refreshAnalytics(){
   }
 }
 
+async function createSupportTicketFromEditor(message){
+  if(!supabase || !session?.user || !currentBusiness) return;
+  const subject = String(message.subject || "").trim();
+  const description = String(message.description || "").trim();
+  const priority = String(message.priority || "normal").trim() || "normal";
+  if(!subject || !description){
+    postToEditor({type:"khamakey:support-ticket-result",ok:false,message:"Compila oggetto e dettagli."});
+    return;
+  }
+  const { error } = await supabase.from("platform_support_tickets").insert({
+    business_id:currentBusiness.id,
+    profile_id:session.user.id,
+    subject,
+    priority,
+    description,
+    status:"open",
+    source:message.source || "business_editor"
+  });
+  postToEditor({
+    type:"khamakey:support-ticket-result",
+    ok:!error,
+    message:error ? (error.message || "Ticket non inviato.") : "Ticket inviato. Lo troviamo nella console supporto."
+  });
+}
+
 async function loadApplication(){
   if(applicationLoading) return;
   applicationLoading = true;
@@ -427,7 +452,7 @@ async function loadApplication(){
     currentUser = userData.user;
     currentBusiness = await ensureWorkspace(currentUser);
     userEmail.textContent = currentUser.email || "";
-    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=117`;
+    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=118`;
     if(editorFrame.getAttribute("src") !== editorUrl){
       editorFrame.src = editorUrl;
     }
@@ -603,6 +628,7 @@ window.addEventListener("message",event=>{
   if(event.data?.type === "khamakey:public-snapshot") queueSave(event.data.state,true);
   if(event.data?.type === "khamakey:logout") supabase.auth.signOut();
   if(event.data?.type === "khamakey:refresh-analytics") refreshAnalytics();
+  if(event.data?.type === "khamakey:create-support-ticket") createSupportTicketFromEditor(event.data);
 });
 setInterval(refreshAnalytics,15000);
 

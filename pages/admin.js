@@ -188,6 +188,14 @@ const clientNoteForm = document.getElementById("clientNoteForm");
 const clientNoteStatus = document.getElementById("clientNoteStatus");
 const clientNotesList = document.getElementById("clientNotesList");
 const supportTicketsTable = document.getElementById("supportTicketsTable");
+const supportSearchInput = document.getElementById("supportSearchInput");
+const supportStatusFilter = document.getElementById("supportStatusFilter");
+const supportPriorityFilter = document.getElementById("supportPriorityFilter");
+const supportFilterClear = document.getElementById("supportFilterClear");
+const supportVisibleCount = document.getElementById("supportVisibleCount");
+const supportTicketEditForm = document.getElementById("supportTicketEditForm");
+const supportTicketEditStatus = document.getElementById("supportTicketEditStatus");
+const supportTicketEditCancel = document.getElementById("supportTicketEditCancel");
 const ticketCategoriesTable = document.getElementById("ticketCategoriesTable");
 const ticketCategoryForm = document.getElementById("ticketCategoryForm");
 const ticketCategoryStatus = document.getElementById("ticketCategoryStatus");
@@ -2450,23 +2458,95 @@ async function loadSupportTickets(){
   try{
     const { data,error } = await supabase
       .from("platform_support_tickets")
-      .select("id,subject,priority,status,businesses(nome,slug)")
+      .select("id,business_id,profile_id,subject,description,priority,status,source,created_at,updated_at,businesses(nome,slug)")
       .order("created_at",{ascending:false})
       .limit(80);
     if(error) throw error;
-    const rows = data || [];
-    supportTicketsTable.innerHTML = rows.length ? rows.map(row=>`
-      <tr>
-        <td><strong>${esc(row.subject)}</strong></td>
-        <td>${esc(row.businesses?.nome || row.businesses?.slug || "-")}</td>
-        <td>${esc(row.priority)}</td>
-        <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
-      </tr>
-    `).join("") : `<tr><td colspan="4">Nessun ticket aperto.</td></tr>`;
+    supportTicketRows = data || [];
+    refreshSupportTicketsTable();
   }catch(error){
     console.error(error);
-    supportTicketsTable.innerHTML = `<tr><td colspan="4">Ticket non disponibili.</td></tr>`;
+    supportTicketsTable.innerHTML = `<tr><td colspan="6">Ticket non disponibili.</td></tr>`;
   }
+}
+
+function supportStatusLabel(status){
+  return ({
+    open:"Aperto",
+    in_progress:"In lavorazione",
+    waiting_customer:"Attesa cliente",
+    resolved:"Risolto",
+    closed:"Chiuso"
+  })[status] || status || "-";
+}
+
+function supportPriorityLabel(priority){
+  return ({
+    low:"Bassa",
+    normal:"Normale",
+    high:"Alta",
+    urgent:"Urgente"
+  })[priority] || priority || "-";
+}
+
+function filteredSupportTickets(){
+  const query = String(supportSearchInput?.value || "").trim().toLowerCase();
+  const status = supportStatusFilter?.value || "";
+  const priority = supportPriorityFilter?.value || "";
+  return supportTicketRows.filter(row=>{
+    if(status && row.status !== status) return false;
+    if(priority && row.priority !== priority) return false;
+    if(query){
+      const haystack = [
+        row.subject,
+        row.description,
+        row.source,
+        row.businesses?.nome,
+        row.businesses?.slug
+      ].join(" ").toLowerCase();
+      if(!haystack.includes(query)) return false;
+    }
+    return true;
+  });
+}
+
+function refreshSupportTicketsTable(){
+  if(!supportTicketsTable) return;
+  const rows = filteredSupportTickets();
+  if(supportVisibleCount) supportVisibleCount.textContent = `${rows.length} ticket visibili`;
+  supportTicketsTable.innerHTML = rows.length ? rows.map(row=>`
+    <tr>
+      <td>
+        <strong>${esc(row.subject)}</strong>
+        <small>${esc(row.description || "")}</small>
+      </td>
+      <td>${esc(row.businesses?.nome || row.businesses?.slug || "Account Moments")}</td>
+      <td><span class="status-pill ${esc(row.priority)}">${esc(supportPriorityLabel(row.priority))}</span></td>
+      <td><span class="status-pill ${esc(row.status)}">${esc(supportStatusLabel(row.status))}</span></td>
+      <td>${esc(row.source || "-")}</td>
+      <td><button class="small-action" type="button" data-support-ticket-edit="${esc(row.id)}">Gestisci</button></td>
+    </tr>
+  `).join("") : `<tr><td colspan="6">Nessun ticket corrisponde ai filtri.</td></tr>`;
+}
+
+function syncSupportQuickChips(){
+  const current = supportStatusFilter?.value || "";
+  document.querySelectorAll("[data-support-quick-status]").forEach(chip=>{
+    chip.classList.toggle("active",(chip.dataset.supportQuickStatus || "") === current);
+  });
+}
+
+function editSupportTicket(id){
+  const row = supportTicketRows.find(item=>item.id === id);
+  if(!row || !supportTicketEditForm) return;
+  supportTicketEditForm.hidden = false;
+  supportTicketEditForm.elements.ticket_id.value = row.id;
+  supportTicketEditForm.elements.ticket_title.value = row.subject || "";
+  supportTicketEditForm.elements.status.value = row.status || "open";
+  supportTicketEditForm.elements.priority.value = row.priority || "normal";
+  supportTicketEditForm.elements.internal_note.value = "";
+  setFormStatus(supportTicketEditStatus,`Ticket ${row.subject || row.id} pronto per aggiornamento.`,"ok");
+  supportTicketEditForm.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 
 async function loadIntegrationHealth(){
@@ -3968,6 +4048,49 @@ async function saveTicket(event){
   await Promise.all([loadClientTickets(currentClient.id),loadSupportTickets()]);
 }
 
+async function saveSupportTicketEdit(event){
+  event.preventDefault();
+  if(!hasPermission("support.write")){
+    setFormStatus(supportTicketEditStatus,"Non hai il permesso support.write.","error");
+    return;
+  }
+  const form = event.currentTarget;
+  const ticketId = form.elements.ticket_id.value;
+  const row = supportTicketRows.find(item=>item.id === ticketId);
+  if(!row) return;
+  const payload = {
+    status:form.elements.status.value,
+    priority:form.elements.priority.value,
+    updated_at:new Date().toISOString()
+  };
+  setFormStatus(supportTicketEditStatus,"Aggiornamento ticket...");
+  const { error } = await supabase
+    .from("platform_support_tickets")
+    .update(payload)
+    .eq("id",ticketId);
+  if(error){
+    console.error(error);
+    setFormStatus(supportTicketEditStatus,error.message || "Errore aggiornamento ticket.","error");
+    return;
+  }
+  const noteBody = String(form.elements.internal_note.value || "").trim();
+  if(noteBody && row.business_id){
+    const { error:noteError } = await supabase.from("platform_client_notes").insert({
+      business_id:row.business_id,
+      note_type:"support",
+      body:`Ticket ${row.subject}: ${noteBody}`
+    });
+    if(noteError) console.warn("Nota ticket non salvata",noteError);
+  }
+  form.hidden = true;
+  form.reset();
+  setFormStatus(supportTicketEditStatus,"Ticket aggiornato.","ok");
+  await Promise.all([
+    loadSupportTickets(),
+    currentClient ? loadClientTickets(currentClient.id) : Promise.resolve()
+  ]);
+}
+
 async function loadAdminSession(){
   const { data:userData,error:userError } = await supabase.auth.getUser();
   if(userError || !userData.user){
@@ -4166,6 +4289,11 @@ ticketCategoriesTable.addEventListener("click",event=>{
   if(button) editTicketCategory(button.dataset.ticketCategoryEdit);
 });
 
+supportTicketsTable?.addEventListener("click",event=>{
+  const button = event.target.closest("[data-support-ticket-edit]");
+  if(button) editSupportTicket(button.dataset.supportTicketEdit);
+});
+
 integrationsTable.addEventListener("click",event=>{
   const button = event.target.closest("[data-integration-edit]");
   if(button) editIntegration(button.dataset.integrationEdit);
@@ -4293,6 +4421,35 @@ document.getElementById("momentInventoryQuickFilters")?.addEventListener("click"
   refreshMomentTable();
 });
 
+document.getElementById("supportQuickFilters")?.addEventListener("click",event=>{
+  const chip = event.target.closest("[data-support-quick-status]");
+  if(!chip || !supportStatusFilter) return;
+  supportStatusFilter.value = chip.dataset.supportQuickStatus || "";
+  syncSupportQuickChips();
+  refreshSupportTicketsTable();
+});
+
+supportFilterClear?.addEventListener("click",()=>{
+  if(supportSearchInput) supportSearchInput.value = "";
+  if(supportStatusFilter) supportStatusFilter.value = "";
+  if(supportPriorityFilter) supportPriorityFilter.value = "";
+  syncSupportQuickChips();
+  refreshSupportTicketsTable();
+});
+
+supportStatusFilter?.addEventListener("change",()=>{
+  syncSupportQuickChips();
+  refreshSupportTicketsTable();
+});
+supportPriorityFilter?.addEventListener("change",refreshSupportTicketsTable);
+bindSearchInput(supportSearchInput, refreshSupportTicketsTable);
+supportTicketEditCancel?.addEventListener("click",()=>{
+  if(supportTicketEditForm){
+    supportTicketEditForm.hidden = true;
+    supportTicketEditForm.reset();
+  }
+});
+
 if(momentSearchInput){
   let searchTimer = null;
   momentSearchInput.addEventListener("input",()=>{
@@ -4414,6 +4571,7 @@ platformOrderForm.addEventListener("submit",savePlatformOrder);
 clientRecordForm.addEventListener("submit",saveClientRecord);
 clientNoteForm.addEventListener("submit",saveClientNote);
 ticketForm.addEventListener("submit",saveTicket);
+supportTicketEditForm?.addEventListener("submit",saveSupportTicketEdit);
 planForm.addEventListener("submit",savePlan);
 materialForm.addEventListener("submit",saveMaterial);
 ticketCategoryForm.addEventListener("submit",saveTicketCategory);

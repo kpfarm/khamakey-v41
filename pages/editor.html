@@ -2447,6 +2447,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
     <aside class="account-side">
       <div class="account-title">Account</div>
       <button class="account-tab active" data-account-tab="profile"><svg class="ui-ico"><use href="#i-user"/></svg>Profilo</button>
+      <button class="account-tab" data-account-tab="support"><svg class="ui-ico"><use href="#i-message"/></svg>Assistenza</button>
       <button class="account-tab" data-account-tab="billing"><svg class="ui-ico"><use href="#i-file"/></svg>Fatturazione</button>
       <button class="account-tab" data-account-tab="plan"><svg class="ui-ico"><use href="#i-star"/></svg>Piano</button>
       <button class="account-tab" data-account-tab="security"><svg class="ui-ico"><use href="#i-lock"/></svg>Sicurezza</button>
@@ -2473,6 +2474,26 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
             <button type="button" class="btn-qr-download" id="accountDownloadQr"><svg class="ui-ico"><use href="#i-zap"/></svg>Scarica QR</button>
           </div>
         </div>
+      </section>
+      <section class="account-panel" id="account-support">
+        <h3>Assistenza</h3>
+        <p>Apri una richiesta al team KhamaKey direttamente dal tuo editor.</p>
+        <form class="account-support-form" id="accountSupportForm">
+          <div class="field-row">
+            <div class="field"><label>Oggetto</label><input type="text" name="subject" placeholder="Es. Non riesco a pubblicare la pagina" required></div>
+            <div class="field"><label>Priorità</label>
+              <select name="priority">
+                <option value="normal">Normale</option>
+                <option value="high">Alta</option>
+                <option value="urgent">Urgente</option>
+                <option value="low">Bassa</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Dettagli</label><textarea name="description" rows="5" placeholder="Scrivi cosa succede e cosa stavi provando a fare." required></textarea></div>
+          <button type="submit" class="btn-generate"><svg class="ui-ico"><use href="#i-message"/></svg>Invia ticket</button>
+          <p class="field-hint" id="accountSupportStatus" aria-live="polite"></p>
+        </form>
       </section>
       <section class="account-panel" id="account-billing">
         <h3>Fatturazione</h3>
@@ -6192,6 +6213,11 @@ window.addEventListener('message', event => {
     openAccount(event.data.tab || 'profile');
     return;
   }
+  if(event.data?.type === 'khamakey:support-ticket-result') {
+    setAccountSupportStatus(event.data.message || (event.data.ok ? 'Ticket inviato.' : 'Ticket non inviato.'), event.data.ok ? 'ok' : 'error');
+    if(event.data.ok) document.getElementById('accountSupportForm')?.reset();
+    return;
+  }
   if(event.data?.type === 'khamakey:save-ok') {
     dirty = false;
     document.getElementById('saveBar')?.classList.remove('visible');
@@ -6699,6 +6725,12 @@ function switchAccountTab(tab){
   document.querySelectorAll('.account-tab').forEach(btn=>btn.classList.toggle('active',btn.dataset.accountTab===tab));
   document.querySelectorAll('.account-panel').forEach(panel=>panel.classList.toggle('active',panel.id==='account-'+tab));
 }
+function setAccountSupportStatus(message='',type=''){
+  const node = document.getElementById('accountSupportStatus');
+  if(!node) return;
+  node.textContent = message;
+  node.className = `field-hint ${type}`.trim();
+}
 userMenuBtn.onclick = e => {
   e.stopPropagation();
   userMenu.classList.toggle('open');
@@ -6708,6 +6740,20 @@ document.querySelectorAll('[data-account-tab]').forEach(btn => btn.addEventListe
 document.getElementById('accountClose').onclick = closeAccount;
 accountModal.addEventListener('click',e=>{ if(e.target.id==='accountModal') closeAccount(); });
 document.addEventListener('click',e=>{ if(!e.target.closest('.user-menu-wrap')) userMenu.classList.remove('open'); });
+document.getElementById('accountSupportForm')?.addEventListener('submit',event=>{
+  event.preventDefault();
+  const form = event.currentTarget;
+  const subject = String(form.elements.subject.value || '').trim();
+  const description = String(form.elements.description.value || '').trim();
+  const priority = form.elements.priority.value || 'normal';
+  if(!subject || !description) return setAccountSupportStatus('Compila oggetto e dettagli.','error');
+  setAccountSupportStatus('Invio ticket...');
+  if(window.parent !== window){
+    window.parent.postMessage({type:'khamakey:create-support-ticket',subject,description,priority,source:'business_editor'},'*');
+  }else{
+    setAccountSupportStatus('Apri l’editor dall’area riservata per inviare il ticket.','error');
+  }
+});
 document.getElementById('logoutBtn').onclick = () => {
   if(window.parent !== window) window.parent.postMessage({type:'khamakey:logout'},'*');
   else showToast('Apri l’editor dall’area riservata per uscire','ok');

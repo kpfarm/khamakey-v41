@@ -66,15 +66,21 @@ Sezione **Rete rivenditori** in admin:
 
 ---
 
-## Portale self-service (da costruire)
+## Portale self-service
 
-File previsto: `reseller.html` o area con permesso `agents.write`.
+File: `pages/reseller.html` + `pages/reseller.js` + `pages/reseller.css`.
 
-Funzionalità target:
-- Brief personalizzazione Business (logo, testi, colori, quantità)
-- Indirizzo spedizione rivenditore
-- Stato ordini e consegne
-- Dashboard vendite Moments offline
+Funzionalità completate:
+- primo accesso / login / recupero password via Supabase Auth;
+- riepilogo provvigioni da incassare, approvate e pagate;
+- tabella provvigioni personali;
+- rete downline fino a 3 livelli;
+- consegne assegnate al rivenditore.
+
+Sicurezza:
+- SQL v86 introduce RPC `get_my_agent_profile`, `get_my_commissions`, `get_my_network`, `get_my_deliveries`;
+- SQL v87 indurisce `current_agent_id()`: nessun `agent_id` viene accettato dal client e il collegamento agente passa solo da `platform_agents.member_id -> platform_members.user_id`;
+- il fallback via email e' stato rimosso per evitare accessi basati solo su email dichiarata nel JWT.
 
 ---
 
@@ -82,5 +88,5 @@ Funzionalità target:
 
 - [x] SQL v68 rete rivenditori
 - [x] Admin rete partner
-- [ ] Portale rivenditori self-service
-- [ ] Hook provvigioni su ingest Stripe (v69)
+- [x] Portale rivenditori self-service
+- [x] Hook provvigioni su ordini Shopify/Stripe/admin (v85)

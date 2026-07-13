@@ -69,3 +69,5 @@
 \i khamakey-order-commissions-v85.sql
 \echo 'v86 portale self-service rivenditori (RPC solo-i-miei-dati)'
 \i khamakey-reseller-portal-v86.sql
+\echo 'v87 hardening portale rivenditori (solo member_id esplicito)'
+\i khamakey-reseller-portal-hardening-v87.sql

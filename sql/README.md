@@ -37,6 +37,8 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 31 | `khamakey-security-linter-fixes-v80-v83.sql` | Triage completo linter Supabase: blocca enumerazione bucket Storage legacy, `search_path` su `_moment_type_valid`, permessi mancanti su `get_agent_delivery_history` + 4 funzioni statistiche admin (`get_moment_customer_stats` esponeva email di tutti i clienti), revocato accesso a 2 funzioni inutilizzate |
 | 32 | `khamakey-crm-v84.sql` | CRM: RPC (`list_crm_clients`, `save_crm_client`, `list_crm_notes`, `add_crm_note`, `delete_crm_note`) su tabelle esistenti `platform_client_records`/`platform_client_notes`. Protette da `crm.read`/`crm.write`. Nessuna tabella nuova |
 | 33 | `khamakey-order-commissions-v85.sql` | Provvigioni automatiche: trigger su `platform_orders` che distribuisce le provvigioni multilivello (`apply_order_commissions`) a creazione ordine o assegnazione agente. Idempotente (`source_type='order'`), fail-safe (mai blocca l'ordine). Nessuna tabella nuova |
+| 34 | `khamakey-reseller-portal-v86.sql` | Portale rivenditori self-service: RPC `get_my_*` che leggono solo i dati dell'agente autenticato |
+| 35 | `khamakey-reseller-portal-hardening-v87.sql` | Hardening `current_agent_id()`: rimosso fallback via email, accesso solo tramite collegamento esplicito `platform_agents.member_id -> platform_members.user_id` |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 

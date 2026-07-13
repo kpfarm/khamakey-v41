@@ -11,7 +11,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ### Added
 - **Portale self-service rivenditori (2026-07-13, Claude Code)** — deployato (`reseller.html`, SQL v86)
   - Nuova pagina `pages/reseller.{html,js,css}`: l'agente accede col proprio account e vede SOLO i propri dati — riepilogo guadagni (da incassare/approvate/pagate), tabella provvigioni, rete downline (fino a 3 livelli), consegne.
-  - 4 RPC self-service (`get_my_agent_profile/commissions/network/deliveries`) che risolvono l'agente dall'auth lato server (`current_agent_id()` via `member_id`→`platform_members.user_id` o email). Nessun id accettato dal client: impossibile vedere i dati di un altro rivenditore. Verificato: senza auth → vuoto.
+  - 4 RPC self-service (`get_my_agent_profile/commissions/network/deliveries`) che risolvono l'agente dall'auth lato server. Nessun id accettato dal client: impossibile vedere i dati di un altro rivenditore. Verificato: senza auth → vuoto.
+  - **Hardening v87**: `current_agent_id()` non usa piu' fallback via email. Il portale mostra dati solo con collegamento esplicito `platform_agents.member_id -> platform_members.user_id`.
   - Completa la Fase 3b della roadmap. Nessuna tabella nuova. `worker.js` non toccato (Antigravity).
 - **Gestione provvigioni nell'admin (2026-07-12, Claude Code)** — deployato (admin v125)
   - Complemento del trigger v85: le provvigioni `pending` generate sugli ordini ora sono gestibili nel pannello «Quanto spetta». Riepilogo (da pagare / approvate / pagate / voci), filtro per stato (default: da pagare), ricerca per agente/ordine, colonna Ordine e azioni per riga (Approva → Segna pagata → Annulla) con transizioni contestuali e update ottimistico + rollback.

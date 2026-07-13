@@ -82,7 +82,7 @@ Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_lead
 | **Editor Business** | **v117** | Analytics affidabili (RPC v74), order_sent, consenso cookie click |
 | **Moments editor** | v110+ | Dashboard organizzatore — **agente dedicato** |
 | **Worker NFC** | **v125** | Deployato — Overhaul completo template Viaggi 2026 (Travel Story Landing Page, icone SVG animate, sfondo pastello) e riprogettazione delle 18 palette colore globali dell'editor con toni eleganti e moderni. |
-| **SQL Supabase** | **v85 (applicata e verificata)** | v75-v83 security, v84 CRM, v85 trigger provvigioni ordini. Verifica live 2026-07-12: RLS `platform_commission_events` attiva, stati `pending/approved/paid/cancelled` accettati |
+| **SQL Supabase** | **v87 (applicata e verificata)** | v75-v83 security, v84 CRM, v85 trigger provvigioni ordini, v86 portale rivenditori, v87 hardening accesso agente solo via `member_id` |
 | **Prossima release Business** | **v118** | `editor.html` + `index.html` `?v=` + `buildPublicSnapshot().version` |
 
 ---
@@ -132,7 +132,7 @@ Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_lead
 | Area | Stato | Priorità |
 |------|-------|----------|
 | Stripe secrets in produzione | Predisposto, secrets da configurare | Alta |
-| Portale rivenditori self-service | Da costruire (`reseller.html`) | Media |
+| Portale rivenditori self-service | Completato v86, hardening v87 applicato | Media |
 | Tabella risposte RSVP backend | Completato v70 — applicare SQL in prod | Alta |
 | Catalogo multilingua completo | Admin predisposto, sync Shopify parziale | Media |
 | Smoke test wizard 5 settori | Checklist aperta | Bassa |

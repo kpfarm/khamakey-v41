@@ -38,9 +38,19 @@ git log --oneline -5
 - `KHAMAKEY_OS/PROJECT_STATE.md`
 - `KHAMAKEY_OS/AGENTS.md`
 - `CODEX-COLLAB.md`
+- `KHAMAKEY_OS/prompts/session-start.md` se stai aprendo o istruendo un nuovo agente
 - il file in `KHAMAKEY_OS/docs/` relativo al task
 
-4. Rispondi con questo handshake prima di iniziare:
+4. Prima di iniziare davvero, controlla se altri agenti hanno lasciato lavoro in corso:
+
+- `git status --short --branch`
+- ultimi commit (`git log --oneline -5`)
+- lock attivi in `CODEX-COLLAB.md`
+- file non tuoi modificati o non tracciati
+
+Se trovi lavoro di altri agenti, non sovrascriverlo e dichiaralo nell'handshake.
+
+5. Rispondi con questo handshake prima di iniziare:
 
 ```text
 Bootstrap completato:
@@ -49,6 +59,7 @@ Bootstrap completato:
 - ultimo commit:
 - stato git:
 - lock letti:
+- lavoro altri agenti rilevato:
 - area task:
 - file probabili:
 - rischi o doc stale:
@@ -63,6 +74,7 @@ Le leggi complete sono in `CODEX-COLLAB.md`. In breve:
 3. Un solo branch operativo: `main`, salvo accordo esplicito.
 4. Mai chiudere una sessione con modifiche non committate senza segnalarlo.
 5. Se tocchi `/p/`, `/m/` o `/k/`, rispetta il contratto 4 punti: editor, anteprima, whitelist app, renderer Worker.
+6. Ogni agente deve lasciare agli altri una traccia leggibile: cosa ha cambiato, cosa non ha toccato, cosa resta in sospeso.
 
 ## Se trovi documenti in conflitto
 
@@ -76,3 +88,5 @@ Se `PROJECT_STATE.md`, `CHANGELOG.md`, `ROADMAP.md`, `CODEX-COLLAB.md` o il codi
 ## Agenti futuri
 
 Questa procedura vale per Cursor, Codex, Claude Code, Antigravity e qualunque agente futuro. Se entra un nuovo agente, non creare un protocollo parallelo: fallo partire da questo file.
+
+Prompt consigliato per nuovi agenti: [`prompts/session-start.md`](prompts/session-start.md).

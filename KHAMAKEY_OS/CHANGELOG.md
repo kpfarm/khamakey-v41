@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Protocollo collaborazione agenti rafforzato (2026-07-13, Codex)** — preparato
+  - `00-START-HERE.md`, `AGENTS.md`, `CODEX-COLLAB.md` e `prompts/session-start.md` ora richiedono esplicitamente di dichiarare lavoro altrui, lock, file sporchi e stato push/deploy.
+  - Creato `KHAMAKEY_OS/prompts/new-agent-brief.md` per istruire qualunque nuovo agente senza creare protocolli paralleli.
 - **Admin v127 — Magazzino NFC Moments usabile per test e stock (2026-07-13, Codex)** — preparato
   - In `Magazzino NFC` aggiunto mini-form per creare modello/SKU direttamente dalla sezione stock, senza dover passare dal catalogo completo.
   - Il form `Genera nuovo stock` e' aperto di default e usa subito lo SKU creato/selezionato.

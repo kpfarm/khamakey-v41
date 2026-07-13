@@ -86,6 +86,25 @@ Per **Moments**, aggiungere anche:
 - Un agente per file condiviso (`worker.js`) alla volta
 - Non committare: `.env`, `.dev.vars`, export chat, chiavi API
 
+## Comunicazione obbligatoria tra agenti
+
+Ogni agente deve lavorare come se un altro agente entrasse subito dopo.
+
+Prima di modificare:
+
+- leggere `CODEX-COLLAB.md` e la tabella lock;
+- controllare `git status --short --branch`;
+- distinguere file propri da file gia' modificati da altri;
+- dichiarare nell'handshake eventuali commit locali non pushati, file sporchi o demo generate da altri.
+
+Dopo modifiche significative:
+
+- aggiornare docs/stato/changelog/roadmap;
+- committare solo file del proprio task;
+- non includere file di altri agenti nello stesso commit;
+- se non si puo' pushare perche' il branch contiene lavoro altrui, dirlo chiaramente;
+- lasciare nel messaggio finale cosa e' stato deployato, cosa e' solo locale e cosa resta fuori.
+
 ---
 
 ## Versioning

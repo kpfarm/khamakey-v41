@@ -264,6 +264,34 @@ Tabella **Log** in fondo a `ROADMAP.md`:
 
 Una riga basta: data, chi (Cursor/Codex/nome), cosa.
 
+### Protocollo minimo di passaggio consegne
+
+Ogni agente deve lasciare agli altri abbastanza contesto per non riportare il progetto indietro e per non pubblicare cambiamenti non compresi.
+
+All'inizio:
+
+1. leggere `KHAMAKEY_OS/00-START-HERE.md`;
+2. controllare `git status --short --branch`;
+3. leggere gli ultimi 5 commit;
+4. leggere i lock attivi;
+5. dichiarare quali file sporchi/non tracciati sembrano di altri agenti.
+
+Durante:
+
+1. non sovrascrivere file sporchi non propri;
+2. non usare `git checkout`, `reset`, merge automatici o risoluzioni "ours/theirs" senza spiegare il conflitto;
+3. se serve toccare un file conteso (`worker.js`, `sql/`, `admin.js`, `moments.js`), prendere o chiedere lock.
+
+Alla fine:
+
+1. aggiornare documenti e roadmap;
+2. fare commit piccolo e leggibile con soli file del task;
+3. dire se e' stato fatto deploy;
+4. dire se il branch e' avanti/indietro o contiene lavoro di altri;
+5. dire esplicitamente cosa non e' stato incluso nel commit.
+
+Se un agente non puo' completare push/deploy/test perche' il ramo contiene lavoro altrui o mancano permessi, non deve "chiudere in silenzio": deve scriverlo nel riepilogo finale e, se rilevante, in `PROJECT_STATE.md`.
+
 ---
 
 ## Workflow Codex (Claude Code / skill release)

@@ -64,6 +64,13 @@ KHAMAKEY_OS/
 | Copywriting e Vendita | [`docs/16-sales-copy-love.md`](docs/16-sales-copy-love.md) |
 | Creative Engine Antigravity | [`docs/17-creative-engine-antigravity.md`](docs/17-creative-engine-antigravity.md) |
 
+## Prompt operativi
+
+| Uso | File |
+|-----|------|
+| Avvio sessione agente | [`prompts/session-start.md`](prompts/session-start.md) |
+| Nuovo agente / nuova chat | [`prompts/new-agent-brief.md`](prompts/new-agent-brief.md) |
+
 ---
 
 ## Codice sorgente (transizione)

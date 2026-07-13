@@ -64,6 +64,8 @@ Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_lead
 
 ## Coordinamento agenti AI
 
+Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro altrui rilevato, file sporchi/non tracciati, lock letti e stato push/deploy. Usare `KHAMAKEY_OS/prompts/new-agent-brief.md` per ogni nuovo agente o nuova chat.
+
 | Agente / track | File principali | Non toccare |
 |----------------|-----------------|-------------|
 | **Business editor** | `pages/editor.html`, `pages/editor-ui.css`, `pages/public-page.css`, `pages/app.js` (iframe Business) | `pages/moments.html`, `pages/moments.js`, RSVP/guestbook Moments |

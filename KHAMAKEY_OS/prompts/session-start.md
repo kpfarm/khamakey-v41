@@ -23,6 +23,12 @@ Prima di iniziare:
 7. Leggi CODEX-COLLAB.md (lock attivi)
 8. Leggi il doc in KHAMAKEY_OS/docs/ relativo al task
 
+Regola collaborazione:
+- Prima di modificare, dichiara file sporchi/non tracciati e ultimi commit locali.
+- Non sovrascrivere lavoro di altri agenti.
+- Se tocchi file contesi, coordina lock in CODEX-COLLAB.md.
+- A fine sessione indica cosa e' deployato, cosa e' solo locale e cosa resta fuori.
+
 Task di questa sessione: [descrivi in 1-2 frasi]
 
 Non toccare: [es. worker.js Stripe, sql v68]
@@ -32,7 +38,8 @@ File probabili: [es. pages/admin.js, KHAMAKEY_OS/docs/05-admin.md]
 A fine sessione:
 - Aggiorna docs/ + PROJECT_STATE.md + CHANGELOG.md
 - Riga log in docs/13-roadmap.md
-- Commit + push (salvo richiesta esplicita)
+- Commit piccolo con soli file del task
+- Push solo se il branch non contiene lavoro altrui non coordinato
 - Rilascia lock se preso
 ```
 
@@ -44,6 +51,7 @@ A fine sessione:
 KhamaKey v41 — leggi KHAMAKEY_OS/00-START-HERE.md e completa il bootstrap
 Task: [descrizione]
 Non toccare: [aree lockate]
+Comunica file sporchi, lock e commit locali prima di modificare.
 ```
 
 ---

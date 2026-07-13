@@ -9,6 +9,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Creative Engine Antigravity + stoccaggio asset marketing (2026-07-13, Codex)** — preparato
+  - Importati nel vault gli asset Antigravity per Moments, Business e Love in `KHAMAKEY_OS/assets/marketing/`.
+  - Creati manifest e protocollo operativo (`asset-manifest.md`, `docs/17-creative-engine-antigravity.md`) per rendere Antigravity il motore creativo condiviso.
+  - `docs/12-marketing.md` ora usa percorsi relativi del vault e non link personali `file:///Users/...`.
 - **Visual & Copy Content per KhamaKey "Love" & Business (2026-07-13, Antigravity)** — creato
   - Generati asset grafici promozionali in qualità fotografica premium per la linea Moments (portachiavi a cuore "Love" in noce e oro) e per la linea Business (tavolo ristorante con espositore NFC).
   - Creato il documento di vendita e copywriting [`16-sales-copy-love.md`](docs/16-sales-copy-love.md) nel vault, contenente testi persuasivi per e-commerce, landing page, inserzioni Facebook/TikTok, bullet points Amazon e script per video virali su TikTok/Reels.

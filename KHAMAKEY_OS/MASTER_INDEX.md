@@ -61,6 +61,8 @@ KHAMAKEY_OS/
 | Roadmap | [`docs/13-roadmap.md`](docs/13-roadmap.md) |
 | FAQ | [`docs/14-faq.md`](docs/14-faq.md) |
 | Decisioni | [`docs/15-decisioni.md`](docs/15-decisioni.md) |
+| Copywriting e Vendita | [`docs/16-sales-copy-love.md`](docs/16-sales-copy-love.md) |
+| Creative Engine Antigravity | [`docs/17-creative-engine-antigravity.md`](docs/17-creative-engine-antigravity.md) |
 
 ---
 

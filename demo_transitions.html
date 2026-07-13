@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Moments Hero Transitions Demo</title>
+  <style>
+    :root {
+      --primary: #b23b18;
+      --surface: #fbf6f1;
+      --bg-base: #f4efe6;
+      --text: #0f172a;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #eaecef;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* Simulate Mobile Frame on Desktop, Fullscreen on Mobile */
+    .phone-simulator {
+      width: 100%;
+      max-width: 412px;
+      min-height: 100vh;
+      background: linear-gradient(180deg, var(--surface) 0%, var(--bg-base) 100%);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+      position: relative;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Fixed top controller for testing */
+    .controller {
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      padding: 10px;
+      z-index: 100;
+      color: white;
+      font-size: 0.8rem;
+    }
+
+    .controller h4 {
+      margin: 0 0 6px 0;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #38bdf8;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .btn-opt {
+      background: #334155;
+      color: #cbd5e1;
+      border: 1px solid #475569;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.72rem;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .btn-opt:hover {
+      background: #475569;
+    }
+
+    .btn-opt.active {
+      background: #38bdf8;
+      color: #0f172a;
+      border-color: #38bdf8;
+      font-weight: bold;
+    }
+
+    /* --- HERO STYLES (LARGE SCREEN HEIGHT: 70vh) --- */
+    .moment-hero {
+      position: relative;
+      height: 70vh;
+      min-height: 480px;
+      width: 100%;
+      background: url('https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&q=80&w=800') center center / cover no-repeat;
+      display: flex;
+      align-items: flex-end;
+      padding-bottom: 60px;
+      box-sizing: border-box;
+      z-index: 10;
+      transition: all 0.4s ease;
+    }
+
+    .moment-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(16, 11, 38, 0.1) 0%, rgba(16, 11, 38, 0.4) 60%, rgba(16, 11, 38, 0.85) 100%);
+      z-index: 2;
+      transition: all 0.4s ease;
+    }
+
+    .moment-hero-content {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      padding: 0 24px;
+      color: white;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    .moment-hero h1 {
+      font-size: 2.2rem;
+      margin: 8px 0;
+      font-family: Georgia, serif;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .moment-hero p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+      margin: 0;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+    }
+
+    /* Content container */
+    .moment-content {
+      padding: 32px 20px;
+      display: grid;
+      gap: 20px;
+      position: relative;
+      z-index: 8;
+      transition: all 0.4s ease;
+    }
+
+    .moment-card {
+      background: white;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .moment-card h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--text);
+    }
+
+    /* --- TRANSITIONS IMPLEMENTATION (TOGGLED BY JS) --- */
+
+    /* 1. Dritto (Standard) */
+    .trans-dritto .moment-hero {
+      margin-bottom: 0;
+      clip-path: none;
+      border-radius: 0;
+    }
+
+    /* 2. Divisore con Icona (Option 1) */
+    .trans-divider .moment-hero {
+      margin-bottom: 0;
+    }
+    .hero-divider-el {
+      display: none;
+    }
+    .trans-divider .hero-divider-el {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin: 24px auto 0 auto;
+      padding: 0 24px;
+      box-sizing: border-box;
+      z-index: 15;
+    }
+    .divider-line {
+      flex-grow: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--primary) 25%, transparent) 50%, transparent);
+    }
+    .divider-icon {
+      padding: 0 16px;
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+
+    /* 3. Taglio ad Arco (Option 2) */
+    .trans-arco .moment-hero {
+      clip-path: ellipse(95% 100% at 50% 0%);
+      margin-bottom: -15px;
+    }
+
+    /* 4. Taglio Diagonale (Option 3 / Opzione 3) */
+    .trans-diagonale .moment-hero {
+      clip-path: polygon(0 0, 100% 0, 100% 93%, 0 100%);
+      margin-bottom: -15px;
+    }
+
+    /* 5. Spaziatura di respiro (Option 4) */
+    .trans-spaced .moment-hero {
+      margin-bottom: 40px;
+    }
+
+    /* 6. Postage Stamp Edge (Opzione A) */
+    .trans-stamp .moment-hero {
+      clip-path: polygon(
+        0% 0%, 100% 0%, 100% 94%,
+        96% 95%, 92% 94%, 88% 95%, 84% 94%, 80% 95%, 76% 94%, 72% 95%, 68% 94%,
+        64% 95%, 60% 94%, 56% 95%, 52% 94%, 48% 95%, 44% 94%, 40% 95%, 36% 94%,
+        32% 95%, 28% 94%, 24% 95%, 20% 94%, 16% 95%, 12% 94%, 8% 95%, 4% 94%, 0% 94%
+      );
+      margin-bottom: -10px;
+    }
+
+    /* 7. Torn Paper Edge (Opzione B) */
+    .trans-paper .moment-hero {
+      position: relative;
+    }
+    .trans-paper .moment-hero::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -10px;
+      height: 24px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L20,15 L45,5 L80,25 L120,10 L160,30 L200,12 L240,25 L290,5 L330,28 L380,10 L420,35 L470,12 L520,30 L570,5 L610,25 L660,10 L710,32 L760,12 L810,28 L860,8 L910,28 L960,12 L1010,32 L1060,10 L1110,25 L1160,5 L1200,20 L1200,120 L0,120 Z' fill='%23fbf6f1'/%3E%3C/svg%3E");
+      background-size: 100% 100%;
+      z-index: 20;
+    }
+
+    /* 8. Wax Seal Stamp (Opzione C) */
+    .trans-seal .moment-hero {
+      margin-bottom: 0;
+    }
+    .seal-el {
+      display: none;
+    }
+    .trans-seal .seal-el {
+      display: block;
+      position: absolute;
+      left: 50%;
+      top: 70vh;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle, #e11d48 0%, #be123c 100%);
+      border-radius: 50%;
+      border: 3px solid #fda4af;
+      box-shadow: 0 4px 15px rgba(190, 18, 60, 0.4);
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .seal-el svg {
+      width: 26px;
+      height: 26px;
+      fill: white;
+    }
+
+    /* 9. Pill Cutout (Opzione F) */
+    .trans-pill .moment-hero {
+      border-radius: 0 0 40px 40px;
+      margin-bottom: 12px;
+    }
+
+    /* 10. Asymmetric Wave (Opzione H) */
+    .trans-wave .moment-hero {
+      clip-path: polygon(
+        0% 0%, 100% 0%, 100% 90%,
+        90% 92%, 80% 95%, 70% 97%, 60% 98%, 50% 98%, 40% 97%, 30% 95%, 20% 92%, 0% 86%
+      );
+      margin-bottom: -15px;
+    }
+
+    /* 11. Archi Concentrici Multilivello */
+    .trans-arcs .moment-hero {
+      margin-bottom: 0;
+    }
+    .arcs-el {
+      display: none;
+    }
+    .trans-arcs .arcs-el {
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 70vh;
+      height: 32px;
+      z-index: 25;
+    }
+    .arcs-el svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* 12. Archivio / Cartella di Cartone */
+    .trans-folder .moment-hero {
+      margin-bottom: 0;
+    }
+    .folder-tab-el {
+      display: none;
+    }
+    .trans-folder .folder-tab-el {
+      display: block;
+      position: absolute;
+      top: 70vh;
+      left: 32px;
+      transform: translateY(-98%);
+      background: var(--surface);
+      color: var(--primary);
+      font-family: Georgia, serif;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 6px 14px;
+      border-radius: 10px 10px 0 0;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-bottom: none;
+      z-index: 25;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.02);
+    }
+
+    /* 13. Coda di Rondine / Nastro */
+    .trans-ribbon .moment-hero {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 94%, 0 100%);
+      margin-bottom: -15px;
+    }
+
+    /* 14. Vetro Satinato Sfocato */
+    .trans-blur .moment-hero {
+      margin-bottom: 0;
+    }
+    .blur-bar-el {
+      display: none;
+    }
+    .trans-blur .blur-bar-el {
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 70vh;
+      transform: translateY(-50%);
+      height: 16px;
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,0.6);
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      z-index: 25;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="phone-simulator" id="simulator">
+
+    <!-- Controller visible to the user -->
+    <div class="controller">
+      <h4>Seleziona raccordo Hero (70vh mobile)</h4>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="setTransition('dritto')">1. Dritto Standard</button>
+        <button class="btn-opt" onclick="setTransition('divider')">2. Divisore con Icona</button>
+        <button class="btn-opt" onclick="setTransition('arco')">3. Arco Morbido</button>
+        <button class="btn-opt" onclick="setTransition('diagonale')">4. Diagonale Inclinato (Approvato)</button>
+        <button class="btn-opt" onclick="setTransition('spaced')">5. Spaziatura Respiro</button>
+        <button class="btn-opt" onclick="setTransition('stamp')">6. Francobollo</button>
+        <button class="btn-opt" onclick="setTransition('paper')">7. Strappo Carta</button>
+        <button class="btn-opt" onclick="setTransition('seal')">8. Sigillo Ceralacca</button>
+        <button class="btn-opt" onclick="setTransition('pill')">9. Angoli Arrotondati</button>
+        <button class="btn-opt" onclick="setTransition('wave')">10. Curva Diagonale (Approvato)</button>
+        <button class="btn-opt" onclick="setTransition('arcs')">11. Archi Concentrici</button>
+        <button class="btn-opt" onclick="setTransition('folder')">12. Linguetta Archivio</button>
+        <button class="btn-opt" onclick="setTransition('ribbon')">13. Coda di Rondine</button>
+        <button class="btn-opt" onclick="setTransition('blur')">14. Vetro Sfocato</button>
+      </div>
+    </div>
+
+    <!-- The Hero section with the larger image height -->
+    <header class="moment-hero">
+      <div class="moment-hero-overlay"></div>
+      <div class="moment-hero-content">
+        <h1>Giappone 2026</h1>
+        <p>Un viaggio indimenticabile nel Sol Levante</p>
+      </div>
+    </header>
+
+    <!-- Floating items dependent on transition -->
+    <div class="hero-divider-el" id="dividerEl">
+      <span class="divider-line"></span>
+      <span class="divider-icon">🧭</span>
+      <span class="divider-line"></span>
+    </div>
+
+    <div class="seal-el" id="sealEl">
+      <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    </div>
+
+    <div class="arcs-el">
+      <svg viewBox="0 0 412 32" preserveAspectRatio="none">
+        <path d="M0,0 Q206,56 412,0" fill="none" stroke="var(--primary)" stroke-width="4" opacity="0.15"/>
+        <path d="M0,0 Q206,38 412,0" fill="none" stroke="var(--primary)" stroke-width="2.5" opacity="0.4"/>
+        <path d="M0,0 Q206,20 412,0" fill="none" stroke="var(--primary)" stroke-width="1.2" opacity="0.75"/>
+      </svg>
+    </div>
+
+    <div class="folder-tab-el">Giappone 2026</div>
+
+    <div class="blur-bar-el"></div>
+
+    <!-- Page Content -->
+    <section class="moment-content">
+      <div class="moment-card">
+        <h2>Il Diario</h2>
+        <p>Siamo partiti con due zaini e una voglia matta di esplorare Tokyo, Kyoto e i villaggi tradizionali.</p>
+      </div>
+
+      <div class="moment-card">
+        <h2>La nostra Bucket List</h2>
+        <p>📍 Salire sulla Tokyo Tower</p>
+        <p>📍 Attraversare Shibuya al tramonto</p>
+        <p>📍 Dormire in un Ryokan tipico</p>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    function setTransition(type) {
+      // Remove all transition classes
+      const sim = document.getElementById('simulator');
+      sim.className = 'phone-simulator';
+      
+      // Add the new transition class
+      sim.classList.add('trans-' + type);
+
+      // Highlight active button
+      const buttons = document.querySelectorAll('.btn-opt');
+      buttons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('onclick').includes(type)) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    // Default transition style
+    setTransition('divider');
+  </script>
+
+</body>
+</html>

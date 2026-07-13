@@ -82,7 +82,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin** | **v128** | Preparato — Console supporto operativa con ricerca, filtri, gestione stato/priorita' ticket e note interne; magazzino NFC Moments v127 resta operativo. |
 | **Editor Business** | **v119** | Overhaul visivo premium (sfondo radial, glassmorphism e card hover) + Assistenza v118. |
-| **Moments editor** | **v114** | Raccordo fondo copertina configurabile (heroCut) + assistenza ticket in editor account. |
+| **Moments editor** | **v115** | Overhaul visivo premium (sfondo radial, glassmorphism e card hover) + Raccordi copertina v114. |
 | **Worker NFC** | **v127** | Supporto a heroCut, unificazione di tutti i 21 sfondi premium e contrasto dinamico footer. |
 | **SQL Supabase** | **v89 (applicata)** | v75-v83 security, v84 CRM, v85 trigger provvigioni ordini, v86 portale rivenditori, v87 hardening accesso agente solo via `member_id`, v88 claim sicuro primo accesso rivenditore, v89 RLS ticket utente |
 | **Prossima release Business** | **v120** | Da definire dopo collaudo supporto/account |

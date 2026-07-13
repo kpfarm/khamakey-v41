@@ -39,6 +39,7 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 33 | `khamakey-order-commissions-v85.sql` | Provvigioni automatiche: trigger su `platform_orders` che distribuisce le provvigioni multilivello (`apply_order_commissions`) a creazione ordine o assegnazione agente. Idempotente (`source_type='order'`), fail-safe (mai blocca l'ordine). Nessuna tabella nuova |
 | 34 | `khamakey-reseller-portal-v86.sql` | Portale rivenditori self-service: RPC `get_my_*` che leggono solo i dati dell'agente autenticato |
 | 35 | `khamakey-reseller-portal-hardening-v87.sql` | Hardening `current_agent_id()`: rimosso fallback via email, accesso solo tramite collegamento esplicito `platform_agents.member_id -> platform_members.user_id` |
+| 36 | `khamakey-reseller-portal-claim-v88.sql` | Primo accesso rivenditore: collega in modo sicuro l'utente autenticato al profilo agente gia' creato dall'admin, solo con email confermata e member non assegnato |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 

@@ -71,3 +71,5 @@
 \i khamakey-reseller-portal-v86.sql
 \echo 'v87 hardening portale rivenditori (solo member_id esplicito)'
 \i khamakey-reseller-portal-hardening-v87.sql
+\echo 'v88 claim sicuro profilo rivenditore al primo accesso'
+\i khamakey-reseller-portal-claim-v88.sql

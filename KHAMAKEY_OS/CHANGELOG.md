@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Claim sicuro primo accesso rivenditori (2026-07-13, Codex)** — preparato (`reseller.js`, SQL v88)
+  - Completa l'hardening v87 senza riaprire il fallback email: `claim_my_agent_profile()` collega l'utente autenticato solo a un profilo agente gia' creato dall'admin, attivo, con stessa email confermata e non gia' assegnato.
+  - Il portale rivenditori chiama il claim prima di leggere `get_my_agent_profile`, poi continua a mostrare dati solo tramite `current_agent_id()`.
 - **Portale self-service rivenditori (2026-07-13, Claude Code)** — deployato (`reseller.html`, SQL v86)
   - Nuova pagina `pages/reseller.{html,js,css}`: l'agente accede col proprio account e vede SOLO i propri dati — riepilogo guadagni (da incassare/approvate/pagate), tabella provvigioni, rete downline (fino a 3 livelli), consegne.
   - 4 RPC self-service (`get_my_agent_profile/commissions/network/deliveries`) che risolvono l'agente dall'auth lato server. Nessun id accettato dal client: impossibile vedere i dati di un altro rivenditore. Verificato: senza auth → vuoto.

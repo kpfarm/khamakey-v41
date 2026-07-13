@@ -246,3 +246,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-11 | Codex | **Follow-up Moments beta**: PIN lockout per slug + visitatore, Worker passa `p_visitor_key`, rate limit leggero su `/event`, CSP Worker allineata per CSS pubblico. **Non committato, non deployato, SQL non applicata** |
 | 2026-07-11 | Claude Code | **Review follow-up Codex** (verificato ok, nessuna regressione) + **SQL v77**: pulizia periodica automatica `moment_pin_attempts`/`platform_rate_limits`, agganciata al cron giornaliero esistente. Aggiunto avviso ordine deploy obbligatorio (SQL prima del Worker) in `PROJECT_STATE.md`. **Non committato, non deployato** |
 | 2026-07-12 | Antigravity | **v118**: restyling premium CSS Moments adattivo (matrimonio vs viaggi) + linee guida grafiche in `docs/01-brand.md` |
+| 2026-07-13 | Codex | **v88**: claim sicuro primo accesso rivenditori, senza fallback email insicuro |

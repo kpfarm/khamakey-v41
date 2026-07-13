@@ -109,6 +109,8 @@ async function enterPortal(){
   gate.hidden = true;
   portal.hidden = false;
 
+  await claimAgentProfile();
+
   const { data: profileRows, error } = await supabase.rpc("get_my_agent_profile");
   if(error){
     console.error("get_my_agent_profile", error);
@@ -139,6 +141,15 @@ async function enterPortal(){
   document.getElementById("cardPaid").textContent = money(profile.paid_total);
 
   await Promise.all([loadCommissions(), loadNetwork(), loadDeliveries()]);
+}
+
+async function claimAgentProfile(){
+  try{
+    const { error } = await supabase.rpc("claim_my_agent_profile");
+    if(error) console.warn("claim_my_agent_profile", error);
+  }catch(error){
+    console.warn("claim_my_agent_profile", error);
+  }
 }
 
 async function loadCommissions(){

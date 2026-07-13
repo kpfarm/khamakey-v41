@@ -104,20 +104,19 @@
       inset: 0;
       background: url('https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&q=80&w=800') center center / cover no-repeat;
       display: flex;
-      align-items: center; /* Centered content to avoid overlap cover */
+      align-items: center; /* Centered content */
       justify-content: center;
       box-sizing: border-box;
       z-index: 10;
-      transition: all 0.4s ease;
+      transition: opacity 0.15s ease, filter 0.15s ease, transform 0.15s ease;
       overflow: hidden;
     }
 
     .moment-hero-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(16, 11, 38, 0.2) 0%, rgba(16, 11, 38, 0.5) 60%, rgba(16, 11, 38, 0.85) 100%);
+      background: linear-gradient(180deg, rgba(16, 11, 38, 0.2) 0%, rgba(16, 11, 38, 0.4) 60%, rgba(16, 11, 38, 0.85) 100%);
       z-index: 2;
-      transition: all 0.4s ease;
     }
 
     .moment-hero-content {
@@ -152,7 +151,6 @@
       position: relative;
       z-index: 20;
       background: transparent;
-      transition: all 0.4s ease;
     }
 
     .moment-card {
@@ -169,19 +167,19 @@
       color: var(--text);
     }
 
-    /* --- INNOVATIVE 2026 TRANSITIONS CSS --- */
+    /* --- TRANSITIONS CSS --- */
 
-    /* Style 1: Dritto Classico (Standard) */
+    /* 1. Dritto Classico */
     .trans-dritto .moment-hero {
       clip-path: none;
     }
 
-    /* Style 2: Diagonale Inclinato (Approvato 4) */
+    /* 2. Diagonale Inclinata */
     .trans-diagonale .moment-hero {
       clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%);
     }
 
-    /* Style 3: Curva Diagonale (Approvato 10) */
+    /* 3. Curva Diagonale */
     .trans-wave .moment-hero {
       clip-path: polygon(
         0% 0%, 100% 0%, 100% 89%,
@@ -189,46 +187,12 @@
       );
     }
 
-    /* Style 4: Scroll-Driven Fade & Blur (NEW 15) */
-    .trans-scroll-fade .moment-hero {
-      /* This simulates the scroll animation dynamic behavior locally */
-      position: sticky;
-      top: 156px; /* offset below controller */
-      height: 70vh;
-      transform-origin: center center;
-    }
-    .phone-simulator.scrolled-down .trans-scroll-fade .moment-hero {
-      opacity: 0.2;
-      filter: blur(12px) scale(1.05);
-      transform: translateY(-30px);
-    }
+    /* 4. Scroll Fade & Blur (JS-Powered) */
+    /* Handled interactively by JS in handleScroll */
 
-    /* Style 5: Glass Frost Fade (NEW 16) */
-    .glass-frost-overlay {
-      display: none;
-    }
-    .trans-glass-frost .moment-hero {
-      margin-bottom: 0;
-    }
-    .trans-glass-frost .glass-frost-overlay {
-      display: block;
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 80px;
-      background: linear-gradient(180deg, transparent, rgba(251, 246, 241, 0.4) 30%, rgba(251, 246, 241, 0.95) 100%);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      z-index: 8;
-    }
-
-    /* Style 6: Organic Color Bleed (NEW 17) */
+    /* 5. Color Bleed Acquerello (Harmonized with template background) */
     .color-bleed-overlay {
       display: none;
-    }
-    .trans-color-bleed .moment-hero {
-      margin-bottom: 0;
     }
     .trans-color-bleed .color-bleed-overlay {
       display: block;
@@ -236,21 +200,45 @@
       left: 0;
       right: 0;
       bottom: 0;
-      height: 120px;
-      background: linear-gradient(180deg, transparent 0%, var(--surface) 100%);
-      mix-blend-mode: screen; /* Blends colors of the image directly into base pastels */
+      height: 140px;
+      /* Fades precisely to var(--surface) and var(--bg-base) matching selected template */
+      background: linear-gradient(180deg, transparent 0%, var(--surface) 60%, var(--bg-base) 100%);
+      mix-blend-mode: normal; /* Normal transparent blend is safer and color-aligned */
       z-index: 8;
     }
     .trans-color-bleed .moment-hero-overlay {
-      /* Soften the overlay gradient to let bottom bleed happen */
-      background: linear-gradient(180deg, rgba(16, 11, 38, 0.1) 0%, rgba(16, 11, 38, 0.3) 50%, transparent 100%) !important;
+      background: linear-gradient(180deg, rgba(16, 11, 38, 0.2) 0%, rgba(16, 11, 38, 0.45) 50%, transparent 100%) !important;
     }
 
-    /* Style 7: Liquid SVG Morphing Mask (NEW 18) */
-    .trans-liquid-mask .moment-hero {
-      /* We use SVG path as clip-path mask to simulate the morphing edge */
-      clip-path: url(#liquid-clip);
+    /* 6. Brezza Marina (7B - Maschera Ondulata Soft) */
+    .trans-mask-brezza .moment-hero {
+      clip-path: url(#clip-brezza);
     }
+
+    /* 7. Diagonale Ondulata (7C) */
+    .trans-mask-diagonale .moment-hero {
+      clip-path: url(#clip-diag-onda);
+    }
+
+    /* 8. Flusso Doppio Strato (7D) */
+    .trans-mask-doppio .moment-hero {
+      clip-path: url(#clip-doppio);
+    }
+    .double-wave-bg {
+      display: none;
+    }
+    .trans-mask-doppio .double-wave-bg {
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -6px;
+      height: 40px;
+      z-index: 8;
+      background: color-mix(in srgb, var(--primary) 20%, transparent);
+      clip-path: url(#clip-doppio-bg);
+    }
+
     .liquid-svg-container {
       position: absolute;
       width: 0;
@@ -261,6 +249,7 @@
 </head>
 <body>
 
+  <!-- The Simulator -->
   <div class="phone-simulator" id="simulator" onscroll="handleScroll(this)">
 
     <!-- Controller visible to the user -->
@@ -271,33 +260,34 @@
         <button class="btn-opt" onclick="setTransition('diagonale')">2. Diagonale Inclinata ✓</button>
         <button class="btn-opt" onclick="setTransition('wave')">3. Curva Diagonale ✓</button>
         <button class="btn-opt" onclick="setTransition('scroll-fade')">4. Scroll Fade & Blur (Prova a Scorrere!)</button>
-        <button class="btn-opt" onclick="setTransition('glass-frost')">5. Dissolvenza Vetro Satinato</button>
-        <button class="btn-opt" onclick="setTransition('color-bleed')">6. Color Bleed Acquerello</button>
-        <button class="btn-opt" onclick="setTransition('liquid-mask')">7. Maschera Liquida</button>
+        <button class="btn-opt" onclick="setTransition('color-bleed')">5. Color Bleed (Coordinato)</button>
+        <button class="btn-opt" onclick="setTransition('mask-brezza')">6. Maschera "Brezza Marina"</button>
+        <button class="btn-opt" onclick="setTransition('mask-diagonale')">7. Diagonale Ondulata</button>
+        <button class="btn-opt" onclick="setTransition('mask-doppio')">8. Flusso Doppio Strato</button>
       </div>
     </div>
 
     <!-- Wrapper to house the Hero height -->
     <div class="moment-hero-wrapper">
-      <header class="moment-hero">
+      <header class="moment-hero" id="heroEl">
         <div class="moment-hero-overlay"></div>
         <div class="moment-hero-content">
           <h1>Giappone 2026</h1>
           <p>Un diario di viaggio immersivo</p>
         </div>
 
-        <!-- Glass overlay for transition 5 -->
-        <div class="glass-frost-overlay"></div>
-        
-        <!-- Color bleed overlay for transition 6 -->
+        <!-- Color bleed overlay for option 5 -->
         <div class="color-bleed-overlay"></div>
+
+        <!-- Background wave for option 8 -->
+        <div class="double-wave-bg"></div>
       </header>
     </div>
 
     <!-- Page Content -->
     <section class="moment-content">
-      <div style="text-align: center; color: #64748b; font-size: 0.8rem; margin: -10px 0 10px 0; display: none;" id="scroll-hint">
-        👇 SCORRI IN BASSO PER PROVARE LO SCROLL FADE & BLUR! 👇
+      <div style="text-align: center; color: #38bdf8; font-size: 0.82rem; margin: -10px 0 10px 0; display: none; font-weight: bold; background: rgba(56, 189, 248, 0.1); padding: 8px; border-radius: 8px;" id="scroll-hint">
+        👇 SCORRI IL DIARIO PER VEDERE LA SFOCATURA DISSOLVERSI! 👇
       </div>
 
       <div class="moment-card">
@@ -320,20 +310,65 @@
 
   </div>
 
-  <!-- SVG Definition for Liquid Mask (Option 7) -->
+  <!-- SVG Definition for Organic Masks -->
   <svg class="liquid-svg-container">
     <defs>
-      <!-- We define a clipPath using absolute coordinates or relative ones (using clipPathUnits) -->
-      <clipPath id="liquid-clip" clipPathUnits="objectBoundingBox">
-        <path d="M0,0 L1,0 L1,0.92 C0.85,0.96 0.7,0.89 0.5,0.94 C0.3,0.99 0.15,0.94 0,0.96 Z">
+      <!-- 7B: Brezza Marina (Very subtle, flat organic ripples) -->
+      <clipPath id="clip-brezza" clipPathUnits="objectBoundingBox">
+        <path d="M0,0 L1,0 L1,0.96 C0.85,0.97 0.7,0.95 0.5,0.97 C0.3,0.99 0.15,0.96 0,0.97 Z">
+          <animate 
+            attributeName="d" 
+            dur="8s" 
+            repeatCount="indefinite"
+            values="
+              M0,0 L1,0 L1,0.96 C0.85,0.97 0.7,0.95 0.5,0.97 C0.3,0.99 0.15,0.96 0,0.97 Z;
+              M0,0 L1,0 L1,0.97 C0.8,0.96 0.65,0.98 0.5,0.96 C0.35,0.94 0.2,0.97 0,0.96 Z;
+              M0,0 L1,0 L1,0.96 C0.85,0.97 0.7,0.95 0.5,0.97 C0.3,0.99 0.15,0.96 0,0.97 Z
+            " />
+        </path>
+      </clipPath>
+
+      <!-- 7C: Diagonale Ondulata (Slanted layout waving slightly) -->
+      <clipPath id="clip-diag-onda" clipPathUnits="objectBoundingBox">
+        <path d="M0,0 L1,0 L1,0.90 C0.8,0.92 0.5,0.95 0,0.97 Z">
+          <animate 
+            attributeName="d" 
+            dur="10s" 
+            repeatCount="indefinite"
+            values="
+              M0,0 L1,0 L1,0.90 C0.8,0.92 0.5,0.95 0,0.97 Z;
+              M0,0 L1,0 L1,0.88 C0.83,0.94 0.45,0.91 0,0.99 Z;
+              M0,0 L1,0 L1,0.90 C0.8,0.92 0.5,0.95 0,0.97 Z
+            " />
+        </path>
+      </clipPath>
+
+      <!-- 7D: Flusso Doppio Strato (Foreground Wave) -->
+      <clipPath id="clip-doppio" clipPathUnits="objectBoundingBox">
+        <path d="M0,0 L1,0 L1,0.94 C0.85,0.96 0.65,0.92 0.5,0.95 C0.35,0.98 0.15,0.93 0,0.95 Z">
           <animate 
             attributeName="d" 
             dur="6s" 
             repeatCount="indefinite"
             values="
-              M0,0 L1,0 L1,0.92 C0.85,0.96 0.7,0.89 0.5,0.94 C0.3,0.99 0.15,0.94 0,0.96 Z;
-              M0,0 L1,0 L1,0.94 C0.8,0.91 0.65,0.97 0.5,0.92 C0.35,0.87 0.2,0.95 0,0.93 Z;
-              M0,0 L1,0 L1,0.92 C0.85,0.96 0.7,0.89 0.5,0.94 C0.3,0.99 0.15,0.94 0,0.96 Z
+              M0,0 L1,0 L1,0.94 C0.85,0.96 0.65,0.92 0.5,0.95 C0.35,0.98 0.15,0.93 0,0.95 Z;
+              M0,0 L1,0 L1,0.96 C0.8,0.93 0.7,0.96 0.5,0.93 C0.3,0.91 0.2,0.96 0,0.94 Z;
+              M0,0 L1,0 L1,0.94 C0.85,0.96 0.65,0.92 0.5,0.95 C0.35,0.98 0.15,0.93 0,0.95 Z
+            " />
+        </path>
+      </clipPath>
+
+      <!-- 7D: Flusso Doppio Strato (Background Wave) -->
+      <clipPath id="clip-doppio-bg" clipPathUnits="objectBoundingBox">
+        <path d="M0,0 L1,0 L1,0.92 C0.75,0.95 0.6,0.90 0.45,0.93 C0.3,0.96 0.15,0.91 0,0.93 Z">
+          <animate 
+            attributeName="d" 
+            dur="9s" 
+            repeatCount="indefinite"
+            values="
+              M0,0 L1,0 L1,0.92 C0.75,0.95 0.6,0.90 0.45,0.93 C0.3,0.96 0.15,0.91 0,0.93 Z;
+              M0,0 L1,0 L1,0.94 C0.85,0.92 0.55,0.95 0.4,0.91 C0.25,0.88 0.1,0.94 0,0.92 Z;
+              M0,0 L1,0 L1,0.92 C0.75,0.95 0.6,0.90 0.45,0.93 C0.3,0.96 0.15,0.91 0,0.93 Z
             " />
         </path>
       </clipPath>
@@ -341,9 +376,18 @@
   </svg>
 
   <script>
+    let activeTransition = 'scroll-fade';
+
     function setTransition(type) {
+      activeTransition = type;
       const sim = document.getElementById('simulator');
+      const hero = document.getElementById('heroEl');
       
+      // Reset simulated inline styles on transition switch
+      hero.style.opacity = "";
+      hero.style.filter = "";
+      hero.style.transform = "";
+
       // Keep simulator base class, but replace the transition class
       sim.className = 'phone-simulator';
       sim.classList.add('trans-' + type);
@@ -367,12 +411,19 @@
     }
 
     function handleScroll(element) {
-      // Toggle class if scrolled down, to simulate scroll timeline trigger
-      if (element.scrollTop > 50) {
-        element.classList.add('scrolled-down');
-      } else {
-        element.classList.remove('scrolled-down');
-      }
+      if (activeTransition !== 'scroll-fade') return;
+
+      const scrollTop = element.scrollTop;
+      const hero = document.getElementById('heroEl');
+      
+      // Calculate real-time percentage progress
+      const maxScroll = 240; // Pixels until completely faded
+      const progress = Math.min(scrollTop / maxScroll, 1);
+
+      // Realtime interactive blur & fade calculation (2026-standard)
+      hero.style.opacity = 1 - progress * 0.85;
+      hero.style.filter = `blur(${progress * 14}px)`;
+      hero.style.transform = `translateY(${progress * -35}px) scale(${1 + progress * 0.06})`;
     }
 
     // Set default transition style

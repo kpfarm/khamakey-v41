@@ -27,6 +27,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - **Moduli Postcard per RSVP e Guestbook**: RSVP e Guestbook ricreati graficamente come cartoline postali vintage con uno sfondo lino, campi a righe sottili e un francobollo illustrato con timbro datato nell'angolo in alto a destra.
   - **Icone SVG e Sfondo Pastello**: Sfondo sfumato pastello desaturato e morbido unito ad icone outline vettoriali animate (bussola, fotocamera, cartolina) per i titoli delle sezioni. Rimosso ogni riferimento o menu in stile commerciale.
   - **Riprogettazione Palette Colore Globali**: Ridisegnati i codici esadecimali di tutte le 18 palette colore dell'editor in `pages/moment-themes.js` e `worker/worker.js` (es. terracotta, salvia, amore, corallo, miele, lavanda) sostituendo i colori HTML primari e saturi con tonalità polverose, eleganti e moderne per il 2026.
+  - **Overhaul completo template Amore (Template 3 - Ethereal/Emotivo)**: Introdotto uno sfondo romantico sognante con sfocature e nuvole di colore fluttuanti (`radial-gradient`), card in vetro satinato (`backdrop-filter`) con ombreggiature coordinate e icone outline SVG a tema amore (cuori, anelli, dediche).
+  - **Rimozione globale delle emoji mobili sullo sfondo**: Nascondiglio definitivo via CSS (`display: none!important`) delle emoji volanti (scintille, stelline, cuoricini) da tutte le pagine Moments per garantire un design pulito e professionale.
 
 ### Changed
 - **Costo API OpenAI ridotto ~90% (2026-07-12, Claude Code)** — deployato (Worker v124)

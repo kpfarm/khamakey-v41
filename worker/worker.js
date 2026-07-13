@@ -1526,8 +1526,8 @@ body.nav-open{overflow:hidden}
 .moment-nav-sheet a{display:flex;align-items:center;min-height:44px;padding:0 14px;border-radius:12px;font-family:${f.ui};font-size:.86rem;font-weight:600;color:${c.ink};text-decoration:none;background:transparent;border:0;transition:background .15s,color .15s}
 .moment-nav-sheet a.active,.moment-nav-sheet a:hover{background:${c.cardSoft};color:${c.ink}}
 @media(min-width:760px){.moment-nav-links{display:flex}.moment-nav-burger{display:none}.moment-nav-brand{max-width:160px}.moment-nav-sheet{display:none}.moment-nav-backdrop{display:none}}
-.moment-decor{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
-.moment-decor-item{position:absolute;font-size:clamp(.95rem,2.8vw,1.35rem);opacity:.08;animation:momentDecorFloat linear infinite;filter:drop-shadow(0 2px 6px rgba(0,0,0,.08))}
+.moment-decor{display:none!important}
+.moment-decor-item{display:none!important}
 @keyframes momentDecorFloat{0%,100%{transform:translate3d(0,0,0) rotate(0deg)}50%{transform:translate3d(0,-12px,0) rotate(6deg)}}
 .moment-page{width:100%;max-width:100%;min-height:100dvh;margin:0;background:transparent;overflow-x:clip;position:relative}
 .moment-hero{position:relative;min-height:min(94dvh,760px);padding:max(120px,env(safe-area-inset-top) + 40px) 24px max(80px,env(safe-area-inset-bottom));text-align:center;color:#fff;background:linear-gradient(145deg,${c.hero},${c.go});overflow:hidden;display:grid;align-content:end}
@@ -1843,36 +1843,193 @@ body.nav-open{overflow:hidden}
 
 /* ==================== CATEGORY TEMPLATE OVERRIDES ==================== */
 
-/* 1. WEDDING / LOVE / ANNIVERSARY: Classico ed elegante */
-.moment-type-wedding .moment-card,
+/* 1. WEDDING / LOVE / ANNIVERSARY: Ethereal & Emotional Layout (Template 3) */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Great+Vibes&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+
+main.moment-type-love,
+main.moment-type-wedding,
+main.moment-type-anniversary {
+  background: 
+    radial-gradient(circle at 12% 24%, color-mix(in srgb, ${colors.go} 9%, transparent) 0%, transparent 45%),
+    radial-gradient(circle at 88% 76%, color-mix(in srgb, ${colors.go} 13%, transparent) 0%, transparent 52%),
+    linear-gradient(180deg, ${colors.surface} 0%, ${colors.bl} 100%) !important;
+  padding-bottom: 80px !important;
+}
+
+.moment-type-love, .moment-type-love *,
+.moment-type-wedding, .moment-type-wedding *,
+.moment-type-anniversary, .moment-type-anniversary * {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Hero Section: Keep title white for contrast, set Playfair Display font */
+.moment-type-love .moment-hero h1,
+.moment-type-wedding .moment-hero h1,
+.moment-type-anniversary .moment-hero h1 {
+  font-family: 'Playfair Display', serif !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  text-shadow: 0 4px 24px rgba(10,10,20,0.5) !important;
+}
+
+/* Glassmorphism Cards: White transluscent background with blurry ambient glows */
 .moment-type-love .moment-card,
-.moment-type-anniversary .moment-card,
-.moment-type-wedding .moment-counter,
 .moment-type-love .moment-counter,
-.moment-type-wedding .moment-countdown,
 .moment-type-love .moment-countdown,
-.moment-type-wedding .moment-quote-wrap,
 .moment-type-love .moment-quote-wrap,
+.moment-type-love .moment-signature,
+.moment-type-wedding .moment-card,
+.moment-type-wedding .moment-counter,
+.moment-type-wedding .moment-countdown,
+.moment-type-wedding .moment-quote-wrap,
 .moment-type-wedding .moment-signature,
-.moment-type-love .moment-signature {
-  border: 1px solid ${c.lineStrong}!important;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.7), 0 16px 36px -12px rgba(17,32,65,.08), inset 0 1px 0 rgba(255,255,255,.9)!important;
+.moment-type-anniversary .moment-card,
+.moment-type-anniversary .moment-counter,
+.moment-type-anniversary .moment-countdown,
+.moment-type-anniversary .moment-quote-wrap,
+.moment-type-anniversary .moment-signature {
+  background: rgba(255, 255, 255, 0.76) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 32px !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 
+    0 24px 60px -18px color-mix(in srgb, ${colors.go} 8%, rgba(0,0,0,0.03)),
+    inset 0 1px 0 rgba(255,255,255,0.95) !important;
+  padding: 44px 28px !important;
+  margin-bottom: 40px !important;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease !important;
 }
-.moment-type-wedding .moment-letter,
+
+.moment-type-love .moment-card:hover,
+.moment-type-wedding .moment-card:hover,
+.moment-type-anniversary .moment-card:hover {
+  transform: translateY(-4px) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 
+    0 35px 70px -12px color-mix(in srgb, ${colors.go} 14%, rgba(0,0,0,0.04)) !important;
+}
+
+.moment-type-love .moment-card-title,
+.moment-type-wedding .moment-card-title,
+.moment-type-anniversary .moment-card-title {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 1.4rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  letter-spacing: 0.02em !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  margin-bottom: 24px !important;
+}
+
+.moment-type-love .moment-card-title::after,
+.moment-type-wedding .moment-card-title::after,
+.moment-type-anniversary .moment-card-title::after {
+  content: "" !important;
+  flex-grow: 1 !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, color-mix(in srgb, ${colors.go} 25%, transparent), transparent) !important;
+}
+
+/* Elegant Postcard Stamp for Love Icons */
+.moment-type-love .moment-card-head .moment-card-icon,
+.moment-type-love .moment-card-icon,
+.moment-type-wedding .moment-card-head .moment-card-icon,
+.moment-type-wedding .moment-card-icon,
+.moment-type-anniversary .moment-card-head .moment-card-icon,
+.moment-type-anniversary .moment-card-icon {
+  background: color-mix(in srgb, ${colors.go} 6%, transparent) !important;
+  border: 1px solid color-mix(in srgb, ${colors.go} 16%, transparent) !important;
+  color: ${colors.go} !important;
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  box-shadow: 0 4px 12px color-mix(in srgb, ${colors.go} 8%, transparent) !important;
+  transform: none !important;
+}
+
+.moment-type-love .love-icon-svg,
+.moment-type-wedding .love-icon-svg,
+.moment-type-anniversary .love-icon-svg {
+  width: 20px !important;
+  height: 20px !important;
+  stroke: ${colors.go} !important;
+  stroke-width: 2px !important;
+  display: block !important;
+  animation: floatingLoveIcon 3s ease-in-out infinite alternate !important;
+}
+
+@keyframes floatingLoveIcon {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-3px) scale(1.05); }
+}
+
+/* Dedication Letter Overhaul */
 .moment-type-love .moment-letter,
+.moment-type-wedding .moment-letter,
 .moment-type-anniversary .moment-letter {
-  background: rgba(255, 248, 248, 0.88)!important;
-  border-radius: 20px!important;
-  border: 1px solid rgba(255, 182, 193, 0.4)!important;
-  border-left: 4px solid ${c.go}!important;
-  padding: 28px 24px!important;
+  background: rgba(255, 255, 255, 0.45) !important;
+  border-radius: 24px !important;
+  border: 1px solid color-mix(in srgb, ${colors.go} 10%, transparent) !important;
+  border-left: 4px solid ${colors.go} !important;
+  padding: 32px 28px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  font-family: 'Playfair Display', serif !important;
+  font-size: 1.12rem !important;
+  line-height: 1.75 !important;
+  font-style: italic !important;
+  color: #334155 !important;
 }
+
+.moment-type-love .moment-letter-heart,
 .moment-type-wedding .moment-letter-heart,
-.moment-type-love .moment-letter-heart {
-  color: ${c.go}!important;
-  opacity: 0.22!important;
-  transform: scale(1.3);
+.moment-type-anniversary .moment-letter-heart {
+  color: ${colors.go} !important;
+  opacity: 0.07 !important;
+  font-size: 8rem !important;
+  position: absolute !important;
+  bottom: -20px !important;
+  right: -10px !important;
+  pointer-events: none !important;
+  transform: none !important;
 }
+
+/* Pulsing Rounded Buttons */
+.moment-type-love .moment-rsvp-submit,
+.moment-type-love .moment-guestbook-submit,
+.moment-type-wedding .moment-rsvp-submit,
+.moment-type-wedding .moment-guestbook-submit,
+.moment-type-anniversary .moment-rsvp-submit,
+.moment-type-anniversary .moment-guestbook-submit {
+  background: ${colors.go} !important;
+  color: #ffffff !important;
+  border-radius: 999px !important;
+  padding: 16px 36px !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  border: none !important;
+  cursor: pointer !important;
+  box-shadow: 0 10px 30px color-mix(in srgb, ${colors.go} 30%, transparent) !important;
+  transition: all 0.3s ease !important;
+}
+
+.moment-type-love .moment-rsvp-submit:hover,
+.moment-type-love .moment-guestbook-submit:hover,
+.moment-type-wedding .moment-rsvp-submit:hover,
+.moment-type-wedding .moment-guestbook-submit:hover,
+.moment-type-anniversary .moment-rsvp-submit:hover,
+.moment-type-anniversary .moment-guestbook-submit:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 15px 35px color-mix(in srgb, ${colors.go} 45%, transparent) !important;
+}
+
 
 /* 2. TRAVEL & ADVENTURE: Immersive 2026 Design Overhaul */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;600;700&family=Special+Elite&family=Caveat:wght@600&display=swap');
@@ -2538,6 +2695,22 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     };
     if (travelSvgs[key]) {
       icon = travelSvgs[key];
+    }
+  } else if (momentType === "love" || momentType === "anniversary" || momentType === "wedding") {
+    const loveSvgs = {
+      intro: `<svg class="love-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
+      dedication: `<svg class="love-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2H2v20h20V2z"/><path d="M22 2L12 13 2 2"/></svg>`,
+      timeline: `<svg class="love-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`,
+      rsvp: `<svg class="love-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`,
+      guestbook: `<svg class="love-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`,
+      gallery: `<svg class="love-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`,
+      promises: `<svg class="love-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="6"/><path d="M12 8V2l4 2-4 2z"/></svg>`,
+      dreams: `<svg class="love-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+      countdown: `<svg class="love-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+      music: `<svg class="love-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`
+    };
+    if (loveSvgs[key]) {
+      icon = loveSvgs[key];
     }
   }
   const head = (title) => `<div class="moment-card-head"><span class="moment-card-icon">${icon}</span><strong>${escapeHtml(title || "Sezione")}</strong></div>`;

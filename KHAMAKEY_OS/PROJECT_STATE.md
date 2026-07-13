@@ -81,7 +81,7 @@ Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_lead
 | **Admin** | **v125** | Menu 4 intenti, CRM operativo, provvigioni con approva/paga/annulla |
 | **Editor Business** | **v117** | Analytics affidabili (RPC v74), order_sent, consenso cookie click |
 | **Moments editor** | v110+ | Dashboard organizzatore — **agente dedicato** |
-| **Worker NFC** | **v125** | Deployato — Overhaul completo template Viaggi 2026 (Travel Story Landing Page, icone SVG animate, sfondo pastello) e riprogettazione delle 18 palette colore globali dell'editor con toni eleganti e moderni. |
+| **Worker NFC** | **v125** | Deployato — Overhaul completo template Viaggi (Travel Story) ed Amore (Ethereal Glassmorphism, cuori ed icone SVG animate, sfocature fluttuanti di sfondo), rimozione emoji mobili e riprogettazione palette colore globali. |
 | **SQL Supabase** | **v88 (preparata, da applicare)** | v75-v83 security, v84 CRM, v85 trigger provvigioni ordini, v86 portale rivenditori, v87 hardening accesso agente solo via `member_id`, v88 claim sicuro primo accesso rivenditore |
 | **Prossima release Business** | **v118** | `editor.html` + `index.html` `?v=` + `buildPublicSnapshot().version` |
 

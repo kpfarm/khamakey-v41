@@ -1,6 +1,6 @@
 # 19 — Piano Admin Console Operativa
 
-> Data: 2026-07-14.  
+> Data: 2026-07-14.
 > Obiettivo: trasformare il pannello Admin da insieme di sezioni cablate a console operativa quotidiana per vendita, produzione, supporto, CRM, ordini, magazzino e rete partner.
 
 ---

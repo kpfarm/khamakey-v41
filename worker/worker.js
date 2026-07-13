@@ -1879,8 +1879,8 @@ body.nav-open{overflow:hidden}
 
 main.moment-type-travel {
   background: 
-    radial-gradient(rgba(178, 59, 24, 0.05) 1.5px, transparent 1.5px) 0 0 / 24px 24px,
-    linear-gradient(180deg, #f8f4eb 0%, #e8dec9 100%) !important;
+    radial-gradient(color-mix(in srgb, ${colors.go} 6%, transparent) 1.5px, transparent 1.5px) 0 0 / 24px 24px,
+    linear-gradient(180deg, ${colors.surface} 0%, ${colors.bl} 100%) !important;
   padding-bottom: 80px !important;
 }
 
@@ -2010,7 +2010,7 @@ main.moment-type-travel {
   content: "" !important;
   flex-grow: 1 !important;
   height: 1px !important;
-  background: linear-gradient(90deg, rgba(178, 59, 24, 0.2), transparent) !important;
+  background: linear-gradient(90deg, color-mix(in srgb, ${colors.go} 20%, transparent), transparent) !important;
 }
 
 /* Timeline as Spacious Chapters */
@@ -2065,12 +2065,12 @@ main.moment-type-travel {
 .moment-type-travel .moment-journey-date {
   font-family: 'Special Elite', monospace !important;
   font-size: 0.85rem !important;
-  color: #b23b18 !important;
-  background: rgba(178, 59, 24, 0.05) !important;
+  color: ${colors.go} !important;
+  background: color-mix(in srgb, ${colors.go} 6%, transparent) !important;
   padding: 4px 12px !important;
   border-radius: 6px !important;
   align-self: flex-start !important;
-  border: 1px solid rgba(178, 59, 24, 0.08) !important;
+  border: 1px solid color-mix(in srgb, ${colors.go} 12%, transparent) !important;
 }
 
 .moment-type-travel .moment-journey-text {
@@ -2090,8 +2090,8 @@ main.moment-type-travel {
 .moment-type-travel .moment-card-head .moment-card-icon,
 .moment-type-travel .moment-card-icon {
   background: transparent !important;
-  border: 2px dashed rgba(178, 59, 24, 0.4) !important;
-  color: rgba(178, 59, 24, 0.75) !important;
+  border: 2px dashed color-mix(in srgb, ${colors.go} 40%, transparent) !important;
+  color: color-mix(in srgb, ${colors.go} 75%, transparent) !important;
   width: 50px !important;
   height: 50px !important;
   border-radius: 50% !important;
@@ -2104,14 +2104,14 @@ main.moment-type-travel {
 .moment-type-travel .travel-icon-svg {
   width: 22px !important;
   height: 22px !important;
-  stroke: #b23b18 !important;
+  stroke: ${colors.go} !important;
   stroke-width: 2px !important;
   display: block !important;
   animation: floatingIcon 3s ease-in-out infinite alternate !important;
 }
 
 .moment-type-travel .moment-card:hover .travel-icon-svg {
-  stroke: #962f12 !important;
+  stroke: color-mix(in srgb, ${colors.go} 85%, #000) !important;
 }
 
 @keyframes floatingIcon {
@@ -2123,27 +2123,30 @@ main.moment-type-travel {
 .moment-type-travel .moment-rsvp,
 .moment-type-travel .moment-guestbook {
   position: relative !important;
-  background: #fdfaf4 !important;
-  border: 1px solid rgba(139, 69, 19, 0.08) !important;
+  background: color-mix(in srgb, ${colors.surface} 40%, #ffffff) !important;
+  border: 1px solid color-mix(in srgb, ${colors.go} 8%, transparent) !important;
   box-shadow: 0 20px 48px -10px rgba(139, 69, 19, 0.06) !important;
 }
 
 .moment-type-travel .moment-rsvp::after,
 .moment-type-travel .moment-guestbook::after {
-  content: "" !important;
+  content: "⛵" !important;
   position: absolute !important;
   top: 32px !important;
   right: 32px !important;
   width: 60px !important;
   height: 75px !important;
   background: 
-    repeating-radial-gradient(circle, #e6dec9 0, #e6dec9 4px, transparent 4px, transparent 8px),
-    linear-gradient(135deg, #ede6da, #dfd5c2) !important;
-  border: 2px dashed #b23b18 !important;
+    repeating-radial-gradient(circle, color-mix(in srgb, ${colors.go} 10%, transparent) 0, color-mix(in srgb, ${colors.go} 10%, transparent) 4px, transparent 4px, transparent 8px),
+    linear-gradient(135deg, ${colors.surface}, ${colors.bl}) !important;
+  border: 2px dashed ${colors.go} !important;
   border-radius: 4px !important;
-  opacity: 0.65 !important;
+  opacity: 0.8 !important;
   transform: rotate(6deg) !important;
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 2rem !important;
   box-shadow: 0 4px 10px rgba(0,0,0,0.03) !important;
   z-index: 2 !important;
 }
@@ -2156,7 +2159,7 @@ main.moment-type-travel {
   width: 100% !important;
   background: transparent !important;
   border: none !important;
-  border-bottom: 1.5px solid rgba(139, 69, 19, 0.18) !important;
+  border-bottom: 1.5px solid color-mix(in srgb, ${colors.go} 20%, transparent) !important;
   border-radius: 0 !important;
   padding: 8px 0 !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
@@ -2169,7 +2172,7 @@ main.moment-type-travel {
 .moment-type-travel .moment-rsvp-form textarea:focus,
 .moment-type-travel .moment-guestbook-form input[type="text"]:focus,
 .moment-type-travel .moment-guestbook-form textarea:focus {
-  border-bottom-color: #b23b18 !important;
+  border-bottom-color: ${colors.go} !important;
   outline: none !important;
 }
 
@@ -2190,9 +2193,9 @@ main.moment-type-travel {
 /* Boarding Pass stamp style RSVP / Guestbook submit buttons */
 .moment-type-travel .moment-rsvp-submit,
 .moment-type-travel .moment-guestbook-submit {
-  background: #b23b18 !important;
+  background: ${colors.go} !important;
   color: #ffffff !important;
-  box-shadow: 0 10px 24px -4px rgba(178, 59, 24, 0.3) !important;
+  box-shadow: 0 10px 24px -4px color-mix(in srgb, ${colors.go} 30%, transparent) !important;
   border-radius: 12px !important;
   padding: 16px 24px !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
@@ -2208,9 +2211,9 @@ main.moment-type-travel {
 
 .moment-type-travel .moment-rsvp-submit:hover,
 .moment-type-travel .moment-guestbook-submit:hover {
-  background: #962f12 !important;
+  background: color-mix(in srgb, ${colors.go} 80%, #000) !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 14px 28px -2px rgba(178, 59, 24, 0.4) !important;
+  box-shadow: 0 14px 28px -2px color-mix(in srgb, ${colors.go} 40%, transparent) !important;
 }
 
 /* Widescreen Asymmetric Gallery */
@@ -2262,15 +2265,15 @@ main.moment-type-travel {
   justify-content: space-between !important;
   align-items: center !important;
   padding: 20px 24px !important;
-  background: #fdfaf4 !important;
+  background: color-mix(in srgb, ${colors.surface} 30%, #ffffff) !important;
   border-radius: 18px !important;
-  border: 1px solid rgba(139, 69, 19, 0.06) !important;
+  border: 1px solid color-mix(in srgb, ${colors.go} 6%, transparent) !important;
   transition: all 0.25s ease !important;
 }
 
 .moment-type-travel .moment-dream:hover {
   background: #ffffff !important;
-  border-color: rgba(178, 59, 24, 0.15) !important;
+  border-color: color-mix(in srgb, ${colors.go} 15%, transparent) !important;
   transform: translateX(6px) !important;
 }
 
@@ -2302,9 +2305,9 @@ main.moment-type-travel {
 }
 
 .moment-type-travel .moment-dream.done .moment-dream-mark {
-  background: #b23b18 !important;
+  background: ${colors.go} !important;
   color: #ffffff !important;
-  border-color: #b23b18 !important;
+  border-color: ${colors.go} !important;
   transform: scale(1.08) !important;
 }
 

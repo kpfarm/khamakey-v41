@@ -109,7 +109,7 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 - [x] SQL v61: `sold_channel`, allocazione codici Moments a agenti
 - [x] SQL v68: rete agenti a grado (L1/L2/L3), listini B2B, storico consegne, admin Rete rivenditori
 - [x] Hook provvigioni multilivello su ordini Shopify/Stripe/admin (SQL v85 + Admin v125)
-- [ ] Portale self-service rivenditori (`reseller.html`)
+- [x] Portale self-service rivenditori (`reseller.html`) — provvigioni/rete/consegne per agente (SQL v86, RPC solo-i-miei-dati)
 - [ ] Hub spedizioni centralizzato con automazione corriere
 - [ ] Supporto unificato + CRM Moments
 

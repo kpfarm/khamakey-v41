@@ -10,7 +10,15 @@
   --red:#D92D20;
 }
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text)}
+html,body{
+  margin:0;
+  min-height:100%;
+  font-family:"DM Sans",sans-serif;
+  background: radial-gradient(circle at 10% 10%, rgba(77, 184, 232, 0.04) 0%, transparent 40%),
+              radial-gradient(circle at 90% 90%, rgba(76, 175, 39, 0.04) 0%, transparent 40%),
+              var(--bg);
+  color:var(--text);
+}
 button,a{font:inherit}
 button{cursor:pointer}
 .admin-shell{min-height:100dvh;display:grid;grid-template-columns:260px 1fr}
@@ -34,8 +42,19 @@ button{cursor:pointer}
 .eyebrow{margin:0 0 4px;font-size:.68rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--green)}
 h1{font-family:"Syne",sans-serif;margin:0;color:var(--navy);font-size:1.7rem}
 .admin-user{display:flex;align-items:center;gap:10px;font-size:.78rem;color:var(--muted)}
-.admin-user button,.ghost-link{border:1px solid var(--border);background:white;color:var(--navy);border-radius:9px;padding:9px 11px;text-decoration:none;font-weight:900}
-.gate-card{max-width:520px;margin:80px auto;background:white;border:1px solid var(--border);border-radius:18px;padding:28px;text-align:center;box-shadow:0 18px 60px rgba(27,42,94,.1)}
+.admin-user button,.ghost-link{border:1px solid var(--border);background:white;color:var(--navy);border-radius:99px;padding:9px 11px;text-decoration:none;font-weight:900}
+.gate-card{
+  max-width:520px;
+  margin:80px auto;
+  background:rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:28px;
+  text-align:center;
+  box-shadow:0 24px 70px -15px rgba(27, 42, 94, 0.12) !important;
+}
 .gate-card img{width:190px;max-width:80%;margin-bottom:18px}
 .gate-card h2{font-family:"Syne",sans-serif;color:var(--navy);margin:0 0 8px}
 .gate-card p{color:var(--muted);line-height:1.5;margin:0}
@@ -43,11 +62,47 @@ h1{font-family:"Syne",sans-serif;margin:0;color:var(--navy);font-size:1.7rem}
 .gate-actions a{display:inline-flex;background:var(--green);color:white;text-decoration:none;border-radius:10px;padding:11px 14px;font-weight:900}
 .admin-login-form{display:grid;gap:12px;margin:20px 0 0;text-align:left}
 .admin-login-form label{display:grid;gap:6px;font-size:.76rem;font-weight:900;color:var(--navy)}
-.admin-login-form input{width:100%;border:1px solid var(--border);border-radius:10px;background:white;color:var(--text);padding:11px 12px;font:inherit;font-size:.9rem}
+.admin-login-form input{
+  width:100%;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  background:var(--surface);
+  color:var(--text);
+  padding:11px 12px;
+  font:inherit;
+  font-size:.9rem;
+  transition:border-color 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease;
+  outline:none;
+}
+.admin-login-form input:focus {
+  border-color:var(--green);
+  background-color:#ffffff;
+  box-shadow:0 0 0 4px rgba(76,175,39,0.15);
+}
 .admin-login-form .primary-action{width:100%;justify-content:center}
 .ghost-button{border:1px solid var(--border);background:white;color:var(--navy);border-radius:10px;padding:10px 12px;font-weight:900}
 .metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
-.metric-grid article,.admin-card{background:white;border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(27,42,94,.06)}
+.metric-grid article,
+.admin-card,
+.inventory-stat-card,
+.admin-details,
+.admin-workflow-steps li {
+  background:rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:0 4px 18px -4px rgba(27,42,94,0.04) !important;
+  transition:transform 0.22s ease, box-shadow 0.22s ease;
+}
+.metric-grid article:hover,
+.admin-card:hover,
+.inventory-stat-card:hover,
+.admin-details:hover,
+.admin-workflow-steps li:hover {
+  box-shadow:0 12px 28px -6px rgba(27,42,94,0.07) !important;
+  transform:translateY(-2px);
+}
 .metric-grid article{padding:18px}
 .metric-grid strong{display:block;font-family:"Syne",sans-serif;font-size:2rem;color:var(--navy)}
 .metric-grid span{font-size:.78rem;color:var(--muted);font-weight:800}
@@ -294,3 +349,44 @@ textarea{width:100%;border:1px solid var(--border);border-radius:10px;background
 .crm-follow-due{color:#B42318;font-weight:800}
 
 .status-pill.approved{background:#EFF8FF;color:#175CD3}
+
+/* Focus morbidi per input form e filtri admin */
+.admin-form input,
+.admin-form select,
+.inventory-search input,
+.inventory-filters input,
+.inventory-filters select,
+.inline-select {
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease;
+  outline: none;
+}
+.admin-form input:focus,
+.admin-form select:focus,
+.inventory-search input:focus,
+.inventory-filters input:focus,
+.inventory-filters select:focus,
+.inline-select:focus {
+  border-color: var(--green) !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(76, 175, 39, 0.15) !important;
+}
+
+/* Transizioni bottoni primari */
+.primary-action {
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+.primary-action:hover {
+  background: var(--navy);
+  opacity: 0.95;
+}
+.primary-action:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Evidenziatore righe tabelle all'hover */
+tbody tr {
+  transition: background-color 0.15s ease;
+}
+tbody tr:hover td {
+  background-color: var(--soft) !important;
+}

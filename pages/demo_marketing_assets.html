@@ -1,0 +1,1332 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KhamaKey - Visual Marketing Lab</title>
+  <link rel="icon" href="khamakey-favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #1B2A5E;
+      --green: #4CAF27;
+      --green-dark: #246517;
+      --cyan: #4DB8E8;
+      --gold: #D4AF37;
+      --ink: #172036;
+      --muted: #64748B;
+      --border: #DFE6EF;
+      --bg: #F4F7FA;
+      --surface: #FFFFFF;
+      
+      /* Preset Gradients for Social Previews */
+      --gradient-business: linear-gradient(135deg, #1B2A5E 0%, #091024 100%);
+      --gradient-moments: linear-gradient(135deg, #246517 0%, #0E2405 100%);
+      --gradient-love: linear-gradient(135deg, #881337 0%, #1c0209 100%);
+      --gradient-christmas: linear-gradient(135deg, #991B1B 0%, #1E3A1E 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "DM Sans", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 10% 20%, rgba(77, 184, 232, 0.04) 0%, transparent 40%),
+                  radial-gradient(circle at 90% 80%, rgba(76, 175, 39, 0.04) 0%, transparent 40%),
+                  var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Layout structure */
+    header {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-logo {
+      height: 28px;
+      width: auto;
+    }
+
+    .header-badge {
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: white;
+      font-size: 0.64rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 10px;
+      border-radius: 99px;
+    }
+
+    .app-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      min-height: calc(100vh - 61px);
+    }
+
+    /* Sidebar controls */
+    .sidebar {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-right: 1px solid var(--border);
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .sidebar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sidebar-section h3 {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--navy);
+      border-bottom: 1.5px solid var(--border);
+      padding-bottom: 6px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-group label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .control-group input,
+    .control-group textarea,
+    .control-group select {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      background: white;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .control-group input:focus,
+    .control-group textarea:focus,
+    .control-group select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(76, 175, 39, 0.12);
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .preset-btn {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--navy);
+    }
+
+    .preset-btn.active {
+      border-color: var(--green);
+      background: rgba(76, 175, 39, 0.05);
+      color: var(--green-dark);
+    }
+
+    /* Main Area */
+    .main-content {
+      padding: 32px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Tab switcher navigation */
+    .tab-navigation {
+      display: flex;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1.5px solid var(--border);
+      padding: 4px;
+      border-radius: 12px;
+      max-width: fit-content;
+    }
+
+    .tab-btn {
+      border: 0;
+      background: transparent;
+      padding: 10px 18px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--muted);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--navy);
+    }
+
+    .tab-btn.active {
+      background: white;
+      color: var(--navy);
+      box-shadow: 0 4px 12px rgba(27, 42, 94, 0.08);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Visualizer Preview Container */
+    .preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      align-items: flex-start;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      padding: 40px;
+    }
+
+    /* 1. Social Post Previews */
+    .post-square {
+      width: 400px;
+      height: 400px;
+      border-radius: 16px;
+      box-shadow: 0 20px 48px rgba(27, 42, 94, 0.15);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 34px;
+      color: white;
+      text-align: center;
+    }
+
+    .post-vertical {
+      width: 300px;
+      height: 533px;
+      border-radius: 16px;
+      box-shadow: 0 20px 48px rgba(27, 42, 94, 0.15);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 38px 28px;
+      color: white;
+      text-align: center;
+    }
+
+    /* Glowing ambient effects on previews */
+    .post-glow {
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .post-glow-1 {
+      top: -30px;
+      left: -30px;
+      background: var(--cyan);
+    }
+
+    .post-glow-2 {
+      bottom: -30px;
+      right: -30px;
+      background: var(--green);
+    }
+
+    .post-header {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+    }
+
+    .post-badge {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 99px;
+      padding: 6px 12px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+    }
+
+    .post-body {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: auto 0;
+    }
+
+    .post-body h2 {
+      font-family: "Syne", sans-serif;
+      font-size: 2.1rem;
+      line-height: 1.1;
+      font-weight: 800;
+    }
+
+    .post-vertical .post-body h2 {
+      font-size: 1.95rem;
+    }
+
+    .post-body p {
+      font-size: 0.9rem;
+      line-height: 1.45;
+      opacity: 0.9;
+    }
+
+    .post-footer {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .post-cta {
+      background: var(--green);
+      color: white;
+      border-radius: 99px;
+      padding: 9px 22px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      box-shadow: 0 4px 14px rgba(76, 175, 39, 0.3);
+      display: inline-block;
+    }
+
+    .post-watermark {
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      opacity: 0.55;
+    }
+
+    /* 2. Amazon listing mockup */
+    .amazon-layout {
+      width: 100%;
+      max-width: 960px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(27, 42, 94, 0.04);
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      overflow: hidden;
+    }
+
+    .amazon-gallery {
+      background: #FAFAFA;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+
+    /* Visual 3D tags simulation */
+    .physical-tag-container {
+      width: 260px;
+      height: 260px;
+      position: relative;
+      perspective: 800px;
+    }
+
+    .smart-tag-wood {
+      position: absolute;
+      top: 30px;
+      left: 10px;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle at 30% 30%, #e0b080, #805020);
+      border-radius: 50%;
+      box-shadow: -10px 15px 30px rgba(9, 16, 36, 0.3), inset -4px -4px 15px rgba(0,0,0,0.4);
+      transform: rotateY(-20deg) rotateX(10deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #d4af37;
+      transition: all 0.4s ease;
+    }
+
+    .smart-tag-ceramic {
+      position: absolute;
+      top: 30px;
+      left: 10px;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle at 30% 30%, #ffffff, #dcdcdc);
+      border-radius: 50%;
+      box-shadow: -10px 15px 30px rgba(9, 16, 36, 0.2), inset -4px -4px 12px rgba(0,0,0,0.15);
+      transform: rotateY(-20deg) rotateX(10deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid var(--border);
+      transition: all 0.4s ease;
+    }
+
+    .smart-tag-logo {
+      width: 55%;
+      height: auto;
+      opacity: 0.95;
+    }
+
+    .smart-tag-nfc-badge {
+      position: absolute;
+      bottom: -6px;
+      right: 16px;
+      background: #000;
+      color: #9fe870;
+      font-size: 0.58rem;
+      font-weight: 900;
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.15);
+      letter-spacing: 0.05em;
+    }
+
+    /* Smartphone mockup */
+    .smartphone-mockup {
+      position: absolute;
+      bottom: 24px;
+      right: 14px;
+      width: 116px;
+      height: 226px;
+      background: #000;
+      border-radius: 20px;
+      padding: 6px;
+      box-shadow: -8px 12px 35px rgba(27, 42, 94, 0.25);
+      transform: rotateY(15deg) rotateX(5deg);
+    }
+
+    .smartphone-screen {
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 30%, #246517, #091024);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px;
+      color: white;
+      text-align: center;
+    }
+
+    .smartphone-screen strong {
+      font-size: 0.48rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.8;
+      display: block;
+      margin-top: 10px;
+    }
+
+    .smartphone-screen h4 {
+      font-family: "Syne", sans-serif;
+      font-size: 0.72rem;
+      line-height: 1.1;
+      margin-top: auto;
+      margin-bottom: auto;
+    }
+
+    .smartphone-screen span {
+      background: var(--green);
+      font-size: 0.4rem;
+      font-weight: 800;
+      padding: 3px 6px;
+      border-radius: 99px;
+      display: inline-block;
+      margin: 0 auto 10px;
+    }
+
+    .amazon-details-panel {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .amazon-brand-link {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #007185;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .amazon-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+
+    .amazon-price {
+      font-size: 1.85rem;
+      color: #b12704;
+      font-weight: 400;
+    }
+
+    .amazon-bullets {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .amazon-bullet {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 6px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      color: #333;
+    }
+
+    .amazon-bullet svg {
+      width: 18px;
+      height: 18px;
+      color: var(--green);
+      margin-top: 2px;
+    }
+
+    /* 3. Infografica interattiva */
+    .infographic-wrapper {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .infographic-flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      width: 100%;
+    }
+
+    @media (max-width: 900px) {
+      .infographic-flow {
+        grid-template-columns: 1fr;
+      }
+      .amazon-layout {
+        grid-template-columns: 1fr;
+      }
+      .amazon-gallery {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+
+    .infographic-card {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      padding: 30px 24px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 4px 18px -4px rgba(27, 42, 94, 0.04);
+      transition: all 0.25s ease;
+    }
+
+    .infographic-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--green);
+      box-shadow: 0 16px 36px -10px rgba(27, 42, 94, 0.08);
+    }
+
+    .infographic-num {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 32px;
+      height: 32px;
+      background: var(--navy);
+      color: white;
+      font-size: 0.86rem;
+      font-weight: 800;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      border: 2px solid white;
+      box-shadow: 0 4px 10px rgba(27,42,94,0.15);
+    }
+
+    .infographic-icon {
+      font-size: 2.2rem;
+      margin-bottom: 14px;
+      line-height: 1;
+    }
+
+    .infographic-card h3 {
+      font-family: "Syne", sans-serif;
+      font-size: 1rem;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .infographic-card p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* Embedded code block styling */
+    .code-export-box {
+      background: #091024;
+      color: #9fe870;
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.76rem;
+      overflow: auto;
+      max-height: 250px;
+      border: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+    }
+
+    .code-title-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .code-title-bar span {
+      color: rgba(255,255,255,0.55);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .copy-btn {
+      background: rgba(255,255,255,0.08);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255,255,255,0.16);
+      border-color: rgba(255,255,255,0.22);
+    }
+
+    .copy-btn.copied {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    /* 4. Storyboard script manager */
+    .script-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 18px -4px rgba(27, 42, 94, 0.04);
+    }
+
+    .script-table th,
+    .script-table td {
+      padding: 14px 18px;
+      text-align: left;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .script-table th {
+      background: #F8FAFC;
+      color: var(--navy);
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+    }
+
+    .script-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .script-table td strong {
+      color: var(--navy);
+    }
+
+    .script-table .scene-number {
+      font-weight: 800;
+      color: var(--green);
+      font-size: 0.88rem;
+    }
+
+    .script-copy-footer {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <img class="header-logo" src="khamakey-wordmark-dark.png" alt="KhamaKey">
+      <div class="header-badge">Visual Marketing Lab</div>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    
+    <!-- Sidebar Control Panel -->
+    <aside class="sidebar">
+      
+      <!-- General Presets -->
+      <div class="sidebar-section">
+        <h3>Linea & Preset</h3>
+        <div class="preset-grid">
+          <button class="preset-btn active" id="presetMomentsBtn" onclick="applyPreset('moments')">Moments (Amore)</button>
+          <button class="preset-btn" id="presetBusinessBtn" onclick="applyPreset('business')">Business (Tech)</button>
+          <button class="preset-btn" id="presetChristmasBtn" onclick="applyPreset('christmas')">Natalizio</button>
+          <button class="preset-btn" id="presetCustomBtn" onclick="applyPreset('custom')">Personalizzato</button>
+        </div>
+      </div>
+
+      <!-- Live Controls for Social Post (Tab 1) -->
+      <div id="controlsSocial" class="sidebar-section">
+        <h3>Modifica Social Post</h3>
+        
+        <div class="control-group">
+          <label for="postBadgeInput">Badge Superiore</label>
+          <input type="text" id="postBadgeInput" oninput="updateSocialPreview()" value="💍 MOMENTS LOVE">
+        </div>
+        
+        <div class="control-group">
+          <label for="postTitleInput">Titolo Principale</label>
+          <textarea id="postTitleInput" rows="3" oninput="updateSocialPreview()">Un ricordo che dura per sempre, con un tap.</textarea>
+        </div>
+        
+        <div class="control-group">
+          <label for="postDescInput">Sottotitolo / Descrizione</label>
+          <textarea id="postDescInput" rows="3" oninput="updateSocialPreview()">Trasforma il tuo portachiavi NFC in legno in una scatola dei ricordi digitale per le foto e gli auguri dei tuoi invitati.</textarea>
+        </div>
+        
+        <div class="control-group">
+          <label for="postCtaInput">Testo Bottone (CTA)</label>
+          <input type="text" id="postCtaInput" oninput="updateSocialPreview()" value="Ordina ora &rarr;">
+        </div>
+
+        <div class="control-group">
+          <label for="bgGradientSelect">Preset Sfumature Sfondo</label>
+          <select id="bgGradientSelect" onchange="changeSocialBgPreset()">
+            <option value="moments">Moments (Verde / Foresta)</option>
+            <option value="business">Business (Navy / Ciano)</option>
+            <option value="love">Romantico (Rubino / Rosa)</option>
+            <option value="christmas">Natale (Rosso / Verde)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Controls for Amazon Mockup (Tab 2) -->
+      <div id="controlsAmazon" class="sidebar-section" style="display: none;">
+        <h3>Opzioni E-commerce</h3>
+        <div class="control-group">
+          <label for="productMaterialSelect">Variante Materiale Prodotto</label>
+          <select id="productMaterialSelect" onchange="updateProductMaterial()">
+            <option value="wood">Pregiato Legno di Noce Massello</option>
+            <option value="ceramic">Ceramica Lucida Impermeabile</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="productTitleInput">Titolo Prodotto Amazon</label>
+          <textarea id="productTitleInput" rows="4" oninput="updateProductTitle()">KhamaKey NFC Smart Tag - Portachiavi e Vetrinetta Digitale per Matrimoni, Compleanni ed Eventi - Configurazione Istantanea No App - Legno Naturale e Cinturino in Pelle</textarea>
+        </div>
+      </div>
+
+      <!-- Controls for Infographic (Tab 3) -->
+      <div id="controlsInfographic" class="sidebar-section" style="display: none;">
+        <h3>Codice Infografica</h3>
+        <p style="font-size: 0.74rem; color: var(--muted); line-height: 1.45;">Copia il codice HTML/CSS pulito per incorporarlo sul tuo ecommerce Shopify, TikTok Shop o sul sito web istituzionale.</p>
+      </div>
+
+      <!-- Controls for Storyboard (Tab 4) -->
+      <div id="controlsStoryboard" class="sidebar-section" style="display: none;">
+        <h3>Script Selezionabile</h3>
+        <div class="control-group">
+          <label for="scriptSelector">Seleziona Copione Video</label>
+          <select id="scriptSelector" onchange="changeActiveScript()">
+            <option value="moments">POV: Il matrimonio digitale 2026 (Moments)</option>
+            <option value="business">Il cameriere stupito (Business)</option>
+            <option value="love">Lucchetto d'amore digitale (San Valentino)</option>
+          </select>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Tab Navigation -->
+      <nav class="tab-navigation" role="tablist">
+        <button class="tab-btn active" id="tabSocial" onclick="switchTab('social')">1. Social Post</button>
+        <button class="tab-btn" id="tabAmazon" onclick="switchTab('amazon')">2. Scheda Amazon</button>
+        <button class="tab-btn" id="tabInfographic" onclick="switchTab('infographic')">3. Infografica</button>
+        <button class="tab-btn" id="tabStoryboard" onclick="switchTab('storyboard')">4. Script Video</button>
+      </nav>
+
+      <!-- Panel 1: Social Post Visualizer -->
+      <section class="tab-panel active" id="panelSocial">
+        <div class="preview-container">
+          
+          <!-- Square Post Mockup -->
+          <div class="post-square" id="socialSquare" style="background: var(--gradient-moments);">
+            <div class="post-glow post-glow-1"></div>
+            <div class="post-glow post-glow-2"></div>
+            <header class="post-header">
+              <span class="post-badge" id="squareBadge">💍 MOMENTS LOVE</span>
+            </header>
+            <div class="post-body">
+              <h2 id="squareTitle">Un ricordo che dura per sempre, con un tap.</h2>
+              <p id="squareDesc">Trasforma il tuo portachiavi NFC in legno in una scatola dei ricordi digitale per le foto e gli auguri dei tuoi invitati.</p>
+            </div>
+            <footer class="post-footer">
+              <span class="post-cta" id="squareCta">Ordina ora &rarr;</span>
+              <span class="post-watermark">khamakey.it</span>
+            </footer>
+          </div>
+
+          <!-- Vertical Post Mockup -->
+          <div class="post-vertical" id="socialVertical" style="background: var(--gradient-moments);">
+            <div class="post-glow post-glow-1"></div>
+            <div class="post-glow post-glow-2"></div>
+            <header class="post-header">
+              <span class="post-badge" id="verticalBadge">💍 MOMENTS LOVE</span>
+            </header>
+            <div class="post-body">
+              <h2 id="verticalTitle">Un ricordo che dura per sempre, con un tap.</h2>
+              <p id="verticalDesc">Trasforma il tuo portachiavi NFC in legno in una scatola dei ricordi digitale per le foto e gli auguri dei tuoi invitati.</p>
+            </div>
+            <footer class="post-footer">
+              <span class="post-cta" id="verticalCta">Ordina ora &rarr;</span>
+              <span class="post-watermark">khamakey.it</span>
+            </footer>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Panel 2: Amazon Listing Mockup -->
+      <section class="tab-panel" id="panelAmazon">
+        <div class="preview-container">
+          
+          <div class="amazon-layout">
+            
+            <!-- Gallery Section with 3D tags rendering simulation -->
+            <div class="amazon-gallery">
+              <div class="physical-tag-container" id="mockupProductContainer">
+                
+                <!-- Wood variant shape -->
+                <div class="smart-tag-wood" id="productTagShape">
+                  <img class="smart-tag-logo" src="khamakey-wordmark-dark.png" alt="Logo" style="filter: brightness(0) invert(1) opacity(0.8);">
+                  <div class="smart-tag-nfc-badge">NFC</div>
+                </div>
+
+                <!-- Phone mockup next to it -->
+                <div class="smartphone-mockup">
+                  <div class="smartphone-screen" id="mockupScreen">
+                    <strong>Il tuo Ricordo</strong>
+                    <h4 id="mockupScreenTitle">Matrimonio di Giulia & Marco</h4>
+                    <span>Avvicina il telefono</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Details Section -->
+            <div class="amazon-details-panel">
+              <a href="#" class="amazon-brand-link">Marca: KhamaKey</a>
+              <h2 class="amazon-title" id="amazonProductTitle">KhamaKey NFC Smart Tag - Portachiavi e Vetrinetta Digitale per Matrimoni, Compleanni ed Eventi - Configurazione Istantanea No App - Legno Naturale e Cinturino in Pelle</h2>
+              
+              <div class="amazon-price">€29,90</div>
+              
+              <div class="amazon-bullets">
+                <div class="amazon-bullet">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                  <span><strong>Configurazione in 3 minuti, Nessuna App</strong>: Invitati e clienti non devono scaricare alcuna applicazione. Basta fare tap con il retro del proprio smartphone.</span>
+                </div>
+                <div class="amazon-bullet">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                  <span><strong>Finiture di pregio artigianali</strong>: Tag intagliato a laser e assemblato a mano, arricchito da anello in ottone massiccio e cinturino in pelle italiana cucito.</span>
+                </div>
+                <div class="amazon-bullet">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                  <span><strong>Servizio Cloud Gratuito</strong>: Gestisci galleria, dediche e dettagli dell'evento dal tuo editor cloud in tempo reale. Zero costi fissi o abbonamenti.</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Panel 3: Infografica "Come Funziona" -->
+      <section class="tab-panel" id="panelInfographic">
+        
+        <!-- Live Infographic visual presentation -->
+        <div class="infographic-wrapper">
+          <div class="infographic-flow">
+            
+            <div class="infographic-card">
+              <div class="infographic-num">1</div>
+              <div class="infographic-icon">📦</div>
+              <h3>Ricevi il Tag NFC</h3>
+              <p>Il portachiavi in legno o l'espositore acrilico ti viene spedito direttamente a casa o nel tuo locale, già pronto.</p>
+            </div>
+
+            <div class="infographic-card">
+              <div class="infographic-num">2</div>
+              <div class="infographic-icon">📱</div>
+              <h3>Avvicina & Configura</h3>
+              <p>Fai tap con lo smartphone. Accedi all'editor e inserisci foto, informazioni o link in 3 minuti di setup guidato.</p>
+            </div>
+
+            <div class="infographic-card">
+              <div class="infographic-num">3</div>
+              <div class="infographic-icon">✨</div>
+              <h3>Condividi col Tap</h3>
+              <p>I tuoi ospiti o clienti dovranno solo avvicinare il proprio telefono per vedere istantaneamente la tua bellissima pagina.</p>
+            </div>
+
+          </div>
+
+          <!-- Code Export Section -->
+          <div class="code-title-bar">
+            <span>Codice HTML/CSS dell'Infografica</span>
+            <button class="copy-btn" id="copyCodeBtn" onclick="copyInfographicCode()">Copia Codice</button>
+          </div>
+          <pre class="code-export-box" id="codeContainer"></pre>
+        </div>
+
+      </section>
+
+      <!-- Panel 4: Storyboard & Script Generator -->
+      <section class="tab-panel" id="panelStoryboard">
+        
+        <table class="script-table">
+          <thead>
+            <tr>
+              <th style="width: 80px;">Scena</th>
+              <th style="width: 25%;">Video (Riprese)</th>
+              <th style="width: 22%;">Testo Overlay (A schermo)</th>
+              <th>Audio & Traccia Voce (Voiceover)</th>
+            </tr>
+          </thead>
+          <tbody id="scriptTableBody">
+            <!-- Dynamic rows will be inserted here -->
+          </tbody>
+        </table>
+
+        <div class="script-copy-footer">
+          <button class="copy-btn" id="copyScriptBtn" onclick="copyActiveScriptText()" style="background: var(--navy); border-color: var(--navy);">Copia Testo Script</button>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Real-time Logic Script -->
+  <script>
+    
+    // Preset structures for lines
+    const presets = {
+      moments: {
+        badge: "💍 MOMENTS LOVE",
+        title: "Un ricordo che dura per sempre, con un tap.",
+        desc: "Trasforma il tuo portachiavi NFC in legno in una scatola dei ricordi digitale per le foto e gli auguri dei tuoi invitati.",
+        cta: "Ordina ora &rarr;",
+        gradient: "moments",
+        productTitle: "KhamaKey NFC Smart Tag - Portachiavi e Vetrinetta Digitale per Matrimoni, Compleanni ed Eventi - Configurazione Istantanea No App - Legno Naturale e Cinturino in Pelle",
+        material: "wood"
+      },
+      business: {
+        badge: "🍽️ KHAMAKEY BUSINESS",
+        title: "Rivoluziona l'esperienza nel tuo locale in un tap.",
+        desc: "Menu digitali interattivi, prenotazioni veloci e recensioni Google a portata di tap. Smetti di far zoomare i tuoi clienti sui PDF!",
+        cta: "Starter Kit 29,90€",
+        gradient: "business",
+        productTitle: "KhamaKey NFC Business Display - Espositore da Tavolo Acrilico e Adesivi Vetrofanati NFC per Ristoranti, Bar e Hotel - Recensioni Google e Menu Digitale",
+        material: "ceramic"
+      },
+      christmas: {
+        badge: "🎄 SPECIAL NATALE",
+        title: "Il regalo più originale di questo Natale.",
+        desc: "Incidi le vostre iniziali ed inserisci foto, canzoni ed auguri personalizzati. Avvicina il telefono ed emoziona chi ami.",
+        cta: "Scatola Regalo inclusa",
+        gradient: "christmas",
+        productTitle: "KhamaKey NFC Special Edition - Regalo di Natale Smart Portachiavi in Noce Pregiato in Confezione Regalo di Lusso",
+        material: "wood"
+      }
+    };
+
+    // Storyboard video scripts repository
+    const videoScripts = {
+      moments: [
+        { scene: "1", video: "Primo piano di un invitato che riceve una scatolina regalo elegante. La apre e trova il portachiavi NFC.", overlay: "POV: Ricevi un portachiavi in legno al matrimonio...", voice: "Cameraman: 'Pensavo fosse il solito portachiavi bomboniera carina...'" },
+        { scene: "2", video: "L'invitato avvicina il retro dell'iPhone al portachiavi. Sullo schermo si sblocca all'istante la pagina del matrimonio.", overlay: "Ma basta un tap sul telefono 💍", voice: "'Ma poi ho avvicinato il telefono ed è successa questa magia.'" },
+        { scene: "3", video: "Dettaglio dello schermo mentre l'invitato naviga tra la gallery e scrive una dedica nel guestbook.", overlay: "Foto, auguri e programma dell'evento in tasca!", voice: "'C'erano tutte le foto del matrimonio, il programma del giorno e la bacheca degli auguri degli sposi in tempo reale.'" },
+        { scene: "4", video: "Dettaglio del portachiavi in legno inciso poggiato sulle partecipazioni.", overlay: "KhamaKey Moments. Link in bio.", voice: "'Se ti sposi o vuoi fare un regalo unico, cerca KhamaKey Moments.'" }
+      ],
+      business: [
+        { scene: "1", video: "Cliente al tavolo del restaurante indica l'espositore di acrilico KhamaKey. Cameriere che si avvicina.", overlay: "Smetti di usare i vecchi PDF difficili da leggere! ❌", voice: "'Ancora costringi i tuoi clienti a scaricare PDF pesantissimi per leggere il menu?'" },
+        { scene: "2", video: "Il cliente appoggia lo smartphone sul tag NFC. Il menu interattivo si apre all'istante con foto nitide.", overlay: "Un tap ed ecco il menu interattivo 🍽️", voice: "'Guarda qui: basta un tap. Il menu si apre in meno di un secondo, senza scaricare nessuna app.'" },
+        { scene: "3", video: "Il cliente prenota e poi clicca sul bottone per lasciare la recensione a fine pasto.", overlay: "Allergeni, varianti e recensioni Google in 1 click", voice: "'I clienti filtrano gli allergeni e possono lasciarti una recensione su Google in un solo click.'" },
+        { scene: "4", video: "Schermata del sito web khamakey.it con panoramica dello Starter Kit.", overlay: "Starter Kit a €29,90. Setup in 3 min.", voice: "'Ordina il tuo Starter Kit su khamakey.it e configura il tuo locale gratis. Zero abbonamenti.'" }
+      ],
+      love: [
+        { scene: "1", video: "Primo piano del portachiavi a cuore inciso con due iniziali. Mano che lo estrae da un sacchetto di velluto.", overlay: "Il lucchetto dell'amore diventa digitale 🔐❤️", voice: "'Ricordi i vecchi lucchetti d'amore che le coppie appendevano ai ponti?'" },
+        { scene: "2", video: "La ragazza avvicina il telefono al cuore di legno. Sullo schermo parte una timeline romantica con una playlist Spotify.", overlay: "Avvicina lo smartphone per sbloccare i tuoi ricordi...", voice: "'Abbiamo reinventato quel gesto. Avvicina lo smartphone per sbloccare la vostra galleria segreta e le canzoni che vi definiscono.'" },
+        { scene: "3", video: "Dettaglio delle finiture dorate e del cinturino in pelle.", overlay: "In legno massello di noce con profilo dorato 🌿✨", voice: "'Pregiato legno di noce massello con un profilo in ottone lucido e personalizzazione con iniziali.'" },
+        { scene: "4", video: "Coppia che si abbraccia tenendo in mano il portachiavi.", overlay: "KhamaKey Love. Sorprendi chi ami.", voice: "'Il regalo perfetto che unisce artigianalità e tecnologia. Trovalo su khamakey.it.'" }
+      ]
+    };
+
+    // Tab switching logic
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+      document.getElementById('tab' + tabId.charAt(0).toUpperCase() + tabId.slice(1)).classList.add('active');
+      document.getElementById('panel' + tabId.charAt(0).toUpperCase() + tabId.slice(1)).classList.add('active');
+
+      // Sync controls panels in sidebar
+      document.getElementById('controlsSocial').style.display = (tabId === 'social') ? 'flex' : 'none';
+      document.getElementById('controlsAmazon').style.display = (tabId === 'amazon') ? 'flex' : 'none';
+      document.getElementById('controlsInfographic').style.display = (tabId === 'infographic') ? 'flex' : 'none';
+      document.getElementById('controlsStoryboard').style.display = (tabId === 'storyboard') ? 'flex' : 'none';
+    }
+
+    // Live update for Social Preview Inputs
+    function updateSocialPreview() {
+      const badgeText = document.getElementById('postBadgeInput').value;
+      const titleText = document.getElementById('postTitleInput').value;
+      const descText = document.getElementById('postDescInput').value;
+      const ctaText = document.getElementById('postCtaInput').value;
+
+      document.getElementById('squareBadge').innerText = badgeText;
+      document.getElementById('squareTitle').innerText = titleText;
+      document.getElementById('squareDesc').innerText = descText;
+      document.getElementById('squareCta').innerHTML = ctaText;
+
+      document.getElementById('verticalBadge').innerText = badgeText;
+      document.getElementById('verticalTitle').innerText = titleText;
+      document.getElementById('verticalDesc').innerText = descText;
+      document.getElementById('verticalCta').innerHTML = ctaText;
+    }
+
+    // Change Social Background Preset
+    function changeSocialBgPreset() {
+      const val = document.getElementById('bgGradientSelect').value;
+      let grad = 'var(--gradient-moments)';
+      if (val === 'business') grad = 'var(--gradient-business)';
+      if (val === 'love') grad = 'var(--gradient-love)';
+      if (val === 'christmas') grad = 'var(--gradient-christmas)';
+
+      document.getElementById('socialSquare').style.background = grad;
+      document.getElementById('socialVertical').style.background = grad;
+    }
+
+    // Apply Presets to everything
+    function applyPreset(key) {
+      document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtnId = 'preset' + key.charAt(0).toUpperCase() + key.slice(1) + 'Btn';
+      if (document.getElementById(activeBtnId)) {
+        document.getElementById(activeBtnId).classList.add('active');
+      }
+
+      if (key === 'custom') return;
+
+      const p = presets[key];
+      if (p) {
+        document.getElementById('postBadgeInput').value = p.badge;
+        document.getElementById('postTitleInput').value = p.title;
+        document.getElementById('postDescInput').value = p.desc;
+        document.getElementById('postCtaInput').value = p.cta;
+        document.getElementById('bgGradientSelect').value = p.gradient;
+        document.getElementById('productMaterialSelect').value = p.material;
+        document.getElementById('productTitleInput').value = p.productTitle;
+
+        updateSocialPreview();
+        changeSocialBgPreset();
+        updateProductMaterial();
+        updateProductTitle();
+
+        // Auto select correct script
+        if (key === 'moments' || key === 'christmas') {
+          document.getElementById('scriptSelector').value = 'moments';
+        } else if (key === 'business') {
+          document.getElementById('scriptSelector').value = 'business';
+        }
+        changeActiveScript();
+      }
+    }
+
+    // Update Amazon product title
+    function updateProductTitle() {
+      const t = document.getElementById('productTitleInput').value;
+      document.getElementById('amazonProductTitle').innerText = t;
+      document.getElementById('mockupScreenTitle').innerText = t.includes('Business') ? 'Menù del Giorno' : 'Matrimonio di Giulia & Marco';
+    }
+
+    // Update Product material rendering
+    function updateProductMaterial() {
+      const material = document.getElementById('productMaterialSelect').value;
+      const shape = document.getElementById('productTagShape');
+      const screen = document.getElementById('mockupScreen');
+      
+      if (material === 'wood') {
+        shape.className = 'smart-tag-wood';
+        screen.style.background = 'radial-gradient(circle at 50% 30%, #246517, #091024)';
+      } else {
+        shape.className = 'smart-tag-ceramic';
+        screen.style.background = 'radial-gradient(circle at 50% 30%, #1B2A5E, #091024)';
+      }
+    }
+
+    // Render active script storyboard in table
+    function changeActiveScript() {
+      const key = document.getElementById('scriptSelector').value;
+      const rows = videoScripts[key];
+      const body = document.getElementById('scriptTableBody');
+      body.innerHTML = '';
+
+      if (rows) {
+        rows.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="scene-number">Scena ${r.scene}</td>
+            <td><strong>${r.video.split(':').shift()}</strong><br>${r.video}</td>
+            <td style="font-style: italic; color: var(--muted);">${r.overlay}</td>
+            <td>${r.voice}</td>
+          `;
+          body.appendChild(tr);
+        });
+      }
+    }
+
+    // Copy script text function
+    function copyActiveScriptText() {
+      const key = document.getElementById('scriptSelector').value;
+      const rows = videoScripts[key];
+      if (!rows) return;
+
+      let txt = `### Script Video KhamaKey: ${key.toUpperCase()}\n\n`;
+      rows.forEach(r => {
+        txt += `Scene ${r.scene}:\n- Video: ${r.video}\n- Text Overlay: ${r.overlay}\n- Voiceover: ${r.voice}\n\n`;
+      });
+
+      navigator.clipboard.writeText(txt).then(() => {
+        const btn = document.getElementById('copyScriptBtn');
+        btn.innerText = 'Copiato!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerText = 'Copia Testo Script';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    }
+
+    // Embeddable infographic raw HTML/CSS generator
+    const rawInfographicCode = `<!-- KHAMAKEY HOW IT WORKS TIMELINE EMBED -->
+<div class="kk-info-timeline">
+  <div class="kk-info-card">
+    <div class="kk-info-num">1</div>
+    <div class="kk-info-icon">📦</div>
+    <h4>Ricevi il Tag NFC</h4>
+    <p>Il portachiavi in legno o l'espositore acrilico ti viene spedito direttamente a casa o nel tuo locale, pronto.</p>
+  </div>
+  <div class="kk-info-card">
+    <div class="kk-info-num">2</div>
+    <div class="kk-info-icon">📱</div>
+    <h4>Avvicina & Configura</h4>
+    <p>Fai tap con lo smartphone. Accedi all'editor e inserisci foto, informazioni o link in 3 minuti di setup guidato.</p>
+  </div>
+  <div class="kk-info-card">
+    <div class="kk-info-num">3</div>
+    <div class="kk-info-icon">✨</div>
+    <h4>Condividi col Tap</h4>
+    <p>I tuoi ospiti o clienti dovranno solo avvicinare il proprio telefono per vedere istantaneamente la tua bellissima pagina.</p>
+  </div>
+</div>
+
+<style>
+.kk-info-timeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  margin: 30px 0;
+}
+.kk-info-card {
+  background: #ffffff;
+  border: 1.5px solid #dfe6ef;
+  border-radius: 18px;
+  padding: 30px 24px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 4px 18px -4px rgba(27, 42, 94, 0.04);
+  transition: all 0.25s ease;
+}
+.kk-info-card:hover {
+  transform: translateY(-4px);
+  border-color: #4CAF27;
+  box-shadow: 0 16px 36px -10px rgba(27, 42, 94, 0.08);
+}
+.kk-info-num {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  background: #1B2A5E;
+  color: #ffffff;
+  font-size: 0.86rem;
+  font-weight: 800;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 2px solid #ffffff;
+}
+.kk-info-icon {
+  font-size: 2.2rem;
+  margin-bottom: 14px;
+}
+.kk-info-card h4 {
+  font-size: 1rem;
+  color: #1B2A5E;
+  margin-bottom: 8px;
+}
+.kk-info-card p {
+  font-size: 0.82rem;
+  color: #64748B;
+  line-height: 1.55;
+}
+</style>`;
+
+    function setupInfographicCode() {
+      document.getElementById('codeContainer').innerText = rawInfographicCode;
+    }
+
+    function copyInfographicCode() {
+      navigator.clipboard.writeText(rawInfographicCode).then(() => {
+        const btn = document.getElementById('copyCodeBtn');
+        btn.innerText = 'Copiato!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerText = 'Copia Codice';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    }
+
+    // Startup initialization
+    window.onload = function() {
+      applyPreset('moments');
+      setupInfographicCode();
+    };
+
+  </script>
+
+</body>
+</html>

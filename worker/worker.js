@@ -2714,6 +2714,103 @@ main.moment-type-pet .moment-card-icon {
   padding: 8px !important;
   display: inline-flex !important;
 }
+
+/* 8. MEMORIES & PHOTO ALBUMS (Polaroid Retro) */
+main.moment-type-memory,
+main.moment-type-photo {
+  background: 
+    radial-gradient(circle at 10% 20%, color-mix(in srgb, ${c.go} 5%, transparent) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, color-mix(in srgb, ${c.go} 8%, transparent) 0%, transparent 45%),
+    linear-gradient(180deg, ${c.surface} 0%, ${c.bl} 100%) !important;
+  padding-bottom: 80px !important;
+}
+main.moment-type-memory .moment-card,
+main.moment-type-photo .moment-card,
+main.moment-type-memory .moment-counter,
+main.moment-type-photo .moment-counter,
+main.moment-type-memory .moment-countdown,
+main.moment-type-photo .moment-countdown,
+main.moment-type-memory .moment-quote-wrap,
+main.moment-type-photo .moment-quote-wrap,
+main.moment-type-memory .moment-signature,
+main.moment-type-photo .moment-signature {
+  background: #ffffff !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(0,0,0,0.05) !important;
+  padding: 24px 24px 44px 24px !important;
+  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.06), 0 8px 16px -6px rgba(0, 0, 0, 0.04) !important;
+  position: relative !important;
+}
+main.moment-type-memory .moment-card::after,
+main.moment-type-photo .moment-card::after,
+main.moment-type-memory .moment-counter::after,
+main.moment-type-photo .moment-counter::after,
+main.moment-type-memory .moment-countdown::after,
+main.moment-type-photo .moment-countdown::after,
+main.moment-type-memory .moment-quote-wrap::after,
+main.moment-type-photo .moment-quote-wrap::after,
+main.moment-type-memory .moment-signature::after,
+main.moment-type-photo .moment-signature::after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: 12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 40px !important;
+  height: 4px !important;
+  background: color-mix(in srgb, ${c.go} 15%, transparent) !important;
+  border-radius: 99px !important;
+  opacity: 0.5 !important;
+}
+
+/* 9. SACRED CELEBRATIONS (Ethereal Grace) */
+main.moment-type-communion,
+main.moment-type-baptism {
+  background: 
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, ${c.go} 8%, transparent) 0%, transparent 50%),
+    linear-gradient(180deg, ${c.surface} 0%, ${c.bl} 100%) !important;
+  padding-bottom: 80px !important;
+}
+main.moment-type-communion .moment-card,
+main.moment-type-baptism .moment-card,
+main.moment-type-communion .moment-counter,
+main.moment-type-baptism .moment-counter,
+main.moment-type-communion .moment-countdown,
+main.moment-type-baptism .moment-countdown,
+main.moment-type-communion .moment-quote-wrap,
+main.moment-type-baptism .moment-quote-wrap,
+main.moment-type-communion .moment-signature,
+main.moment-type-baptism .moment-signature {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 10px 30px -10px color-mix(in srgb, ${c.go} 6%, rgba(0, 0, 0, 0.03)) !important;
+}
+
+/* 10. FRIENDSHIP & PORTFOLIOS (Modern Collage) */
+main.moment-type-friendship,
+main.moment-type-portfolio {
+  background: 
+    radial-gradient(circle at 15% 15%, color-mix(in srgb, ${c.go} 10%, transparent) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, color-mix(in srgb, ${c.go} 12%, transparent) 0%, transparent 45%),
+    linear-gradient(180deg, ${c.surface} 0%, ${c.bl} 100%) !important;
+  padding-bottom: 80px !important;
+}
+main.moment-type-friendship .moment-card,
+main.moment-type-portfolio .moment-card,
+main.moment-type-friendship .moment-counter,
+main.moment-type-portfolio .moment-counter,
+main.moment-type-friendship .moment-countdown,
+main.moment-type-portfolio .moment-countdown,
+main.moment-type-friendship .moment-quote-wrap,
+main.moment-type-portfolio .moment-quote-wrap,
+main.moment-type-friendship .moment-signature,
+main.moment-type-portfolio .moment-signature {
+  background: #ffffff !important;
+  border-radius: 24px 8px 24px 8px !important;
+  border: 1.5px solid color-mix(in srgb, ${c.go} 6%, transparent) !important;
+  box-shadow: 0 16px 36px -12px color-mix(in srgb, ${c.go} 8%, rgba(0,0,0,0.03)) !important;
+}
 `;
 }
 

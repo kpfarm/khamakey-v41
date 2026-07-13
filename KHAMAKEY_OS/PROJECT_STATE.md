@@ -80,7 +80,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin** | **v128** | Preparato — Console supporto operativa con ricerca, filtri, gestione stato/priorita' ticket e note interne; magazzino NFC Moments v127 resta operativo. |
+| **Admin** | **v129** | Overhaul visivo premium (sfondo radial, glassmorphism, card hover e tabelle) + Console supporto v128. |
 | **Editor Business** | **v119** | Overhaul visivo premium (sfondo radial, glassmorphism e card hover) + Assistenza v118. |
 | **Moments editor** | **v115** | Overhaul visivo premium (sfondo radial, glassmorphism e card hover) + Raccordi copertina v114. |
 | **Worker NFC** | **v127** | Supporto a heroCut, unificazione di tutti i 21 sfondi premium e contrasto dinamico footer. |

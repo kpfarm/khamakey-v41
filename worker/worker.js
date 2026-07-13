@@ -1875,322 +1875,239 @@ body.nav-open{overflow:hidden}
 }
 
 /* 2. TRAVEL & ADVENTURE: Immersive 2026 Design Overhaul */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;600;700&family=Special+Elite&family=Caveat:wght@600&display=swap');
+
 main.moment-type-travel {
   background: 
-    radial-gradient(rgba(178, 59, 24, 0.09) 1.5px, transparent 1.5px) 0 0 / 24px 24px,
-    linear-gradient(180deg, #100b26 0%, #1e1b4b 160px, #faf6ee 620px, #fdfbf7 100%) !important;
-  padding-bottom: 64px !important;
+    radial-gradient(rgba(178, 59, 24, 0.05) 1.5px, transparent 1.5px) 0 0 / 24px 24px,
+    linear-gradient(180deg, #f8f4eb 0%, #e8dec9 100%) !important;
+  padding-bottom: 80px !important;
 }
 
-/* Page global fonts override for travel */
 .moment-type-travel, .moment-type-travel * {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* High contrast deep charcoal for titles */
-.moment-type-travel h1,
-.moment-type-travel h2,
-.moment-type-travel h3,
-.moment-type-travel .moment-card-title,
-.moment-type-travel .moment-card-head strong {
-  color: #0f172a !important;
-  font-family: 'Outfit', sans-serif !important;
-  font-weight: 800 !important;
-}
-
-.moment-type-travel .moment-card-title {
-  font-size: 1.05rem !important;
-  letter-spacing: 0.06em !important;
-  text-transform: uppercase !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-}
-
-.moment-type-travel .moment-card-title::after {
-  content: "" !important;
-  flex-grow: 1 !important;
-  height: 1px !important;
-  background: linear-gradient(90deg, rgba(178, 59, 24, 0.15), transparent) !important;
-}
-
-/* Immersive Hero Section with Curved bottom */
+/* Hero Section: Full-height cinematic header */
 .moment-type-travel .moment-hero {
   position: relative !important;
-  height: 440px !important;
-  clip-path: ellipse(125% 100% at 50% 0%) !important;
+  height: 80vh !important;
+  max-height: 680px !important;
+  min-height: 440px !important;
+  clip-path: none !important;
   overflow: hidden !important;
-  margin-bottom: -32px !important;
-  box-shadow: none !important;
+  margin-bottom: 48px !important;
   z-index: 1 !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  padding-bottom: 80px !important;
+  box-shadow: none !important;
 }
 
 .moment-type-travel .moment-hero-overlay {
-  background: linear-gradient(180deg, rgba(44, 64, 53, 0.1) 0%, rgba(15, 23, 42, 0.6) 80%, rgba(15, 23, 42, 0.8) 100%) !important;
-}
-
-/* Floating particles layer on Hero */
-.moment-type-travel .moment-hero::after {
-  content: "" !important;
-  position: absolute !important;
-  top: 0; left: 0; right: 0; bottom: 0 !important;
-  background-image: 
-    radial-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px),
-    radial-gradient(rgba(255, 255, 255, 0.25) 1.5px, transparent 1.5px) !important;
-  background-size: 140px 140px, 200px 200px !important;
-  background-position: 0 0, 50px 70px !important;
-  opacity: 0.65 !important;
-  animation: floatingParticles 50s linear infinite !important;
-  pointer-events: none !important;
-  z-index: 3 !important;
-}
-
-@keyframes floatingParticles {
-  0% { background-position: 0 0, 50px 70px; }
-  100% { background-position: 140px 280px, 250px 270px; }
+  background: linear-gradient(180deg, rgba(16, 11, 38, 0.1) 0%, rgba(16, 11, 38, 0.4) 50%, rgba(16, 11, 38, 0.85) 100%) !important;
+  z-index: 2 !important;
 }
 
 .moment-type-travel .moment-hero-content {
-  position: absolute !important;
-  bottom: 64px !important;
-  left: 24px !important;
-  right: 24px !important;
+  position: relative !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin: 0 auto !important;
+  max-width: 600px !important;
+  width: calc(100% - 48px) !important;
+  padding: 0 !important;
   color: #ffffff !important;
-  text-align: left !important;
+  text-align: center !important;
   z-index: 5 !important;
 }
 
 .moment-type-travel .moment-hero h1 {
-  font-size: clamp(2rem, 8vw, 2.75rem) !important;
-  margin-bottom: 10px !important;
+  font-family: 'Playfair Display', serif !important;
+  font-size: clamp(2.2rem, 9vw, 3.5rem) !important;
+  font-weight: 700 !important;
+  margin: 12px 0 !important;
   line-height: 1.15 !important;
-  letter-spacing: -0.02em !important;
   text-transform: uppercase !important;
+  letter-spacing: 0.02em !important;
   color: #ffffff !important;
-  text-shadow: 0 4px 20px rgba(15, 23, 42, 0.4) !important;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5) !important;
 }
 
 .moment-type-travel .moment-hero p {
-  font-size: 0.98rem !important;
-  opacity: 0.92 !important;
-  line-height: 1.5 !important;
-  font-weight: 500 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 1.05rem !important;
+  opacity: 0.9 !important;
+  line-height: 1.6 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.05em !important;
   color: #ffffff !important;
-  text-shadow: 0 2px 10px rgba(15, 23, 42, 0.3) !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Travel Pill Badges */
+.moment-type-travel .moment-profile {
+  width: 80px !important;
+  height: 80px !important;
+  border-radius: 50% !important;
+  border: 3px solid #ffffff !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+  margin: 0 auto 16px auto !important;
+  display: block !important;
+  object-fit: cover !important;
+}
+
 .moment-type-travel .moment-pill {
-  background: #2c4035 !important;
+  background: rgba(255, 255, 255, 0.15) !important;
   color: #ffffff !important;
-  font-family: 'Outfit', sans-serif !important;
-  font-size: 0.72rem !important;
-  font-weight: 800 !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.12em !important;
-  padding: 6px 16px !important;
+  letter-spacing: 0.15em !important;
+  padding: 6px 18px !important;
   border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   display: inline-block !important;
-  margin-bottom: 8px !important;
-  box-shadow: 0 4px 12px rgba(44, 64, 53, 0.2) !important;
 }
 
-/* Content wrapping */
-.moment-type-travel .moment-content {
-  position: relative !important;
-  z-index: 2 !important;
-}
-
-/* Premium Card layout for 2026 */
+/* Premium Spacious Cards */
 .moment-type-travel .moment-card,
 .moment-type-travel .moment-counter,
 .moment-type-travel .moment-countdown,
 .moment-type-travel .moment-quote-wrap,
 .moment-type-travel .moment-signature {
   background: #ffffff !important;
-  border-radius: 32px !important;
-  padding: 28px 24px !important;
-  margin-bottom: 24px !important;
-  box-shadow: 
-    0 24px 50px -16px rgba(139, 69, 19, 0.08),
-    0 4px 16px rgba(139, 69, 19, 0.02) !important;
-  border: 1px solid rgba(178, 59, 24, 0.05) !important;
+  border-radius: 28px !important;
+  padding: 48px 32px !important;
+  margin-bottom: 48px !important;
+  box-shadow: 0 30px 60px -15px rgba(139, 69, 19, 0.05) !important;
+  border: 1px solid rgba(139, 69, 19, 0.03) !important;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .moment-type-travel .moment-card:hover {
   transform: translateY(-4px) !important;
-  box-shadow: 
-    0 32px 64px -14px rgba(139, 69, 19, 0.11),
-    0 6px 20px rgba(139, 69, 19, 0.03) !important;
+  box-shadow: 0 40px 80px -12px rgba(139, 69, 19, 0.09) !important;
 }
 
-/* Counter & Countdown style */
-.moment-type-travel .moment-counter-label,
-.moment-type-travel .moment-countdown-label {
-  font-family: 'Outfit', sans-serif !important;
-  font-size: 0.78rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.08em !important;
-  color: #b23b18 !important;
+.moment-type-travel .moment-card-title {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 1.45rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
   text-transform: uppercase !important;
-  margin-bottom: 12px !important;
+  letter-spacing: 0.03em !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  margin-bottom: 24px !important;
 }
 
-.moment-type-travel .moment-counter-unit b,
-.moment-type-travel .moment-countdown-unit b {
-  color: #b23b18 !important;
-  font-family: 'Outfit', sans-serif !important;
+.moment-type-travel .moment-card-title::after {
+  content: "" !important;
+  flex-grow: 1 !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, rgba(178, 59, 24, 0.2), transparent) !important;
 }
 
-/* 2026 Timeline Polaroid Layout */
+/* Timeline as Spacious Chapters */
 .moment-type-travel .moment-journey {
   position: relative !important;
-  padding-left: 16px !important;
+  padding-left: 0 !important;
 }
 
 .moment-type-travel .moment-journey::before {
-  content: "" !important;
-  position: absolute !important;
-  left: 8px !important;
-  top: 0; bottom: 0 !important;
-  width: 2px !important;
-  background: linear-gradient(180deg, #b23b18 0%, rgba(178, 59, 24, 0.1) 100%) !important;
-  opacity: 0.15 !important;
+  display: none !important;
 }
 
 .moment-type-travel .moment-journey-item {
-  background: #fdfbf7 !important;
-  border: 1px solid rgba(178, 59, 24, 0.06) !important;
-  padding: 16px 16px 42px 16px !important; /* Thick bottom border */
-  box-shadow: 0 16px 36px -12px rgba(139, 69, 19, 0.13) !important;
-  border-radius: 4px !important; /* Sharp corners like raw paper polaroid */
+  background: #ffffff !important;
+  border-radius: 28px !important;
+  padding: 32px !important;
+  box-shadow: 0 30px 60px -15px rgba(139, 69, 19, 0.05) !important;
+  border: 1px solid rgba(139, 69, 19, 0.03) !important;
+  margin-bottom: 48px !important;
+  margin-left: 0 !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 12px !important;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), box-shadow 0.4s ease !important;
+  gap: 20px !important;
+  transform: none !important;
+  transition: transform 0.4s ease, box-shadow 0.4s ease !important;
   position: relative !important;
-  margin-bottom: 32px !important;
-  margin-left: 20px !important;
-}
-
-.moment-type-travel .moment-journey-item:nth-child(odd) {
-  transform: rotate(-1.5deg);
-}
-.moment-type-travel .moment-journey-item:nth-child(even) {
-  transform: rotate(1.8deg);
 }
 
 .moment-type-travel .moment-journey-item:hover {
-  transform: translateY(-8px) rotate(0deg) scale(1.03) !important;
-  z-index: 10 !important;
-  box-shadow: 0 24px 50px -10px rgba(15,23,42,0.18) !important;
+  transform: translateY(-4px) !important;
+  box-shadow: 0 40px 80px -12px rgba(139, 69, 19, 0.09) !important;
 }
 
 .moment-type-travel .moment-journey-photo {
   width: 100% !important;
   height: auto !important;
-  max-height: 280px !important;
+  max-height: 480px !important;
   object-fit: cover !important;
-  border-radius: 2px !important;
-  box-shadow: none !important;
-  border: 1px solid rgba(15,23,42,0.06) !important;
+  border-radius: 18px !important;
+  border: none !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03) !important;
 }
 
-/* Passport Pin Indicator */
-.moment-type-travel .moment-journey-item::before {
-  content: "📍" !important;
-  position: absolute !important;
-  left: -32px !important;
-  top: 12px !important;
-  font-size: 1.1rem !important;
-  z-index: 5 !important;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-}
-
-/* Tape style decoration */
-.moment-type-travel .moment-journey-item::after {
-  content: "" !important;
-  position: absolute !important;
-  top: -10px !important;
-  left: 50% !important;
-  transform: translateX(-50%) rotate(-4deg) !important;
-  width: 80px !important;
-  height: 22px !important;
-  background: rgba(225, 215, 185, 0.5) !important; /* translucent mask tape */
-  border-left: 1px dashed rgba(255,255,255,0.4) !important;
-  border-right: 1px dashed rgba(255,255,255,0.4) !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
-  backdrop-filter: blur(1.5px) !important;
-  -webkit-backdrop-filter: blur(1.5px) !important;
-  z-index: 3 !important;
-}
-
-.moment-type-travel .moment-journey-text {
-  font-family: 'Caveat', cursive !important;
-  font-size: 1.55rem !important;
-  color: #2e3d52 !important;
-  line-height: 1.25 !important;
-  font-weight: 600 !important;
+.moment-type-travel .moment-journey-place {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 1.6rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin-top: 4px !important;
 }
 
 .moment-type-travel .moment-journey-date {
   font-family: 'Special Elite', monospace !important;
-  font-size: 0.82rem !important;
-  color: #5d6a7d !important;
+  font-size: 0.85rem !important;
+  color: #b23b18 !important;
   background: rgba(178, 59, 24, 0.05) !important;
-  padding: 3px 10px !important;
-  border-radius: 4px !important;
+  padding: 4px 12px !important;
+  border-radius: 6px !important;
   align-self: flex-start !important;
   border: 1px solid rgba(178, 59, 24, 0.08) !important;
 }
 
-.moment-type-travel .moment-journey-place {
-  font-family: 'Special Elite', monospace !important;
+.moment-type-travel .moment-journey-text {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
   font-size: 1.05rem !important;
-  font-weight: 600 !important;
-  color: #0f172a !important;
-  margin-top: 4px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
+  color: #334155 !important;
+  line-height: 1.65 !important;
+  font-weight: 400 !important;
 }
 
-/* Passport stamp style icons */
+.moment-type-travel .moment-journey-item::after,
+.moment-type-travel .moment-journey-item::before {
+  display: none !important;
+}
+
+/* Postcard Timbro e Icone */
 .moment-type-travel .moment-card-head .moment-card-icon,
 .moment-type-travel .moment-card-icon {
   background: transparent !important;
-  border: 3px double rgba(178, 59, 24, 0.65) !important;
+  border: 2px dashed rgba(178, 59, 24, 0.4) !important;
   color: rgba(178, 59, 24, 0.75) !important;
-  width: 54px !important;
-  height: 54px !important;
+  width: 50px !important;
+  height: 50px !important;
   border-radius: 50% !important;
   display: grid !important;
   place-items: center !important;
   transform: rotate(-6deg) !important;
-  font-family: 'Special Elite', monospace !important;
-  font-size: 1.2rem !important;
-  font-weight: 800 !important;
   box-shadow: none !important;
-  position: relative !important;
-  opacity: 0.85 !important;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-}
-
-.moment-type-travel .moment-card:hover .moment-card-icon {
-  transform: scale(1.1) rotate(6deg) !important;
-  border-color: rgba(178, 59, 24, 0.85) !important;
-  color: #b23b18 !important;
 }
 
 .moment-type-travel .travel-icon-svg {
-  width: 24px !important;
-  height: 24px !important;
+  width: 22px !important;
+  height: 22px !important;
   stroke: #b23b18 !important;
   stroke-width: 2px !important;
-  transition: transform 0.3s ease, stroke 0.3s ease !important;
-  animation: floatingIcon 3s ease-in-out infinite alternate !important;
   display: block !important;
+  animation: floatingIcon 3s ease-in-out infinite alternate !important;
 }
 
 .moment-type-travel .moment-card:hover .travel-icon-svg {
@@ -2202,117 +2119,112 @@ main.moment-type-travel {
   100% { transform: translateY(-3px) rotate(3deg); }
 }
 
-/* Mappe Boarding Pass */
-.moment-type-travel .moment-place {
-  background: #ffffff !important;
-  border: 1px dashed rgba(178, 59, 24, 0.2) !important;
-  border-radius: 16px !important;
-  padding: 20px !important;
+/* Postcard theme for RSVP & Guestbook form */
+.moment-type-travel .moment-rsvp,
+.moment-type-travel .moment-guestbook {
   position: relative !important;
-  overflow: hidden !important;
-  box-shadow: 0 4px 16px rgba(139, 69, 19, 0.02) !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 14px !important;
+  background: #fdfaf4 !important;
+  border: 1px solid rgba(139, 69, 19, 0.08) !important;
+  box-shadow: 0 20px 48px -10px rgba(139, 69, 19, 0.06) !important;
 }
 
-.moment-type-travel .moment-place::before,
-.moment-type-travel .moment-place::after {
+.moment-type-travel .moment-rsvp::after,
+.moment-type-travel .moment-guestbook::after {
   content: "" !important;
   position: absolute !important;
-  top: 50% !important;
-  width: 16px !important;
-  height: 16px !important;
-  background: #faf6ee !important; /* matches grid background */
-  border-radius: 50% !important;
-  border: 1px solid rgba(178, 59, 24, 0.15) !important;
+  top: 32px !important;
+  right: 32px !important;
+  width: 60px !important;
+  height: 75px !important;
+  background: 
+    repeating-radial-gradient(circle, #e6dec9 0, #e6dec9 4px, transparent 4px, transparent 8px),
+    linear-gradient(135deg, #ede6da, #dfd5c2) !important;
+  border: 2px dashed #b23b18 !important;
+  border-radius: 4px !important;
+  opacity: 0.65 !important;
+  transform: rotate(6deg) !important;
+  display: block !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03) !important;
   z-index: 2 !important;
 }
 
-.moment-type-travel .moment-place::before {
-  left: -8px !important;
-  transform: translateY(-50%) !important;
-}
-
-.moment-type-travel .moment-place::after {
-  right: -8px !important;
-  transform: translateY(-50%) !important;
-}
-
-/* Dreams Bucket List Checklist overrides */
-.moment-type-travel .moment-dreams {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 12px !important;
-  margin-top: 16px !important;
-}
-
-.moment-type-travel .moment-dream {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  padding: 16px 20px !important;
-  background: #fdfbf7 !important;
-  border-radius: 20px !important;
-  border: 1px solid rgba(178, 59, 24, 0.04) !important;
-  transition: all 0.25s ease !important;
-}
-
-.moment-type-travel .moment-dream:hover {
-  background: #ffffff !important;
-  border-color: rgba(178, 59, 24, 0.1) !important;
-  transform: translateX(4px) !important;
-}
-
-.moment-type-travel .moment-dream-text {
+/* Forms input fields styled like paper lines */
+.moment-type-travel .moment-rsvp-form input[type="text"],
+.moment-type-travel .moment-rsvp-form textarea,
+.moment-type-travel .moment-guestbook-form input[type="text"],
+.moment-type-travel .moment-guestbook-form textarea {
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1.5px solid rgba(139, 69, 19, 0.18) !important;
+  border-radius: 0 !important;
+  padding: 8px 0 !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 0.95rem !important;
-  color: #334155 !important;
+  font-size: 0.98rem !important;
+  color: #0f172a !important;
+  transition: border-bottom-color 0.25s ease !important;
+}
+
+.moment-type-travel .moment-rsvp-form input[type="text"]:focus,
+.moment-type-travel .moment-rsvp-form textarea:focus,
+.moment-type-travel .moment-guestbook-form input[type="text"]:focus,
+.moment-type-travel .moment-guestbook-form textarea:focus {
+  border-bottom-color: #b23b18 !important;
+  outline: none !important;
+}
+
+.moment-type-travel .moment-rsvp-attending {
+  border: none !important;
+  padding: 0 !important;
+  margin: 20px 0 !important;
+}
+
+.moment-type-travel .moment-rsvp-attending legend {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 1.15rem !important;
   font-weight: 700 !important;
-  text-decoration: none !important;
-  opacity: 1 !important;
+  color: #0f172a !important;
+  margin-bottom: 12px !important;
 }
 
-.moment-type-travel .moment-dream.done .moment-dream-text {
-  color: #94a3b8 !important;
-  text-decoration: line-through !important;
-  opacity: 0.65 !important;
-}
-
-.moment-type-travel .moment-dream-mark {
-  width: 24px !important;
-  height: 24px !important;
-  border-radius: 8px !important;
-  border: 2px solid #cbd5e1 !important;
-  display: grid !important;
-  place-items: center !important;
-  font-size: 0.78rem !important;
-  font-weight: bold !important;
-  background: #ffffff !important;
-  color: transparent !important;
-  transition: all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.2) !important;
-  order: 2 !important; /* Move checklist boxes to the right like mockup */
-}
-
-.moment-type-travel .moment-dream.done .moment-dream-mark {
+/* Boarding Pass stamp style RSVP / Guestbook submit buttons */
+.moment-type-travel .moment-rsvp-submit,
+.moment-type-travel .moment-guestbook-submit {
   background: #b23b18 !important;
   color: #ffffff !important;
-  border-color: #b23b18 !important;
-  transform: scale(1.1) !important;
+  box-shadow: 0 10px 24px -4px rgba(178, 59, 24, 0.3) !important;
+  border-radius: 12px !important;
+  padding: 16px 24px !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  margin-top: 20px !important;
 }
 
-/* Gallery layout in premium 2-column grid override */
+.moment-type-travel .moment-rsvp-submit:hover,
+.moment-type-travel .moment-guestbook-submit:hover {
+  background: #962f12 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 28px -2px rgba(178, 59, 24, 0.4) !important;
+}
+
+/* Widescreen Asymmetric Gallery */
 .moment-type-travel .moment-gallery {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 16px !important;
+  gap: 20px !important;
 }
 
 .moment-type-travel .moment-gallery figure {
   margin: 0 !important;
   overflow: hidden !important;
   border-radius: 20px !important;
-  box-shadow: 0 10px 24px -8px rgba(15,23,42,0.12) !important;
+  box-shadow: 0 15px 35px -5px rgba(15,23,42,0.06) !important;
   border: 1px solid rgba(255,255,255,0.8) !important;
 }
 
@@ -2322,7 +2234,7 @@ main.moment-type-travel {
 
 .moment-type-travel .moment-gallery img {
   border-radius: 0 !important;
-  aspect-ratio: 1 !important;
+  aspect-ratio: 1.1 !important;
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
@@ -2330,33 +2242,70 @@ main.moment-type-travel {
 }
 
 .moment-type-travel .moment-gallery figure:nth-child(3n) img {
-  aspect-ratio: 16/10 !important;
+  aspect-ratio: 1.8 !important;
 }
 
 .moment-type-travel .moment-gallery figure:hover img {
-  transform: scale(1.06) !important;
+  transform: scale(1.05) !important;
 }
 
-/* Primary buttons style */
-.moment-type-travel .moment-rsvp-submit,
-.moment-type-travel .moment-guestbook-submit {
-  background: #b23b18 !important;
-  box-shadow: 0 10px 24px -4px rgba(178, 59, 24, 0.3) !important;
+/* Dreams Bucket List */
+.moment-type-travel .moment-dreams {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  margin-top: 24px !important;
+}
+
+.moment-type-travel .moment-dream {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 20px 24px !important;
+  background: #fdfaf4 !important;
   border-radius: 18px !important;
-  padding: 16px !important;
-  font-family: 'Outfit', sans-serif !important;
-  font-weight: 800 !important;
-  font-size: 0.88rem !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
-  transition: all 0.3s ease !important;
+  border: 1px solid rgba(139, 69, 19, 0.06) !important;
+  transition: all 0.25s ease !important;
 }
 
-.moment-type-travel .moment-rsvp-submit:hover,
-.moment-type-travel .moment-guestbook-submit:hover {
-  background: #962f12 !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 14px 28px -2px rgba(178, 59, 24, 0.4) !important;
+.moment-type-travel .moment-dream:hover {
+  background: #ffffff !important;
+  border-color: rgba(178, 59, 24, 0.15) !important;
+  transform: translateX(6px) !important;
+}
+
+.moment-type-travel .moment-dream-text {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 1rem !important;
+  color: #1e293b !important;
+  font-weight: 600 !important;
+}
+
+.moment-type-travel .moment-dream.done .moment-dream-text {
+  color: #94a3b8 !important;
+  text-decoration: line-through !important;
+}
+
+.moment-type-travel .moment-dream-mark {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 6px !important;
+  border: 2px solid #cbd5e1 !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 0.78rem !important;
+  font-weight: bold !important;
+  background: #ffffff !important;
+  color: transparent !important;
+  order: 2 !important;
+  transition: all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.2) !important;
+}
+
+.moment-type-travel .moment-dream.done .moment-dream-mark {
+  background: #b23b18 !important;
+  color: #ffffff !important;
+  border-color: #b23b18 !important;
+  transform: scale(1.08) !important;
 }
 
 

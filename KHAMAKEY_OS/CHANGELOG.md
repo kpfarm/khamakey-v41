@@ -17,11 +17,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Complemento del trigger v85: le provvigioni `pending` generate sugli ordini ora sono gestibili nel pannello «Quanto spetta». Riepilogo (da pagare / approvate / pagate / voci), filtro per stato (default: da pagare), ricerca per agente/ordine, colonna Ordine e azioni per riga (Approva → Segna pagata → Annulla) con transizioni contestuali e update ottimistico + rollback.
   - Aggiornamento stato via update diretto (RLS `commissions.write` esistente, nessuna RPC nuova). Solo `pages/admin.*` — `worker.js` non toccato (lasciato ad Antigravity).
   - Verificato end-to-end a livello DB: ordine test 100€ → L1 10€ + L2 2€ (regole standard), idempotenza confermata, dati test rimossi.
-- **Overhaul completo template Viaggi 2026 (2026-07-12, Antigravity)** — deployato (Worker v125)
-  - **Sfondo Gradiente Dinamico ("Sunset to Dawn")**: Introdotto uno sfondo cangiante che sfuma da un blu indaco intenso del tramonto nella parte superiore, fino a crema sabbia dorata `#faf6ee` ed alba a fondo pagina, sormontato da una griglia a punti terracotta.
-  - **Icone Vettoriali SVG Animate Custom**: Sostituite le emoji generiche con icone SVG lineari fatte a mano (es. bussola, mongolfiera, macchina fotografica, boarding ticket) inserite all'interno di un anello in stile timbro postale che oscilla lentamente.
-  - **Hero Immersiva con Floating Particles**: Copertina estesa a `440px` ad altezza variabile con taglio curvo ed un effetto stellato/particellare animato in CSS che fluttua costantemente.
-  - **Layout & Mosaico Galleria**: Organizzazione asimmetrica a mosaico per le foto e didascalie Polaroid rialzate con effetto 3D. Rimossa la barra inferiore ed il modale per mantenere intatto il menu superiore standard.
+- **Overhaul completo template Viaggi 2026 (2026-07-13, Antigravity)** — deployato (Worker v125)
+  - **Struttura Travel Story Landing Page**: Ridisegnato il layout per simulare una moderna landing page dei ricordi personali. Hero cinematica a schermo intero (`80vh`) con grandi titoli in carattere Serif elegante.
+  - **Sezioni Timeline a Capitoli**: Ogni tappa del viaggio è impaginata in modo ordinato come un capitolo editoriale spazioso, con foto panoramiche orizzontali ad alta definizione e ampi spazi bianchi per una leggibilità premium.
+  - **Moduli Postcard per RSVP e Guestbook**: RSVP e Guestbook ricreati graficamente come cartoline postali vintage con uno sfondo lino, campi a righe sottili e un francobollo illustrato con timbro datato nell'angolo in alto a destra.
+  - **Icone SVG e Sfondo Pastello**: Sfondo sfumato pastello desaturato e morbido unito ad icone outline vettoriali animate (bussola, fotocamera, cartolina) per i titoli delle sezioni. Rimosso ogni riferimento o menu in stile commerciale.
 
 ### Changed
 - **Costo API OpenAI ridotto ~90% (2026-07-12, Claude Code)** — deployato (Worker v124)

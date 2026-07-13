@@ -3,7 +3,15 @@
   --ink:#172036; --muted:#64748b; --border:#dfe6ef; --bg:#f4f7fa; --soft:#f8fafc;
 }
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:"DM Sans",sans-serif;color:var(--ink);background:var(--bg)}
+html,body{
+  margin:0;
+  min-height:100%;
+  font-family:"DM Sans",sans-serif;
+  color:var(--ink);
+  background: radial-gradient(circle at 5% 5%, rgba(77, 184, 232, 0.04) 0%, transparent 40%),
+              radial-gradient(circle at 95% 95%, rgba(47, 127, 29, 0.04) 0%, transparent 40%),
+              var(--bg);
+}
 [hidden]{display:none!important}
 button,input,select{font:inherit}
 button{cursor:pointer}
@@ -11,14 +19,47 @@ a{color:var(--navy)}
 
 /* Login gate */
 .gate{min-height:100dvh;display:grid;place-items:center;padding:24px}
-.gate-card{width:min(94vw,400px);background:#fff;border:1px solid var(--border);border-radius:18px;padding:30px;box-shadow:0 18px 60px rgba(27,42,94,.10);text-align:center}
+.gate-card{
+  width:min(94vw,400px);
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 30px;
+  box-shadow: 0 20px 50px -10px rgba(27,42,94,.12) !important;
+  text-align: center;
+}
 .gate-card img{width:min(200px,60%);height:auto;margin-bottom:14px}
 .gate-card h1{font-family:"Syne",sans-serif;color:var(--navy);font-size:1.5rem;margin:0 0 6px}
 .gate-card p{color:var(--muted);line-height:1.5;margin:0 0 18px}
 .gate-form{display:grid;gap:12px;text-align:left}
 .gate-form label{display:grid;gap:6px;font-size:.82rem;font-weight:700;color:var(--navy)}
-.gate-form input{border:1px solid var(--border);border-radius:10px;padding:12px;font-size:1rem}
-.gate-form button{border:0;border-radius:10px;background:var(--green);color:#fff;padding:13px;font-weight:800}
+.gate-form input{
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 1rem;
+  background: var(--soft);
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease;
+  outline: none;
+}
+.gate-form input:focus {
+  border-color: var(--green);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(47, 127, 29, 0.15);
+}
+.gate-form button{
+  border: 0;
+  border-radius: 10px;
+  background: var(--green);
+  color: #fff;
+  padding: 13px;
+  font-weight: 800;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+.gate-form button:hover{background:var(--green-dark)}
+.gate-form button:active{transform:scale(0.98)}
 .gate-msg{font-size:.85rem;color:#b42318;min-height:1.1em;text-align:center}
 
 /* Portal shell */
@@ -28,29 +69,54 @@ a{color:var(--navy)}
 .portal-hello{font-family:"Syne",sans-serif;color:var(--navy);font-size:1.35rem;margin:0}
 .portal-sub{color:var(--muted);font-size:.85rem;margin:2px 0 0}
 .badge{display:inline-block;font-size:.66rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:20px;background:#EFF6FF;color:#175CD3;margin-left:6px}
-.logout{border:1px solid var(--border);background:#fff;border-radius:10px;padding:8px 14px;font-weight:700;color:var(--navy)}
+.logout{border:1px solid var(--border);background:#fff;border-radius:10px;padding:8px 14px;font-weight:700;color:var(--navy);transition:background .2s, border-color .2s;}
+.logout:hover{background:var(--soft);border-color:var(--navy)}
 
 .help-lead{margin:0 0 16px;color:var(--muted);line-height:1.5;font-size:.92rem}
 .help-lead strong,.section-help strong{color:var(--navy)}
 
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
-.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px}
+.card{
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 4px 18px -4px rgba(27,42,94,0.04);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.card:hover{
+  box-shadow: 0 12px 28px -6px rgba(27,42,94,0.07);
+  transform: translateY(-2px);
+}
 .card span{display:block;font-size:.7rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
 .card strong{display:block;font-size:1.5rem;color:var(--navy);margin-top:6px;font-variant-numeric:tabular-nums}
 .card.pending strong{color:#B54708}
 .card.paid strong{color:#027A48}
 
 .tabs{display:flex;gap:6px;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap}
-.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;font-weight:800;color:var(--muted)}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;font-weight:800;color:var(--muted);transition:color .2s, border-bottom-color .2s}
+.tabs button:hover{color:var(--navy)}
 .tabs button.active{color:var(--navy);border-bottom-color:var(--green)}
 
-.section{background:#fff;border:1px solid var(--border);border-radius:14px;padding:6px 4px}
+.section{
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 8px 10px;
+  box-shadow: 0 4px 18px -4px rgba(27,42,94,0.04);
+}
 .section-help{margin:8px 10px 12px;color:var(--muted);line-height:1.45;font-size:.84rem}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
 th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
 th{font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:800}
 td strong{color:var(--navy)}
+tbody tr{transition:background-color .15s ease}
+tbody tr:hover td{background-color:var(--soft)}
 tbody tr:last-child td{border-bottom:0}
 .num{font-variant-numeric:tabular-nums}
 
@@ -69,7 +135,9 @@ tbody tr:last-child td{border-bottom:0}
 
 /* Tab login / primo accesso */
 .gate-tabs{display:flex;gap:6px;margin:0 0 16px;border-bottom:1px solid var(--border)}
-.gate-tabs button{flex:1;background:none;border:0;border-bottom:2px solid transparent;padding:10px;font-weight:800;color:var(--muted)}
+.gate-tabs button{flex:1;background:none;border:0;border-bottom:2px solid transparent;padding:10px;font-weight:800;color:var(--muted);transition:color .2s, border-bottom-color .2s}
+.gate-tabs button:hover{color:var(--navy)}
 .gate-tabs button.active{color:var(--navy);border-bottom-color:var(--green)}
 .gate-hint{font-size:.82rem;color:var(--muted);line-height:1.5;margin:0 0 4px;text-align:left}
-.link-btn{background:none;border:0;color:var(--navy);font-weight:700;font-size:.82rem;text-decoration:underline;padding:2px}
+.link-btn{background:none;border:0;color:var(--navy);font-weight:700;font-size:.82rem;text-decoration:underline;padding:2px;transition:color .2s}
+.link-btn:hover{color:var(--green)}

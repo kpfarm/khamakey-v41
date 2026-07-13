@@ -30,6 +30,21 @@ async function showGate(message){
   if(message) gateMsg.textContent = message;
 }
 
+const signupForm = document.getElementById("signupForm");
+const signupMsg = document.getElementById("signupMsg");
+
+// Switch fra Accedi / Primo accesso
+document.querySelectorAll(".gate-tabs button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const tab = btn.dataset.gateTab;
+    document.querySelectorAll(".gate-tabs button").forEach(b => b.classList.toggle("active", b === btn));
+    loginForm.hidden = tab !== "login";
+    signupForm.hidden = tab !== "signup";
+    gateMsg.textContent = "";
+    signupMsg.textContent = "";
+  });
+});
+
 loginForm.addEventListener("submit", async event => {
   event.preventDefault();
   gateMsg.textContent = "Accesso in corso…";
@@ -42,6 +57,39 @@ loginForm.addEventListener("submit", async event => {
   }
   gateMsg.textContent = "";
   await enterPortal();
+});
+
+signupForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  signupMsg.textContent = "Creazione accesso…";
+  const email = document.getElementById("signupEmail").value.trim();
+  const password = document.getElementById("signupPassword").value;
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if(error){
+    signupMsg.textContent = /registered|already/i.test(error.message)
+      ? "Questa email ha già un accesso. Usa «Accedi» o «Password dimenticata»."
+      : "Non è stato possibile creare l'accesso. Riprova.";
+    return;
+  }
+  // Se serve conferma email, non c'è ancora sessione: guida l'utente.
+  if(!data?.session){
+    signupMsg.textContent = "Ti abbiamo inviato un'email di conferma: aprila per attivare l'accesso, poi torna qui e accedi.";
+    return;
+  }
+  signupMsg.textContent = "";
+  await enterPortal();
+});
+
+document.getElementById("forgotBtn").addEventListener("click", async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  if(!email){
+    gateMsg.textContent = "Scrivi prima la tua email qui sopra, poi premi «Password dimenticata».";
+    return;
+  }
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: location.origin + "/reseller.html" });
+  gateMsg.textContent = error
+    ? "Non è stato possibile inviare l'email. Controlla l'indirizzo."
+    : "Ti abbiamo inviato un'email per reimpostare la password.";
 });
 
 document.getElementById("logoutBtn").addEventListener("click", async () => {

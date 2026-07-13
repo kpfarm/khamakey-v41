@@ -62,3 +62,10 @@ tbody tr:last-child td{border-bottom:0}
 @media (max-width:640px){
   .cards{grid-template-columns:1fr}
 }
+
+/* Tab login / primo accesso */
+.gate-tabs{display:flex;gap:6px;margin:0 0 16px;border-bottom:1px solid var(--border)}
+.gate-tabs button{flex:1;background:none;border:0;border-bottom:2px solid transparent;padding:10px;font-weight:800;color:var(--muted)}
+.gate-tabs button.active{color:var(--navy);border-bottom-color:var(--green)}
+.gate-hint{font-size:.82rem;color:var(--muted);line-height:1.5;margin:0 0 4px;text-align:left}
+.link-btn{background:none;border:0;color:var(--navy);font-weight:700;font-size:.82rem;text-decoration:underline;padding:2px}

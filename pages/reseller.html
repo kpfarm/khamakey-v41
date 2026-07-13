@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="reseller.css?v=1">
+  <link rel="stylesheet" href="reseller.css?v=2">
 </head>
 <body>
   <!-- Login gate -->
@@ -17,7 +17,14 @@
     <div class="gate-card">
       <img src="khamakey-wordmark-dark.png" alt="KhamaKey">
       <h1>Area Rivenditori</h1>
-      <p>Accedi con l'email del tuo account partner KhamaKey per vedere provvigioni, rete e consegne.</p>
+      <p>Vedi le tue provvigioni, la tua rete e le consegne. Usa l'email che ti ha comunicato KhamaKey.</p>
+
+      <div class="gate-tabs" role="tablist">
+        <button class="active" type="button" data-gate-tab="login">Accedi</button>
+        <button type="button" data-gate-tab="signup">Primo accesso</button>
+      </div>
+
+      <!-- Login -->
       <form class="gate-form" id="loginForm">
         <label>Email
           <input id="loginEmail" type="email" autocomplete="email" required>
@@ -26,7 +33,21 @@
           <input id="loginPassword" type="password" autocomplete="current-password" minlength="6" required>
         </label>
         <button type="submit">Accedi</button>
+        <button class="link-btn" type="button" id="forgotBtn">Password dimenticata?</button>
         <p class="gate-msg" id="gateMsg"></p>
+      </form>
+
+      <!-- Primo accesso / registrazione -->
+      <form class="gate-form" id="signupForm" hidden>
+        <p class="gate-hint">Crea la tua password. <strong>Usa la stessa email</strong> che ti ha dato KhamaKey, così vedrai subito le tue provvigioni.</p>
+        <label>Email
+          <input id="signupEmail" type="email" autocomplete="email" required>
+        </label>
+        <label>Scegli una password
+          <input id="signupPassword" type="password" autocomplete="new-password" minlength="6" required>
+        </label>
+        <button type="submit">Crea accesso</button>
+        <p class="gate-msg" id="signupMsg"></p>
       </form>
     </div>
   </main>
@@ -89,6 +110,6 @@
     </div>
   </main>
 
-  <script type="module" src="reseller.js?v=1"></script>
+  <script type="module" src="reseller.js?v=2"></script>
 </body>
 </html>

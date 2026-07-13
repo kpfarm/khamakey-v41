@@ -1862,7 +1862,35 @@ main.moment-type-anniversary {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Hero Section: Keep title white for contrast, set Playfair Display font */
+/* Hero Section: Dynamic Overlap, Gradient fade and Title styling */
+.moment-type-love .moment-hero,
+.moment-type-wedding .moment-hero,
+.moment-type-anniversary .moment-hero {
+  position: relative !important;
+  height: 80vh !important;
+  max-height: 660px !important;
+  min-height: 420px !important;
+  margin-bottom: -60px !important; /* Overlap: tira le sezioni verso l'alto */
+  z-index: 1 !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  padding-bottom: 120px !important; /* Spazio extra per compensare l'overlap */
+}
+
+.moment-type-love .moment-hero-overlay,
+.moment-type-wedding .moment-hero-overlay,
+.moment-type-anniversary .moment-hero-overlay {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.45) 55%, rgba(15, 23, 42, 0.7) 80%, ${colors.surface} 100%) !important;
+  z-index: 2 !important;
+}
+
+.moment-type-love .moment-content,
+.moment-type-wedding .moment-content,
+.moment-type-anniversary .moment-content {
+  position: relative !important;
+  z-index: 5 !important;
+}
+
 .moment-type-love .moment-hero h1,
 .moment-type-wedding .moment-hero h1,
 .moment-type-anniversary .moment-hero h1 {
@@ -2053,18 +2081,25 @@ main.moment-type-travel {
   min-height: 440px !important;
   clip-path: none !important;
   overflow: hidden !important;
-  margin-bottom: 48px !important;
+  margin-bottom: -60px !important; /* Overlap: tira le sezioni verso l'alto */
   z-index: 1 !important;
   display: flex !important;
   align-items: flex-end !important;
-  padding-bottom: 80px !important;
+  padding-bottom: 120px !important; /* Spazio extra per compensare l'overlap */
   box-shadow: none !important;
 }
 
 .moment-type-travel .moment-hero-overlay {
-  background: linear-gradient(180deg, rgba(16, 11, 38, 0.1) 0%, rgba(16, 11, 38, 0.4) 50%, rgba(16, 11, 38, 0.85) 100%) !important;
+  background: linear-gradient(180deg, rgba(16, 11, 38, 0.1) 0%, rgba(16, 11, 38, 0.4) 55%, rgba(16, 11, 38, 0.75) 80%, ${colors.surface} 100%) !important;
   z-index: 2 !important;
 }
+
+.moment-type-travel .moment-content {
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+
 
 .moment-type-travel .moment-hero-content {
   position: relative !important;

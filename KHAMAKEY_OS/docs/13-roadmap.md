@@ -86,6 +86,7 @@
 | 2026-07-13 | Codex | **Collaborazione agenti**: rafforzato bootstrap/passaggio consegne e creato prompt per nuovi agenti |
 | 2026-07-14 | Codex | **Audit Admin**: creato `docs/18-admin-audit.md` con stato funzioni, gap e piano miglioramento |
 | 2026-07-14 | Codex | **Admin v128 / Business v118 / Moments v114 / SQL v89**: console supporto operativa e ticket assistenza apribili da editor account |
+| 2026-07-14 | Codex | **Piano Admin Console Operativa**: creato `docs/19-admin-console-operativa.md`, roadmap a blocchi 1-2 sezioni per volta |
 
 ---
 

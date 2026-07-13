@@ -64,6 +64,7 @@ KHAMAKEY_OS/
 | Copywriting e Vendita | [`docs/16-sales-copy-love.md`](docs/16-sales-copy-love.md) |
 | Creative Engine Antigravity | [`docs/17-creative-engine-antigravity.md`](docs/17-creative-engine-antigravity.md) |
 | Audit Admin | [`docs/18-admin-audit.md`](docs/18-admin-audit.md) |
+| Piano Admin Console Operativa | [`docs/19-admin-console-operativa.md`](docs/19-admin-console-operativa.md) |
 
 ## Prompt operativi
 

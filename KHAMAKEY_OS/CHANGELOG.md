@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Piano Admin Console Operativa (2026-07-14, Codex)** — preparato
+  - Creato `docs/19-admin-console-operativa.md` con ricontrollo delle 19 sezioni Admin, definizione di "sezione operativa" e roadmap a blocchi da 1-2 sezioni per volta.
+  - Confermato che il supporto e' attivo sia da Business editor sia da Moments editor; primo blocco consigliato: Supporto + CRM.
 - **Admin v128 + Supporto operativo (2026-07-14, Codex)** — preparato/applicato
   - La tab Admin `Supporto` e' diventata console operativa: ricerca, filtri stato/priorita', viste rapide, gestione stato/priorita' ticket e nota interna sulla timeline cliente.
   - Business editor v118: tab `Assistenza` nel modal Account; il ticket viene salvato dal parent `pages/app.js` con `business_id`, `profile_id`, `source='business_editor'`.

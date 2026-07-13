@@ -926,24 +926,24 @@ function renderMomentDecor(state){
 
 function resolveMomentPalette(state) {
   const palettes = {
-    amore:{go:"#DC143C",g2:"#B22222",ro:"#CCCCCC",bl:"#CC0000",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#CC0000",mu:"#666666"},
-    rubino:{go:"#B22222",g2:"#CC0000",ro:"#DDDDDD",bl:"#5C0000",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#8B0000",mu:"#666666"},
-    gentleman:{go:"#666666",g2:"#333333",ro:"#DDDDDD",bl:"#EEEEEE",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#333333",mu:"#666666"},
-    uomo:{go:"#003366",g2:"#000080",ro:"#CCCCCC",bl:"#E8ECF0",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#000080",mu:"#666666"},
-    aurora:{go:"#663399",g2:"#4B0082",ro:"#DDDDDD",bl:"#EDE7F6",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#4B0082",mu:"#666666"},
-    terracotta:{go:"#A0522D",g2:"#8B4513",ro:"#DDDDDD",bl:"#F5E6D3",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#8B4513",mu:"#666666"},
-    rosa:{go:"#C71585",g2:"#DB2777",ro:"#DDDDDD",bl:"#8B0045",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#C71585",mu:"#666666"},
-    blu:{go:"#0066CC",g2:"#003366",ro:"#CCCCCC",bl:"#E6EEF7",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#003366",mu:"#666666"},
-    salvia:{go:"#228B22",g2:"#006400",ro:"#CCCCCC",bl:"#E8F5E9",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#228B22",mu:"#666666"},
-    bordeaux:{go:"#800020",g2:"#660019",ro:"#DDDDDD",bl:"#4A0010",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#660019",mu:"#666666"},
-    perla:{go:"#666666",g2:"#555555",ro:"#DDDDDD",bl:"#F0F0F0",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#555555",mu:"#666666"},
-    lavanda:{go:"#663399",g2:"#7B68EE",ro:"#DDDDDD",bl:"#F0E6FF",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#663399",mu:"#666666"},
-    cipria:{go:"#A0522D",g2:"#8B4513",ro:"#DDDDDD",bl:"#FAF0E6",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#8B4513",mu:"#666666"},
-    corallo:{go:"#FF6600",g2:"#CC5500",ro:"#DDDDDD",bl:"#FFF0E6",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#CC5500",mu:"#666666"},
-    miele:{go:"#DAA520",g2:"#006400",ro:"#DDDDDD",bl:"#006400",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#006400",mu:"#666666"},
-    notte:{go:"#444444",g2:"#222222",ro:"#DDDDDD",bl:"#111111",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#000000",mu:"#888888"},
-    neve:{go:"#666666",g2:"#999999",ro:"#DDDDDD",bl:"#F5F5F5",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#696969",mu:"#666666"},
-    classic:{go:"#4CAF27",g2:"#1B2A5E",ro:"#DDDDDD",bl:"#F0F0F0",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#1B2A5E",mu:"#666666"}
+    amore:{go:"#9f1c30",g2:"#72101e",ro:"#DDDDDD",bl:"#fcf2f4",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#9f1c30",mu:"#64748b"},
+    rubino:{go:"#881337",g2:"#4c0519",ro:"#DDDDDD",bl:"#fff1f2",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#881337",mu:"#64748b"},
+    gentleman:{go:"#475569",g2:"#1e293b",ro:"#DDDDDD",bl:"#f8fafc",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#334155",mu:"#64748b"},
+    uomo:{go:"#1e3a8a",g2:"#172554",ro:"#CCCCCC",bl:"#eff6ff",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#1e3a8a",mu:"#64748b"},
+    aurora:{go:"#6b21a8",g2:"#4a044e",ro:"#DDDDDD",bl:"#faf5ff",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#6b21a8",mu:"#64748b"},
+    terracotta:{go:"#b23b18",g2:"#8b2609",ro:"#DDDDDD",bl:"#f4efe6",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#b23b18",mu:"#64748b"},
+    rosa:{go:"#be185d",g2:"#831843",ro:"#DDDDDD",bl:"#fdf2f8",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#be185d",mu:"#64748b"},
+    blu:{go:"#1d4ed8",g2:"#1e3a8a",ro:"#CCCCCC",bl:"#eff6ff",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#1d4ed8",mu:"#64748b"},
+    salvia:{go:"#5a7164",g2:"#3b4d42",ro:"#CCCCCC",bl:"#e9edea",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#5a7164",mu:"#64748b"},
+    bordeaux:{go:"#800c2a",g2:"#500315",ro:"#DDDDDD",bl:"#faf2f4",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#800c2a",mu:"#64748b"},
+    perla:{go:"#4b5563",g2:"#374151",ro:"#DDDDDD",bl:"#f3f4f6",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#4b5563",mu:"#64748b"},
+    lavanda:{go:"#7c5295",g2:"#4a2c5d",ro:"#DDDDDD",bl:"#f7f4fa",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#7c5295",mu:"#64748b"},
+    cipria:{go:"#a87c66",g2:"#704a37",ro:"#DDDDDD",bl:"#FAF5F2",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#a87c66",mu:"#64748b"},
+    corallo:{go:"#e05a47",g2:"#ab3525",ro:"#DDDDDD",bl:"#fdf4f2",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#e05a47",mu:"#64748b"},
+    miele:{go:"#c69214",g2:"#2b4237",ro:"#DDDDDD",bl:"#fdfbf2",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#c69214",mu:"#64748b"},
+    notte:{go:"#334155",g2:"#0f172a",ro:"#DDDDDD",bl:"#0f172a",bl2:"#FFFFFF",card:"#1e293b",in:"#f8fafc",hero:"#0f172a",mu:"#94a3b8"},
+    neve:{go:"#475569",g2:"#64748b",ro:"#DDDDDD",bl:"#f8fafc",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#475569",mu:"#64748b"},
+    classic:{go:"#059669",g2:"#022c22",ro:"#DDDDDD",bl:"#f0fdf4",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#059669",mu:"#64748b"},
   };
   const variants = {
     caldo:{

@@ -22,6 +22,7 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - **Sezioni Timeline a Capitoli**: Ogni tappa del viaggio è impaginata in modo ordinato come un capitolo editoriale spazioso, con foto panoramiche orizzontali ad alta definizione e ampi spazi bianchi per una leggibilità premium.
   - **Moduli Postcard per RSVP e Guestbook**: RSVP e Guestbook ricreati graficamente come cartoline postali vintage con uno sfondo lino, campi a righe sottili e un francobollo illustrato con timbro datato nell'angolo in alto a destra.
   - **Icone SVG e Sfondo Pastello**: Sfondo sfumato pastello desaturato e morbido unito ad icone outline vettoriali animate (bussola, fotocamera, cartolina) per i titoli delle sezioni. Rimosso ogni riferimento o menu in stile commerciale.
+  - **Riprogettazione Palette Colore Globali**: Ridisegnati i codici esadecimali di tutte le 18 palette colore dell'editor in `pages/moment-themes.js` e `worker/worker.js` (es. terracotta, salvia, amore, corallo, miele, lavanda) sostituendo i colori HTML primari e saturi con tonalità polverose, eleganti e moderne per il 2026.
 
 ### Changed
 - **Costo API OpenAI ridotto ~90% (2026-07-12, Claude Code)** — deployato (Worker v124)

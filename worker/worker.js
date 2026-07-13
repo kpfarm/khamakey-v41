@@ -1870,7 +1870,7 @@ body.nav-open{overflow:hidden}
 .moment-media-list .moment-media-card{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:76px;padding:12px;background:${c.cardSoft};border:1px solid ${c.line};border-radius:14px;box-shadow:none;transition:border-color .2s,background .2s}
 .moment-media-list .moment-media-card:hover{background:${c.surface};border-color:${c.lineStrong}}
 .moment-media-card-audio{min-height:88px}
-.moment-footer{text-align:center;color:${c.muted};font-family:${f.ui};font-size:12px;padding:16px 20px max(28px,env(safe-area-inset-bottom))}
+.moment-footer{text-align:center;color:color-mix(in srgb, ${c.bl} 35%, ${c.in}) !important;opacity:0.75;font-family:${f.ui};font-size:12px;padding:16px 20px max(28px,env(safe-area-inset-bottom))}
 @media(prefers-reduced-motion:reduce){.hero-in,.rv{opacity:1;transform:none;transition:none}.rv.on .moment-journey-item,.rv.on .moment-promise,.rv.on .moment-ritual,.rv.on .moment-number,.rv.on .moment-dream{animation:none}.moment-sealed-icon,.moment-decor-item{animation:none}.moment-decor{display:none}}
 @media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:24px;box-shadow:0 24px 70px rgba(17,32,65,.08);background:${c.surface}}.moment-content{padding:20px 20px 36px}.moment-gallery-scroll img,.moment-gallery-scroll .moment-gallery-figure img{width:260px;height:320px}}
 .moment-cut-arco #moment-hero {
@@ -2657,6 +2657,62 @@ main.moment-type-travel {
   color: ${c.muted} !important;
   background: transparent !important;
   border: 0 !important;
+}
+
+/* 6. FAMILY / MOM / DAD (Warm & Cozy) */
+main.moment-type-family,
+main.moment-type-mom,
+main.moment-type-dad {
+  background: 
+    radial-gradient(circle at 12% 24%, color-mix(in srgb, ${c.go} 6%, transparent) 0%, transparent 45%),
+    radial-gradient(circle at 88% 76%, color-mix(in srgb, ${c.go} 8%, transparent) 0%, transparent 45%),
+    linear-gradient(180deg, ${c.surface} 0%, ${c.bl} 100%) !important;
+  padding-bottom: 80px !important;
+}
+main.moment-type-family .moment-card,
+main.moment-type-mom .moment-card,
+main.moment-type-dad .moment-card,
+main.moment-type-family .moment-counter,
+main.moment-type-mom .moment-counter,
+main.moment-type-dad .moment-counter,
+main.moment-type-family .moment-countdown,
+main.moment-type-mom .moment-countdown,
+main.moment-type-dad .moment-countdown,
+main.moment-type-family .moment-quote-wrap,
+main.moment-type-mom .moment-quote-wrap,
+main.moment-type-dad .moment-quote-wrap,
+main.moment-type-family .moment-signature,
+main.moment-type-mom .moment-signature,
+main.moment-type-dad .moment-signature {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 16px 40px -12px color-mix(in srgb, ${c.go} 5%, rgba(0,0,0,0.03)) !important;
+  border-radius: 20px !important;
+}
+
+/* 7. PET (Playful & Round) */
+main.moment-type-pet {
+  background: 
+    radial-gradient(circle at 25% 25%, color-mix(in srgb, ${c.go} 8%, transparent) 0%, transparent 40%),
+    radial-gradient(circle at 75% 75%, color-mix(in srgb, ${c.go} 10%, transparent) 0%, transparent 45%),
+    linear-gradient(180deg, ${c.surface} 0%, ${c.bl} 100%) !important;
+  padding-bottom: 80px !important;
+}
+main.moment-type-pet .moment-card,
+main.moment-type-pet .moment-counter,
+main.moment-type-pet .moment-countdown,
+main.moment-type-pet .moment-quote-wrap,
+main.moment-type-pet .moment-signature {
+  background: #ffffff !important;
+  border-radius: 30px !important;
+  border: 1px solid color-mix(in srgb, ${c.go} 8%, transparent) !important;
+  box-shadow: 0 12px 32px -8px color-mix(in srgb, ${c.go} 6%, rgba(0,0,0,0.02)) !important;
+}
+main.moment-type-pet .moment-card-icon {
+  background: color-mix(in srgb, ${c.go} 10%, transparent) !important;
+  border-radius: 50% !important;
+  padding: 8px !important;
+  display: inline-flex !important;
 }
 `;
 }

@@ -363,6 +363,49 @@
       z-index: 25;
     }
 
+
+    /* 15. Diagonale con Linea d'Accento Parallela */
+    .trans-accents-slant .moment-hero {
+      clip-path: polygon(0 0, 100% 0, 100% 91%, 0 97%);
+      margin-bottom: -15px;
+    }
+    .accent-slant-line {
+      display: none;
+    }
+    .trans-accents-slant .accent-slant-line {
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      transform: translateY(100%);
+      height: 40px;
+      z-index: 25;
+    }
+    .accent-slant-line svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* 16. Doppia Diagonale a V (V-Cut) */
+    .trans-v-cut .moment-hero {
+      clip-path: polygon(0 0, 100% 0, 100% 92%, 50% 98%, 0 92%);
+      margin-bottom: -15px;
+    }
+
+    /* 17. Diagonale Concava (Curvata) */
+    .trans-concave-slant .moment-hero {
+      clip-path: polygon(0 0, 100% 0, 100% 90%, 65% 91.5%, 40% 94%, 20% 96.5%, 0 98.5%);
+      margin-bottom: -15px;
+    }
+
+    /* 18. Diagonale Sfalsata a Gradino */
+    .trans-step-slant .moment-hero {
+      clip-path: polygon(0 0, 100% 0, 100% 90%, 55% 91.5%, 55% 94.5%, 0 96%);
+      margin-bottom: -15px;
+    }
+
   </style>
 </head>
 <body>
@@ -387,6 +430,10 @@
         <button class="btn-opt" onclick="setTransition('folder')">12. Linguetta Archivio</button>
         <button class="btn-opt" onclick="setTransition('ribbon')">13. Coda di Rondine</button>
         <button class="btn-opt" onclick="setTransition('blur')">14. Vetro Sfocato</button>
+        <button class="btn-opt" onclick="setTransition('accents-slant')">15. Diagonale + Linea Accento</button>
+        <button class="btn-opt" onclick="setTransition('v-cut')">16. Doppia Diagonale a V</button>
+        <button class="btn-opt" onclick="setTransition('concave-slant')">17. Diagonale Concava</button>
+        <button class="btn-opt" onclick="setTransition('step-slant')">18. Diagonale a Gradino</button>
       </div>
     </div>
 
@@ -420,6 +467,12 @@
       <div class="folder-tab-el">Giappone 2026</div>
 
       <div class="blur-bar-el"></div>
+      
+      <div class="accent-slant-line">
+        <svg viewBox="0 0 412 40" preserveAspectRatio="none">
+          <line x1="0" y1="36" x2="412" y2="12" stroke="var(--primary)" stroke-width="2" />
+        </svg>
+      </div>
     </header>
 
     <!-- Page Content -->

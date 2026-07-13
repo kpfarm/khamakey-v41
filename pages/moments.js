@@ -382,6 +382,7 @@ function mergedState(row){
     colorPalette:state.colorPalette || legacyThemeToPalette(state.theme || "classic"),
     themeVariant:state.themeVariant || "chiaro",
     heroStyle:state.heroStyle || "classico",
+    heroCut:state.heroCut || "dritto",
     fontPair:Object.keys(FONT_PAIRS).includes(state.fontPair) ? state.fontPair : "classic",
     pageDecor:PAGE_DECOR_PRESETS[state.pageDecor] ? state.pageDecor : "none",
     show_together_counter:Boolean(state.show_together_counter),
@@ -1126,7 +1127,8 @@ function readDesignFields(formNode){
     colorPalette: formNode.querySelector("#colorPaletteInput")?.value || "classic",
     themeVariant: formNode.querySelector('[name="theme_variant"]')?.value || "chiaro",
     fontPair: formNode.querySelector('[name="font_pair"]')?.value || "classic",
-    heroStyle: formNode.querySelector('[name="hero_style"]')?.value || "classico"
+    heroStyle: formNode.querySelector('[name="hero_style"]')?.value || "classico",
+    heroCut: formNode.querySelector('[name="hero_cut"]')?.value || "dritto"
   };
 }
 
@@ -1394,7 +1396,17 @@ function renderDesignPanel(state){
           ${Object.entries(HERO_STYLES).map(([value,label])=>option(value,label,state.heroStyle || "classico")).join("")}
         </select>
       </label>
-      <p class="field-hint">La copertina è la prima cosa che si vede aprendo il link NFC.</p>
+      <label>Raccordo fondo copertina
+        <select name="hero_cut">
+          ${[
+            ["dritto", "Dritto classico"],
+            ["divider", "Divisore con icona"],
+            ["arco", "Taglio ad arco"],
+            ["diagonale", "Taglio diagonale"]
+          ].map(([value,label])=>option(value,label,state.heroCut || "dritto")).join("")}
+        </select>
+      </label>
+      <p class="field-hint">Scegli come si raccorda la foto con il corpo della pagina su smartphone.</p>
     </details>
   </div>`;
 }
@@ -2675,6 +2687,7 @@ function readFormState(formNode){
     colorPalette:String(form.get("color_palette") || "classic"),
     themeVariant:String(form.get("theme_variant") || "chiaro"),
     heroStyle:String(form.get("hero_style") || "classico"),
+    heroCut:String(form.get("hero_cut") || "dritto"),
     fontPair:String(form.get("font_pair") || "classic"),
     pageDecor:String(form.get("page_decor") || "none"),
     show_together_counter:form.get("show_together_counter") === "on",

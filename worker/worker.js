@@ -817,21 +817,34 @@ function renderMomentPage(page, origin) {
   const ogImage = coverUrl || profileUrl || "";
   const navClass = navHtml ? " has-nav" : "";
 
+  let heroCut = state.heroCut;
+  if (!heroCut) {
+    const typeKey = String(state.momentType || momentType).trim().toLowerCase();
+    if (typeKey === "travel" || typeKey === "love" || typeKey === "anniversary" || typeKey === "wedding") {
+      heroCut = "divider";
+    } else {
+      heroCut = "dritto";
+    }
+  }
+
   let dividerHtml = "";
-  if (state.momentType === "travel") {
-    dividerHtml = `
-      <div class="moment-hero-divider" aria-hidden="true">
-        <span class="moment-divider-line"></span>
-        <span class="moment-divider-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
-        <span class="moment-divider-line"></span>
-      </div>`;
-  } else if (state.momentType === "love" || state.momentType === "anniversary" || state.momentType === "wedding") {
-    dividerHtml = `
-      <div class="moment-hero-divider" aria-hidden="true">
-        <span class="moment-divider-line"></span>
-        <span class="moment-divider-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
-        <span class="moment-divider-line"></span>
-      </div>`;
+  if (heroCut === "divider") {
+    const typeKey = String(state.momentType || momentType).trim().toLowerCase();
+    if (typeKey === "travel") {
+      dividerHtml = `
+        <div class="moment-hero-divider" aria-hidden="true">
+          <span class="moment-divider-line"></span>
+          <span class="moment-divider-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
+          <span class="moment-divider-line"></span>
+        </div>`;
+    } else if (typeKey === "love" || typeKey === "anniversary" || typeKey === "wedding") {
+      dividerHtml = `
+        <div class="moment-hero-divider" aria-hidden="true">
+          <span class="moment-divider-line"></span>
+          <span class="moment-divider-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+          <span class="moment-divider-line"></span>
+        </div>`;
+    }
   }
 
   return `<!doctype html>
@@ -847,7 +860,7 @@ ${ogImage ? `<meta property="og:image" content="${attr(ogImage)}">` : ""}
 <link href="https://fonts.googleapis.com/css2?${fonts.google}&display=swap" rel="stylesheet">
 <style>${momentPageCss(colors, fonts)}</style></head>
 <body>${navHtml}
-<main class="moment-page hero-${attr(heroStyle)}${navClass} moment-type-${attr(momentType)} moment-palette-${attr(paletteKey)}">
+<main class="moment-page hero-${attr(heroStyle)}${navClass} moment-type-${attr(momentType)} moment-palette-${attr(paletteKey)} moment-cut-${attr(heroCut)}">
 ${decorHtml}
 <section class="moment-hero" id="moment-hero">${heroCover}<div class="moment-hero-overlay"></div><div class="moment-hero-content hero-in">
 ${pill ? `<span class="moment-pill">${escapeHtml(pill)}</span>` : `<small>KhamaKey Moments</small>`}
@@ -1516,7 +1529,7 @@ function momentPageCss(colors, fonts) {
   const f = fonts || resolveMomentFontPair("classic");
   return `@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Special+Elite&family=Shadows+Into+Light&display=swap');
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:72px}
-body{margin:0;font-family:${f.body};background:linear-gradient(180deg,${c.surface} 0%,${c.surface} 60%,${c.bl}18 100%)!important;color:${c.ink};-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{margin:0;font-family:${f.body};background:radial-gradient(circle at 12% 24%, color-mix(in srgb, ${c.go} 8%, transparent) 0%, transparent 45%), radial-gradient(circle at 88% 76%, color-mix(in srgb, ${c.go} 12%, transparent) 0%, transparent 52%), linear-gradient(180deg, ${c.surface} 0%, ${c.bl} 100%)!important;color:${c.ink};-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 #moment-hero,.moment-section-anchor,#moment-section-counter{scroll-margin-top:72px}
 .moment-nav-backdrop{position:fixed;inset:0;background:rgba(12,16,24,.22);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:38}
 .moment-nav-backdrop.open{opacity:1;pointer-events:auto}
@@ -1860,6 +1873,14 @@ body.nav-open{overflow:hidden}
 .moment-footer{text-align:center;color:${c.muted};font-family:${f.ui};font-size:12px;padding:16px 20px max(28px,env(safe-area-inset-bottom))}
 @media(prefers-reduced-motion:reduce){.hero-in,.rv{opacity:1;transform:none;transition:none}.rv.on .moment-journey-item,.rv.on .moment-promise,.rv.on .moment-ritual,.rv.on .moment-number,.rv.on .moment-dream{animation:none}.moment-sealed-icon,.moment-decor-item{animation:none}.moment-decor{display:none}}
 @media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:24px;box-shadow:0 24px 70px rgba(17,32,65,.08);background:${c.surface}}.moment-content{padding:20px 20px 36px}.moment-gallery-scroll img,.moment-gallery-scroll .moment-gallery-figure img{width:260px;height:320px}}
+.moment-cut-arco #moment-hero {
+  clip-path: ellipse(95% 100% at 50% 0%) !important;
+  margin-bottom: -15px !important;
+}
+.moment-cut-diagonale #moment-hero {
+  clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%) !important;
+  margin-bottom: -15px !important;
+}
 
 /* ==================== CATEGORY TEMPLATE OVERRIDES ==================== */
 
@@ -2077,7 +2098,9 @@ main.moment-type-anniversary {
 
 main.moment-type-travel {
   background: 
-    radial-gradient(color-mix(in srgb, ${colors.go} 6%, transparent) 1.5px, transparent 1.5px) 0 0 / 24px 24px,
+    radial-gradient(color-mix(in srgb, ${colors.go} 5%, transparent) 1.5px, transparent 1.5px) 0 0 / 24px 24px,
+    radial-gradient(circle at 12% 24%, color-mix(in srgb, ${colors.go} 9%, transparent) 0%, transparent 45%),
+    radial-gradient(circle at 88% 76%, color-mix(in srgb, ${colors.go} 13%, transparent) 0%, transparent 52%),
     linear-gradient(180deg, ${colors.surface} 0%, ${colors.bl} 100%) !important;
   padding-bottom: 80px !important;
 }

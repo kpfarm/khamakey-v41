@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Audit Admin e piano miglioramento (2026-07-14, Codex)** — preparato
+  - Creato `docs/18-admin-audit.md` con stato sezione per sezione, verifiche codice/Supabase/live, gap P0-P2 e piano dettagliato.
+  - Evidenziate sezioni parziali: NFC/Spedizioni, Supporto, Billing, Partner/Provvigioni senza dati reali, sicurezza RPC da audit dedicato.
 - **Protocollo collaborazione agenti rafforzato (2026-07-13, Codex)** — preparato
   - `00-START-HERE.md`, `AGENTS.md`, `CODEX-COLLAB.md` e `prompts/session-start.md` ora richiedono esplicitamente di dichiarare lavoro altrui, lock, file sporchi e stato push/deploy.
   - Creato `KHAMAKEY_OS/prompts/new-agent-brief.md` per istruire qualunque nuovo agente senza creare protocolli paralleli.

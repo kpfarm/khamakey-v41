@@ -63,6 +63,7 @@ KHAMAKEY_OS/
 | Decisioni | [`docs/15-decisioni.md`](docs/15-decisioni.md) |
 | Copywriting e Vendita | [`docs/16-sales-copy-love.md`](docs/16-sales-copy-love.md) |
 | Creative Engine Antigravity | [`docs/17-creative-engine-antigravity.md`](docs/17-creative-engine-antigravity.md) |
+| Audit Admin | [`docs/18-admin-audit.md`](docs/18-admin-audit.md) |
 
 ## Prompt operativi
 

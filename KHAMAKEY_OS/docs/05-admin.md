@@ -85,6 +85,7 @@ Admin: ricerca, filtri, modifica singola, bulk, drawer ordine/codice.
 
 ## Roadmap admin
 
+- [ ] Completare piano audit Admin: vedi [`18-admin-audit.md`](18-admin-audit.md)
 - [ ] Portale rivenditori self-service
 - [ ] Tab traduzioni catalogo per SKU
 - [ ] Dashboard analytics avanzata

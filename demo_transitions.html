@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Moments 2026: Hero Transitions Demo</title>
+  <title>Moments 2026: Ethereal & Emotional Transitions</title>
   <style>
     :root {
-      --primary: #b23b18;
+      --primary: #9f1c30; /* Deep emotional crimson */
       --surface: #fbf6f1;
       --bg-base: #f4efe6;
       --text: #0f172a;
@@ -62,7 +62,7 @@
 
     .options-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: 1fr;
       gap: 6px;
     }
 
@@ -70,13 +70,13 @@
       background: #1e293b;
       color: #cbd5e1;
       border: 1px solid #334155;
-      padding: 8px 10px;
+      padding: 10px 12px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 0.72rem;
+      font-size: 0.76rem;
       text-align: left;
       transition: all 0.2s ease;
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .btn-opt:hover {
@@ -84,66 +84,27 @@
     }
 
     .btn-opt.active {
-      background: #38bdf8;
-      color: #0f172a;
-      border-color: #38bdf8;
-      font-weight: 700;
-    }
-
-    /* --- HERO STYLES (IMMERSIVE TALL HEIGHT: 70vh) --- */
-    .moment-hero-wrapper {
-      position: relative;
-      width: 100%;
-      height: 70vh;
-      min-height: 480px;
-      z-index: 10;
-    }
-
-    .moment-hero {
-      position: absolute;
-      inset: 0;
-      background: url('https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&q=80&w=800') center center / cover no-repeat;
-      display: flex;
-      align-items: center; /* Centered content */
-      justify-content: center;
-      box-sizing: border-box;
-      z-index: 10;
-      transition: opacity 0.15s ease, filter 0.15s ease, transform 0.15s ease;
-      overflow: hidden;
-    }
-
-    .moment-hero-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(16, 11, 38, 0.2) 0%, rgba(16, 11, 38, 0.4) 60%, rgba(16, 11, 38, 0.85) 100%);
-      z-index: 2;
-    }
-
-    .moment-hero-content {
-      position: relative;
-      z-index: 5;
-      width: 100%;
-      padding: 0 24px;
+      background: #e11d48; /* Crimson active */
       color: white;
-      text-align: center;
-      box-sizing: border-box;
+      border-color: #e11d48;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(225, 29, 72, 0.4);
     }
 
-    .moment-hero h1 {
-      font-size: 2.3rem;
-      margin: 8px 0;
-      font-family: Georgia, serif;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+    /* --- BASIC HERO WRAPPER --- */
+    .hero-container {
+      position: relative;
+      width: 100%;
+      height: 75vh;
+      min-height: 500px;
+      z-index: 10;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .moment-hero p {
-      font-size: 0.95rem;
-      opacity: 0.92;
-      margin: 0;
-      text-shadow: 0 1px 8px rgba(0,0,0,0.5);
-    }
-
-    /* Content container */
+    /* --- CONTENT DIARIO --- */
     .moment-content {
       padding: 32px 20px;
       display: grid;
@@ -154,251 +115,335 @@
     }
 
     .moment-card {
-      background: white;
-      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 28px;
       padding: 28px 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-      border: 1px solid rgba(0,0,0,0.02);
+      box-shadow: 0 10px 30px rgba(159, 28, 48, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.5);
     }
 
     .moment-card h2 {
       margin-top: 0;
-      font-size: 1.25rem;
+      font-size: 1.3rem;
+      font-family: Georgia, serif;
       color: var(--text);
     }
 
-    /* --- TRANSITIONS CSS --- */
-
-    /* 1. Dritto Classico */
-    .trans-dritto .moment-hero {
-      clip-path: none;
+    .moment-card p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #475569;
+      margin: 0;
     }
 
-    /* 2. Diagonale Inclinata */
-    .trans-diagonale .moment-hero {
-      clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%);
-    }
 
-    /* 3. Curva Diagonale */
-    .trans-wave .moment-hero {
-      clip-path: polygon(
-        0% 0%, 100% 0%, 100% 89%,
-        90% 91%, 80% 94%, 70% 96%, 60% 97%, 50% 97%, 40% 96%, 30% 94%, 20% 91%, 0% 85%
-      );
-    }
-
-    /* 4. Scroll Fade & Blur (JS-Powered) */
-    /* Handled interactively by JS in handleScroll */
-
-    /* 5. Color Bleed Acquerello (Harmonized with template background) */
-    .color-bleed-overlay {
+    /* ==========================================================================
+       CONCETTO I: LA SCATOLA DEI RICORDI (TACTILE PHOTO STACK)
+       ========================================================================== */
+    .stack-wrapper {
       display: none;
+      position: relative;
+      width: 82%;
+      height: 60vh;
+      margin: 30px auto 0 auto;
+      z-index: 10;
     }
-    .trans-color-bleed .color-bleed-overlay {
+
+    .trans-photo-stack .stack-wrapper {
       display: block;
+    }
+    .trans-photo-stack .hero-container {
+      display: none; /* We hide standard hero */
+    }
+
+    .photo-card {
       position: absolute;
+      inset: 0;
+      background: white;
+      padding: 12px 12px 48px 12px; /* classic Polaroid thick white bottom */
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease;
+      box-sizing: border-box;
+    }
+
+    .photo-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    /* Polaroids stack effect */
+    .photo-card.card-under-1 {
+      transform: rotate(-3deg) scale(0.96) translate(-5px, -5px);
+      z-index: 3;
+      filter: brightness(0.95);
+    }
+    .photo-card.card-under-2 {
+      transform: rotate(4deg) scale(0.92) translate(8px, 10px);
+      z-index: 2;
+      filter: brightness(0.9);
+    }
+    .photo-card.card-main {
+      z-index: 5;
+      transform: rotate(1deg);
+    }
+
+    /* Polaroid Labels */
+    .polaroid-label {
+      position: absolute;
+      bottom: 12px;
       left: 0;
       right: 0;
-      bottom: 0;
-      height: 140px;
-      /* Fades precisely to var(--surface) and var(--bg-base) matching selected template */
-      background: linear-gradient(180deg, transparent 0%, var(--surface) 60%, var(--bg-base) 100%);
-      mix-blend-mode: normal; /* Normal transparent blend is safer and color-aligned */
-      z-index: 8;
-    }
-    .trans-color-bleed .moment-hero-overlay {
-      background: linear-gradient(180deg, rgba(16, 11, 38, 0.2) 0%, rgba(16, 11, 38, 0.45) 50%, transparent 100%) !important;
+      text-align: center;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: bold;
+      color: #334155;
+      font-size: 1.1rem;
     }
 
-    /* 6. Brezza Marina (7B - Maschera Ondulata Soft) */
-    .trans-mask-brezza .moment-hero {
-      clip-path: url(#clip-brezza);
+    /* Scroller interaction */
+    .scrolled-down.trans-photo-stack .photo-card.card-main {
+      transform: translate(280px, -180px) rotate(22deg) scale(0.85);
+      opacity: 0;
+    }
+    .scrolled-down.trans-photo-stack .photo-card.card-under-1 {
+      transform: rotate(1deg) scale(1);
+      z-index: 5;
+      filter: brightness(1);
+    }
+    .scrolled-down.trans-photo-stack .photo-card.card-under-2 {
+      transform: rotate(-3deg) scale(0.96);
+      z-index: 4;
+      filter: brightness(0.95);
     }
 
-    /* 7. Diagonale Ondulata (7C) */
-    .trans-mask-diagonale .moment-hero {
-      clip-path: url(#clip-diag-onda);
+
+    /* ==========================================================================
+       CONCETTO II: LUCE PULSANTE ETEREA (BREATHING LIGHT AURA)
+       ========================================================================== */
+    .trans-light-aura .hero-container {
+      height: 65vh;
+    }
+    .trans-light-aura .moment-hero {
+      /* Smooth fade of the photo at the bottom */
+      mask-image: linear-gradient(180deg, black 0%, black 60%, transparent 100%);
+      -webkit-mask-image: linear-gradient(180deg, black 0%, black 60%, transparent 100%);
     }
 
-    /* 8. Flusso Doppio Strato (7D) */
-    .trans-mask-doppio .moment-hero {
-      clip-path: url(#clip-doppio);
-    }
-    .double-wave-bg {
+    .light-aura-glow {
       display: none;
     }
-    .trans-mask-doppio .double-wave-bg {
+
+    /* Animated ethereal lights */
+    .trans-light-aura .light-aura-glow {
       display: block;
       position: absolute;
-      left: 0;
-      right: 0;
-      bottom: -6px;
-      height: 40px;
-      z-index: 8;
-      background: color-mix(in srgb, var(--primary) 20%, transparent);
-      clip-path: url(#clip-doppio-bg);
+      left: -20%;
+      right: -20%;
+      top: 55vh;
+      height: 350px;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(225, 29, 72, 0.22) 0%, transparent 50%),
+        radial-gradient(circle at 80% 60%, rgba(244, 180, 26, 0.18) 0%, transparent 50%),
+        radial-gradient(circle at 50% 30%, rgba(178, 59, 24, 0.15) 0%, transparent 60%);
+      filter: blur(40px);
+      z-index: 12;
+      animation: auraBreath 12s ease-in-out infinite alternate;
     }
 
-    .liquid-svg-container {
-      position: absolute;
-      width: 0;
-      height: 0;
+    @keyframes auraBreath {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.8;
+      }
+      50% {
+        transform: translateY(-20px) scale(1.1) rotate(5deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(10px) scale(0.95) rotate(-3deg);
+        opacity: 0.75;
+      }
+    }
+
+
+    /* ==========================================================================
+       CONCETTO III: IL PORTALE AD ARCO (ZOOM-THROUGH PORTAL)
+       ========================================================================== */
+    .portal-mask {
+      display: none;
+    }
+    .trans-portal .hero-container {
+      display: none; /* Hide normal hero */
+    }
+    .trans-portal .portal-mask {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 70vh;
+      min-height: 480px;
+      position: relative;
+      z-index: 10;
+      overflow: hidden;
+      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* The Arch Portal Mask Shape */
+    .portal-window {
+      width: 70%;
+      height: 78%;
+      border-radius: 120px 120px 24px 24px; /* Romantic Arch Window shape */
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+      border: 8px solid rgba(255, 255, 255, 0.95);
+      transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .portal-image {
+      width: 100%;
+      height: 100%;
+      background: url('https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&q=80&w=800') center center / cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .portal-text {
+      color: white;
+      text-align: center;
+      padding: 20px;
+      z-index: 5;
+      text-shadow: 0 2px 15px rgba(0,0,0,0.6);
+    }
+    
+    .portal-text h1 {
+      font-size: 1.8rem;
+      margin: 0 0 6px 0;
+      font-family: Georgia, serif;
+    }
+
+    /* Zoom interaction on scroll */
+    .scrolled-down.trans-portal .portal-mask {
+      /* Zooms through the arch! */
+      transform: scale(2.2);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .scrolled-down.trans-portal .portal-window {
+      border-radius: 0px;
+      border-width: 0px;
+    }
+    .scrolled-down.trans-portal .portal-image {
+      transform: scale(0.6); /* offsets the scale zoom to keep text clear */
     }
 
   </style>
 </head>
 <body>
 
-  <!-- The Simulator -->
+  <!-- The Simulator Frame -->
   <div class="phone-simulator" id="simulator" onscroll="handleScroll(this)">
 
     <!-- Controller visible to the user -->
     <div class="controller">
-      <h4>Raccordi Hero 2026 (Cellulare)</h4>
+      <h4>Modelli Emozionali 2026 (Prova a Scorrere!)</h4>
       <div class="options-grid">
-        <button class="btn-opt" onclick="setTransition('dritto')">1. Dritto Classico</button>
-        <button class="btn-opt" onclick="setTransition('diagonale')">2. Diagonale Inclinata ✓</button>
-        <button class="btn-opt" onclick="setTransition('wave')">3. Curva Diagonale ✓</button>
-        <button class="btn-opt" onclick="setTransition('scroll-fade')">4. Scroll Fade & Blur (Prova a Scorrere!)</button>
-        <button class="btn-opt" onclick="setTransition('color-bleed')">5. Color Bleed (Coordinato)</button>
-        <button class="btn-opt" onclick="setTransition('mask-brezza')">6. Maschera "Brezza Marina"</button>
-        <button class="btn-opt" onclick="setTransition('mask-diagonale')">7. Diagonale Ondulata</button>
-        <button class="btn-opt" onclick="setTransition('mask-doppio')">8. Flusso Doppio Strato</button>
+        <button class="btn-opt" onclick="setTransition('photo-stack')">I. La Scatola dei Ricordi (Sfoglia le foto)</button>
+        <button class="btn-opt" onclick="setTransition('light-aura')">II. Luce Pulsante Eterea (Glow in movimento)</button>
+        <button class="btn-opt" onclick="setTransition('portal')">III. Portale ad Arco (Zoom-through 3D)</button>
       </div>
     </div>
 
-    <!-- Wrapper to house the Hero height -->
-    <div class="moment-hero-wrapper">
-      <header class="moment-hero" id="heroEl">
+    <!-- 1. TACTILE PHOTO STACK VIEW (CONCETTO I) -->
+    <div class="stack-wrapper">
+      <!-- Underlying card 2 -->
+      <div class="photo-card card-under-2">
+        <img class="photo-card-img" src="https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&q=80&w=800">
+        <div class="polaroid-label">Kyoto 🏮</div>
+      </div>
+      <!-- Underlying card 1 -->
+      <div class="photo-card card-under-1">
+        <img class="photo-card-img" src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&q=80&w=800">
+        <div class="polaroid-label">Tradizioni 🌸</div>
+      </div>
+      <!-- Main visible card -->
+      <div class="photo-card card-main">
+        <img class="photo-card-img" src="https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&q=80&w=800">
+        <div class="polaroid-label">Tokyo 2026 🗼</div>
+      </div>
+    </div>
+
+    <!-- 2. STANDARD CONTAINER (Used for Aura & Portal) -->
+    <div class="hero-container" id="standardHero">
+      <header class="moment-hero">
         <div class="moment-hero-overlay"></div>
         <div class="moment-hero-content">
           <h1>Giappone 2026</h1>
           <p>Un diario di viaggio immersivo</p>
         </div>
-
-        <!-- Color bleed overlay for option 5 -->
-        <div class="color-bleed-overlay"></div>
-
-        <!-- Background wave for option 8 -->
-        <div class="double-wave-bg"></div>
       </header>
     </div>
 
-    <!-- Page Content -->
+    <!-- 3. PORTAL MASK VIEW (CONCETTO III) -->
+    <div class="portal-mask" id="portalMask">
+      <div class="portal-window">
+        <div class="portal-image">
+          <div class="portal-text">
+            <h1>Giappone 2026</h1>
+            <p>Attraversa il portale</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ethereal Aura overlay (CONCETTO II) -->
+    <div class="light-aura-glow"></div>
+
+    <!-- Page Content (Diario) -->
     <section class="moment-content">
-      <div style="text-align: center; color: #38bdf8; font-size: 0.82rem; margin: -10px 0 10px 0; display: none; font-weight: bold; background: rgba(56, 189, 248, 0.1); padding: 8px; border-radius: 8px;" id="scroll-hint">
-        👇 SCORRI IL DIARIO PER VEDERE LA SFOCATURA DISSOLVERSI! 👇
+      <div style="text-align: center; color: #e11d48; font-size: 0.85rem; margin: -10px 0 10px 0; font-weight: bold; background: rgba(225, 29, 72, 0.08); padding: 10px; border-radius: 12px;" id="scroll-hint">
+        👇 PROVA A SCORRERE VERSO IL BASSO PER ATTIVARE L'EFFETTO! 👇
       </div>
 
       <div class="moment-card">
-        <h2>L'Inizio dell'Avventura</h2>
-        <p>Siamo partiti con due zaini e una voglia matta di esplorare Tokyo, Kyoto e le foreste secolari del Sol Levante.</p>
+        <h2>Il Nostro Racconto</h2>
+        <p>Siamo partiti con due zaini e una voglia matta di esplorare Tokyo, Kyoto e i villaggi tradizionali circondati dalla natura.</p>
       </div>
 
       <div class="moment-card">
         <h2>La nostra Bucket List</h2>
-        <p>📍 Ammirare Shibuya dall'alto</p>
-        <p>📍 Raggiungere il Monte Fuji</p>
-        <p>📍 Gustare ramen in un locale tipico</p>
+        <p>📍 Salire sulla Tokyo Tower al tramonto</p>
+        <p>📍 Attraversare Shibuya all'ora di punta</p>
+        <p>📍 Dormire in un Ryokan termale tipico</p>
       </div>
 
       <div class="moment-card">
-        <h2>Lascia un Ricordo</h2>
-        <p>Scrivici i tuoi pensieri e auguraci buon viaggio!</p>
+        <h2>Lascia un Augurio</h2>
+        <p>Scrivi un messaggio per sostenerci nel nostro percorso!</p>
       </div>
     </section>
 
   </div>
 
-  <!-- SVG Definition for Organic Masks -->
-  <svg class="liquid-svg-container">
-    <defs>
-      <!-- 7B: Brezza Marina (Very subtle, flat organic ripples) -->
-      <clipPath id="clip-brezza" clipPathUnits="objectBoundingBox">
-        <path d="M0,0 L1,0 L1,0.96 C0.85,0.97 0.7,0.95 0.5,0.97 C0.3,0.99 0.15,0.96 0,0.97 Z">
-          <animate 
-            attributeName="d" 
-            dur="8s" 
-            repeatCount="indefinite"
-            values="
-              M0,0 L1,0 L1,0.96 C0.85,0.97 0.7,0.95 0.5,0.97 C0.3,0.99 0.15,0.96 0,0.97 Z;
-              M0,0 L1,0 L1,0.97 C0.8,0.96 0.65,0.98 0.5,0.96 C0.35,0.94 0.2,0.97 0,0.96 Z;
-              M0,0 L1,0 L1,0.96 C0.85,0.97 0.7,0.95 0.5,0.97 C0.3,0.99 0.15,0.96 0,0.97 Z
-            " />
-        </path>
-      </clipPath>
-
-      <!-- 7C: Diagonale Ondulata (Slanted layout waving slightly) -->
-      <clipPath id="clip-diag-onda" clipPathUnits="objectBoundingBox">
-        <path d="M0,0 L1,0 L1,0.90 C0.8,0.92 0.5,0.95 0,0.97 Z">
-          <animate 
-            attributeName="d" 
-            dur="10s" 
-            repeatCount="indefinite"
-            values="
-              M0,0 L1,0 L1,0.90 C0.8,0.92 0.5,0.95 0,0.97 Z;
-              M0,0 L1,0 L1,0.88 C0.83,0.94 0.45,0.91 0,0.99 Z;
-              M0,0 L1,0 L1,0.90 C0.8,0.92 0.5,0.95 0,0.97 Z
-            " />
-        </path>
-      </clipPath>
-
-      <!-- 7D: Flusso Doppio Strato (Foreground Wave) -->
-      <clipPath id="clip-doppio" clipPathUnits="objectBoundingBox">
-        <path d="M0,0 L1,0 L1,0.94 C0.85,0.96 0.65,0.92 0.5,0.95 C0.35,0.98 0.15,0.93 0,0.95 Z">
-          <animate 
-            attributeName="d" 
-            dur="6s" 
-            repeatCount="indefinite"
-            values="
-              M0,0 L1,0 L1,0.94 C0.85,0.96 0.65,0.92 0.5,0.95 C0.35,0.98 0.15,0.93 0,0.95 Z;
-              M0,0 L1,0 L1,0.96 C0.8,0.93 0.7,0.96 0.5,0.93 C0.3,0.91 0.2,0.96 0,0.94 Z;
-              M0,0 L1,0 L1,0.94 C0.85,0.96 0.65,0.92 0.5,0.95 C0.35,0.98 0.15,0.93 0,0.95 Z
-            " />
-        </path>
-      </clipPath>
-
-      <!-- 7D: Flusso Doppio Strato (Background Wave) -->
-      <clipPath id="clip-doppio-bg" clipPathUnits="objectBoundingBox">
-        <path d="M0,0 L1,0 L1,0.92 C0.75,0.95 0.6,0.90 0.45,0.93 C0.3,0.96 0.15,0.91 0,0.93 Z">
-          <animate 
-            attributeName="d" 
-            dur="9s" 
-            repeatCount="indefinite"
-            values="
-              M0,0 L1,0 L1,0.92 C0.75,0.95 0.6,0.90 0.45,0.93 C0.3,0.96 0.15,0.91 0,0.93 Z;
-              M0,0 L1,0 L1,0.94 C0.85,0.92 0.55,0.95 0.4,0.91 C0.25,0.88 0.1,0.94 0,0.92 Z;
-              M0,0 L1,0 L1,0.92 C0.75,0.95 0.6,0.90 0.45,0.93 C0.3,0.96 0.15,0.91 0,0.93 Z
-            " />
-        </path>
-      </clipPath>
-    </defs>
-  </svg>
-
   <script>
-    let activeTransition = 'scroll-fade';
+    let activeTransition = 'photo-stack';
 
     function setTransition(type) {
       activeTransition = type;
       const sim = document.getElementById('simulator');
-      const hero = document.getElementById('heroEl');
-      
-      // Reset simulated inline styles on transition switch
-      hero.style.opacity = "";
-      hero.style.filter = "";
-      hero.style.transform = "";
+      const standardHero = document.getElementById('standardHero');
+      const portalMask = document.getElementById('portalMask');
 
-      // Keep simulator base class, but replace the transition class
+      // Reset scroll position on change
+      sim.scrollTop = 0;
       sim.className = 'phone-simulator';
       sim.classList.add('trans-' + type);
-
-      // Hint display for scroll transition
-      const hint = document.getElementById('scroll-hint');
-      if (type === 'scroll-fade') {
-        hint.style.display = 'block';
-      } else {
-        hint.style.display = 'none';
-      }
 
       // Highlight active button
       const buttons = document.querySelectorAll('.btn-opt');
@@ -411,23 +456,16 @@
     }
 
     function handleScroll(element) {
-      if (activeTransition !== 'scroll-fade') return;
-
-      const scrollTop = element.scrollTop;
-      const hero = document.getElementById('heroEl');
-      
-      // Calculate real-time percentage progress
-      const maxScroll = 240; // Pixels until completely faded
-      const progress = Math.min(scrollTop / maxScroll, 1);
-
-      // Realtime interactive blur & fade calculation (2026-standard)
-      hero.style.opacity = 1 - progress * 0.85;
-      hero.style.filter = `blur(${progress * 14}px)`;
-      hero.style.transform = `translateY(${progress * -35}px) scale(${1 + progress * 0.06})`;
+      // Toggle scrolled class when scroll exceeds threshold to fire transitions
+      if (element.scrollTop > 60) {
+        element.classList.add('scrolled-down');
+      } else {
+        element.classList.remove('scrolled-down');
+      }
     }
 
-    // Set default transition style
-    setTransition('scroll-fade');
+    // Initialize with Photo Stack
+    setTransition('photo-stack');
   </script>
 
 </body>

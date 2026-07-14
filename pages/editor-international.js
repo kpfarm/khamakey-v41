@@ -78,6 +78,10 @@ function updateIntlHero() {
   if (topBtn) {
     topBtn.textContent = enabled ? "🌍 5 lingue attive" : "🌍 Internazionale";
     topBtn.classList.toggle("active", enabled);
+    topBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
+    topBtn.title = enabled
+      ? "Traduzioni attive: la pagina pubblica mostra il selettore lingua."
+      : "Attiva traduzioni automatiche e selettore lingua sulla pagina pubblica.";
   }
   const welcomeLangField = document.getElementById("welcomeLangField");
   const intlStatusField = document.getElementById("intlStatusField");
@@ -204,6 +208,12 @@ async function runInternationalize({ quiet = false } = {}) {
   }
 
   intlRunning = true;
+  const topBtn = document.getElementById("btnInternationalTop");
+  if (topBtn) {
+    topBtn.disabled = true;
+    topBtn.textContent = "🌍 Attivazione...";
+    topBtn.title = "Sto creando e salvando le traduzioni.";
+  }
   if (!quiet) openIntlModal();
 
   try {
@@ -250,6 +260,9 @@ async function runInternationalize({ quiet = false } = {}) {
     showToast(error.message || "Traduzione non riuscita.", "err");
   } finally {
     intlRunning = false;
+    const topBtn = document.getElementById("btnInternationalTop");
+    if (topBtn) topBtn.disabled = false;
+    updateIntlHero();
   }
 }
 

@@ -9,6 +9,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Business Editor v120 — Ripristino operativo comandi principali (2026-07-14, Codex)** — preparato
+  - Aggiunto tasto `Salva` sempre visibile nella topbar dell'editor Business.
+  - `Copia link`, `Apri pagina finale` e `Scarica QR` usano la pagina pubblica `/p/` come fallback operativo quando il link NFC fisico non e' ancora assegnato.
+  - Resi piu' robusti i listener di Account/Anteprima per evitare che un elemento mancante blocchi l'inizializzazione dei comandi.
+  - Il pulsante Internazionale ora comunica lo stato: attivazione in corso, 5 lingue attive, tooltip e aria-state.
+  - Aggiornati cache-bust: `app.js?v=134`, iframe `editor.html?v=134`, `editor-international.js?v=120`.
 - **Admin v131 — Supporto + CRM piu' operativi (2026-07-14, Codex)** — preparato
   - Supporto: aggiunto riepilogo operativo con ticket aperti, urgenti, in attesa cliente e risolti da chiudere.
   - Supporto: aggiunte viste rapide per ticket urgenti e alta priorita', oltre agli stati gia' presenti.

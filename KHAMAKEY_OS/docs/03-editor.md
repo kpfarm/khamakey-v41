@@ -32,6 +32,12 @@
 - Chiave wizard per attività (non globale)
 - Salvataggio cloud automatico dopo template
 
+### Comandi operativi v120
+- Il tasto `Salva` e' sempre visibile nella topbar, non solo nella barra modifiche.
+- `Anteprima` e `Account` devono restare azionabili sia dalla shell sia dall'editor iframe.
+- `Apri pagina finale`, `Copia link` e `Scarica QR` usano il link NFC quando esiste; se il chip non e' ancora assegnato usano la pagina pubblica `/p/<slug>` come fallback operativo.
+- Il pulsante `Internazionale` mostra chiaramente lo stato: da attivare, attivazione in corso o 5 lingue attive.
+
 ### Supporto
 - Il modal Account contiene la tab `Assistenza`.
 - L'iframe invia la richiesta a `pages/app.js`, che salva in `platform_support_tickets` con `business_id`, `profile_id`, `source='business_editor'` e stato `open`.

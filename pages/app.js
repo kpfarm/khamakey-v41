@@ -400,13 +400,25 @@ function buildAnalyticsFromRows(rows=[]){
   });
 }
 
+async function getAnalyticsTimeseries(){
+  if(!currentBusiness) return null;
+  try{
+    const { data,error } = await supabase.rpc("get_business_analytics_timeseries",{
+      p_business_id:currentBusiness.id,
+      p_days:30
+    });
+    return error ? null : data;
+  }catch(e){ return null; }
+}
+
 async function getAnalytics(){
   if(!currentBusiness) return {};
-  const { data:rpcData,error:rpcError } = await supabase.rpc("get_business_analytics",{
-    p_business_id:currentBusiness.id
-  });
+  const [{ data:rpcData,error:rpcError }, timeseries] = await Promise.all([
+    supabase.rpc("get_business_analytics",{ p_business_id:currentBusiness.id }),
+    getAnalyticsTimeseries()
+  ]);
   if(!rpcError && rpcData){
-    return normalizeAnalyticsPayload(rpcData);
+    return {...normalizeAnalyticsPayload(rpcData), timeseries};
   }
   if(rpcError) console.warn("get_business_analytics RPC non disponibile, uso fallback client",rpcError);
   const { data,error } = await supabase
@@ -485,7 +497,7 @@ async function loadApplication(){
     currentUser = userData.user;
     currentBusiness = await ensureWorkspace(currentUser);
     userEmail.textContent = currentUser.email || "";
-    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=118`;
+    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=133`;
     if(editorFrame.getAttribute("src") !== editorUrl){
       editorFrame.src = editorUrl;
     }

@@ -73,3 +73,7 @@
 \i khamakey-reseller-portal-hardening-v87.sql
 \echo 'v88 claim sicuro profilo rivenditore al primo accesso'
 \i khamakey-reseller-portal-claim-v88.sql
+\echo 'v89 ticket supporto clienti (RLS)'
+\i khamakey-support-customer-tickets-v89.sql
+\echo 'v90 analytics storiche: serie temporale + confronto periodo'
+\i khamakey-analytics-timeseries-v90.sql

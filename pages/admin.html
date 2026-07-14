@@ -1232,7 +1232,15 @@
               <button type="button" class="filter-chip" data-support-quick-status="open">Aperti</button>
               <button type="button" class="filter-chip" data-support-quick-status="in_progress">In lavorazione</button>
               <button type="button" class="filter-chip" data-support-quick-status="waiting_customer">Attesa cliente</button>
+              <button type="button" class="filter-chip" data-support-quick-priority="urgent">Urgenti</button>
+              <button type="button" class="filter-chip" data-support-quick-priority="high">Alta priorità</button>
               <button type="button" class="filter-chip" data-support-quick-status="closed">Chiusi</button>
+            </div>
+            <div class="inventory-stat-grid support-stat-grid" id="supportStats">
+              <div><span>Aperti</span><strong id="supportStatOpen">0</strong></div>
+              <div><span>Urgenti</span><strong id="supportStatUrgent">0</strong></div>
+              <div><span>Attesa cliente</span><strong id="supportStatWaiting">0</strong></div>
+              <div><span>Da chiudere</span><strong id="supportStatResolved">0</strong></div>
             </div>
             <div class="inventory-meta"><strong id="supportVisibleCount">0 ticket visibili</strong></div>
             <form class="admin-form compact-form" id="supportTicketEditForm" hidden>
@@ -1329,6 +1337,15 @@
                   <option value="bassa">Bassa</option>
                 </select>
               </label>
+            </div>
+            <div class="filter-chip-bar" id="crmQuickFilters">
+              <span class="filter-chip-label">Vista rapida</span>
+              <button type="button" class="filter-chip active" data-crm-quick="all">Tutti</button>
+              <button type="button" class="filter-chip" data-crm-quick="overdue">Scaduti</button>
+              <button type="button" class="filter-chip" data-crm-quick="today">Oggi</button>
+              <button type="button" class="filter-chip" data-crm-quick="week">Questa settimana</button>
+              <button type="button" class="filter-chip" data-crm-quick="high">Priorità alta</button>
+              <button type="button" class="filter-chip" data-crm-quick="new">Da contattare</button>
             </div>
             <p class="inventory-table-meta"><span id="crmTableCount">0 clienti</span></p>
             <div class="table-wrap">
@@ -1988,6 +2005,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=130"></script>
+  <script type="module" src="admin.js?v=131"></script>
 </body>
 </html>

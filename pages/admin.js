@@ -924,6 +924,7 @@ function refreshClientsTable(){
 // ---------------------------------------------------------------------------
 let crmRows = [];
 let crmCurrentBusinessId = "";
+let crmQuickFilter = "all";
 const crmTable = document.getElementById("crmTable");
 const crmTableCount = document.getElementById("crmTableCount");
 const crmSearchInput = document.getElementById("crmSearchInput");
@@ -931,6 +932,7 @@ const crmSearchClear = document.getElementById("crmSearchClear");
 const crmRefreshBtn = document.getElementById("crmRefreshBtn");
 const crmFilterStatus = document.getElementById("crmFilterStatus");
 const crmFilterPriority = document.getElementById("crmFilterPriority");
+const crmQuickFilters = document.getElementById("crmQuickFilters");
 const crmEditorCard = document.getElementById("crmEditorCard");
 const crmEditorTitle = document.getElementById("crmEditorTitle");
 const crmRecordForm = document.getElementById("crmRecordForm");
@@ -998,13 +1000,37 @@ function updateCrmStats(){
   set("crmStatTotal",total); set("crmStatFollow",follow); set("crmStatHigh",high); set("crmStatNew",fresh);
 }
 
+function isSameLocalDay(a,b){
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function crmQuickMatch(row,now){
+  const quick = crmQuickFilter || "all";
+  if(quick === "all") return true;
+  const follow = row.next_follow_up_at ? new Date(row.next_follow_up_at) : null;
+  if(quick === "overdue") return !!follow && follow.getTime() < startOfLocalDay(now).getTime();
+  if(quick === "today") return !!follow && isSameLocalDay(follow,now);
+  if(quick === "week") return !!follow && follow.getTime() <= addDays(startOfLocalDay(now),7).getTime();
+  if(quick === "high") return crmPriorityKey(row.priority) === "alta";
+  if(quick === "new") return ["nuovo","new","contattato"].includes(String(row.onboarding_status));
+  return true;
+}
+
+function syncCrmQuickChips(){
+  crmQuickFilters?.querySelectorAll("[data-crm-quick]").forEach(chip=>{
+    chip.classList.toggle("active",(chip.dataset.crmQuick || "all") === (crmQuickFilter || "all"));
+  });
+}
+
 function refreshCrmTable(){
   if(!crmTable) return;
   const search = String(crmSearchInput?.value || "").trim().toLowerCase();
   const status = crmFilterStatus?.value || "";
   const priority = crmFilterPriority?.value || "";
-  const now = Date.now();
+  const nowDate = new Date();
+  const now = nowDate.getTime();
   const rows = crmRows.filter(r=>{
+    if(!crmQuickMatch(r,nowDate)) return false;
     if(status && String(r.onboarding_status) !== status) return false;
     if(priority && crmPriorityKey(r.priority) !== priority) return false;
     if(search){
@@ -2652,9 +2678,21 @@ function filteredSupportTickets(){
   });
 }
 
+function updateSupportStats(){
+  const open = supportTicketRows.filter(row=>["open","in_progress","waiting_customer"].includes(row.status)).length;
+  const urgent = supportTicketRows.filter(row=>row.priority === "urgent" && !["resolved","closed"].includes(row.status)).length;
+  const waiting = supportTicketRows.filter(row=>row.status === "waiting_customer").length;
+  const resolved = supportTicketRows.filter(row=>row.status === "resolved").length;
+  if(supportStatOpen) supportStatOpen.textContent = fmt(open);
+  if(supportStatUrgent) supportStatUrgent.textContent = fmt(urgent);
+  if(supportStatWaiting) supportStatWaiting.textContent = fmt(waiting);
+  if(supportStatResolved) supportStatResolved.textContent = fmt(resolved);
+}
+
 function refreshSupportTicketsTable(){
   if(!supportTicketsTable) return;
   const rows = filteredSupportTickets();
+  updateSupportStats();
   if(supportVisibleCount) supportVisibleCount.textContent = `${rows.length} ticket visibili`;
   supportTicketsTable.innerHTML = rows.length ? rows.map(row=>`
     <tr>
@@ -2673,8 +2711,12 @@ function refreshSupportTicketsTable(){
 
 function syncSupportQuickChips(){
   const current = supportStatusFilter?.value || "";
+  const priority = supportPriorityFilter?.value || "";
   document.querySelectorAll("[data-support-quick-status]").forEach(chip=>{
-    chip.classList.toggle("active",(chip.dataset.supportQuickStatus || "") === current);
+    chip.classList.toggle("active",(chip.dataset.supportQuickStatus || "") === current && !priority);
+  });
+  document.querySelectorAll("[data-support-quick-priority]").forEach(chip=>{
+    chip.classList.toggle("active",(chip.dataset.supportQuickPriority || "") === priority && !current);
   });
 }
 
@@ -4564,9 +4606,10 @@ document.getElementById("momentInventoryQuickFilters")?.addEventListener("click"
 });
 
 document.getElementById("supportQuickFilters")?.addEventListener("click",event=>{
-  const chip = event.target.closest("[data-support-quick-status]");
-  if(!chip || !supportStatusFilter) return;
-  supportStatusFilter.value = chip.dataset.supportQuickStatus || "";
+  const chip = event.target.closest("[data-support-quick-status],[data-support-quick-priority]");
+  if(!chip) return;
+  if(supportStatusFilter) supportStatusFilter.value = chip.dataset.supportQuickStatus || "";
+  if(supportPriorityFilter) supportPriorityFilter.value = chip.dataset.supportQuickPriority || "";
   syncSupportQuickChips();
   refreshSupportTicketsTable();
 });
@@ -4583,8 +4626,18 @@ supportStatusFilter?.addEventListener("change",()=>{
   syncSupportQuickChips();
   refreshSupportTicketsTable();
 });
-supportPriorityFilter?.addEventListener("change",refreshSupportTicketsTable);
+supportPriorityFilter?.addEventListener("change",()=>{
+  syncSupportQuickChips();
+  refreshSupportTicketsTable();
+});
 bindSearchInput(supportSearchInput, refreshSupportTicketsTable);
+crmQuickFilters?.addEventListener("click",event=>{
+  const chip = event.target.closest("[data-crm-quick]");
+  if(!chip) return;
+  crmQuickFilter = chip.dataset.crmQuick || "all";
+  syncCrmQuickChips();
+  refreshCrmTable();
+});
 supportTicketEditCancel?.addEventListener("click",()=>{
   if(supportTicketEditForm){
     supportTicketEditForm.hidden = true;

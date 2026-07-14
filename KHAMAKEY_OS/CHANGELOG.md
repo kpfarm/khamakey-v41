@@ -9,6 +9,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Admin v131 — Supporto + CRM piu' operativi (2026-07-14, Codex)** — preparato
+  - Supporto: aggiunto riepilogo operativo con ticket aperti, urgenti, in attesa cliente e risolti da chiudere.
+  - Supporto: aggiunte viste rapide per ticket urgenti e alta priorita', oltre agli stati gia' presenti.
+  - CRM: aggiunte viste rapide per follow-up scaduti, oggi, settimana, priorita' alta e clienti da contattare.
+  - Aggiornato il cache-bust Admin a `admin.js?v=131`.
 - **Admin v130 — Dashboard operativa ordini/incassi (2026-07-14, Codex)** — preparato
   - La Dashboard Admin ora include un blocco "Andamento operativo" con KPI per ordini ricevuti negli ultimi 7 giorni, ordini da evadere, incassi stimati a 30 giorni e valore medio ordine.
   - Aggiunti mini-grafici senza librerie esterne: ordini ultimi 7 giorni, incassi stimati ultime 4 settimane e pipeline stato ordini.

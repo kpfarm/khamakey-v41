@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-14** (Admin v130 dashboard operativa)
+> Ultimo aggiornamento: **2026-07-14** (Admin v131 supporto + CRM operativo)
 
 ---
 
@@ -80,7 +80,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin** | **v130** | Dashboard operativa con KPI ordini/incassi e grafici base + Overhaul visivo premium v129 + Console supporto v128. |
+| **Admin** | **v131** | Supporto + CRM operativo con viste rapide e KPI lavoro + Dashboard v130 + Overhaul visivo premium v129. |
 | **Editor Business** | **v119** | Overhaul visivo premium (sfondo radial, glassmorphism e card hover) + Assistenza v118. |
 | **Moments editor** | **v115** | Overhaul visivo premium (sfondo radial, glassmorphism e card hover) + Raccordi copertina v114. |
 | **Worker NFC** | **v127** | Supporto a heroCut, unificazione di tutti i 21 sfondi premium e contrasto dinamico footer. |

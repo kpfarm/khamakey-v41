@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v130** (dashboard operativa ordini/incassi, menu 4 intenti, modalità semplice, CRM operativo, gestione provvigioni, magazzino NFC Moments con creazione SKU/stock e console supporto operativa).
+Versione attuale: **v131** (supporto + CRM operativo, dashboard ordini/incassi, menu 4 intenti, modalità semplice, gestione provvigioni, magazzino NFC Moments con creazione SKU/stock).
 
 ---
 
@@ -23,13 +23,15 @@ Versione attuale: **v130** (dashboard operativa ordini/incassi, menu 4 intenti, 
 | **Integration Hub** | Shopify, Stripe, PayPal, Resend |
 | **Piani** | Abbonamenti Business (Stripe) |
 
-## Console supporto v128
+## Console supporto v131
 
 - La tab `Supporto` e' ora una console operativa: ricerca, filtri stato/priorita', viste rapide e conteggio ticket visibili.
 - Ogni ticket puo' essere gestito dalla tab globale con cambio stato (`open`, `in_progress`, `waiting_customer`, `resolved`, `closed`) e priorita'.
 - L'admin puo' aggiungere una nota interna durante l'aggiornamento del ticket; se il ticket e' collegato a una Business, la nota finisce nella timeline cliente.
 - Restano attive le categorie ticket modificabili e la creazione ticket dalla scheda cliente.
 - I ticket creati da Business editor e Moments editor confluiscono nella stessa tab globale.
+- v131 aggiunge KPI lavoro: aperti, urgenti, in attesa cliente e risolti da chiudere.
+- v131 aggiunge viste rapide per urgenza e alta priorita', oltre alle viste per stato.
 
 ---
 
@@ -51,7 +53,7 @@ Versione attuale: **v130** (dashboard operativa ordini/incassi, menu 4 intenti, 
 
 ## CRM e provvigioni
 
-- **CRM v84**: pipeline clienti con stato onboarding, priorita, follow-up, agente assegnato, tag e note timeline.
+- **CRM v84/v131**: pipeline clienti con stato onboarding, priorita, follow-up, agente assegnato, tag e note timeline. v131 aggiunge viste rapide per scaduti, oggi, settimana, priorita' alta e clienti da contattare.
 - **Provvigioni v85/v125**: il trigger SQL su `platform_orders` crea provvigioni `pending`; l'Admin mostra riepilogo, ricerca, filtro per stato e azioni contestuali `Approva`, `Segna pagata`, `Annulla`.
 - Verifica live 2026-07-12: `platform_commission_events` ha RLS attiva, policy `commissions.read`/`commissions.write` e stati ammessi `pending`, `approved`, `paid`, `cancelled`.
 

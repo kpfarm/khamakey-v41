@@ -73,8 +73,8 @@ Mappa attuale: 19 sezioni, 27 form, `pages/admin.js` sintatticamente valido.
 | Magazzino NFC | Buono dopo v127 | Va collaudato con lotto reale; serve alert stock minimo e collegamento diretto a spedizione. |
 | Catalogo online | Buono base | Mancano asset vendita, copy, traduzioni SKU, stato Shopify piu' leggibile. |
 | NFC / Spedizioni | Non operativa | Oggi e' rimando. Deve diventare console produzione/spedizione. |
-| Supporto | Buono base dopo v128 | Aggiungere responsabile, risposta cliente/email, SLA e conversazione. |
-| CRM | Buono/parziale | Serve vista oggi/settimana/scaduti, reminder e collegamento ticket/ordini. |
+| Supporto | Buono base v131 | KPI lavoro e viste rapide presenti. Restano da aggiungere responsabile, risposta cliente/email, SLA e conversazione completa. |
+| CRM | Buono base v131 | Viste oggi/settimana/scaduti presenti. Restano reminder automatici e collegamento ticket/ordini piu' profondo. |
 | Magazzino Business | Base | Serve carico/scarico reale, movimenti da ordine, alert minimi. |
 | Partner e agenti | Parziale | Mancano dati di collaudo; serve wizard nuovo partner e link portale. |
 | Chi segue chi | Parziale | Serve test con root/downline e viste rete verificabili. |

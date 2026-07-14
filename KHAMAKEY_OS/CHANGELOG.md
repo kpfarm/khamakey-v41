@@ -9,6 +9,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Admin v130 — Dashboard operativa ordini/incassi (2026-07-14, Codex)** — preparato
+  - La Dashboard Admin ora include un blocco "Andamento operativo" con KPI per ordini ricevuti negli ultimi 7 giorni, ordini da evadere, incassi stimati a 30 giorni e valore medio ordine.
+  - Aggiunti mini-grafici senza librerie esterne: ordini ultimi 7 giorni, incassi stimati ultime 4 settimane e pipeline stato ordini.
+  - Aggiornato il cache-bust Admin a `admin.js?v=130`.
 - **Piano Admin Console Operativa (2026-07-14, Codex)** — preparato
   - Creato `docs/19-admin-console-operativa.md` con ricontrollo delle 19 sezioni Admin, definizione di "sezione operativa" e roadmap a blocchi da 1-2 sezioni per volta.
   - Confermato che il supporto e' attivo sia da Business editor sia da Moments editor; primo blocco consigliato: Supporto + CRM.

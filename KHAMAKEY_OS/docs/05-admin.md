@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v128** (menu 4 intenti, modalità semplice, CRM operativo, gestione provvigioni, magazzino NFC Moments con creazione SKU/stock e console supporto operativa).
+Versione attuale: **v130** (dashboard operativa ordini/incassi, menu 4 intenti, modalità semplice, CRM operativo, gestione provvigioni, magazzino NFC Moments con creazione SKU/stock e console supporto operativa).
 
 ---
 
@@ -12,7 +12,7 @@ Versione attuale: **v128** (menu 4 intenti, modalità semplice, CRM operativo, g
 
 | Sezione | Contenuto |
 |---------|-----------|
-| **Dashboard** | Alert operativi, KPI rapidi |
+| **Dashboard** | Alert operativi, KPI rapidi, grafici ordini/incassi |
 | **Clienti Business** | Account, attività, stato |
 | **Clienti Moments** | Utenti, pagine, attivazioni |
 | **Moments** | Gestione pagine evento |
@@ -30,6 +30,14 @@ Versione attuale: **v128** (menu 4 intenti, modalità semplice, CRM operativo, g
 - L'admin puo' aggiungere una nota interna durante l'aggiornamento del ticket; se il ticket e' collegato a una Business, la nota finisce nella timeline cliente.
 - Restano attive le categorie ticket modificabili e la creazione ticket dalla scheda cliente.
 - I ticket creati da Business editor e Moments editor confluiscono nella stessa tab globale.
+
+---
+
+## Dashboard operativa v130
+
+- Il blocco `Andamento operativo` mostra ordini ricevuti negli ultimi 7 giorni, ordini da evadere, incassi stimati a 30 giorni e valore medio ordine.
+- I grafici sono generati senza librerie esterne: barre ordini ultimi 7 giorni, barre incassi ultime 4 settimane e pipeline stato ordini.
+- Gli incassi sono stimati dagli ordini pagati/completati; il margine netto reale resta da calcolare quando saranno consolidati costi, provvigioni e spedizioni.
 
 ---
 

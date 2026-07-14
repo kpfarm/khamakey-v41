@@ -65,7 +65,7 @@ Mappa attuale: 19 sezioni, 27 form, `pages/admin.js` sintatticamente valido.
 
 | Sezione | Stato oggi | Per renderla operativa |
 |---------|------------|------------------------|
-| Dashboard | Parziale | Deve diventare command center con CTA per codici 0, ordini da evadere, ticket aperti, follow-up CRM, integrazioni rotte. |
+| Dashboard | Buono base v130 | Ora mostra KPI ordini/incassi, grafici base ordini/incassi e pipeline stati. Deve completare CTA per follow-up CRM, integrazioni rotte e margine netto reale. |
 | Clienti Business | Buono base | Aggiungere azioni rapide: crea ticket, crea ordine, apri CRM, apri pagina/editor, stato onboarding visibile. |
 | Clienti Moments | Buono/parziale | Serve wizard test account: SKU -> codice -> email -> pagina -> editor -> link `/k/` e `/m/`. |
 | Moments | Buono base | Rafforzare dettaglio pagina, stato pubblicazione, PIN, link e azioni admin. |

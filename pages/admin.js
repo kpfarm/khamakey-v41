@@ -334,6 +334,8 @@ let currentClientRecord = null;
 
 const ORDER_STATUS_OPTIONS = ["draft","pending","paid","production","ready","shipped","completed","cancelled","refunded"];
 const PAYMENT_STATUS_OPTIONS = ["unpaid","pending","paid","refunded","failed"];
+const FULFILLMENT_ORDER_STATUSES = ["pending","paid","production","ready"];
+const DASHBOARD_REVENUE_PAYMENT_STATUSES = ["paid"];
 
 function setGate(message,type=""){
   gateText.textContent = message;
@@ -398,6 +400,134 @@ function marginPercent(salePrice,unitCost){
 function dateShort(value){
   if(!value) return "-";
   return new Date(value).toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"});
+}
+
+function dashboardSetText(id,value){
+  const node = document.getElementById(id);
+  if(node) node.textContent = value;
+}
+
+function startOfLocalDay(date){
+  return new Date(date.getFullYear(),date.getMonth(),date.getDate());
+}
+
+function addDays(date,days){
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function dayKey(date){
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2,"0"),
+    String(date.getDate()).padStart(2,"0")
+  ].join("-");
+}
+
+function shortDayLabel(date){
+  return date.toLocaleDateString("it-IT",{weekday:"short"}).replace(".","");
+}
+
+function statusLabel(status){
+  return {
+    draft:"Bozza",
+    pending:"Attesa",
+    paid:"Pagato",
+    production:"Produzione",
+    ready:"Pronto",
+    shipped:"Spedito",
+    completed:"Completato",
+    cancelled:"Annullato",
+    refunded:"Rimborsato"
+  }[status] || status || "-";
+}
+
+function isDashboardRevenueOrder(row){
+  return DASHBOARD_REVENUE_PAYMENT_STATUSES.includes(row.payment_status) || ["paid","completed","shipped"].includes(row.status);
+}
+
+function renderBarChart(id,items,{ moneyValues = false } = {}){
+  const node = document.getElementById(id);
+  if(!node) return;
+  if(!items.length){
+    node.innerHTML = `<div class="dashboard-empty">Nessun dato disponibile</div>`;
+    return;
+  }
+  const max = Math.max(...items.map(item=>Number(item.value || 0)),1);
+  node.innerHTML = items.map(item=>{
+    const value = Number(item.value || 0);
+    const height = Math.max(value ? Math.round((value / max) * 100) : 0, value ? 8 : 4);
+    const title = moneyValues ? money(value) : fmt(value);
+    return `
+      <div class="dashboard-bar" title="${esc(item.label)} · ${esc(title)}">
+        <div class="dashboard-bar-fill" style="height:${height}%"></div>
+        <small>${esc(item.shortLabel || item.label)}</small>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderStatusChart(rows){
+  const node = document.getElementById("dashboardStatusChart");
+  if(!node) return;
+  const counts = ORDER_STATUS_OPTIONS
+    .map(status=>({ status, count:rows.filter(row=>row.status === status).length }))
+    .filter(item=>item.count > 0);
+  if(!counts.length){
+    node.innerHTML = `<div class="dashboard-empty">Nessun ordine registrato</div>`;
+    return;
+  }
+  const max = Math.max(...counts.map(item=>item.count),1);
+  node.innerHTML = counts.map(item=>`
+    <div class="dashboard-status-row">
+      <span>${esc(statusLabel(item.status))}</span>
+      <div class="dashboard-status-track"><div class="dashboard-status-fill" style="width:${Math.max(6,Math.round((item.count / max) * 100))}%"></div></div>
+      <strong>${fmt(item.count)}</strong>
+    </div>
+  `).join("");
+}
+
+function renderDashboardOrderInsights(rows){
+  const today = startOfLocalDay(new Date());
+  const first7 = addDays(today,-6);
+  const first30 = addDays(today,-29);
+  const rows7 = rows.filter(row=>row.created_at && new Date(row.created_at) >= first7);
+  const revenueRows30 = rows.filter(row=>row.created_at && new Date(row.created_at) >= first30 && isDashboardRevenueOrder(row));
+  const fulfillmentRows = rows.filter(row=>FULFILLMENT_ORDER_STATUSES.includes(row.status));
+  const revenue30 = revenueRows30.reduce((sum,row)=>sum + Number(row.total || 0),0);
+  const avgOrder = rows.length ? rows.reduce((sum,row)=>sum + Number(row.total || 0),0) / rows.length : 0;
+  dashboardSetText("dOrders7",fmt(rows7.length));
+  dashboardSetText("dFulfillment",fmt(fulfillmentRows.length));
+  dashboardSetText("dRevenue30",money(revenue30));
+  dashboardSetText("dAvgOrder",money(avgOrder));
+
+  const orderDays = Array.from({length:7},(_,index)=>{
+    const date = addDays(first7,index);
+    const key = dayKey(date);
+    return {
+      label:date.toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit"}),
+      shortLabel:shortDayLabel(date),
+      value:rows.filter(row=>row.created_at && dayKey(new Date(row.created_at)) === key).length
+    };
+  });
+  const revenueWeeks = Array.from({length:4},(_,index)=>{
+    const start = addDays(first30,index * 7);
+    const end = index === 3 ? addDays(today,1) : addDays(start,7);
+    return {
+      label:`${start.toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit"})} - ${addDays(end,-1).toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit"})}`,
+      shortLabel:`S${index + 1}`,
+      value:revenueRows30
+        .filter(row=>{
+          const created = new Date(row.created_at);
+          return created >= start && created < end;
+        })
+        .reduce((sum,row)=>sum + Number(row.total || 0),0)
+    };
+  });
+  renderBarChart("dashboardOrdersChart",orderDays);
+  renderBarChart("dashboardRevenueChart",revenueWeeks,{ moneyValues:true });
+  renderStatusChart(rows);
 }
 
 function toDateTimeLocal(value){
@@ -670,7 +800,7 @@ async function loadCurrentMember(user){
 }
 
 async function loadDashboard(){
-  const [clients,published,nfc,events,agents,orders,pendingCommissions,moments,momentsAvailable,pendingOrders,openTickets] = await Promise.all([
+  const [clients,published,nfc,events,agents,orders,pendingCommissions,moments,momentsAvailable,pendingOrders,openTickets,orderOverview] = await Promise.all([
     safeCount("businesses"),
     safeCount("business_public_pages",query=>query.eq("published",true)),
     safeCount("nfc_tags"),
@@ -681,8 +811,15 @@ async function loadDashboard(){
     safeCount("moment_events"),
     safeCount("moment_activation_codes",query=>query.eq("status","available")),
     safeCount("platform_orders",query=>query.in("status",["pending","paid","production","ready"])),
-    countOpenSupportTickets()
+    countOpenSupportTickets(),
+    supabase
+      .from("platform_orders")
+      .select("id,created_at,total,status,payment_status")
+      .order("created_at",{ascending:false})
+      .limit(500)
   ]);
+  const orderOverviewRows = orderOverview?.error ? [] : (orderOverview?.data || []);
+  if(orderOverview?.error) console.warn("Andamento ordini non disponibile",orderOverview.error);
   let stock = 0;
   let lowStockProducts = 0;
   try{
@@ -710,6 +847,7 @@ async function loadDashboard(){
   document.getElementById("mMoments").textContent = fmt(moments);
   const momentStockNode = document.getElementById("mMomentStock");
   if(momentStockNode) momentStockNode.textContent = fmt(momentsAvailable);
+  renderDashboardOrderInsights(orderOverviewRows);
   renderDashboardAlerts({
     momentsAvailable,
     pendingOrders,

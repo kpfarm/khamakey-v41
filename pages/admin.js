@@ -1203,7 +1203,10 @@ function momentEditorUrl(eventId){
 }
 
 function businessEditorUrl(businessId){
-  return `${LOCAL_PAGES_BASE}/editor.html?business=${encodeURIComponent(businessId)}`;
+  // Apre il GUSCIO completo (index.html), non l'iframe editor diretto: solo il guscio ha il
+  // client Supabase che carica/salva i dati. Con ?business=<id> app.js entra in modalità admin
+  // e carica/modifica l'attività del cliente (permessi garantiti dalla RLS platform_write).
+  return `${LOCAL_PAGES_BASE}/index.html?business=${encodeURIComponent(businessId)}`;
 }
 
 async function loadMoments(){

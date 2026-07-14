@@ -18,6 +18,7 @@ let supabase = null;
 let session = null;
 let currentUser = null;
 let currentBusiness = null;
+let adminImpersonation = null; // attività di un cliente aperta da un admin via ?business=<id>
 let saveTimer = null;
 let pendingState = null;
 let recoveryMode = false;
@@ -173,6 +174,38 @@ function showRecoveryForm(){
 
 async function ensureWorkspace(user){
   workspaceWarnings = [];
+  adminImpersonation = null;
+
+  // Modalità admin: ?business=<id> apre l'attività di un cliente.
+  // La sicurezza è garantita dalla RLS: se l'utente NON è admin (né proprietario),
+  // la SELECT non restituisce l'attività di un altro e si prosegue normalmente.
+  const requestedBusinessId = new URLSearchParams(location.search).get("business");
+  if(requestedBusinessId){
+    const { data:target,error:targetError } = await supabase
+      .from("businesses")
+      .select("*")
+      .eq("id",requestedBusinessId)
+      .maybeSingle();
+    if(!targetError && target && target.profile_id !== user.id){
+      // RLS ci ha fatto leggere l'attività di un ALTRO utente → siamo admin.
+      const { data:editorState } = await supabase
+        .from("business_editor_states")
+        .select("state")
+        .eq("business_id",target.id)
+        .maybeSingle();
+      const { data:targetNfc } = await supabase
+        .from("nfc_tags")
+        .select("*")
+        .eq("business_id",target.id)
+        .limit(1)
+        .maybeSingle();
+      currentNfc = targetNfc || null;
+      adminImpersonation = { id:target.id, nome:target.nome, profile_id:target.profile_id };
+      return {...target, editor_state:editorState?.state || {}};
+    }
+    // target è la propria attività, o RLS l'ha nascosta: nessuna impersonazione, flusso normale.
+  }
+
   const fullName = user.user_metadata?.full_name || user.email?.split("@")[0] || "Cliente KhamaKey";
   const businessName = user.user_metadata?.business_name || "La mia attività";
   const { error:profileError } = await supabase
@@ -458,12 +491,31 @@ async function loadApplication(){
     }
     authView.hidden = true;
     appView.hidden = false;
+    renderAdminImpersonationBanner();
     setCloudStatus(workspaceWarnings.length ? "Editor aperto, cloud parziale" : "Cloud collegato",workspaceWarnings.length ? "warn" : "ok");
     if(workspaceWarnings.length) setAuthStatus(`Accesso riuscito. Alcuni dati cloud non sono disponibili: ${workspaceWarnings.join(" | ")}`,"error");
     await sendStateToEditor();
   }finally{
     applicationLoading = false;
   }
+}
+
+function renderAdminImpersonationBanner(){
+  const existing = document.getElementById("adminImpersonationBanner");
+  if(!adminImpersonation){
+    if(existing) existing.remove();
+    return;
+  }
+  let banner = existing;
+  if(!banner){
+    banner = document.createElement("div");
+    banner.id = "adminImpersonationBanner";
+    banner.setAttribute("role","status");
+    banner.style.cssText = "position:sticky;top:0;z-index:50;background:#B54708;color:#fff;padding:8px 16px;font:600 13px/1.4 system-ui,sans-serif;text-align:center;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap";
+    document.body.prepend(banner);
+  }
+  const nome = adminImpersonation.nome || "cliente";
+  banner.innerHTML = `<span>👁️ Modalità amministratore — stai modificando l'attività di <strong>${String(nome).replace(/[<>&]/g,"")}</strong>. Le modifiche salvate valgono per il cliente.</span>`;
 }
 
 async function saveDraft(state){
@@ -474,7 +526,7 @@ async function saveDraft(state){
   const publicPageSave = state.publicSnapshot
     ? supabase.from("business_public_pages").upsert({
         business_id:currentBusiness.id,
-        profile_id:session.user.id,
+        profile_id:currentBusiness.profile_id || session.user.id,
         slug:currentBusiness.slug,
         state:publicStateFromEditor(state),
         published:true,
@@ -489,7 +541,7 @@ async function saveDraft(state){
     }).eq("id",currentBusiness.id),
     supabase.from("business_editor_states").upsert({
       business_id:currentBusiness.id,
-      profile_id:session.user.id,
+      profile_id:currentBusiness.profile_id || session.user.id,
       state:editorState,
       updated_at:new Date().toISOString()
     },{onConflict:"business_id"}),

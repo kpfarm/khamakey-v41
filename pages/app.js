@@ -252,24 +252,25 @@ async function ensureWorkspace(user){
   }
 
   const publicSlug = workspaceBusiness.slug || `${slugify(workspaceBusiness.nome || businessName)}-${user.id.slice(0,6)}`;
-  const { data:existingPublicPage,error:publicPageReadError } = await supabase
+  if(!workspaceBusiness.slug){
+    const { error:slugError } = await supabase
+      .from("businesses")
+      .update({ slug:publicSlug, updated_at:new Date().toISOString() })
+      .eq("id",workspaceBusiness.id);
+    if(slugError) recordWorkspaceWarning("Slug pagina non aggiornato",slugError);
+    else workspaceBusiness = { ...workspaceBusiness, slug:publicSlug };
+  }
+  const { error:publicPageError } = await supabase
     .from("business_public_pages")
-    .select("business_id")
-    .eq("business_id",workspaceBusiness.id)
-    .maybeSingle();
-  if(publicPageReadError){
-    recordWorkspaceWarning("Pagina pubblica non verificata",publicPageReadError);
-  }else if(!existingPublicPage){
-    const { error:publicPageError } = await supabase.from("business_public_pages").insert({
+    .upsert({
       business_id:workspaceBusiness.id,
       profile_id:user.id,
       slug:publicSlug,
       state:publicStateFromEditor(workspaceBusiness.editor_state),
       published:true,
       updated_at:new Date().toISOString()
-    });
-    if(publicPageError) recordWorkspaceWarning("Pagina pubblica non creata",publicPageError);
-  }
+    },{onConflict:"business_id"});
+  if(publicPageError) recordWorkspaceWarning("Pagina pubblica non creata/aggiornata",publicPageError);
 
   const { data:nfc,error:nfcError } = await supabase
     .from("nfc_tags")
@@ -497,7 +498,7 @@ async function loadApplication(){
     currentUser = userData.user;
     currentBusiness = await ensureWorkspace(currentUser);
     userEmail.textContent = currentUser.email || "";
-    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=134`;
+    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=135`;
     if(editorFrame.getAttribute("src") !== editorUrl){
       editorFrame.src = editorUrl;
     }

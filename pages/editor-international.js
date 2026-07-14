@@ -74,14 +74,17 @@ function updateIntlHero() {
   const enabled = Boolean(pageI18n.enabled);
   if (intlHeroPending) intlHeroPending.hidden = enabled;
   if (intlHeroDone) intlHeroDone.hidden = !enabled;
-  const topBtn = document.getElementById("btnInternationalTop");
-  if (topBtn) {
-    topBtn.textContent = enabled ? "🌍 5 lingue attive" : "🌍 Internazionale";
-    topBtn.classList.toggle("active", enabled);
-    topBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
-    topBtn.title = enabled
-      ? "Traduzioni attive: la pagina pubblica mostra il selettore lingua."
-      : "Attiva traduzioni automatiche e selettore lingua sulla pagina pubblica.";
+  const mainBtn = document.getElementById("btnInternationalMain");
+  const switchLabel = document.getElementById("intlSwitchLabel");
+  if (mainBtn) {
+    mainBtn.classList.toggle("active", enabled);
+    mainBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
+    mainBtn.title = enabled
+      ? "Pagina internazionale attiva: la pagina pubblica mostra il selettore lingua."
+      : "Attiva la pagina internazionale.";
+  }
+  if (switchLabel) {
+    switchLabel.textContent = enabled ? "Pagina internazionale attiva" : "Pagina internazionale disattiva";
   }
   const welcomeLangField = document.getElementById("welcomeLangField");
   const intlStatusField = document.getElementById("intlStatusField");
@@ -208,11 +211,14 @@ async function runInternationalize({ quiet = false } = {}) {
   }
 
   intlRunning = true;
-  const topBtn = document.getElementById("btnInternationalTop");
-  if (topBtn) {
-    topBtn.disabled = true;
-    topBtn.textContent = "🌍 Attivazione...";
-    topBtn.title = "Sto creando e salvando le traduzioni.";
+  const mainBtn = document.getElementById("btnInternationalMain");
+  const switchLabel = document.getElementById("intlSwitchLabel");
+  if (mainBtn) {
+    mainBtn.disabled = true;
+    mainBtn.title = "Sto creando e salvando le traduzioni.";
+  }
+  if (switchLabel) {
+    switchLabel.textContent = "Attivazione in corso...";
   }
   if (!quiet) openIntlModal();
 
@@ -260,8 +266,8 @@ async function runInternationalize({ quiet = false } = {}) {
     showToast(error.message || "Traduzione non riuscita.", "err");
   } finally {
     intlRunning = false;
-    const topBtn = document.getElementById("btnInternationalTop");
-    if (topBtn) topBtn.disabled = false;
+    const mainBtn = document.getElementById("btnInternationalMain");
+    if (mainBtn) mainBtn.disabled = false;
     updateIntlHero();
   }
 }
@@ -304,7 +310,7 @@ function scheduleIntlBackgroundSync() {
 }
 
 function bindButtons() {
-  ["btnInternationalMain", "btnInternationalTop", "btnInternationalRefresh"].forEach(id => {
+  ["btnInternationalMain", "btnInternationalRefresh"].forEach(id => {
     document.getElementById(id)?.addEventListener("click", () => runInternationalize({ quiet: id === "btnInternationalRefresh" }));
   });
   document.getElementById("intlModalDone")?.addEventListener("click", closeIntlModal);

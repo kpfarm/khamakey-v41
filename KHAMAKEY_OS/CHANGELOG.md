@@ -9,6 +9,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Business Editor v121 — Link finale e UX comandi pulita (2026-07-15, Codex)** — preparato
+  - Rimossi i comandi ridondanti dalla topbar interna dell'editor: l'Anteprima resta nella shell principale.
+  - `Internazionale` diventa uno switch chiaro nella card dedicata, con stato attivo/disattivo leggibile.
+  - `app.js` normalizza lo slug e crea/aggiorna sempre la pagina pubblica `/p/<slug>` con upsert idempotente.
+  - La sezione link mostra `Pagina finale` o `Link NFC` in base a cio' che esiste, evitando "Collegamento in preparazione" quando la pagina pubblica e' disponibile.
+  - Aggiornati cache-bust: `app.js?v=135`, iframe `editor.html?v=135`, `editor-international.js?v=121`.
 - **Business Editor v120 — Ripristino operativo comandi principali (2026-07-14, Codex)** — preparato
   - Aggiunto tasto `Salva` sempre visibile nella topbar dell'editor Business.
   - `Copia link`, `Apri pagina finale` e `Scarica QR` usano la pagina pubblica `/p/` come fallback operativo quando il link NFC fisico non e' ancora assegnato.

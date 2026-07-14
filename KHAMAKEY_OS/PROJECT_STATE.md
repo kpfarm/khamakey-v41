@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-14** (Business Editor v120 operativo)
+> Ultimo aggiornamento: **2026-07-15** (Business Editor v121 link finale + UX pulita)
 
 ---
 
@@ -81,11 +81,11 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin** | **v131** | Supporto + CRM operativo con viste rapide e KPI lavoro + Dashboard v130 + Overhaul visivo premium v129. |
-| **Editor Business** | **v120** | Ripristino operativo: Salva sempre visibile, Account/Anteprima robusti, link pagina/QR fallback e stato Internazionale chiaro. |
+| **Editor Business** | **v121** | Rimosso doppio Anteprima, Internazionale come switch in card, pagina finale `/p/` creata via upsert e link/QR sempre operativi. |
 | **Moments editor** | **v115** | Overhaul visivo premium (sfondo radial, glassmorphism e card hover) + Raccordi copertina v114. |
 | **Worker NFC** | **v127** | Supporto a heroCut, unificazione di tutti i 21 sfondi premium e contrasto dinamico footer. |
 | **SQL Supabase** | **v89 (applicata)** | v75-v83 security, v84 CRM, v85 trigger provvigioni ordini, v86 portale rivenditori, v87 hardening accesso agente solo via `member_id`, v88 claim sicuro primo accesso rivenditore, v89 RLS ticket utente |
-| **Prossima release Business** | **v121** | Collaudo browser autenticato e rifinitura UX dopo test cliente |
+| **Prossima release Business** | **v122** | Collaudo browser autenticato e rifinitura UX dopo test cliente |
 
 ---
 

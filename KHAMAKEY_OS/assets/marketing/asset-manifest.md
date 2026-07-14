@@ -8,6 +8,8 @@
 | 2026-07-13 | Catalogo asset Antigravity | documento sorgente | Tutte | Archivio | sorgente | `source-antigravity/marketing-assets-catalog-antigravity.md` | Antigravity |
 | 2026-07-13 | Piano Visual Marketing Lab | documento sorgente | Tutte | Tool creativo | sorgente | `source-antigravity/implementation-plan-antigravity.md` | Antigravity |
 | 2026-07-13 | Walkthrough Visual Marketing Lab | documento sorgente | Tutte | Tool creativo | sorgente | `source-antigravity/walkthrough-antigravity.md` | Antigravity |
+| 2026-07-14 | Moments Wedding Lifestyle | immagine prodotto | Moments | Shopify / Social | da verificare | `product/moments-wedding-lifestyle.png` | Antigravity |
+| 2026-07-14 | Business Table Lifestyle | immagine prodotto | Business | Landing / Ads | da verificare | `product/business-table-lifestyle.png` | Antigravity |
 
 ## Note
 

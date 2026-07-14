@@ -105,7 +105,7 @@ Per ogni nuovo prodotto creato da Antigravity devono esistere almeno:
 
 - [x] Creare `demo_marketing_assets.html` (completato e integrato nella root del progetto).
 - [ ] Definire template ripetibili per immagini prodotto: Hero, Dettaglio, Come funziona, Confezione, Uso reale.
-- [ ] Creare pacchetto rivenditori: PDF, immagini WhatsApp, script chiamata, listino visuale.
+- [x] Creare pacchetto rivenditori: immagini/testi WhatsApp, script chiamata ed obiezioni, listino prezzi consigliato interattivo (integrato in `demo_marketing_assets.html`).
 - [ ] Creare video demo tap NFC per Moments e Business.
 - [ ] Preparare listing Amazon/TikTok Shop per linea Love.
 - [ ] Collegare gli asset marketing agli SKU del catalogo Admin.

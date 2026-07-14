@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KhamaKey - Visual Marketing Lab</title>
+  <title>KhamaKey - Visual Marketing Lab & B2B Hub</title>
   <link rel="icon" href="khamakey-favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <!-- html2canvas for high quality PNG exports -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
       --navy: #1B2A5E;
@@ -197,6 +199,7 @@
       padding: 4px;
       border-radius: 12px;
       max-width: fit-content;
+      flex-wrap: wrap;
     }
 
     .tab-btn {
@@ -232,6 +235,16 @@
       animation: fadeIn 0.25s ease-in-out;
     }
 
+    @media (max-width: 768px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
@@ -248,6 +261,7 @@
       border: 1px dashed var(--border);
       border-radius: 16px;
       padding: 40px;
+      position: relative;
     }
 
     /* 1. Social Post Previews */
@@ -447,6 +461,7 @@
       width: 55%;
       height: auto;
       opacity: 0.95;
+      transition: filter 0.25s;
     }
 
     .smart-tag-nfc-badge {
@@ -750,6 +765,131 @@
       justify-content: flex-end;
     }
 
+    /* 5. Reseller B2B layout */
+    .b2b-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      width: 100%;
+    }
+
+    @media (max-width: 900px) {
+      .b2b-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pricing-table-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(27, 42, 94, 0.03);
+    }
+
+    .pricing-table-card h3 {
+      font-family: "Syne", sans-serif;
+      font-size: 1.1rem;
+      color: var(--navy);
+      margin-bottom: 14px;
+    }
+
+    .price-kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .price-kpi-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .price-kpi-card span {
+      display: block;
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .price-kpi-card strong {
+      display: block;
+      font-size: 1.25rem;
+      color: var(--navy);
+      margin-top: 4px;
+    }
+
+    .price-kpi-card strong.profit {
+      color: var(--green-dark);
+    }
+
+    .accordion-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .accordion-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: white;
+    }
+
+    .accordion-header {
+      background: var(--bg);
+      padding: 12px 16px;
+      font-weight: 800;
+      font-size: 0.84rem;
+      color: var(--navy);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .accordion-header::after {
+      content: '+';
+      font-size: 1.1rem;
+    }
+
+    .accordion-item.open .accordion-header::after {
+      content: '−';
+    }
+
+    .accordion-body {
+      padding: 16px;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      display: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .accordion-item.open .accordion-body {
+      display: block;
+    }
+
+    .whatsapp-template-box {
+      border: 1px solid #C8E6B8;
+      border-radius: 12px;
+      background: #F3FAF0;
+      padding: 16px;
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .whatsapp-template-box p {
+      font-size: 0.82rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      color: #172036;
+    }
+
   </style>
 </head>
 <body>
@@ -810,6 +950,14 @@
             <option value="christmas">Natale (Rosso / Verde)</option>
           </select>
         </div>
+
+        <div class="control-group" id="customColorGroup" style="display: none;">
+          <label>Colori Sfondo Personalizzati</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="color" id="customColor1" value="#1B2A5E" oninput="updateCustomGradient()">
+            <input type="color" id="customColor2" value="#091024" oninput="updateCustomGradient()">
+          </div>
+        </div>
       </div>
 
       <!-- Controls for Amazon Mockup (Tab 2) -->
@@ -847,6 +995,15 @@
         </div>
       </div>
 
+      <!-- Controls for Resellers Pack (Tab 5) -->
+      <div id="controlsReseller" class="sidebar-section" style="display: none;">
+        <h3>Configurazione B2B</h3>
+        <div class="control-group">
+          <label for="resellerCommissionInput">Commissione Rivenditore (%)</label>
+          <input type="number" id="resellerCommissionInput" min="5" max="80" value="30" oninput="updateB2BPrices()">
+        </div>
+      </div>
+
     </aside>
 
     <!-- Main Content Area -->
@@ -858,10 +1015,18 @@
         <button class="tab-btn" id="tabAmazon" onclick="switchTab('amazon')">2. Scheda Amazon</button>
         <button class="tab-btn" id="tabInfographic" onclick="switchTab('infographic')">3. Infografica</button>
         <button class="tab-btn" id="tabStoryboard" onclick="switchTab('storyboard')">4. Script Video</button>
+        <button class="tab-btn" id="tabReseller" onclick="switchTab('reseller')">5. Pacchetto Rivenditori</button>
       </nav>
 
       <!-- Panel 1: Social Post Visualizer -->
       <section class="tab-panel active" id="panelSocial">
+        
+        <!-- Live Export Actions -->
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <button class="copy-btn" onclick="exportPost('socialSquare', 'post-1-1.png')" style="background: var(--navy); border-color: var(--navy);">Scarica Quadrato 1:1 (Feed)</button>
+          <button class="copy-btn" onclick="exportPost('socialVertical', 'post-9-16.png')" style="background: var(--green-dark); border-color: var(--green-dark);">Scarica Verticale 9:16 (Story)</button>
+        </div>
+
         <div class="preview-container">
           
           <!-- Square Post Mockup -->
@@ -911,9 +1076,9 @@
             <div class="amazon-gallery">
               <div class="physical-tag-container" id="mockupProductContainer">
                 
-                <!-- Wood variant shape -->
+                <!-- Wood/Ceramic variant shape -->
                 <div class="smart-tag-wood" id="productTagShape">
-                  <img class="smart-tag-logo" src="khamakey-wordmark-dark.png" alt="Logo" style="filter: brightness(0) invert(1) opacity(0.8);">
+                  <img class="smart-tag-logo" src="khamakey-wordmark-dark.png" alt="Logo" style="filter: brightness(0.2) contrast(1.5) opacity(0.75); mix-blend-mode: multiply;">
                   <div class="smart-tag-nfc-badge">NFC</div>
                 </div>
 
@@ -1020,6 +1185,115 @@
 
       </section>
 
+      <!-- Panel 5: Reseller B2B Pack -->
+      <section class="tab-panel" id="panelReseller">
+        
+        <div class="b2b-grid">
+          
+          <!-- Pricing List & Margins -->
+          <div class="pricing-table-card">
+            <h3>Listino Prezzi Consigliato & Margine</h3>
+            
+            <div class="price-kpi-row">
+              <div class="price-kpi-card">
+                <span>Prezzo Pubblico</span>
+                <strong id="b2bRetailPrice">€29.90</strong>
+              </div>
+              <div class="price-kpi-card">
+                <span>Guadagno Rivenditore</span>
+                <strong id="b2bResellerProfit" class="profit">€8.97</strong>
+              </div>
+              <div class="price-kpi-card">
+                <span>Costo Fornitore (B2B)</span>
+                <strong id="b2bResellerCost">€20.93</strong>
+              </div>
+            </div>
+
+            <table class="script-table" style="box-shadow: none;">
+              <thead>
+                <tr>
+                  <th>Prodotto / Kit</th>
+                  <th>Prezzo Listino</th>
+                  <th>Costo B2B</th>
+                  <th>Margine (€)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Kit Starter Moments (1 Tag)</strong></td>
+                  <td>€29.90</td>
+                  <td id="rowCostStarter">€20.93</td>
+                  <td id="rowMarginStarter" style="color: var(--green-dark); font-weight: 800;">€8.97</td>
+                </tr>
+                <tr>
+                  <td><strong>Kit Espositore Business (1 Display)</strong></td>
+                  <td>€49.90</td>
+                  <td id="rowCostBusiness">€34.93</td>
+                  <td id="rowMarginBusiness" style="color: var(--green-dark); font-weight: 800;">€14.97</td>
+                </tr>
+                <tr>
+                  <td><strong>Pacchetto Ristorante Premium (5 Display)</strong></td>
+                  <td>€189.00</td>
+                  <td id="rowCostPremium">€132.30</td>
+                  <td id="rowMarginPremium" style="color: var(--green-dark); font-weight: 800;">€56.70</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Phone Pitch & Objections Accordion -->
+          <div class="pricing-table-card">
+            <h3>WhatsApp Templates & Pitch Script</h3>
+            
+            <!-- WhatsApp promo templates -->
+            <div style="margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <strong style="font-size: 0.8rem; color: var(--navy); text-transform: uppercase;">Messaggio WhatsApp per Promozione</strong>
+                <button class="copy-btn" id="copyWaBtn" onclick="copyWhatsAppTemplate()" style="padding: 4px 10px; font-size: 0.68rem;">Copia Messaggio</button>
+              </div>
+              <div class="whatsapp-template-box">
+                <p id="whatsappText">Ciao! Volevo mostrarti un'idea stupenda per il tuo locale. 🍽️
+
+Abbiamo introdotto i nuovi Espositori Smart NFC di KhamaKey. I tuoi clienti dovranno solo avvicinare lo smartphone per consultare il tuo menu digitale in tempo reale, senza costringerli a zoomare su PDF illeggibili. 
+
+In più, il sistema ha un modulo automatico per raccogliere Recensioni Google a fine pasto. Si configura in soli 3 minuti e non richiede abbonamenti.
+
+Se ti va, posso passare domani per farti fare una prova gratuita col mio tag. Fammi sapere!</p>
+              </div>
+            </div>
+
+            <!-- Pitch scripts accordion -->
+            <div class="accordion-list">
+              
+              <div class="accordion-item open" onclick="toggleAccordion(this)">
+                <div class="accordion-header">Gancio Telefonico Rapido</div>
+                <div class="accordion-body">
+                  "Buongiorno Marco! Sono [Tuo Nome]. Ti rubo solo 40 secondi perché ho visto la scheda Google del tuo ristorante e ho notato che usate ancora il menu QR Code con PDF. Abbiamo sviluppato un sistema che fa aprire il menu all'istante avvicinando il telefono al tavolo, e vi aiuta a triplicare le recensioni Google senza alcun canone mensile. Posso passarti a mostrare come funziona domani alle 15:00 o preferisci mercoledì?"
+                </div>
+              </div>
+
+              <div class="accordion-item" onclick="toggleAccordion(this)">
+                <div class="accordion-header">Gestione Obiezioni: "Quanto costa?"</div>
+                <div class="accordion-body">
+                  "Il bello è che non c'è nessun abbonamento mensile obbligatorio. Lo Starter Kit costa solo €29,90 una volta sola, include i tag NFC e l'editor di gestione. Si ripaga da solo nei primi due giorni di utilizzo grazie alle nuove recensioni a 5 stelle che raccoglierete."
+                </div>
+              </div>
+
+              <div class="accordion-item" onclick="toggleAccordion(this)">
+                <div class="accordion-header">Chiusura & Consegna</div>
+                <div class="accordion-body">
+                  "Ti lascio il tag già attivo con il tuo logo inciso. Facciamo insieme la configurazione sul tuo telefono in meno di tre minuti così puoi vederlo funzionare all'istante con i tuoi piatti. Posso procedere all'ordine per la spedizione o ne vuoi uno in ceramica pronto subito?"
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
     </main>
 
   </div>
@@ -1067,7 +1341,7 @@
         { scene: "4", video: "Dettaglio del portachiavi in legno inciso poggiato sulle partecipazioni.", overlay: "KhamaKey Moments. Link in bio.", voice: "'Se ti sposi o vuoi fare un regalo unico, cerca KhamaKey Moments.'" }
       ],
       business: [
-        { scene: "1", video: "Cliente al tavolo del restaurante indica l'espositore di acrilico KhamaKey. Cameriere che si avvicina.", overlay: "Smetti di usare i vecchi PDF difficili da leggere! ❌", voice: "'Ancora costringi i tuoi clienti a scaricare PDF pesantissimi per leggere il menu?'" },
+        { scene: "1", video: "Cliente al tavolo del ristorante indica l'espositore di acrilico KhamaKey. Cameriere che si avvicina.", overlay: "Smetti di usare i vecchi PDF difficili da leggere! ❌", voice: "'Ancora costringi i tuoi clienti a scaricare PDF pesantissimi per leggere il menu?'" },
         { scene: "2", video: "Il cliente appoggia lo smartphone sul tag NFC. Il menu interattivo si apre all'istante con foto nitide.", overlay: "Un tap ed ecco il menu interattivo 🍽️", voice: "'Guarda qui: basta un tap. Il menu si apre in meno di un secondo, senza scaricare nessuna app.'" },
         { scene: "3", video: "Il cliente prenota e poi clicca sul bottone per lasciare la recensione a fine pasto.", overlay: "Allergeni, varianti e recensioni Google in 1 click", voice: "'I clienti filtrano gli allergeni e possono lasciarti una recensione su Google in un solo click.'" },
         { scene: "4", video: "Schermata del sito web khamakey.it con panoramica dello Starter Kit.", overlay: "Starter Kit a €29,90. Setup in 3 min.", voice: "'Ordina il tuo Starter Kit su khamakey.it e configura il tuo locale gratis. Zero abbonamenti.'" }
@@ -1093,6 +1367,7 @@
       document.getElementById('controlsAmazon').style.display = (tabId === 'amazon') ? 'flex' : 'none';
       document.getElementById('controlsInfographic').style.display = (tabId === 'infographic') ? 'flex' : 'none';
       document.getElementById('controlsStoryboard').style.display = (tabId === 'storyboard') ? 'flex' : 'none';
+      document.getElementById('controlsReseller').style.display = (tabId === 'reseller') ? 'flex' : 'none';
     }
 
     // Live update for Social Preview Inputs
@@ -1117,10 +1392,26 @@
     function changeSocialBgPreset() {
       const val = document.getElementById('bgGradientSelect').value;
       let grad = 'var(--gradient-moments)';
-      if (val === 'business') grad = 'var(--gradient-business)';
-      if (val === 'love') grad = 'var(--gradient-love)';
-      if (val === 'christmas') grad = 'var(--gradient-christmas)';
+      document.getElementById('customColorGroup').style.display = 'none';
 
+      if (val === 'business') grad = 'var(--gradient-business)';
+      else if (val === 'love') grad = 'var(--gradient-love)';
+      else if (val === 'christmas') grad = 'var(--gradient-christmas)';
+      else if (val === 'custom') {
+        document.getElementById('customColorGroup').style.display = 'flex';
+        updateCustomGradient();
+        return;
+      }
+
+      document.getElementById('socialSquare').style.background = grad;
+      document.getElementById('socialVertical').style.background = grad;
+    }
+
+    // Custom gradient update
+    function updateCustomGradient() {
+      const c1 = document.getElementById('customColor1').value;
+      const c2 = document.getElementById('customColor2').value;
+      const grad = `linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`;
       document.getElementById('socialSquare').style.background = grad;
       document.getElementById('socialVertical').style.background = grad;
     }
@@ -1133,7 +1424,11 @@
         document.getElementById(activeBtnId).classList.add('active');
       }
 
-      if (key === 'custom') return;
+      if (key === 'custom') {
+        document.getElementById('bgGradientSelect').value = 'custom';
+        changeSocialBgPreset();
+        return;
+      }
 
       const p = presets[key];
       if (p) {
@@ -1167,17 +1462,22 @@
       document.getElementById('mockupScreenTitle').innerText = t.includes('Business') ? 'Menù del Giorno' : 'Matrimonio di Giulia & Marco';
     }
 
-    // Update Product material rendering
+    // Update Product material rendering & Logo filter
     function updateProductMaterial() {
       const material = document.getElementById('productMaterialSelect').value;
       const shape = document.getElementById('productTagShape');
       const screen = document.getElementById('mockupScreen');
+      const logo = shape.querySelector('.smart-tag-logo');
       
       if (material === 'wood') {
         shape.className = 'smart-tag-wood';
+        logo.style.filter = 'brightness(0.2) contrast(1.5) opacity(0.75)';
+        logo.style.mixBlendMode = 'multiply';
         screen.style.background = 'radial-gradient(circle at 50% 30%, #246517, #091024)';
       } else {
         shape.className = 'smart-tag-ceramic';
+        logo.style.filter = 'brightness(0.3) opacity(0.85)';
+        logo.style.mixBlendMode = 'normal';
         screen.style.background = 'radial-gradient(circle at 50% 30%, #1B2A5E, #091024)';
       }
     }
@@ -1223,6 +1523,75 @@
           btn.classList.remove('copied');
         }, 1800);
       });
+    }
+
+    // Export post to PNG using html2canvas
+    function exportPost(elementId, filename) {
+      const element = document.getElementById(elementId);
+      html2canvas(element, {
+        scale: 2, // High resolution export
+        useCORS: true,
+        backgroundColor: null
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    }
+
+    // Update B2B reseller pricing dynamically based on commission input
+    function updateB2BPrices() {
+      const comm = parseFloat(document.getElementById('resellerCommissionInput').value) / 100;
+      
+      const prices = {
+        starter: 29.90,
+        business: 49.90,
+        premium: 189.00
+      };
+
+      const profitStarter = prices.starter * comm;
+      const profitBusiness = prices.business * comm;
+      const profitPremium = prices.premium * comm;
+
+      // Update primary KPI
+      document.getElementById('b2bResellerProfit').innerText = `€${profitStarter.toFixed(2)}`;
+      document.getElementById('b2bResellerCost').innerText = `€${(prices.starter - profitStarter).toFixed(2)}`;
+
+      // Update table starter
+      document.getElementById('rowCostStarter').innerText = `€${(prices.starter - profitStarter).toFixed(2)}`;
+      document.getElementById('rowMarginStarter').innerText = `€${profitStarter.toFixed(2)}`;
+
+      // Update table business
+      document.getElementById('rowCostBusiness').innerText = `€${(prices.business - profitBusiness).toFixed(2)}`;
+      document.getElementById('rowMarginBusiness').innerText = `€${profitBusiness.toFixed(2)}`;
+
+      // Update table premium
+      document.getElementById('rowCostPremium').innerText = `€${(prices.premium - profitPremium).toFixed(2)}`;
+      document.getElementById('rowMarginPremium').innerText = `€${profitPremium.toFixed(2)}`;
+    }
+
+    // Copy WhatsApp message template
+    function copyWhatsAppTemplate() {
+      const txt = document.getElementById('whatsappText').innerText;
+      navigator.clipboard.writeText(txt).then(() => {
+        const btn = document.getElementById('copyWaBtn');
+        btn.innerText = 'Copiato!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerText = 'Copia Messaggio';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    }
+
+    // Accordion toggle
+    function toggleAccordion(element) {
+      const isOpen = element.classList.contains('open');
+      document.querySelectorAll('.accordion-item').forEach(item => item.classList.remove('open'));
+      if (!isOpen) {
+        element.classList.add('open');
+      }
     }
 
     // Embeddable infographic raw HTML/CSS generator
@@ -1324,6 +1693,7 @@
     window.onload = function() {
       applyPreset('moments');
       setupInfographicCode();
+      updateB2BPrices();
     };
 
   </script>

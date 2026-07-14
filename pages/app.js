@@ -498,7 +498,7 @@ async function loadApplication(){
     currentUser = userData.user;
     currentBusiness = await ensureWorkspace(currentUser);
     userEmail.textContent = currentUser.email || "";
-    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=135`;
+    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=136`;
     if(editorFrame.getAttribute("src") !== editorUrl){
       editorFrame.src = editorUrl;
     }

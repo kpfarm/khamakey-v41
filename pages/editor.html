@@ -1186,15 +1186,15 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
       </div>
       <div class="card intl-hero-card" id="intlHeroCard">
         <div id="intlHeroPending">
-          <div class="card-title">🌍 Pagina internazionale</div>
-          <p class="field-hint">Scrivi sempre in italiano. Attiva le lingue quando vuoi mostrare il selettore lingua sulla pagina pubblica.</p>
+          <div class="card-title">🌍 Pagina multilingua</div>
+          <p class="field-hint">Scrivi sempre in italiano. Attiva il multilingua quando vuoi mostrare il selettore lingua sulla pagina pubblica.</p>
           <button type="button" class="btn-intl-main intl-switch" id="btnInternationalMain" aria-pressed="false">
             <span class="intl-switch-knob" aria-hidden="true"></span>
-            <span id="intlSwitchLabel">Pagina internazionale disattiva</span>
+            <span id="intlSwitchLabel">Multilingua disattivo</span>
           </button>
         </div>
         <div id="intlHeroDone" hidden>
-          <div class="card-title">🌍 La tua pagina ora parla 5 lingue</div>
+          <div class="card-title">🌍 Multilingua attivo</div>
           <p class="field-hint">I visitatori vedranno automaticamente la lingua del loro telefono.</p>
           <div class="intl-lang-badges">
             <span class="intl-lang-badge">🇮🇹 Italiano</span>
@@ -2214,7 +2214,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         </div>
         <div class="field" id="welcomeLangField">
           <label>Lingue disponibili nella pagina pubblica</label>
-          <div class="field-hint">Attiva la pagina internazionale dalla sezione Informazioni per tradurre automaticamente i tuoi contenuti.</div>
+          <div class="field-hint">Attiva il multilingua dalla sezione Informazioni per tradurre automaticamente i tuoi contenuti.</div>
           <div class="field-row">
             <label class="toggle-row" style="border:0;padding:8px 0"><span>Italiano</span><span class="toggle"><input type="checkbox" id="langIt" checked><span class="toggle-slider"></span></span></label>
             <label class="toggle-row" style="border:0;padding:8px 0"><span>English</span><span class="toggle"><input type="checkbox" id="langEn" checked><span class="toggle-slider"></span></span></label>
@@ -2224,7 +2224,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
           </div>
         </div>
         <div class="field" id="intlStatusField" hidden>
-          <label>Pagina internazionale</label>
+          <label>Pagina multilingua</label>
           <div class="field-hint">La pagina è attiva in 5 lingue. I visitatori vedono automaticamente la lingua del telefono.</div>
           <div class="intl-lang-badges">
             <span class="intl-lang-badge">🇮🇹 Italiano ✅</span>
@@ -2673,7 +2673,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 </div>
 
 <!-- PAGINA INTERNAZIONALE -->
-<div class="intl-modal" id="intlModal" hidden aria-label="Attivazione pagina internazionale">
+<div class="intl-modal" id="intlModal" hidden aria-label="Attivazione multilingua">
   <div class="intl-modal-backdrop" id="intlModalBackdrop"></div>
   <div class="intl-shell">
     <div id="intlModalProgress">
@@ -2683,7 +2683,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
       <p id="intlProgressSub" class="field-hint">Non chiudere la pagina</p>
     </div>
     <div id="intlModalSuccess" hidden>
-      <h2>🌍 La tua pagina ora parla 5 lingue.</h2>
+      <h2>🌍 Multilingua attivo.</h2>
       <p>I visitatori vedranno automaticamente la lingua del loro telefono.</p>
       <p><strong>Fatto.</strong></p>
       <button type="button" class="btn-intl-main" id="intlModalDone">✅ Continua</button>
@@ -6917,7 +6917,7 @@ window.__khamakeyEditor = {
   getPublicLang(){ return publicLang; }
 };
 </script>
-<script type="module" src="editor-international.js?v=121"></script>
+<script type="module" src="editor-international.js?v=122"></script>
 <script type="module" src="editor-media.js?v=117"></script>
 </body>
 </html>

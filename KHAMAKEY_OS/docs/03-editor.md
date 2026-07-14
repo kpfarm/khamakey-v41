@@ -32,12 +32,12 @@
 - Chiave wizard per attività (non globale)
 - Salvataggio cloud automatico dopo template
 
-### Comandi operativi v120-v121
+### Comandi operativi v120-v122
 - Il tasto `Salva` e' sempre visibile nella topbar, non solo nella barra modifiche.
 - `Anteprima` e `Account` restano azionabili dalla shell principale; l'editor iframe non deve duplicare il tasto Anteprima in alto.
 - `Apri pagina finale`, `Copia link` e `Scarica QR` usano il link NFC quando esiste; se il chip non e' ancora assegnato usano la pagina pubblica `/p/<slug>` come fallback operativo.
 - `app.js` crea/aggiorna sempre la pagina pubblica `/p/<slug>` via upsert idempotente quando apre il workspace Business.
-- Il controllo `Internazionale` vive nella card dedicata ed e' uno switch leggibile: disattivo, attivazione in corso o attivo.
+- Il controllo `Multilingua` vive nella card dedicata ed e' uno switch leggibile: disattivo, attivazione in corso o attivo.
 
 ### Supporto
 - Il modal Account contiene la tab `Assistenza`.

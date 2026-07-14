@@ -87,8 +87,9 @@
 | 2026-07-14 | Codex | **Audit Admin**: creato `docs/18-admin-audit.md` con stato funzioni, gap e piano miglioramento |
 | 2026-07-14 | Codex | **Admin v128 / Business v118 / Moments v114 / SQL v89**: console supporto operativa e ticket assistenza apribili da editor account |
 | 2026-07-14 | Codex | **Piano Admin Console Operativa**: creato `docs/19-admin-console-operativa.md`, roadmap a blocchi 1-2 sezioni per volta |
-| 2026-07-14 | Codex | **Business Editor v120**: ripristinati Salva sempre visibile, Account/Anteprima robusti, link pagina finale/QR fallback e stato Internazionale chiaro |
-| 2026-07-15 | Codex | **Business Editor v121**: rimossi doppioni Anteprima, Internazionale trasformato in switch nella card e pagina finale `/p/` creata via upsert |
+| 2026-07-14 | Codex | **Business Editor v120**: ripristinati Salva sempre visibile, Account/Anteprima robusti, link pagina finale/QR fallback e stato multilingua chiaro |
+| 2026-07-15 | Codex | **Business Editor v121**: rimossi doppioni Anteprima, controllo multilingua trasformato in switch nella card e pagina finale `/p/` creata via upsert |
+| 2026-07-15 | Codex | **Business Editor v122**: rinominato il comando visibile in Multilingua e reso lo switch piu' chiaro |
 
 ---
 

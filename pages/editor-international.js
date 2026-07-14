@@ -80,11 +80,11 @@ function updateIntlHero() {
     mainBtn.classList.toggle("active", enabled);
     mainBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
     mainBtn.title = enabled
-      ? "Pagina internazionale attiva: la pagina pubblica mostra il selettore lingua."
-      : "Attiva la pagina internazionale.";
+      ? "Multilingua attivo: la pagina pubblica mostra il selettore lingua."
+      : "Attiva il multilingua.";
   }
   if (switchLabel) {
-    switchLabel.textContent = enabled ? "Pagina internazionale attiva" : "Pagina internazionale disattiva";
+    switchLabel.textContent = enabled ? "Multilingua attivo" : "Multilingua disattivo";
   }
   const welcomeLangField = document.getElementById("welcomeLangField");
   const intlStatusField = document.getElementById("intlStatusField");
@@ -218,7 +218,7 @@ async function runInternationalize({ quiet = false } = {}) {
     mainBtn.title = "Sto creando e salvando le traduzioni.";
   }
   if (switchLabel) {
-    switchLabel.textContent = "Attivazione in corso...";
+    switchLabel.textContent = "Attivazione multilingua...";
   }
   if (!quiet) openIntlModal();
 

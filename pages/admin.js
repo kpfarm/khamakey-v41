@@ -167,6 +167,12 @@ const commissionTableCount = document.getElementById("commissionTableCount");
 const productsTable = document.getElementById("productsTable");
 const stockMovementsTable = document.getElementById("stockMovementsTable");
 const platformOrdersTable = document.getElementById("platformOrdersTable");
+const nfcShippingStats = document.getElementById("nfcShippingStats");
+const nfcShippingTable = document.getElementById("nfcShippingTable");
+const nfcShippingCount = document.getElementById("nfcShippingCount");
+const nfcShippingSearch = document.getElementById("nfcShippingSearch");
+const nfcShippingSearchClear = document.getElementById("nfcShippingSearchClear");
+const nfcShippingQuickFilters = document.getElementById("nfcShippingQuickFilters");
 const productForm = document.getElementById("productForm");
 const productFormStatus = document.getElementById("productFormStatus");
 const stockForm = document.getElementById("stockForm");
@@ -332,6 +338,7 @@ let materialRows = [];
 let ticketCategoryRows = [];
 let integrationRows = [];
 let momentCatalogRows = [];
+let nfcShippingStageFilter = "";
 let editingMomentCatalogId = null;
 let currentClient = null;
 let currentClientRecord = null;
@@ -339,6 +346,13 @@ let currentClientRecord = null;
 const ORDER_STATUS_OPTIONS = ["draft","pending","paid","production","ready","shipped","completed","cancelled","refunded"];
 const PAYMENT_STATUS_OPTIONS = ["unpaid","pending","paid","refunded","failed"];
 const FULFILLMENT_ORDER_STATUSES = ["pending","paid","production","ready"];
+const NFC_SHIPPING_STAGE_LABELS = {
+  production:"Da produrre",
+  print:"Da stampare",
+  ship:"Da spedire",
+  shipped:"Spedita",
+  issue:"Problema"
+};
 const DASHBOARD_REVENUE_PAYMENT_STATUSES = ["paid"];
 
 function setGate(message,type=""){
@@ -742,6 +756,7 @@ function switchTab(tab){
   if(group) group.classList.add("open");
   adminTitle.textContent = TAB_PAGE_TITLES[tab] || active?.textContent || "Admin";
   renderPanelGuide(tab, guideElements);
+  if(tab === "nfc") refreshNfcShippingConsole();
   if(panelGuide && !panelGuide.hidden){
     panelGuide.classList.toggle("collapsed", isGuideCollapsed());
   }
@@ -1325,7 +1340,7 @@ function renderDashboardAlerts(stats){
       level:"warn",
       title:"Ordini da evadere",
       text:`${fmt(stats.pendingOrders)} ordini in attesa, pagati o in produzione.`,
-      tab:"platformOrders"
+      tab:"nfc"
     });
   }
   if(stats.openTickets > 0){
@@ -1711,6 +1726,7 @@ async function loadMomentProducts(){
     momentProductRows = data || [];
     populateMomentFilters();
     refreshMomentTable();
+    refreshNfcShippingConsole();
   }catch(error){
     console.error(error);
     momentProductsTable.innerHTML = `<tr><td colspan="11">Prodotti Moments non disponibili. Applica SQL v61/v62.</td></tr>`;
@@ -2446,12 +2462,13 @@ async function loadPlatformOrders(){
   try{
     const { data,error } = await supabase
       .from("platform_orders")
-      .select("id,order_code,order_type,customer_name,customer_email,customer_phone,status,payment_status,subtotal,shipping_total,discount_total,total,notes,agent_id,stripe_checkout_session_id,stripe_invoice_id,platform_agents(contact_name,email,referral_code),businesses(nome,slug)")
+      .select("id,order_code,order_type,customer_name,customer_email,customer_phone,status,payment_status,subtotal,shipping_total,discount_total,total,notes,agent_id,created_at,stripe_checkout_session_id,stripe_invoice_id,platform_agents(contact_name,email,referral_code),businesses(nome,slug)")
       .order("created_at",{ascending:false})
       .limit(200);
     if(error) throw error;
     platformOrderRows = data || [];
     refreshOrdersTable();
+    refreshNfcShippingConsole();
     if(momentProductRows.length) refreshMomentTable();
   }catch(error){
     console.error(error);
@@ -2490,6 +2507,110 @@ function refreshOrdersTable(){
       </td>
     </tr>
   `).join("") : `<tr><td colspan="8">${platformOrderRows.length ? "Nessun ordine corrisponde ai filtri." : "Nessun ordine interno registrato."}</td></tr>`;
+}
+
+function nfcCodesForOrder(orderId){
+  return momentProductRows.filter(row=>row.platform_order_id === orderId);
+}
+
+function nfcShippingStageForOrder(order,codes=[]){
+  if(["cancelled","refunded"].includes(order.status)) return "issue";
+  if(["shipped","completed"].includes(order.status)) return "shipped";
+  if(order.status === "ready") return "ship";
+  if(order.status === "production") return "print";
+  if(["pending","paid"].includes(order.status)) return codes.length ? "print" : "production";
+  if(!codes.length && order.order_type === "nfc") return "production";
+  return "issue";
+}
+
+function nfcShippingNextAction(stage,codes=[]){
+  if(stage === "production") return codes.length ? "Controlla codici assegnati" : "Assegna codici dal magazzino";
+  if(stage === "print") return "Stampa QR / etichette e prepara confezione";
+  if(stage === "ship") return "Spedisci o consegna al cliente";
+  if(stage === "shipped") return "Verifica consegna e chiudi ordine";
+  return "Controlla dati ordine/codici";
+}
+
+function nfcShippingRows(){
+  return platformOrderRows
+    .map(order=>{
+      const codes = nfcCodesForOrder(order.id);
+      const isNfcOrder = order.order_type === "nfc" || codes.length > 0;
+      if(!isNfcOrder) return null;
+      return { order,codes,stage:nfcShippingStageForOrder(order,codes) };
+    })
+    .filter(Boolean);
+}
+
+function nfcShippingPriority(stage){
+  return { issue:0, production:1, print:2, ship:3, shipped:4 }[stage] ?? 9;
+}
+
+function refreshNfcShippingConsole(){
+  if(!nfcShippingTable || !nfcShippingStats) return;
+  const allRows = nfcShippingRows();
+  const counts = allRows.reduce((acc,row)=>{
+    acc[row.stage] = (acc[row.stage] || 0) + 1;
+    return acc;
+  },{});
+  nfcShippingStats.innerHTML = ["production","print","ship","shipped","issue"].map(stage=>`
+    <article class="shipping-stage-card shipping-stage-${stage}">
+      <span>${esc(NFC_SHIPPING_STAGE_LABELS[stage])}</span>
+      <strong>${fmt(counts[stage] || 0)}</strong>
+    </article>
+  `).join("");
+  const search = String(nfcShippingSearch?.value || "").trim().toLowerCase();
+  const rows = allRows
+    .filter(row=>!nfcShippingStageFilter || row.stage === nfcShippingStageFilter)
+    .filter(row=>{
+      if(!search) return true;
+      const codeText = row.codes.map(code=>code.code).join(" ");
+      return haystackIncludes(row.order, search, [
+        "order_code","order_type","customer_name","customer_email","customer_phone","status","payment_status",
+        order=>order.businesses?.nome,
+        order=>order.businesses?.slug,
+        order=>order.platform_agents?.contact_name,
+        order=>order.platform_agents?.email,
+        ()=>codeText
+      ]);
+    })
+    .sort((a,b)=>nfcShippingPriority(a.stage) - nfcShippingPriority(b.stage));
+  if(nfcShippingCount) nfcShippingCount.textContent = `${fmt(rows.length)} spedizioni`;
+  nfcShippingTable.innerHTML = rows.length ? rows.map(({order,codes,stage})=>{
+    const nextStatus = stage === "production" ? "production" : stage === "print" ? "ready" : stage === "ship" ? "shipped" : stage === "shipped" ? "completed" : "";
+    const codeSummary = codes.length
+      ? `${fmt(codes.length)} codici<div class="muted-cell">${codes.slice(0,3).map(code=>esc(code.code)).join(" · ")}${codes.length > 3 ? " ..." : ""}</div>`
+      : `<span class="status-pill low">0 codici</span>`;
+    return `<tr>
+      <td><span class="status-pill ${stage === "issue" ? "error" : stage}">${esc(NFC_SHIPPING_STAGE_LABELS[stage])}</span></td>
+      <td><strong>${esc(order.order_code)}</strong><div class="muted-cell">${esc(order.order_type)} · ${dateShort(order.created_at)}</div></td>
+      <td><strong>${esc(order.businesses?.nome || order.customer_name || "-")}</strong><div class="muted-cell">${esc(order.customer_email || order.businesses?.slug || "")}</div></td>
+      <td>${codeSummary}</td>
+      <td>${esc(statusLabel(order.status))}<div class="muted-cell">Pagamento: ${esc(order.payment_status || "-")}</div></td>
+      <td>${esc(nfcShippingNextAction(stage,codes))}</td>
+      <td class="row-actions">
+        <button type="button" data-nfc-order-open="${esc(order.id)}">Gestisci</button>
+        ${codes.length ? `<button type="button" data-admin-tab-jump="momentInventory">Stampa</button>` : `<button type="button" data-nfc-order-open="${esc(order.id)}" data-order-view="codes">Assegna</button>`}
+        ${nextStatus ? `<button type="button" data-nfc-order-stage="${esc(order.id)}" data-next-status="${esc(nextStatus)}">${stage === "shipped" ? "Completa" : "Avanza"}</button>` : ""}
+      </td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="7">${allRows.length ? "Nessuna spedizione corrisponde ai filtri." : "Nessun ordine NFC collegato. Crea un ordine NFC o assegna codici dal magazzino."}</td></tr>`;
+}
+
+async function advanceNfcShippingOrder(orderId,status){
+  if(!hasPermission("orders.write")){
+    alert("Permesso orders.write richiesto.");
+    return;
+  }
+  const { error } = await supabase
+    .from("platform_orders")
+    .update({status})
+    .eq("id",orderId);
+  if(error){
+    alert(error.message || "Aggiornamento ordine non riuscito.");
+    return;
+  }
+  await Promise.all([loadPlatformOrders(),loadDashboard()]);
 }
 
 async function loadPlans(){
@@ -4456,6 +4577,21 @@ platformOrdersTable.addEventListener("click",event=>{
   if(openBtn) openOrderDrawer(openBtn.dataset.orderOpen);
 });
 
+nfcShippingTable?.addEventListener("click",event=>{
+  const jumpBtn = event.target.closest("[data-admin-tab-jump]");
+  if(jumpBtn){
+    switchTab(jumpBtn.dataset.adminTabJump);
+    return;
+  }
+  const openBtn = event.target.closest("[data-nfc-order-open]");
+  if(openBtn){
+    openOrderDrawer(openBtn.dataset.nfcOrderOpen,openBtn.dataset.orderView || "summary");
+    return;
+  }
+  const stageBtn = event.target.closest("[data-nfc-order-stage]");
+  if(stageBtn) advanceNfcShippingOrder(stageBtn.dataset.nfcOrderStage,stageBtn.dataset.nextStatus);
+});
+
 plansTable.addEventListener("click",event=>{
   const stripeBtn = event.target.closest("[data-plan-stripe]");
   if(stripeBtn){
@@ -4593,6 +4729,26 @@ document.getElementById("orderQuickFilters")?.addEventListener("click",event=>{
     node.classList.toggle("active", node === chip);
   });
   refreshOrdersTable();
+});
+
+nfcShippingQuickFilters?.addEventListener("click",event=>{
+  const chip = event.target.closest("[data-nfc-shipping-stage]");
+  if(!chip) return;
+  nfcShippingStageFilter = chip.dataset.nfcShippingStage || "";
+  chip.closest(".filter-chip-bar")?.querySelectorAll(".filter-chip").forEach(node=>{
+    node.classList.toggle("active", node === chip);
+  });
+  refreshNfcShippingConsole();
+});
+
+bindSearchInput(nfcShippingSearch, refreshNfcShippingConsole);
+nfcShippingSearchClear?.addEventListener("click",()=>{
+  if(nfcShippingSearch) nfcShippingSearch.value = "";
+  nfcShippingStageFilter = "";
+  nfcShippingQuickFilters?.querySelectorAll(".filter-chip").forEach(node=>{
+    node.classList.toggle("active", !node.dataset.nfcShippingStage);
+  });
+  refreshNfcShippingConsole();
 });
 
 document.getElementById("momentInventoryQuickFilters")?.addEventListener("click",event=>{

@@ -171,6 +171,15 @@ tr:last-child td{border-bottom:0}
 .admin-form.compact-form .form-status,.admin-form.moment-batch-form .form-status,.admin-form.moment-sku-form .form-status{grid-column:1/-1}
 .admin-form.moment-batch-form button{grid-column:1/-1}
 .inventory-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:14px 0 18px}
+.shipping-stage-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0 18px}
+.shipping-stage-card{border:1px solid var(--border);border-radius:14px;background:#fff;padding:14px;display:grid;gap:6px}
+.shipping-stage-card span{color:var(--muted);font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.shipping-stage-card strong{color:var(--navy);font-size:1.5rem;line-height:1}
+.shipping-stage-production{border-color:#FCD34D;background:#FFFBEB}
+.shipping-stage-print{border-color:#93C5FD;background:#EFF6FF}
+.shipping-stage-ship{border-color:#86EFAC;background:#F0FDF4}
+.shipping-stage-shipped{border-color:#CBD5E1;background:#F8FAFC}
+.shipping-stage-issue{border-color:#FCA5A5;background:#FEF2F2}
 .inventory-stats-empty{margin:0;color:var(--muted);font-size:.82rem;line-height:1.45}
 .network-tree{display:flex;flex-direction:column;gap:10px;margin:14px 0 6px}
 .network-node{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01))}
@@ -213,6 +222,7 @@ tr:last-child td{border-bottom:0}
 .admin-workflow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#F8FAFC;font-size:.78rem;color:var(--muted)}
 .workflow-link{display:inline-flex;align-items:center;border-radius:999px;background:var(--navy);color:#fff;padding:8px 12px;font-weight:900;text-decoration:none;font-size:.76rem}
 .workflow-link:hover{opacity:.92}
+.button-link{border:0;cursor:pointer;font:inherit}
 .admin-workflow-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 16px;padding:0;list-style:none}
 .admin-workflow-steps li{border:1px solid var(--border);border-radius:12px;background:#fff;padding:12px;display:grid;gap:4px}
 .admin-workflow-steps strong{color:var(--navy);font-size:.82rem}
@@ -242,6 +252,11 @@ tr:last-child td{border-bottom:0}
 .status-pill.available{background:#EFF6FF;color:#175CD3}
 .status-pill.claimed{background:#ECFDF3;color:#027A48}
 .status-pill.paused,.status-pill.archived{background:#FEF3F2;color:#B42318}
+.status-pill.production{background:#FFFBEB;color:#B54708}
+.status-pill.print{background:#EFF6FF;color:#175CD3}
+.status-pill.ship{background:#ECFDF3;color:#027A48}
+.status-pill.shipped{background:#F8FAFC;color:#475467}
+.status-pill.issue,.status-pill.error{background:#FEF3F2;color:#B42318}
 .muted-cell{color:var(--muted);font-size:.72rem}
 .stock-low{color:#B54708;font-weight:900}
 .stock-ok{color:#027A48;font-weight:900}

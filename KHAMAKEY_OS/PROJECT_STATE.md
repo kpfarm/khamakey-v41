@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-15** (Business Editor v123 idratazione editor)
+> Ultimo aggiornamento: **2026-07-15** (Admin v133 Spedizioni NFC operative)
 
 ---
 
@@ -80,7 +80,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin** | **v131** | Supporto + CRM operativo con viste rapide e KPI lavoro + Dashboard v130 + Overhaul visivo premium v129. |
+| **Admin** | **v133** | Console Spedizioni NFC operativa con pipeline produzione/stampa/spedizione, KPI, ricerca, filtri e azioni sugli ordini. |
 | **Editor Business** | **v123** | Handshake idratazione editor: dopo reload carica stato cloud, link `/p/`, QR e comandi senza tornare a "Collegamento in preparazione". |
 | **Moments editor** | **v115** | Overhaul visivo premium (sfondo radial, glassmorphism e card hover) + Raccordi copertina v114. |
 | **Worker NFC** | **v127** | Supporto a heroCut, unificazione di tutti i 21 sfondi premium e contrasto dinamico footer. |

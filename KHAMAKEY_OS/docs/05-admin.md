@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v131** (supporto + CRM operativo, dashboard ordini/incassi, menu 4 intenti, modalità semplice, gestione provvigioni, magazzino NFC Moments con creazione SKU/stock).
+Versione attuale: **v133** (console Spedizioni NFC operativa, supporto + CRM operativo, dashboard ordini/incassi, menu 4 intenti, modalità semplice, gestione provvigioni, magazzino NFC Moments con creazione SKU/stock).
 
 ---
 
@@ -18,6 +18,7 @@ Versione attuale: **v131** (supporto + CRM operativo, dashboard ordini/incassi, 
 | **Moments** | Gestione pagine evento |
 | **Ordini** | `platform_orders` — Shopify, Stripe |
 | **Magazzino NFC** | Lotti, codici, stock-first |
+| **Spedizioni NFC** | Pipeline produzione, stampa, spedizione e completamento ordini NFC |
 | **Catalogo vendita** | SKU Moments → sync Shopify |
 | **Agenti / Rete** | Rivenditori, tier, listini |
 | **Integration Hub** | Shopify, Stripe, PayPal, Resend |
@@ -32,6 +33,16 @@ Versione attuale: **v131** (supporto + CRM operativo, dashboard ordini/incassi, 
 - I ticket creati da Business editor e Moments editor confluiscono nella stessa tab globale.
 - v131 aggiunge KPI lavoro: aperti, urgenti, in attesa cliente e risolti da chiudere.
 - v131 aggiunge viste rapide per urgenza e alta priorita', oltre alle viste per stato.
+
+---
+
+## Spedizioni NFC v133
+
+- La tab `Spedizioni NFC` non e' piu' un rimando: mostra una console evasione con pipeline `Da produrre`, `Da stampare`, `Da spedire`, `Spedite`, `Problemi`.
+- I dati sono calcolati da `platform_orders` + `moment_activation_codes`, senza nuove tabelle e senza migrazioni SQL.
+- Ogni riga collega ordine, cliente, codici NFC assegnati, stato pagamento, prossima azione e pulsanti operativi.
+- Azioni disponibili: `Gestisci` ordine, `Assegna` codici se mancanti, `Stampa` aprendo il magazzino NFC, `Avanza` lo stato ordine fino a spedito/completato.
+- La Dashboard ora manda gli alert `Ordini da evadere` alla console Spedizioni NFC, non solo alla lista ordini.
 
 ---
 
@@ -110,3 +121,4 @@ Admin: ricerca, filtri, modifica singola, bulk, drawer ordine/codice.
 - [ ] Dashboard analytics avanzata
 - [x] Gestione ticket supporto unificato base (v128)
 - [ ] Assegnazione responsabile ticket e risposta cliente via email
+- [x] Console Spedizioni NFC operativa base (v133)

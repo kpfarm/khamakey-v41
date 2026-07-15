@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=125">
+  <link rel="stylesheet" href="admin.css?v=126">
 </head>
 <body>
   <main class="admin-shell locked" id="adminShell">
@@ -1192,8 +1192,37 @@
         <section class="admin-panel" data-panel="nfc">
           <div class="admin-card">
             <h2>NFC / Spedizioni</h2>
-            <p class="system-note">La gestione stock e assegnazione codici è in <button type="button" class="link-button" data-admin-tab-jump="momentInventory">Magazzino NFC Moments</button>. Qui trovi ordini e spedizioni collegati.</p>
-            <p>Vai a <button type="button" class="link-button" data-admin-tab-jump="platformOrders">Ordini KhamaKey</button> per creare un ordine e assegnare codici da magazzino.</p>
+            <p class="system-note"><strong>Console evasione</strong> — controlla ordini NFC, codici assegnati, stampa QR/etichette e stato spedizione senza saltare tra sezioni.</p>
+            <div class="admin-workflow">
+              <button type="button" class="workflow-link button-link" data-admin-tab-jump="platformOrders">Crea ordine</button>
+              <button type="button" class="small-action" data-admin-tab-jump="momentInventory">Apri magazzino NFC</button>
+              <span>Pipeline: ordine pagato → produzione → stampa → spedizione → completato.</span>
+            </div>
+            <div class="shipping-stage-grid" id="nfcShippingStats">
+              <p class="inventory-stats-empty">Caricamento pipeline spedizioni...</p>
+            </div>
+            <div class="inventory-toolbar">
+              <label class="inventory-search">Cerca ordine, cliente, email o codice
+                <input type="search" id="nfcShippingSearch" placeholder="Es. KK-..., MOMENT..., cliente@email.it">
+              </label>
+              <button type="button" class="small-action" id="nfcShippingSearchClear">Pulisci</button>
+            </div>
+            <div class="filter-chip-bar" id="nfcShippingQuickFilters" aria-label="Filtri rapidi spedizioni">
+              <span class="filter-chip-label">Vista rapida</span>
+              <button type="button" class="filter-chip active" data-nfc-shipping-stage="">Tutte</button>
+              <button type="button" class="filter-chip" data-nfc-shipping-stage="production">Da produrre</button>
+              <button type="button" class="filter-chip" data-nfc-shipping-stage="print">Da stampare</button>
+              <button type="button" class="filter-chip" data-nfc-shipping-stage="ship">Da spedire</button>
+              <button type="button" class="filter-chip" data-nfc-shipping-stage="shipped">Spedite</button>
+              <button type="button" class="filter-chip" data-nfc-shipping-stage="issue">Problemi</button>
+            </div>
+            <p class="inventory-table-meta"><span id="nfcShippingCount">0 spedizioni</span></p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Priorità</th><th>Ordine</th><th>Cliente</th><th>Codici NFC</th><th>Stato</th><th>Prossima azione</th><th>Azioni</th></tr></thead>
+                <tbody id="nfcShippingTable"><tr><td colspan="7">Caricamento spedizioni...</td></tr></tbody>
+              </table>
+            </div>
           </div>
         </section>
 
@@ -2005,6 +2034,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=132"></script>
+  <script type="module" src="admin.js?v=133"></script>
 </body>
 </html>

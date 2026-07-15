@@ -72,7 +72,7 @@ Mappa attuale: 19 sezioni, 27 form, `pages/admin.js` sintatticamente valido.
 | Ordini | Buono/parziale | Serve pipeline ordine: ricevuto, da produrre, da stampare, da spedire, spedito, problema. |
 | Magazzino NFC | Buono dopo v127 | Va collaudato con lotto reale; serve alert stock minimo e collegamento diretto a spedizione. |
 | Catalogo online | Buono base | Mancano asset vendita, copy, traduzioni SKU, stato Shopify piu' leggibile. |
-| NFC / Spedizioni | Non operativa | Oggi e' rimando. Deve diventare console produzione/spedizione. |
+| NFC / Spedizioni | Buono base v133 | Ora ha pipeline produzione/stampa/spedizione, KPI, ricerca e azioni ordine. Restano tracking corriere e storico consegne completo. |
 | Supporto | Buono base v131 | KPI lavoro e viste rapide presenti. Restano da aggiungere responsabile, risposta cliente/email, SLA e conversazione completa. |
 | CRM | Buono base v131 | Viste oggi/settimana/scaduti presenti. Restano reminder automatici e collegamento ticket/ordini piu' profondo. |
 | Magazzino Business | Base | Serve carico/scarico reale, movimenti da ordine, alert minimi. |
@@ -135,14 +135,16 @@ Obiettivo: dalla vendita alla consegna senza saltare tra sezioni.
 
 Sezioni: `Ordini`, `NFC / Spedizioni`, `Magazzino NFC`.
 
+Stato v133: avviato. La console `Spedizioni NFC` ora aggrega ordini NFC e codici assegnati, mostra pipeline, ricerca e consente di avanzare lo stato ordine.
+
 Da fare:
 
-1. trasformare `NFC / Spedizioni` in console reale;
-2. pipeline stati: `da_produrre`, `da_stampare`, `da_spedire`, `spedito`, `problema`;
-3. collegare ordine, codice NFC, cliente, agente, tracking;
-4. azioni bulk: stampa PDF, esporta CSV, assegna tracking, segna spedito;
-5. alert dashboard per ordini da evadere e codici disponibili a 0;
-6. collaudo: genera 5 codici, crea ordine test, assegna codice, stampa/esporta, segna spedito.
+1. completato v133: trasformare `NFC / Spedizioni` in console reale;
+2. completato v133: pipeline stati produzione/stampa/spedizione/problemi;
+3. parziale v133: collegare ordine, codici NFC, cliente e agente; resta tracking corriere;
+4. da fare: azioni bulk, assegna tracking, stampa/esporta per ordine;
+5. parziale v133: alert dashboard per ordini da evadere; resta alert stock minimo avanzato;
+6. da fare: collaudo reale con 5 codici, ordine test, assegna codice, stampa/esporta, segna spedito.
 
 Output atteso:
 

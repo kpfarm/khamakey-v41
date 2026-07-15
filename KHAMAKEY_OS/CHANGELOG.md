@@ -9,6 +9,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Admin v133 — Console Spedizioni NFC operativa (2026-07-15, Codex)** — preparato
+  - Trasformata la tab `Spedizioni NFC` da rimando a console operativa.
+  - Aggiunti KPI pipeline: da produrre, da stampare, da spedire, spedite e problemi.
+  - La tabella unisce ordini NFC e codici `moment_activation_codes` assegnati, con ricerca per ordine, cliente, email e codice.
+  - Aggiunte azioni: gestisci ordine, assegna codici, apri stampa/magazzino e avanza stato ordine.
+  - Aggiornati cache-bust Admin: `admin.css?v=126`, `admin.js?v=133`.
 - **Business Editor v123 — Idratazione editor e link finale dopo reload (2026-07-15, Codex)** — preparato
   - Aggiunto handshake `editor-ready` / `editor-hydrated` tra `app.js` ed editor iframe.
   - Il parent non accetta snapshot/salvataggi iniziali finche' l'editor non ha ricevuto lo stato cloud.

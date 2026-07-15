@@ -9,6 +9,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Business Editor v123 — Idratazione editor e link finale dopo reload (2026-07-15, Codex)** — preparato
+  - Aggiunto handshake `editor-ready` / `editor-hydrated` tra `app.js` ed editor iframe.
+  - Il parent non accetta snapshot/salvataggi iniziali finche' l'editor non ha ricevuto lo stato cloud.
+  - Risolve il caso in cui dopo refresh l'editor mostrava dati vuoti e `Collegamento in preparazione...` pur avendo una pagina `/p/` disponibile.
+  - Aggiornati cache-bust: `app.js?v=137`, iframe `editor.html?v=137`.
 - **Business Editor v122 — Naming Multilingua (2026-07-15, Codex)** — preparato
   - Sostituito il vecchio naming visibile con "Multilingua" nell'editor Business.
   - Lo switch mostra `Multilingua disattivo`, `Attivazione multilingua...` e `Multilingua attivo`.

@@ -6315,8 +6315,11 @@ window.addEventListener('message', event => {
   }
   maybeOpenWizard(false);
   window.__khamakeyIntl?.hydrateI18nFromState?.(event.data.state || {});
+  window.parent.postMessage({type:'khamakey:editor-hydrated'},'*');
   window.parent.postMessage({type:'khamakey:public-snapshot',state:collectState(true)},'*');
 });
+
+if(window.parent !== window) window.parent.postMessage({type:'khamakey:editor-ready'},'*');
 
 document.getElementById('statsRefreshBtn')?.addEventListener('click', requestAnalyticsRefresh);
 document.getElementById('downloadPublicQr')?.addEventListener('click', downloadPublicPageQr);

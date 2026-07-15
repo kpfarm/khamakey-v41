@@ -32,12 +32,13 @@
 - Chiave wizard per attività (non globale)
 - Salvataggio cloud automatico dopo template
 
-### Comandi operativi v120-v122
+### Comandi operativi v120-v123
 - Il tasto `Salva` e' sempre visibile nella topbar, non solo nella barra modifiche.
 - `Anteprima` e `Account` restano azionabili dalla shell principale; l'editor iframe non deve duplicare il tasto Anteprima in alto.
 - `Apri pagina finale`, `Copia link` e `Scarica QR` usano il link NFC quando esiste; se il chip non e' ancora assegnato usano la pagina pubblica `/p/<slug>` come fallback operativo.
 - `app.js` crea/aggiorna sempre la pagina pubblica `/p/<slug>` via upsert idempotente quando apre il workspace Business.
 - Il controllo `Multilingua` vive nella card dedicata ed e' uno switch leggibile: disattivo, attivazione in corso o attivo.
+- L'iframe editor usa un handshake di idratazione: il parent invia lo stato cloud quando l'editor e' pronto e ignora snapshot iniziali vuoti finche' l'idratazione non e' completata.
 
 ### Supporto
 - Il modal Account contiene la tab `Assistenza`.

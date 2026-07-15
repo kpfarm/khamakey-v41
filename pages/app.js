@@ -25,6 +25,7 @@ let recoveryMode = false;
 let currentNfc = null;
 let applicationLoading = false;
 let workspaceWarnings = [];
+let editorHydrated = false;
 const messageOrigin = location.protocol === "file:" ? "*" : location.origin;
 
 function setAuthStatus(message="",type=""){
@@ -498,8 +499,9 @@ async function loadApplication(){
     currentUser = userData.user;
     currentBusiness = await ensureWorkspace(currentUser);
     userEmail.textContent = currentUser.email || "";
-    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=136`;
+    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=137`;
     if(editorFrame.getAttribute("src") !== editorUrl){
+      editorHydrated = false;
       editorFrame.src = editorUrl;
     }
     authView.hidden = true;
@@ -507,7 +509,7 @@ async function loadApplication(){
     renderAdminImpersonationBanner();
     setCloudStatus(workspaceWarnings.length ? "Editor aperto, cloud parziale" : "Cloud collegato",workspaceWarnings.length ? "warn" : "ok");
     if(workspaceWarnings.length) setAuthStatus(`Accesso riuscito. Alcuni dati cloud non sono disponibili: ${workspaceWarnings.join(" | ")}`,"error");
-    await sendStateToEditor();
+    if(editorFrame.getAttribute("src") === editorUrl) await sendStateToEditor();
   }finally{
     applicationLoading = false;
   }
@@ -684,10 +686,25 @@ document.getElementById("shellAccountBtn")?.addEventListener("click",()=>{
   postToEditor({type:"khamakey:open-account",tab:"profile"});
 });
 
-editorFrame.addEventListener("load",()=>sendStateToEditor());
+editorFrame.addEventListener("load",()=>{
+  editorHydrated = false;
+  sendStateToEditor();
+});
 window.addEventListener("message",event=>{
   const validOrigin = location.protocol === "file:" ? event.origin === "null" : event.origin === location.origin;
   if(!validOrigin || event.source !== editorFrame.contentWindow) return;
+  if(event.data?.type === "khamakey:editor-ready"){
+    sendStateToEditor();
+    return;
+  }
+  if(event.data?.type === "khamakey:editor-hydrated"){
+    editorHydrated = true;
+    return;
+  }
+  if(["khamakey:dirty","khamakey:save","khamakey:public-snapshot"].includes(event.data?.type) && !editorHydrated){
+    console.warn("Editor non ancora idratato: salvataggio iniziale ignorato",event.data?.type);
+    return;
+  }
   if(event.data?.type === "khamakey:dirty") queueSave(event.data.state);
   if(event.data?.type === "khamakey:save") queueSave(event.data.state,true);
   if(event.data?.type === "khamakey:public-snapshot") queueSave(event.data.state,true);

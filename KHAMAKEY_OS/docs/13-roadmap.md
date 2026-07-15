@@ -90,6 +90,7 @@
 | 2026-07-14 | Codex | **Business Editor v120**: ripristinati Salva sempre visibile, Account/Anteprima robusti, link pagina finale/QR fallback e stato multilingua chiaro |
 | 2026-07-15 | Codex | **Business Editor v121**: rimossi doppioni Anteprima, controllo multilingua trasformato in switch nella card e pagina finale `/p/` creata via upsert |
 | 2026-07-15 | Codex | **Business Editor v122**: rinominato il comando visibile in Multilingua e reso lo switch piu' chiaro |
+| 2026-07-15 | Codex | **Business Editor v123**: corretto handshake editor/app dopo reload per caricare stato cloud e link pagina finale |
 
 ---
 

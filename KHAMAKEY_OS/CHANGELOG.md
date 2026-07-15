@@ -9,6 +9,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Business Editor v158 — Crash sintassi in produzione (2026-07-15, Cursor Cloud)** — da deployare su Pages
+  - Causa: in `editor.html` live, `document.getElementById('btnSaveTop')?.disabled = false` (optional chaining a sinistra di un’assegnazione) generava `SyntaxError` e bloccava l’intero script dell’editor → UI ferma su «Caricamento dati…», campi vuoti, Salva/Anteprima inerti.
+  - Fix: assegnazione sicura con null-check; cache-bust `APP_VERSION` / `?v=` **158**.
+  - Allineato il repo Git allo stack Pages live (`app.js`, `index.html`, `shell.css`, `editor.html`, …) che era avanti rispetto a `main`.
+  - **Deploy richiesto**: `cd pages && npx wrangler pages deploy . --project-name khamakey-app` (questo ambiente non ha `CLOUDFLARE_API_TOKEN`).
 - **Business Editor v124 — Fix upload da audit (2026-07-15, Claude Code)** — preparato
   - Video presentazione ora caricato davvero su R2 (prima restava `blob:` locale: perso al reload, link rotto nello snapshot pubblico). Limite client allineato al server: 25 MB (era 200 MB) + max 2 minuti.
   - `collectState`/`applyState` persistono e ripristinano l'URL video cloud.

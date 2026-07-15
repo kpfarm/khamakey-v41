@@ -9,6 +9,16 @@
 <script>
 if(window.top === window.self) location.replace('./');
 document.documentElement.classList.add('editor-embedded');
+window.__khamakeyBootstrapLinks = (function(){
+  const p = new URLSearchParams(location.search);
+  return {
+    publicUrl: p.get('pu') || '',
+    publicPageUrl: p.get('pp') || '',
+    businessSlug: p.get('slug') || '',
+    nfcCode: p.get('nfc') || '',
+    workerUrl: 'https://khamakey-nfc.khamakey-nfc.workers.dev'
+  };
+})();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
 <style>
@@ -827,10 +837,17 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .account-modal{position:fixed;inset:0;background:rgba(9,16,36,.56);z-index:760;display:none;align-items:center;justify-content:center;padding:18px;}
 .account-modal.open{display:flex;}
 .account-shell{width:min(940px,100%);max-height:92vh;background:white;border-radius:18px;box-shadow:0 24px 80px rgba(9,16,36,.35);display:grid;grid-template-columns:240px 1fr;overflow:hidden;}
-.account-side{background:#F8FAFC;border-right:1px solid var(--border);padding:18px;}
+.account-side{background:#F8FAFC;border-right:1px solid var(--border);padding:18px;display:flex;flex-direction:column;gap:4px;min-height:100%;}
 .account-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;color:var(--navy);margin-bottom:14px;}
 .account-tab{width:100%;border:0;background:transparent;color:var(--muted);display:flex;align-items:center;gap:9px;padding:10px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:800;cursor:pointer;text-align:left;}
 .account-tab.active,.account-tab:hover{background:white;color:var(--verde-dark);box-shadow:0 2px 10px rgba(27,42,94,.05);}
+.account-tab-logout{margin-top:auto;color:#B42318;}
+.account-tab-logout:hover{background:#FEF2F2;color:#991B1B;}
+.editor-sync-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px;}
+.editor-sync-chip{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;font-size:.68rem;font-weight:800;background:#EEF1F9;color:var(--navy);}
+.editor-sync-chip.ok{background:#E8F5E0;color:#246517;}
+.editor-sync-chip.warn{background:#FFF4E5;color:#B54708;}
+.editor-sync-chip.error{background:#FEF2F2;color:#B42318;}
 .account-main{padding:22px;overflow:auto;}
 .account-panel{display:none;}
 .account-panel.active{display:block;}
@@ -883,8 +900,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 
 /* ═══ BOTTOM NAV MOBILE ═══ */
 .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:2px solid var(--border);z-index:400;height:var(--bottomnav-h);overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.bottom-nav-inner{display:flex;align-items:center;min-width:max-content;padding:0 4px;}
-.bnav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 12px;cursor:pointer;font-size:.58rem;font-weight:600;color:var(--muted);white-space:nowrap;border-bottom:3px solid transparent;transition:color .15s;flex-shrink:0;}
+.bottom-nav-inner{display:flex;align-items:center;width:100%;min-width:0;padding:0 4px;}
+.bnav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;cursor:pointer;font-size:.58rem;font-weight:600;color:var(--muted);white-space:nowrap;border-bottom:3px solid transparent;transition:color .15s;flex:1 1 0;min-width:0;}
 .bnav-item.active{color:var(--verde-dark);border-bottom-color:var(--verde);}
 .bnav-icon{height:20px;display:grid;place-items:center;}
 .bnav-icon .ui-ico{width:19px;height:19px;}
@@ -970,8 +987,9 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
   .sidebar{display:none;}
   .bottom-nav{display:block !important;}
   .bottom-nav{height:var(--bottomnav-h);box-shadow:0 -10px 30px rgba(27,42,94,.08);}
-  .bottom-nav-inner{height:100%;align-items:stretch;padding:0 8px;}
-  .bnav-item{min-width:64px;justify-content:center;padding:8px 9px;font-size:.62rem;}
+  .bottom-nav{overflow-x:hidden;}
+  .bottom-nav-inner{height:100%;align-items:stretch;padding:0 4px;}
+  .bnav-item{min-width:0;justify-content:center;padding:8px 4px;font-size:.6rem;}
   .bnav-icon .ui-ico{width:21px;height:21px;}
   .main{padding:15px 12px calc(var(--bottomnav-h) + 96px);max-width:none;}
   .save-bar{padding:10px 12px;bottom:var(--bottomnav-h);gap:10px;}
@@ -1050,7 +1068,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
   .pub-doc-actions,.pub-wifi-actions{grid-template-columns:1fr;}
 }
 </style>
-<link rel="stylesheet" href="editor-ui.css?v=117">
+<link rel="stylesheet" href="editor-ui.css?v=158">
 <script src="business-categories.js?v=117"></script>
 </head>
 <body>
@@ -1095,6 +1113,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
     <div class="topbar-plan" id="planBadge">FREE</div>
   </div>
   <div class="topbar-right">
+    <button type="button" class="btn-preview" id="btnPreviewTop"><svg class="ui-ico"><use href="#i-eye"/></svg>Anteprima</button>
+    <button type="button" class="btn-preview" id="btnAccountTop"><svg class="ui-ico"><use href="#i-user"/></svg>Account</button>
     <button type="button" class="btn-save-top" id="btnSaveTop"><svg class="ui-ico"><use href="#i-save"/></svg>Salva</button>
     <div class="user-menu-wrap">
       <button class="user-menu-btn" id="userMenuBtn"><span class="user-avatar" id="accountAvatar">KK</span><span class="user-name-short">Account</span></button>
@@ -1117,8 +1137,10 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 
   <!-- SIDEBAR DESKTOP -->
   <nav class="sidebar">
+    <div class="sidebar-section">Home</div>
+    <a class="nav-item active" data-s="dashboard" href="#"><span class="nav-icon"><svg class="ui-ico"><use href="#i-chart"/></svg></span>Panoramica</a>
     <div class="sidebar-section">Profilo</div>
-    <a class="nav-item active" data-s="info" href="#"><span class="nav-icon"><svg class="ui-ico"><use href="#i-building"/></svg></span>Informazioni</a>
+    <a class="nav-item" data-s="info" href="#"><span class="nav-icon"><svg class="ui-ico"><use href="#i-building"/></svg></span>Informazioni</a>
     <a class="nav-item" data-s="brand" href="#"><span class="nav-icon"><svg class="ui-ico"><use href="#i-palette"/></svg></span>Brand & colori</a>
     <a class="nav-item" data-s="contatti" href="#"><span class="nav-icon"><svg class="ui-ico"><use href="#i-phone"/></svg></span>Contatti</a>
     <a class="nav-item" data-s="azioni" href="#"><span class="nav-icon"><svg class="ui-ico"><use href="#i-zap"/></svg></span>Azioni rapide</a>
@@ -1145,14 +1167,42 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
   <main class="main">
 
     <nav class="editor-hub" id="editorHub" aria-label="Aree editor">
-      <button type="button" class="editor-hub-btn active" data-hub="setup"><span class="hub-dot"></span>Setup</button>
+      <button type="button" class="editor-hub-btn active" data-hub="panoramica"><span class="hub-dot"></span>Panoramica</button>
+      <button type="button" class="editor-hub-btn" data-hub="setup"><span class="hub-dot"></span>Setup</button>
       <button type="button" class="editor-hub-btn" data-hub="contenuti"><span class="hub-dot"></span>Contenuti</button>
       <button type="button" class="editor-hub-btn" data-hub="servizi"><span class="hub-dot"></span>Servizi & extra</button>
       <button type="button" class="editor-hub-btn" data-hub="dati"><span class="hub-dot"></span>Dati & privacy</button>
     </nav>
 
+    <!-- DASHBOARD -->
+    <div class="section active" id="s-dashboard">
+      <div class="section-header">
+        <div class="section-title">Panoramica</div>
+        <div class="section-sub">La tua attività a colpo d'occhio</div>
+      </div>
+      <div class="card business-dashboard" id="businessDashboard">
+        <div class="card-title"><svg class="ui-ico"><use href="#i-chart"/></svg>Stato pagina e link</div>
+        <div id="bizDashHead" class="dash-head"></div>
+        <p class="field-hint" id="bizDashCloud"></p>
+        <div class="dash-link-row">
+          <input type="text" readonly id="bizDashPublicUrl" aria-label="Link pagina pubblica">
+          <button type="button" class="btn-generate" id="bizDashCopyBtn">Copia</button>
+          <button type="button" class="btn-generate" id="bizDashOpenBtn">Apri</button>
+        </div>
+        <div class="dash-stats" id="bizDashStats">
+          <span class="dash-stat muted">Caricamento dati…</span>
+        </div>
+        <ul class="dash-checklist" id="bizDashChecklist"></ul>
+        <div class="dash-actions">
+          <button type="button" class="btn-add-row" data-biz-dash-go="menu">Vai al catalogo</button>
+          <button type="button" class="btn-add-row" data-biz-dash-go="info">Completa profilo</button>
+          <button type="button" class="btn-add-row" data-biz-dash-go="stats">Analytics dettagliate</button>
+        </div>
+      </div>
+    </div>
+
     <!-- INFO -->
-    <div class="section active" id="s-info">
+    <div class="section" id="s-info">
       <div class="section-header">
         <div class="section-title">Informazioni base</div>
         <div class="section-sub">Come appare la tua attività ai clienti</div>
@@ -1222,22 +1272,17 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
           </div>
         </div>
         <div class="field">
-            <label>Pagina finale e link NFC</label>
-            <div class="field-hint">La pagina finale deve essere sempre disponibile. Il link NFC fisico viene usato quando il chip è assegnato.</div>
+            <label>Il tuo link</label>
             <div class="locked-url">
-              <strong id="publicUrlShow">Collegamento in preparazione...</strong>
-              <span class="locked-pill" id="publicUrlMode"><svg class="ui-ico"><use href="#i-lock"/></svg>Pagina finale</span>
+              <strong id="publicUrlShow" data-public-url-show>In preparazione…</strong>
+              <span class="locked-pill" id="publicUrlMode"><svg class="ui-ico"><use href="#i-lock"/></svg>Link</span>
             </div>
             <div class="media-actions">
               <button class="media-remove" type="button" id="copyPublicUrl"><svg class="ui-ico"><use href="#i-copy"/></svg>Copia link</button>
-              <button class="media-remove" type="button" id="openPublicUrl"><svg class="ui-ico"><use href="#i-eye"/></svg>Apri pagina finale</button>
+              <button class="media-remove" type="button" id="openPublicUrl"><svg class="ui-ico"><use href="#i-eye"/></svg>Apri pagina</button>
               <button class="btn-qr-download" type="button" id="downloadPublicQr"><svg class="ui-ico"><use href="#i-zap"/></svg>Scarica QR</button>
             </div>
             <input type="hidden" id="slug" value="tuonome">
-            <div class="link-flow">
-              <div class="link-flow-item"><svg class="ui-ico"><use href="#i-zap"/></svg><div><strong>Link NFC reale</strong><span>Cloudflare registra il tap e apre la pagina pubblica salvata su Supabase.</span></div></div>
-              <div class="link-flow-item"><svg class="ui-ico"><use href="#i-lock"/></svg><div><strong>Pronto per il chip</strong><span>Dopo il collaudo questo indirizzo può essere scritto nel prodotto NFC KhamaKey.</span></div></div>
-            </div>
         </div>
         <div class="field">
           <label>Descrizione</label>
@@ -2411,12 +2456,6 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         </div>
       </div>
       <div class="card">
-        <div class="card-title"><svg class="ui-ico"><use href="#i-wifi"/></svg>Come vengono raccolti</div>
-        <div class="field-hint" style="font-size:.82rem;margin:0;line-height:1.55">
-          Cloudflare registra tap, visite e click pubblici; Supabase conserva gli eventi e mostra qui i risultati. I valori non sono modificabili manualmente.
-        </div>
-      </div>
-      <div class="card">
         <div class="card-title"><svg class="ui-ico"><use href="#i-trending"/></svg>Andamento storico</div>
         <div id="statsChart"><div class="field-hint">Caricamento storico…</div></div>
       </div>
@@ -2466,6 +2505,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
       <button class="account-tab" data-account-tab="billing"><svg class="ui-ico"><use href="#i-file"/></svg>Fatturazione</button>
       <button class="account-tab" data-account-tab="plan"><svg class="ui-ico"><use href="#i-star"/></svg>Piano</button>
       <button class="account-tab" data-account-tab="security"><svg class="ui-ico"><use href="#i-lock"/></svg>Sicurezza</button>
+      <button type="button" class="account-tab account-tab-logout" id="accountLogoutBtn"><svg class="ui-ico"><use href="#i-x"/></svg>Esci</button>
     </aside>
     <main class="account-main">
       <section class="account-panel active" id="account-profile">
@@ -2481,8 +2521,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         </div>
         <div class="field-hint">Questi dati provengono dall’account con cui hai effettuato l’accesso.</div>
         <div class="account-public-card">
-          <strong>Pagina finale</strong>
-          <p>Apri la pagina che vedono i tuoi clienti quando toccano il NFC.</p>
+          <strong>La tua pagina</strong>
+          <p>Apri o condividi il link che vedi anche nella sezione Informazioni.</p>
           <div class="account-public-actions">
             <button type="button" class="btn-generate" id="accountOpenPublicPage"><svg class="ui-ico"><use href="#i-eye"/></svg>Apri pagina finale</button>
             <button type="button" class="media-remove" id="accountCopyPublicUrl"><svg class="ui-ico"><use href="#i-copy"/></svg>Copia link NFC</button>
@@ -2495,7 +2535,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         <p>Apri una richiesta al team KhamaKey direttamente dal tuo editor.</p>
         <form class="account-support-form" id="accountSupportForm">
           <div class="field-row">
-            <div class="field"><label>Oggetto</label><input type="text" name="subject" placeholder="Es. Non riesco a pubblicare la pagina" required></div>
+            <div class="field"><label>Oggetto</label><input type="text" name="subject" placeholder="Es. Problema con salvataggio o link pagina" required></div>
             <div class="field"><label>Priorità</label>
               <select name="priority">
                 <option value="normal">Normale</option>
@@ -2512,14 +2552,14 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
       </section>
       <section class="account-panel" id="account-billing">
         <h3>Fatturazione</h3>
-        <p>Dati fiscali e storico pagamenti saranno completati quando attiveremo pagamenti e fatturazione.</p>
+        <p>Dati fiscali e storico pagamenti saranno disponibili quando attiveremo fatturazione e pagamenti online.</p>
         <div class="field-row">
-          <div class="field"><label>Ragione sociale</label><input type="text" id="billCompany" placeholder="Nome azienda"></div>
-          <div class="field"><label>Partita IVA / Codice fiscale</label><input type="text" id="billVat" placeholder="IT..."></div>
+          <div class="field"><label>Ragione sociale</label><input type="text" id="billCompany" placeholder="Presto disponibile" disabled></div>
+          <div class="field"><label>Partita IVA / Codice fiscale</label><input type="text" id="billVat" placeholder="Presto disponibile" disabled></div>
         </div>
         <div class="field-row">
-          <div class="field"><label>Codice SDI</label><input type="text" id="billSdi" placeholder="0000000"></div>
-          <div class="field"><label>PEC</label><input type="email" id="billPec" placeholder="pec@azienda.it"></div>
+          <div class="field"><label>Codice SDI</label><input type="text" id="billSdi" placeholder="Presto disponibile" disabled></div>
+          <div class="field"><label>PEC</label><input type="email" id="billPec" placeholder="Presto disponibile" disabled></div>
         </div>
         <div class="billing-card"><strong>Stato fatturazione</strong><span>Modalità test attiva: tutte le funzioni sono disponibili. Fatturazione e pagamenti saranno collegati successivamente.</span></div>
       </section>
@@ -2603,12 +2643,9 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
       </section>
       <section class="account-panel" id="account-security">
         <h3>Sicurezza</h3>
-        <p>Accesso, password, sessioni e protezioni dell'account.</p>
-        <div class="field-row">
-          <div class="field"><label>Nuova password</label><input type="password" placeholder="••••••••"></div>
-          <div class="field"><label>Conferma password</label><input type="password" placeholder="••••••••"></div>
-        </div>
-        <div class="billing-card"><strong>Autenticazione</strong><span>Login, sessioni e recupero password sono gestiti da Supabase Auth. Le email definitive saranno configurate dopo il dominio.</span></div>
+        <p>Password e accesso sono gestiti dal login KhamaKey (Supabase Auth).</p>
+        <div class="billing-card"><strong>Cambia password</strong><span>Esci dall’editor, clicca «Password dimenticata?» nella schermata di accesso e segui il link ricevuto via email.</span></div>
+        <div class="billing-card"><strong>Sessione attiva</strong><span>Per uscire da questo dispositivo usa «Esci» nel menu Account o nella barra in alto.</span></div>
       </section>
     </main>
   </div>
@@ -2616,7 +2653,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 
 <!-- SAVE BAR -->
 <div class="save-bar" id="saveBar">
-  <div class="save-msg" id="saveBarMsg">Hai <strong>modifiche non salvate</strong></div>
+  <div class="save-msg" id="saveBarMsg">Modifiche in corso — salvataggio automatico attivo</div>
   <div class="save-actions">
     <button class="btn-save-outline" id="saveBarQr" type="button" onclick="downloadPublicPageQr()"><svg class="ui-ico"><use href="#i-zap"/></svg>QR</button>
     <button class="btn-save-outline" id="saveBarTryOrder" type="button" onclick="tryOrderFlow()"><svg class="ui-ico"><use href="#i-list"/></svg>Prova ordine</button>
@@ -2639,7 +2676,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
     <input type="search" class="wizard-search" id="wizardSearch" placeholder="Cerca categoria (es. hotel, bar, palestra...)">
     <div id="wizardGroups"></div>
     <div class="wizard-footer">
-      <span class="wizard-small">Il link NFC resta bloccato: cambiano solo contenuti e moduli.</span>
+      <span class="wizard-small">Puoi cambiare categoria e contenuti in qualsiasi momento.</span>
       <button class="wizard-skip" id="wizardSkip" type="button">Salta setup</button>
     </div>
   </div>
@@ -2744,10 +2781,20 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 
 <script>
 // ══ CONFIG ══
+// ══ CONFIG ══
 const PLAN = 'test'; // Tutte le funzioni restano aperte durante sviluppo e collaudo.
+let editorCloudStatus = {message:'Caricamento…',type:''};
+function applyEditorCloudStatus(message,type=''){
+  editorCloudStatus = {message:message || '',type:type || ''};
+  renderPageReadyHead();
+}
+function mediaUploadReady(){
+  return !!String(window.__khamakeyBusinessId || '').trim() || window.parent === window;
+}
 
 // ══ NAV ══
 const SECTIONS = [
+  {id:'dashboard',icon:'i-chart',label:'Home'},
   {id:'info',icon:'i-building',label:'Info'},
   {id:'brand',icon:'i-palette',label:'Brand'},
   {id:'contatti',icon:'i-phone',label:'Contatti'},
@@ -2815,19 +2862,114 @@ function brandIco(name){
 function val(id){return document.getElementById(id)?.value||'';}
 function checked(id){return !!document.getElementById(id)?.checked;}
 
+function syncEditorHubUi(sectionId){
+  const hubId = Object.entries(EDITOR_HUBS).find(([,hub])=>hub.sections.includes(sectionId))?.[0] || '';
+  if(!hubId) return;
+  document.querySelectorAll('.editor-hub-btn').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.hub === hubId);
+  });
+  document.querySelectorAll('.sidebar .nav-item').forEach(item=>{
+    item.classList.toggle('hub-hidden',!EDITOR_HUBS[hubId].sections.includes(item.dataset.s));
+  });
+  document.querySelectorAll('.bnav-item').forEach(el=>{
+    el.classList.toggle('active',el.dataset.hub === hubId);
+  });
+}
+
 function goTo(id) {
+  const section = document.getElementById('s-'+id);
+  if(!section) return;
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item,.bnav-item').forEach(i => i.classList.remove('active'));
-  document.getElementById('s-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  section.classList.add('active');
   document.querySelectorAll('[data-s="'+id+'"]').forEach(i => i.classList.add('active'));
+  syncEditorHubUi(id);
   window.scrollTo({top:0,behavior:'smooth'});
-  if(id === 'stats') requestAnalyticsRefresh();
+  if(id === 'stats' || id === 'dashboard') requestAnalyticsRefresh();
+}
+
+function buildDashboardChecklist(){
+  const catalogReady = Array.isArray(cats) && cats.some(cat=>normalizeCat(cat).voci.some(v=>String(v.nome||v.desc||'').trim()));
+  return [
+    {ok:!!String(val('nome') || '').trim(), text:'Nome attività compilato'},
+    {ok:!!String(val('wa') || '').trim(), text:'WhatsApp configurato per ordini e richieste'},
+    {ok:catalogReady, text:'Almeno una voce nel catalogo'},
+    {ok:!!publicUrlForShare(), text:'Link pagina attivo e condivisibile'},
+    {ok:!dirty, text:dirty ? 'Salva le ultime modifiche' : 'Ultima versione salvata nel cloud'}
+  ];
+}
+
+let lastAnalyticsPayload = {};
+let workspaceNfcCode = '';
+
+function renderBusinessDashboard(){
+  const panel = document.getElementById('businessDashboard');
+  if(!panel) return;
+  const shareUrl = String(publicUrlForShare() || '').trim();
+  const hasUrl = Boolean(shareUrl);
+  const statusChip = dirty
+    ? '<span class="dash-chip draft">Modifiche da salvare</span>'
+    : hasUrl
+      ? '<span class="dash-chip live">Pagina online</span>'
+      : '<span class="dash-chip draft">In preparazione</span>';
+  const head = panel.querySelector('#bizDashHead');
+  if(head){
+    const name = val('nome') ? `<span class="dash-slug">${esc(val('nome'))}</span>` : '';
+    const nfc = workspaceNfcCode ? `<span class="dash-slug">NFC ${esc(workspaceNfcCode)}</span>` : '';
+    head.innerHTML = `${statusChip}${name}${nfc}`;
+  }
+  const linkInput = panel.querySelector('#bizDashPublicUrl');
+  if(linkInput) linkInput.value = shareUrl;
+  const stats = panel.querySelector('#bizDashStats');
+  if(stats){
+    const a = lastAnalyticsPayload || {};
+    const fmt = v => Number.isFinite(Number(v)) ? Number(v).toLocaleString('it-IT') : '0';
+    stats.innerHTML = [
+      `<span class="dash-stat"><strong>${fmt(a.nfc)}</strong> tap NFC</span>`,
+      `<span class="dash-stat"><strong>${fmt(a.visits)}</strong> visite</span>`,
+      `<span class="dash-stat"><strong>${fmt(a.whatsapp)}</strong> WhatsApp</span>`,
+      `<span class="dash-stat yes"><strong>${fmt(a.orders)}</strong> ordini</span>`
+    ].join('');
+  }
+  const checklist = panel.querySelector('#bizDashChecklist');
+  if(checklist){
+    checklist.innerHTML = buildDashboardChecklist().map(item=>
+      `<li class="${item.ok ? 'ok' : 'todo'}">${esc(item.text)}</li>`
+    ).join('');
+  }
+  const statusEl = panel.querySelector('#bizDashCloud');
+  if(statusEl) statusEl.textContent = editorCloudStatus.message || '';
+}
+function bindBusinessDashboardUi(){
+  const panel = document.getElementById('businessDashboard');
+  if(!panel || panel.dataset.bound === '1') return;
+  panel.dataset.bound = '1';
+  panel.querySelector('#bizDashCopyBtn')?.addEventListener('click',async()=>{
+    const url = panel.querySelector('#bizDashPublicUrl')?.value || '';
+    if(!url) return;
+    try{ await navigator.clipboard.writeText(url); showToast('Link copiato','ok'); }
+    catch{ showToast('Impossibile copiare il link','err'); }
+  });
+  panel.querySelector('#bizDashOpenBtn')?.addEventListener('click',()=>{
+    const url = panel.querySelector('#bizDashPublicUrl')?.value || '';
+    if(url) window.open(url,'_blank','noopener');
+  });
+  panel.querySelectorAll('[data-biz-dash-go]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const target = btn.dataset.bizDashGo;
+      if(target === 'menu') setEditorHub('contenuti');
+      else if(target === 'stats') setEditorHub('dati');
+      else if(target === 'info') setEditorHub('setup');
+      goTo(target);
+    });
+  });
 }
 function requestAnalyticsRefresh(){
   window.parent.postMessage({type:'khamakey:refresh-analytics'},'*');
 }
 
 const EDITOR_HUBS = {
+  panoramica:{sections:['dashboard'],first:'dashboard'},
   setup:{sections:['info','brand','contatti','azioni','orari'],first:'info'},
   contenuti:{sections:['menu','galleria','video','eventi','promo'],first:'menu'},
   servizi:{sections:['wifi','social','azienda','welcome','documenti'],first:'wifi'},
@@ -2847,21 +2989,31 @@ function setEditorHub(hubId){
 document.querySelectorAll('.editor-hub-btn').forEach(btn=>{
   btn.addEventListener('click',()=>setEditorHub(btn.dataset.hub));
 });
-setEditorHub('setup');
+setEditorHub('panoramica');
+window.goTo = goTo;
+window.setEditorHub = setEditorHub;
+bindBusinessDashboardUi();
 
 // Sidebar desktop
 document.querySelectorAll('.nav-item').forEach(el => {
   el.addEventListener('click', e => { e.preventDefault(); goTo(el.dataset.s); });
 });
 
-// Bottom nav mobile
+// Bottom nav mobile — 5 hub (stile Moments), tutte le sezioni restano nella sidebar desktop
+const MOBILE_NAV = [
+  {hub:'panoramica',icon:'i-chart',label:'Home'},
+  {hub:'setup',icon:'i-building',label:'Setup'},
+  {hub:'contenuti',icon:'i-list',label:'Contenuti'},
+  {hub:'servizi',icon:'i-zap',label:'Extra'},
+  {hub:'dati',icon:'i-trending',label:'Dati'}
+];
 const bnavInner = document.getElementById('bnavInner');
-SECTIONS.forEach(s => {
+MOBILE_NAV.forEach(item=>{
   const el = document.createElement('div');
-  el.className = 'bnav-item' + (s.id==='info'?' active':'');
-  el.dataset.s = s.id;
-  el.innerHTML = `<span class="bnav-icon">${ico(s.icon)}</span>${s.label}`;
-  el.addEventListener('click', () => goTo(s.id));
+  el.className = 'bnav-item' + (item.hub === 'panoramica' ? ' active' : '');
+  el.dataset.hub = item.hub;
+  el.innerHTML = `<span class="bnav-icon">${ico(item.icon)}</span>${item.label}`;
+  el.addEventListener('click',()=>setEditorHub(item.hub));
   bnavInner.appendChild(el);
 });
 
@@ -3187,6 +3339,10 @@ function validImageFile(file,maxMb=8){
 }
 function readImageFile(file,onload){
   if(!validImageFile(file)) return;
+  if(!mediaUploadReady()){
+    showToast('Attendi il caricamento della pagina, poi riprova.','err');
+    return;
+  }
   if(window.__khamakeyMedia?.upload){
     showToast('Caricamento cloud...','ok');
     window.__khamakeyMedia.upload({file}).then(url=>{
@@ -3945,7 +4101,7 @@ function onPdfUpload(input){
   uploadedPdfUrl = URL.createObjectURL(file);
   uploadedPdfName = file.name || '';
   document.getElementById('menuPdfStatus').textContent = uploadedPdfName || 'PDF caricato';
-  showToast('PDF collegato al catalogo','ok');
+  showToast('PDF collegato al catalogo. Salva per confermare.','ok');
   changed();
 }
 
@@ -4884,6 +5040,7 @@ function renderPageReadyHead(){
   const canOpen = !dirty && !!cloudPublicPageUrl && checks.slice(0,5).every(item=>item.ok);
   const canTryBooking = canOpen && checked('aPrenota') && bookingReadyChecks().every(item=>item.ok);
   host.innerHTML = `
+    <div class="editor-sync-row"><span class="editor-sync-chip ${esc(editorCloudStatus.type || (dirty ? 'warn' : 'ok'))}" id="editorSyncChip">${esc(editorCloudStatus.message || (dirty ? 'Salvataggio in corso…' : 'Pagina online'))}</span><span class="field-hint">Ogni salvataggio aggiorna la pagina pubblica · auto-save attivo</span></div>
     <div class="page-ready-top"><strong>Pagina pronta</strong><span>${done}/${total} · ${pct}%</span></div>
     <div class="page-ready-bar"><span style="width:${pct}%"></span></div>
     <div class="page-ready-actions">
@@ -4908,13 +5065,24 @@ function publicPageUrlForShare(){
   return cloudPublicPageUrl || cloudPublicUrl || '';
 }
 function updatePublicLinkUi(){
+  const url = publicUrlForShare();
+  document.querySelectorAll('[data-public-url-show]').forEach(node=>{
+    node.textContent = url || 'In preparazione…';
+  });
   const publicUrlShow = document.getElementById('publicUrlShow');
   const mode = document.getElementById('publicUrlMode');
-  if(publicUrlShow) publicUrlShow.textContent = cloudPublicUrl || cloudPublicPageUrl || 'Collegamento in preparazione...';
-  if(mode) mode.innerHTML = cloudPublicUrl
-    ? '<svg class="ui-ico"><use href="#i-zap"/></svg>Link NFC'
-    : '<svg class="ui-ico"><use href="#i-lock"/></svg>Pagina finale';
+  if(publicUrlShow) publicUrlShow.textContent = url || 'In preparazione…';
+  if(mode){
+    if(!url){
+      mode.innerHTML = '<svg class="ui-ico"><use href="#i-lock"/></svg>In preparazione';
+    }else if(cloudPublicUrl && cloudPublicUrl.includes('/k/')){
+      mode.innerHTML = '<svg class="ui-ico"><use href="#i-zap"/></svg>Link NFC attivo';
+    }else{
+      mode.innerHTML = '<svg class="ui-ico"><use href="#i-eye"/></svg>Pagina online';
+    }
+  }
   updateSaveBarOpenState();
+  renderBusinessDashboard();
 }
 async function downloadPublicPageQr(){
   if(dirty) return showToast('Salva prima le modifiche','err');
@@ -5124,6 +5292,7 @@ function renderQuickStart(){
   renderPrivacySimpleStatus();
   maybeShowOrderCoach();
   updateSaveBarOpenState();
+  renderBusinessDashboard();
 }
 
 function digitalConsentRequired(){
@@ -5909,9 +6078,11 @@ function updWifi(){
 // ══ SAVE ══
 let dirty = false;
 let cloudHydrating = false;
+let editorCloudHydrated = false;
 let cloudPublicUrl = '';
 let cloudPublicPageUrl = '';
 function applyCloudAnalytics(analytics = {}, meta = {}){
+  lastAnalyticsPayload = analytics || {};
   const statValues = {
     stTap:analytics.nfc,
     stVisite:analytics.visits,
@@ -5962,6 +6133,7 @@ function applyCloudAnalytics(analytics = {}, meta = {}){
       ? `Dati cloud aggiornati alle ${stamp}. Salvataggio editor: non modifica questi numeri.`
       : `Nessun evento ancora registrato. Apri la pagina pubblica o prova un tap NFC, poi aggiorna. Ultimo controllo: ${stamp}.`;
   }
+  renderBusinessDashboard();
 }
 function formatAnalyticsNumber(value){
   return Number.isFinite(Number(value)) ? Number(value).toLocaleString('it-IT') : '0';
@@ -6170,12 +6342,26 @@ function save(){
   persistLocalState();
   if(window.parent !== window){
     window.parent.postMessage({type:'khamakey:save',state:collectState(true)},'*');
+    showToast('Salvataggio cloud in corso…','ok');
+    return;
   }
   dirty=false;
   document.getElementById('saveBar').classList.remove('visible');
   renderQuickStart();
   updateSaveBarOpenState();
-  showToast(window.parent === window ? 'Salvato in questo browser' : 'Salvataggio cloud in corso…','ok');
+  if(topSave) topSave.disabled = false;
+  showToast('Salvato in questo browser','ok');
+}
+function finishEditorHydration(state={}){
+  window.__khamakeyIntl?.hydrateI18nFromState?.(state);
+  renderPublicPreview();
+  syncPreviewDock();
+  updatePublicLinkUi();
+  if(window.parent === window) return;
+  window.parent.postMessage({type:'khamakey:editor-hydrated'},'*');
+  requestAnimationFrame(()=>{
+    window.parent.postMessage({type:'khamakey:public-snapshot',state:collectState(true)},'*');
+  });
 }
 function updateSaveBarOpenState(){
   const btn = document.getElementById('saveBarOpenPage');
@@ -6337,7 +6523,11 @@ function loadLocalState(){
 
 window.addEventListener('message', event => {
   const validOrigin = location.protocol === 'file:' ? event.origin === 'null' : event.origin === location.origin;
-  if(!validOrigin || event.source !== window.parent) return;
+  if(!validOrigin || !event.data?.type?.startsWith('khamakey:')) return;
+  if(event.data?.type === 'khamakey:cloud-status') {
+    applyEditorCloudStatus(event.data.message || '', event.data.statusType || '');
+    return;
+  }
   if(event.data?.type === 'khamakey:analytics') {
     applyCloudAnalytics(event.data.analytics,{ok:event.data.ok !== false,error:event.data.error || ''});
     return;
@@ -6350,6 +6540,21 @@ window.addEventListener('message', event => {
     openAccount(event.data.tab || 'profile');
     return;
   }
+  if(event.data?.type === 'khamakey:workspace-links') {
+    applyWorkspaceMeta(event.data);
+    return;
+  }
+  if(event.data?.type === 'khamakey:shell-save') {
+    save();
+    return;
+  }
+  if(event.data?.type === 'khamakey:force-publish') {
+    renderPublicPreview();
+    syncPreviewDock();
+    updatePublicLinkUi();
+    window.parent.postMessage({type:'khamakey:public-snapshot',state:collectState(true)},'*');
+    return;
+  }
   if(event.data?.type === 'khamakey:support-ticket-result') {
     setAccountSupportStatus(event.data.message || (event.data.ok ? 'Ticket inviato.' : 'Ticket non inviato.'), event.data.ok ? 'ok' : 'error');
     if(event.data.ok) document.getElementById('accountSupportForm')?.reset();
@@ -6358,27 +6563,40 @@ window.addEventListener('message', event => {
   if(event.data?.type === 'khamakey:save-ok') {
     dirty = false;
     document.getElementById('saveBar')?.classList.remove('visible');
+    const btnSaveTop = document.getElementById('btnSaveTop');
+    if(btnSaveTop) btnSaveTop.disabled = false;
+    applyEditorCloudStatus('Pagina aggiornata nel cloud','ok');
     renderQuickStart();
     updatePublicLinkUi();
-    showToast('Pagina salvata nel cloud. Puoi aprirla con «Apri pagina».','ok');
+    showToast('Pagina salvata nel cloud. Anteprima e pagina finale aggiornate.','ok');
     maybeOpenCollaudoWizard();
+    return;
+  }
+  if(event.data?.type === 'khamakey:save-error') {
+    dirty = true;
+    document.getElementById('saveBar')?.classList.add('visible');
+    const btnSaveTop = document.getElementById('btnSaveTop');
+    if(btnSaveTop) btnSaveTop.disabled = false;
+    applyEditorCloudStatus('Errore salvataggio','error');
+    showToast(event.data.message || 'Salvataggio non riuscito. Riprova.','err');
     return;
   }
   if(event.data?.type !== 'khamakey:load-state') return;
   if(event.data.businessId) window.__khamakeyBusinessId = event.data.businessId;
   if(window.__khamakeyMedia?.setBusinessId) window.__khamakeyMedia.setBusinessId(event.data.businessId || '');
+  applyWorkspaceSeedFromMeta(event.data);
   applyAccountData(event.data.account);
-  cloudPublicUrl = event.data.publicUrl || cloudPublicUrl;
-  cloudPublicPageUrl = event.data.publicPageUrl || cloudPublicPageUrl;
-  updatePublicLinkUi();
   applyCloudAnalytics(event.data.analytics);
-  if(!event.data.state || Object.keys(event.data.state).length === 0) {
+  const incomingState = normalizeIncomingState(event.data.state);
+  if(isEditorStateEmpty(incomingState)) {
+    editorCloudHydrated = true;
+    finishEditorHydration(incomingState);
     maybeOpenWizard(true);
     return;
   }
   cloudHydrating = true;
   try {
-    applyState(event.data.state);
+    applyState(incomingState);
     applyAccountData(event.data.account);
     persistLocalState();
     dirty = false;
@@ -6386,13 +6604,22 @@ window.addEventListener('message', event => {
   } finally {
     cloudHydrating = false;
   }
+  editorCloudHydrated = true;
   maybeOpenWizard(false);
-  window.__khamakeyIntl?.hydrateI18nFromState?.(event.data.state || {});
-  window.parent.postMessage({type:'khamakey:editor-hydrated'},'*');
-  window.parent.postMessage({type:'khamakey:public-snapshot',state:collectState(true)},'*');
+  finishEditorHydration(incomingState);
+  applyEditorCloudStatus('Pagina online','ok');
 });
 
-if(window.parent !== window) window.parent.postMessage({type:'khamakey:editor-ready'},'*');
+if(window.parent !== window){
+  function signalEditorReady(){
+    window.parent.postMessage({type:'khamakey:editor-ready'},'*');
+    requestCloudState();
+  }
+  signalEditorReady();
+  window.addEventListener('load', signalEditorReady);
+  setTimeout(()=>{ if(!editorCloudHydrated) requestCloudState(); }, 700);
+  setTimeout(()=>{ if(!editorCloudHydrated) requestCloudState(); }, 1800);
+}
 
 document.getElementById('statsRefreshBtn')?.addEventListener('click', requestAnalyticsRefresh);
 document.getElementById('downloadPublicQr')?.addEventListener('click', downloadPublicPageQr);
@@ -6857,8 +7084,81 @@ function applyAccountData(account={}){
   document.getElementById('accEmail').value = email;
   document.getElementById('accPhone').value = phone;
 }
+function normalizeIncomingState(raw){
+  if(!raw) return {};
+  if(typeof raw === 'string'){
+    try{
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    }catch{
+      return {};
+    }
+  }
+  return typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+}
+function isEditorStateEmpty(state){
+  if(!state || typeof state !== 'object') return true;
+  const fields = state.fields;
+  if(fields && typeof fields === 'object' && Object.keys(fields).length > 0) return false;
+  if(Array.isArray(state.cats) && state.cats.length) return false;
+  if(Array.isArray(state.fotos) && state.fotos.length) return false;
+  if(Array.isArray(state.eventItems) && state.eventItems.length) return false;
+  if(Array.isArray(state.promoItems) && state.promoItems.length) return false;
+  if(state.logoSrc || state.coverSrc || state.aboutSrc) return false;
+  return Object.keys(state).length === 0;
+}
+function applyWorkspaceSeedFromMeta(data={}){
+  applyWorkspaceMeta(data);
+  const businessName = String(data.businessName || '').trim();
+  if(businessName && !val('nome').trim()) setFieldValue('nome', businessName);
+  const businessSlug = String(data.businessSlug || '').trim();
+  if(businessSlug){
+    const slugInput = document.getElementById('slug');
+    const slugShow = document.getElementById('slugShow');
+    if(slugInput && !slugInput.value.trim()) slugInput.value = businessSlug;
+    if(slugShow && !slugShow.textContent.trim()) slugShow.textContent = businessSlug;
+  }
+  updatePublicSlug();
+}
+function resolveWorkspaceLinks(data={}){
+  const pageUrl = String(data.publicPageUrl || '').trim();
+  const nfcUrl = String(data.publicUrl || '').trim();
+  if(pageUrl || nfcUrl){
+    return {
+      pageUrl: pageUrl || nfcUrl,
+      nfcUrl: nfcUrl || pageUrl,
+      publicUrl: nfcUrl || pageUrl
+    };
+  }
+  const base = String(data.workerUrl || '').replace(/\/$/,'');
+  const slug = String(data.businessSlug || '').trim();
+  const nfcCode = String(data.nfcCode || '').trim().toUpperCase();
+  workspaceNfcCode = nfcCode;
+  const builtPage = base && slug ? `${base}/p/${encodeURIComponent(slug)}` : '';
+  const builtNfc = base && nfcCode ? `${base}/k/${nfcCode}` : '';
+  const publicUrl = builtNfc || builtPage;
+  return { pageUrl: builtPage, nfcUrl: builtNfc || builtPage, publicUrl };
+}
+function requestCloudState(){
+  if(window.parent === window) return;
+  window.parent.postMessage({type:'khamakey:request-state'},'*');
+}
+function applyWorkspaceMeta(data={}){
+  const badge = document.getElementById('planBadge');
+  const businessName = String(data.businessName || '').trim();
+  if(badge && businessName){
+    badge.textContent = businessName.length > 24 ? `${businessName.slice(0,22)}…` : businessName;
+    badge.title = businessName;
+  }
+  const links = resolveWorkspaceLinks(data);
+  if(links.pageUrl) cloudPublicPageUrl = links.pageUrl;
+  if(links.nfcUrl) cloudPublicUrl = links.nfcUrl;
+  if(!cloudPublicUrl && links.publicUrl) cloudPublicUrl = links.publicUrl;
+  if(!cloudPublicPageUrl && links.publicUrl) cloudPublicPageUrl = links.publicUrl;
+  updatePublicLinkUi();
+}
 function openAccount(tab='profile'){
-  userMenu.classList.remove('open');
+  userMenu?.classList.remove('open');
   accountModal.classList.add('open');
   switchAccountTab(tab);
 }
@@ -6878,6 +7178,8 @@ userMenuBtn?.addEventListener('click', e => {
   userMenu.classList.toggle('open');
 });
 document.getElementById('btnSaveTop')?.addEventListener('click', save);
+document.getElementById('btnPreviewTop')?.addEventListener('click', openPreview);
+document.getElementById('btnAccountTop')?.addEventListener('click', () => openAccount('profile'));
 document.querySelectorAll('[data-account-open]').forEach(btn => btn.addEventListener('click',()=>openAccount(btn.dataset.accountOpen)));
 document.querySelectorAll('[data-account-tab]').forEach(btn => btn.addEventListener('click',()=>switchAccountTab(btn.dataset.accountTab)));
 document.getElementById('accountClose')?.addEventListener('click', closeAccount);
@@ -6898,6 +7200,10 @@ document.getElementById('accountSupportForm')?.addEventListener('submit',event=>
   }
 });
 document.getElementById('logoutBtn')?.addEventListener('click', () => {
+  if(window.parent !== window) window.parent.postMessage({type:'khamakey:logout'},'*');
+  else showToast('Apri l’editor dall’area riservata per uscire','ok');
+});
+document.getElementById('accountLogoutBtn')?.addEventListener('click', () => {
   if(window.parent !== window) window.parent.postMessage({type:'khamakey:logout'},'*');
   else showToast('Apri l’editor dall’area riservata per uscire','ok');
 });
@@ -6962,8 +7268,24 @@ document.addEventListener('input', e => {
 
 // ══ PIANO BADGE ══
 document.getElementById('planBadge').textContent = PLAN.toUpperCase();
-const restoredState = loadLocalState();
+let restoredState = false;
+if(window.parent === window){
+  restoredState = loadLocalState();
+}else{
+  requestCloudState();
+  setTimeout(()=>{
+    if(editorCloudHydrated) return;
+    if(loadLocalState()){
+      renderPublicPreview();
+      updatePublicLinkUi();
+      applyEditorCloudStatus('Dati locali (cloud in ritardo)','warn');
+    }
+  }, 3200);
+}
 updatePublicSlug();
+if(window.__khamakeyBootstrapLinks && (window.__khamakeyBootstrapLinks.publicUrl || window.__khamakeyBootstrapLinks.businessSlug)){
+  applyWorkspaceMeta(window.__khamakeyBootstrapLinks);
+}
 renderBlockOrder();
 bindBlockOrderDnD();
 renderSlots();
@@ -6973,6 +7295,8 @@ renderCategorySelect();
 renderWizardCategories();
 updateCategoryHint();
   renderQuickStart();
+  bindBusinessDashboardUi();
+  renderBusinessDashboard();
   syncOrderBusinessType();
   lastCategoryValue = val('categoria');
 renderPublicPreview();
@@ -6993,7 +7317,7 @@ window.__khamakeyEditor = {
   getPublicLang(){ return publicLang; }
 };
 </script>
-<script type="module" src="editor-international.js?v=122"></script>
+<script type="module" src="editor-international.js?v=123"></script>
 <script type="module" src="editor-media.js?v=124"></script>
 </body>
 </html>

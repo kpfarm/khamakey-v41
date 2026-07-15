@@ -124,7 +124,7 @@ function buildLocalizedSnapshots(translations = {}) {
     renderPublicPreview();
     const snapshot = buildPublicSnapshot();
     if (snapshot) {
-      snapshots[locale] = { ...snapshot, version: "107" };
+      snapshots[locale] = { ...snapshot, version: "117" };
     }
   }
   applyState(backup);

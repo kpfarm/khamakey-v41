@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL } from "./config.js";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
 
 const authView = document.getElementById("authView");
 const appView = document.getElementById("appView");
@@ -12,6 +12,7 @@ const authTabs = document.querySelector(".auth-tabs");
 const loginForm = document.getElementById("loginForm");
 const signupForm = document.getElementById("signupForm");
 const recoveryForm = document.getElementById("recoveryForm");
+const activationForm = document.getElementById("activationForm");
 const PUBLIC_BASE_URL = WORKER_BASE_URL;
 
 let supabase = null;
@@ -22,25 +23,414 @@ let adminImpersonation = null; // attività di un cliente aperta da un admin via
 let saveTimer = null;
 let pendingState = null;
 let recoveryMode = false;
+let pendingRecovery = false;
+let authCallbackPending = false;
 let currentNfc = null;
 let applicationLoading = false;
 let workspaceWarnings = [];
 let editorHydrated = false;
+let editorReady = false;
+let pendingShellCommands = [];
+let hydrationRetryTimer = null;
+let hydrationAttempt = 0;
 const messageOrigin = location.protocol === "file:" ? "*" : location.origin;
+const APP_VERSION = "158";
+let shellPublicUrl = "";
+
+const EDITOR_MESSAGE_TYPES = new Set([
+  "khamakey:editor-ready",
+  "khamakey:editor-hydrated",
+  "khamakey:request-state",
+  "khamakey:dirty",
+  "khamakey:save",
+  "khamakey:public-snapshot",
+  "khamakey:logout",
+  "khamakey:refresh-analytics",
+  "khamakey:create-support-ticket"
+]);
+
+function isEditorFrameMessage(event){
+  const validOrigin = location.protocol === "file:" ? event.origin === "null" : event.origin === location.origin;
+  if(!validOrigin || !event.data?.type?.startsWith("khamakey:")) return false;
+  try{
+    if(event.source === editorFrame.contentWindow) return true;
+  }catch(error){
+    console.warn("editor message source",error);
+  }
+  return EDITOR_MESSAGE_TYPES.has(event.data.type);
+}
+
+function markEditorReadyIfPresent(){
+  try{
+    const doc = editorFrame.contentDocument;
+    if(!doc?.getElementById("s-info")) return false;
+    if(!editorReady){
+      editorReady = true;
+      clearEditorLoadTimer();
+      sendStateToEditor();
+      flushPendingShellCommands();
+      setCloudStatus(workspaceWarnings.length ? "Cloud collegato, dati parziali" : "Cloud collegato",workspaceWarnings.length ? "warn" : "ok");
+    }
+    return true;
+  }catch(error){
+    return false;
+  }
+}
+
+let editorHandshakeTimer = null;
+
+function scheduleEditorHandshakePoll(){
+  if(editorHandshakeTimer) clearInterval(editorHandshakeTimer);
+  let attempts = 0;
+  editorHandshakeTimer = setInterval(()=>{
+    attempts += 1;
+    if(editorReady || editorHydrated || attempts > 48){
+      clearInterval(editorHandshakeTimer);
+      editorHandshakeTimer = null;
+      return;
+    }
+    markEditorReadyIfPresent();
+  },250);
+}
+
+function normalizeEditorState(raw){
+  if(!raw) return {};
+  if(typeof raw === "string"){
+    try{
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    }catch{
+      return {};
+    }
+  }
+  return typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+}
+
+function editorUrlForBusiness(businessId,links={}){
+  const params = new URLSearchParams();
+  params.set("business",businessId);
+  params.set("v",APP_VERSION);
+  const publicUrl = String(links.publicUrl || "").trim();
+  const publicPageUrl = String(links.publicPageUrl || "").trim();
+  const slug = String(currentBusiness?.slug || "").trim();
+  const nfcCode = String(currentNfc?.code || "").trim().toUpperCase();
+  if(publicUrl) params.set("pu",publicUrl);
+  if(publicPageUrl) params.set("pp",publicPageUrl);
+  if(slug) params.set("slug",slug);
+  if(nfcCode) params.set("nfc",nfcCode);
+  return `/editor?${params.toString()}`;
+}
+
+function editorSrcHasBusiness(src,businessId){
+  if(!src || !businessId) return false;
+  try{
+    const url = new URL(src,location.origin);
+    return url.searchParams.get("business") === businessId;
+  }catch{
+    return src.includes(`business=${encodeURIComponent(businessId)}`);
+  }
+}
+
+function editorSrcNeedsReload(src,businessId,links={}){
+  if(!editorSrcHasBusiness(src,businessId)) return true;
+  try{
+    const url = new URL(src,location.origin);
+    const version = url.searchParams.get("v") || "";
+    const hasLinkParam = Boolean(url.searchParams.get("pu") || url.searchParams.get("slug"));
+    const hasLinks = Boolean(String(links.publicUrl || links.publicPageUrl || "").trim());
+    return version !== APP_VERSION || (hasLinks && !hasLinkParam);
+  }catch{
+    return true;
+  }
+}
+
+function resetHydrationRetry(){
+  hydrationAttempt = 0;
+  clearTimeout(hydrationRetryTimer);
+  hydrationRetryTimer = null;
+}
+
+function scheduleHydrationRetry(){
+  clearTimeout(hydrationRetryTimer);
+  if(editorHydrated || hydrationAttempt >= 6) return;
+  hydrationRetryTimer = setTimeout(()=>{
+    if(editorHydrated) return;
+    hydrationAttempt += 1;
+    sendStateToEditor();
+  }, 700 + hydrationAttempt * 300);
+}
+
+function workspaceLinks(){
+  const slug = String(currentBusiness?.slug || "").trim();
+  const publicPageUrl = slug ? `${PUBLIC_BASE_URL}/p/${encodeURIComponent(slug)}` : "";
+  const nfcUrl = String(currentNfc?.url || "").trim();
+  const nfcCode = String(currentNfc?.code || "").trim().toUpperCase();
+  const publicUrl = nfcUrl || (nfcCode ? `${PUBLIC_BASE_URL}/k/${nfcCode}` : "") || publicPageUrl;
+  return { publicPageUrl, publicUrl };
+}
+
+async function refreshWorkspaceLinks(){
+  if(!currentBusiness?.id) return workspaceLinks();
+  if(supabase){
+    const [{ data:business,error:businessError },{ data:nfc,error:nfcError },{ data:publicPage,error:publicPageError }] = await Promise.all([
+      supabase.from("businesses").select("id,nome,slug").eq("id",currentBusiness.id).maybeSingle(),
+      supabase.from("nfc_tags").select("id,code,url,stato").eq("business_id",currentBusiness.id).order("created_at",{ascending:true}).limit(1).maybeSingle(),
+      supabase.from("business_public_pages").select("slug,published").eq("business_id",currentBusiness.id).maybeSingle()
+    ]);
+    if(!businessError && business){
+      currentBusiness = {...currentBusiness,nome:business.nome || currentBusiness.nome,slug:business.slug || currentBusiness.slug};
+    }else if(businessError){
+      recordWorkspaceWarning("Attività non aggiornata",businessError);
+    }
+    if(!nfcError && nfc) currentNfc = nfc;
+    else if(nfcError) recordWorkspaceWarning("Link NFC non letto",nfcError);
+    if(!publicPageError && publicPage?.slug && !currentBusiness.slug){
+      currentBusiness = {...currentBusiness,slug:publicPage.slug};
+    }else if(publicPageError){
+      recordWorkspaceWarning("Pagina pubblica non letta",publicPageError);
+    }
+  }
+  return workspaceLinks();
+}
+
+function syncShellHeader(links={}){
+  const url = String(links.publicUrl || links.publicPageUrl || "").trim();
+  shellPublicUrl = url;
+  const businessName = document.getElementById("shellBusinessName");
+  const openBtn = document.getElementById("shellOpenPageBtn");
+  const copyBtn = document.getElementById("shellCopyLinkBtn");
+  if(businessName){
+    const name = String(currentBusiness?.nome || "La tua attività").trim();
+    businessName.textContent = name;
+    businessName.title = name;
+  }
+  if(openBtn){
+    openBtn.href = url || "#";
+    openBtn.setAttribute("aria-disabled",url ? "false" : "true");
+  }
+  if(copyBtn) copyBtn.disabled = !url;
+  const mobileOpen = document.getElementById("shellMobileOpen");
+  if(mobileOpen){
+    mobileOpen.href = url || "#";
+    mobileOpen.setAttribute("aria-disabled",url ? "false" : "true");
+  }
+}
+
+function postWorkspaceLinks(links){
+  if(!editorFrame.contentWindow) return;
+  editorFrame.contentWindow.postMessage({
+    type:"khamakey:workspace-links",
+    publicUrl:links.publicUrl || "",
+    publicPageUrl:links.publicPageUrl || "",
+    businessSlug:currentBusiness?.slug || "",
+    businessName:currentBusiness?.nome || "",
+    workerUrl:PUBLIC_BASE_URL,
+    nfcCode:String(currentNfc?.code || "").trim().toUpperCase()
+  },messageOrigin);
+}
+
+function humanAuthError(error){
+  const message = String(error?.message || "Accesso non riuscito.");
+  if(/rate limit|too many requests|429/i.test(message)){
+    return "Limite email Supabase raggiunto (max 2/ora). Attendi ~1 ora oppure usa l’ultimo link già ricevuto. Non richiedere altre email per ora.";
+  }
+  if(/invalid login credentials/i.test(message)){
+    return "Email o password non corretti. Se ti eri già registrato, usa quella password o «Password dimenticata».";
+  }
+  if(/email not confirmed/i.test(message)){
+    return "Email non ancora confermata. Controlla posta e spam, poi accedi.";
+  }
+  return message;
+}
+
+function isRepeatedSignup(data){
+  return Boolean(data?.user && (!data.user.identities || data.user.identities.length === 0));
+}
+
+function promptExistingAccountLogin(email){
+  setAuthStatus("Questa email è già registrata. Vai su «Accedi» con la tua password, oppure usa «Password dimenticata».","error");
+  switchAuthTab("login");
+  const loginEmail = document.getElementById("loginEmail");
+  if(loginEmail) loginEmail.value = email;
+}
 
 function setAuthStatus(message="",type=""){
   authStatus.textContent = message;
   authStatus.className = `auth-status ${type}`.trim();
 }
 
+let editorLoadTimer = null;
+
 function setCloudStatus(message,type=""){
   cloudStatus.textContent = message;
-  cloudDot.className = type;
+  cloudDot.className = type || "";
+  if(!editorFrame.contentWindow || !editorFrame.src || editorFrame.src === "about:blank") return;
+  try{
+    editorFrame.contentWindow.postMessage({type:"khamakey:cloud-status",message,statusType:type || ""},messageOrigin);
+  }catch(error){
+    console.warn("cloud-status postMessage",error);
+  }
+}
+
+function clearEditorLoadTimer(){
+  if(editorLoadTimer){
+    clearTimeout(editorLoadTimer);
+    editorLoadTimer = null;
+  }
+}
+
+function scheduleEditorLoadWatch(){
+  clearEditorLoadTimer();
+  scheduleEditorHandshakePoll();
+  editorLoadTimer = setTimeout(()=>{
+    if(editorReady) return;
+    if(markEditorReadyIfPresent()) return;
+    let failed = true;
+    try{
+      const doc = editorFrame.contentDocument;
+      failed = !doc?.getElementById("s-info");
+    }catch(error){
+      failed = true;
+    }
+    if(failed){
+      setCloudStatus("Editor non disponibile. Ricarica la pagina (Cmd+Shift+R).","error");
+      setAuthStatus("Il file editor non è stato caricato dal server. Se il problema resta, segnala al team KhamaKey.","error");
+    }else{
+      setCloudStatus("Sincronizzazione dati…","warn");
+      sendStateToEditor();
+    }
+  },12000);
+}
+
+function refreshLoginCodeLabel(){
+  const label = document.getElementById("loginProductCodeLabel");
+  const input = document.getElementById("loginProductCode");
+  if(!label || !input) return;
+  const pending = normalizeBusinessCode(sessionStorage.getItem("khamakey_pending_business_code") || "");
+  const needsCode = !!pending;
+  if(needsCode){
+    label.childNodes[0].textContent = "Codice prodotto (richiesto al primo accesso) ";
+    input.placeholder = "Codice sulla card NFC";
+    input.required = true;
+  }else{
+    label.childNodes[0].textContent = "Codice prodotto (opzionale) ";
+    input.placeholder = "Solo se attivi un nuovo NFC";
+    input.required = false;
+  }
 }
 
 function recordWorkspaceWarning(context,error){
   console.warn(context,error);
   workspaceWarnings.push(`${context}: ${error?.message || error || "errore non specificato"}`);
+}
+
+function normalizeBusinessCode(value){
+  return String(value || "").replace(/[^A-Za-z0-9]/g,"").toUpperCase();
+}
+
+function setSignupStep(step){
+  document.querySelectorAll(".signup-step").forEach(node=>{
+    node.classList.toggle("active",Number(node.dataset.signupStep) === step);
+  });
+  document.querySelectorAll("[data-signup-panel]").forEach(panel=>{
+    panel.hidden = Number(panel.dataset.signupPanel) !== step;
+  });
+}
+
+function showActivationForm(prefillCode="",message=""){
+  authView.hidden = false;
+  appView.hidden = true;
+  authTabs.hidden = true;
+  loginForm.hidden = true;
+  signupForm.hidden = true;
+  recoveryForm.hidden = true;
+  activationForm.hidden = false;
+  editorFrame.src = "about:blank";
+  editorHydrated = false;
+  editorReady = false;
+  pendingShellCommands = [];
+  const codeInput = document.getElementById("activationCode");
+  if(codeInput && prefillCode) codeInput.value = prefillCode;
+  setAuthStatus(message);
+}
+
+async function activateBusinessCode(code,businessName){
+  const cleanCode = normalizeBusinessCode(code);
+  if(!/^[A-Z0-9]{8,32}$/.test(cleanCode)){
+    throw new Error("Codice prodotto non valido (8-32 caratteri).");
+  }
+  const name = String(businessName || "").trim();
+  const { data,error } = await supabase.rpc("activate_business_code",{
+    p_code:cleanCode,
+    p_business_name:name || null
+  });
+  if(error) throw error;
+  const row = Array.isArray(data) ? data[0] : data;
+  if(!row?.business_id) throw new Error("Attivazione non completata. Riprova.");
+  return row;
+}
+
+async function reloadWorkspaceBusiness(businessId){
+  const { data:business,error } = await supabase
+    .from("businesses")
+    .select("*")
+    .eq("id",businessId)
+    .maybeSingle();
+  if(error || !business) throw error || new Error("Attività non trovata dopo attivazione.");
+  const { data:editorState } = await supabase
+    .from("business_editor_states")
+    .select("state")
+    .eq("business_id",business.id)
+    .maybeSingle();
+  const { data:nfc } = await supabase
+    .from("nfc_tags")
+    .select("*")
+    .eq("business_id",business.id)
+    .order("created_at",{ascending:true})
+    .limit(1)
+    .maybeSingle();
+  currentNfc = nfc || null;
+  return {...business,editor_state:normalizeEditorState(editorState?.state)};
+}
+
+async function tryPendingBusinessActivation(user){
+  const pendingCode = normalizeBusinessCode(
+    sessionStorage.getItem("khamakey_pending_business_code")
+      || user?.user_metadata?.pending_business_code
+      || ""
+  );
+  if(!pendingCode) return false;
+  const businessName = String(
+    user?.user_metadata?.business_name
+      || document.getElementById("activationBusiness")?.value
+      || document.getElementById("signupBusiness")?.value
+      || ""
+  ).trim();
+  try{
+    const row = await activateBusinessCode(pendingCode,businessName || "La mia attività");
+    sessionStorage.removeItem("khamakey_pending_business_code");
+    currentBusiness = await reloadWorkspaceBusiness(row.business_id);
+    return true;
+  }catch(error){
+    console.error(error);
+    showActivationForm(pendingCode,error?.message || "Codice non attivabile.");
+    return false;
+  }
+}
+
+function applyUrlParams(){
+  const params = new URLSearchParams(location.search);
+  const code = normalizeBusinessCode(params.get("code") || "");
+  if(code){
+    switchAuthTab("signup");
+    const signupCode = document.getElementById("signupProductCode");
+    if(signupCode) signupCode.value = code;
+    setSignupStep(1);
+    const loginCode = document.getElementById("loginProductCode");
+    if(loginCode) loginCode.value = code;
+  }
+  if(params.get("tab") === "signup") switchAuthTab("signup");
+  refreshLoginCodeLabel();
 }
 
 function slugify(value){
@@ -51,6 +441,15 @@ function slugify(value){
     .replace(/[^a-z0-9]+/g,"-")
     .replace(/^-+|-+$/g,"")
     .slice(0,48) || `pagina-${Date.now()}`;
+}
+
+function syncShellUser(user){
+  const account = accountDataFromUser(user);
+  if(userEmail) userEmail.textContent = account.email || "account";
+  const avatar = document.getElementById("shellUserAvatar");
+  const dropdownEmail = document.getElementById("shellUserDropdownEmail");
+  if(avatar) avatar.textContent = account.initials;
+  if(dropdownEmail) dropdownEmail.textContent = account.email || "";
 }
 
 function accountDataFromUser(user){
@@ -150,6 +549,41 @@ function configureClient(){
   return true;
 }
 
+function authCallbackFlags(){
+  const hash = new URLSearchParams(String(location.hash || "").replace(/^#/, ""));
+  const query = new URLSearchParams(location.search || "");
+  const type = hash.get("type") || query.get("type") || "";
+  const hashRecovery = type === "recovery" || /type=recovery/i.test(location.hash || "");
+  return {
+    isRecovery:hashRecovery,
+    hasCallback:Boolean(type || hash.get("access_token") || query.get("code") || hashRecovery)
+  };
+}
+
+async function prepareAuthCallback(){
+  const flags = authCallbackFlags();
+  if(!flags.hasCallback || !supabase) return flags;
+  authCallbackPending = true;
+  pendingRecovery = flags.isRecovery;
+  try{
+    await supabase.auth.signOut({ scope:"local" });
+  }catch(error){
+    console.warn("prepareAuthCallback signOut",error);
+  }
+  return flags;
+}
+
+function scrubAuthUrl(){
+  const query = new URLSearchParams(location.search || "");
+  if(query.get("code") || query.get("type")){
+    history.replaceState(null, "", location.pathname);
+    return;
+  }
+  if(location.hash && /access_token|refresh_token|type=recovery|type=signup/i.test(location.hash)){
+    history.replaceState(null, "", location.pathname + location.search);
+  }
+}
+
 function switchAuthTab(tab){
   recoveryMode = false;
   authTabs.hidden = false;
@@ -159,18 +593,28 @@ function switchAuthTab(tab){
   loginForm.hidden = tab !== "login";
   signupForm.hidden = tab !== "signup";
   recoveryForm.hidden = true;
+  activationForm.hidden = true;
+  if(tab === "signup") setSignupStep(1);
   setAuthStatus();
 }
 
-function showRecoveryForm(){
+function showRecoveryForm(email=""){
   recoveryMode = true;
+  pendingRecovery = false;
   authView.hidden = false;
   appView.hidden = true;
   authTabs.hidden = true;
   loginForm.hidden = true;
   signupForm.hidden = true;
   recoveryForm.hidden = false;
-  setAuthStatus();
+  activationForm.hidden = true;
+  editorFrame.src = "about:blank";
+  editorHydrated = false;
+  editorReady = false;
+  pendingShellCommands = [];
+  const hint = email ? `Reimposta la password per ${email}.` : "Scegli una nuova password per il tuo account.";
+  setAuthStatus(hint);
+  scrubAuthUrl();
 }
 
 async function ensureWorkspace(user){
@@ -202,7 +646,7 @@ async function ensureWorkspace(user){
         .maybeSingle();
       currentNfc = targetNfc || null;
       adminImpersonation = { id:target.id, nome:target.nome, profile_id:target.profile_id };
-      return {...target, editor_state:editorState?.state || {}};
+      return {...target, editor_state:normalizeEditorState(editorState?.state)};
     }
     // target è la propria attività, o RLS l'ha nascosta: nessuna impersonazione, flusso normale.
   }
@@ -227,6 +671,7 @@ async function ensureWorkspace(user){
     .limit(1)
     .maybeSingle();
   if(businessError) throw businessError;
+  if(!business) return null;
   let workspaceBusiness = business;
   if(business){
     const { data:editorState,error:editorStateError } = await supabase
@@ -235,21 +680,25 @@ async function ensureWorkspace(user){
       .eq("business_id",business.id)
       .maybeSingle();
     if(editorStateError) recordWorkspaceWarning("Stato editor non letto",editorStateError);
-    workspaceBusiness = {...business,editor_state:editorState?.state || {}};
-  }else{
-    const { data:newBusiness,error:newBusinessError } = await supabase
-      .from("businesses")
-      .insert({
+    workspaceBusiness = {...business,editor_state:normalizeEditorState(editorState?.state)};
+    if(!editorState){
+      const { error:seedStateError } = await supabase.from("business_editor_states").upsert({
+        business_id:business.id,
         profile_id:user.id,
-        nome:businessName,
-        slug:`${slugify(businessName)}-${user.id.slice(0,6)}`,
-        categoria:"Azienda",
-        pubblicato:true
-      })
-      .select()
-      .single();
-    if(newBusinessError) throw newBusinessError;
-    workspaceBusiness = {...newBusiness,editor_state:{}};
+        state:{},
+        updated_at:new Date().toISOString()
+      },{onConflict:"business_id"});
+      if(seedStateError) recordWorkspaceWarning("Stato editor non inizializzato",seedStateError);
+    }
+  }
+
+  if(!workspaceBusiness.pubblicato){
+    const { error:publishError } = await supabase
+      .from("businesses")
+      .update({ pubblicato:true, updated_at:new Date().toISOString() })
+      .eq("id",workspaceBusiness.id);
+    if(publishError) recordWorkspaceWarning("Attività non pubblicata",publishError);
+    else workspaceBusiness = {...workspaceBusiness,pubblicato:true};
   }
 
   const publicSlug = workspaceBusiness.slug || `${slugify(workspaceBusiness.nome || businessName)}-${user.id.slice(0,6)}`;
@@ -261,17 +710,25 @@ async function ensureWorkspace(user){
     if(slugError) recordWorkspaceWarning("Slug pagina non aggiornato",slugError);
     else workspaceBusiness = { ...workspaceBusiness, slug:publicSlug };
   }
-  const { error:publicPageError } = await supabase
+  const { data:existingPublicPage,error:existingPageError } = await supabase
     .from("business_public_pages")
-    .upsert({
-      business_id:workspaceBusiness.id,
-      profile_id:user.id,
-      slug:publicSlug,
-      state:publicStateFromEditor(workspaceBusiness.editor_state),
-      published:true,
-      updated_at:new Date().toISOString()
-    },{onConflict:"business_id"});
-  if(publicPageError) recordWorkspaceWarning("Pagina pubblica non creata/aggiornata",publicPageError);
+    .select("business_id")
+    .eq("business_id",workspaceBusiness.id)
+    .maybeSingle();
+  if(existingPageError) recordWorkspaceWarning("Pagina pubblica non verificata",existingPageError);
+  if(!existingPublicPage){
+    const { error:publicPageError } = await supabase
+      .from("business_public_pages")
+      .insert({
+        business_id:workspaceBusiness.id,
+        profile_id:user.id,
+        slug:publicSlug,
+        state:publicStateFromEditor(workspaceBusiness.editor_state),
+        published:true,
+        updated_at:new Date().toISOString()
+      });
+    if(publicPageError) recordWorkspaceWarning("Pagina pubblica non creata",publicPageError);
+  }
 
   const { data:nfc,error:nfcError } = await supabase
     .from("nfc_tags")
@@ -282,28 +739,8 @@ async function ensureWorkspace(user){
   if(nfcError){
     recordWorkspaceWarning("Link NFC non letto",nfcError);
     currentNfc = null;
-  }else if(nfc){
-    currentNfc = nfc;
   }else{
-    const code = crypto.randomUUID().replaceAll("-","").slice(0,12).toUpperCase();
-    const url = `${PUBLIC_BASE_URL}/k/${code}`;
-    const { data:newNfc,error:newNfcError } = await supabase
-      .from("nfc_tags")
-      .insert({
-        business_id:workspaceBusiness.id,
-        profile_id:user.id,
-        stato:"attivo",
-        code,
-        url
-      })
-      .select()
-      .single();
-    if(newNfcError){
-      recordWorkspaceWarning("Link NFC non creato",newNfcError);
-      currentNfc = null;
-    }else{
-      currentNfc = newNfc;
-    }
+    currentNfc = nfc || null;
   }
   return workspaceBusiness;
 }
@@ -434,17 +871,37 @@ async function getAnalytics(){
 }
 
 async function sendStateToEditor(){
-  if(!currentBusiness?.editor_state || !editorFrame.contentWindow) return;
+  if(!currentBusiness || !editorFrame.contentWindow) return;
+  const links = await refreshWorkspaceLinks();
+  if(supabase){
+    const { data:editorRow,error } = await supabase
+      .from("business_editor_states")
+      .select("state")
+      .eq("business_id",currentBusiness.id)
+      .maybeSingle();
+    if(!error && editorRow?.state){
+      currentBusiness = {...currentBusiness,editor_state:normalizeEditorState(editorRow.state)};
+    }else if(error){
+      recordWorkspaceWarning("Stato editor non aggiornato",error);
+    }
+  }
+  const state = normalizeEditorState(currentBusiness.editor_state);
+  syncShellHeader(links);
   editorFrame.contentWindow.postMessage({
     type:"khamakey:load-state",
-    state:currentBusiness.editor_state,
+    state,
     businessId:currentBusiness.id,
-    publicUrl:currentNfc?.url || "",
-    publicPageUrl:`${PUBLIC_BASE_URL}/p/${currentBusiness.slug}`,
+    businessName:currentBusiness.nome || "",
+    businessSlug:currentBusiness.slug || "",
+    publicUrl:links.publicUrl,
+    publicPageUrl:links.publicPageUrl,
     workerUrl:PUBLIC_BASE_URL,
+    nfcCode:String(currentNfc?.code || "").trim().toUpperCase(),
     account:accountDataFromUser(currentUser),
     analytics:{}
   },messageOrigin);
+  postWorkspaceLinks(links);
+  scheduleHydrationRetry();
   refreshAnalytics();
 }
 
@@ -497,19 +954,49 @@ async function loadApplication(){
     const { data:userData,error:userError } = await supabase.auth.getUser();
     if(userError || !userData.user) throw userError || new Error("Utente non disponibile");
     currentUser = userData.user;
+    syncShellUser(currentUser);
+
     currentBusiness = await ensureWorkspace(currentUser);
-    userEmail.textContent = currentUser.email || "";
-    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=138`;
-    if(editorFrame.getAttribute("src") !== editorUrl){
-      editorHydrated = false;
+    if(!currentBusiness){
+      const activated = await tryPendingBusinessActivation(currentUser);
+      if(activated) currentBusiness = await ensureWorkspace(currentUser);
+    }
+    if(!currentBusiness){
+      const prefill = normalizeBusinessCode(
+        sessionStorage.getItem("khamakey_pending_business_code")
+          || document.getElementById("loginProductCode")?.value
+          || ""
+      );
+      showActivationForm(prefill,"Inserisci il codice NFC per attivare la tua pagina Business.");
+      setCloudStatus("Attivazione richiesta");
+      return;
+    }
+
+    const initialLinks = await refreshWorkspaceLinks();
+    syncShellHeader(initialLinks);
+
+    const editorUrl = editorUrlForBusiness(currentBusiness.id,initialLinks);
+    editorHydrated = false;
+    resetHydrationRetry();
+    if(editorSrcNeedsReload(editorFrame.getAttribute("src"),currentBusiness.id,initialLinks)){
+      editorReady = false;
+      pendingShellCommands = [];
+      setCloudStatus("Editor in caricamento…","warn");
       editorFrame.src = editorUrl;
+      scheduleEditorLoadWatch();
     }
     authView.hidden = true;
     appView.hidden = false;
+    activationForm.hidden = true;
     renderAdminImpersonationBanner();
-    setCloudStatus(workspaceWarnings.length ? "Editor aperto, cloud parziale" : "Cloud collegato",workspaceWarnings.length ? "warn" : "ok");
-    if(workspaceWarnings.length) setAuthStatus(`Accesso riuscito. Alcuni dati cloud non sono disponibili: ${workspaceWarnings.join(" | ")}`,"error");
-    if(editorFrame.getAttribute("src") === editorUrl) await sendStateToEditor();
+    if(editorSrcHasBusiness(editorFrame.getAttribute("src"),currentBusiness.id)){
+      setCloudStatus(workspaceWarnings.length ? "Cloud collegato, dati parziali" : "Cloud collegato",workspaceWarnings.length ? "warn" : "ok");
+      if(workspaceWarnings.length) setAuthStatus(`Accesso riuscito. Alcuni dati cloud non sono disponibili: ${workspaceWarnings.join(" | ")}`,"error");
+      markEditorReadyIfPresent();
+      await sendStateToEditor();
+    }else if(workspaceWarnings.length){
+      setAuthStatus(`Accesso riuscito. Alcuni dati cloud non sono disponibili: ${workspaceWarnings.join(" | ")}`,"error");
+    }
   }finally{
     applicationLoading = false;
   }
@@ -533,24 +1020,23 @@ function renderAdminImpersonationBanner(){
   banner.innerHTML = `<span>👁️ Modalità amministratore — stai modificando l'attività di <strong>${String(nome).replace(/[<>&]/g,"")}</strong>. Le modifiche salvate valgono per il cliente.</span>`;
 }
 
+function hasPublishableSnapshot(state){
+  if(!state || typeof state !== "object") return false;
+  const html = state.publicSnapshot?.html || publicStateFromEditor(state).publicSnapshot?.html;
+  return Boolean(String(html || "").trim());
+}
+
 async function saveDraft(state){
   if(!currentBusiness || !state) return;
   setCloudStatus("Salvataggio...");
   const editorState = {...state};
   delete editorState.publicSnapshot;
-  const publicPageSave = state.publicSnapshot
-    ? supabase.from("business_public_pages").upsert({
-        business_id:currentBusiness.id,
-        profile_id:currentBusiness.profile_id || session.user.id,
-        slug:currentBusiness.slug,
-        state:publicStateFromEditor(state),
-        published:true,
-        updated_at:new Date().toISOString()
-      },{onConflict:"business_id"})
-    : Promise.resolve({error:null});
-  const [{ error:businessError },{ error:stateError },{ error:publicPageError }] = await Promise.all([
+  const publicState = publicStateFromEditor(state);
+  const hasSnapshot = Boolean(publicState.publicSnapshot?.html?.trim());
+  const businessName = String(state.fields?.nome || "").trim();
+  const writes = [
     supabase.from("businesses").update({
-      nome:state.fields?.nome || currentBusiness.nome,
+      nome:businessName || currentBusiness.nome,
       categoria:state.fields?.categoria || currentBusiness.categoria,
       updated_at:new Date().toISOString()
     }).eq("id",currentBusiness.id),
@@ -559,15 +1045,36 @@ async function saveDraft(state){
       profile_id:currentBusiness.profile_id || session.user.id,
       state:editorState,
       updated_at:new Date().toISOString()
-    },{onConflict:"business_id"}),
-    publicPageSave
-  ]);
+    },{onConflict:"business_id"})
+  ];
+  if(hasSnapshot){
+    writes.push(supabase.from("business_public_pages").upsert({
+      business_id:currentBusiness.id,
+      profile_id:currentBusiness.profile_id || session.user.id,
+      slug:currentBusiness.slug,
+      state:publicState,
+      published:true,
+      updated_at:new Date().toISOString()
+    },{onConflict:"business_id"}));
+  }
+  const results = await Promise.all(writes);
+  const businessError = results[0]?.error;
+  const stateError = results[1]?.error;
+  const publicPageError = hasSnapshot ? results[2]?.error : null;
   if(businessError || stateError || publicPageError){
     setCloudStatus("Errore salvataggio","error");
     throw businessError || stateError || publicPageError;
   }
-  currentBusiness = {...currentBusiness,editor_state:editorState};
-  setCloudStatus("Salvato nel cloud","ok");
+  currentBusiness = {
+    ...currentBusiness,
+    editor_state:editorState,
+    nome:businessName || currentBusiness.nome,
+    categoria:state.fields?.categoria || currentBusiness.categoria
+  };
+  const links = await refreshWorkspaceLinks();
+  syncShellHeader(links);
+  postWorkspaceLinks(links);
+  setCloudStatus(hasSnapshot ? "Pagina aggiornata" : "Bozza salvata","ok");
 }
 
 function queueSave(state,immediate=false){
@@ -581,8 +1088,31 @@ function queueSave(state,immediate=false){
       }
     }catch(error){
       console.error(error);
+      if(editorFrame.contentWindow){
+        editorFrame.contentWindow.postMessage({
+          type:"khamakey:save-error",
+          message:error?.message || "Salvataggio non riuscito."
+        },messageOrigin);
+      }
+      setCloudStatus("Errore salvataggio","error");
     }
   },immediate ? 0 : 1200);
+}
+
+function flushPendingShellCommands(){
+  if(!editorReady || !pendingShellCommands.length || !editorFrame.contentWindow) return;
+  const queue = pendingShellCommands.splice(0);
+  queue.forEach(message=>{
+    editorFrame.contentWindow.postMessage(message,messageOrigin);
+  });
+}
+
+function notifyEditorSaveBlocked(reason){
+  if(!editorFrame.contentWindow) return;
+  editorFrame.contentWindow.postMessage({
+    type:"khamakey:save-error",
+    message:reason
+  },messageOrigin);
 }
 
 document.querySelectorAll("[data-auth-tab]").forEach(button=>{
@@ -606,37 +1136,117 @@ loginForm.addEventListener("submit",async event=>{
   event.preventDefault();
   if(!supabase) return;
   setAuthStatus("Accesso in corso...");
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const loginCode = normalizeBusinessCode(document.getElementById("loginProductCode")?.value || "");
+  if(loginCode) sessionStorage.setItem("khamakey_pending_business_code",loginCode);
+  else sessionStorage.removeItem("khamakey_pending_business_code");
+  refreshLoginCodeLabel();
   const { error } = await supabase.auth.signInWithPassword({
-    email:document.getElementById("loginEmail").value.trim(),
+    email,
     password:document.getElementById("loginPassword").value
   });
   if(error){
-    setAuthStatus(error.message,"error");
+    setAuthStatus(humanAuthError(error),"error");
   }
 });
+
+document.getElementById("signupNextStep")?.addEventListener("click",()=>{
+  const code = normalizeBusinessCode(document.getElementById("signupProductCode")?.value || "");
+  if(!/^[A-Z0-9]{8,32}$/.test(code)){
+    setAuthStatus("Inserisci un codice prodotto valido (8-32 caratteri).","error");
+    return;
+  }
+  setAuthStatus("");
+  setSignupStep(2);
+});
+
+document.getElementById("signupPrevStep")?.addEventListener("click",()=>setSignupStep(1));
 
 signupForm.addEventListener("submit",async event=>{
   event.preventDefault();
   if(!supabase) return;
+  const email = document.getElementById("signupEmail").value.trim().toLowerCase();
+  const code = normalizeBusinessCode(document.getElementById("signupProductCode")?.value || "");
+  const businessName = document.getElementById("signupBusiness").value.trim();
+  if(!/^[A-Z0-9]{8,32}$/.test(code)){
+    setAuthStatus("Codice prodotto non valido.","error");
+    setSignupStep(1);
+    return;
+  }
+  if(!businessName){
+    setAuthStatus("Inserisci il nome attività.","error");
+    return;
+  }
+  sessionStorage.setItem("khamakey_pending_business_code",code);
   setAuthStatus("Creazione account...");
-  const email = document.getElementById("signupEmail").value.trim();
   const { data,error } = await supabase.auth.signUp({
     email,
     password:document.getElementById("signupPassword").value,
     options:{
-      emailRedirectTo:location.protocol === "file:" ? undefined : location.origin,
+      emailRedirectTo:authRedirectTo(),
       data:{
         full_name:document.getElementById("signupName").value.trim(),
-        business_name:document.getElementById("signupBusiness").value.trim()
+        business_name:businessName,
+        pending_business_code:code
       }
     }
   });
   if(error){
+    if(/already registered|already been registered|user already registered/i.test(String(error.message || ""))){
+      promptExistingAccountLogin(email);
+      return;
+    }
     setAuthStatus(error.message,"error");
     return;
   }
-  if(!data.session){
-    setAuthStatus("Account creato. Controlla l’email per confermare la registrazione.","ok");
+  if(data.session?.user){
+    currentUser = data.session.user;
+    try{
+      await activateBusinessCode(code,businessName);
+      sessionStorage.removeItem("khamakey_pending_business_code");
+      setAuthStatus("Account creato e prodotto collegato.","ok");
+    }catch(activationError){
+      console.error(activationError);
+      setAuthStatus(activationError.message || "Account creato, ma codice non collegato. Usa il modulo attivazione.","error");
+      showActivationForm(code);
+      return;
+    }
+    currentBusiness = null;
+    await loadApplication();
+    return;
+  }
+  if(isRepeatedSignup(data)){
+    promptExistingAccountLogin(email);
+    return;
+  }
+  setAuthStatus("Account creato. Conferma l’email, poi accedi con lo stesso codice prodotto.","ok");
+});
+
+activationForm?.addEventListener("submit",async event=>{
+  event.preventDefault();
+  if(!supabase || !session?.user){
+    setAuthStatus("Sessione scaduta. Accedi di nuovo e riprova.","error");
+    return;
+  }
+  const code = normalizeBusinessCode(document.getElementById("activationCode")?.value || "");
+  const businessName = document.getElementById("activationBusiness")?.value.trim() || "";
+  if(!/^[A-Z0-9]{8,32}$/.test(code)){
+    setAuthStatus("Codice prodotto non valido.","error");
+    return;
+  }
+  if(!businessName){
+    setAuthStatus("Inserisci il nome attività.","error");
+    return;
+  }
+  setAuthStatus("Attivazione in corso...");
+  try{
+    const row = await activateBusinessCode(code,businessName);
+    sessionStorage.removeItem("khamakey_pending_business_code");
+    currentBusiness = await reloadWorkspaceBusiness(row.business_id);
+    setAuthStatus("Prodotto attivato. Apertura editor…","ok");
+    await loadApplication();
+  }catch(error){
+    setAuthStatus(error.message || "Attivazione non riuscita.","error");
   }
 });
 
@@ -659,54 +1269,151 @@ recoveryForm.addEventListener("submit",async event=>{
 
 document.getElementById("forgotPassword").addEventListener("click",async()=>{
   if(!supabase) return;
-  const email = document.getElementById("loginEmail").value.trim();
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
   if(!email){
     setAuthStatus("Inserisci prima la tua email.","error");
     return;
   }
-  const redirectTo = location.protocol === "file:" ? undefined : location.origin;
+  const redirectTo = authRedirectTo("/");
   const { error } = await supabase.auth.resetPasswordForEmail(email,{redirectTo});
-  setAuthStatus(error ? error.message : "Email di recupero inviata.",error ? "error" : "ok");
+  const loggedAs = session?.user?.email;
+  const extra = loggedAs && loggedAs.toLowerCase() !== email.toLowerCase()
+    ? ` Sei ancora connesso come ${loggedAs}: esci prima, poi riapri il link dall’email.`
+    : " Apri il link sullo stesso dispositivo. Se eri connesso con un altro account, esci prima.";
+  setAuthStatus(error ? humanAuthError(error) : `Email inviata a ${email}.${extra}`,error ? "error" : "ok");
 });
 
-document.getElementById("logoutButton").addEventListener("click",async()=>{
+document.getElementById("logoutButton")?.addEventListener("click",async()=>{
   if(supabase) await supabase.auth.signOut();
+});
+
+const shellUserMenu = document.getElementById("shellUserMenu");
+const shellUserBtn = document.getElementById("shellUserBtn");
+const shellUserDropdown = document.getElementById("shellUserDropdown");
+shellUserBtn?.addEventListener("click",event=>{
+  event.stopPropagation();
+  const open = shellUserDropdown?.hidden !== false;
+  if(shellUserDropdown) shellUserDropdown.hidden = !open;
+  shellUserBtn?.setAttribute("aria-expanded",open ? "true" : "false");
+});
+document.addEventListener("click",event=>{
+  if(!event.target.closest("#shellUserMenu") && shellUserDropdown){
+    shellUserDropdown.hidden = true;
+    shellUserBtn?.setAttribute("aria-expanded","false");
+  }
+});
+
+document.getElementById("shellCopyLinkBtn")?.addEventListener("click",async()=>{
+  if(!shellPublicUrl) return;
+  try{
+    await navigator.clipboard.writeText(shellPublicUrl);
+    setCloudStatus("Link copiato","ok");
+  }catch{
+    setCloudStatus("Impossibile copiare il link","error");
+  }
+});
+
+document.getElementById("shellSaveBtn")?.addEventListener("click",()=>{
+  postToEditor({type:"khamakey:shell-save"});
+});
+document.getElementById("shellMobilePreview")?.addEventListener("click",()=>{
+  postToEditor({type:"khamakey:open-preview"});
+});
+document.getElementById("shellMobileAccount")?.addEventListener("click",()=>{
+  postToEditor({type:"khamakey:open-account",tab:"profile"});
+});
+document.getElementById("shellMobileSave")?.addEventListener("click",()=>{
+  postToEditor({type:"khamakey:shell-save"});
 });
 
 function postToEditor(message){
   if(!editorFrame.contentWindow) return;
-  editorFrame.contentWindow.postMessage(message,messageOrigin);
+  markEditorReadyIfPresent();
+  try{
+    editorFrame.contentWindow.postMessage(message,messageOrigin);
+  }catch(error){
+    console.warn("postToEditor",error);
+  }
+  const shellUi = message?.type === "khamakey:open-preview" || message?.type === "khamakey:open-account";
+  if(shellUi && !editorReady) pendingShellCommands.push(message);
 }
+
+editorFrame.addEventListener("load",()=>{
+  if(!editorFrame.src || editorFrame.src === "about:blank") return;
+  editorHydrated = false;
+  try{
+    const doc = editorFrame.contentDocument;
+    if(!doc?.getElementById("s-info")){
+      clearEditorLoadTimer();
+      setCloudStatus("Editor non trovato sul server (404).","error");
+      setAuthStatus("Rideploy necessario: editor non raggiungibile.","error");
+      return;
+    }
+  }catch(error){
+    console.warn("editor iframe inspect",error);
+  }
+  markEditorReadyIfPresent();
+  sendStateToEditor();
+  setTimeout(()=> sendStateToEditor(),120);
+  setTimeout(()=> markEditorReadyIfPresent(),400);
+  scheduleEditorHandshakePoll();
+});
 
 document.getElementById("shellPreviewBtn")?.addEventListener("click",()=>{
   postToEditor({type:"khamakey:open-preview"});
 });
-
 document.getElementById("shellAccountBtn")?.addEventListener("click",()=>{
   postToEditor({type:"khamakey:open-account",tab:"profile"});
 });
-
-editorFrame.addEventListener("load",()=>{
-  editorHydrated = false;
-  sendStateToEditor();
-});
 window.addEventListener("message",event=>{
-  const validOrigin = location.protocol === "file:" ? event.origin === "null" : event.origin === location.origin;
-  if(!validOrigin || event.source !== editorFrame.contentWindow) return;
+  if(!isEditorFrameMessage(event)) return;
   if(event.data?.type === "khamakey:editor-ready"){
+    editorReady = true;
+    clearEditorLoadTimer();
+    sendStateToEditor();
+    flushPendingShellCommands();
+    setCloudStatus(workspaceWarnings.length ? "Cloud collegato, dati parziali" : "Cloud collegato",workspaceWarnings.length ? "warn" : "ok");
+    return;
+  }
+  if(event.data?.type === "khamakey:request-state"){
     sendStateToEditor();
     return;
   }
   if(event.data?.type === "khamakey:editor-hydrated"){
     editorHydrated = true;
+    resetHydrationRetry();
+    if(workspaceWarnings.length){
+      setCloudStatus("Cloud collegato, alcuni dati non disponibili","warn");
+    }else{
+      setCloudStatus("Cloud collegato","ok");
+    }
+    setTimeout(()=>postToEditor({type:"khamakey:force-publish"}),300);
     return;
   }
-  if(["khamakey:dirty","khamakey:save","khamakey:public-snapshot"].includes(event.data?.type) && !editorHydrated){
-    console.warn("Editor non ancora idratato: salvataggio iniziale ignorato",event.data?.type);
+  if(["khamakey:dirty","khamakey:save","khamakey:public-snapshot"].includes(event.data?.type) && !editorHydrated && !editorReady){
+    console.warn("Editor non ancora pronto: messaggio ignorato",event.data?.type);
+    if(event.data?.type === "khamakey:save"){
+      notifyEditorSaveBlocked("Sincronizzazione in corso. Attendi un secondo e riprova.");
+    }
     return;
   }
-  if(event.data?.type === "khamakey:dirty") queueSave(event.data.state);
-  if(event.data?.type === "khamakey:save") queueSave(event.data.state,true);
+  if(event.data?.type === "khamakey:public-snapshot" && !editorHydrated){
+    if(hasPublishableSnapshot(event.data.state)) queueSave(event.data.state,true);
+    return;
+  }
+  if(event.data?.type === "khamakey:dirty"){
+    setCloudStatus("Salvataggio automatico…","warn");
+    if(hasPublishableSnapshot(event.data.state)) queueSave(event.data.state);
+    return;
+  }
+  if(event.data?.type === "khamakey:save"){
+    if(!hasPublishableSnapshot(event.data.state)){
+      notifyEditorSaveBlocked("Anteprima non pronta. Attendi un secondo e riprova.");
+      return;
+    }
+    queueSave(event.data.state,true);
+    return;
+  }
   if(event.data?.type === "khamakey:public-snapshot") queueSave(event.data.state,true);
   if(event.data?.type === "khamakey:logout") supabase.auth.signOut();
   if(event.data?.type === "khamakey:refresh-analytics") refreshAnalytics();
@@ -714,27 +1421,40 @@ window.addEventListener("message",event=>{
 });
 setInterval(refreshAnalytics,15000);
 
-if(configureClient()){
-  const { data } = await supabase.auth.getSession();
-  session = data.session;
-  if(session){
-    try{
-      await loadApplication();
-    }catch(error){
-      setAuthStatus(error.message,"error");
-      authView.hidden = false;
-    }
-  }else{
-    authView.hidden = false;
-  }
+function bindAuthStateListener(){
   supabase.auth.onAuthStateChange(async(event,newSession)=>{
     session = newSession;
     if(event === "PASSWORD_RECOVERY"){
-      showRecoveryForm();
+      authCallbackPending = false;
+      showRecoveryForm(newSession?.user?.email || "");
+      return;
+    }
+    if(event === "SIGNED_IN" && pendingRecovery){
+      authCallbackPending = false;
+      showRecoveryForm(newSession?.user?.email || "");
       return;
     }
     if(event === "INITIAL_SESSION"){
-      if(!session) {
+      if(authCallbackPending){
+        if(session && pendingRecovery){
+          authCallbackPending = false;
+          showRecoveryForm(session.user?.email || "");
+          return;
+        }
+        if(!session) return;
+      }
+      if(session && pendingRecovery){
+        showRecoveryForm(session.user?.email || "");
+        return;
+      }
+      if(session && !recoveryMode){
+        try{
+          await loadApplication();
+        }catch(error){
+          setAuthStatus(error.message,"error");
+          authView.hidden = false;
+        }
+      }else if(!session){
         authView.hidden = false;
       }
       return;
@@ -742,6 +1462,12 @@ if(configureClient()){
     if(!session){
       currentUser = null;
       currentBusiness = null;
+      currentNfc = null;
+      editorHydrated = false;
+      editorReady = false;
+      pendingShellCommands = [];
+      sessionStorage.removeItem("khamakey_pending_business_code");
+      refreshLoginCodeLabel();
       editorFrame.src = "about:blank";
       appView.hidden = true;
       authView.hidden = false;
@@ -750,6 +1476,7 @@ if(configureClient()){
       return;
     }
     if(recoveryMode) return;
+    authCallbackPending = false;
     try{
       await loadApplication();
     }catch(error){
@@ -757,6 +1484,19 @@ if(configureClient()){
       authView.hidden = false;
     }
   });
-}else{
-  authView.hidden = false;
 }
+
+async function bootstrapAuth(){
+  if(!configureClient()){
+    authView.hidden = false;
+    return;
+  }
+  applyUrlParams();
+  const flags = authCallbackFlags();
+  pendingRecovery = flags.isRecovery;
+  authView.hidden = false;
+  await prepareAuthCallback();
+  bindAuthStateListener();
+}
+
+bootstrapAuth();

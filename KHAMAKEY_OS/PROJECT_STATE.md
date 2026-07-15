@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-15** (Admin v133 Spedizioni NFC operative)
+> Ultimo aggiornamento: **2026-07-15** (hotfix Business editor v158 — crash sintassi in produzione)
 
 ---
 
@@ -81,11 +81,11 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin** | **v133** | Console Spedizioni NFC operativa con pipeline produzione/stampa/spedizione, KPI, ricerca, filtri e azioni sugli ordini. |
-| **Editor Business** | **v124** | Fix upload da audit: video presentazione su R2 (prima blob perso), limite 25 MB allineato al server, pulizia file orfani R2 su sostituzione/rimozione media. Pendenti PDF catalogo e documenti base64→R2 (lock `worker.js`). |
+| **Editor Business** | **v158** | Hotfix produzione: rimosso `?.disabled =` illegale in `editor.html` che bloccava l’intero script (UI ferma su «Caricamento dati…»). Repo riallineato allo stack Pages live (shell/app v157→158). Pendenti PDF catalogo e documenti base64→R2 (lock `worker.js`). |
 | **Moments editor** | **v115** | Overhaul visivo premium (sfondo radial, glassmorphism e card hover) + Raccordi copertina v114. |
 | **Worker NFC** | **v127** | Supporto a heroCut, unificazione di tutti i 21 sfondi premium e contrasto dinamico footer. |
 | **SQL Supabase** | **v89 (applicata)** | v75-v83 security, v84 CRM, v85 trigger provvigioni ordini, v86 portale rivenditori, v87 hardening accesso agente solo via `member_id`, v88 claim sicuro primo accesso rivenditore, v89 RLS ticket utente |
-| **Prossima release Business** | **v125** | Collaudo browser autenticato completo e rifinitura UX dopo test cliente; PDF catalogo + documenti su R2 quando si libera `worker.js` |
+| **Prossima release Business** | **v159** | Deploy Pages del hotfix v158 se non ancora live; collaudo browser autenticato; PDF catalogo + documenti su R2 quando si libera `worker.js` |
 
 ---
 

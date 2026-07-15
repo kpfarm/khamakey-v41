@@ -44,6 +44,12 @@ button{cursor:pointer}
 .brand-logo{display:block;width:min(270px,72%);height:auto;object-fit:contain;margin-bottom:38px;position:relative;z-index:1}
 .auth-brand h1{font-family:"Syne",sans-serif;font-size:clamp(2.35rem,4.4vw,4.25rem);line-height:1.04;margin:0;max-width:660px;position:relative;z-index:1}
 .auth-brand p{font-size:1rem;line-height:1.55;color:rgba(255,255,255,.92);max-width:520px;margin:22px 0;position:relative;z-index:1}
+.auth-eyebrow{margin:0 0 8px;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9AE06A;position:relative;z-index:1}
+.auth-steps{display:grid;gap:12px;max-width:480px;margin-top:8px;position:relative;z-index:1}
+.auth-step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.05)}
+.auth-step span{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.12);font-weight:900}
+.auth-step strong{display:block;font-size:.88rem;margin-bottom:3px}
+.auth-step p{margin:0;font-size:.78rem;color:rgba(255,255,255,.78);line-height:1.4}
 .auth-points{display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1}
 .auth-points span{border:1px solid rgba(255,255,255,.18);padding:9px 11px;border-radius:7px;font-size:.76rem;font-weight:800;background:rgba(255,255,255,0.04)}
 .auth-panel{display:grid;place-items:center;padding:28px;overflow-y:auto}
@@ -92,19 +98,73 @@ button{cursor:pointer}
 .auth-status{min-height:22px;margin-top:14px;font-size:.78rem;color:#526078;line-height:1.4}
 .auth-status.error{color:#c53030}
 .auth-status.ok{color:var(--green-dark)}
-.app-view{height:100dvh;display:grid;grid-template-rows:50px 1fr;overflow:hidden}
-.app-header{height:50px;background:#091024;color:white;display:flex;align-items:center;padding:0 14px;gap:12px}
-.header-logo{display:block;width:112px;height:26px;object-fit:contain;object-position:left center;flex-shrink:0}
-.cloud-state{display:flex;align-items:center;gap:7px;font-size:.7rem;color:rgba(255,255,255,.72)}
-.cloud-state span{width:8px;height:8px;border-radius:50%;background:#f59e0b}
+.app-view{height:100dvh;height:100svh;display:grid;grid-template-rows:auto 1fr;overflow:hidden;background:var(--bg)}
+.app-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  min-height:56px;
+  padding:0 16px;
+  background:var(--navy);
+  color:#fff;
+  border-bottom:none;
+  box-shadow:0 2px 12px rgba(27,42,94,.28);
+  z-index:30;
+}
+.app-header-start{display:flex;align-items:center;gap:14px;min-width:0;flex:1 1 auto}
+.app-header-workspace{display:flex;flex-direction:column;gap:2px;min-width:0}
+.shell-product-eyebrow{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9AE06A}
+.shell-business-name{font-size:.82rem;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:min(280px,36vw)}
+.header-logo{display:block;width:118px;height:28px;object-fit:contain;object-position:left center;flex-shrink:0;filter:brightness(0) invert(1)}
+.cloud-state{display:flex;align-items:center;gap:6px;font-size:.68rem;color:rgba(255,255,255,.72);min-width:0}
+.cloud-state strong{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:rgba(255,255,255,.9)}
+.cloud-state span{width:7px;height:7px;border-radius:50%;background:#f59e0b;flex-shrink:0}
 .cloud-state span.ok{background:var(--green)}
+.cloud-state span.warn{background:#f59e0b}
 .cloud-state span.error{background:#ef4444}
-.app-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
-.app-tool-btn{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:white;border-radius:8px;padding:7px 12px;font-size:.72rem;font-weight:800;white-space:nowrap}
-.app-tool-btn:hover{background:rgba(255,255,255,.18)}
-.app-user{display:flex;align-items:center;gap:10px;font-size:.72rem;flex-shrink:0}
-.app-user button{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:white;border-radius:7px;padding:7px 10px;font-weight:800}
-#editorFrame{width:100%;height:100%;border:0;background:var(--bg)}
+.app-header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.app-tool-btn{
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.1);
+  color:#fff;
+  border-radius:10px;
+  padding:8px 12px;
+  font-size:.72rem;
+  font-weight:800;
+  white-space:nowrap;
+  min-height:36px;
+  transition:background .15s ease,border-color .15s ease,opacity .15s ease;
+}
+.app-tool-btn:hover:not(:disabled):not([aria-disabled="true"]){background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.35)}
+.app-tool-btn:disabled,.app-tool-btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;pointer-events:none}
+.app-tool-link{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.app-tool-accent{background:var(--green);border-color:var(--green);color:#fff}
+.app-tool-accent:hover:not(:disabled){background:var(--green-dark);border-color:var(--green-dark)}
+.app-user-menu{position:relative;margin-left:4px}
+.app-user-btn{
+  display:flex;align-items:center;gap:8px;
+  border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:#fff;
+  border-radius:999px;padding:4px 10px 4px 4px;min-height:36px;font-weight:700;
+}
+.app-user-btn:hover{background:rgba(255,255,255,.18)}
+.app-user-avatar{
+  width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--navy),#2a4078);color:#fff;font-size:.62rem;font-weight:800;
+}
+.app-user-email{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.68rem;color:#526078}
+.app-user-dropdown{
+  position:absolute;right:0;top:calc(100% + 8px);min-width:220px;
+  background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px;
+  box-shadow:0 16px 40px rgba(27,42,94,.12);
+}
+.app-user-dropdown[hidden]{display:none!important}
+.app-user-dropdown-email{margin:0 0 10px;font-size:.72rem;color:var(--muted);word-break:break-all}
+.app-user-dropdown button{
+  width:100%;border:1px solid #fecaca;background:#fff5f5;color:#b91c1c;
+  border-radius:8px;padding:8px 10px;font-weight:800;min-height:36px;
+}
+#editorFrame{width:100%;height:100%;min-height:0;border:0;background:var(--bg)}
 @media(max-width:760px){
   html,body{background:white}
   .auth-page{grid-template-columns:1fr;grid-template-rows:auto 1fr;overflow:auto}
@@ -113,6 +173,7 @@ button{cursor:pointer}
   .auth-brand h1{font-size:clamp(1.45rem,6.8vw,1.85rem);line-height:1.1;max-width:340px}
   .auth-brand p{font-size:.82rem;line-height:1.4;margin:9px 0 0}
   .auth-points{display:none}
+  .auth-steps{display:none}
   .auth-panel{display:block;padding:0;background:white;overflow:visible}
   .auth-card{width:100%;min-height:100%;border:0;border-radius:0;padding:22px 20px 30px;box-shadow:none}
   .auth-tabs{margin-bottom:22px}
@@ -122,12 +183,20 @@ button{cursor:pointer}
   .auth-form input{min-height:48px;font-size:16px}
   .primary{min-height:48px}
   .auth-status{margin-top:12px}
-  .app-header{gap:8px;padding:0 9px}
-  .app-actions{gap:6px}
+  .app-header{padding:0 10px;gap:8px;min-height:52px}
+  .header-logo{width:100px;height:24px}
+  .shell-business-name{max-width:140px;font-size:.76rem}
+  .app-header-actions{gap:6px}
   .app-tool-btn{padding:7px 9px;font-size:.66rem}
-  .app-user span{display:none}
-  .cloud-state strong{max-width:125px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .app-user-email{display:none}
+  .app-tool-btn#shellCopyLinkBtn{display:none}
+  .app-header-actions #shellOpenPageBtn,
+  .app-header-actions #shellPreviewBtn,
+  .app-header-actions #shellAccountBtn{display:none}
+  .app-header-actions #shellSaveBtn{display:inline-flex}
+  .app-mobile-bar{display:none}
 }
+.app-mobile-bar{display:none}
 @media(max-width:390px){
   .auth-brand{padding:18px 16px 20px}
   .auth-card{padding:18px 16px 26px}
@@ -138,3 +207,7 @@ button{cursor:pointer}
 /* Link area rivenditori (pannello brand scuro) */
 .reseller-link{display:inline-block;margin-top:26px;color:rgba(255,255,255,.92);font-weight:700;font-size:.9rem;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.4);padding-bottom:2px}
 .reseller-link:hover{border-bottom-color:rgba(255,255,255,.9)}
+.signup-steps{display:flex;gap:8px;margin:0 0 18px}
+.signup-step{font-size:.72rem;font-weight:800;color:#64748b;padding:6px 10px;border-radius:999px;background:#eef2f7}
+.signup-step.active{background:#e8f5e0;color:#246517}
+.signup-panel{display:grid;gap:14px}

@@ -499,7 +499,7 @@ async function loadApplication(){
     currentUser = userData.user;
     currentBusiness = await ensureWorkspace(currentUser);
     userEmail.textContent = currentUser.email || "";
-    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=137`;
+    const editorUrl = `editor.html?business=${encodeURIComponent(currentBusiness.id)}&v=138`;
     if(editorFrame.getAttribute("src") !== editorUrl){
       editorHydrated = false;
       editorFrame.src = editorUrl;

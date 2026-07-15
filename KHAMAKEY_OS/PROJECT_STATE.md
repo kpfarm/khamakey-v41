@@ -81,11 +81,11 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin** | **v133** | Console Spedizioni NFC operativa con pipeline produzione/stampa/spedizione, KPI, ricerca, filtri e azioni sugli ordini. |
-| **Editor Business** | **v123** | Handshake idratazione editor: dopo reload carica stato cloud, link `/p/`, QR e comandi senza tornare a "Collegamento in preparazione". |
+| **Editor Business** | **v124** | Fix upload da audit: video presentazione su R2 (prima blob perso), limite 25 MB allineato al server, pulizia file orfani R2 su sostituzione/rimozione media. Pendenti PDF catalogo e documenti base64→R2 (lock `worker.js`). |
 | **Moments editor** | **v115** | Overhaul visivo premium (sfondo radial, glassmorphism e card hover) + Raccordi copertina v114. |
 | **Worker NFC** | **v127** | Supporto a heroCut, unificazione di tutti i 21 sfondi premium e contrasto dinamico footer. |
 | **SQL Supabase** | **v89 (applicata)** | v75-v83 security, v84 CRM, v85 trigger provvigioni ordini, v86 portale rivenditori, v87 hardening accesso agente solo via `member_id`, v88 claim sicuro primo accesso rivenditore, v89 RLS ticket utente |
-| **Prossima release Business** | **v124** | Collaudo browser autenticato completo e rifinitura UX dopo test cliente |
+| **Prossima release Business** | **v125** | Collaudo browser autenticato completo e rifinitura UX dopo test cliente; PDF catalogo + documenti su R2 quando si libera `worker.js` |
 
 ---
 

@@ -8,6 +8,14 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **Business Editor v124 — Fix upload da audit (2026-07-15, Claude Code)** — preparato
+  - Video presentazione ora caricato davvero su R2 (prima restava `blob:` locale: perso al reload, link rotto nello snapshot pubblico). Limite client allineato al server: 25 MB (era 200 MB) + max 2 minuti.
+  - `collectState`/`applyState` persistono e ripristinano l'URL video cloud.
+  - Pulizia R2: sostituzione/rimozione di logo, copertina, chi siamo, foto galleria, immagini catalogo (anche eliminazione voce/sezione/catalogo) e video cancellano il vecchio file dal bucket (prima orfano). Solo URL `/cdn/`, legacy Supabase Storage intatti.
+  - Cache-bust: `editor-media.js?v=124`, `app.js?v=138`, iframe `editor.html?v=138`.
+  - Pendenti (bloccati dal lock `worker.js`): PDF catalogo e Welcome book/Documenti base64→R2 — dettaglio in `docs/03-editor.md`.
+
 ### Added
 - **Admin v133 — Console Spedizioni NFC operativa (2026-07-15, Codex)** — preparato
   - Trasformata la tab `Spedizioni NFC` da rimando a console operativa.

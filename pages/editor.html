@@ -2021,7 +2021,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
         <div class="field">
           <label>Oppure carica un video</label>
           <input type="file" id="vidFile" accept="video/*" style="padding:8px;" onchange="onVideoUpload(this)">
-          <div class="field-hint" style="margin-top:6px">MP4 · Max 200MB · Max 2 minuti</div>
+          <div class="field-hint" style="margin-top:6px">MP4 · Max 25 MB · Max 2 minuti</div>
           <div class="field-hint" id="videoStatus">Nessun video caricato</div>
           <div class="media-actions">
             <button class="media-remove" type="button" onclick="removeUploadedVideo()"><svg class="ui-ico"><use href="#i-trash"/></svg>Rimuovi video</button>
@@ -3216,6 +3216,12 @@ function readImageFile(file,onload){
   r.onerror = () => showToast('Impossibile leggere l’immagine','err');
   r.readAsDataURL(file);
 }
+function removeCloudMedia(url){
+  // Pulizia R2: senza questa chiamata il file sostituito/rimosso resterebbe orfano
+  // nel bucket (costo storage). Best-effort, mai bloccante per l'utente.
+  if(!url || !window.__khamakeyMedia?.remove || !window.__khamakeyMedia?.isCloudUrl?.(url)) return;
+  window.__khamakeyMedia.remove(url).catch(()=>{});
+}
 function validFileSize(file,maxMb,label='File'){
   if(file.size > maxMb * 1024 * 1024) {
     showToast(`${label} troppo grande: massimo ${maxMb} MB`,'err');
@@ -3227,10 +3233,35 @@ function hasExtension(file,extensions){
   const name = String(file?.name || '').toLowerCase();
   return extensions.some(ext=>name.endsWith(ext));
 }
+function removeCatSection(ci){
+  (cats[ci]?.voci || []).forEach(item=>removeCloudMedia(item?.img));
+  cats.splice(ci,1);
+  renderCats();
+  changed();
+}
+function removeCatItem(ci,pi){
+  removeCloudMedia(cats[ci]?.voci?.[pi]?.img);
+  cats[ci].voci.splice(pi,1);
+  renderCats();
+  changed();
+}
+function removeExtraCatalog(ei){
+  (extraCatalogs[ei]?.items || []).forEach(item=>removeCloudMedia(item?.img));
+  extraCatalogs.splice(ei,1);
+  renderExtraCatalogs();
+  changed();
+}
+function removeExtraItem(ei,pi){
+  removeCloudMedia(extraCatalogs[ei]?.items?.[pi]?.img);
+  extraCatalogs[ei].items.splice(pi,1);
+  renderExtraCatalogs();
+  changed();
+}
 function setItemImage(input,ci,pi){
   const file = input.files?.[0];
   if(!file) return;
   readImageFile(file,src => {
+    if(cats[ci].voci[pi].img && cats[ci].voci[pi].img !== src) removeCloudMedia(cats[ci].voci[pi].img);
     cats[ci].voci[pi].img = src;
     renderCats();
     changed();
@@ -3267,7 +3298,7 @@ function renderCats() {
     d.className = 'menu-cat';
     d.innerHTML = `${hideCatHeader ? '' : `<div class="menu-cat-hd">
         <input data-cat-placeholder value="${esc(cat.nome)}" placeholder="${esc(cfg.cat)}" oninput="cats[${ci}].nome=this.value;changed()" onclick="event.stopPropagation()">
-        <button class="btn-icon" onclick="cats.splice(${ci},1);renderCats();changed()" aria-label="Elimina sezione">${ico('i-trash')}</button>
+        <button class="btn-icon" onclick="removeCatSection(${ci})" aria-label="Elimina sezione">${ico('i-trash')}</button>
       </div>`}
       <div class="menu-cat-body" ${hideCatHeader ? 'style="border-top:0;padding-top:0"' : ''}>
         ${cat.voci.map((p,pi)=>`<div class="menu-row menu-row-simple">
@@ -3287,7 +3318,7 @@ function renderCats() {
             </details>
           </div>
           <input class="menu-row-price" data-price-placeholder value="${esc(p.prezzo)}" placeholder="${esc(cfg.price)}" oninput="cats[${ci}].voci[${pi}].prezzo=this.value;changed()">
-          <button class="btn-icon" onclick="cats[${ci}].voci.splice(${pi},1);renderCats();changed()" aria-label="Elimina voce">✕</button>
+          <button class="btn-icon" onclick="removeCatItem(${ci},${pi})" aria-label="Elimina voce">✕</button>
         </div>`).join('')}
         <button class="btn-add-row" data-catalog-action onclick="cats[${ci}].voci.push(normalizeItem({nome:'',desc:'',prezzo:'',img:''}));renderCats();changed()">${esc(cfg.add)}</button>
       </div>`;
@@ -3340,6 +3371,7 @@ function setExtraItemImage(input,ei,pi){
   const file = input.files?.[0];
   if(!file) return;
   readImageFile(file,src => {
+    if(extraCatalogs[ei].items[pi].img && extraCatalogs[ei].items[pi].img !== src) removeCloudMedia(extraCatalogs[ei].items[pi].img);
     extraCatalogs[ei].items[pi].img = src;
     renderExtraCatalogs();
     changed();
@@ -3354,7 +3386,7 @@ function renderExtraCatalogs(){
     <div class="menu-cat">
       <div class="menu-cat-hd">
         <input value="${esc(catalog.title)}" placeholder="Titolo catalogo" oninput="extraCatalogs[${ei}].title=this.value;changed()" onclick="event.stopPropagation()">
-        <button class="btn-icon" onclick="extraCatalogs.splice(${ei},1);renderExtraCatalogs();changed()" aria-label="Elimina catalogo">${ico('i-trash')}</button>
+        <button class="btn-icon" onclick="removeExtraCatalog(${ei})" aria-label="Elimina catalogo">${ico('i-trash')}</button>
       </div>
       <div class="menu-cat-body">
         <textarea placeholder="Descrizione catalogo" oninput="extraCatalogs[${ei}].desc=this.value;changed()">${esc(catalog.desc||'')}</textarea>
@@ -3369,7 +3401,7 @@ function renderExtraCatalogs(){
             ${catalogExtraFieldsHtml(item,`extraCatalogs[${ei}].items[${pi}]`)}
           </div>
           <input class="menu-row-price" value="${esc(item.prezzo)}" placeholder="Prezzo / da" oninput="extraCatalogs[${ei}].items[${pi}].prezzo=this.value;changed()">
-          <button class="btn-icon" onclick="extraCatalogs[${ei}].items.splice(${pi},1);renderExtraCatalogs();changed()">${ico('i-trash')}</button>
+          <button class="btn-icon" onclick="removeExtraItem(${ei},${pi})">${ico('i-trash')}</button>
         </div>`).join('')}
         <button class="btn-add-row" onclick="extraCatalogs[${ei}].items.push(normalizeItem({nome:'',desc:'',prezzo:'',img:''}));renderExtraCatalogs();changed()">＋ Aggiungi voce</button>
       </div>
@@ -3763,13 +3795,20 @@ function addFotos(input) {
   }));
   input.value = '';
 }
+function removeFoto(i){
+  const removed = fotos[i];
+  fotos.splice(i,1);
+  renderGal();
+  changed();
+  removeCloudMedia(removed);
+}
 function renderGal() {
   const g = document.getElementById('galGrid');
   g.innerHTML = '';
   fotos.forEach((src,i) => {
     const d = document.createElement('div');
     d.className = 'gal-item';
-    d.innerHTML = `<img src="${src}" loading="lazy" decoding="async"><button class="gi-rm" onclick="event.stopPropagation();fotos.splice(${i},1);renderGal();changed()">✕</button>`;
+    d.innerHTML = `<img src="${src}" loading="lazy" decoding="async"><button class="gi-rm" onclick="event.stopPropagation();removeFoto(${i})">✕</button>`;
     g.appendChild(d);
   });
   if (fotos.length < 10) {
@@ -3845,7 +3884,9 @@ function onVideoUpload(input){
     showToast('Seleziona un video valido','err');
     return;
   }
-  if(!validFileSize(file,200,'Video')) { input.value = ''; return; }
+  // Limite allineato al server (Worker MEDIA_LIMITS.video): oltre fallirebbe comunque l'upload.
+  const maxVideoMb = window.__khamakeyMedia?.maxVideoMb || 25;
+  if(!validFileSize(file,maxVideoMb,'Video')) { input.value = ''; return; }
   const probeUrl = URL.createObjectURL(file);
   const probe = document.createElement('video');
   probe.preload = 'metadata';
@@ -3856,7 +3897,28 @@ function onVideoUpload(input){
       showToast('Video troppo lungo: massimo 2 minuti','err');
       return;
     }
-    if(uploadedVideoUrl) URL.revokeObjectURL(uploadedVideoUrl);
+    if(window.__khamakeyMedia?.uploadVideo){
+      const status = document.getElementById('videoStatus');
+      if(status) status.textContent = 'Caricamento video in corso...';
+      showToast('Caricamento video cloud...','ok');
+      window.__khamakeyMedia.uploadVideo({file}).then(url=>{
+        URL.revokeObjectURL(probeUrl);
+        const oldUrl = uploadedVideoUrl;
+        uploadedVideoUrl = url;
+        if(oldUrl && oldUrl !== url) removeCloudMedia(oldUrl);
+        if(status) status.textContent = file.name || 'Video caricato';
+        showToast('Video caricato','ok');
+        changed();
+      }).catch(error=>{
+        URL.revokeObjectURL(probeUrl);
+        input.value = '';
+        if(status) status.textContent = 'Nessun video caricato';
+        showToast(error.message || 'Upload video non riuscito','err');
+      });
+      return;
+    }
+    // Fallback senza cloud (demo/file://): anteprima locale, non persistita.
+    if(uploadedVideoUrl && uploadedVideoUrl.startsWith('blob:')) URL.revokeObjectURL(uploadedVideoUrl);
     uploadedVideoUrl = probeUrl;
     document.getElementById('videoStatus').textContent = file.name || 'Video caricato';
     showToast('Video caricato in anteprima','ok');
@@ -3888,7 +3950,8 @@ function onPdfUpload(input){
 }
 
 function removeUploadedVideo(){
-  if(uploadedVideoUrl) URL.revokeObjectURL(uploadedVideoUrl);
+  if(uploadedVideoUrl && uploadedVideoUrl.startsWith('blob:')) URL.revokeObjectURL(uploadedVideoUrl);
+  else removeCloudMedia(uploadedVideoUrl);
   uploadedVideoUrl = '';
   const input = document.getElementById('vidFile');
   if(input) input.value = '';
@@ -5650,6 +5713,7 @@ function prevLogo(input) {
   if(!file) return;
   readImageFile(file,src => {
     const img = document.getElementById('logoImg');
+    if(img.dataset.src && img.dataset.src !== src) removeCloudMedia(img.dataset.src);
     img.src = src; img.dataset.src = src; img.style.display='block';
     document.getElementById('logoTxt').style.display='none';
     const toggle = document.getElementById('showLogo');
@@ -5663,6 +5727,7 @@ function removeLogo() {
   const img = document.getElementById('logoImg');
   const file = document.getElementById('logoFile');
   const txt = document.getElementById('logoTxt');
+  if(img?.dataset.src) removeCloudMedia(img.dataset.src);
   if(img) {
     img.removeAttribute('src');
     delete img.dataset.src;
@@ -5681,6 +5746,7 @@ function prevCover(input) {
   if(!file) return;
   readImageFile(file,src => {
     const img = document.getElementById('coverImg');
+    if(img.dataset.src && img.dataset.src !== src) removeCloudMedia(img.dataset.src);
     img.src = src; img.dataset.src = src; img.style.display='block';
     rememberCoverAspect(img);
     document.getElementById('coverTxt').style.display='none';
@@ -5695,6 +5761,7 @@ function removeCover() {
   const img = document.getElementById('coverImg');
   const file = document.getElementById('coverFile');
   const txt = document.getElementById('coverTxt');
+  if(img?.dataset.src) removeCloudMedia(img.dataset.src);
   if(img) {
     img.removeAttribute('src');
     delete img.dataset.src;
@@ -5713,6 +5780,7 @@ function prevAboutImage(input) {
   if(!file) return;
   readImageFile(file,src => {
     const img = document.getElementById('aboutImg');
+    if(img.dataset.src && img.dataset.src !== src) removeCloudMedia(img.dataset.src);
     img.src = src;
     img.dataset.src = src;
     img.style.display='block';
@@ -5727,6 +5795,7 @@ function removeAboutImage(){
   const img = document.getElementById('aboutImg');
   const file = document.getElementById('aboutFile');
   const txt = document.getElementById('aboutTxt');
+  if(img?.dataset.src) removeCloudMedia(img.dataset.src);
   if(img) {
     img.removeAttribute('src');
     delete img.dataset.src;
@@ -6168,7 +6237,8 @@ function collectState(includePublicSnapshot=false){
     publicBlockOrder,
     uploadedPdfUrl:'',
     uploadedPdfName,
-    uploadedVideoUrl:'',
+    // Persistiamo solo URL cloud (R2): i blob: locali muoiono al reload.
+    uploadedVideoUrl:uploadedVideoUrl && !uploadedVideoUrl.startsWith('blob:') ? uploadedVideoUrl : '',
     logoSrc:document.getElementById('logoImg')?.dataset.src || '',
     coverSrc:document.getElementById('coverImg')?.dataset.src || '',
     aboutSrc:document.getElementById('aboutImg')?.dataset.src || ''
@@ -6220,6 +6290,9 @@ function applyState(state){
   }
   window.__khamakeyIntl?.hydrateI18nFromState?.(state);
   uploadedPdfName = '';
+  uploadedVideoUrl = typeof state.uploadedVideoUrl === 'string' && !state.uploadedVideoUrl.startsWith('blob:') ? state.uploadedVideoUrl : '';
+  const videoStatusEl = document.getElementById('videoStatus');
+  if(videoStatusEl) videoStatusEl.textContent = uploadedVideoUrl ? 'Video caricato' : 'Nessun video caricato';
   applyImageState('logoImg','logoTxt',state.logoSrc,'Logo caricato');
   applyImageState('coverImg','coverTxt',state.coverSrc,'Copertina caricata');
   rememberCoverAspect(document.getElementById('coverImg'));
@@ -6921,6 +6994,6 @@ window.__khamakeyEditor = {
 };
 </script>
 <script type="module" src="editor-international.js?v=122"></script>
-<script type="module" src="editor-media.js?v=117"></script>
+<script type="module" src="editor-media.js?v=124"></script>
 </body>
 </html>

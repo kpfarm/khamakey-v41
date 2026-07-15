@@ -88,10 +88,41 @@ Definiti in `moment-themes.js` e `worker.js`:
 | Endpoint | Metodo | Storage |
 |----------|--------|---------|
 | `POST /api/media/upload` | Worker | R2 bucket `khamakey-media` |
+| `POST /api/media/delete` | Worker | Cancella file R2 (solo proprietario) |
 | `GET /cdn/{path}` | Worker | Serve file pubblici |
 
-Limiti: dimensione e quantità per tipo (foto, video, audio).  
-Compressione WebP per immagini.
+Limiti server (Worker `MEDIA_LIMITS`): immagine 8 MB · video 25 MB · audio 12 MB.  
+Compressione WebP client-side per immagini (max 1920px, q0.82).
+
+### Limiti quantità (base per futuri piani a pagamento)
+
+| Area | Limite attuale |
+|------|----------------|
+| Business — galleria | 10 foto |
+| Business — video presentazione | 1 (R2, max 25 MB / 2 min) oppure link YouTube |
+| Moments — galleria | 24 elementi, di cui max 6 video e 6 audio |
+| Moments — journey | 24 tappe con foto |
+| Rate limit upload | 30 file/ora per utente (Worker) |
+
+### Fix upload Business v124 (2026-07-15, Claude Code)
+
+Da audit upload: prima di v124 il video di presentazione Business restava un `blob:` URL
+locale — mai caricato su R2, perso al reload e rotto nello snapshot pubblico. Ora:
+
+- `onVideoUpload` carica su R2 via `__khamakeyMedia.uploadVideo` (limite allineato al
+  server: 25 MB, prima il check client diceva 200 MB), `collectState`/`applyState`
+  persistono/ripristinano l'URL cloud (mai i `blob:`).
+- Pulizia R2 (`removeCloudMedia`): sostituzione o rimozione di logo, copertina, chi siamo,
+  foto galleria, immagini voci catalogo (anche eliminazione voce/sezione/catalogo extra) e
+  video ora cancellano il vecchio file dal bucket — prima restavano orfani (costo storage).
+  Solo URL `/cdn/` (R2): i legacy Supabase Storage non vengono toccati.
+
+### Limitazioni note (in attesa lock `worker.js`)
+
+- **PDF catalogo Business**: ancora `blob:` locale non persistito — il Worker non accetta
+  `application/pdf` in `MEDIA_MIME`; serve modifica Worker (lockato da Antigravity).
+- **Welcome book / Documenti Business**: salvati come base64 dentro lo stato su Supabase
+  (8 MB/file, quantità illimitata) — da migrare a R2 con lo stesso vincolo Worker.
 
 ---
 

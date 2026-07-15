@@ -236,7 +236,7 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Security hardening (audit 2026-07-11)** | Completato e deployato (vedi `PROJECT_STATE.md`) | Le regole assolute su CSP/RLS/dati restano vincolanti per tutti |
 | **`worker/worker.js` — CSS/tema Moments** | **Antigravity** (in corso, moments premium theming) | Chi altri deve toccare `worker.js` si coordina prima: è il file più conteso |
 | **Admin — CRM + provvigioni + backend** | **Claude Code** (2026-07-12) | `pages/admin.html`, `admin.js`, `admin.css` + `sql/` RPC. NON tocca `worker.js` per lasciare campo ad Antigravity |
-| **Editor Business — upload media (fix audit)** | **Claude Code** (2026-07-15, in corso) | `pages/editor.html` (handler upload video/immagini), `pages/editor-media.js`. Video su R2 + pulizia file orfani. NON tocca `worker.js` né file Moments |
+| **Editor Business — upload media (fix audit)** | Completato v124 (2026-07-15, Claude Code) — libero | Video Business su R2 + pulizia file orfani. Restano pendenti (bloccati dal lock `worker.js`): PDF catalogo e documenti base64→R2, dettaglio in `KHAMAKEY_OS/docs/03-editor.md` |
 
 Quando **nessuno** sta lavorando su un’area, lasciare **libero** o **—** nella colonna Owner.
 

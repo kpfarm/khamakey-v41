@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=169";
-import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=169";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=170";
+import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=170";
 import {
   generateMomentSku,
   generateMomentProductName,
@@ -248,6 +248,7 @@ const supportSearchInput = document.getElementById("supportSearchInput");
 const supportStatusFilter = document.getElementById("supportStatusFilter");
 const supportPriorityFilter = document.getElementById("supportPriorityFilter");
 const supportFilterClear = document.getElementById("supportFilterClear");
+const supportRefreshBtn = document.getElementById("supportRefreshBtn");
 const supportVisibleCount = document.getElementById("supportVisibleCount");
 const supportStatOpen = document.getElementById("supportStatOpen");
 const supportStatUrgent = document.getElementById("supportStatUrgent");
@@ -256,6 +257,7 @@ const supportStatResolved = document.getElementById("supportStatResolved");
 const supportTicketEditForm = document.getElementById("supportTicketEditForm");
 const supportTicketEditStatus = document.getElementById("supportTicketEditStatus");
 const supportTicketEditCancel = document.getElementById("supportTicketEditCancel");
+let activeSupportTicketId = "";
 const ticketCategoriesTable = document.getElementById("ticketCategoriesTable");
 const ticketCategoryForm = document.getElementById("ticketCategoryForm");
 const ticketCategoryStatus = document.getElementById("ticketCategoryStatus");
@@ -3388,19 +3390,44 @@ function supportSourceLabel(source){
   return ({
     moments_editor:"Editor Moments",
     business_editor:"Editor Business",
-    admin:"Creato da admin"
+    admin:"Creato da admin",
+    account_area:"Area account"
   })[source] || source || "—";
 }
 
+function supportCustomerEmail(row){
+  return String(
+    row?.profiles?.email
+    || String(row?.description || "").match(/Cliente:\s*([^\s\n]+@[^\s\n]+)/i)?.[1]
+    || ""
+  ).trim();
+}
+
+function supportMomentSlug(row){
+  return String(row?.description || "").match(/Pagina Moments:\s*([A-Za-z0-9_-]+)/i)?.[1] || "";
+}
+
 function supportCustomerLabel(row){
-  const email = row.profiles?.email
-    || String(row.description || "").match(/Cliente:\s*([^\s\n]+@[^\s\n]+)/i)?.[1]
-    || "";
+  const email = supportCustomerEmail(row);
   const business = row.businesses?.nome || row.businesses?.slug || "";
   if(email && business) return `${email} · ${business}`;
   if(email) return email;
   if(business) return business;
   return IS_MOMENTS_CONSOLE ? "Cliente Moments" : "Cliente";
+}
+
+function splitSupportDescription(description){
+  const raw = String(description || "").trim();
+  if(!raw) return { customer:"", notes:[] };
+  const chunks = raw.split(/\n\n(?=\[Nota staff )/i);
+  const customerParts = [];
+  const notes = [];
+  chunks.forEach(chunk=>{
+    const trimmed = chunk.trim();
+    if(/^\[Nota staff /i.test(trimmed)) notes.push(trimmed);
+    else if(trimmed) customerParts.push(trimmed);
+  });
+  return { customer:customerParts.join("\n\n").trim(), notes };
 }
 
 function formatSupportWhen(value){
@@ -3414,13 +3441,29 @@ function formatSupportWhen(value){
   }
 }
 
+function formatSupportAge(value){
+  if(!value) return "—";
+  const ms = Date.now() - new Date(value).getTime();
+  if(!Number.isFinite(ms) || ms < 0) return formatSupportWhen(value);
+  const hours = Math.floor(ms / 3600000);
+  if(hours < 1) return "ora";
+  if(hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if(days < 21) return `${days}g`;
+  return formatSupportWhen(value);
+}
+
+function supportPriorityRank(priority){
+  return ({ urgent:0, high:1, normal:2, low:3 })[priority] ?? 9;
+}
+
 async function loadSupportTickets(){
   try{
     let query = supabase
       .from("platform_support_tickets")
       .select("id,business_id,profile_id,subject,description,priority,status,source,created_at,updated_at,businesses(nome,slug),profiles(email)")
       .order("created_at",{ascending:false})
-      .limit(80);
+      .limit(150);
     // Console Moments: solo ticket Moments
     if(IS_MOMENTS_CONSOLE){
       query = query.eq("source","moments_editor");
@@ -3429,6 +3472,9 @@ async function loadSupportTickets(){
     if(error) throw error;
     supportTicketRows = data || [];
     refreshSupportTicketsTable();
+    if(activeSupportTicketId && supportTicketRows.some(row=>row.id === activeSupportTicketId)){
+      editSupportTicket(activeSupportTicketId, { keepScroll:true, quiet:true });
+    }
   }catch(error){
     console.error(error);
     supportTicketsTable.innerHTML = `<tr><td colspan="6">Ticket non disponibili.</td></tr>`;
@@ -3441,7 +3487,8 @@ function supportStatusLabel(status){
     in_progress:"In lavorazione",
     waiting_customer:"Attesa cliente",
     resolved:"Risolto",
-    closed:"Chiuso"
+    closed:"Chiuso",
+    active:"Da lavorare"
   })[status] || status || "-";
 }
 
@@ -3454,25 +3501,40 @@ function supportPriorityLabel(priority){
   })[priority] || priority || "-";
 }
 
+function supportStatusMatches(filter, status){
+  if(!filter) return true;
+  if(filter === "active") return ["open","in_progress","waiting_customer"].includes(status);
+  return status === filter;
+}
+
 function filteredSupportTickets(){
   const query = String(supportSearchInput?.value || "").trim().toLowerCase();
   const status = supportStatusFilter?.value || "";
   const priority = supportPriorityFilter?.value || "";
-  return supportTicketRows.filter(row=>{
-    if(status && row.status !== status) return false;
+  const rows = supportTicketRows.filter(row=>{
+    if(!supportStatusMatches(status, row.status)) return false;
     if(priority && row.priority !== priority) return false;
     if(query){
       const haystack = [
         row.subject,
         row.description,
         row.source,
-        row.profiles?.email,
+        supportCustomerEmail(row),
+        supportMomentSlug(row),
         row.businesses?.nome,
         row.businesses?.slug
       ].join(" ").toLowerCase();
       if(!haystack.includes(query)) return false;
     }
     return true;
+  });
+  return rows.sort((a,b)=>{
+    const closedA = ["resolved","closed"].includes(a.status) ? 1 : 0;
+    const closedB = ["resolved","closed"].includes(b.status) ? 1 : 0;
+    if(closedA !== closedB) return closedA - closedB;
+    const prio = supportPriorityRank(a.priority) - supportPriorityRank(b.priority);
+    if(prio !== 0) return prio;
+    return new Date(b.created_at || 0) - new Date(a.created_at || 0);
   });
 }
 
@@ -3491,57 +3553,109 @@ function refreshSupportTicketsTable(){
   if(!supportTicketsTable) return;
   const rows = filteredSupportTickets();
   updateSupportStats();
-  if(supportVisibleCount) supportVisibleCount.textContent = `${rows.length} ticket visibili`;
+  syncSupportQuickChips();
+  if(supportVisibleCount) supportVisibleCount.textContent = `${rows.length} ticket visibili · ${supportTicketRows.length} caricati`;
   supportTicketsTable.innerHTML = rows.length ? rows.map(row=>{
-    const preview = String(row.description || "").replace(/\s+/g," ").trim();
+    const { customer } = splitSupportDescription(row.description);
+    const preview = String(customer || row.description || "").replace(/\s+/g," ").trim();
     const short = preview.length > 90 ? `${preview.slice(0,90)}…` : preview;
+    const activeClass = row.id === activeSupportTicketId ? " is-active" : "";
     return `
-    <tr>
-      <td>
+    <tr class="support-row${activeClass}" data-support-row="${esc(row.id)}">
+      <td class="col-ticket" data-label="Ticket">
         <strong>${esc(row.subject)}</strong>
         <small>${esc(short || "Nessun dettaglio")}</small>
       </td>
-      <td>${esc(supportCustomerLabel(row))}</td>
-      <td><span class="status-pill ${esc(row.priority)}">${esc(supportPriorityLabel(row.priority))}</span></td>
-      <td><span class="status-pill ${esc(row.status)}">${esc(supportStatusLabel(row.status))}</span></td>
-      <td>${esc(supportSourceLabel(row.source))}</td>
-      <td><button class="small-action" type="button" data-support-ticket-edit="${esc(row.id)}">Apri ticket</button></td>
+      <td class="col-client" data-label="Cliente">${esc(supportCustomerLabel(row))}</td>
+      <td class="col-priority" data-label="Priorità"><span class="status-pill ${esc(row.priority)}">${esc(supportPriorityLabel(row.priority))}</span></td>
+      <td class="col-status" data-label="Stato"><span class="status-pill ${esc(row.status)}">${esc(supportStatusLabel(row.status))}</span></td>
+      <td class="col-when" data-label="Quando" title="${esc(formatSupportWhen(row.created_at))}">${esc(formatSupportAge(row.created_at))}</td>
+      <td class="col-actions" data-label="Azioni"><button class="small-action" type="button" data-support-ticket-edit="${esc(row.id)}">Apri</button></td>
     </tr>
   `;
   }).join("") : `<tr><td colspan="6">Nessun ticket corrisponde ai filtri.</td></tr>`;
 }
 
+function applySupportQuickFilter(chip){
+  if(!chip) return;
+  if(chip.hasAttribute("data-support-quick-priority")){
+    if(supportPriorityFilter) supportPriorityFilter.value = chip.dataset.supportQuickPriority || "";
+    if(supportStatusFilter) supportStatusFilter.value = "";
+  }else if(chip.hasAttribute("data-support-quick-status")){
+    if(supportStatusFilter) supportStatusFilter.value = chip.dataset.supportQuickStatus || "";
+    if(supportPriorityFilter) supportPriorityFilter.value = "";
+  }
+  syncSupportQuickChips();
+  refreshSupportTicketsTable();
+}
+
 function syncSupportQuickChips(){
   const current = supportStatusFilter?.value || "";
   const priority = supportPriorityFilter?.value || "";
-  document.querySelectorAll("[data-support-quick-status]").forEach(chip=>{
-    chip.classList.toggle("active",(chip.dataset.supportQuickStatus || "") === current && !priority);
+  document.querySelectorAll("#supportQuickFilters [data-support-quick-status], #supportStats [data-support-quick-status]").forEach(chip=>{
+    const isStatusChip = chip.hasAttribute("data-support-quick-status") && !chip.hasAttribute("data-support-quick-priority");
+    chip.classList.toggle("active", isStatusChip && (chip.dataset.supportQuickStatus || "") === current && !priority);
   });
-  document.querySelectorAll("[data-support-quick-priority]").forEach(chip=>{
+  document.querySelectorAll("#supportQuickFilters [data-support-quick-priority], #supportStats [data-support-quick-priority]").forEach(chip=>{
     chip.classList.toggle("active",(chip.dataset.supportQuickPriority || "") === priority && !current);
   });
 }
 
-function editSupportTicket(id){
+function editSupportTicket(id, { keepScroll = false, quiet = false } = {}){
   const row = supportTicketRows.find(item=>item.id === id);
   if(!row || !supportTicketEditForm) return;
+  activeSupportTicketId = row.id;
   supportTicketEditForm.hidden = false;
   supportTicketEditForm.elements.ticket_id.value = row.id;
   supportTicketEditForm.elements.ticket_title.value = row.subject || "";
+  const split = splitSupportDescription(row.description);
   if(supportTicketEditForm.elements.ticket_description){
-    supportTicketEditForm.elements.ticket_description.value = row.description || "";
+    supportTicketEditForm.elements.ticket_description.value = split.customer || "Nessun dettaglio";
   }
   supportTicketEditForm.elements.status.value = row.status || "open";
   supportTicketEditForm.elements.priority.value = row.priority || "normal";
   supportTicketEditForm.elements.internal_note.value = "";
+
+  const email = supportCustomerEmail(row);
+  const slug = supportMomentSlug(row);
   const customerNode = supportTicketEditForm.querySelector("[data-support-customer]");
+  const emailNode = supportTicketEditForm.querySelector("[data-support-email]");
+  const mailtoNode = supportTicketEditForm.querySelector("[data-support-mailto]");
+  const copyEmailBtn = supportTicketEditForm.querySelector("[data-support-copy-email]");
+  const pageNode = supportTicketEditForm.querySelector("[data-support-page]");
+  const pageLink = supportTicketEditForm.querySelector("[data-support-page-link]");
   const sourceNode = supportTicketEditForm.querySelector("[data-support-source]");
   const createdNode = supportTicketEditForm.querySelector("[data-support-created]");
+  const notesBlock = supportTicketEditForm.querySelector("[data-support-notes-block]");
+  const notesList = supportTicketEditForm.querySelector("[data-support-notes]");
+
   if(customerNode) customerNode.textContent = supportCustomerLabel(row);
+  if(emailNode) emailNode.textContent = email || "—";
+  if(mailtoNode){
+    mailtoNode.hidden = !email;
+    if(email){
+      const subject = encodeURIComponent(`Re: ${row.subject || "Assistenza KhamaKey"}`);
+      mailtoNode.href = `mailto:${email}?subject=${subject}`;
+    }
+  }
+  if(copyEmailBtn) copyEmailBtn.hidden = !email;
+  if(pageNode) pageNode.textContent = slug ? `/m/${slug}` : "—";
+  if(pageLink){
+    pageLink.hidden = !slug;
+    if(slug) pageLink.href = `${PUBLIC_BASE_URL}/m/${encodeURIComponent(slug)}`;
+  }
   if(sourceNode) sourceNode.textContent = supportSourceLabel(row.source);
-  if(createdNode) createdNode.textContent = formatSupportWhen(row.created_at);
-  setFormStatus(supportTicketEditStatus,"Ticket aperto: leggi il messaggio, aggiorna stato/priorità e salva.","ok");
-  supportTicketEditForm.scrollIntoView({behavior:"smooth",block:"nearest"});
+  if(createdNode) createdNode.textContent = `${formatSupportWhen(row.created_at)} · ${formatSupportAge(row.created_at)}`;
+  if(notesBlock && notesList){
+    notesBlock.hidden = !split.notes.length;
+    notesList.innerHTML = split.notes.map(note=>`<li>${esc(note)}</li>`).join("");
+  }
+
+  refreshSupportTicketsTable();
+  if(!quiet){
+    setFormStatus(supportTicketEditStatus,"Ticket aperto: messaggio cliente sopra, note staff sotto. Aggiorna stato e salva.","ok");
+  }
+  if(!keepScroll) supportTicketEditForm.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 
 async function loadIntegrationHealth(){
@@ -5203,8 +5317,7 @@ async function saveSupportTicketEdit(event){
       .eq("id",ticketId);
     if(noteError) console.warn("Nota ticket Moments non salvata",noteError);
   }
-  form.hidden = true;
-  form.reset();
+  activeSupportTicketId = ticketId;
   setFormStatus(supportTicketEditStatus,"Ticket aggiornato.","ok");
   await Promise.all([
     loadSupportTickets(),
@@ -5628,21 +5741,25 @@ document.getElementById("momentInventoryQuickFilters")?.addEventListener("click"
   refreshMomentTable();
 });
 
-document.getElementById("supportQuickFilters")?.addEventListener("click",event=>{
+function onSupportQuickClick(event){
   const chip = event.target.closest("[data-support-quick-status],[data-support-quick-priority]");
   if(!chip) return;
-  if(supportStatusFilter) supportStatusFilter.value = chip.dataset.supportQuickStatus || "";
-  if(supportPriorityFilter) supportPriorityFilter.value = chip.dataset.supportQuickPriority || "";
-  syncSupportQuickChips();
-  refreshSupportTicketsTable();
-});
+  applySupportQuickFilter(chip);
+}
+document.getElementById("supportQuickFilters")?.addEventListener("click", onSupportQuickClick);
+document.getElementById("supportStats")?.addEventListener("click", onSupportQuickClick);
 
 supportFilterClear?.addEventListener("click",()=>{
   if(supportSearchInput) supportSearchInput.value = "";
-  if(supportStatusFilter) supportStatusFilter.value = "";
+  if(supportStatusFilter) supportStatusFilter.value = "active";
   if(supportPriorityFilter) supportPriorityFilter.value = "";
   syncSupportQuickChips();
   refreshSupportTicketsTable();
+});
+supportRefreshBtn?.addEventListener("click", async ()=>{
+  if(supportRefreshBtn) supportRefreshBtn.disabled = true;
+  await loadSupportTickets();
+  if(supportRefreshBtn) supportRefreshBtn.disabled = false;
 });
 
 supportStatusFilter?.addEventListener("change",()=>{
@@ -5654,6 +5771,19 @@ supportPriorityFilter?.addEventListener("change",()=>{
   refreshSupportTicketsTable();
 });
 bindSearchInput(supportSearchInput, refreshSupportTicketsTable);
+
+supportTicketEditForm?.addEventListener("click", async event=>{
+  const copyBtn = event.target.closest("[data-support-copy-email]");
+  if(!copyBtn || !supportTicketEditForm) return;
+  const email = String(supportTicketEditForm.querySelector("[data-support-email]")?.textContent || "").trim();
+  if(!email || email === "—") return;
+  try{
+    await navigator.clipboard.writeText(email);
+    setFormStatus(supportTicketEditStatus,"Email copiata.","ok");
+  }catch{
+    setFormStatus(supportTicketEditStatus,"Copia non riuscita — seleziona l’email a mano.","error");
+  }
+});
 crmQuickFilters?.addEventListener("click",event=>{
   const chip = event.target.closest("[data-crm-quick]");
   if(!chip) return;
@@ -5665,6 +5795,8 @@ supportTicketEditCancel?.addEventListener("click",()=>{
   if(supportTicketEditForm){
     supportTicketEditForm.hidden = true;
     supportTicketEditForm.reset();
+    activeSupportTicketId = "";
+    refreshSupportTicketsTable();
   }
 });
 

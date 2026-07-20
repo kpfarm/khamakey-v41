@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v167** (mobile UX: menu off-canvas + topbar sticky; magazzino NFC Moments/Business; supporto; dashboard; modalità semplice).
+Versione attuale: **v170** (supporto operativo v170; PDF Cricut v169; mobile UX v167; magazzino NFC Moments/Business).
 
 ---
 
@@ -25,15 +25,14 @@ Versione attuale: **v167** (mobile UX: menu off-canvas + topbar sticky; magazzin
 | **Integration Hub** | Shopify, Stripe, PayPal, Resend |
 | **Piani** | Abbonamenti Business (Stripe) |
 
-## Console supporto v131
+## Console supporto v170
 
-- La tab `Supporto` e' ora una console operativa: ricerca, filtri stato/priorita', viste rapide e conteggio ticket visibili.
-- Ogni ticket puo' essere gestito dalla tab globale con cambio stato (`open`, `in_progress`, `waiting_customer`, `resolved`, `closed`) e priorita'.
-- L'admin puo' aggiungere una nota interna durante l'aggiornamento del ticket; se il ticket e' collegato a una Business, la nota finisce nella timeline cliente.
-- Restano attive le categorie ticket modificabili e la creazione ticket dalla scheda cliente.
-- I ticket creati da Business editor e Moments editor confluiscono nella stessa tab globale.
-- v131 aggiunge KPI lavoro: aperti, urgenti, in attesa cliente e risolti da chiudere.
-- v131 aggiunge viste rapide per urgenza e alta priorita', oltre alle viste per stato.
+- Tab `Supporto`: coda default **Da lavorare** (open + in_progress + waiting_customer), KPI cliccabili, chip rapide, Aggiorna.
+- Dettaglio ticket: messaggio cliente separato dalle note staff, email (mailto + copia), link `/m/` se presente nel ticket Moments, età relativa.
+- Lista ordinata per urgenza; pill colorate stato/priorità; layout a card su smartphone.
+- Cambio stato/priorità + nota interna; Business → timeline cliente; Moments → note append in descrizione (mostrate separate in UI).
+- Categorie ticket sotto modalità avanzata; creazione ticket anche dalla scheda cliente (Business).
+- Ancora in backlog: assegnazione responsabile, risposta email automatica, conversazione completa.
 
 ---
 

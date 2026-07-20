@@ -92,7 +92,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v169** | PDF etichette Cricut 4 sezioni (panoramica · ovali codice · barcode · link NFC); fix Modifica magazzino v168. |
+| **Admin / Officina Moments** | **v170** | Supporto: coda «Da lavorare», KPI cliccabili, note staff separate, email/link /m/, card mobile; PDF Cricut v169. |
 | **Moments editor** | **v166** | Copy: codice solo in inserto confezione (non sul chip). |
 | **Worker NFC** | **v157-nav-contrast** | Menu sezioni: testo scuro su foglio bianco (contrasto); attivazione sicura v156. |
 | **Business shell** | **app v167** | `APP_VERSION` in `app.js` — account Moments non finiscono nel flusso Business. Editor Business HTML può avere WIP locale non ancora allineato in tabella. |

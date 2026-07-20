@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=169">
+  <link rel="stylesheet" href="admin.css?v=170">
   <script>
     // Dominio Moments: questo è l'admin Business — vai subito all'Officina Moments.
     (function () {
@@ -1250,15 +1250,16 @@
         <section class="admin-panel" data-panel="support">
           <div class="admin-card">
             <h2>Console supporto</h2>
-            <p>Ticket assistenza globali: filtra, assegna priorità e cambia stato senza aprire la scheda cliente.</p>
+            <p>Ticket assistenza globali: filtra la coda, apri il dettaglio, aggiorna stato/priorità e lascia note staff.</p>
             <div class="inventory-toolbar">
               <label class="inventory-search">Cerca ticket
-                <input type="search" id="supportSearchInput" placeholder="Oggetto, cliente, descrizione...">
+                <input type="search" id="supportSearchInput" placeholder="Oggetto, email, slug, messaggio...">
               </label>
               <label>Stato
                 <select id="supportStatusFilter">
+                  <option value="active">Da lavorare</option>
                   <option value="">Tutti</option>
-                  <option value="open">Aperti</option>
+                  <option value="open">Solo aperti</option>
                   <option value="in_progress">In lavorazione</option>
                   <option value="waiting_customer">In attesa cliente</option>
                   <option value="resolved">Risolti</option>
@@ -1274,29 +1275,38 @@
                   <option value="urgent">Urgente</option>
                 </select>
               </label>
+              <button class="small-action" type="button" id="supportRefreshBtn">Aggiorna</button>
               <button class="small-action" type="button" id="supportFilterClear">Pulisci</button>
             </div>
             <div class="filter-chip-bar" id="supportQuickFilters">
               <span class="filter-chip-label">Vista rapida</span>
-              <button type="button" class="filter-chip active" data-support-quick-status="">Tutti</button>
-              <button type="button" class="filter-chip" data-support-quick-status="open">Aperti</button>
+              <button type="button" class="filter-chip active" data-support-quick-status="active">Da lavorare</button>
+              <button type="button" class="filter-chip" data-support-quick-status="open">Solo aperti</button>
               <button type="button" class="filter-chip" data-support-quick-status="in_progress">In lavorazione</button>
               <button type="button" class="filter-chip" data-support-quick-status="waiting_customer">Attesa cliente</button>
               <button type="button" class="filter-chip" data-support-quick-priority="urgent">Urgenti</button>
               <button type="button" class="filter-chip" data-support-quick-priority="high">Alta priorità</button>
-              <button type="button" class="filter-chip" data-support-quick-status="closed">Chiusi</button>
+              <button type="button" class="filter-chip" data-support-quick-status="resolved">Da chiudere</button>
+              <button type="button" class="filter-chip" data-support-quick-status="">Tutti</button>
             </div>
             <div class="inventory-stat-grid support-stat-grid" id="supportStats">
-              <div><span>Aperti</span><strong id="supportStatOpen">0</strong></div>
-              <div><span>Urgenti</span><strong id="supportStatUrgent">0</strong></div>
-              <div><span>Attesa cliente</span><strong id="supportStatWaiting">0</strong></div>
-              <div><span>Da chiudere</span><strong id="supportStatResolved">0</strong></div>
+              <button type="button" class="support-stat" data-support-quick-status="active"><span>Da lavorare</span><strong id="supportStatOpen">0</strong></button>
+              <button type="button" class="support-stat" data-support-quick-priority="urgent"><span>Urgenti</span><strong id="supportStatUrgent">0</strong></button>
+              <button type="button" class="support-stat" data-support-quick-status="waiting_customer"><span>Attesa cliente</span><strong id="supportStatWaiting">0</strong></button>
+              <button type="button" class="support-stat" data-support-quick-status="resolved"><span>Da chiudere</span><strong id="supportStatResolved">0</strong></button>
             </div>
             <div class="inventory-meta"><strong id="supportVisibleCount">0 ticket visibili</strong></div>
             <form class="admin-form compact-form support-ticket-detail" id="supportTicketEditForm" hidden>
               <input type="hidden" name="ticket_id">
               <div class="support-ticket-meta">
                 <p><strong>Cliente</strong> <span data-support-customer>—</span></p>
+                <p><strong>Email</strong> <span data-support-email>—</span>
+                  <a class="support-inline-link" data-support-mailto hidden href="#">Scrivi email</a>
+                  <button type="button" class="support-inline-btn" data-support-copy-email hidden>Copia</button>
+                </p>
+                <p><strong>Pagina</strong> <span data-support-page>—</span>
+                  <a class="support-inline-link" data-support-page-link hidden target="_blank" rel="noopener">Apri /m/</a>
+                </p>
                 <p><strong>Origine</strong> <span data-support-source>—</span></p>
                 <p><strong>Aperto il</strong> <span data-support-created>—</span></p>
               </div>
@@ -1306,6 +1316,10 @@
               <label class="wide-field">Messaggio del cliente
                 <textarea name="ticket_description" rows="7" readonly placeholder="Nessun dettaglio"></textarea>
               </label>
+              <div class="support-notes-block" data-support-notes-block hidden>
+                <strong>Note staff</strong>
+                <ul class="support-notes-list" data-support-notes></ul>
+              </div>
               <label>Stato
                 <select name="status">
                   <option value="open">Aperto</option>
@@ -1330,14 +1344,14 @@
               <button class="small-action" type="button" id="supportTicketEditCancel">Chiudi</button>
               <p class="form-status" id="supportTicketEditStatus"></p>
             </form>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Ticket</th><th>Cliente</th><th>Priorità</th><th>Stato</th><th>Origine</th><th>Azioni</th></tr></thead>
+            <div class="table-wrap support-table-wrap">
+              <table class="support-table">
+                <thead><tr><th>Ticket</th><th>Cliente</th><th>Priorità</th><th>Stato</th><th>Quando</th><th>Azioni</th></tr></thead>
                 <tbody id="supportTicketsTable"><tr><td colspan="6">Caricamento ticket...</td></tr></tbody>
               </table>
             </div>
           </div>
-          <div class="admin-card">
+          <div class="admin-card" data-advanced-only>
             <h2>Categorie ticket</h2>
             <form class="admin-form" id="ticketCategoryForm">
               <label>Codice
@@ -2063,6 +2077,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=169"></script>
+  <script type="module" src="admin.js?v=170"></script>
 </body>
 </html>

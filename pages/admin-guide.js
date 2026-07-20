@@ -84,13 +84,19 @@ export const MOMENTS_CONSOLE_GUIDES = {
   support: {
     subtitle: "Assistenza Moments — ticket clienti (codici, attivazione, pagina /m/).",
     steps: [
-      "Ricevi un’email a ogni nuovo ticket; in consolle filtra Aperti o Urgenti.",
-      "Clicca «Apri ticket» per leggere messaggio completo, email cliente e dettagli.",
-      "Aggiorna stato/priorità e salva; le note interne restano nel ticket.",
-      "Problema codice/NFC → Clienti Moments; problema pagina → Editor dalla riga oggetto."
+      "Parti da «Da lavorare» o clicca i KPI (urgenti / attesa cliente / da chiudere).",
+      "Apri il ticket: messaggio cliente, note staff separate, email e link /m/.",
+      "Aggiorna stato/priorità, aggiungi nota interna e salva — il dettaglio resta aperto.",
+      "Problema codice/NFC → Clienti Moments; problema pagina → Apri /m/ dal ticket."
     ],
-    legend: COMMON_STATUS_LEGEND,
-    tip: "Non serve Shopify né Business qui: solo assistenza Moments. Priorità urgente = cliente bloccato."
+    legend: [
+      { pill: "urgent", label: "Urgente — cliente bloccato" },
+      { pill: "open", label: "Aperto" },
+      { pill: "in_progress", label: "In lavorazione" },
+      { pill: "waiting_customer", label: "Attesa cliente" },
+      { pill: "resolved", label: "Risolto — da chiudere" }
+    ],
+    tip: "Urgente = cliente bloccato. Usa Copia email o Scrivi email per rispondere subito."
   }
 };
 
@@ -292,12 +298,17 @@ export const PANEL_GUIDES = {
   support: {
     subtitle: "Ticket assistenza clienti Business e Moments.",
     steps: [
-      "Filtra per stato Aperti per lavorare la coda.",
-      "Apri ticket per leggere messaggi e aggiornare stato.",
-      "Chiudi quando risolto — sparisce dagli alert."
+      "Usa «Da lavorare» o i KPI per la coda operativa.",
+      "Apri ticket: messaggio, email, note staff separate, aggiorna stato.",
+      "Segna Risolto poi Chiuso quando il cliente è a posto."
     ],
-    legend: COMMON_STATUS_LEGEND,
-    tip: "Priorità alta = cliente in attesa da più tempo."
+    legend: [
+      { pill: "urgent", label: "Urgente" },
+      { pill: "open", label: "Aperto" },
+      { pill: "waiting_customer", label: "Attesa cliente" },
+      { pill: "resolved", label: "Risolto" }
+    ],
+    tip: "Priorità urgente = cliente bloccato; alta = da smaltire presto."
   },
   crm: {
     subtitle: "Pipeline commerciale e follow-up clienti.",

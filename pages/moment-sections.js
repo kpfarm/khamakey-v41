@@ -272,6 +272,7 @@ export function sectionHasContent(key, section){
     case "video":
       return Boolean(String(section.video_url || "").trim());
     case "rsvp":
+      return Boolean(String(section.whatsapp_number || "").replace(/\D/g, ""));
     case "guestbook":
       return Boolean(section?.enabled);
     case "promises":

@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "./config.js";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, authRedirectTo } from "./config.js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
@@ -86,7 +86,7 @@ document.getElementById("forgotBtn").addEventListener("click", async () => {
     gateMsg.textContent = "Scrivi prima la tua email qui sopra, poi premi «Password dimenticata».";
     return;
   }
-  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: location.origin + "/reseller.html" });
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: authRedirectTo("/reseller.html") });
   gateMsg.textContent = error
     ? "Non è stato possibile inviare l'email. Controlla l'indirizzo."
     : "Ti abbiamo inviato un'email per reimpostare la password.";

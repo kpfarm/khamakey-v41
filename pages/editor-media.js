@@ -1,4 +1,4 @@
-import { getUploadClient,uploadImage,uploadVideo,validateImageFile,validateVideoFile,deleteStorageObject,isCloudflareMediaUrl,MAX_VIDEO_MB } from "./media-upload.js";
+import { getUploadClient,uploadImage,uploadVideo,validateImageFile,validateVideoFile,deleteStorageObject,isCloudflareMediaUrl,MAX_VIDEO_MB } from "./media-upload.js?v=132";
 
 const supabase = getUploadClient();
 

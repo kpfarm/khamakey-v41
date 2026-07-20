@@ -5,23 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>KhamaKey - Accesso</title>
   <link rel="icon" href="khamakey-favicon.png">
+  <script>
+    // Su dominio Moments la home Business confonde: porta all'area clienti Moments.
+    // Bypass: ?product=business
+    (function () {
+      try {
+        var host = location.hostname || "";
+        var params = new URLSearchParams(location.search || "");
+        if (params.get("product") === "business") return;
+        if (/(?:^|\.)khamakeymoments\.com$/i.test(host)) {
+          location.replace("./moments.html" + location.search + location.hash);
+        }
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="shell.css?v=118">
+  <link rel="stylesheet" href="shell.css?v=165">
 </head>
 <body>
   <main class="auth-page" id="authView">
     <section class="auth-brand">
       <img class="brand-logo" src="khamakey-wordmark-dark.png" alt="KhamaKey">
-      <h1>La tua pagina, sempre aggiornata.</h1>
-      <p>Gestisci i prodotti KhamaKey con NFC integrato.</p>
-      <div class="auth-points">
-        <span>Editor completo</span>
-        <span>Salvataggio cloud</span>
-        <span>Pagina pubblica</span>
+      <p class="auth-eyebrow">KhamaKey Business</p>
+      <h1>La tua pagina attività, sempre aggiornata.</h1>
+      <p>Inserisci il codice sulla card NFC per attivare la pagina del tuo locale, menu o servizio.</p>
+      <div class="auth-steps">
+        <div class="auth-step"><span>1</span><div><strong>Inserisci il codice</strong><p>Trovi il codice sulla confezione o sull'oggetto NFC Business.</p></div></div>
+        <div class="auth-step"><span>2</span><div><strong>Crea l'account</strong><p>Collega il codice al profilo della tua attività.</p></div></div>
+        <div class="auth-step"><span>3</span><div><strong>Personalizza la pagina</strong><p>Catalogo, contatti, prenotazioni e pubblicazione live.</p></div></div>
       </div>
       <a class="reseller-link" href="reseller.html">Sei un rivenditore? Vai alla tua area &rarr;</a>
     </section>
@@ -39,6 +54,7 @@
             <p>Continua a lavorare sulla tua pagina KhamaKey.</p>
           </div>
           <label>Email<input id="loginEmail" type="email" autocomplete="email" required></label>
+          <label id="loginProductCodeLabel">Codice prodotto (opzionale)<input id="loginProductCode" type="text" autocomplete="off" placeholder="Solo se attivi un nuovo NFC"></label>
           <label>Password
             <span class="password-field">
               <input id="loginPassword" type="password" autocomplete="current-password" minlength="6" required>
@@ -55,8 +71,19 @@
         <form id="signupForm" class="auth-form" hidden>
           <div>
             <h2>Crea il tuo account</h2>
-            <p>Per il test tutte le funzioni sono disponibili.</p>
+            <p>Collega il codice prodotto al tuo profilo Business.</p>
           </div>
+          <div class="signup-steps">
+            <span class="signup-step active" data-signup-step="1">1. Codice</span>
+            <span class="signup-step" data-signup-step="2">2. Account</span>
+          </div>
+          <div class="signup-panel" data-signup-panel="1">
+            <label>Codice prodotto
+              <input id="signupProductCode" type="text" autocomplete="off" placeholder="Codice sulla card NFC" required>
+            </label>
+            <button type="button" class="primary" id="signupNextStep">Continua</button>
+          </div>
+          <div class="signup-panel" data-signup-panel="2" hidden>
           <label>Nome e cognome<input id="signupName" type="text" autocomplete="name" required></label>
           <label>Nome attività<input id="signupBusiness" type="text" autocomplete="organization" required></label>
           <label>Email<input id="signupEmail" type="email" autocomplete="email" required></label>
@@ -69,7 +96,19 @@
               </button>
             </span>
           </label>
-          <button class="primary" type="submit">Crea account</button>
+          <button type="button" class="text-button" id="signupPrevStep">Indietro</button>
+          <button class="primary" type="submit">Crea account e attiva</button>
+          </div>
+        </form>
+
+        <form id="activationForm" class="auth-form" hidden>
+          <div>
+            <h2>Attiva il tuo prodotto</h2>
+            <p>Inserisci il codice NFC ricevuto con la card KhamaKey.</p>
+          </div>
+          <label>Codice prodotto<input id="activationCode" type="text" autocomplete="off" required></label>
+          <label>Nome attività<input id="activationBusiness" type="text" autocomplete="organization" required></label>
+          <button class="primary" type="submit">Attiva e apri editor</button>
         </form>
 
         <form id="recoveryForm" class="auth-form" hidden>
@@ -96,20 +135,47 @@
 
   <main class="app-view" id="appView" hidden>
     <header class="app-header">
-      <img class="header-logo" src="khamakey-wordmark-dark.png" alt="KhamaKey">
-      <div class="cloud-state"><span id="cloudDot"></span><strong id="cloudStatus">Connessione...</strong></div>
-      <div class="app-actions">
-        <button type="button" id="shellPreviewBtn" class="app-tool-btn">Anteprima</button>
-        <button type="button" id="shellAccountBtn" class="app-tool-btn">Account</button>
+      <div class="app-header-start">
+        <span class="header-logo-wrap">
+          <img class="header-logo" src="khamakey-wordmark-dark.png" alt="KhamaKey">
+        </span>
+        <div class="app-header-workspace">
+          <span class="shell-business-name" id="shellBusinessName">La tua attività</span>
+          <div class="cloud-state" id="shellCloudState">
+            <span id="cloudDot"></span>
+            <strong id="cloudStatus">Connessione…</strong>
+          </div>
+        </div>
       </div>
-      <div class="app-user">
-        <span id="userEmail"></span>
-        <button type="button" id="logoutButton">Esci</button>
+      <div class="app-header-actions">
+        <a class="app-tool-btn app-tool-link" id="shellOpenPageBtn" href="#" target="_blank" rel="noopener" aria-disabled="true">Apri pagina</a>
+        <button type="button" class="app-tool-btn" id="shellCopyLinkBtn" disabled>Copia link</button>
+        <button type="button" class="app-tool-btn" id="shellPreviewBtn">Anteprima</button>
+        <button type="button" class="app-tool-btn app-tool-accent" id="shellSaveBtn">Salva</button>
+        <div class="app-user-menu" id="shellUserMenu">
+          <button type="button" class="app-user-btn" id="shellUserBtn" aria-haspopup="true" aria-expanded="false">
+            <span class="app-user-avatar" id="shellUserAvatar">KK</span>
+            <span class="app-user-email" id="userEmail">account</span>
+          </button>
+          <div class="app-user-dropdown" id="shellUserDropdown" hidden>
+            <p class="app-user-dropdown-email" id="shellUserDropdownEmail"></p>
+            <button type="button" class="app-user-item" data-shell-account="profile">Profilo utente</button>
+            <button type="button" class="app-user-item" data-shell-account="billing">Profilo di fatturazione</button>
+            <button type="button" class="app-user-item" data-shell-account="support">Supporto</button>
+            <button type="button" class="app-user-item danger" id="logoutButton">Esci</button>
+          </div>
+        </div>
       </div>
     </header>
     <iframe id="editorFrame" title="Editor KhamaKey" src="about:blank"></iframe>
+    <nav class="app-mobile-bar" id="shellMobileBar" aria-label="Azioni rapide">
+      <a class="app-mobile-btn" id="shellMobileOpen" href="#" target="_blank" rel="noopener" aria-disabled="true">Apri</a>
+      <button type="button" class="app-mobile-btn" id="shellMobilePreview">Anteprima</button>
+      <button type="button" class="app-mobile-btn app-mobile-accent" id="shellMobileSave">Salva</button>
+      <button type="button" class="app-mobile-btn" id="shellMobileAccount">Account</button>
+    </nav>
   </main>
 
-  <script type="module" src="app.js?v=138"></script>
+  <script type="module" src="app.js?v=167"></script>
 </body>
 </html>

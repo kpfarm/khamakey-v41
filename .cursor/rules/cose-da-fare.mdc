@@ -1,0 +1,22 @@
+---
+description: Quando l'utente scrive «cose da fare», ricordare la checklist ops Moments/Officina
+alwaysApply: true
+---
+
+# Trigger «cose da fare»
+
+Se l'utente scrive **cose da fare** (anche con varianti tipo «che cose da fare», «le cose da fare»), rispondi **prima** con questa checklist operativa, poi chiedi cosa vuole affrontare:
+
+## Checklist da ricordare (aggiorna se un punto è chiuso)
+
+1. **Supabase Auth** — abilitare *Leaked Password Protection* (Dashboard → Authentication)
+2. **Chip magazzino** — riprogrammare pezzi ancora su `/k/CODICE` con Link NFC `/m/slug` (sicurezza scaffale)
+3. **Smoke test Moments** — pezzo reale: attivazione → editor → `/m/` → ticket Supporto → PDF Cricut
+4. **Supporto** — provare assegnazione ticket + invio risposta Resend (Admin v172 / Worker v158)
+5. Prossimo backlog prodotto solo se ops sopra ok (es. report rivenditori, hub spedizioni)
+
+## Stile
+
+- Elenco breve, actionable, senza riscrivere tutta la roadmap
+- Segna cosa è già fatto se l'utente lo conferma in chat
+- Non implementare codice solo per questa frase — aspetta istruzioni esplicite

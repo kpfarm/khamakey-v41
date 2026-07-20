@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Moments v152 — RSVP auto-off senza WhatsApp (2026-07-20, Cursor)** — Pages only
+  - Al Salva, se RSVP è attivo ma manca WhatsApp: switch OFF, sezione fuori dal menu, salvataggio ok + messaggio chiaro.
 - **Moments v151 — WhatsApp non blocca più Salva (2026-07-20, Cursor)** — Pages only
   - Mancanza WhatsApp = avviso (banner/UI); il salvataggio procede sempre. RSVP senza WA resta nascosto in pagina pubblica.
   - Pulsanti Salva chiamano direttamente `saveMoment` (niente blocco HTML).

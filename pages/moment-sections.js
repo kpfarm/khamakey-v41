@@ -412,7 +412,7 @@ export function sectionFillGuide(key){
     numbers:"Tocca «Aggiungi numero» — es. 365 + «giorni insieme».",
     quote:"Titolo facoltativo, citazione e autore — testo grande in pagina.",
     signature:"Titolo della chiusura (es. «Con amore»), poi nomi e sottotitolo.",
-    rsvp:"WhatsApp consigliato (39… senza +). Senza numero la sezione non compare in pagina, ma puoi salvare comunque. Gli invitati compilano e ti inviano il messaggio.",
+    rsvp:"WhatsApp necessario per tenere RSVP attivo (39… senza +). Senza numero, al Salva la sezione si spegne da sola. Gli invitati compilano e ti inviano il messaggio.",
     guestbook:"Attiva la sezione e scrivi un invito. Gli ospiti lasciano messaggi che approvi dall'editor."
   };
   return guides[key] || "Compila i campi sotto, attiva la sezione e clicca Salva.";

@@ -86,7 +86,7 @@ import {
   formatImageLines,
   sectionFieldHints,
   sectionHasContent
-} from "./moment-sections.js?v=151";
+} from "./moment-sections.js?v=152";
 import {
   TYPE_LABELS,
   renderCategorySelect,
@@ -107,7 +107,7 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js?v=151";
+} from "./moment-editor-kit.js?v=152";
 import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderGuestbookModerationShell, bindGuestbookModerationPanel } from "./moment-guestbook-kit.js";
@@ -3089,7 +3089,7 @@ function sectionEditor(key,section,standalone=false){
   const rsvpFields = key === "rsvp" ? `
     <div class="editor-card smart-card" data-rsvp-wa-card>
       <p class="ecard-title"><span class="step-badge">1</span> WhatsApp organizzatore <span class="field-required">obbligatorio</span></p>
-      <p class="rsvp-wa-warn" id="rsvpWaWarn" ${normalizeWhatsAppDigits(safe.whatsapp_number) ? "hidden" : ""}>Avviso: senza WhatsApp la sezione RSVP <strong>non compare</strong> in pagina pubblica. Puoi comunque salvare il resto.</p>
+      <p class="rsvp-wa-warn" id="rsvpWaWarn" ${normalizeWhatsAppDigits(safe.whatsapp_number) ? "hidden" : ""}>Senza WhatsApp, al Salva la sezione RSVP si <strong>disattiva da sola</strong> e esce dal menu. Inserisci il numero per tenerla attiva.</p>
       <label>Numero WhatsApp<input name="section_${esc(key)}_whatsapp_number" id="rsvpWhatsappInput" value="${esc(safe.whatsapp_number || "")}" placeholder="393331234567" inputmode="tel" autocomplete="tel"></label>
       <p class="field-hint">Prefisso internazionale senza + (es. 39333… per Italia). Gli invitati compilano il modulo e ti inviano il messaggio su WhatsApp.</p>
     </div>
@@ -3508,19 +3508,29 @@ async function saveMoment(event,row){
       return showEditorSaveFeedback("Lettera al futuro: attendi il caricamento degli allegati o ricaricali prima di salvare.","error");
     }
   }
-  // WhatsApp RSVP: solo avviso, mai blocco salvataggio (la pagina pubblica già nasconde RSVP senza WA)
+  // Senza WhatsApp: spegni RSVP in automatico (niente blocco, UX semplice)
+  let rsvpAutoOff = false;
   if(state.sections?.rsvp){
     const wa = normalizeWhatsAppDigits(state.sections.rsvp.whatsapp_number);
     state.sections.rsvp.whatsapp_number = wa;
     if(state.sections.rsvp.enabled && (!wa || wa.length < 10)){
-      syncRsvpWhatsappWarn(formNode);
-      const barMsg = document.querySelector("#momentsSaveBar .save-msg");
-      if(barMsg){
-        barMsg.innerHTML = "<strong>Avviso RSVP:</strong> senza WhatsApp non compare in pagina — salvataggio in corso…";
+      state.sections.rsvp.enabled = false;
+      rsvpAutoOff = true;
+      const enabledInput = formNode.querySelector('[name="section_rsvp_enabled"]');
+      if(enabledInput){
+        enabledInput.checked = false;
+        syncSectionToggleButtons(formNode, "rsvp");
       }
+      if(pinnedExtraSections.includes("rsvp")){
+        pinnedExtraSections = pinnedExtraSections.filter(item => item !== "rsvp");
+        syncPinnedSectionsInput(formNode);
+      }
+      state.pinned_sections = [...pinnedExtraSections];
+      syncRsvpWhatsappWarn(formNode);
+      syncEditorKitUi(formNode);
     }
   }
-  showEditorSaveFeedback("Salvataggio...","");
+  showEditorSaveFeedback(rsvpAutoOff ? "RSVP spento (manca WhatsApp) — salvataggio…" : "Salvataggio...","");
   try{
     let pinHash = null;
     if(pin){
@@ -3566,7 +3576,12 @@ async function saveMoment(event,row){
     const barMsg = document.querySelector("#momentsSaveBar .save-msg");
     if(barMsg) barMsg.innerHTML = "Hai <strong>modifiche non salvate</strong>";
     localStorage.setItem(onboardingKey(row.id),"done");
-    showEditorSaveFeedback("Pagina salvata.","ok");
+    showEditorSaveFeedback(
+      rsvpAutoOff
+        ? "Pagina salvata. RSVP disattivato: inserisci il WhatsApp e riattivalo se ti serve."
+        : "Pagina salvata.",
+      "ok"
+    );
     const hint = document.getElementById("editorActionHint");
     if(hint) hint.hidden = true;
     // Soft update: niente reload completo dell'editor (più fluido)

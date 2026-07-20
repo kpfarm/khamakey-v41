@@ -277,3 +277,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Moments v149**: fix Salva bloccato in silenzio — WhatsApp RSVP `required` solo con RSVP attivo |
 | 2026-07-20 | Cursor | **Moments v150**: Salva sempre eseguibile (`novalidate`) + messaggio se RSVP attivo senza WhatsApp |
 | 2026-07-20 | Cursor | **Moments v151**: WhatsApp RSVP non blocca più il salvataggio (solo avviso); Salva via click diretto |
+| 2026-07-20 | Cursor | **Moments v152**: senza WhatsApp → RSVP auto-off al Salva (più semplice, zero blocco) |

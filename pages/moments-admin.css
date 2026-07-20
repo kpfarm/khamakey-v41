@@ -1,0 +1,313 @@
+/* KhamaKey Moments — consolle operativa dedicata */
+html[data-admin-product="moments"]{
+  --moments-accent:#4CAF27;
+  --moments-accent-soft:#E8F5E0;
+  --moments-glow:rgba(76,175,39,0.12);
+}
+
+html[data-admin-product="moments"] .admin-shell:not(.locked){
+  grid-template-columns:272px 1fr;
+}
+
+html[data-admin-product="moments"] .admin-sidebar{
+  background:linear-gradient(180deg,#0a1228 0%,#091024 100%);
+  border-right:1px solid rgba(159,232,112,0.12);
+}
+
+html[data-admin-product="moments"] .admin-logo span{
+  color:#B8F090;
+  letter-spacing:.14em;
+}
+
+html[data-admin-product="moments"] .admin-logo-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-top:4px;
+  padding:4px 8px;
+  border-radius:999px;
+  background:rgba(76,175,39,0.15);
+  color:#B8F090;
+  font-size:.62rem;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+html[data-admin-product="moments"] .nav-intent[data-nav-intent="today"] .nav-group-toggle{
+  color:#B8F090;
+}
+
+html[data-admin-product="moments"] .admin-topbar h1{
+  font-size:clamp(1.35rem,2.5vw,1.75rem);
+}
+
+html[data-admin-product="moments"] .moments-console-tag{
+  display:inline-block;
+  margin-left:8px;
+  padding:3px 8px;
+  border-radius:999px;
+  background:var(--moments-accent-soft);
+  color:var(--green-dark,#246517);
+  font-size:.62rem;
+  font-weight:900;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  vertical-align:middle;
+}
+
+html[data-admin-product="moments"] .panel-welcome.moments-welcome{
+  border:1px solid rgba(76,175,39,0.25);
+  background:linear-gradient(135deg,rgba(76,175,39,0.06) 0%,rgba(255,255,255,0.95) 55%);
+}
+
+html[data-admin-product="moments"] .moments-flow-card{
+  margin:16px 0 18px;
+  padding:16px 18px;
+  border-radius:14px;
+  background:white;
+  border:1px solid var(--border);
+  box-shadow:0 8px 24px -12px rgba(27,42,94,0.12);
+}
+
+html[data-admin-product="moments"] .moments-flow-title{
+  margin:0 0 12px;
+  font-size:.78rem;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--navy);
+}
+
+html[data-admin-product="moments"] .moments-flow-steps{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:grid;
+  gap:10px;
+}
+
+@media(min-width:900px){
+  html[data-admin-product="moments"] .moments-flow-steps{
+    grid-template-columns:repeat(5,1fr);
+    gap:8px;
+  }
+}
+
+html[data-admin-product="moments"] .moments-flow-steps li{
+  display:grid;
+  gap:4px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:var(--soft,#F8FAFC);
+  border:1px solid var(--border);
+  font-size:.78rem;
+  line-height:1.4;
+}
+
+html[data-admin-product="moments"] .moments-flow-steps li strong{
+  display:block;
+  color:var(--navy);
+  font-size:.72rem;
+  letter-spacing:.04em;
+}
+
+html[data-admin-product="moments"] .moments-flow-steps li span{
+  color:var(--muted);
+}
+
+html[data-admin-product="moments"] .welcome-chip-primary{
+  background:var(--moments-accent);
+  border-color:var(--moments-accent);
+  color:white;
+}
+
+html[data-admin-product="moments"] .metric-grid.moments-metrics article{
+  border-color:rgba(76,175,39,0.2);
+}
+
+html[data-admin-product="moments"] .metric-grid.moments-metrics strong{
+  color:var(--navy);
+}
+
+html[data-admin-product="moments"] .panel-guide{
+  border-color:rgba(76,175,39,0.25);
+  background:linear-gradient(180deg,#fff 0%,#F9FCF7 100%);
+}
+
+html[data-admin-product="moments"] .panel-guide-head strong{
+  color:var(--navy);
+}
+
+html[data-admin-product="moments"] .guide-tip{
+  border-left:3px solid var(--moments-accent);
+  padding-left:10px;
+}
+
+html[data-admin-product="moments"] .system-note{
+  border-left:3px solid var(--moments-accent);
+}
+
+html[data-admin-product="moments"] .ghost-link.moments-link{
+  border-color:rgba(76,175,39,0.35);
+  color:var(--green-dark,#246517);
+}
+
+html[data-admin-product="moments"] .admin-user .console-switch{
+  font-size:.72rem;
+  opacity:.85;
+}
+
+/* Schermata login — solo accesso, zero anteprima pannello */
+html[data-admin-product="moments"] .admin-shell.locked{
+  background:
+    radial-gradient(circle at 12% 8%, rgba(76,175,39,0.08) 0%, transparent 42%),
+    radial-gradient(circle at 88% 92%, rgba(77,184,232,0.06) 0%, transparent 40%),
+    var(--bg,#F5F7FA);
+}
+
+html[data-admin-product="moments"] .admin-shell.locked .admin-main{
+  align-items:center;
+  padding-top:clamp(40px,12vh,96px);
+}
+
+html[data-admin-product="moments"] .admin-shell.locked #adminGate{
+  box-shadow:0 28px 80px -20px rgba(27,42,94,0.18);
+  border:1px solid rgba(76,175,39,0.18);
+}
+
+html[data-admin-product="moments"] .admin-shell.locked #adminGate h2{
+  font-family:"Syne",sans-serif;
+  color:var(--navy);
+}
+
+html[data-admin-product="moments"] .nav-group-desc{
+  margin:-2px 12px 8px;
+  padding:0 4px;
+  font-size:.62rem;
+  line-height:1.35;
+  color:rgba(255,255,255,0.45);
+}
+
+html[data-admin-product="moments"] .nav-highlight{
+  background:rgba(76,175,39,0.22)!important;
+  border-color:rgba(159,232,112,0.35)!important;
+  color:#D4FFB8!important;
+  font-weight:900;
+}
+
+html[data-admin-product="moments"] .moment-wizard-layout{
+  display:grid;
+  gap:20px;
+}
+
+@media(min-width:960px){
+  html[data-admin-product="moments"] .moment-wizard-layout{
+    grid-template-columns:1fr min(300px,32%);
+    align-items:start;
+  }
+}
+
+html[data-admin-product="moments"] .moment-wizard-step{
+  margin:0 0 18px;
+  padding:0;
+  border:none;
+}
+
+html[data-admin-product="moments"] .moment-wizard-step legend{
+  margin-bottom:12px;
+  font-size:.78rem;
+  font-weight:900;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--navy);
+}
+
+html[data-admin-product="moments"] .moment-wizard-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
+
+html[data-admin-product="moments"] .input-with-action{
+  display:flex;
+  gap:8px;
+  align-items:stretch;
+}
+
+html[data-admin-product="moments"] .input-with-action input{
+  flex:1;
+  min-width:0;
+}
+
+html[data-admin-product="moments"] .product-lines-reference{
+  padding:16px 18px;
+  border-radius:14px;
+  background:var(--soft,#F8FAFC);
+  border:1px solid var(--border);
+}
+
+html[data-admin-product="moments"] .product-lines-reference h3{
+  margin:0 0 8px;
+  font-size:.85rem;
+  color:var(--navy);
+}
+
+html[data-admin-product="moments"] .product-lines-list{
+  list-style:none;
+  margin:12px 0;
+  padding:0;
+  display:grid;
+  gap:8px;
+}
+
+html[data-admin-product="moments"] .product-lines-list li{
+  display:grid;
+  gap:2px;
+  padding:8px 10px;
+  border-radius:10px;
+  background:white;
+  border:1px solid var(--border);
+  font-size:.75rem;
+}
+
+html[data-admin-product="moments"] .product-lines-list li strong{
+  color:var(--navy);
+  font-size:.72rem;
+}
+
+html[data-admin-product="moments"] .product-lines-list li span{
+  color:var(--muted);
+}
+
+html[data-admin-product="moments"] .guide-tip-inline{
+  margin:0;
+  font-size:.72rem;
+  color:var(--muted);
+  line-height:1.45;
+}
+
+html[data-admin-product="moments"] .sidebar-external-note{
+  margin:14px 12px 0;
+  padding:10px 12px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+  font-size:.62rem;
+  line-height:1.45;
+  color:rgba(255,255,255,0.55);
+}
+
+html[data-admin-product="moments"] .sidebar-external-note a{
+  color:#B8F090;
+  font-weight:700;
+}
+
+html[data-admin-product="moments"] .qty-preset-bar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  align-items:center;
+  margin:-4px 0 8px;
+}

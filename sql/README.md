@@ -40,12 +40,18 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 34 | `khamakey-reseller-portal-v86.sql` | Portale rivenditori self-service: RPC `get_my_*` che leggono solo i dati dell'agente autenticato |
 | 35 | `khamakey-reseller-portal-hardening-v87.sql` | Hardening `current_agent_id()`: rimosso fallback via email, accesso solo tramite collegamento esplicito `platform_agents.member_id -> platform_members.user_id` |
 | 36 | `khamakey-reseller-portal-claim-v88.sql` | Primo accesso rivenditore: collega in modo sicuro l'utente autenticato al profilo agente gia' creato dall'admin, solo con email confermata e member non assegnato |
+| 37 | `khamakey-business-activation-v147.sql` | Attivazione codice Business: tabella `business_activation_codes`, RPC `activate_business_code`, seed da `nfc_tags` |
+| 38 | `khamakey-business-inventory-v148.sql` | Magazzino admin Business: batch RPC, RLS inventory, stats, bulk update, provisioning staff |
+| 39 | `khamakey-moments-activation-codes-v156.sql` | Codici attivazione 12 char + barcode confezione |
+| 40 | `khamakey-moments-category-lock-v157.sql` | Categoria bloccata al codice NFC: peek, activate, save lock, batch tutte le categorie v59 |
+| 41 | `khamakey-support-ticket-sources-v158.sql` | CHECK `source` ticket: consente `moments_editor` / `business_editor` (fix insert clienti) |
+| 42 | `khamakey-moments-activate-overload-drop-v159.sql` | Drop overload `activate_moment_code` a 4 args (resta firma con `p_pin_hash`) |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 
 **`khamakey-integrations-i18n-v66-production.sql` non è nella sequenza.** È una patch storica applicata a mano nel SQL Editor di Supabase quando su produzione `platform_integrations`/`platform_payment_transactions` risultavano già create fuori sequenza. `khamakey-integrations-i18n-v66.sql` è già completo e idempotente (crea quelle tabelle solo se assenti) e la copre interamente: non serve applicare entrambe. Il file `-production` resta nel repo solo come traccia storica — non eseguirlo di nuovo.
 
-**Stato produzione (2026-07-11):** `apply-all.psql` ora include l'intera catena v37→v74 (mancavano v64–v73). Resta da confermare direttamente su Supabase quali versioni risultano già applicate al progetto `cuxlwaocjqwzluycznyp` — questo file non ha visibilità sullo schema live.
+**Stato produzione (2026-07-18):** v158 (`support_ticket_sources_v158`) applicata su `cuxlwaocjqwzluycznyp`. Ticket editor clienti sbloccati. Catena precedente documentata in `KHAMAKEY_OS/docs/07-database.md`.
 
 ## Supabase SQL Editor
 

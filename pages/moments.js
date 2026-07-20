@@ -1,23 +1,33 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL } from "./config.js";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
+import { normalizeMomentCode, formatMomentCodeDisplay, isValidMomentCode } from "./moment-codes.js";
 import {
   uploadImage,
+  uploadVideo,
   uploadAudio,
+  bindUploadClient,
   validateImageFile,
+  validateVideoFile,
   deleteStorageObject,
   isCloudflareMediaUrl,
   inferMediaKind,
+  fileMatchesGalleryType,
+  IMAGE_ACCEPT,
+  warmUploadPipeline,
+  warmUploadAuth,
   MAX_GALLERY_IMAGES
-} from "./media-upload.js";
+} from "./media-upload.js?v=144";
 import {
   readGalleryMedia,
   writeGalleryMedia,
   renderGalleryGrid,
   uploadGalleryMedia,
+  replaceGalleryMediaItem,
   renderGalleryUploadPanel,
   renderGalleryFileInput,
   renderCoverFramer,
   renderMusicAudioPanel,
+  renderVideoSectionPanel,
   bindCoverFramer,
   syncCoverFramer,
   bindGalleryMediaInteractions,
@@ -25,7 +35,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js";
+} from "./moments-media-ui.js?v=144";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -34,15 +44,16 @@ import {
   renderJourneyFileInput,
   bindJourneyEditor,
   uploadJourneyStepPhoto
-} from "./moments-journey-ui.js";
+} from "./moments-journey-ui.js?v=144";
+import { migrateLetterMediaSection } from "./moment-media.js?v=144";
+import { LIST_SECTION_MODES, itemsFromSection } from "./moment-list-items.js";
 import {
-  renderLetterMediaPanel,
-  renderLetterFileInput,
-  uploadLetterMedia,
-  syncLetterMediaPanel,
-  readLetterMedia,
-  writeLetterMedia
-} from "./moments-letter-ui.js";
+  renderListItemsPanel,
+  renderListItems,
+  writeListItems,
+  readListItems,
+  bindListItemsEditor
+} from "./moments-list-ui.js";
 import { journeyStepId, MAX_JOURNEY_STEPS, normalizeJourneyStep, resolveJourneySteps, compactJourneySteps } from "./moment-journey.js";
 import {
   COLOR_PALETTES,
@@ -57,11 +68,8 @@ import {
   resolveFontPair,
   findLookForDesign,
   suggestLookForMomentType,
-  looksForMomentType,
-  decorPresetForType,
-  decorPresetsForMomentType,
-  PAGE_DECOR_PRESETS
-} from "./moment-themes.js";
+  looksForMomentType
+} from "./moment-themes.js?v=143";
 import {
   SECTION_ORDER_DEFAULT,
   DEFAULT_SECTIONS,
@@ -76,7 +84,8 @@ import {
   readSectionFromForm,
   parseImageLines,
   formatImageLines,
-  sectionFieldHints
+  sectionFieldHints,
+  sectionHasContent
 } from "./moment-sections.js";
 import {
   TYPE_LABELS,
@@ -107,6 +116,7 @@ import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, n
 
 const auth = document.getElementById("momentsAuth");
 const app = document.getElementById("momentsApp");
+const boot = document.getElementById("momentsBoot");
 const authTabs = document.getElementById("authTabs");
 const loginForm = document.getElementById("momentsLoginForm");
 const signupForm = document.getElementById("momentsSignupForm");
@@ -125,7 +135,7 @@ const EDITOR_PANELS = {
   objects:{title:"Le tue pagine",subtitle:"Scegli quale pagina modificare"},
   cover:{title:"Copertina",subtitle:"Titolo, foto e messaggio — la prima cosa che si vede"},
   styling:{title:"Colori",subtitle:"Scegli lo stile — colori classici, molto contrasto"},
-  counter:{title:"Contatore",subtitle:"Quanto tempo è passato da una data speciale?"},
+  counter:{title:"Contatore",subtitle:"Quanto tempo è passato da un giorno speciale? Scegli la data; ore/min/sec sono opzionali."},
   order:{title:"Ordine",subtitle:"Trascina per cambiare l'ordine delle sezioni"},
   privacy:{title:"Pubblica",subtitle:"Rendi visibile la pagina e proteggila con PIN"}
 };
@@ -134,6 +144,7 @@ let activeEditorPanel = "cover";
 let mobilePreviewMode = false;
 let activeNavGroup = "content";
 let currentMomentType = "free";
+let lastSavedMomentType = "free";
 let pinnedExtraSections = [];
 
 let supabase;
@@ -143,12 +154,45 @@ let currentUser = null;
 let sectionOrder = [...SECTION_ORDER_DEFAULT];
 let recoveryMode = false;
 let signupStep = 1;
+const PENDING_MOMENT_KEY = "khamakey_pending_moment_activation";
+
+function storePendingMomentActivation({ code, title, pin }){
+  try{
+    sessionStorage.setItem(PENDING_MOMENT_KEY, JSON.stringify({
+      code:normalizeCode(code),
+      title:String(title || "").trim(),
+      pin:String(pin || "").trim(),
+      at:Date.now()
+    }));
+  }catch{ /* ignore */ }
+}
+
+function readPendingMomentActivation(){
+  try{
+    const raw = sessionStorage.getItem(PENDING_MOMENT_KEY);
+    if(!raw) return null;
+    const data = JSON.parse(raw);
+    if(!data?.code) return null;
+    return data;
+  }catch{
+    return null;
+  }
+}
+
+function clearPendingMomentActivation(){
+  try{ sessionStorage.removeItem(PENDING_MOMENT_KEY); }catch{ /* ignore */ }
+}
 let editorDirty = false;
 let savedEditorSnapshot = "";
+let lastPreviewHash = "";
+let previewDebounceTimer = null;
+let previewFetchId = 0;
 const SECTION_PHOTO_FIELDS = {
   countdown:{ field:"image_url", previewId:"countdownPhotoPreview", fileId:"countdownPhotoFile", label:"Carica foto" },
-  pet:{ field:"pet_photo", previewId:"petPhotoPreview", fileId:"petPhotoFile", label:"Carica foto" }
+  pet:{ field:"pet_photo", previewId:"petPhotoPreview", fileId:"petPhotoFile", label:"Carica foto" },
+  music:{ field:"image_url", previewId:"musicPhotoPreview", fileId:"musicPhotoFile", label:"Carica immagine" }
 };
+const LIST_SECTION_KEYS = new Set(Object.keys(LIST_SECTION_MODES));
 const PROFILE_PHOTO_FIELD = { previewId:"profilePhotoPreview", fileId:"profilePhotoFile", label:"Carica foto profilo" };
 let uploadBusy = false;
 
@@ -163,7 +207,7 @@ function esc(value){
 }
 
 function normalizeCode(value){
-  return String(value || "").trim().toUpperCase().replace(/[^A-Z0-9]/g,"");
+  return normalizeMomentCode(value);
 }
 
 function validatePin(pin){
@@ -211,10 +255,6 @@ function showPinSuccessBanner(eventId,pin,title){
   document.getElementById("dismissPinBanner")?.addEventListener("click",()=>banner.remove());
 }
 
-function authRedirectUrl(){
-  return location.protocol === "file:" ? undefined : `${location.origin}/moments.html`;
-}
-
 function bindPasswordToggles(root=document){
   root.querySelectorAll("[data-password-target]").forEach(button=>{
     button.addEventListener("click",()=>{
@@ -228,14 +268,91 @@ function bindPasswordToggles(root=document){
   });
 }
 
+function activationTypeHintId(input){
+  if(input.id === "momentsSignupCode") return "momentsSignupTypeHint";
+  const form = input.closest("form");
+  return form?.querySelector("[data-activation-type-hint]")?.id || "";
+}
+
+async function refreshActivationCodeTypeHint(code, hintEl){
+  if(!hintEl) return;
+  const clean = normalizeCode(code);
+  if(!isValidMomentCode(clean)){
+    hintEl.hidden = true;
+    hintEl.textContent = "";
+    hintEl.className = "field-hint activation-code-type";
+    return;
+  }
+  hintEl.hidden = false;
+  hintEl.textContent = "Verifica codice…";
+  hintEl.className = "field-hint activation-code-type";
+  try{
+    const { data,error } = await supabase.rpc("peek_moment_activation_code",{ p_code:clean });
+    if(error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    if(!row?.product_type){
+      hintEl.textContent = "Codice non trovato in magazzino KhamaKey.";
+      hintEl.className = "field-hint activation-code-type warn";
+      return;
+    }
+    const typeLabel = TYPE_LABELS[normalizeMomentType(row.product_type)] || row.product_type;
+    const productLabel = String(row.product_label || "").trim();
+    hintEl.textContent = productLabel
+      ? `Modello pagina: ${typeLabel} · ${productLabel}`
+      : `Modello pagina: ${typeLabel}`;
+    hintEl.className = "field-hint activation-code-type ok";
+  }catch(error){
+    console.warn("peek_moment_activation_code", error);
+    hintEl.hidden = true;
+    hintEl.textContent = "";
+  }
+}
+
 function bindCodeInputs(root=document){
   root.querySelectorAll("input[name='code'],#momentsSignupCode").forEach(input=>{
     input.addEventListener("input",()=>{
-      const pos = input.selectionStart;
-      input.value = normalizeCode(input.value);
-      if(pos != null) input.setSelectionRange(pos,pos);
+      const start = input.selectionStart;
+      const before = input.value;
+      const formatted = formatMomentCodeDisplay(before);
+      input.value = formatted;
+      if(start != null){
+        const delta = formatted.length - before.length;
+        const next = Math.max(0, Math.min(formatted.length, start + delta));
+        input.setSelectionRange(next, next);
+      }
+    });
+    input.addEventListener("blur",()=>{
+      input.value = formatMomentCodeDisplay(normalizeCode(input.value));
+      const hintId = activationTypeHintId(input);
+      if(hintId) refreshActivationCodeTypeHint(input.value, document.getElementById(hintId));
     });
   });
+}
+
+function lockedMomentType(row){
+  return normalizeMomentType(row?.moment_type || row?.event_type || "free");
+}
+
+function renderMomentTypeField(state){
+  const type = normalizeMomentType(state.type);
+  const label = TYPE_LABELS[type] || type;
+  if(adminMode){
+    return `<label>Tipo di momento (admin)
+        <select name="moment_type" id="momentTypeSelect">
+          ${renderCategorySelect(type)}
+        </select>
+      </label>`;
+  }
+  return `<div class="moment-type-locked">
+      <span class="field-label">Tipo di pagina</span>
+      <p class="moment-type-badge"><span class="type-pill">${esc(label)}</span></p>
+      <input type="hidden" name="moment_type" id="momentTypeInput" value="${esc(type)}">
+      <p class="field-hint">Definito dal prodotto NFC collegato — ogni codice attiva il modello giusto per l'occasione.</p>
+    </div>`;
+}
+
+function templateSeedKey(eventId){
+  return `moments_template_seed_${eventId}`;
 }
 
 function rsvpGuestPreviewFromForm(formNode, pageTitle = ""){
@@ -292,6 +409,8 @@ function showAuthTab(tab){
 
 function showForgotForm(){
   recoveryMode = false;
+  hideBoot();
+  auth.hidden = false;
   authTabs.hidden = true;
   loginForm.hidden = true;
   signupForm.hidden = true;
@@ -304,6 +423,8 @@ function showForgotForm(){
 
 function showRecoveryForm(){
   recoveryMode = true;
+  hideBoot();
+  auth.hidden = false;
   authTabs.hidden = true;
   loginForm.hidden = true;
   signupForm.hidden = true;
@@ -332,22 +453,22 @@ function applyUrlParams(){
   adminMode = Boolean(adminEventId);
   if(code){
     showAuthTab("signup");
-    document.getElementById("momentsSignupCode").value = code;
+    document.getElementById("momentsSignupCode").value = formatMomentCodeDisplay(code);
     setSignupStep(1);
   }
   if(params.get("tab") === "signup") showAuthTab("signup");
 }
 
-async function activateCode({ code, title, momentType, pin }){
+async function activateCode({ code, title, pin }){
   const cleanCode = normalizeCode(code);
-  if(!/^[A-Z0-9]{8,32}$/.test(cleanCode)) throw new Error("Il codice deve contenere 8-32 lettere o numeri.");
+  if(!isValidMomentCode(cleanCode)) throw new Error("Il codice deve contenere 8-32 lettere o numeri (es. M7K2-9XPL-H3WN).");
   const cleanPin = validatePin(pin);
   const publicSlug = cleanCode.toLowerCase();
   const { data,error } = await supabase.rpc("activate_moment_code",{
     p_code:cleanCode,
     p_title:title,
     p_slug:publicSlug,
-    p_moment_type:momentType || "free",
+    p_moment_type:"free",
     p_pin_hash:await momentPinHash(publicSlug,cleanPin)
   });
   if(error) throw error;
@@ -364,8 +485,18 @@ function mergedState(row){
   const state = row.page_state && typeof row.page_state === "object" ? row.page_state : {};
   const sections = migrateSections(state.sections || {});
   if(sections.gallery){
-    sections.gallery.media = normalizeMediaList(sections.gallery);
-    sections.gallery.images = sections.gallery.media.filter(item=>item.type === "image").map(item=>item.url);
+    const allMedia = normalizeMediaList(sections.gallery);
+    const galleryVideos = allMedia.filter(item=>item.type === "video");
+    const galleryImages = allMedia.filter(item=>item.type === "image");
+    sections.gallery.media = galleryImages;
+    sections.gallery.images = galleryImages.map(item=>item.url);
+    if(!sections.video) sections.video = { ...DEFAULT_SECTIONS.video };
+    if(galleryVideos.length && !String(sections.video.video_url || "").trim()){
+      const first = galleryVideos[0];
+      sections.video.video_url = first.url;
+      sections.video.video_title = first.title || sections.video.video_title || "";
+      sections.video.video_description = first.description || sections.video.video_description || "";
+    }
   }
   return {
     title:row.title || state.title || "",
@@ -384,7 +515,7 @@ function mergedState(row){
     heroStyle:state.heroStyle || "classico",
     heroCut:state.heroCut || "dritto",
     fontPair:Object.keys(FONT_PAIRS).includes(state.fontPair) ? state.fontPair : "classic",
-    pageDecor:PAGE_DECOR_PRESETS[state.pageDecor] ? state.pageDecor : "none",
+    pageDecor:"none",
     show_together_counter:Boolean(state.show_together_counter),
     together_since:state.together_since || "",
     counter_label:state.counter_label || "",
@@ -395,14 +526,46 @@ function mergedState(row){
   };
 }
 
+function finishSessionBoot(){
+  document.body.classList.remove("session-pending");
+  if(boot) boot.hidden = true;
+}
+
+function hideBoot(){
+  finishSessionBoot();
+}
+
 function showAuth(message=""){
+  finishSessionBoot();
   auth.hidden = false;
   app.hidden = true;
   setStatus(statusNode,message);
 }
 
+function renderEditorFailure(error, { reload = true } = {}){
+  console.error(error);
+  setEditorChromeVisible(false);
+  const msg = String(error?.message || error || "Errore imprevisto durante il caricamento dell'editor.");
+  detail.innerHTML = `
+    <div class="empty-state editor-failure">
+      <p class="eyebrow">KhamaKey Moments</p>
+      <h2>Editor non disponibile</h2>
+      <p>${esc(msg)}</p>
+      ${reload ? `<button type="button" class="primary" id="editorFailureReload">Ricarica pagina</button>` : ""}
+    </div>`;
+  document.getElementById("editorFailureReload")?.addEventListener("click",()=>location.reload());
+}
+
+function showAppLoadError(error){
+  finishSessionBoot();
+  auth.hidden = true;
+  app.hidden = false;
+  renderEditorFailure(error);
+}
+
 async function showApp(user){
   if(!user) return;
+  finishSessionBoot();
   currentUser = user;
   auth.hidden = true;
   app.hidden = false;
@@ -414,9 +577,9 @@ async function showApp(user){
   try{
     await loadObjects();
     if(!adminMode) await tryPendingActivation(user);
+    warmUploadAuth(supabase);
   }catch(error){
-    console.error(error);
-    setStatus(statusNode,error.message || "Errore caricamento area Moments.","error");
+    showAppLoadError(error);
   }
 }
 
@@ -673,17 +836,53 @@ function bindEditorPageActions(publicUrl, pageTitle){
 }
 
 async function tryPendingActivation(user){
-  const pendingCode = normalizeCode(user?.user_metadata?.pending_moment_code || "");
-  if(!pendingCode || rows.some(row=>normalizeCode(row.nfc_code) === pendingCode)) return;
+  const stored = readPendingMomentActivation();
+  const metaCode = normalizeCode(user?.user_metadata?.pending_moment_code || "");
+  const pendingCode = normalizeCode(stored?.code || metaCode);
+  if(!pendingCode) return;
+  if(rows.some(row=>normalizeCode(row.nfc_code) === pendingCode)){
+    clearPendingMomentActivation();
+    return;
+  }
+  const title = String(stored?.title || user?.user_metadata?.pending_moment_title || "").trim();
+  const pin = String(stored?.pin || "").trim();
+  if(title && pin){
+    try{
+      const item = await activateCode({ code:pendingCode, title, pin });
+      clearPendingMomentActivation();
+      activeId = item.event_id || "";
+      rememberPin(activeId, pin);
+      await loadObjects({ render:true });
+      if(activeId) showPinSuccessBanner(activeId, pin, title);
+      return;
+    }catch(error){
+      console.error(error);
+      activeEditorPanel = "objects";
+      renderEmptyState(
+        error.message || "Attivazione Moments non riuscita. Riprova con il modulo sotto (non serve un codice Business).",
+        pendingCode
+      );
+      return;
+    }
+  }
   activeEditorPanel = "objects";
   if(activeId) renderDetail(activeId);
-  else renderEmptyState(`Hai un codice da attivare (${pendingCode}). Compilalo nel modulo sotto.`,pendingCode);
+  else renderEmptyState(
+    `Hai il codice Moments ${formatMomentCodeDisplay(pendingCode)} da collegare. Inserisci nome pagina e PIN sotto — non è richiesto nessun codice Business.`,
+    pendingCode
+  );
 }
 
 function renderObjectsListHtml(){
   if(!rows.length) return `<p class="empty-inline">Nessun oggetto collegato. Attiva il primo codice nel modulo sotto.</p>`;
   return rows.map(row=>{
-    const state = mergedState(row);
+    let state;
+    try{
+      state = mergedState(row);
+    }catch(error){
+      console.warn("mergedState fallito per pagina", row?.id, error);
+      state = { title:row?.title || row?.slug || "Pagina", type:normalizeMomentType(row?.moment_type || row?.event_type || "free") };
+    }
     const type = TYPE_LABELS[state.type] || state.type;
     return `<button class="object-pick ${row.id === activeId ? "active" : ""}" type="button" data-object-id="${esc(row.id)}">
       ${esc(state.title || row.slug)}
@@ -695,14 +894,10 @@ function renderObjectsListHtml(){
 
 function renderActivationFormHtml(formId = "editorActivationForm",statusId = "editorActivationStatus",prefillCode = ""){
   return `<form id="${formId}" class="activation-inline-form">
-    <label>Codice NFC<input name="code" autocomplete="off" placeholder="Esempio MOMENT1234" value="${esc(prefillCode)}" required></label>
+    <label>Codice NFC<input name="code" autocomplete="off" placeholder="Es. M7K2-9XPL-H3WN" value="${esc(formatMomentCodeDisplay(prefillCode))}" required></label>
+    <p class="field-hint activation-code-type" id="editorActivationTypeHint" data-activation-type-hint hidden></p>
     <label>Nome pagina<input name="title" placeholder="Esempio Il nostro viaggio" required></label>
     <label>PIN pagina<input name="access_pin" inputmode="numeric" autocomplete="new-password" placeholder="Esempio 1234" minlength="4" required></label>
-    <label>Tipo di pagina
-      <select name="moment_type">
-        ${renderCategorySelect("free")}
-      </select>
-    </label>
     <button type="submit" class="primary">Attiva oggetto</button>
   </form>
   <p class="status" id="${statusId}"></p>`;
@@ -725,8 +920,8 @@ function renderObjectsPanel(){
       </div>
       <div class="objects-switcher" id="objectsSwitcher">${renderObjectsListHtml()}</div>
       <div class="activation-inline">
-        <h3>Attiva un altro prodotto</h3>
-        <p class="field-hint">Ogni codice NFC attiva il link pubblico già preparato per quell'oggetto.</p>
+        <h3>${rows.length ? "Attiva un altro oggetto Moments" : "Attiva il primo oggetto Moments"}</h3>
+        <p class="field-hint">Serve un codice Moments dalla confezione NFC — non un codice Business.</p>
         ${renderActivationFormHtml()}
       </div>
     </div>
@@ -785,7 +980,7 @@ async function submitMomentSupportTicket(event,row){
     return;
   }
   form.reset();
-  setStatus(status,"Ticket inviato. Lo troviamo nella console supporto.","ok");
+  setStatus(status,"Ticket inviato. Il team KhamaKey lo vede nella console Supporto.","ok");
 }
 
 function renderEmptyState(message = "",prefillCode = ""){
@@ -793,8 +988,8 @@ function renderEmptyState(message = "",prefillCode = ""){
   detail.innerHTML = `
     <div class="empty-state">
       <p class="eyebrow">KhamaKey Moments</p>
-      <h2>Attiva il tuo primo oggetto</h2>
-      <p>${esc(message || "Inserisci il codice NFC ricevuto con il prodotto per creare la pagina collegata.")}</p>
+      <h2>Attiva il tuo primo oggetto Moments</h2>
+      <p>${esc(message || "Inserisci il codice Moments sulla confezione NFC per creare la pagina. Non è un account Business.")}</p>
     </div>
     <div class="editor-card" style="margin-top:16px;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:14px">
       ${renderActivationFormHtml("emptyActivationForm","emptyActivationStatus",prefillCode)}
@@ -802,10 +997,25 @@ function renderEmptyState(message = "",prefillCode = ""){
   bindActivationForm(document.getElementById("emptyActivationForm"),document.getElementById("emptyActivationStatus"));
 }
 
-async function loadObjects(){
+async function ensureEventPageState(eventId){
+  const row = rows.find(item=>item.id === eventId);
+  if(!row) return null;
+  if(row.page_state && typeof row.page_state === "object") return row;
+  const { data,error } = await supabase
+    .from("moment_events")
+    .select("page_state,description,title,moment_type,event_type,pin_enabled,public_visible,nfc_code")
+    .eq("id",eventId)
+    .maybeSingle();
+  if(error) throw error;
+  if(data) Object.assign(row, data);
+  if(!row.page_state || typeof row.page_state !== "object") row.page_state = {};
+  return row;
+}
+
+async function loadObjects({ render = true } = {}){
   let query = supabase
     .from("moment_events")
-    .select("id,title,slug,event_type,moment_type,status,description,nfc_code,pin_enabled,public_visible,owner_email,page_state,created_at")
+    .select("id,title,slug,event_type,moment_type,status,description,nfc_code,pin_enabled,public_visible,owner_email,created_at")
     .order("created_at",{ascending:false});
   if(adminMode && adminEventId){
     query = query.eq("id",adminEventId);
@@ -818,7 +1028,11 @@ async function loadObjects(){
     renderEmptyState(adminMode ? "Oggetto non trovato o permessi admin insufficienti." : "Oggetti non disponibili. Verifica account e codice prodotto.");
     return;
   }
-  rows = data || [];
+  const prevStates = new Map(rows.map(row=>[row.id, row.page_state]));
+  rows = (data || []).map(row=>({
+    ...row,
+    page_state: prevStates.get(row.id)
+  }));
   if(adminMode && rows.length){
     const banner = document.getElementById("adminModeBanner");
     if(banner){
@@ -827,8 +1041,20 @@ async function loadObjects(){
     }
   }
   if(rows.length && !rows.some(row=>row.id === activeId)) activeId = rows[0].id;
-  if(activeId) renderDetail(activeId);
-  else renderEmptyState();
+  if(!render){
+    refreshObjectsSwitcher();
+    return;
+  }
+  if(activeId){
+    try{
+      await ensureEventPageState(activeId);
+      renderDetail(activeId);
+    }catch(error){
+      showAppLoadError(error);
+    }
+  }else{
+    renderEmptyState();
+  }
 }
 
 function refreshObjectsSwitcher(){
@@ -842,11 +1068,18 @@ function bindObjectSwitcher(root){
   root?.querySelectorAll("[data-object-id]").forEach(button=>{
     if(button.dataset.bound === "1") return;
     button.dataset.bound = "1";
-    button.addEventListener("click",()=>{
+    button.addEventListener("click",async()=>{
       if(button.dataset.objectId === activeId) return;
       if(editorDirty && !confirm("Hai modifiche non salvate. Vuoi cambiare oggetto senza salvare?")) return;
       activeEditorPanel = "objects";
-      renderDetail(button.dataset.objectId);
+      const nextId = button.dataset.objectId;
+      try{
+        await ensureEventPageState(nextId);
+        renderDetail(nextId);
+      }catch(error){
+        console.error(error);
+        alert(error.message || "Impossibile aprire la pagina.");
+      }
     });
   });
 }
@@ -860,17 +1093,17 @@ function bindActivationForm(form,statusEl){
     const code = normalizeCode(data.get("code"));
     const title = String(data.get("title") || "").trim();
     const pin = String(data.get("access_pin") || "").trim();
-    const momentType = String(data.get("moment_type") || "free");
     if(!/^[A-Z0-9]{8,32}$/.test(code)) return setStatus(statusEl,"Codice non valido.","error");
     if(!title) return setStatus(statusEl,"Inserisci il nome della pagina.","error");
     try{ validatePin(pin); }catch(error){ return setStatus(statusEl,error.message,"error"); }
     setStatus(statusEl,"Collegamento in corso...");
     try{
-      const item = await activateCode({code,title,momentType,pin});
+      const item = await activateCode({code,title,pin});
+      clearPendingMomentActivation();
       activeId = item.event_id || activeId;
       rememberPin(activeId,pin);
       form.reset();
-      setStatus(statusEl,"Prodotto collegato al tuo account.","ok");
+      setStatus(statusEl,"Oggetto Moments collegato al tuo account.","ok");
       activeEditorPanel = "cover";
       await loadObjects();
       if(activeId) showPinSuccessBanner(activeId,pin,title);
@@ -1002,7 +1235,7 @@ function refreshSectionOrderList(formNode){
     listNode.innerHTML = `<p class="section-order-empty">Nessuna sezione attiva. Attiva almeno una sezione dal menu <strong>Contenuti</strong>.</p>`;
     return;
   }
-  listNode.innerHTML = keys.map((key,idx)=>renderSectionOrderItem(key,idx, currentTypeFromForm(formNode))).join("");
+  listNode.innerHTML = keys.map((key,idx)=>renderSectionOrderItem(key,idx, currentTypeFromForm(formNode), formNode)).join("");
 }
 
 function bindSectionToggleButtons(formNode){
@@ -1060,6 +1293,39 @@ function bindSectionEnableHandlers(formNode){
   });
 }
 
+function formHasMeaningfulContent(formNode){
+  if(!formNode) return false;
+  const state = readFormState(formNode);
+  if(String(state.cover_url || "").trim()) return true;
+  if(String(state.subtitle || "").trim() || String(state.description || "").trim() || String(state.pill || "").trim()) return true;
+  if(String(state.profile_photo || "").trim()) return true;
+  if(state.show_together_counter || String(state.together_since || "").trim()) return true;
+  for(const [key,section] of Object.entries(state.sections || {})){
+    if(sectionHasContent(key, section)) return true;
+  }
+  return false;
+}
+
+function confirmMomentTypeChange(nextType, previousType){
+  const nextLabel = TYPE_LABELS[nextType] || nextType;
+  const prevLabel = TYPE_LABELS[previousType] || previousType;
+  return window.confirm(
+    `Stai passando da «${prevLabel}» a «${nextLabel}».\n\n` +
+    "Cambiare categoria aggiorna il design suggerito. I testi che hai già scritto restano finché non tocchi «Prepara tutto per me».\n\n" +
+    "Se usi quel pulsante, testi, sezioni e impostazioni verranno sostituiti in modo irreversibile.\n\n" +
+    "Vuoi cambiare categoria?"
+  );
+}
+
+function confirmApplyMomentTemplate(type){
+  const label = TYPE_LABELS[type] || type;
+  return window.confirm(
+    `«Prepara tutto per me» sostituirà testi, sezioni attive, ordine e colori con il modello «${label}».\n\n` +
+    "I contenuti attuali andranno persi se poi salvi la pagina. Operazione irreversibile.\n\n" +
+    "Continuare?"
+  );
+}
+
 function applyTemplateToForm(formNode,type){
   const template = templateForType(type);
   if(template.subtitle) formNode.elements.subtitle.value = template.subtitle;
@@ -1109,10 +1375,6 @@ function applyTemplateToForm(formNode,type){
   syncAllSectionToggleButtons(formNode);
   const suggestedLook = suggestLookForMomentType(normalizeMomentType(type));
   if(suggestedLook && PAGE_LOOKS[suggestedLook]) applyPageLook(formNode, suggestedLook, { preview:false });
-  const suggestedDecor = decorPresetForType(normalizeMomentType(type));
-  const decorInput = formNode.querySelector('[name="page_decor"]');
-  if(decorInput) decorInput.value = suggestedDecor;
-  syncDecorCards(formNode, decorInput?.value || "none");
   schedulePreviewUpdate(formNode,{immediate:true,force:true});
   promptSaveReminder("Template applicato. Clicca Salva verde in alto a destra per pubblicare le modifiche.");
 }
@@ -1216,33 +1478,16 @@ function refreshDesignPickers(formNode, momentType){
     || suggestLookForMomentType(type);
   const lookHost = stylingPanel.querySelector(".look-picker-host");
   if(lookHost) lookHost.innerHTML = renderLookPicker(currentLook, type);
-  const decorHost = stylingPanel.querySelector(".decor-picker-host");
-  const currentDecor = formNode.querySelector("#pageDecorInput")?.value || "none";
-  if(decorHost) decorHost.innerHTML = renderDecorPicker(currentDecor, type);
   stylingPanel.querySelectorAll(".look-card").forEach(button=>{
     button.addEventListener("click",()=>applyPageLook(formNode, button.dataset.look || "classic"));
   });
-  stylingPanel.querySelectorAll(".decor-card").forEach(button=>{
-    button.addEventListener("click",()=>{
-      const input = formNode.querySelector("#pageDecorInput");
-      if(input) input.value = button.dataset.decor || "none";
-      syncDecorCards(formNode, input?.value || "none");
-      markEditorDirty(formNode);
-      schedulePreviewUpdate(formNode,{ immediate:true });
-    });
-  });
   syncLookCards(formNode, formNode.querySelector("#pageLookInput")?.value || currentLook);
-  syncDecorCards(formNode, formNode.querySelector("#pageDecorInput")?.value || "none");
 }
 
 function applySuggestedLookForType(formNode, type, { preview = true } = {}){
   refreshDesignPickers(formNode, type);
   const suggestedLook = suggestLookForMomentType(normalizeMomentType(type));
   if(suggestedLook && PAGE_LOOKS[suggestedLook]) applyPageLook(formNode, suggestedLook, { preview });
-  const suggestedDecor = decorPresetForType(normalizeMomentType(type));
-  const decorInput = formNode.querySelector("#pageDecorInput");
-  if(decorInput) decorInput.value = suggestedDecor;
-  syncDecorCards(formNode, decorInput?.value || "none");
   if(preview) schedulePreviewUpdate(formNode,{ immediate:true });
 }
 
@@ -1271,8 +1516,6 @@ function resetCoverZoomIfNeeded(formNode){
   const zoomInput = formNode?.elements?.cover_zoom;
   if(!zoomInput || Number(zoomInput.value) <= 110) return;
   zoomInput.value = 100;
-  const zoomVal = document.getElementById("coverZoomVal");
-  if(zoomVal) zoomVal.textContent = "100%";
   syncCoverFramer(formNode);
 }
 
@@ -1281,15 +1524,6 @@ function syncPaletteButtons(formNode, palette){
   if(!stylingPanel) return;
   stylingPanel.querySelectorAll(".palette-btn").forEach(button=>{
     button.classList.toggle("active", button.dataset.palette === palette);
-  });
-}
-
-function syncDecorCards(formNode, decorId){
-  const stylingPanel = formNode.querySelector('[data-editor-panel="styling"]');
-  if(!stylingPanel) return;
-  stylingPanel.querySelectorAll(".decor-card").forEach(button=>{
-    button.classList.toggle("active", button.dataset.decor === decorId);
-    button.setAttribute("aria-pressed", button.dataset.decor === decorId ? "true" : "false");
   });
 }
 
@@ -1309,22 +1543,6 @@ function renderLookPicker(currentLook, momentType = "free"){
     </button>`;
   }).join("")}</div>
   <input type="hidden" name="page_look" id="pageLookInput" value="${esc(currentLook)}">`;
-}
-
-function renderDecorPicker(currentDecor, momentType = "free"){
-  const current = PAGE_DECOR_PRESETS[currentDecor] ? currentDecor : "none";
-  const ids = decorPresetsForMomentType(normalizeMomentType(momentType));
-  return `<div class="decor-grid">${ids.map(id=>{
-    const preset = PAGE_DECOR_PRESETS[id];
-    if(!preset) return "";
-    const preview = preset.emojis.slice(0, 3).join("") || "—";
-    return `<button type="button" class="decor-card ${current === id ? "active" : ""}" data-decor="${esc(id)}" aria-pressed="${current === id ? "true" : "false"}">
-      <span class="decor-card-preview">${preview}</span>
-      <strong>${esc(preset.label)}</strong>
-      <small>${esc(preset.hint)}</small>
-    </button>`;
-  }).join("")}</div>
-  <input type="hidden" name="page_decor" id="pageDecorInput" value="${esc(current)}">`;
 }
 
 function renderPalettePicker(current){
@@ -1363,15 +1581,6 @@ function bindDesignPanelHandlers(formNode){
   stylingPanel.querySelectorAll(".look-card").forEach(button=>{
     button.addEventListener("click",()=>{
       applyPageLook(formNode, button.dataset.look || "classic");
-    });
-  });
-
-  stylingPanel.querySelectorAll(".decor-card").forEach(button=>{
-    button.addEventListener("click",()=>{
-      const input = formNode.querySelector("#pageDecorInput");
-      if(input) input.value = button.dataset.decor || "none";
-      syncDecorCards(formNode, input?.value || "none");
-      onDesignChange();
     });
   });
 
@@ -1430,11 +1639,6 @@ function renderDesignPanel(state){
         <div class="design-swatch-body"><span>Sfondo</span><span>Accenti</span></div>
       </div>
     </div>
-    <div class="editor-card">
-      <p class="ecard-title">Icone e adesivi (facoltativo)</p>
-      <p class="design-intro">Adesivi leggeri — solo quelli adatti a questa categoria.</p>
-      <div class="decor-picker-host">${renderDecorPicker(state.pageDecor || "none", state.type)}</div>
-    </div>
     <details class="design-advanced editor-card">
       <summary>Vuoi cambiare qualcosa in più? (facoltativo)</summary>
       <label>Tonalità colori
@@ -1477,24 +1681,21 @@ function renderCoverPanel(state){
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">1</span> Di cosa parla?</p>
       <label>Titolo della pagina<input name="title" value="${esc(state.title)}" required placeholder="Es. Il nostro anniversario"></label>
-      <label>Tipo di momento
-        <select name="moment_type" id="momentTypeSelect">
-          ${renderCategorySelect(state.type)}
-        </select>
-      </label>
+      ${renderMomentTypeField(state)}
+      <p class="category-change-warning">⚠️ <strong>Attenzione:</strong> «Prepara tutto per me» sostituisce testi, sezioni e colori — operazione <strong>irreversibile</strong> dopo il salvataggio.</p>
       <button type="button" class="primary smart-action-btn" id="applyMomentTemplate">✨ Prepara tutto per me</button>
-      <p class="field-hint">Scegli il tipo e tocca il pulsante — testi, sezioni e colori si sistemano da soli.</p>
+      <p class="field-hint">Ripristina il modello della tua categoria con testi e sezioni suggeriti. I contenuti attuali verranno sostituiti.</p>
     </div>
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">2</span> La foto di copertina</p>
       <div class="cover-preview-wrap">
         <input type="hidden" name="cover_url" id="coverUrlInput" value="${esc(state.cover_url)}">
         <div class="cover-upload-actions">
-          <input type="file" id="coverFileInput" accept="image/*" hidden>
+          <input type="file" id="coverFileInput" accept="${IMAGE_ACCEPT}" hidden>
           <button type="button" class="primary upload-trigger" data-upload-target="cover">📷 Carica foto copertina</button>
         </div>
         <p class="field-hint" id="coverUploadStatus"></p>
-        ${renderCoverFramer(state)}
+        <div id="coverFramerSlot">${renderCoverFramer(state)}</div>
       </div>
         <details class="design-advanced cover-extra">
         <summary>Altri testi sulla copertina (facoltativo)</summary>
@@ -1506,7 +1707,7 @@ function renderCoverPanel(state){
         <summary>Foto profilo tonda (solo stile Natura)</summary>
         <input type="hidden" name="profile_photo" id="profilePhotoInput" value="${esc(state.profile_photo)}">
         <div class="section-photo-preview" id="profilePhotoPreview">${profilePhotoPreviewHtml(state.profile_photo)}</div>
-        <input type="file" id="profilePhotoFile" accept="image/*" hidden>
+        <input type="file" id="profilePhotoFile" accept="${IMAGE_ACCEPT}" hidden>
         <p class="field-hint">Opzionale — compare nella copertina con lo stile Profilo/Natura.</p>
       </details>
       <p class="field-hint">I colori si scelgono in <strong>Design → Colori</strong> — un tap e la pagina cambia look.</p>
@@ -1532,15 +1733,15 @@ function renderCounterPanel(state){
     <input type="checkbox" name="show_together_counter" ${state.show_together_counter ? "checked" : ""} hidden id="showTogetherCounterInput">
     <div class="section-editor-stack ${state.show_together_counter ? "" : "is-muted"}">
       <div class="editor-card smart-card">
-        <p class="ecard-title"><span class="step-badge">1</span> Da quale data?</p>
+        <p class="ecard-title"><span class="step-badge">1</span> Da quale giorno?</p>
         <label>Testo sopra il contatore<input name="counter_label" value="${esc(state.counter_label || "")}" placeholder="Es. Insieme da, Ti sopporto da"></label>
         <label>Data speciale<input type="date" name="together_since" value="${esc(state.together_since || "")}"></label>
-        <p class="field-hint">Es. primo appuntamento, matrimonio o inizio viaggio.</p>
+        <p class="field-hint">Solo il giorno (es. primo appuntamento). Non serve ora: il conteggio parte dalla mezzanotte di quella data.</p>
       </div>
       <div class="editor-card smart-card">
-        <p class="ecard-title"><span class="step-badge">2</span> Come contare?</p>
-        <label class="smart-toggle"><input type="checkbox" name="show_counter_hms" ${state.show_counter_hms ? "checked" : ""}> Timer live (giorni · ore · min · sec)</label>
-        <p class="field-hint">Spento = <strong>anni, mesi, giorni</strong> (fisso). Acceso = il contatore <strong>scorre ogni secondo</strong> nella pagina.</p>
+        <p class="ecard-title"><span class="step-badge">2</span> Come mostrarlo?</p>
+        <label class="smart-toggle"><input type="checkbox" name="show_counter_hms" ${state.show_counter_hms ? "checked" : ""}> Mostra anche ore, minuti e secondi (timer che scorre)</label>
+        <p class="field-hint"><strong>Spento</strong> (consigliato): anni · mesi · giorni, aggiornato in modo calmo.<br><strong>Acceso</strong>: giorni · ore · min · sec che cambiano ogni secondo — utile se vuoi l’effetto “orologio vivo”. Parte sempre dalla mezzanotte del giorno scelto sopra.</p>
       </div>
     </div>
   </div>`;
@@ -1595,7 +1796,7 @@ function renderSectionPanels(state, shareMeta = {}){
   const navKeys = new Set(navSectionsForEditor(state.type, sectionOrder, state.pinned_sections || [], enabled));
   return sectionOrder.filter(key=>key !== "places").map(key=>{
     const panelId = `section-${key}`;
-    const section = state.sections[key];
+    const section = state.sections[key] || DEFAULT_SECTIONS[key] || {};
     const enabledOn = Boolean(section?.enabled);
     const hidden = !panelKeys.has(key);
     const mutedNav = panelKeys.has(key) && !navKeys.has(key);
@@ -1609,8 +1810,9 @@ function renderSectionPanels(state, shareMeta = {}){
         })
       : "";
     const guestbookModeration = key === "guestbook" ? renderGuestbookModerationShell() : "";
+    const panelTitle = String(section?.title || "").trim() || sectionLabelForType(state.type, key);
     return `<div class="editor-panel ${activeEditorPanel === panelId ? "active" : ""}" data-editor-panel="${esc(panelId)}" data-section-panel-key="${esc(key)}" ${hidden ? "hidden" : ""}>
-      ${renderSectionHeader(sectionLabelForType(state.type, key),sectionSubtitleForType(state.type, key))}
+      ${renderSectionHeader(panelTitle,sectionSubtitleForType(state.type, key))}
       ${mutedNav ? `<p class="field-hint extras-hint">Sezione extra — attivala con l'interruttore sotto o da <strong>Altre sezioni</strong>.</p>` : ""}
       ${renderSectionPanelToggle(key,enabledOn)}
       <div class="section-editor-stack ${enabledOn ? "" : "is-muted"}" data-section-stack="${esc(key)}">
@@ -1786,13 +1988,47 @@ function updateSaveStatus(saved){
     node.classList.toggle("dirty",!saved);
   }
   document.getElementById("momentsSaveBar")?.classList.toggle("visible",!saved);
+  document.querySelectorAll(".editor-undo-btn").forEach(button=>{
+    button.hidden = saved;
+    button.disabled = saved;
+  });
 }
 
-function renderSectionOrderItem(key,idx,momentType = currentMomentType){
-  return `<div class="section-order-item" draggable="true" data-section-key="${esc(key)}">
-    <span class="section-drag" aria-hidden="true">☰</span>
+function revertEditorChanges(){
+  if(!editorDirty || !savedEditorSnapshot || !activeId) return;
+  if(!window.confirm("Annullare le modifiche non salvate e tornare all'ultima versione salvata?")) return;
+  const row = rows.find(item=>item.id === activeId);
+  if(!row) return;
+  let savedState;
+  try{
+    savedState = JSON.parse(savedEditorSnapshot);
+  }catch{
+    return;
+  }
+  const panel = activeEditorPanel;
+  row.page_state = savedState;
+  row.title = savedState.title || row.title;
+  row.moment_type = savedState.type || row.moment_type;
+  row.event_type = savedState.type || row.event_type;
+  row.description = savedState.description ?? row.description;
+  renderDetail(activeId);
+  activeEditorPanel = panel;
+  setEditorPanel(panel);
+  syncMobileNav(panel);
+  const hint = document.getElementById("editorActionHint");
+  if(hint) hint.hidden = true;
+}
+
+function renderSectionOrderItem(key,idx,momentType = currentMomentType,formNode = null){
+  const label = formNode ? sectionOrderDisplayLabel(formNode, momentType, key) : sectionLabelForType(momentType, key);
+  return `<div class="section-order-item" data-section-key="${esc(key)}">
+    <button type="button" class="section-drag section-drag-handle" aria-label="Trascina per riordinare">☰</button>
     <span class="section-order-icon">${esc(SECTION_ICONS[key] || "•")}</span>
-    <span>${esc(sectionLabelForType(momentType, key))}</span>
+    <span class="section-order-label">${esc(label)}</span>
+    <div class="section-order-actions">
+      <button type="button" class="section-move-btn" data-section-move-up="${esc(key)}" aria-label="Sposta su">↑</button>
+      <button type="button" class="section-move-btn" data-section-move-down="${esc(key)}" aria-label="Sposta giù">↓</button>
+    </div>
     <span class="section-order-num">#${idx+1}</span>
   </div>`;
 }
@@ -1803,9 +2039,34 @@ function renderSectionOrderList(state){
     ? keys.map((key,idx)=>renderSectionOrderItem(key,idx, state?.type || currentMomentType)).join("")
     : `<p class="section-order-empty">Nessuna sezione attiva. Attiva almeno una sezione dal menu <strong>Contenuti</strong>.</p>`;
   return `<div class="section-order-panel">
-    <p class="section-order-hint">Trascina per cambiare l'ordine delle sezioni attive sulla tua pagina.</p>
+    <p class="section-order-hint">Trascina con ☰ oppure usa ↑ ↓ per cambiare l'ordine delle sezioni attive.</p>
     <div class="section-order-list" id="sectionOrderList">${items}</div>
   </div>`;
+}
+
+function moveEnabledSection(formNode,key,direction){
+  const enabled = enabledSectionKeysFromForm(formNode);
+  const idx = enabled.indexOf(key);
+  if(idx < 0) return;
+  const next = idx + direction;
+  if(next < 0 || next >= enabled.length) return;
+  enabled.splice(idx,1);
+  enabled.splice(next,0,key);
+  applyEnabledSectionOrder(enabled,formNode);
+  refreshSectionOrderList(formNode);
+  markEditorDirty(formNode);
+  schedulePreviewUpdate(formNode,{immediate:true});
+}
+
+function applySectionOrderFromList(formNode){
+  const listNode = document.getElementById("sectionOrderList");
+  if(!listNode) return;
+  const keys = [...listNode.querySelectorAll(".section-order-item")].map(item=>item.dataset.sectionKey).filter(Boolean);
+  if(!keys.length) return;
+  applyEnabledSectionOrder(keys,formNode);
+  refreshSectionOrderList(formNode);
+  markEditorDirty(formNode);
+  schedulePreviewUpdate(formNode,{immediate:true});
 }
 
 function bindSectionOrderDnD(){
@@ -1813,16 +2074,76 @@ function bindSectionOrderDnD(){
   if(!listNode || listNode.dataset.bound === "1") return;
   listNode.dataset.bound = "1";
   let dragKey = null;
+  let dragEl = null;
+  let lastOverKey = null;
+
+  listNode.addEventListener("click",event=>{
+    const upBtn = event.target.closest("[data-section-move-up]");
+    if(upBtn && listNode.contains(upBtn)){
+      event.preventDefault();
+      moveEnabledSection(document.getElementById("momentEditorForm"),upBtn.dataset.sectionMoveUp,-1);
+      return;
+    }
+    const downBtn = event.target.closest("[data-section-move-down]");
+    if(downBtn && listNode.contains(downBtn)){
+      event.preventDefault();
+      moveEnabledSection(document.getElementById("momentEditorForm"),downBtn.dataset.sectionMoveDown,1);
+    }
+  });
+
+  listNode.addEventListener("pointerdown",event=>{
+    const handle = event.target.closest(".section-drag-handle");
+    if(!handle || !listNode.contains(handle)) return;
+    const item = handle.closest(".section-order-item");
+    if(!item) return;
+    event.preventDefault();
+    dragKey = item.dataset.sectionKey;
+    dragEl = item;
+    lastOverKey = dragKey;
+    item.classList.add("dragging");
+    handle.setPointerCapture(event.pointerId);
+  });
+
+  listNode.addEventListener("pointermove",event=>{
+    if(!dragEl || !dragKey) return;
+    const over = document.elementFromPoint(event.clientX,event.clientY)?.closest(".section-order-item");
+    if(!over || !listNode.contains(over) || over === dragEl || over.dataset.sectionKey === lastOverKey) return;
+    lastOverKey = over.dataset.sectionKey;
+    const items = [...listNode.querySelectorAll(".section-order-item")];
+    const dragIdx = items.indexOf(dragEl);
+    const overIdx = items.indexOf(over);
+    if(dragIdx < 0 || overIdx < 0) return;
+    if(dragIdx < overIdx) over.after(dragEl);
+    else over.before(dragEl);
+    dragEl = listNode.querySelector(`[data-section-key="${dragKey}"]`);
+  });
+
+  const finishPointerDrag = event=>{
+    if(!dragEl) return;
+    dragEl.classList.remove("dragging");
+    dragEl = null;
+    dragKey = null;
+    lastOverKey = null;
+    const form = document.getElementById("momentEditorForm");
+    if(form) applySectionOrderFromList(form);
+    event?.preventDefault?.();
+  };
+
+  listNode.addEventListener("pointerup",finishPointerDrag);
+  listNode.addEventListener("pointercancel",finishPointerDrag);
+
   listNode.addEventListener("dragstart",event=>{
-    const item = event.target.closest(".section-order-item");
+    const handle = event.target.closest(".section-drag-handle");
+    const item = handle?.closest(".section-order-item") || event.target.closest(".section-order-item");
     if(!item) return;
     dragKey = item.dataset.sectionKey;
     item.classList.add("dragging");
     event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", dragKey);
   });
   listNode.addEventListener("dragend",()=>{
     dragKey = null;
-    listNode.querySelector(".dragging")?.classList.remove("dragging");
+    listNode.querySelector(".section-order-item.dragging")?.classList.remove("dragging");
   });
   listNode.addEventListener("dragover",event=>{
     event.preventDefault();
@@ -1832,7 +2153,7 @@ function bindSectionOrderDnD(){
     const enabled = enabledSectionKeysFromForm(form);
     const from = enabled.indexOf(dragKey);
     const to = enabled.indexOf(over.dataset.sectionKey);
-    if(from < 0 || to < 0) return;
+    if(from < 0 || to < 0 || from === to) return;
     enabled.splice(from,1);
     enabled.splice(to,0,dragKey);
     applyEnabledSectionOrder(enabled,form);
@@ -1886,16 +2207,28 @@ function promptSaveReminder(message = "Modifiche pronte — clicca Salva in alto
 function renderDetail(id){
   activeId = id;
   const row = rows.find(item=>item.id === id);
-  if(!row) return;
-  const state = mergedState(row);
+  if(!row){
+    renderEmptyState("Pagina non trovata. Ricarica o seleziona un'altra pagina.");
+    return;
+  }
+  let state;
+  try{
+    state = mergedState(row);
+  }catch(error){
+    renderEditorFailure(error);
+    return;
+  }
   sectionOrder = [...state.sectionOrder];
   currentMomentType = normalizeMomentType(state.type);
+  lastSavedMomentType = currentMomentType;
   pinnedExtraSections = [...(state.pinned_sections || [])];
   editorDirty = false;
   const publicUrl = `${PUBLIC_BASE_URL}/m/${encodeURIComponent(row.slug)}`;
   const nfcUrl = row.nfc_code ? `${PUBLIC_BASE_URL}/k/${encodeURIComponent(row.nfc_code)}` : "";
   const showWizard = needsOnboarding(row);
-  detail.innerHTML = `
+  let editorHtml;
+  try{
+    editorHtml = `
     ${adminMode ? `<p class="admin-mode-banner" id="adminModeBanner">Modalità admin — stai modificando l'oggetto di ${esc(row.owner_email || "cliente")}.</p>` : ""}
     <div class="detail-head">
       <div>
@@ -1923,6 +2256,7 @@ function renderDetail(id){
           </div>
           <button type="button" class="ghost quick-publish published" id="quickPublishBtn" title="Rende la pagina visibile a chi ha il link">Pubblica pagina</button>
           <button type="button" class="ghost editor-open-link" id="editorOpenPageBtn" title="Apre la pagina pubblica">Apri pagina</button>
+          <button type="button" class="ghost editor-undo-btn" id="editorUndoBtn" hidden title="Annulla le modifiche non salvate">↩ Annulla</button>
           <button type="submit" form="momentEditorForm" class="primary editor-save-btn">Salva</button>
         </div>
       </div>
@@ -1943,8 +2277,8 @@ function renderDetail(id){
             ${renderSectionPanels(state,{ publicUrl, published:row.public_visible, pageTitle:state.title })}
             ${renderExtrasPanel(state)}
             ${renderGalleryFileInput("gallery")}
+            ${renderGalleryFileInput("letter_future")}
             ${renderJourneyFileInput()}
-            ${renderLetterFileInput()}
             ${renderPrivacyPanel(row, state)}
             <p class="status editor-form-status" id="editorStatus"></p>
           </form>
@@ -1962,6 +2296,11 @@ function renderDetail(id){
         </aside>
       </div>
     </div>`;
+  }catch(error){
+    renderEditorFailure(error);
+    return;
+  }
+  detail.innerHTML = editorHtml;
   const editorForm = document.getElementById("momentEditorForm");
   const editorShell = document.getElementById("momentEditorShell");
   mobilePreviewMode = false;
@@ -1969,7 +2308,13 @@ function renderDetail(id){
   if(previewFab) previewFab.textContent = "Anteprima";
   editorShell?.classList.remove("show-preview");
   savedEditorSnapshot = JSON.stringify(readFormState(editorForm));
+  lastPreviewHash = "";
   updateSaveStatus(true);
+  document.getElementById("editorUndoBtn")?.addEventListener("click",revertEditorChanges);
+  if(document.body.dataset.momentsUndoBound !== "1"){
+    document.body.dataset.momentsUndoBound = "1";
+    document.getElementById("editorUndoBtnMobile")?.addEventListener("click",revertEditorChanges);
+  }
   editorForm.addEventListener("submit",event=>saveMoment(event,row));
   document.getElementById("momentSupportForm")?.addEventListener("submit",event=>submitMomentSupportTicket(event,row));
   editorForm.addEventListener("input",event=>{
@@ -1989,14 +2334,26 @@ function renderDetail(id){
   bindActivationForm(document.getElementById("editorActivationForm"),document.getElementById("editorActivationStatus"));
   document.getElementById("editorLogout")?.addEventListener("click",()=>document.getElementById("momentsLogout")?.click());
   document.getElementById("applyMomentTemplate")?.addEventListener("click",()=>{
-    applyTemplateToForm(editorForm,editorForm.elements.moment_type.value || "free");
+    const type = lockedMomentType(row);
+    if(!confirmApplyMomentTemplate(type)) return;
+    applyTemplateToForm(editorForm,type);
   });
-  document.getElementById("momentTypeSelect")?.addEventListener("change",()=>{
-    const type = editorForm.elements.moment_type?.value || "free";
-    applySuggestedLookForType(editorForm, type);
-    syncEditorKitUi(editorForm);
-    markEditorDirty(editorForm);
-  });
+  if(adminMode){
+    document.getElementById("momentTypeSelect")?.addEventListener("change",event=>{
+      const select = event.currentTarget;
+      const nextType = normalizeMomentType(select.value || "free");
+      const previousType = currentMomentType;
+      if(nextType === previousType) return;
+      if(formHasMeaningfulContent(editorForm) && !confirmMomentTypeChange(nextType, previousType)){
+        select.value = previousType;
+        return;
+      }
+      currentMomentType = nextType;
+      applySuggestedLookForType(editorForm, nextType);
+      syncEditorKitUi(editorForm);
+      markEditorDirty(editorForm);
+    });
+  }
   bindDesignPanelHandlers(editorForm);
   updateDesignSwatch(editorForm);
   bindEditorNavigation(editorShell);
@@ -2042,6 +2399,15 @@ function renderDetail(id){
   const galleryMedia = normalizeMediaList(state.sections.gallery);
   writeGalleryMedia(editorForm,"gallery",galleryMedia);
   renderGalleryGrid(editorForm,"gallery");
+  const letterMedia = migrateLetterMediaSection(state.sections.letter_future);
+  writeGalleryMedia(editorForm,"letter_future",letterMedia);
+  renderGalleryGrid(editorForm,"letter_future");
+  for(const key of LIST_SECTION_KEYS){
+    const items = itemsFromSection(state.sections[key], LIST_SECTION_MODES[key]);
+    writeListItems(editorForm,key,items);
+    renderListItems(editorForm,key);
+  }
+  bindListItemsEditor(editorForm);
   const journeySteps = resolveJourneySteps(state.sections.timeline,state.sections.places);
   writeJourneySteps(editorForm,"timeline",journeySteps);
   renderJourneySteps(editorForm,"timeline");
@@ -2086,6 +2452,14 @@ function renderDetail(id){
       }
     }
   });
+  if(showWizard && sessionStorage.getItem(templateSeedKey(row.id)) !== "done"){
+    applyTemplateToForm(editorForm, currentMomentType);
+    sessionStorage.setItem(templateSeedKey(row.id), "done");
+    savedEditorSnapshot = JSON.stringify(readFormState(editorForm));
+    editorDirty = true;
+    updateSaveStatus(false);
+    promptSaveReminder(`Modello «${TYPE_LABELS[currentMomentType] || currentMomentType}» preparato dal tuo prodotto NFC. Salva per pubblicare.`);
+  }
   setEditorChromeVisible(true);
 }
 
@@ -2147,15 +2521,21 @@ function removeProfilePhoto(formNode){
 }
 
 async function uploadCoverImage(file,row,formNode){
-  validateImageFile(file);
   const status = document.getElementById("coverUploadStatus");
   setUploadStatus(status,"Caricamento in corso...");
   uploadBusy = true;
   try{
     const url = await uploadImage(supabase,{scope:"moments",scopeId:row.id,file});
     setCoverUrl(formNode, url);
-    const framerImg = document.getElementById("coverFramerImg");
-    if(framerImg) framerImg.src = url;
+    const slot = formNode.querySelector("#coverFramerSlot");
+    if(slot){
+      slot.innerHTML = renderCoverFramer({
+        cover_url:url,
+        cover_focus_x:formNode.elements.cover_focus_x?.value ?? 50,
+        cover_focus_y:formNode.elements.cover_focus_y?.value ?? 50,
+        cover_zoom:formNode.elements.cover_zoom?.value ?? 100
+      });
+    }
     bindCoverFramer(formNode);
     markEditorDirty(formNode);
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
@@ -2199,11 +2579,56 @@ async function uploadGalleryImages(files,row,formNode,key){
     markEditorDirty(formNode);
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
     const count = items?.length || batchSize;
-    promptSaveReminder(`${count} file caricati in galleria. Clicca Salva verde per vederli sulla tua pagina.`);
+    const label = key === "letter_future" ? "lettera al futuro" : "galleria";
+    promptSaveReminder(`${count} file caricati nella ${label}. Clicca Salva verde per vederli sulla tua pagina.`);
   }catch(error){
     const message = error.message || "Upload non riuscito.";
     setUploadStatus(status,message,"error");
     alert(message);
+  }
+}
+
+async function uploadSectionVideo(file,row,formNode){
+  uploadBusy = true;
+  try{
+    validateVideoFile(file);
+    const url = await uploadVideo(supabase,{scope:"moments",scopeId:row.id,file});
+    const urlInput = formNode.querySelector('[name="section_video_video_url"]');
+    const oldUrl = urlInput?.value || "";
+    if(urlInput) urlInput.value = url;
+    refreshVideoSectionPreview(formNode,url);
+    enableSection(formNode,"video");
+    markEditorDirty(formNode);
+    schedulePreviewUpdate(formNode,{immediate:true,force:true});
+    if(oldUrl && isCloudflareMediaUrl(oldUrl) && oldUrl !== url){
+      deleteStorageObject(supabase,oldUrl).catch(()=>{});
+    }
+  }catch(error){
+    alert(error.message || "Upload video non riuscito.");
+  }finally{
+    uploadBusy = false;
+  }
+}
+
+function refreshVideoSectionPreview(formNode,url){
+  const panel = document.getElementById("videoSectionPanel");
+  if(!panel) return;
+  const preview = url
+    ? `<div class="video-section-preview"><video src="${esc(url)}" controls playsinline preload="metadata"></video><button type="button" class="ghost video-section-remove" data-video-section-remove aria-label="Rimuovi video">Rimuovi</button></div>`
+    : `<button type="button" class="gallery-add video-section-add" data-video-section-upload><span>▶</span>Carica video MP4/MOV</button>`;
+  panel.querySelector(".video-section-preview,.video-section-add")?.remove();
+  panel.querySelector("#sectionVideoFile")?.insertAdjacentHTML("beforebegin",preview);
+}
+
+function removeSectionVideo(formNode){
+  const urlInput = formNode.querySelector('[name="section_video_video_url"]');
+  const oldUrl = urlInput?.value || "";
+  if(urlInput) urlInput.value = "";
+  refreshVideoSectionPreview(formNode,"");
+  markEditorDirty(formNode);
+  schedulePreviewUpdate(formNode,{immediate:true,force:true});
+  if(oldUrl && isCloudflareMediaUrl(oldUrl)){
+    deleteStorageObject(supabase,oldUrl).catch(()=>{});
   }
 }
 
@@ -2319,6 +2744,71 @@ function bindCounterSwitch(formNode){
   input.addEventListener("change",sync);
 }
 
+async function handleGalleryFileInputChange(input,row,formNode){
+  if(!input?.files?.length || uploadBusy) return;
+  const key = String(input.id || "").replace("galleryFile_","");
+  if(!key) return;
+  const pendingType = input.dataset.pendingType || "";
+  const replaceId = input.dataset.pendingReplaceId || "";
+  input.dataset.pendingType = "";
+  input.dataset.pendingReplaceId = "";
+  const files = [...input.files];
+  input.value = "";
+  if(!files.length) return;
+  const filtered = pendingType
+    ? files.filter(file=>fileMatchesGalleryType(file,pendingType))
+    : files;
+  if(!filtered.length){
+    const status = document.getElementById(`galleryUploadStatus_${key}`);
+    const label = pendingType === "video" ? "video" : pendingType === "audio" ? "audio" : "foto";
+    const formats = pendingType === "video"
+      ? "MP4, WebM o MOV"
+      : pendingType === "audio"
+        ? "MP3, M4A o WAV"
+        : "JPG, PNG, WebP o HEIC";
+    setUploadStatus(status,`Formato non riconosciuto. Seleziona un ${label} valido (${formats}).`,"error");
+    return;
+  }
+  const liveRow = rows.find(item=>item.id === activeId) || row;
+  if(!liveRow?.id){
+    alert("Pagina non selezionata. Ricarica l'editor e riprova.");
+    return;
+  }
+  if(replaceId){
+    await replaceGalleryImage(filtered[0],liveRow,formNode,key,replaceId);
+    return;
+  }
+  await uploadGalleryImages(filtered,liveRow,formNode,key);
+}
+
+async function replaceGalleryImage(file,row,formNode,key,mediaId){
+  const status = document.getElementById(`galleryUploadStatus_${key}`);
+  enableSection(formNode,key);
+  try{
+    const result = await replaceGalleryMediaItem({
+      supabase,
+      row,
+      formNode,
+      key,
+      mediaId,
+      file,
+      onStatus:(msg,type)=>setUploadStatus(status,msg,type),
+      onBusy:busy=>{ uploadBusy = busy; }
+    });
+    enableSection(formNode,key);
+    markEditorDirty(formNode);
+    schedulePreviewUpdate(formNode,{immediate:true,force:true});
+    if(result?.oldUrl && isCloudflareMediaUrl(result.oldUrl) && result.oldUrl !== result.item?.url){
+      deleteStorageObject(supabase,result.oldUrl).catch(()=>{});
+    }
+    promptSaveReminder("Foto sostituita. Clicca Salva verde per aggiornare la pagina.");
+  }catch(error){
+    const message = error.message || "Sostituzione non riuscita.";
+    setUploadStatus(status,message,"error");
+    alert(message);
+  }
+}
+
 function bindMediaUploads(root,row){
   const formNode = document.getElementById("momentEditorForm");
   if(!formNode) return;
@@ -2331,11 +2821,30 @@ function bindMediaUploads(root,row){
     if(!file || uploadBusy) return;
     await uploadCoverImage(file,row,formNode);
   });
+  formNode.querySelectorAll("input[id^='galleryFile_']").forEach(input=>{
+    input.addEventListener("change",async event=>{
+      await handleGalleryFileInputChange(event.currentTarget,row,formNode);
+    });
+  });
+  document.getElementById("journeyStepFile")?.addEventListener("change",async event=>{
+    const file = event.target.files?.[0];
+    const stepId = journeyUploadStepId;
+    journeyUploadStepId = null;
+    event.target.value = "";
+    if(!file || uploadBusy || !stepId) return;
+    await uploadJourneyStepImage(file,row,formNode,stepId);
+  });
   document.getElementById("musicAudioFile")?.addEventListener("change",async event=>{
     const file = event.target.files?.[0];
     event.target.value = "";
     if(!file || uploadBusy) return;
     await uploadMusicAudio(file,row,formNode);
+  });
+  document.getElementById("sectionVideoFile")?.addEventListener("change",async event=>{
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if(!file || uploadBusy) return;
+    await uploadSectionVideo(file,row,formNode);
   });
   document.getElementById("petPhotoFile")?.addEventListener("change",async event=>{
     const file = event.target.files?.[0];
@@ -2349,33 +2858,17 @@ function bindMediaUploads(root,row){
     if(!file || uploadBusy) return;
     await uploadSectionPhoto("countdown",file,row,formNode);
   });
+  document.getElementById("musicPhotoFile")?.addEventListener("change",async event=>{
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if(!file || uploadBusy) return;
+    await uploadSectionPhoto("music",file,row,formNode);
+  });
   document.getElementById("profilePhotoFile")?.addEventListener("change",async event=>{
     const file = event.target.files?.[0];
     event.target.value = "";
     if(!file || uploadBusy) return;
     await uploadProfilePhoto(file,row,formNode);
-  });
-  document.getElementById("letterFutureFile")?.addEventListener("change",async event=>{
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if(!file || uploadBusy) return;
-    try{
-      const { oldUrl } = await uploadLetterMedia({
-        supabase,
-        row,
-        formNode,
-        file,
-        onBusy:busy=>{ uploadBusy = busy; }
-      });
-      enableSection(formNode,"letter_future");
-      markEditorDirty(formNode);
-      schedulePreviewUpdate(formNode,{immediate:true,force:true});
-      if(oldUrl && isCloudflareMediaUrl(oldUrl)){
-        deleteStorageObject(supabase,oldUrl).catch(()=>{});
-      }
-    }catch(error){
-      alert(error.message || "Upload allegato non riuscito.");
-    }
   });
 }
 
@@ -2412,14 +2905,20 @@ async function uploadJourneyStepImage(file,row,formNode,stepId){
   }
 }
 
-function openGalleryFilePicker(formNode,key,type = ""){
+function openGalleryFilePicker(formNode,key,type = "",{ replaceId = "", multiple } = {}){
   setEditorPanel(`section-${key}`);
   enableSection(formNode,key);
   const input = document.getElementById(`galleryFile_${key}`);
   if(!input) return;
-  const accepts = { image:"image/*", video:"video/*", audio:"audio/*" };
-  input.accept = accepts[type] || "image/*,video/*,audio/*";
+  const accepts = { image:IMAGE_ACCEPT, video:"video/*", audio:"audio/*" };
+  input.accept = accepts[type] || `${IMAGE_ACCEPT},video/*,audio/*`;
   input.dataset.pendingType = type || "";
+  input.dataset.pendingReplaceId = replaceId || "";
+  if(typeof multiple === "boolean"){
+    input.multiple = multiple;
+  }else{
+    input.multiple = replaceId ? false : (key === "letter_future" ? type === "image" : true);
+  }
   requestAnimationFrame(()=>{ input.click(); });
 }
 
@@ -2427,53 +2926,37 @@ function bindMediaUploadDelegation(){
   if(!detail) return;
   if(detail.dataset.mediaBound === "1") return;
   detail.dataset.mediaBound = "1";
-  detail.addEventListener("change",async event=>{
-    const journeyInput = event.target.closest("#journeyStepFile");
-    if(journeyInput){
-      const formNode = document.getElementById("momentEditorForm");
-      const row = rows.find(item=>item.id === activeId);
-      const file = journeyInput.files?.[0];
-      const stepId = journeyUploadStepId;
-      journeyUploadStepId = null;
-      journeyInput.value = "";
-      if(!formNode || !row || !file || !stepId || uploadBusy) return;
-      await uploadJourneyStepImage(file,row,formNode,stepId);
-      return;
-    }
-    const input = event.target.closest("input[id^='galleryFile_']");
-    if(!input) return;
-    const formNode = document.getElementById("momentEditorForm");
-    const row = rows.find(item=>item.id === activeId);
-    if(!formNode || !row) return;
-    const key = input.id.replace("galleryFile_","");
-    const files = input.files;
-    const pendingType = input.dataset.pendingType || "";
-    input.dataset.pendingType = "";
-    input.value = "";
-    if(!files?.length || uploadBusy) return;
-    const filtered = pendingType
-      ? [...files].filter(file=>(inferMediaKind(file) || "image") === pendingType)
-      : [...files];
-    if(!filtered.length){
-      const status = document.getElementById(`galleryUploadStatus_${key}`);
-      const label = pendingType === "video" ? "video" : pendingType === "audio" ? "audio" : "foto";
-      setUploadStatus(status,`Formato non riconosciuto. Seleziona un ${label} valido (JPG, PNG, MP4 o MOV).`,"error");
-      return;
-    }
-    await uploadGalleryImages(filtered,row,formNode,key);
-  });
   detail.addEventListener("click",event=>{
     const formNode = document.getElementById("momentEditorForm");
     const row = rows.find(item=>item.id === activeId);
-    if(!formNode || !row) return;
+    if(!formNode || !row){
+      if(event.target.closest("[data-gallery-add],[data-gallery-remove],[data-gallery-replace]")){
+        alert("Editor non pronto. Ricarica la pagina e riprova.");
+      }
+      return;
+    }
     const addBtn = event.target.closest("[data-gallery-add]");
     if(addBtn){
       event.preventDefault();
       openGalleryFilePicker(formNode,addBtn.dataset.galleryAdd || "gallery",addBtn.dataset.galleryType || "");
       return;
     }
+    const replaceBtn = event.target.closest("[data-gallery-replace]");
+    if(replaceBtn){
+      event.preventDefault();
+      event.stopPropagation();
+      const panel = replaceBtn.closest("[data-gallery-key]");
+      const key = replaceBtn.dataset.mediaSection || panel?.dataset.galleryKey;
+      const mediaId = replaceBtn.dataset.mediaId || "";
+      const type = replaceBtn.dataset.mediaType || "image";
+      if(!key || !mediaId) return;
+      openGalleryFilePicker(formNode,key,type,{ replaceId:mediaId, multiple:false });
+      return;
+    }
     const removeBtn = event.target.closest("[data-gallery-remove]");
     if(removeBtn){
+      event.preventDefault();
+      event.stopPropagation();
       const panel = removeBtn.closest("[data-gallery-key]");
       const key = removeBtn.dataset.mediaSection || panel?.dataset.galleryKey;
       if(!key) return;
@@ -2481,6 +2964,7 @@ function bindMediaUploadDelegation(){
       const mediaId = removeBtn.dataset.mediaId;
       let index = mediaId ? media.findIndex(item=>item.id === mediaId) : Number(removeBtn.dataset.galleryRemove);
       if(index < 0) index = Number(removeBtn.dataset.galleryRemove);
+      if(!Number.isInteger(index) || index < 0 || index >= media.length) return;
       const removed = media[index];
       media.splice(index,1);
       writeGalleryMedia(formNode,key,media);
@@ -2494,6 +2978,14 @@ function bindMediaUploadDelegation(){
     }
     if(event.target.closest("[data-music-audio-add]")){
       document.getElementById("musicAudioFile")?.click();
+      return;
+    }
+    if(event.target.closest("[data-video-section-upload]")){
+      document.getElementById("sectionVideoFile")?.click();
+      return;
+    }
+    if(event.target.closest("[data-video-section-remove]")){
+      removeSectionVideo(formNode);
       return;
     }
     if(event.target.closest("[data-music-audio-remove]")){
@@ -2538,20 +3030,6 @@ function bindMediaUploadDelegation(){
       removeSectionPhoto(sectionPhotoRemove.dataset.sectionPhotoRemove,formNode);
       return;
     }
-    if(event.target.closest("[data-letter-media-add]")){
-      document.getElementById("letterFutureFile")?.click();
-      return;
-    }
-    if(event.target.closest("[data-letter-media-remove]")){
-      const old = readLetterMedia(formNode);
-      writeLetterMedia(formNode,{ media_type:"", media_url:"", media_title:"" });
-      syncLetterMediaPanel(formNode);
-      markEditorDirty(formNode);
-      schedulePreviewUpdate(formNode,{immediate:true,force:true});
-      if(old.media_url && isCloudflareMediaUrl(old.media_url)){
-        deleteStorageObject(supabase,old.media_url).catch(()=>{});
-      }
-    }
   });
 }
 
@@ -2563,66 +3041,92 @@ function renderGalleryUpload(section,key){
   return renderGalleryUploadPanel(section,key);
 }
 
+function renderSectionTitleField(key, section){
+  const placeholder = DEFAULT_SECTIONS[key]?.title || SECTION_LABELS[key] || "";
+  return `<label>Titolo sezione<input name="section_${esc(key)}_title" value="${esc(section.title || "")}" placeholder="Es. ${esc(placeholder)}"><span class="field-hint">Compare nel menu della pagina e come titolo della sezione.</span></label>`;
+}
+
+function sectionOrderDisplayLabel(formNode, momentType, key){
+  const custom = String(formNode?.querySelector(`[name="section_${key}_title"]`)?.value || "").trim();
+  if(custom) return custom;
+  return sectionLabelForType(momentType, key);
+}
+
 function sectionEditor(key,section,standalone=false){
+  const safe = section || DEFAULT_SECTIONS[key] || {};
   const hints = sectionFieldHints();
   const icon = SECTION_ICONS[key] || "•";
   const guide = sectionFillGuideForType(currentMomentType, key);
-  const galleryField = key === "gallery" ? renderGalleryUpload(section,key) : "";
-  const journeyField = key === "timeline" ? renderJourneyPanel(section) : "";
+  const galleryField = key === "gallery" ? renderGalleryUpload(safe,key) : "";
+  const journeyField = key === "timeline" ? renderJourneyPanel(safe) : "";
   const listHint = hints[key] && key !== "timeline"
     ? `<p class="section-hint">${esc(hints[key])}</p>` : "";
   const dedicationFields = key === "dedication" ? `
-    <label>Destinatario<input name="section_${esc(key)}_recipient" value="${esc(section.recipient || "")}" placeholder="Es. Marco, amici, futuro noi"></label>
-    <label>Firma<input name="section_${esc(key)}_signature" value="${esc(section.signature || "")}" placeholder="Es. Con amore, i tuoi nomi"></label>` : "";
+    <label>Destinatario<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="Es. Marco, amici, futuro noi"></label>
+    <label>Firma<input name="section_${esc(key)}_signature" value="${esc(safe.signature || "")}" placeholder="Es. Con amore, i tuoi nomi"></label>` : "";
   const countdownFields = key === "countdown" ? `
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">1</span> Quando?</p>
-      <label>Cosa aspettate?<input name="section_${esc(key)}_event_label" value="${esc(section.event_label || "")}" placeholder="Es. Al nostro matrimonio"></label>
-      <label>Data e ora<input type="datetime-local" name="section_${esc(key)}_target_date" value="${esc(section.target_date || "")}"></label>
+      <label>Cosa aspettate?<input name="section_${esc(key)}_event_label" value="${esc(safe.event_label || "")}" placeholder="Es. Al nostro matrimonio"></label>
+      <label>Data e ora<input type="datetime-local" name="section_${esc(key)}_target_date" value="${esc(safe.target_date || "")}"></label>
     </div>
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">2</span> Foto</p>
-      ${renderSectionPhotoPanel(key, section, "image_url", SECTION_PHOTO_FIELDS.countdown)}
+      ${renderSectionPhotoPanel(key, safe, "image_url", SECTION_PHOTO_FIELDS.countdown)}
       <p class="field-hint">Facoltativa — appare sopra il timer nella pagina.</p>
     </div>` : "";
   const musicFields = key === "music" ? `
-    <label>Link Spotify<input name="section_${esc(key)}_spotify_url" value="${esc(section.spotify_url || "")}" placeholder="https://open.spotify.com/track/..."><span class="field-hint">Link pubblico della canzone o playlist — non link di file caricati.</span></label>
-    <label>Link YouTube<input name="section_${esc(key)}_youtube_url" value="${esc(section.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..."><span class="field-hint">Link pubblico del video — non link di file caricati.</span></label>
-    ${renderMusicAudioPanel(section)}` : "";
+    <div class="editor-card">
+      <p class="ecard-title"><span class="step-badge">1</span> Collegamenti</p>
+      <label>Link Spotify<input name="section_${esc(key)}_spotify_url" value="${esc(safe.spotify_url || "")}" placeholder="https://open.spotify.com/track/..."><span class="field-hint">Link pubblico — non file caricati.</span></label>
+      <label>Link YouTube<input name="section_${esc(key)}_youtube_url" value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..."><span class="field-hint">Link pubblico del video.</span></label>
+      ${renderMusicAudioPanel(safe)}
+    </div>
+    <div class="editor-card">
+      <p class="ecard-title"><span class="step-badge">2</span> Immagine</p>
+      ${renderSectionPhotoPanel(key, safe, "image_url", SECTION_PHOTO_FIELDS.music)}
+      <p class="field-hint">Facoltativa — copertina del brano, locandina o foto simbolica.</p>
+    </div>` : "";
+  const videoFields = key === "video" ? `
+    <div class="editor-card">
+      <p class="ecard-title"><span class="step-badge">1</span> Video del ricordo</p>
+      ${renderVideoSectionPanel(safe)}
+    </div>` : "";
+  const listItemsPanel = LIST_SECTION_KEYS.has(key) ? renderListItemsPanel(key, safe) : "";
   const letterFutureFields = key === "letter_future" ? `
-    <label>Destinatario<input name="section_${esc(key)}_recipient" value="${esc(section.recipient || "")}" placeholder="Es. noi tra 10 anni"></label>
-    <label>Data di apertura<input type="datetime-local" name="section_${esc(key)}_unlock_date" value="${esc(section.unlock_date || "")}"></label>
-    ${renderLetterMediaPanel(section)}` : "";
+    <label>Destinatario<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="Es. noi tra 10 anni"></label>
+    <label>Data di apertura<input type="datetime-local" name="section_${esc(key)}_unlock_date" value="${esc(safe.unlock_date || "")}"></label>
+    ${renderGalleryUploadPanel(safe, "letter_future")}` : "";
   const rsvpFields = key === "rsvp" ? `
     <div class="editor-card smart-card">
       <p class="ecard-title"><span class="step-badge">1</span> WhatsApp organizzatore</p>
-      <label>Numero WhatsApp<input name="section_${esc(key)}_whatsapp_number" value="${esc(section.whatsapp_number || "")}" placeholder="393331234567" inputmode="tel" autocomplete="tel"></label>
+      <label>Numero WhatsApp<input name="section_${esc(key)}_whatsapp_number" value="${esc(safe.whatsapp_number || "")}" placeholder="393331234567" inputmode="tel" autocomplete="tel"></label>
       <p class="field-hint">Prefisso internazionale senza + (39 = Italia). Gli invitati inviano il RSVP a questo numero.</p>
     </div>
-    ${renderRsvpFieldsEditor(section)}` : "";
+    ${renderRsvpFieldsEditor(safe)}` : "";
   const petFields = key === "pet" ? `
-    <label>Nome<input name="section_${esc(key)}_pet_name" value="${esc(section.pet_name || "")}" placeholder="Es. Luna"></label>
-    <label>Emoji<input name="section_${esc(key)}_pet_emoji" value="${esc(section.pet_emoji || "🐾")}" maxlength="4" placeholder="🐾"></label>
-    ${renderSectionPhotoPanel(key, section, "pet_photo", SECTION_PHOTO_FIELDS.pet)}` : "";
+    <label>Nome<input name="section_${esc(key)}_pet_name" value="${esc(safe.pet_name || "")}" placeholder="Es. Luna"></label>
+    <label>Emoji<input name="section_${esc(key)}_pet_emoji" value="${esc(safe.pet_emoji || "🐾")}" maxlength="4" placeholder="🐾"></label>
+    ${renderSectionPhotoPanel(key, safe, "pet_photo", SECTION_PHOTO_FIELDS.pet)}` : "";
   const quoteFields = key === "quote" ? `
-    <label>Autore<input name="section_${esc(key)}_author" value="${esc(section.author || "")}" placeholder="Es. William Shakespeare"></label>` : "";
+    <label>Autore<input name="section_${esc(key)}_author" value="${esc(safe.author || "")}" placeholder="Es. William Shakespeare"></label>` : "";
   const signatureFields = key === "signature" ? `
-    <label>Nome firma<input name="section_${esc(key)}_sign_name" value="${esc(section.sign_name || "")}" placeholder="Es. Marco & Giulia"></label>
-    <label>Sottotitolo<input name="section_${esc(key)}_sign_subtitle" value="${esc(section.sign_subtitle || "")}" placeholder="Es. Per sempre"></label>` : "";
+    <label>Nome firma<input name="section_${esc(key)}_sign_name" value="${esc(safe.sign_name || "")}" placeholder="Es. Marco & Giulia"></label>
+    <label>Sottotitolo<input name="section_${esc(key)}_sign_subtitle" value="${esc(safe.sign_subtitle || "")}" placeholder="Es. Per sempre"></label>` : "";
   const bodyLabel = key === "quote" ? "Citazione" : key === "dedication" || key === "letter_future" ? "Testo della lettera" : key === "pet" ? "Racconto" : "Contenuto";
-  const bodyField = key === "timeline" || key === "gallery" || key === "countdown" || key === "rsvp" || key === "guestbook"
-    ? (key === "countdown" || key === "rsvp" || key === "guestbook" ? `<details class="design-advanced editor-card"><summary>Testo extra (facoltativo)</summary><label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(section.body || "")}</textarea></label></details>` : "")
-    : `<label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(section.body || "")}</textarea></label>`;
-  const titleField = key !== "quote" && key !== "signature"
-    ? `<label>Titolo sezione<input name="section_${esc(key)}_title" value="${esc(section.title || "")}" placeholder="Es. ${esc(DEFAULT_SECTIONS[key]?.title || SECTION_LABELS[key] || "")}"><span class="field-hint">Compare nel menu della pagina e come titolo della sezione.</span></label>`
-    : "";
+  const bodyField = key === "timeline" || key === "gallery" || key === "video" || key === "countdown" || key === "rsvp" || key === "guestbook" || LIST_SECTION_KEYS.has(key)
+    ? (key === "countdown" || key === "rsvp" || key === "guestbook" ? `<details class="design-advanced editor-card"><summary>Testo extra (facoltativo)</summary><label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></details>` : "")
+    : `<label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label>`;
+  const titleField = renderSectionTitleField(key, safe);
   const fields = `
     ${titleField}
     ${bodyField}
+    ${listItemsPanel}
     ${listHint}
     ${dedicationFields}
     ${countdownFields}
     ${musicFields}
+    ${videoFields}
     ${letterFutureFields}
     ${rsvpFields}
     ${petFields}
@@ -2632,10 +3136,13 @@ function sectionEditor(key,section,standalone=false){
     ${galleryField}`;
   if(standalone){
     if(key === "gallery"){
-      return `<div class="editor-card"><p class="ecard-title">${icon} Aggiungi ricordi</p><p class="field-hint">${esc(guide)}</p>${galleryField}</div>`;
+      return `<div class="editor-card"><p class="ecard-title">${icon} Galleria foto</p><p class="field-hint">${esc(guide)}</p>${titleField}${galleryField}</div>`;
+    }
+    if(key === "video"){
+      return `<div class="editor-card"><p class="ecard-title">${icon} Video</p><p class="field-hint">${esc(guide)}</p>${titleField}${videoFields}</div>`;
     }
     if(key === "timeline"){
-      return `<div class="editor-card"><p class="ecard-title">${icon} Tappe del percorso</p><p class="field-hint">${esc(guide)}</p>${journeyField}</div>`;
+      return `<div class="editor-card"><p class="ecard-title">${icon} Tappe del percorso</p><p class="field-hint">${esc(guide)}</p>${titleField}${journeyField}</div>`;
     }
     if(key === "countdown"){
       return `<div class="editor-card"><p class="ecard-title">${icon} Conto alla rovescia</p><p class="field-hint">${esc(guide)}</p>${titleField}</div>${countdownFields}${bodyField}`;
@@ -2644,13 +3151,13 @@ function sectionEditor(key,section,standalone=false){
       return `<div class="editor-card"><p class="ecard-title">${icon} RSVP invitati</p><p class="field-hint">${esc(guide)}</p>${titleField}${rsvpFields}${bodyField}</div>`;
     }
     if(key === "guestbook"){
-      return `<div class="editor-card"><p class="ecard-title"><span class="step-badge">1</span> ${icon} Libro degli ospiti</p><p class="field-hint">${esc(guide)}</p>${titleField}<label>Invito agli ospiti<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(section.body || "")}</textarea></label></div>`;
+      return `<div class="editor-card"><p class="ecard-title"><span class="step-badge">1</span> ${icon} Libro degli ospiti</p><p class="field-hint">${esc(guide)}</p>${titleField}<label>Invito agli ospiti<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></div>`;
     }
     return `<div class="editor-card"><p class="ecard-title">${icon} ${esc(guide.split(".")[0])}</p>${fields.replace(galleryField,"").replace(journeyField,"")}</div>`;
   }
   const fillGuide = `<div class="section-fill-guide"><p>${esc(guide)}</p></div>`;
-  return `<details class="section-box section-box-${esc(key)}" data-section-key="${esc(key)}" ${section.enabled ? "open" : ""}>
-    <summary><span class="section-icon">${esc(icon)}</span><label><input type="checkbox" name="section_${esc(key)}_enabled" ${section.enabled ? "checked" : ""} onclick="event.stopPropagation()"> <span>${esc(SECTION_LABELS[key])}</span></label></summary>
+  return `<details class="section-box section-box-${esc(key)}" data-section-key="${esc(key)}" ${safe.enabled ? "open" : ""}>
+    <summary><span class="section-icon">${esc(icon)}</span><label><input type="checkbox" name="section_${esc(key)}_enabled" ${safe.enabled ? "checked" : ""} onclick="event.stopPropagation()"> <span>${esc(SECTION_LABELS[key])}</span></label></summary>
     <div class="section-body">${fillGuide}${fields}</div>
   </details>`;
 }
@@ -2677,21 +3184,36 @@ function sanitizeStateForSave(state){
   const sections = clone.sections || {};
   if(sections.letter_future){
     const letter = sections.letter_future;
-    letter.media_url = stripBlob(letter.media_url);
-    if(!letter.media_url){
+    letter.media = migrateLetterMediaSection(letter)
+      .map(item=>({ ...item, url:stripBlob(item.url) }))
+      .filter(item=>item.url);
+    const first = letter.media[0];
+    if(first){
+      letter.media_type = first.type;
+      letter.media_url = first.url;
+      letter.media_title = first.title || "";
+    }else{
       letter.media_type = "";
+      letter.media_url = "";
       letter.media_title = "";
-    }else if(!letter.media_type){
-      letter.media_type = letter.media_url.match(/\.(mp4|webm|mov|m4v)(\?|$)/i) ? "video"
-        : letter.media_url.match(/\.(mp3|m4a|wav|ogg|aac)(\?|$)/i) ? "audio" : "image";
     }
   }
   if(sections.gallery?.media){
-    sections.gallery.media = sections.gallery.media.filter(item=>!String(item?.url || "").startsWith("blob:"));
-    sections.gallery.images = sections.gallery.media.filter(item=>item.type === "image").map(item=>item.url);
+    sections.gallery.media = sections.gallery.media
+      .filter(item=>item.type === "image" && !String(item?.url || "").startsWith("blob:"));
+    sections.gallery.images = sections.gallery.media.map(item=>item.url);
+  }
+  if(sections.video){
+    sections.video.video_url = stripBlob(sections.video.video_url);
   }
   if(sections.music){
     sections.music.audio_url = stripBlob(sections.music.audio_url);
+    sections.music.image_url = stripBlob(sections.music.image_url);
+  }
+  for(const key of LIST_SECTION_KEYS){
+    if(sections[key]?.items){
+      sections[key].items = sections[key].items.filter(item=>!String(item?.url || item?.image_url || "").startsWith("blob:"));
+    }
   }
   if(sections.rsvp){
     sections.rsvp = normalizeRsvpSection(sections.rsvp);
@@ -2728,12 +3250,23 @@ function readFormState(formNode){
     ...sections.music,
     audio_url:String(form.get("section_music_audio_url") || sections.music.audio_url || "").trim(),
     audio_title:String(form.get("section_music_audio_title") || sections.music.audio_title || "").trim(),
-    audio_description:String(form.get("section_music_audio_description") || sections.music.audio_description || "").trim()
+    audio_description:String(form.get("section_music_audio_description") || sections.music.audio_description || "").trim(),
+    image_url:String(form.get("section_music_image_url") || sections.music.image_url || "").trim()
   };
+  for(const key of LIST_SECTION_KEYS){
+    sections[key] = {
+      ...sections[key],
+      items:readListItems(formNode,key)
+    };
+  }
   sections.letter_future = {
     ...sections.letter_future,
-    ...readLetterMedia(formNode)
+    media:readGalleryMedia(formNode,"letter_future")
   };
+  const letterFirst = sections.letter_future.media[0];
+  sections.letter_future.media_type = letterFirst?.type || "";
+  sections.letter_future.media_url = letterFirst?.url || "";
+  sections.letter_future.media_title = letterFirst?.title || "";
   return {
     title:String(form.get("title") || "").trim(),
     type:normalizeMomentType(form.get("moment_type")),
@@ -2750,7 +3283,7 @@ function readFormState(formNode){
     heroStyle:String(form.get("hero_style") || "classico"),
     heroCut:String(form.get("hero_cut") || "dritto"),
     fontPair:String(form.get("font_pair") || "classic"),
-    pageDecor:String(form.get("page_decor") || "none"),
+    pageDecor:"none",
     show_together_counter:form.get("show_together_counter") === "on",
     together_since:String(form.get("together_since") || "").trim(),
     counter_label:String(form.get("counter_label") || "").trim(),
@@ -2764,14 +3297,26 @@ function readFormState(formNode){
 }
 
 function markEditorDirty(formNode){
+  // Dirty immediato: evita JSON.stringify a ogni keystroke (costoso su form grandi)
+  if(!editorDirty){
+    editorDirty = true;
+    updateSaveStatus(false);
+    const flag = document.getElementById("unsavedFlag");
+    if(flag) flag.hidden = false;
+  }
   clearTimeout(markEditorDirty.timer);
   markEditorDirty.timer = setTimeout(()=>{
-    const snapshot = JSON.stringify(readFormState(formNode));
-    editorDirty = snapshot !== savedEditorSnapshot;
-    updateSaveStatus(!editorDirty);
-    const flag = document.getElementById("unsavedFlag");
-    if(flag) flag.hidden = !editorDirty;
-  },180);
+    if(!formNode) return;
+    try{
+      const snapshot = JSON.stringify(readFormState(formNode));
+      editorDirty = snapshot !== savedEditorSnapshot;
+      updateSaveStatus(!editorDirty);
+      const flag = document.getElementById("unsavedFlag");
+      if(flag) flag.hidden = !editorDirty;
+    }catch{
+      /* ignore parse errors during typing */
+    }
+  },900);
 }
 
 function shouldLivePreview(){
@@ -2783,7 +3328,20 @@ function shouldLivePreview(){
 
 function schedulePreviewUpdate(formNode,options = {}){
   if(!options.force && !shouldLivePreview()) return;
-  renderPreview(readFormState(formNode),options);
+  clearTimeout(previewDebounceTimer);
+  const delay = options.immediate ? 100 : 700;
+  previewDebounceTimer = setTimeout(()=>{
+    let state;
+    try{
+      state = readFormState(formNode);
+    }catch{
+      return;
+    }
+    const hash = JSON.stringify(state);
+    if(!options.force && hash === lastPreviewHash) return;
+    lastPreviewHash = hash;
+    renderPreview(state,{ force:options.force });
+  },delay);
 }
 
 function updateCoverPreview(formNode){
@@ -2798,9 +3356,6 @@ function updateCoverPreview(formNode){
   }
   syncCoverFramer(formNode);
 }
-
-let previewDebounceTimer = null;
-let previewFetchId = 0;
 
 function ensurePreviewShell(preview){
   let stage = preview.querySelector("#previewLiveStage");
@@ -2852,43 +3407,41 @@ async function renderPreview(state,options = {}){
   const preview = document.getElementById("momentPreview");
   if(!preview) return;
   if(!options.force && !shouldLivePreview()) return;
-  clearTimeout(previewDebounceTimer);
-  const delay = options.immediate ? 0 : 350;
-  previewDebounceTimer = setTimeout(async ()=>{
-    const requestId = ++previewFetchId;
-    const { iframe, status } = ensurePreviewShell(preview);
-    if(!iframe) return;
-    if(status) status.textContent = "Aggiornamento…";
-    try{
-      const response = await fetch(`${WORKER_BASE_URL}/api/moment/preview`,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          title:state.title,
-          description:state.subtitle || state.description,
-          page_state:state
-        })
-      });
+  const requestId = ++previewFetchId;
+  const { iframe, status } = ensurePreviewShell(preview);
+  if(!iframe) return;
+  if(status) status.textContent = "Aggiornamento…";
+  try{
+    const response = await fetch(`${WORKER_BASE_URL}/api/moment/preview`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        title:state.title,
+        description:state.subtitle || state.description,
+        slug:rows.find(item=>item.id === activeId)?.slug || "",
+        page_state:state
+      })
+    });
+    if(requestId !== previewFetchId) return;
+    if(response.status === 429) throw new Error("Troppe anteprime — attendi un attimo.");
+    if(!response.ok) throw new Error("Anteprima non disponibile");
+    const html = await response.text();
+    iframe.onload = ()=>{
       if(requestId !== previewFetchId) return;
-      if(!response.ok) throw new Error("Anteprima non disponibile");
-      const html = await response.text();
-      iframe.onload = ()=>{
-        if(requestId !== previewFetchId) return;
-        fitPreviewStage();
-        if(status) status.textContent = "";
-      };
-      iframe.srcdoc = html;
-      setTimeout(()=>{
-        if(requestId === previewFetchId) fitPreviewStage();
-      },120);
-    }catch(error){
-      if(requestId !== previewFetchId) return;
-      iframe.onload = null;
-      iframe.srcdoc = `<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#64748b"><p><strong>Anteprima non disponibile</strong></p><p>${esc(error.message || "Riprova tra poco.")}</p></body></html>`;
-      iframe.style.height = "240px";
+      fitPreviewStage();
       if(status) status.textContent = "";
-    }
-  },delay);
+    };
+    iframe.srcdoc = html;
+    setTimeout(()=>{
+      if(requestId === previewFetchId) fitPreviewStage();
+    },120);
+  }catch(error){
+    if(requestId !== previewFetchId) return;
+    iframe.onload = null;
+    iframe.srcdoc = `<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#64748b"><p><strong>Anteprima non disponibile</strong></p><p>${esc(error.message || "Riprova tra poco.")}</p></body></html>`;
+    iframe.style.height = "240px";
+    if(status) status.textContent = "";
+  }
 }
 
 async function saveMoment(event,row){
@@ -2902,18 +3455,21 @@ async function saveMoment(event,row){
     setStatus(editorStatus,error.message || "Controlla i campi e riprova.","error");
     return;
   }
+  if(!adminMode){
+    state.type = lockedMomentType(row);
+  }
   const pin = String(new FormData(formNode).get("access_pin") || "").trim();
   const publicVisible = new FormData(formNode).get("public_visible") === "true";
   const pinEnabled = new FormData(formNode).get("pin_enabled") === "true";
   if(!state.title) return setStatus(editorStatus,"Inserisci il titolo della pagina.","error");
   if(state.sections?.letter_future?.enabled){
     const letter = state.sections.letter_future;
-    const hasLetter = Boolean(String(letter.body || "").trim() || letter.unlock_date || letter.media_url);
+    const hasLetter = Boolean(String(letter.body || "").trim() || letter.unlock_date || migrateLetterMediaSection(letter).length);
     if(!hasLetter){
       return setStatus(editorStatus,"Lettera al futuro: scrivi il testo, la data di apertura o un allegato.","error");
     }
-    if(letter.media_url && !letter.media_type){
-      return setStatus(editorStatus,"Lettera al futuro: ricarica l'allegato prima di salvare.","error");
+    if(letter.media?.some(item=>String(item?.url || "").startsWith("blob:"))){
+      return setStatus(editorStatus,"Lettera al futuro: attendi il caricamento degli allegati o ricaricali prima di salvare.","error");
     }
   }
   setStatus(editorStatus,"Salvataggio...");
@@ -2956,20 +3512,38 @@ async function saveMoment(event,row){
       return;
     }
     savedEditorSnapshot = JSON.stringify(state);
+    lastPreviewHash = savedEditorSnapshot;
+    lastSavedMomentType = normalizeMomentType(state.type);
+    currentMomentType = lastSavedMomentType;
     editorDirty = false;
     updateSaveStatus(true);
     localStorage.setItem(onboardingKey(row.id),"done");
     setStatus(editorStatus,"Pagina salvata.","ok");
     const hint = document.getElementById("editorActionHint");
     if(hint) hint.hidden = true;
-    const panel = activeEditorPanel;
-    try{
-      await loadObjects();
-    }catch(loadError){
-      console.warn(loadError);
-    }
-    activeEditorPanel = panel;
-    setEditorPanel(panel);
+    // Soft update: niente reload completo dell'editor (più fluido)
+    Object.assign(row,{
+      title:state.title,
+      description:state.description,
+      moment_type:state.type,
+      event_type:state.type,
+      public_visible:publicVisible,
+      pin_enabled:pinEnabled,
+      page_state:state
+    });
+    const rowIndex = rows.findIndex(item=>item.id === row.id);
+    if(rowIndex >= 0) rows[rowIndex] = row;
+    refreshObjectsSwitcher();
+    const titleNode = detail.querySelector(".detail-head h2");
+    if(titleNode) titleNode.textContent = state.title || row.slug;
+    detail.querySelectorAll(".status-pill.live, .status-pill.draft").forEach(pill=>{
+      const isLive = publicVisible;
+      pill.className = `status-pill ${isLive ? "live" : "draft"}`;
+      pill.textContent = isLive ? "Pubblicata" : "Bozza privata";
+    });
+    detail.querySelectorAll(".status-pill.pin").forEach(pill=>{
+      pill.textContent = pinEnabled ? "PIN attivo" : "PIN disattivo";
+    });
     const formAfter = document.getElementById("momentEditorForm");
     if(formAfter) schedulePreviewUpdate(formAfter,{immediate:true,force:true});
     bindMomentDashboard({
@@ -2993,6 +3567,8 @@ async function saveMoment(event,row){
 supabase = createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
   auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
 });
+bindUploadClient(supabase);
+warmUploadPipeline();
 bindPasswordToggles();
 bindCodeInputs();
 bindMediaUploadDelegation();
@@ -3008,7 +3584,7 @@ forgotForm?.addEventListener("submit",async event=>{
   const email = document.getElementById("momentsForgotEmail").value.trim().toLowerCase();
   if(!email) return setStatus(statusNode,"Inserisci l’email.","error");
   setStatus(statusNode,"Invio link di recupero...");
-  const { error } = await supabase.auth.resetPasswordForEmail(email,{redirectTo:authRedirectUrl()});
+  const { error } = await supabase.auth.resetPasswordForEmail(email,{redirectTo:authRedirectTo("/moments.html")});
   setStatus(statusNode,error ? (error.message || "Recupero non riuscito.") : "Controlla la email: ti abbiamo inviato il link per la nuova password.", error ? "error" : "ok");
 });
 
@@ -3041,11 +3617,30 @@ loginForm?.addEventListener("submit",async event=>{
   }
 });
 
-document.getElementById("signupNextStep")?.addEventListener("click",()=>{
+document.getElementById("signupNextStep")?.addEventListener("click",async()=>{
   const code = normalizeCode(document.getElementById("momentsSignupCode").value);
-  if(!/^[A-Z0-9]{8,32}$/.test(code)) return setStatus(statusNode,"Inserisci un codice prodotto valido (8-32 caratteri).","error");
-  setStatus(statusNode,"");
-  setSignupStep(2);
+  if(!isValidMomentCode(code)) return setStatus(statusNode,"Inserisci un codice Moments valido (es. M7K2-9XPL-H3WN).","error");
+  setStatus(statusNode,"Verifica codice Moments…");
+  try{
+    const { data,error } = await supabase.rpc("peek_moment_activation_code",{ p_code:code });
+    if(error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    if(!row?.product_type){
+      return setStatus(statusNode,"Codice non trovato nel magazzino Moments. Controlla di averlo digitato bene.","error");
+    }
+    if(String(row.status || "") === "claimed"){
+      return setStatus(statusNode,"Questo codice è già stato attivato. Accedi con l’account collegato.","error");
+    }
+    if(row.status && String(row.status) !== "available"){
+      return setStatus(statusNode,"Questo codice non è attivabile al momento.","error");
+    }
+    setStatus(statusNode,"");
+    setSignupStep(2);
+    await refreshActivationCodeTypeHint(code, document.getElementById("momentsSignupTypeHint"));
+  }catch(error){
+    console.error(error);
+    setStatus(statusNode,error.message || "Verifica codice non riuscita. Riprova.","error");
+  }
 });
 
 document.getElementById("signupPrevStep")?.addEventListener("click",()=>setSignupStep(1));
@@ -3055,36 +3650,45 @@ signupForm?.addEventListener("submit",async event=>{
   const email = document.getElementById("momentsSignupEmail").value.trim().toLowerCase();
   const code = normalizeCode(document.getElementById("momentsSignupCode").value);
   const title = document.getElementById("momentsSignupTitle").value.trim();
-  const momentType = document.getElementById("momentsSignupType").value;
   const pin = document.getElementById("momentsSignupPin").value.trim();
-  if(!/^[A-Z0-9]{8,32}$/.test(code)) return setStatus(statusNode,"Codice prodotto non valido.","error");
+  if(!isValidMomentCode(code)) return setStatus(statusNode,"Codice Moments non valido.","error");
   if(!title) return setStatus(statusNode,"Inserisci il nome della pagina.","error");
   try{ validatePin(pin); }catch(error){ return setStatus(statusNode,error.message,"error"); }
-  setStatus(statusNode,"Creazione account...");
+  storePendingMomentActivation({ code, title, pin });
+  setStatus(statusNode,"Creazione account Moments...");
   const { data,error } = await supabase.auth.signUp({
     email,
     password:document.getElementById("momentsSignupPassword").value,
-    options:{data:{full_name:document.getElementById("momentsSignupName").value.trim(),product_area:"moments",pending_moment_code:code}}
+    options:{
+      emailRedirectTo:authRedirectTo("/moments.html"),
+      data:{
+        full_name:document.getElementById("momentsSignupName").value.trim(),
+        product_area:"moments",
+        pending_moment_code:code,
+        pending_moment_title:title
+      }
+    }
   });
   if(error) return setStatus(statusNode,error.message || "Registrazione non riuscita.","error");
   if(data.session?.user){
     try{
-      const item = await activateCode({code,title,momentType,pin});
+      const item = await activateCode({code,title,pin});
+      clearPendingMomentActivation();
       activeId = item.event_id || "";
       rememberPin(activeId,pin);
-      setStatus(statusNode,"Account creato e prodotto collegato.","ok");
+      setStatus(statusNode,"Account creato e oggetto Moments collegato.","ok");
     }catch(activationError){
       console.error(activationError);
-      setStatus(statusNode,activationError.message || "Account creato, ma codice non collegato. Usa il modulo attivazione.","error");
+      setStatus(statusNode,activationError.message || "Account creato, ma codice non collegato. Completa l’attivazione Moments nell’app.","error");
     }
     await showApp(data.session.user);
     if(activeId) showPinSuccessBanner(activeId,pin,title);
   }else{
-    setStatus(statusNode,"Account creato. Conferma l’email, poi accedi e attiva lo stesso codice prodotto.","ok");
+    setStatus(statusNode,"Account creato. Conferma l’email dal link (tornerai su Moments), poi accedi: il codice verrà collegato automaticamente se hai completato nome pagina e PIN.","ok");
   }
 });
 
-document.getElementById("momentsLogout").addEventListener("click",async()=>{
+document.getElementById("momentsLogout")?.addEventListener("click",async()=>{
   await supabase.auth.signOut();
   activeId = "";
   rows = [];
@@ -3096,9 +3700,24 @@ window.addEventListener("beforeunload",event=>{
   if(editorDirty) event.preventDefault();
 });
 
-const { data } = await supabase.auth.getSession();
-if(data.session?.user) await showApp(data.session.user);
-else showAuthTab("login");
+try{
+  const { data,error } = await supabase.auth.getSession();
+  if(error) throw error;
+  if(data.session?.user){
+    await showApp(data.session.user);
+  }else{
+    showAuth();
+    const params = new URLSearchParams(location.search);
+    if(!params.get("code") && params.get("tab") !== "signup"){
+      showAuthTab("login");
+    }
+  }
+}catch(error){
+  console.error(error);
+  showAuth();
+  showAuthTab("login");
+  setStatus(statusNode,"Impossibile verificare la sessione. Accedi di nuovo.","error");
+}
 
 supabase.auth.onAuthStateChange(async(event,session)=>{
   if(event === "PASSWORD_RECOVERY"){

@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-15** (Admin v133 Spedizioni NFC operative)
+> Ultimo aggiornamento: **2026-07-20** (Moments v144 galleria Cambia/Rimuovi; v143 palette; v142 no pageDecor)
 
 ---
 
@@ -80,12 +80,12 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin** | **v133** | Console Spedizioni NFC operativa con pipeline produzione/stampa/spedizione, KPI, ricerca, filtri e azioni sugli ordini. |
-| **Editor Business** | **v124** | Fix upload da audit: video presentazione su R2 (prima blob perso), limite 25 MB allineato al server, pulizia file orfani R2 su sostituzione/rimozione media. Pendenti PDF catalogo e documenti base64→R2 (lock `worker.js`). |
+| **Admin** | **v148** | Magazzino NFC Business (lotti, filtri, CSV, KPI), clienti Business arricchiti (email, codice, slug, Analytics), provisioning staff. Include v133 Spedizioni NFC operativa. |
+| **Editor Business** | **v148** | Sprint S1: barra shell mobile, chip stato pagina, account/logout, fix form finti, guard upload · include v147 attivazione |
 | **Moments editor** | **v115** | Overhaul visivo premium (sfondo radial, glassmorphism e card hover) + Raccordi copertina v114. |
 | **Worker NFC** | **v127** | Supporto a heroCut, unificazione di tutti i 21 sfondi premium e contrasto dinamico footer. |
-| **SQL Supabase** | **v89 (applicata)** | v75-v83 security, v84 CRM, v85 trigger provvigioni ordini, v86 portale rivenditori, v87 hardening accesso agente solo via `member_id`, v88 claim sicuro primo accesso rivenditore, v89 RLS ticket utente |
-| **Prossima release Business** | **v125** | Collaudo browser autenticato completo e rifinitura UX dopo test cliente; PDF catalogo + documenti su R2 quando si libera `worker.js` |
+| **SQL Supabase** | **v148 (applicata)** | v147 attivazione Business (`business_activation_codes`, `activate_business_code`); v148 magazzino admin Business (batch RPC, RLS inventory, provisioning). Precedenti: v75-v83 security, v84 CRM, v85 provvigioni, v86-v88 rivenditori, v89 ticket utente |
+| **Prossima release piattaforma** | **v149** | Commit git v147/v148, PDF etichette Business, smoke test end-to-end attivazione + admin magazzino |
 
 ---
 
@@ -103,6 +103,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 - [x] Wizard onboarding per settore (5 template)
 - [x] Prenotazioni con email automatica Resend
 - [x] Catalogo prodotti con varianti
+- [x] **Attivazione codice NFC v147** — parità Moments (signup/login + inventario admin v148)
 
 ### Moments
 - [x] Editor parità UX Business (sidebar, topbar, wizard post-attivazione)
@@ -110,10 +111,12 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 - [x] Temi visivi (classic, celebration, minimal, memorial)
 - [x] RSVP configurabile per tipo evento
 - [x] Attivazione codici NFC + PIN opzionale
+- [x] **Categoria bloccata al codice NFC (v135 / SQL v157)** — tipo da magazzino, badge editor, peek signup, save lock
 
 ### Admin
 - [x] Pannelli Business e Moments separati
-- [x] Magazzino NFC, lotti, codici, clienti Moments
+- [x] Magazzino NFC Moments, lotti, codici, clienti Moments
+- [x] **Magazzino NFC Business v148** — lotti, filtri, CSV, provisioning clienti
 - [x] Catalogo vendita Shopify (sync bozza → live)
 - [x] Integration Hub (Shopify, Stripe, PayPal, Resend)
 - [x] Rete rivenditori v68 (tier, listini, consegne)
@@ -149,7 +152,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |---|----------|---------|--------|
 | 1 | `STRIPE_SECRET_KEY` non in produzione | Pagamenti Business bloccati | Vedi `STRIPE-PERSONAL-SETUP.md` |
 | 2 | `RESEND_API_KEY` da verificare in prod | Email ordini potrebbero non partire | `wrangler secret put` |
-| 3 | Documentazione sparsa tra chat e file root | Perdita contesto tra sessioni AI | **KhamaKey OS** (in corso) |
+| 3 | Documentazione sparsa tra chat e file root | Perdita contesto tra sessioni AI | **KhamaKey OS** — checklist operabilità in `docs/21-checklist-operabilita-business-admin.md` |
 | 4 | Skill Codex punta a path vecchi | Rischio deploy su cartella sbagliata | Specificare sempre root v41 |
 | 5 | `RESEND_WEBHOOK_SECRET` non ancora impostato | Webhook Resend risponde 503 finché non configurato (sicuro, non urgente) | `wrangler secret put RESEND_WEBHOOK_SECRET` |
 
@@ -166,9 +169,9 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 ## Prossimo obiettivo
 
-> Completare **Fase 1 KhamaKey OS**: struttura cartelle, file fondamentali, migrazione graduale documentazione da `ROADMAP.md` e guide setup verso `docs/`.
+> Eseguire **Sprint S1–S2** dalla checklist [`docs/21-checklist-operabilita-business-admin.md`](docs/21-checklist-operabilita-business-admin.md): mobile editor (Account/Logout/Salva) + admin Business NFC end-to-end (bulk, ordini, spedizioni).
 
-Poi: configurare Stripe secrets e smoke test flusso ordine Moments end-to-end.
+Poi: S3 chiarezza salvataggio, smoke test C1/C2 completi, commit git v147/v148.
 
 ---
 

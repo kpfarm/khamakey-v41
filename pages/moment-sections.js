@@ -1,6 +1,7 @@
 /** Sezioni Moments — catalogo emotivo condiviso tra editor e pagina pubblica. */
 
-import { normalizeMediaList, parseMediaList } from "./moment-media.js";
+import { normalizeMediaList, parseMediaList, migrateLetterMediaSection } from "./moment-media.js";
+import { parseListItems, itemsFromSection, LIST_SECTION_MODES, normalizeListItems } from "./moment-list-items.js";
 import { mergePlacesIntoTimeline, resolveJourneySteps, parseJourneySteps } from "./moment-journey.js";
 import { readRsvpFieldsFromForm } from "./moment-rsvp-fields.js";
 
@@ -11,6 +12,7 @@ export const SECTION_ORDER_DEFAULT = [
   "rsvp",
   "guestbook",
   "gallery",
+  "video",
   "promises",
   "dreams",
   "countdown",
@@ -29,16 +31,17 @@ export const DEFAULT_SECTIONS = {
   timeline:{ enabled:false, title:"Tappe & luoghi", body:"", items:[], images:[] },
   rsvp:{ enabled:false, title:"Conferma presenza", body:"Compila il modulo e invia la risposta su WhatsApp.", whatsapp_number:"", event_name:"", ask_guests:true, ask_notes:true, field_keys:["guests","notes"], custom_fields:[], images:[] },
   guestbook:{ enabled:false, title:"Libro degli ospiti", body:"Lascia un pensiero — apparirà dopo l'approvazione dell'organizzatore.", images:[] },
-  gallery:{ enabled:false, title:"I nostri ricordi", body:"", images:[], media:[] },
-  promises:{ enabled:false, title:"Le nostre promesse", body:"", images:[] },
+  gallery:{ enabled:false, title:"Galleria foto", body:"", images:[], media:[] },
+  video:{ enabled:false, title:"Il nostro video", body:"", video_url:"", video_title:"", video_description:"", images:[] },
+  promises:{ enabled:false, title:"Le nostre promesse", body:"", items:[], images:[] },
   places:{ enabled:false, title:"Luoghi del cuore", body:"", images:[] },
-  dreams:{ enabled:false, title:"Sogni insieme", body:"", images:[] },
+  dreams:{ enabled:false, title:"Sogni insieme", body:"", items:[], images:[] },
   countdown:{ enabled:false, title:"Conto alla rovescia", body:"", event_label:"", target_date:"", image_url:"", images:[] },
-  music:{ enabled:false, title:"La nostra canzone", body:"", spotify_url:"", youtube_url:"", audio_url:"", audio_title:"", audio_description:"", images:[] },
-  letter_future:{ enabled:false, title:"Lettera al futuro", body:"", recipient:"", unlock_date:"", media_type:"", media_url:"", media_title:"", images:[] },
-  rituals:{ enabled:false, title:"I nostri rituali", body:"", images:[] },
+  music:{ enabled:false, title:"La nostra canzone", body:"", spotify_url:"", youtube_url:"", audio_url:"", audio_title:"", audio_description:"", image_url:"", images:[] },
+  letter_future:{ enabled:false, title:"Lettera al futuro", body:"", recipient:"", unlock_date:"", media:[], media_type:"", media_url:"", media_title:"", images:[] },
+  rituals:{ enabled:false, title:"I nostri rituali", body:"", items:[], images:[] },
   pet:{ enabled:false, title:"Il nostro compagno", body:"", pet_name:"", pet_emoji:"🐾", pet_photo:"", images:[] },
-  numbers:{ enabled:false, title:"I nostri numeri", body:"", images:[] },
+  numbers:{ enabled:false, title:"I nostri numeri", body:"", items:[], images:[] },
   quote:{ enabled:false, title:"", body:"", author:"", images:[] },
   signature:{ enabled:false, title:"", body:"", sign_name:"", sign_subtitle:"", images:[] }
 };
@@ -49,7 +52,8 @@ export const SECTION_LABELS = {
   timeline:"Tappe & luoghi",
   rsvp:"RSVP invitati",
   guestbook:"Libro degli ospiti",
-  gallery:"Foto & video",
+  gallery:"Galleria foto",
+  video:"Video",
   promises:"Promesse",
   places:"Luoghi del cuore",
   dreams:"Sogni insieme",
@@ -69,7 +73,8 @@ export const SECTION_SUBTITLES = {
   timeline:"Date, luoghi e foto del percorso",
   rsvp:"Gli invitati confermano via WhatsApp",
   guestbook:"Messaggi degli invitati con moderazione",
-  gallery:"Aggiungi foto, video e audio",
+  gallery:"Piccola galleria di foto con titolo e descrizione",
+  video:"Un video del ricordo (MP4 o MOV)",
   promises:"Lista di promesse con emoji",
   places:"I posti che contano per voi",
   dreams:"Sogni da realizzare insieme",
@@ -92,6 +97,7 @@ export const SECTION_ICONS = {
   rsvp:"📲",
   guestbook:"📖",
   gallery:"📸",
+  video:"🎬",
   promises:"💍",
   places:"📍",
   dreams:"🌟",
@@ -218,8 +224,36 @@ export function migrateSections(rawSections = {}){
     if(rawSections.details.enabled) sections.intro.enabled = true;
   }
   if(sections.gallery){
-    sections.gallery.media = normalizeMediaList(sections.gallery);
-    sections.gallery.images = sections.gallery.media.filter(item=>item.type === "image").map(item=>item.url);
+    const allMedia = normalizeMediaList(sections.gallery);
+    const galleryVideos = allMedia.filter(item=>item.type === "video");
+    const galleryImages = allMedia.filter(item=>item.type === "image");
+    sections.gallery.media = galleryImages;
+    sections.gallery.images = galleryImages.map(item=>item.url);
+    if(!sections.video) sections.video = { ...DEFAULT_SECTIONS.video };
+    if(galleryVideos.length && !String(sections.video.video_url || "").trim()){
+      const first = galleryVideos[0];
+      sections.video.video_url = first.url;
+      sections.video.video_title = first.title || sections.video.video_title || "";
+      sections.video.video_description = first.description || sections.video.video_description || "";
+    }
+  }
+  if(sections.letter_future){
+    sections.letter_future.media = migrateLetterMediaSection(sections.letter_future);
+    const first = sections.letter_future.media[0];
+    if(first){
+      sections.letter_future.media_type = first.type;
+      sections.letter_future.media_url = first.url;
+      sections.letter_future.media_title = first.title || "";
+    }
+  }
+  for(const key of Object.keys(LIST_SECTION_MODES)){
+    if(!sections[key]) continue;
+    const hadItems = Array.isArray(sections[key].items) && sections[key].items.length;
+    const mode = LIST_SECTION_MODES[key];
+    sections[key].items = itemsFromSection(sections[key], mode);
+    if(!hadItems && sections[key].items.length && sections[key].body?.includes("·")){
+      sections[key].body = "";
+    }
   }
   return mergePlacesIntoTimeline(sections);
 }
@@ -234,7 +268,9 @@ export function sectionHasContent(key, section){
     case "timeline":
       return resolveJourneySteps(section).length > 0;
     case "gallery":
-      return normalizeMediaList(section).length > 0;
+      return normalizeMediaList(section).some(item=>item.type === "image");
+    case "video":
+      return Boolean(String(section.video_url || "").trim());
     case "rsvp":
       return Boolean(String(section.whatsapp_number || "").replace(/\D/g, ""));
     case "guestbook":
@@ -243,13 +279,13 @@ export function sectionHasContent(key, section){
     case "dreams":
     case "rituals":
     case "numbers":
-      return Boolean(String(section.body || "").trim());
+      return itemsFromSection(section, LIST_SECTION_MODES[key]).length > 0 || Boolean(String(section.body || "").trim());
     case "countdown":
       return Boolean(section.target_date || section.image_url || section.images?.length);
     case "music":
-      return Boolean(section.spotify_url || section.youtube_url || section.audio_url);
+      return Boolean(section.spotify_url || section.youtube_url || section.audio_url || section.image_url);
     case "letter_future":
-      return Boolean(section.body || section.unlock_date || section.media_url);
+      return Boolean(section.body || section.unlock_date || migrateLetterMediaSection(section).length);
     case "pet":
       return Boolean(section.pet_name || section.body || section.pet_photo);
     case "quote":
@@ -266,43 +302,7 @@ export function sectionIsVisible(key, section){
   return Boolean(section?.enabled);
 }
 
-export function parseLineItems(body, mode = "dot"){
-  return String(body || "")
-    .split("\n")
-    .map(line=>line.trim())
-    .filter(Boolean)
-    .map(line=>{
-      const parts = line.split("·").map(part=>part.trim());
-      if(mode === "promise"){
-        const emoji = parts[0]?.match(/^[\p{Extended_Pictographic}\u2600-\u27BF]/u) ? parts.shift() : "✦";
-        return { emoji, text:parts.join(" · ") || line };
-      }
-      if(mode === "place"){
-        const icon = parts[0]?.match(/^[\p{Extended_Pictographic}\u2600-\u27BF]/u) ? parts.shift() : "📍";
-        const url = parts.find(part=>/^https?:\/\//i.test(part)) || "";
-        const name = parts.filter(part=>part !== url).join(" · ");
-        return { icon, name:name || line, url };
-      }
-      if(mode === "dream"){
-        const done = /^✓/.test(parts[0] || "");
-        if(done) parts.shift();
-        return { done, text:parts.join(" · ") || line.replace(/^✓\s*/,"") };
-      }
-      if(mode === "timeline"){
-        if(parts.length >= 2) return { date:parts[0], text:parts.slice(1).join(" · ") };
-        return { date:"", text:line };
-      }
-      if(mode === "ritual"){
-        const emoji = parts[0]?.match(/^[\p{Extended_Pictographic}\u2600-\u27BF]/u) ? parts.shift() : "🕯";
-        return { emoji, text:parts.join(" · ") || line };
-      }
-      if(mode === "number"){
-        if(parts.length >= 2) return { value:parts[0], label:parts.slice(1).join(" · ") };
-        return { value:"", label:line };
-      }
-      return { text:line };
-    });
-}
+export { parseLineItems } from "./moment-list-items.js";
 
 export function readSectionFromForm(form, key){
   const base = {
@@ -331,13 +331,19 @@ export function readSectionFromForm(form, key){
     base.audio_url = String(form.get(`section_${key}_audio_url`) || "").trim();
     base.audio_title = String(form.get(`section_${key}_audio_title`) || "").trim();
     base.audio_description = String(form.get(`section_${key}_audio_description`) || "").trim();
+    base.image_url = String(form.get(`section_${key}_image_url`) || "").trim();
+  }
+  if(LIST_SECTION_MODES[key]){
+    base.items = normalizeListItems(parseListItems(form.get(`section_${key}_items`)), LIST_SECTION_MODES[key]);
   }
   if(key === "letter_future"){
     base.recipient = String(form.get(`section_${key}_recipient`) || "").trim();
     base.unlock_date = String(form.get(`section_${key}_unlock_date`) || "").trim();
-    base.media_type = String(form.get(`section_${key}_media_type`) || "").trim();
-    base.media_url = String(form.get(`section_${key}_media_url`) || "").trim();
-    base.media_title = String(form.get(`section_${key}_media_title`) || "").trim();
+    base.media = parseMediaList(form.get(`section_${key}_media`));
+    const first = base.media[0];
+    base.media_type = first?.type || String(form.get(`section_${key}_media_type`) || "").trim();
+    base.media_url = first?.url || String(form.get(`section_${key}_media_url`) || "").trim();
+    base.media_title = first?.title || String(form.get(`section_${key}_media_title`) || "").trim();
   }
   if(key === "pet"){
     base.pet_name = String(form.get(`section_${key}_pet_name`) || "").trim();
@@ -352,8 +358,13 @@ export function readSectionFromForm(form, key){
     base.sign_subtitle = String(form.get(`section_${key}_sign_subtitle`) || "").trim();
   }
   if(key === "gallery"){
-    base.media = parseMediaList(form.get(`section_${key}_media`));
-    base.images = base.media.filter(item=>item.type === "image").map(item=>item.url);
+    base.media = parseMediaList(form.get(`section_${key}_media`)).filter(item=>item.type === "image");
+    base.images = base.media.map(item=>item.url);
+  }
+  if(key === "video"){
+    base.video_url = String(form.get(`section_${key}_video_url`) || "").trim();
+    base.video_title = String(form.get(`section_${key}_video_title`) || "").trim();
+    base.video_description = String(form.get(`section_${key}_video_description`) || "").trim();
   }
   if(key === "timeline"){
     base.items = parseJourneySteps(form.get(`section_${key}_items`));
@@ -376,10 +387,10 @@ export function formatImageLines(images){
 export function sectionFieldHints(){
   return {
     timeline:"Ogni tappa: data, luogo, descrizione, foto e link mappa.",
-    promises:"Una riga per promessa: «💍 · Esserci sempre»",
-    dreams:"Una riga per sogno. Prefix «✓ ·» se già realizzato",
-    rituals:"Una riga per rituale: «☕ · Caffè insieme ogni mattina»",
-    numbers:"Una riga per numero: «365 · giorni insieme»"
+    promises:"Aggiungi promesse con il pulsante — emoji e testo in ogni card.",
+    dreams:"Aggiungi sogni uno per uno. Spunta «Realizzato» se già avete fatto il passo.",
+    rituals:"Aggiungi rituali quotidiani — una card per abitudine.",
+    numbers:"Aggiungi numeri simbolo — valore ed etichetta in ogni card."
   };
 }
 
@@ -389,17 +400,18 @@ export function sectionFillGuide(key){
     intro:"Scrivi chi siete e perché questo momento è speciale. 2–4 frasi bastano.",
     dedication:"Lettera personale: destinatario, testo e firma. Appare come busta elegante.",
     timeline:"Ogni tappa: data, luogo, descrizione, foto e link mappa. Trascina ☰ per riordinare.",
-    gallery:"Carica foto, video o audio con i pulsanti Aggiungi. Poi titolo e descrizione per ogni file. Infine Salva. Non compariranno link tecnici — solo anteprima e titoli.",
-    promises:"Una riga = una promessa. Inizia con un emoji, es. «💍 · Esserci sempre».",
-    dreams:"Lista desideri. Prefix «✓ ·» se già realizzato.",
+    gallery:"Carica le foto con Aggiungi foto. Titolo e descrizione per ogni immagine — in pagina si aprono ingrandite al tocco.",
+    video:"Carica un solo video (MP4/MOV, max 25 MB) con titolo e descrizione. Per audio usa la sezione Musica.",
+    promises:"Tocca «Aggiungi promessa» per ogni voce — niente più righe manuali.",
+    dreams:"Tocca «Aggiungi sogno» — puoi segnare quelli già realizzati.",
     countdown:"Scegli data e ora — compare il timer live. Puoi aggiungere anche una foto.",
-    music:"Spotify, YouTube o audio caricato — puoi usarne uno o tutti. Incolla solo link pubblici (Spotify/YouTube), non link di file caricati.",
-    letter_future:"Scrivi la lettera, scegli la data di apertura e opzionalmente allega foto, video o audio. Riceverai un'email il giorno dell'apertura.",
-    rituals:"Abitudini vostre, una riga ciascuna. Es. «☕ · Caffè insieme ogni mattina».",
+    music:"Spotify, YouTube, audio caricato o foto copertina — combina come preferite.",
+    letter_future:"Scrivi la lettera, scegli la data di apertura e opzionalmente allega fino a 2 foto, 1 video e 1 audio. Riceverai un'email il giorno dell'apertura.",
+    rituals:"Tocca «Aggiungi rituale» per ogni abitudine quotidiana.",
     pet:"Nome, emoji e foto del vostro compagno a quattro zampe.",
-    numbers:"Statistiche simboliche. Es. «365 · giorni insieme», «12 · viaggi fatti».",
-    quote:"Solo la citazione e l'autore — testo grande in pagina.",
-    signature:"Chiusura finale con i vostri nomi.",
+    numbers:"Tocca «Aggiungi numero» — es. 365 + «giorni insieme».",
+    quote:"Titolo facoltativo, citazione e autore — testo grande in pagina.",
+    signature:"Titolo della chiusura (es. «Con amore»), poi nomi e sottotitolo.",
     rsvp:"Inserisci il tuo numero WhatsApp (39…). Gli invitati compilano il modulo e inviano un messaggio pronto.",
     guestbook:"Attiva la sezione e scrivi un invito. Gli ospiti lasciano messaggi che approvi dall'editor."
   };

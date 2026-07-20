@@ -9,6 +9,39 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Moments v144 — Galleria rimuovi/sostituisci (2026-07-20, Cursor)** — Pages
+  - Ogni foto in editor mostra azioni chiare **Cambia foto** e **Rimuovi**; replace mantiene titolo/descrizione e cancella il vecchio file R2.
+- **Moments fluido v138 / Worker v140 (2026-07-18, Cursor)** — deployato
+  - Anteprima: debounce 700ms + skip se stato invariato; rate limit Worker 45/min per IP.
+  - Lista pagine senza `page_state` (caricato solo per la pagina aperta).
+  - Salvataggio soft: niente reload completo dell'editor.
+- **Support ticket clienti bloccati (2026-07-18, Cursor)** — SQL v158 + deploy
+  - CHECK `platform_support_tickets.source` non accettava `moments_editor` / `business_editor` → 0 ticket in produzione.
+  - Feedback Business se sessione/business assente; console Moments filtra ticket Moments.
+
+### Added
+- **Domini custom khamakeymoments.com (2026-07-18, Cursor)** — deployato
+  - Pages: `https://app.khamakeymoments.com` · Worker NFC: `https://link.khamakeymoments.com`
+  - Aggiornati `config.js`, `wrangler.toml`, CSP `_headers` + Worker, fallback URL in `worker.js`.
+  - Cache-bust Moments v136 / Business shell v165 / Worker v139.
+- **Moments v135 / SQL v157 — Categoria bloccata al codice NFC (2026-07-17, Cursor)** — deployato + migration applicata
+  - Tipo pagina da `product_type` del codice magazzino; badge read-only in editor (dropdown solo con `?admin_event=`).
+  - RPC `peek_moment_activation_code`; `activate_moment_code` e `save_my_moment_page` non accettano cambio categoria utente; batch magazzino accetta categorie v59.
+  - Prima apertura: auto-applica template della categoria. Cache-bust: `moments.html` / `moments.js` / `moments.css` `?v=135`.
+- **Admin v148 — Magazzino NFC Business (2026-07-15, Cursor)** — deployato
+  - Nuova tab `Magazzino NFC Business`: generazione lotti (`create_business_product_batch`), KPI stock, filtri, export CSV, drawer modifica codice.
+  - Tab Clienti Business arricchita: email, codice NFC, slug, Analytics; drawer con URL NFC; form provisioning `admin_provision_business_customer`.
+  - SQL v148 applicata: colonne SKU/linea/canale/agente/ordine su `business_activation_codes`, RLS inventory, RPC batch/stats/bulk/provision.
+  - Cache-bust Admin: `admin.js?v=148`, `admin.html?v=148`.
+  - Doc vault: `docs/20-business-activation-inventory-v147-v148.md`.
+- **Business Editor v147 — Attivazione codice prodotto (2026-07-15, Cursor)** — deployato
+  - Flusso parità Moments: signup 2-step (codice → account), login con codice opzionale, form attivazione per utenti loggati senza business, `?code=` URL prefill.
+  - RPC `activate_business_code`; tabella `business_activation_codes` (SQL v147); seed da `nfc_tags` esistenti.
+  - `ensureWorkspace` non auto-crea business senza codice (account pre-v147 grandfathered).
+  - Save bar navy ripristinata; fix race snapshot/idratazione editor.
+  - Cache-bust: `app.js?v=147`, `editor.html?v=147`.
+
+### Fixed
 - **Business Editor v124 — Fix upload da audit (2026-07-15, Claude Code)** — preparato
   - Video presentazione ora caricato davvero su R2 (prima restava `blob:` locale: perso al reload, link rotto nello snapshot pubblico). Limite client allineato al server: 25 MB (era 200 MB) + max 2 minuti.
   - `collectState`/`applyState` persistono e ripristinano l'URL video cloud.

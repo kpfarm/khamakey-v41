@@ -32,13 +32,24 @@
 - Chiave wizard per attività (non globale)
 - Salvataggio cloud automatico dopo template
 
-### Comandi operativi v120-v123
+### Comandi operativi v120-v124
+
 - Il tasto `Salva` e' sempre visibile nella topbar, non solo nella barra modifiche.
 - `Anteprima` e `Account` restano azionabili dalla shell principale; l'editor iframe non deve duplicare il tasto Anteprima in alto.
 - `Apri pagina finale`, `Copia link` e `Scarica QR` usano il link NFC quando esiste; se il chip non e' ancora assegnato usano la pagina pubblica `/p/<slug>` come fallback operativo.
 - `app.js` crea/aggiorna sempre la pagina pubblica `/p/<slug>` via upsert idempotente quando apre il workspace Business.
 - Il controllo `Multilingua` vive nella card dedicata ed e' uno switch leggibile: disattivo, attivazione in corso o attivo.
 - L'iframe editor usa un handshake di idratazione: il parent invia lo stato cloud quando l'editor e' pronto e ignora snapshot iniziali vuoti finche' l'idratazione non e' completata.
+
+### Attivazione codice e accesso editor v147
+
+- **Nuovi utenti**: devono attivare un codice da `business_activation_codes` (signup 2-step o form `#activationForm` se già loggati).
+- **`ensureWorkspace`**: non crea più business/NFC automaticamente senza codice (account pre-v147 grandfathered).
+- **Login**: campo codice opzionale per utenti senza attività; parametro URL `?code=XXX` precompila il codice.
+- **Save bar**: colore navy ripristinato in `editor-ui.css` (rimosso override che la nascondeva).
+- **Race fix**: snapshot pubblico ritardato fino a `editor-hydrated`; salvataggio consentito quando editor pronto.
+
+Dettaglio flusso + admin magazzino: [`20-business-activation-inventory-v147-v148.md`](20-business-activation-inventory-v147-v148.md)
 
 ### Supporto
 - Il modal Account contiene la tab `Assistenza`.
@@ -61,7 +72,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 ### Sezioni principali
 - Copertina (sposta, centra, zoom)
 - Sezioni evento (programma, storia, messaggi…)
-- Galleria media (foto, video, audio)
+- Galleria media (foto, video, audio) — ogni riga ha **Cambia foto** e **Rimuovi** (v144)
 - RSVP configurabile per tipo evento
 - Privacy (PIN opzionale)
 - Lettera / messaggio speciale

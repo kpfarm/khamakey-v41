@@ -1,9 +1,5 @@
-import { uploadMediaFiles, inferMediaKind } from "./media-upload.js";
+import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=144";
 import {
-  MAX_GALLERY_ITEMS,
-  MAX_GALLERY_VIDEOS,
-  MAX_GALLERY_AUDIO,
-  MEDIA_LIMITS_HINT,
   normalizeMediaItem,
   normalizeMediaList,
   parseMediaList,
@@ -11,10 +7,13 @@ import {
   countMediaByType,
   mediaThumbHtml,
   mediaEditorRowHtml,
+  galleryEditorGroups,
   GALLERY_TYPE_GROUPS,
   coverFocusStyle,
-  mediaId
-} from "./moment-media.js";
+  mediaId,
+  mediaLimitsForKey,
+  VIDEO_SECTION_HINT
+} from "./moment-media.js?v=144";
 
 let mediaEditContext = null;
 
@@ -33,19 +32,26 @@ export function writeGalleryMedia(formNode,key,media){
 export function renderGalleryGrid(formNode,key){
   const root = document.getElementById(`galleryOrganized_${key}`);
   if(!root) return;
+  const limits = mediaLimitsForKey(key);
   const media = readGalleryMedia(formNode,key);
-  root.innerHTML = GALLERY_TYPE_GROUPS.map(group=>{
+  const groups = galleryEditorGroups(key);
+  root.innerHTML = groups.map(group=>{
     const items = media.map((item,idx)=>({item,idx})).filter(({item})=>item.type === group.type);
-    const canAdd = media.length < MAX_GALLERY_ITEMS
-      && (group.type !== "video" || countMediaByType(media,"video") < MAX_GALLERY_VIDEOS)
-      && (group.type !== "audio" || countMediaByType(media,"audio") < MAX_GALLERY_AUDIO);
+    const canAdd = media.length < limits.maxItems
+      && (group.type !== "image" || countMediaByType(media,"image") < limits.maxImages)
+      && (group.type !== "video" || countMediaByType(media,"video") < limits.maxVideos)
+      && (group.type !== "audio" || countMediaByType(media,"audio") < limits.maxAudio);
     const rows = items.length
       ? items.map(({item,idx})=>mediaEditorRowHtml(item,{index:idx,sectionKey:key})).join("")
-      : `<p class="gallery-type-empty">Nessun ${group.label.toLowerCase()} ancora.</p>`;
+      : `<p class="gallery-type-empty">Nessuna ${group.label.toLowerCase()} ancora.</p>`;
     const addBtn = canAdd
       ? `<button type="button" class="ghost gallery-type-add" data-gallery-add="${key}" data-gallery-type="${group.type}"><span>${group.icon}</span>${group.addLabel}</button>`
       : "";
-    const hint = group.addHint ? `<p class="field-hint gallery-type-hint">${group.addHint}</p>` : "";
+    const hint = group.addHint
+      ? `<p class="field-hint gallery-type-hint">${group.addHint}</p>`
+      : key === "gallery" && group.type === "image"
+        ? `<p class="field-hint gallery-type-hint">In pagina le foto si aprono ingrandite con titolo e descrizione.</p>`
+        : "";
     return `<section class="gallery-type-block" data-gallery-type="${group.type}">
       <div class="gallery-type-head">
         <h4 class="gallery-type-title">${group.label} <span class="gallery-type-count">${items.length}</span></h4>
@@ -65,43 +71,131 @@ function focusMediaRowTitle(formNode,key,mediaId){
   });
 }
 
-function canAddFiles(current,batch){
+function canAddFiles(current,batch,key = "gallery"){
+  const limits = mediaLimitsForKey(key);
+  const label = key === "letter_future" ? "lettera al futuro" : "galleria";
   const next = [...current];
-  for(const file of batch){
+  const filtered = key === "gallery"
+    ? batch.filter(file=>(inferMediaKind(file) || "image") === "image")
+    : batch;
+  for(const file of filtered){
     const type = inferMediaKind(file) || "image";
-    if(next.length >= MAX_GALLERY_ITEMS) throw new Error(`Limite raggiunto: massimo ${MAX_GALLERY_ITEMS} elementi in galleria.`);
-    if(type === "video" && countMediaByType(next,"video") >= MAX_GALLERY_VIDEOS){
-      throw new Error(`Massimo ${MAX_GALLERY_VIDEOS} video in galleria.`);
+    if(key === "gallery" && type !== "image"){
+      throw new Error("La galleria accetta solo foto. Usa la sezione Video o Musica.");
     }
-    if(type === "audio" && countMediaByType(next,"audio") >= MAX_GALLERY_AUDIO){
-      throw new Error(`Massimo ${MAX_GALLERY_AUDIO} audio in galleria.`);
+    if(next.length >= limits.maxItems){
+      throw new Error(`Limite raggiunto: massimo ${limits.maxItems} allegati nella ${label}.`);
+    }
+    if(type === "image" && countMediaByType(next,"image") >= limits.maxImages){
+      throw new Error(`Massimo ${limits.maxImages} foto nella ${label}.`);
+    }
+    if(type === "video" && countMediaByType(next,"video") >= limits.maxVideos){
+      throw new Error(`Massimo ${limits.maxVideos} video nella ${label}.`);
+    }
+    if(type === "audio" && countMediaByType(next,"audio") >= limits.maxAudio){
+      throw new Error(`Massimo ${limits.maxAudio} audio nella ${label}.`);
     }
     next.push({type});
   }
-  return batch;
+  return filtered;
 }
 
 export async function uploadGalleryMedia({supabase,row,formNode,key,files,onStatus,onBusy}){
+  if(!row?.id) throw new Error("Pagina non selezionata. Ricarica l'editor e riprova.");
+  const limits = mediaLimitsForKey(key);
   const current = readGalleryMedia(formNode,key);
-  const batch = canAddFiles(current,[...files].slice(0,MAX_GALLERY_ITEMS - current.length));
+  const batch = canAddFiles(current,[...files].slice(0,limits.maxItems - current.length),key);
   if(!batch.length) throw new Error("Nessun file selezionato.");
-  onStatus?.(`Caricamento ${batch.length} file...`);
+  onStatus?.(`Preparazione ${batch.length} file...`);
+  onBusy?.(true);
+  const uploadedItems = [];
+  const errors = [];
+  try{
+    const results = await uploadMediaBatch(supabase,{scope:"moments",scopeId:row.id},batch,{
+      onProgress:({phase,done,total,success,file,error})=>{
+        if(phase === "prepare"){
+          onStatus?.(`Ottimizzazione ${total} file...`);
+          return;
+        }
+        if(!success){
+          errors.push(`${file?.name || "file"}: ${error?.message || "errore"}`);
+        }
+        onStatus?.(`Caricati ${done}/${total}...`);
+      }
+    });
+    for(const result of results){
+      if(!result.ok) continue;
+      uploadedItems.push(normalizeMediaItem({
+        id:mediaId(),
+        type:result.type || inferMediaKind(result.file) || "image",
+        url:result.url,
+        title:"",
+        description:""
+      }));
+    }
+    if(!uploadedItems.length){
+      throw new Error(errors[0] || "Upload non riuscito.");
+    }
+    writeGalleryMedia(formNode,key,[...current,...uploadedItems]);
+    renderGalleryGrid(formNode,key);
+    const okMsg = errors.length
+      ? `${uploadedItems.length} file caricati, ${errors.length} errori — aggiungi titolo e descrizione, poi Salva.`
+      : `${uploadedItems.length} file caricati — aggiungi titolo e descrizione, poi clicca Salva.`;
+    onStatus?.(okMsg, errors.length ? "error" : "ok");
+    formNode.dispatchEvent(new Event("input",{bubbles:true}));
+    if(uploadedItems[0]?.id) focusMediaRowTitle(formNode,key,uploadedItems[0].id);
+    return uploadedItems;
+  }finally{
+    onBusy?.(false);
+  }
+}
+
+/** Sostituisce il file di una riga galleria mantenendo titolo e descrizione. */
+export async function replaceGalleryMediaItem({supabase,row,formNode,key,mediaId,file,onStatus,onBusy}){
+  if(!row?.id) throw new Error("Pagina non selezionata. Ricarica l'editor e riprova.");
+  if(!file) throw new Error("Nessun file selezionato.");
+  const current = readGalleryMedia(formNode,key);
+  const index = current.findIndex(item=>item.id === mediaId);
+  if(index < 0) throw new Error("Elemento non trovato nella galleria.");
+  const existing = current[index];
+  const nextType = inferMediaKind(file) || "image";
+  if(key === "gallery" && nextType !== "image"){
+    throw new Error("La galleria accetta solo foto. Usa la sezione Video o Musica.");
+  }
+  if(existing.type && nextType !== existing.type){
+    const want = existing.type === "video" ? "video" : existing.type === "audio" ? "audio" : "foto";
+    throw new Error(`Seleziona un file dello stesso tipo (${want}) oppure rimuovi l'elemento e aggiungine uno nuovo.`);
+  }
+  onStatus?.("Sostituzione in corso...");
   onBusy?.(true);
   try{
-    const uploaded = await uploadMediaFiles(supabase,{scope:"moments",scopeId:row.id},batch);
-    const items = uploaded.map(entry=>normalizeMediaItem({
-      id:mediaId(),
-      type:entry.type,
-      url:entry.url,
-      title:"",
-      description:""
-    }));
-    writeGalleryMedia(formNode,key,[...current,...items]);
+    let uploadError = null;
+    const results = await uploadMediaBatch(supabase,{scope:"moments",scopeId:row.id},[file],{
+      onProgress:({phase,done,total,success,file:progressFile,error})=>{
+        if(phase === "prepare"){
+          onStatus?.("Ottimizzazione file...");
+          return;
+        }
+        if(!success){
+          uploadError = error || new Error(`${progressFile?.name || "file"}: upload non riuscito`);
+          return;
+        }
+        onStatus?.(`Caricato ${done}/${total}...`);
+      }
+    });
+    const result = results.find(item=>item.ok);
+    if(!result?.url) throw uploadError || new Error("Upload non riuscito.");
+    const oldUrl = existing.url;
+    current[index] = normalizeMediaItem({
+      ...existing,
+      type:result.type || nextType,
+      url:result.url
+    });
+    writeGalleryMedia(formNode,key,current);
     renderGalleryGrid(formNode,key);
-    onStatus?.(`${items.length} file caricati — aggiungi titolo e descrizione, poi clicca Salva.`,"ok");
+    onStatus?.("File sostituito — clicca Salva per aggiornare la pagina.","ok");
     formNode.dispatchEvent(new Event("input",{bubbles:true}));
-    if(items[0]?.id) focusMediaRowTitle(formNode,key,items[0].id);
-    return items;
+    return { item:current[index], oldUrl };
   }finally{
     onBusy?.(false);
   }
@@ -203,45 +297,81 @@ export function bindGalleryMediaInteractions(root,formNode){
   bindGalleryInlineEdit(formNode);
 }
 
-export function bindCoverFramer(formNode){
-  const framer = document.getElementById("coverFramer");
-  const img = document.getElementById("coverFramerImg");
-  if(!framer || !img) return;
-  if(framer.dataset.bound === "1"){
-    syncCoverFramer(formNode);
-    return;
+const COVER_QUICK = [
+  { id:"top", x:50, y:12, label:"Alto" },
+  { id:"center", x:50, y:50, label:"Centro" },
+  { id:"bottom", x:50, y:88, label:"Basso" }
+];
+
+const COVER_ZOOM_STEPS = [100, 115, 130];
+
+function nearestZoomStep(zoom){
+  const value = Number(zoom) || 100;
+  return COVER_ZOOM_STEPS.reduce((best,step)=>Math.abs(step - value) < Math.abs(best - value) ? step : best, COVER_ZOOM_STEPS[0]);
+}
+
+function activeQuickPositionId(x,y){
+  let best = COVER_QUICK[1];
+  let bestDist = Infinity;
+  for(const pos of COVER_QUICK){
+    const dist = (pos.x - x) ** 2 + (pos.y - y) ** 2;
+    if(dist < bestDist){
+      bestDist = dist;
+      best = pos;
+    }
   }
-  framer.dataset.bound = "1";
+  return best.id;
+}
+
+function setCoverFocus(formNode,x,y){
+  if(formNode.elements.cover_focus_x) formNode.elements.cover_focus_x.value = String(x);
+  if(formNode.elements.cover_focus_y) formNode.elements.cover_focus_y.value = String(y);
   syncCoverFramer(formNode);
-  ["cover_focus_x","cover_focus_y","cover_zoom"].forEach(name=>{
-    formNode.elements[name]?.addEventListener("input",()=>{
-      syncCoverFramer(formNode);
-      formNode.dispatchEvent(new Event("input",{bubbles:true}));
+  formNode.dispatchEvent(new Event("input",{bubbles:true}));
+}
+
+function setCoverZoom(formNode,zoom){
+  const safe = nearestZoomStep(zoom);
+  if(formNode.elements.cover_zoom) formNode.elements.cover_zoom.value = String(safe);
+  syncCoverFramer(formNode);
+  formNode.dispatchEvent(new Event("input",{bubbles:true}));
+}
+
+function stepCoverZoom(formNode,direction){
+  const current = nearestZoomStep(formNode.elements.cover_zoom?.value || 100);
+  const idx = COVER_ZOOM_STEPS.indexOf(current);
+  const next = COVER_ZOOM_STEPS[Math.min(COVER_ZOOM_STEPS.length - 1, Math.max(0, idx + direction))];
+  setCoverZoom(formNode, next);
+}
+
+export function bindCoverFramer(formNode){
+  const slot = formNode.querySelector("#coverFramerSlot");
+  if(!slot) return;
+  if(slot.dataset.bound !== "1"){
+    slot.dataset.bound = "1";
+    slot.addEventListener("click",event=>{
+      const phone = event.target.closest("[data-cover-tap]");
+      if(phone){
+        const rect = phone.getBoundingClientRect();
+        const x = Math.round(Math.min(100, Math.max(0, ((event.clientX - rect.left) / rect.width) * 100)));
+        const y = Math.round(Math.min(100, Math.max(0, ((event.clientY - rect.top) / rect.height) * 100)));
+        setCoverFocus(formNode, x, y);
+        return;
+      }
+      const posBtn = event.target.closest("[data-cover-x]");
+      if(posBtn){
+        event.preventDefault();
+        setCoverFocus(formNode,Number(posBtn.dataset.coverX),Number(posBtn.dataset.coverY));
+        return;
+      }
+      const zoomStep = event.target.closest("[data-cover-zoom-step]");
+      if(zoomStep){
+        event.preventDefault();
+        stepCoverZoom(formNode, Number(zoomStep.dataset.coverZoomStep));
+      }
     });
-  });
-  let dragging = false;
-  const onPointer = event=>{
-    if(!dragging) return;
-    const rect = framer.getBoundingClientRect();
-    const x = Math.round(Math.min(100,Math.max(0,((event.clientX - rect.left) / rect.width) * 100)));
-    const y = Math.round(Math.min(100,Math.max(0,((event.clientY - rect.top) / rect.height) * 100)));
-    if(formNode.elements.cover_focus_x) formNode.elements.cover_focus_x.value = String(x);
-    if(formNode.elements.cover_focus_y) formNode.elements.cover_focus_y.value = String(y);
-    syncCoverFramer(formNode);
-  };
-  framer.addEventListener("pointerdown",event=>{
-    if(!formNode.elements.cover_url?.value) return;
-    dragging = true;
-    framer.setPointerCapture(event.pointerId);
-    onPointer(event);
-  });
-  framer.addEventListener("pointermove",onPointer);
-  framer.addEventListener("pointerup",event=>{
-    dragging = false;
-    framer.releasePointerCapture(event.pointerId);
-    formNode.dispatchEvent(new Event("input",{bubbles:true}));
-  });
-  framer.addEventListener("pointercancel",()=>{ dragging = false; });
+  }
+  syncCoverFramer(formNode);
 }
 
 export function syncCoverFramer(formNode){
@@ -254,44 +384,80 @@ export function syncCoverFramer(formNode){
   };
   const {x,y,zoom,css} = coverFocusStyle(state);
   img.style.cssText = css;
-  const xLabel = document.getElementById("coverFocusXVal");
-  const yLabel = document.getElementById("coverFocusYVal");
-  const zLabel = document.getElementById("coverZoomVal");
-  if(xLabel) xLabel.textContent = `${x}%`;
-  if(yLabel) yLabel.textContent = `${y}%`;
-  if(zLabel) zLabel.textContent = `${zoom}%`;
+  const marker = document.getElementById("coverFocusMarker");
+  if(marker){
+    marker.style.left = `${x}%`;
+    marker.style.top = `${y}%`;
+  }
+  const quickId = activeQuickPositionId(x,y);
+  formNode.querySelectorAll("[data-cover-x]").forEach(btn=>{
+    const active = btn.dataset.coverQuick === quickId;
+    btn.classList.toggle("active",active);
+    btn.setAttribute("aria-pressed",active ? "true" : "false");
+  });
+  const zoomLabel = document.getElementById("coverZoomLabel");
+  const normalizedZoom = nearestZoomStep(zoom);
+  if(zoomLabel) zoomLabel.textContent = `${normalizedZoom}%`;
+  const minus = formNode.querySelector("[data-cover-zoom-step='-1']");
+  const plus = formNode.querySelector("[data-cover-zoom-step='1']");
+  if(minus) minus.disabled = normalizedZoom <= COVER_ZOOM_STEPS[0];
+  if(plus) plus.disabled = normalizedZoom >= COVER_ZOOM_STEPS[COVER_ZOOM_STEPS.length - 1];
 }
 
 export function renderCoverFramer(state){
   const url = state.cover_url || "";
   const {x,y,zoom,css} = coverFocusStyle(state);
-  if(!url) return `<div class="cover-framer cover-framer-empty"><p class="field-hint">Carica una copertina per regolare inquadratura e zoom.</p></div>`;
-  return `<div class="cover-framer" id="coverFramer" aria-label="Trascina per spostare la copertina">
-    <div class="cover-framer-phone"><img id="coverFramerImg" src="${esc(url)}" alt="" style="${esc(css)}" loading="lazy" decoding="async"></div>
-    <p class="cover-framer-hint">Trascina con il dito per inquadrare la foto · usa Zoom se serve</p>
+  if(!url){
+    return `<div class="cover-framer cover-framer-empty"><p class="field-hint">Carica una copertina, poi tocca l'anteprima per inquadrarla.</p></div>`;
+  }
+  const quickId = activeQuickPositionId(x,y);
+  const normalizedZoom = nearestZoomStep(zoom);
+  const quick = COVER_QUICK.map(pos=>`<button type="button" class="cover-quick-btn ${pos.id === quickId ? "active" : ""}" data-cover-quick="${pos.id}" data-cover-x="${pos.x}" data-cover-y="${pos.y}" aria-pressed="${pos.id === quickId ? "true" : "false"}">${esc(pos.label)}</button>`).join("");
+  return `<div class="cover-framer" id="coverFramer" aria-label="Anteprima copertina">
+    <p class="cover-picker-hint cover-framer-top-hint">Tocca la foto dove vuoi il fuoco</p>
+    <div class="cover-framer-phone" data-cover-tap>
+      <img id="coverFramerImg" src="${esc(url)}" alt="" style="${esc(css)}" loading="lazy" decoding="async">
+      <span class="cover-focus-marker" id="coverFocusMarker" style="left:${x}%;top:${y}%"></span>
+    </div>
   </div>
-  <div class="cover-focus-controls">
-    <label>Sposta ↔ <strong id="coverFocusXVal">${x}%</strong><input type="range" name="cover_focus_x" min="0" max="100" step="1" value="${x}"></label>
-    <label>Sposta ↕ <strong id="coverFocusYVal">${y}%</strong><input type="range" name="cover_focus_y" min="0" max="100" step="1" value="${y}"></label>
-    <label>Ingrandisci <strong id="coverZoomVal">${zoom}%</strong><input type="range" name="cover_zoom" min="100" max="200" step="5" value="${zoom}"></label>
+  <input type="hidden" name="cover_focus_x" value="${x}">
+  <input type="hidden" name="cover_focus_y" value="${y}">
+  <input type="hidden" name="cover_zoom" value="${normalizedZoom}">
+  <div class="cover-picker">
+    <p class="cover-picker-label">Scorciatoie</p>
+    <div class="cover-quick-row" role="group" aria-label="Posizione rapida">${quick}</div>
+  </div>
+  <div class="cover-picker cover-picker-zoom">
+    <p class="cover-picker-label">Zoom</p>
+    <div class="cover-zoom-stepper" role="group" aria-label="Zoom copertina">
+      <button type="button" class="cover-zoom-step-btn" data-cover-zoom-step="-1" aria-label="Riduci zoom" ${normalizedZoom <= COVER_ZOOM_STEPS[0] ? "disabled" : ""}>−</button>
+      <span class="cover-zoom-label" id="coverZoomLabel">${normalizedZoom}%</span>
+      <button type="button" class="cover-zoom-step-btn" data-cover-zoom-step="1" aria-label="Aumenta zoom" ${normalizedZoom >= COVER_ZOOM_STEPS[COVER_ZOOM_STEPS.length - 1] ? "disabled" : ""}>+</button>
+    </div>
   </div>`;
 }
 
 /** Input file fuori dai pannelli nascosti — altrimenti il dialog non si apre in Chrome/Safari. */
 export function renderGalleryFileInput(key = "gallery"){
-  return `<input type="file" id="galleryFile_${key}" accept="image/*,video/*,audio/*" multiple hidden tabindex="-1" aria-hidden="true">`;
+  const accept = key === "letter_future" ? `${IMAGE_ACCEPT},video/*,audio/*` : IMAGE_ACCEPT;
+  return `<input type="file" id="galleryFile_${key}" accept="${accept}" multiple hidden tabindex="-1" aria-hidden="true">`;
 }
 
 export function renderGalleryUploadPanel(section,key){
   const media = normalizeMediaList(section);
+  const limits = mediaLimitsForKey(key);
+  const isLetter = key === "letter_future";
+  const intro = isLetter
+    ? `<p><strong>Allegati sigillati</strong></p><p class="field-hint">Foto, video o audio che si sbloccano <strong>insieme alla lettera</strong>. Tocca Aggiungi, poi <strong>Salva</strong>.</p>`
+    : `<p><strong>Galleria foto</strong></p><p class="field-hint">Solo immagini qui. Tocca <strong>Aggiungi foto</strong>, scrivi titolo e descrizione, poi <strong>Salva</strong>.</p>`;
+  const footer = isLetter
+    ? `${media.length ? `${media.length} allegati pronti. ` : ""}${limits.hint}`
+    : `${media.length ? `${media.length} foto pronte. ` : ""}${limits.hint} Video → sezione <strong>Video</strong> · Audio → sezione <strong>Musica</strong>.`;
   return `<div class="gallery-upload-panel" data-gallery-key="${key}">
-    <div class="gallery-steps">
-      <p><strong>Aggiungi i tuoi ricordi</strong></p>
-      <p class="field-hint">Tocca <strong>Aggiungi foto</strong>, video o audio — poi scrivi titolo e descrizione e tocca <strong>Salva</strong>.</p>
-    </div>
+    <div class="gallery-steps">${intro}</div>
     <div class="gallery-organized" id="galleryOrganized_${key}"></div>
     <textarea name="section_${key}_media" class="gallery-media-json" aria-hidden="true" tabindex="-1"></textarea>
-    <p class="field-hint" id="galleryUploadStatus_${key}">${media.length ? `${media.length} elementi organizzati. ` : ""}${MEDIA_LIMITS_HINT}. La musica di sottofondo va nella sezione <strong>Musica</strong>.</p>
+    <p class="field-hint" id="galleryUploadStatus_${key}">${footer}</p>
   </div>`;
 }
 
@@ -305,7 +471,22 @@ export function renderSectionPhotoPanel(key, section, fieldName, { previewId, fi
   return `<div class="section-photo-panel" data-section-photo-key="${esc(key)}">
     <input type="hidden" name="section_${esc(key)}_${esc(fieldName)}" value="${esc(url)}">
     <div class="section-photo-preview" id="${esc(resolvedPreviewId)}">${preview}</div>
-    <input type="file" id="${esc(resolvedFileId)}" accept="image/*" hidden data-section-photo-input="${esc(key)}">
+    <input type="file" id="${esc(resolvedFileId)}" accept="${IMAGE_ACCEPT}" hidden data-section-photo-input="${esc(key)}">
+  </div>`;
+}
+
+export function renderVideoSectionPanel(section){
+  const videoUrl = String(section.video_url || "").trim();
+  const preview = videoUrl
+    ? `<div class="video-section-preview"><video src="${esc(videoUrl)}" controls playsinline preload="metadata"></video><button type="button" class="ghost video-section-remove" data-video-section-remove aria-label="Rimuovi video">Rimuovi</button></div>`
+    : `<button type="button" class="gallery-add video-section-add" data-video-section-upload><span>▶</span>Carica video MP4/MOV</button>`;
+  return `<div class="video-section-panel" id="videoSectionPanel">
+    <input type="hidden" name="section_video_video_url" value="${esc(videoUrl)}">
+    <label>Titolo del video<input name="section_video_video_title" value="${esc(section.video_title || "")}" placeholder="Es. Il giorno più bello" maxlength="120"></label>
+    <label>Descrizione<textarea name="section_video_video_description" rows="3" placeholder="Racconta questo video...">${esc(section.video_description || "")}</textarea></label>
+    <p class="field-hint">${VIDEO_SECTION_HINT}</p>
+    ${preview}
+    <input type="file" id="sectionVideoFile" accept="video/*" hidden>
   </div>`;
 }
 
@@ -328,4 +509,4 @@ function esc(value){
   return String(value ?? "").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 }
 
-export { MEDIA_LIMITS_HINT, coverFocusStyle, normalizeMediaList };
+export { coverFocusStyle, normalizeMediaList, mediaLimitsForKey };

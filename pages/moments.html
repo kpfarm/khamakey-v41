@@ -7,10 +7,19 @@
   <link rel="icon" href="khamakey-favicon.png">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="moments.css?v=111">
+  <link rel="stylesheet" href="moments.css?v=144">
 </head>
-<body>
-  <main class="moments-auth" id="momentsAuth">
+<body class="session-pending">
+  <main class="moments-boot" id="momentsBoot" aria-live="polite">
+    <div class="boot-card">
+      <img src="khamakey-wordmark-dark.png" alt="KhamaKey" class="brand-logo">
+      <p class="eyebrow">KhamaKey Moments</p>
+      <h2>Apertura in corso…</h2>
+      <p>Attendere qualche istante.</p>
+    </div>
+  </main>
+
+  <main class="moments-auth" id="momentsAuth" hidden>
     <section class="auth-brand">
       <img src="khamakey-wordmark-dark.png" alt="KhamaKey" class="brand-logo">
       <p class="eyebrow">KhamaKey Moments</p>
@@ -79,16 +88,16 @@
         <form id="momentsSignupForm" class="auth-form" hidden>
           <div class="form-intro">
             <h2>Nuovo account Moments</h2>
-            <p>Collega il codice prodotto al tuo profilo e crea la prima pagina.</p>
+            <p>Serve il <strong>codice Moments</strong> sulla confezione NFC (non è un account Business). Poi inserisci email e password.</p>
           </div>
           <div class="signup-steps" id="signupSteps">
             <span class="signup-step active" data-step="1">1. Codice</span>
             <span class="signup-step" data-step="2">2. Account</span>
           </div>
           <div class="signup-panel" data-signup-panel="1">
-            <label>Codice prodotto
-              <input id="momentsSignupCode" type="text" autocomplete="off" placeholder="Esempio MOMENT1234ABCDEF" required>
-              <span class="field-hint">8–32 caratteri, lettere e numeri. Viene scritto in maiuscolo automaticamente.</span>
+            <label>Codice Moments (sulla confezione)
+              <input id="momentsSignupCode" type="text" autocomplete="off" placeholder="Es. M7K2-9XPL-H3WN" required>
+              <span class="field-hint">Lo trovi sull’etichetta / confezione dell’oggetto NFC Moments. Senza codice non si apre lo step account — è normale.</span>
             </label>
             <button type="button" class="primary" id="signupNextStep">Continua</button>
           </div>
@@ -105,20 +114,10 @@
               </span>
             </label>
             <label>Nome pagina<input id="momentsSignupTitle" type="text" placeholder="Esempio Il nostro ricordo" required></label>
+            <p class="field-hint activation-code-type" id="momentsSignupTypeHint" hidden></p>
             <label>PIN pagina (per aprire il link)
               <input id="momentsSignupPin" type="text" inputmode="numeric" autocomplete="new-password" placeholder="Esempio 1234" minlength="4" required>
               <span class="field-hint">Scegli un PIN da 4 cifre o più. Lo userai per aprire la pagina collegata all’NFC.</span>
-            </label>
-            <label>Tipo pagina
-              <select id="momentsSignupType">
-                <option value="free">Uso libero</option>
-                <option value="wedding">Matrimonio</option>
-                <option value="party">Festa</option>
-                <option value="travel">Viaggio</option>
-                <option value="memory">Ricordo</option>
-                <option value="memorial">Memoriale</option>
-                <option value="portfolio">Portfolio</option>
-              </select>
             </label>
             <div class="signup-actions">
               <button type="button" class="ghost" id="signupPrevStep">Indietro</button>
@@ -166,7 +165,10 @@
 
     <div class="save-bar" id="momentsSaveBar">
       <div class="save-msg">Hai <strong>modifiche non salvate</strong></div>
-      <button type="submit" form="momentEditorForm" class="btn-save">Salva</button>
+      <div class="save-bar-actions">
+        <button type="button" class="btn-undo editor-undo-btn" id="editorUndoBtnMobile" hidden>↩ Annulla</button>
+        <button type="submit" form="momentEditorForm" class="btn-save">Salva</button>
+      </div>
     </div>
     <button type="button" class="preview-fab" id="momentsPreviewFab">Anteprima</button>
     <nav class="bottom-nav" id="momentsBottomNav" aria-label="Navigazione editor">
@@ -175,6 +177,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=114"></script>
+  <script type="module" src="moments.js?v=144"></script>
 </body>
 </html>

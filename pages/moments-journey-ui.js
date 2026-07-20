@@ -91,7 +91,7 @@ export function renderJourneyPanel(section,placesSection = null){
 }
 
 export function renderJourneyFileInput(){
-  return `<input type="file" id="journeyStepFile" accept="image/*" hidden tabindex="-1" aria-hidden="true">`;
+  return `<input type="file" id="journeyStepFile" accept="image/*,.heic,.heif,.heics,.hif" hidden tabindex="-1" aria-hidden="true">`;
 }
 
 function bindJourneyStepDnD(formNode){

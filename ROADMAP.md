@@ -253,4 +253,16 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-13 | Codex | **Collaborazione agenti**: rafforzato bootstrap/passaggio consegne e creato prompt per nuovi agenti |
 | 2026-07-14 | Codex | **Audit Admin**: creato `KHAMAKEY_OS/docs/18-admin-audit.md` con stato funzioni, gap e piano miglioramento |
 | 2026-07-14 | Codex | **Admin v128 / Business v118 / Moments v114 / SQL v89**: console supporto operativa e ticket assistenza apribili da editor account |
-| 2026-07-14 | Codex | **Piano Admin Console Operativa**: creato `KHAMAKEY_OS/docs/19-admin-console-operativa.md`, roadmap a blocchi 1-2 sezioni per volta |
+| 2026-07-15 | Cursor | **Business v147 / SQL v147**: attivazione codice prodotto (parità Moments), signup 2-step, form attivazione, save bar navy, fix idratazione — deploy Pages, doc vault `docs/20-business-activation-inventory-v147-v148.md` |
+| 2026-07-15 | Cursor | **Business v148 (Sprint S1)**: barra shell mobile Account/Esci/cloud, chip stato pagina, fix account sicurezza/fatturazione, guard upload, copy auto-save |
+| 2026-07-17 | Cursor | **Moments v135 / SQL v157**: categoria bloccata al codice NFC (badge editor, peek signup, activate/save lock, batch magazzino tutte le categorie) — Pages deploy + migration Supabase |
+| 2026-07-18 | Cursor | **Domini custom**: `app.khamakeymoments.com` (Pages) + `link.khamakeymoments.com` (Worker) — config/CSP/deploy v136 / Worker v139 |
+| 2026-07-18 | Cursor | **Audit + fix assistenza**: SQL v158 sblocca ticket `moments_editor`/`business_editor` (CHECK); feedback Business; filtro Supporto Moments admin v161 |
+| 2026-07-18 | Cursor | **Moments perf v138 / Worker v140**: anteprima debounce+hash, rate limit preview, lista senza page_state, soft-save senza reload editor |
+| 2026-07-18 | Cursor | **Admin Moments v162**: consolle senza Shopify/Business; redirect `admin.html`→`moments-admin` su dominio Moments; reset filtri magazzino se nascondono i pezzi |
+| 2026-07-19 | Cursor | **Admin v163**: fix critico — `Promise.all(loaders)` non invocava le load (magazzino restava su «Caricamento prodotti...») |
+| 2026-07-19 | Cursor | **Moments v139**: su `khamakeymoments.com` la home `/` reindirizza a `moments.html` (niente signup Business); copy signup chiarisce codice Moments |
+| 2026-07-19 | Cursor | **Moments v140 / Business app v167 / SQL v159**: account Moments non finiscono più nel flusso Business; emailRedirect → moments.html; peek codice in signup; auto-attivazione pending; drop overload activate_moment_code |
+| 2026-07-20 | Cursor | **Moments v142 / Worker v141**: rimosso selettore «Icone e adesivi» (pageDecor); pagine pubbliche senza decor emoji |
+| 2026-07-20 | Cursor | **Moments v143 / Worker v142**: palette colori rinfrescate (meno grigi morti, accenti saturi); variante Caldo = sfondo caldo non blocco scuro |
+| 2026-07-20 | Cursor | **Moments v144**: galleria — pulsanti visibili **Cambia foto** e **Rimuovi** per sostituire/cancellare immagini (titolo/desc preservati al replace) |

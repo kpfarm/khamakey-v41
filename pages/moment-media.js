@@ -1,14 +1,57 @@
 /** Modello media Moments — foto, video, audio con titolo e descrizione. */
 
-import { inferMediaKind } from "./media-upload.js";
+import { inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=144";
 
 export const MAX_GALLERY_ITEMS = 24;
-export const MAX_GALLERY_VIDEOS = 6;
-export const MAX_GALLERY_AUDIO = 6;
+export const MAX_GALLERY_VIDEOS = 0;
+export const MAX_GALLERY_AUDIO = 0;
 export const MAX_MUSIC_AUDIO = 2;
+export const MAX_VIDEO_CLIPS = 1;
+export const MAX_LETTER_IMAGES = 2;
+export const MAX_LETTER_VIDEOS = 1;
+export const MAX_LETTER_AUDIO = 1;
+export const MAX_LETTER_ITEMS = MAX_LETTER_IMAGES + MAX_LETTER_VIDEOS + MAX_LETTER_AUDIO;
 
 export const MEDIA_LIMITS_HINT =
-  `Fino a ${MAX_GALLERY_ITEMS} elementi · foto 8 MB · video 25 MB (max ${MAX_GALLERY_VIDEOS}) · audio 12 MB (max ${MAX_GALLERY_AUDIO})`;
+  `Fino a ${MAX_GALLERY_ITEMS} foto (8 MB) — titolo e descrizione visibili ingrandendo in pagina.`;
+
+export const VIDEO_SECTION_HINT =
+  `Un solo video (MP4/MOV, max 25 MB) con titolo e descrizione. Per audio usa la sezione Musica.`;
+
+export const LETTER_MEDIA_HINT =
+  `Fino a ${MAX_LETTER_IMAGES} foto, ${MAX_LETTER_VIDEOS} video e ${MAX_LETTER_AUDIO} audio (8 MB foto · 25 MB video · 12 MB audio) — si sbloccano con la lettera.`;
+
+export function mediaLimitsForKey(sectionKey = "gallery"){
+  if(sectionKey === "letter_future"){
+    return {
+      maxItems:MAX_LETTER_ITEMS,
+      maxImages:MAX_LETTER_IMAGES,
+      maxVideos:MAX_LETTER_VIDEOS,
+      maxAudio:MAX_LETTER_AUDIO,
+      hint:LETTER_MEDIA_HINT
+    };
+  }
+  return {
+    maxItems:MAX_GALLERY_ITEMS,
+    maxImages:MAX_GALLERY_ITEMS,
+    maxVideos:0,
+    maxAudio:0,
+    hint:MEDIA_LIMITS_HINT
+  };
+}
+
+/** Converte media[] o allegato legacy (media_url) in lista normalizzata. */
+export function migrateLetterMediaSection(section = {}){
+  const list = normalizeMediaList(section);
+  if(list.length) return list.slice(0, MAX_LETTER_ITEMS);
+  const type = String(section.media_type || "").trim();
+  const url = String(section.media_url || "").trim();
+  const title = String(section.media_title || "").trim();
+  if(url && ["image","video","audio"].includes(type)){
+    return [normalizeMediaItem({ type, url, title })];
+  }
+  return [];
+}
 
 export function mediaId(){
   return crypto.randomUUID();
@@ -114,21 +157,33 @@ export function mediaEditorRowHtml(item,{index = 0,sectionKey = "gallery"} = {})
     : safe.type === "video"
       ? `<video src="${escAttr(safe.url)}" muted playsinline preload="metadata"></video>`
       : `<div class="media-audio-row-icon" aria-hidden="true">♫</div>`;
+  const replaceLabel = safe.type === "image" ? "Cambia foto" : safe.type === "video" ? "Cambia video" : "Cambia audio";
   return `<article class="media-edit-row media-edit-row-${safe.type}" data-media-id="${escAttr(safe.id)}" data-media-index="${index}" data-media-section="${escAttr(sectionKey)}">
     <div class="media-edit-preview" aria-label="${escAttr(typeLabel)}">${preview}</div>
     <div class="media-edit-fields">
       <label class="media-edit-label">Titolo<input class="media-row-title" type="text" value="${escAttr(safe.title)}" placeholder="Es. Il nostro primo giorno" maxlength="120"></label>
       <label class="media-edit-label">Descrizione<textarea class="media-row-desc" rows="2" placeholder="Racconta questo ricordo...">${escHtml(safe.description)}</textarea></label>
+      <div class="media-edit-actions">
+        <button type="button" class="media-edit-replace" data-gallery-replace="${index}" data-media-id="${escAttr(safe.id)}" data-media-section="${escAttr(sectionKey)}" data-media-type="${escAttr(safe.type)}">${escHtml(replaceLabel)}</button>
+        <button type="button" class="media-edit-remove" data-gallery-remove="${index}" data-media-id="${escAttr(safe.id)}" data-media-section="${escAttr(sectionKey)}">Rimuovi</button>
+      </div>
     </div>
-    <button type="button" class="gallery-remove media-edit-remove" data-gallery-remove="${index}" data-media-id="${escAttr(safe.id)}" data-media-section="${escAttr(sectionKey)}" aria-label="Rimuovi ${escAttr(typeLabel)}">×</button>
   </article>`;
 }
 
-export const GALLERY_TYPE_GROUPS = [
-  { type:"image", label:"Foto", icon:"📷", addLabel:"Aggiungi foto", accept:"image/*" },
-  { type:"video", label:"Video", icon:"▶", addLabel:"Aggiungi video", accept:"video/*" },
-  { type:"audio", label:"Audio", icon:"♫", addLabel:"Aggiungi audio", accept:"audio/*", addHint:"Messaggi vocali e registrazioni — non la musica di sottofondo (usa la sezione Musica)." }
+export const GALLERY_IMAGE_GROUP = [
+  { type:"image", label:"Foto", icon:"📷", addLabel:"Aggiungi foto", accept:IMAGE_ACCEPT }
 ];
+
+export const GALLERY_TYPE_GROUPS = [
+  ...GALLERY_IMAGE_GROUP,
+  { type:"video", label:"Video", icon:"▶", addLabel:"Aggiungi video", accept:"video/*" },
+  { type:"audio", label:"Audio", icon:"♫", addLabel:"Aggiungi audio", accept:"audio/*", addHint:"Messaggi vocali e registrazioni — si sbloccano con la lettera." }
+];
+
+export function galleryEditorGroups(key = "gallery"){
+  return key === "letter_future" ? GALLERY_TYPE_GROUPS : GALLERY_IMAGE_GROUP;
+}
 
 function escAttr(value){
   return String(value ?? "").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));

@@ -163,15 +163,18 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 ## Problemi aperti
 
+Checklist ops dettagliata: [`docs/22-ops-secrets-auth-checklist.md`](docs/22-ops-secrets-auth-checklist.md).  
+Health live 2026-07-20 (`link.khamakeymoments.com/health`): Worker **v144**, Resend **active**, Shopify **active**, Stripe/PayPal/OpenAI **not_configured**.
+
 | # | Problema | Impatto | Azione |
 |---|----------|---------|--------|
-| 1 | `STRIPE_SECRET_KEY` non in produzione | Pagamenti Business bloccati | Vedi `STRIPE-PERSONAL-SETUP.md` |
-| 2 | `RESEND_WEBHOOK_SECRET` non impostato | Webhook delivery Resend → 503 (sicuro) | `wrangler secret put RESEND_WEBHOOK_SECRET` |
-| 3 | Auth «Leaked Password Protection» disabilitata | Advisory Supabase | Dashboard → Authentication → Policies |
+| 1 | Stripe non configurato (`/health`) | Solo pagamenti **Business** — Moments OK | `docs/22` §C + `STRIPE-PERSONAL-SETUP.md` |
+| 2 | `RESEND_WEBHOOK_SECRET` probabilmente assente | Webhook delivery → 503 (sicuro); **invio email OK** (`RESEND_API_KEY` active) | `docs/22` §B — opzionale |
+| 3 | Auth «Leaked Password Protection» OFF (advisor WARN) | Password violate accettate a signup/cambio | `docs/22` §A — toggle Dashboard Email provider |
 | 4 | Working tree spesso sporco (Business WIP + demo) | Rischio commit accidentali | Non mescolare con fix Moments; commit mirati |
 | 5 | IDOR Business fix non E2E dual-account | Confidenza media | Test manuale due utenti quando possibile |
 
-RSVP backend (SQL v70) e guestbook: **operativi in prod** — rimossi dalla lista bloccanti.
+RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments).
 
 ---
 

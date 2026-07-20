@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **Ops checklist secrets/Auth (2026-07-20, Cursor)** — solo documentazione
+  - Nuovo `docs/22-ops-secrets-auth-checklist.md` da health live Worker v144 (Resend/Shopify active; Stripe off).
+  - Guida Stripe: webhook URL → `link.khamakeymoments.com`. Zero deploy / zero secret in git.
 - **SSOT versioni / lock multi-agente (2026-07-20, Cursor)** — solo documentazione
   - `PROJECT_STATE.md` e `CODEX-COLLAB.md` riallineati al codice live (Admin/Officina v165, Moments v147, Worker v144-support-notify, SQL ≥ v159).
   - Lock stale (Antigravity worker, Claude admin, Moments July) rilasciati → **libero**.

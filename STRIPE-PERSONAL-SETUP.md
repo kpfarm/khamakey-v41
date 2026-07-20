@@ -12,7 +12,8 @@ Guida per collegare **temporaneamente** il tuo account Stripe personale, finché
 | Secrets Cloudflare `STRIPE_*` | ❌ non configurati |
 | Admin → Piani → Price ID | ❌ da compilare |
 
-Verifica live: `GET https://khamakey-nfc.khamakey-nfc.workers.dev/health` → `integrations.stripe.configured: false`
+Verifica live: `GET https://link.khamakeymoments.com/health` → `integrations.stripe.configured`  
+(2026-07-20: ancora `false` — Moments non dipende da Stripe.)
 
 ---
 
@@ -41,8 +42,9 @@ Consiglio: partire in **modalità Test** (`sk_test_...`), poi passare a Live qua
 1. Stripe Dashboard → **Developers → Webhooks → Add endpoint**
 2. URL:
    ```
-   https://khamakey-nfc.khamakey-nfc.workers.dev/webhooks/stripe
+   https://link.khamakeymoments.com/webhooks/stripe
    ```
+   (fallback workers.dev solo se il custom domain non risponde)
 3. Eventi da abilitare (minimo):
    - `checkout.session.completed`
    - (opzionale) `invoice.paid`, `customer.subscription.updated`

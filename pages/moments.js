@@ -124,10 +124,12 @@ const forgotForm = document.getElementById("momentsForgotForm");
 const recoveryForm = document.getElementById("momentsRecoveryForm");
 const statusNode = document.getElementById("momentsAuthStatus");
 const detail = document.getElementById("momentDetail");
+const userName = document.getElementById("momentsUserName");
 const userEmail = document.getElementById("momentsUserEmail");
 const userAvatar = document.getElementById("momentsUserAvatar");
 const userMenu = document.getElementById("momentsUserMenu");
 const userMenuBtn = document.getElementById("momentsUserMenuBtn");
+const userMenuProducts = document.getElementById("momentsMenuProducts");
 const PUBLIC_BASE_URL = WORKER_BASE_URL;
 
 const EDITOR_PANELS = {
@@ -580,15 +582,74 @@ function showAppLoadError(error){
   renderEditorFailure(error);
 }
 
+function accountDisplayName(user = currentUser){
+  const metaName = String(user?.user_metadata?.full_name || "").trim();
+  if(metaName) return metaName;
+  const email = String(user?.email || "").trim();
+  if(!email) return "Account Moments";
+  return email.split("@")[0] || "Account Moments";
+}
+
+function refreshAccountMenu(){
+  const email = String(currentUser?.email || "").trim();
+  const name = accountDisplayName(currentUser);
+  if(userName) userName.textContent = name;
+  if(userEmail) userEmail.textContent = email || "Email non disponibile";
+  if(userAvatar){
+    const seed = name || email || "K";
+    userAvatar.textContent = seed.charAt(0).toUpperCase();
+  }
+  if(!userMenuProducts) return;
+  if(!rows.length){
+    userMenuProducts.innerHTML = `<p class="user-menu-empty">Nessun prodotto attivo. Attiva un codice NFC dall’account.</p>`;
+    return;
+  }
+  userMenuProducts.innerHTML = rows.map(row=>{
+    let title = row?.title || row?.slug || "Pagina Moments";
+    let typeLabel = "";
+    try{
+      const state = mergedState(row);
+      title = state.title || title;
+      typeLabel = TYPE_LABELS[state.type] || state.type || "";
+    }catch(_error){
+      typeLabel = TYPE_LABELS[normalizeMomentType(row?.moment_type || row?.event_type || "free")] || "";
+    }
+    const status = row.public_visible ? "pubblicata" : "bozza";
+    const code = row.nfc_code ? formatMomentCodeDisplay(row.nfc_code) : "NFC";
+    return `<button type="button" class="user-menu-product ${row.id === activeId ? "active" : ""}" data-menu-object-id="${esc(row.id)}">
+      ${esc(title)}
+      <span>${esc(code)} · ${esc(typeLabel)} · ${status}</span>
+    </button>`;
+  }).join("");
+  userMenuProducts.querySelectorAll("[data-menu-object-id]").forEach(button=>{
+    button.addEventListener("click",async()=>{
+      userMenu?.classList.remove("open");
+      const nextId = button.dataset.menuObjectId;
+      if(!nextId) return;
+      if(nextId === activeId){
+        activeNavGroup = "account";
+        setEditorPanel("objects");
+        return;
+      }
+      if(editorDirty && !confirm("Hai modifiche non salvate. Vuoi cambiare oggetto senza salvare?")) return;
+      activeEditorPanel = "cover";
+      try{
+        await ensureEventPageState(nextId);
+        renderDetail(nextId);
+      }catch(error){
+        showAppLoadError(error);
+      }
+    });
+  });
+}
+
 async function showApp(user){
   if(!user) return;
   finishSessionBoot();
   currentUser = user;
   auth.hidden = true;
   app.hidden = false;
-  const email = user.email || "";
-  if(userEmail) userEmail.textContent = email;
-  if(userAvatar) userAvatar.textContent = (email[0] || "K").toUpperCase();
+  refreshAccountMenu();
   ensureMobileNav();
   bindGlobalAppChrome();
   try{
@@ -624,6 +685,16 @@ function bindGlobalAppChrome(){
         const form = document.getElementById("momentEditorForm");
         if(form) schedulePreviewUpdate(form,{immediate:true,force:true});
       }
+    });
+  }
+  const accountBtn = document.getElementById("momentsMenuAccount");
+  if(accountBtn && accountBtn.dataset.bound !== "1"){
+    accountBtn.dataset.bound = "1";
+    accountBtn.addEventListener("click",()=>{
+      userMenu?.classList.remove("open");
+      activeNavGroup = "account";
+      setEditorPanel("objects");
+      document.getElementById("objectsSwitcher")?.scrollIntoView({behavior:"smooth",block:"start"});
     });
   }
   const supportBtn = document.getElementById("momentsMenuSupport");
@@ -821,24 +892,6 @@ function syncMobileNav(panelId){
   document.querySelectorAll("#momentsSubNav .snav-btn").forEach(button=>{
     button.classList.toggle("active",button.dataset.editorPanel === panelId);
   });
-}
-
-function bindPageMenuActions(publicUrl, pageTitle){
-  const openPage = document.getElementById("momentsMenuOpenPage");
-  const sharePage = document.getElementById("momentsMenuSharePage");
-  const copyLink = document.getElementById("momentsMenuCopyLink");
-  if(openPage){
-    openPage.hidden = !publicUrl;
-    openPage.onclick = ()=>publicUrl && window.open(publicUrl,"_blank","noopener");
-  }
-  if(sharePage){
-    sharePage.hidden = !publicUrl;
-    sharePage.onclick = ()=>publicUrl && sharePageUrl(publicUrl, pageTitle || "KhamaKey Moments");
-  }
-  if(copyLink){
-    copyLink.hidden = !publicUrl;
-    copyLink.onclick = ()=>publicUrl && copyText(publicUrl,copyLink);
-  }
 }
 
 function bindEditorPageActions(publicUrl, pageTitle){
@@ -1076,6 +1129,7 @@ async function loadObjects({ render = true } = {}){
     }
   }
   if(rows.length && !rows.some(row=>row.id === activeId)) activeId = rows[0].id;
+  refreshAccountMenu();
   if(!render){
     refreshObjectsSwitcher();
     return;
@@ -2468,7 +2522,7 @@ function renderDetail(id){
   schedulePreviewUpdate(editorForm,{immediate:true,force:true});
   ensureMobileNav();
   syncMobileNav(activeEditorPanel);
-  bindPageMenuActions(publicUrl, state.title || row.slug);
+  refreshAccountMenu();
   bindEditorPageActions(publicUrl, state.title || row.slug);
   bindRsvpSharePanel(editorForm,{
     publicUrl,

@@ -7,7 +7,7 @@
   <link rel="icon" href="khamakey-favicon.png">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="moments.css?v=156">
+  <link rel="stylesheet" href="moments.css?v=157">
 </head>
 <body class="session-pending">
   <main class="moments-boot" id="momentsBoot" aria-live="polite">
@@ -141,11 +141,21 @@
           </button>
           <div class="user-menu" id="momentsUserMenu">
             <div class="user-menu-head">
+              <p class="user-menu-name" id="momentsUserName">Account</p>
               <p class="user-menu-email" id="momentsUserEmail"></p>
             </div>
-            <button type="button" class="user-menu-item" id="momentsMenuOpenPage" hidden>Apri pagina</button>
-            <button type="button" class="user-menu-item" id="momentsMenuSharePage" hidden>Condividi pagina</button>
-            <button type="button" class="user-menu-item" id="momentsMenuCopyLink" hidden>Copia link</button>
+            <div class="user-menu-section">
+              <p class="user-menu-label">Prodotti attivi</p>
+              <div class="user-menu-products" id="momentsMenuProducts"></div>
+            </div>
+            <div class="user-menu-section">
+              <p class="user-menu-label">Piano</p>
+              <div class="user-menu-plan" id="momentsMenuPlan">
+                <strong>Moments Free</strong>
+                <span>Piani premium in arrivo</span>
+              </div>
+            </div>
+            <button type="button" class="user-menu-item" id="momentsMenuAccount">Gestisci account</button>
             <button type="button" class="user-menu-item" id="momentsMenuSupport">Assistenza</button>
             <button type="button" class="user-menu-item danger" id="momentsLogout">Esci</button>
           </div>
@@ -174,6 +184,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=156"></script>
+  <script type="module" src="moments.js?v=157"></script>
 </body>
 </html>

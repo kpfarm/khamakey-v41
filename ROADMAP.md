@@ -280,3 +280,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Moments v152**: senza WhatsApp → RSVP auto-off al Salva (più semplice, zero blocco) |
 | 2026-07-20 | Cursor | **Moments v153**: applica brand Moments ufficiale (logo wordmark + palette rosa/blu notte) a editor/auth |
 | 2026-07-20 | Cursor | **Moments v156**: wordmark PNG trasparente (niente riquadro nero), rimossi doppi “Moments”, boot on-light |
+| 2026-07-20 | Cursor | **Moments v157**: menu avatar = account (profilo, prodotti attivi, slot piano); via Apri/Condividi/Copia |

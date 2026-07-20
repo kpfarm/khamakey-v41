@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **Moments v157 — Menu account cliente (2026-07-20, Cursor)** — Pages only
+  - Dropdown avatar: nome, email, prodotti NFC attivi, slot «Moments Free / piani in arrivo», Gestisci account, Assistenza, Esci.
+  - Rimossi Apri/Condividi/Copia dal menu (restano nella barra editor della pagina).
 - **Moments v156 — Logo senza rettangolo / senza doppio Moments (2026-07-20, Cursor)** — Pages only
   - Wordmark PNG con nero → trasparente; topbar/auth senza titolo “Moments” duplicato; boot usa variante on-light.
 - **Moments v153 — Brand ufficiale logo + palette (2026-07-20, Cursor)** — Pages + vault

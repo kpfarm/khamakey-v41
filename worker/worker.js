@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v149-gallery";
+const WORKER_VERSION = "v150-gallery-scroll";
 
 export default {
   async fetch(request, env, ctx) {
@@ -1989,17 +1989,20 @@ body.nav-open{overflow:hidden}
 .moment-number b{display:block;font-size:clamp(1.6rem,7vw,2rem);font-weight:700;font-style:normal;color:${c.go};line-height:1;font-family:${f.ui}}
 .moment-number small{display:block;font-family:${f.ui};font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:${c.muted};margin-top:8px;line-height:1.35}
 .moment-gallery-hint{margin:4px 0 0;font-family:${f.ui};font-size:.78rem;font-weight:600;color:${c.muted};text-align:center}
-.moment-gallery{display:grid;grid-template-columns:1fr;gap:18px;margin-top:14px}
-.moment-gallery-figure{margin:0;display:grid;gap:10px;min-width:0;width:100%;cursor:pointer;outline:none;border:0;background:transparent;padding:0;text-align:left}
+.moment-gallery{margin-top:10px}
+.moment-gallery-scroll{margin:10px -12px 0;padding:0 16px 14px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x mandatory;scroll-padding-inline:16px}
+.moment-gallery-scroll::-webkit-scrollbar{display:none}
+.moment-gallery-track{display:flex;gap:14px;width:max-content;align-items:start}
+.moment-gallery-figure{margin:0;display:grid;gap:8px;width:min(72vw,260px);flex:0 0 auto;scroll-snap-align:center;cursor:pointer;outline:none;border:0;background:transparent;padding:0;text-align:left}
 .moment-gallery-figure:focus-visible .moment-gallery-frame{box-shadow:0 0 0 3px ${c.go}66}
 .moment-gallery-frame{position:relative;overflow:hidden;border-radius:18px;aspect-ratio:4/5;background:#111;box-shadow:0 10px 28px rgba(15,23,42,.12)}
 .moment-gallery-frame img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
 .moment-gallery-figure:hover .moment-gallery-frame img,.moment-gallery-figure:focus-visible .moment-gallery-frame img{transform:scale(1.03)}
 .moment-gallery-zoom-hint{position:absolute;right:10px;bottom:10px;width:34px;height:34px;border-radius:999px;background:rgba(255,255,255,.94);color:#111;display:grid;place-items:center;font-size:1.15rem;font-weight:800;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.22)}
-.moment-gallery-meta{display:grid;gap:4px;padding:0 2px}
-.moment-gallery-caption{font-family:${f.ui};font-size:.95rem;font-weight:800;color:${cardInk};line-height:1.3;max-width:100%}
-.moment-gallery-desc{font-family:${f.body};font-size:.9rem;font-weight:500;color:${c.muted};line-height:1.5;max-width:100%}
-@media(min-width:560px){.moment-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.moment-gallery-frame{aspect-ratio:1/1}}
+.moment-gallery-meta{display:grid;gap:3px;padding:0 2px;min-width:0}
+.moment-gallery-caption{font-family:${f.ui};font-size:.88rem;font-weight:600;color:${cardInk};line-height:1.3;max-width:100%}
+.moment-gallery-desc{font-family:${f.body};font-size:.88rem;font-weight:400;color:${cardInk};line-height:1.45;max-width:100%;opacity:.92}
+@media(min-width:720px){.moment-gallery-figure{width:240px}.moment-gallery-frame{aspect-ratio:1/1}}
 .moment-letter{padding:26px 20px;margin-top:8px;border-left:3px solid ${c.go}!important;position:relative;box-shadow:none}
 .moment-letter-to{font-style:italic;color:${c.muted};font-weight:600;margin:0 0 12px}
 .moment-letter-sign{display:block;margin-top:18px;font-family:${f.display};font-size:1.6rem;color:${c.go}}
@@ -2143,7 +2146,6 @@ body.nav-open{overflow:hidden}
 }
 .moment-signature-sub{font-style:italic;color:${c.muted};margin-top:10px;font-size:1rem}
 .moment-gallery-empty,.moment-empty-hint{font-family:${f.ui};font-size:.88rem;line-height:1.55;color:${c.muted};font-style:italic;margin:12px 0 0;padding:14px 16px;border-radius:12px;background:${c.cardSoft};border:1px dashed ${c.lineStrong};text-align:center}
-.moment-gallery-track{display:flex;gap:12px;width:max-content;padding-bottom:2px}
 .moment-gallery-group{margin-top:20px}
 .moment-gallery-group:first-child{margin-top:8px}
 .moment-gallery-group-label{font-family:${f.ui};font-size:.62rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${c.muted};text-align:center;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid ${c.line}}
@@ -2154,7 +2156,7 @@ body.nav-open{overflow:hidden}
 .moment-media-card-audio{min-height:88px}
 .moment-footer{text-align:center;color:color-mix(in srgb, ${c.bl} 35%, ${c.in}) !important;opacity:0.75;font-family:${f.ui};font-size:12px;padding:16px 20px max(28px,env(safe-area-inset-bottom))}
 @media(prefers-reduced-motion:reduce){.hero-in,.rv{opacity:1;transform:none;transition:none}.rv.on .moment-journey-item,.rv.on .moment-promise,.rv.on .moment-ritual,.rv.on .moment-number,.rv.on .moment-dream{animation:none}.moment-sealed-icon,.moment-decor-item{animation:none}.moment-decor{display:none}}
-@media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:24px;box-shadow:0 24px 70px rgba(17,32,65,.08);background:${c.surface}}.moment-content{padding:20px 20px 36px}.moment-gallery-scroll img,.moment-gallery-scroll .moment-gallery-figure,.moment-gallery-scroll .moment-gallery-figure img{width:220px}.moment-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}}
+@media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:24px;box-shadow:0 24px 70px rgba(17,32,65,.08);background:${c.surface}}.moment-content{padding:20px 20px 36px}}
 .moment-cut-arco #moment-hero {
   clip-path: ellipse(95% 100% at 50% 0%) !important;
   margin-bottom: -15px !important;
@@ -2727,22 +2729,8 @@ main.moment-type-travel {
   box-shadow: 0 14px 28px -2px color-mix(in srgb, ${colors.go} 40%, transparent) !important;
 }
 
-/* Travel gallery — foto grandi, caption sempre visibili (niente overflow sul figure) */
-.moment-type-travel .moment-gallery {
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 20px !important;
-}
-@media(min-width:560px){
-  .moment-type-travel .moment-gallery {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-  .moment-type-travel .moment-gallery figure:nth-child(3n) {
-    grid-column: span 2 !important;
-  }
-}
+/* Travel gallery — stesso scroll laterale, frame un po’ più morbido */
 .moment-type-travel .moment-gallery figure {
-  margin: 0 !important;
   overflow: visible !important;
   border-radius: 0 !important;
   box-shadow: none !important;
@@ -2752,12 +2740,6 @@ main.moment-type-travel {
   border-radius: 20px !important;
   box-shadow: 0 15px 35px -5px rgba(15,23,42,0.06) !important;
   border: 1px solid rgba(255,255,255,0.8) !important;
-}
-.moment-type-travel .moment-gallery figure:nth-child(3n) .moment-gallery-frame {
-  aspect-ratio: 16/10 !important;
-}
-.moment-type-travel .moment-gallery figure:hover .moment-gallery-frame img {
-  transform: scale(1.04) !important;
 }
 
 /* Dreams Bucket List */
@@ -3419,7 +3401,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
       return `<article class="${rv} moment-card-gallery">${headBlock}<p class="moment-gallery-empty">Le foto verranno aggiunte presto.</p></article>`;
     }
     const cards = media.map((item, idx) => {
-      const title = item.title ? `<strong class="moment-gallery-caption">${escapeHtml(item.title)}</strong>` : "";
+      const title = item.title ? `<span class="moment-gallery-caption">${escapeHtml(item.title)}</span>` : "";
       const desc = item.description ? `<span class="moment-gallery-desc">${escapeHtml(item.description)}</span>` : "";
       const meta = (title || desc) ? `<figcaption class="moment-gallery-meta">${title}${desc}</figcaption>` : "";
       const label = item.title || "Apri foto a schermo intero";
@@ -3433,7 +3415,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     }).join("");
     const payload = media.map(({ type, url, title, description }) => ({ type, url, title, description }));
     const json = JSON.stringify(payload).replace(/</g, "\\u003c");
-    return `<article class="${rv} moment-card-gallery">${headBlock}<p class="moment-gallery-hint">Tocca una foto per ingrandirla</p><div class="moment-gallery">${cards}</div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
+    return `<article class="${rv} moment-card-gallery">${headBlock}<p class="moment-gallery-hint">Scorri le foto · tocca ＋ per ingrandire</p><div class="moment-gallery"><div class="moment-gallery-scroll"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
   }
 
   if (key === "video") {

@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **Worker v150 — Galleria scroll laterale (2026-07-20, Cursor)** — Worker only
+  - Galleria a scorrimento orizzontale (meno spazio verticale); descrizioni con contrasto cardInk, senza bold; lightbox ＋ invariato.
 - **Moments v164 / Worker v149 — Galleria foto leggibile (2026-07-20, Cursor)** — Pages + Worker
   - Foto più grandi, titolo+descrizione sotto ciascuna, tap per lightbox a schermo intero (fix overflow che tagliava i testi).
 - **Moments v163 / Worker v148 — Zoom copertina migliorato (2026-07-20, Cursor)** — Pages + Worker

@@ -288,3 +288,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Moments v162 / Worker v147**: 12 sfondi densi distinti + rosso vero; card con testo nero leggibile |
 | 2026-07-20 | Cursor | **Moments v163 / Worker v148**: zoom copertina slider 100–200% sul punto di fuoco |
 | 2026-07-20 | Cursor | **Moments v164 / Worker v149**: galleria con foto grandi, descrizioni visibili, lightbox |
+| 2026-07-20 | Cursor | **Worker v150**: galleria scroll laterale + descrizioni leggibili (stesso colore testo) |

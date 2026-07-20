@@ -4,7 +4,7 @@
 
 Progetto: `cuxlwaocjqwzluycznyp`
 
-Migrazioni in `sql/` — versionate da v37 a **v89**.
+Migrazioni in `sql/` — versionate da v37 a **v148** (applicata in produzione: v147 attivazione Business, v148 magazzino Business admin).
 
 ---
 
@@ -42,6 +42,8 @@ Eseguire **in ordine** i file non ancora applicati. Vedi [`../../sql/README.md`]
 | v85 | `khamakey-order-commissions-v85.sql` | Trigger provvigioni automatiche su ordini |
 | v86-v88 | portale rivenditori | Self-service, hardening `member_id`, claim primo accesso |
 | v89 | `khamakey-support-customer-tickets-v89.sql` | Policy RLS per ticket supporto creati da utenti autenticati |
+| **v147** | `khamakey-business-activation-v147.sql` | Tabella `business_activation_codes` + RPC `activate_business_code` |
+| **v148** | `khamakey-business-inventory-v148.sql` | Magazzino admin Business: batch RPC, RLS inventory, provisioning staff |
 
 ---
 
@@ -52,7 +54,8 @@ Eseguire **in ordine** i file non ancora applicati. Vedi [`../../sql/README.md`]
 | `platform_members` | Ruoli e permessi utenti |
 | `businesses` | Attività Business |
 | `moments` | Pagine evento |
-| `moment_activation_codes` | Codici NFC |
+| `moment_activation_codes` | Codici NFC Moments |
+| `business_activation_codes` | Codici NFC Business (v147+) — inventario + claim |
 | `platform_orders` | Ordini (Shopify, Stripe) |
 | `platform_moment_catalog` | Catalogo vendita |
 | `platform_agents` | Rivenditori / agenti |
@@ -75,7 +78,11 @@ Eseguire **in ordine** i file non ancora applicati. Vedi [`../../sql/README.md`]
 
 | Funzione | Uso |
 |----------|-----|
-| `activate_moment_code` | Attivazione codice NFC (5 parametri) |
+| `activate_moment_code` | Attivazione codice NFC Moments (5 parametri) |
+| `activate_business_code` | Attivazione codice NFC Business — crea attività + pagina + tag (v147) |
+| `create_business_product_batch` | Genera lotti codici Business in admin (v148) |
+| `get_business_product_inventory_stats` | KPI magazzino Business (v148) |
+| `admin_provision_business_customer` | Provisioning staff: utente + codice + business (v148) |
 | `ingest_stripe_checkout_event` | Webhook Stripe |
 | Funzioni rete v68 | Assegnazione, listini, consegne |
 | `apply_order_commissions` | Trigger interno v85 per creare provvigioni da `platform_orders` |

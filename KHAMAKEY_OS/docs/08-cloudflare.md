@@ -19,7 +19,7 @@ cd pages
 npx wrangler pages deploy . --project-name khamakey-app
 ```
 
-URL: `https://khamakey-app.pages.dev`
+URL: `https://app.khamakeymoments.com` (fallback: `https://khamakey-app.pages.dev`)
 
 ### Config
 - `pages/config.js` — URL Supabase e Worker
@@ -37,13 +37,13 @@ cd worker
 npx wrangler deploy
 ```
 
-URL: `https://khamakey-nfc.khamakey-nfc.workers.dev`
+URL: `https://link.khamakeymoments.com` (fallback: `https://khamakey-nfc.khamakey-nfc.workers.dev`)
 
 ### `WORKER_VERSION`
 Definito in `worker/worker.js` — attuale: `v103-shopify-email-stripe-complete`.
 
 ### `PAGES_ASSET_BASE`
-In `wrangler.toml` — punta a `https://khamakey-app.pages.dev` per CSS snapshot.
+In `wrangler.toml` — punta a `https://app.khamakeymoments.com` per CSS snapshot.
 
 ---
 
@@ -112,9 +112,12 @@ Dev vars: `worker/.env.example` → `.dev.vars` (solo locale).
 
 ---
 
-## Dominio custom (futuro)
+## Dominio custom (attivo 2026-07-18)
 
-- `app.khamakey.com` → Pages
-- `nfc.khamakey.com` → Worker
+- `app.khamakeymoments.com` → Cloudflare Pages (`khamakey-app`) — editor, admin, Moments
+- `link.khamakeymoments.com` → Worker NFC (`khamakey-nfc`) — `/k/`, `/m/`, `/p/`, CDN
+- `khamakeymoments.com` (+ `www`) → Shopify storefront (negozio Moments)
 
-Aggiornare `config.js` e `PAGES_ASSET_BASE` dopo switch.
+Config: `pages/config.js` (`PAGES_BASE_URL`, `WORKER_BASE_URL`) + `worker/wrangler.toml` (`PAGES_ASSET_BASE`, `WORKER_PUBLIC_BASE`).
+
+Supabase Auth → Site URL `https://app.khamakeymoments.com` e Redirect URLs `https://app.khamakeymoments.com/**` (+ keep `https://khamakey-app.pages.dev/**`).

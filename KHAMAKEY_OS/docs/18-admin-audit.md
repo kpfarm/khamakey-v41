@@ -15,9 +15,10 @@ Stato generale:
 |------|-------|---------|
 | Accesso admin e permessi | Parziale | Login e controllo membro esistono; gestione `platform_members` non crea utenti Auth/password. |
 | Dashboard | Parziale | KPI e alert funzionano, ma dipendono da tabelle con pochi dati e alcune metriche legacy. |
-| Clienti Business | Buono | Lista, filtri, drawer, preview, note, ticket, ordini e analytics collegati. |
+| Clienti Business | Buono (v148) | Email, codice NFC, slug, Analytics; drawer URL NFC; provisioning staff; editor via `?business=`. |
 | Clienti Moments | Buono/parziale | Provisioning account/codice collegato via RPC; manca flusso guidato test account completo. |
 | Catalogo Moments | Buono | SKU, prezzi, bundle, Shopify bozza/live; serve completare immagini/copy e traduzioni SKU. |
+| Magazzino NFC Business | Buono (v148) | Lotti codici, filtri, CSV, KPI stock; parità operativa Moments. PDF etichette: backlog. |
 | Magazzino NFC Moments | Buono dopo v127 | Creazione SKU in sezione, generazione stock, filtri SKU/data, CSV/PDF. Da collaudare con nuovi codici reali. |
 | Ordini | Buono/parziale | Creazione ordine e assegnazione codici cablate; mancano workflow produzione/spedizione piu' guidati. |
 | Partner/agenti | Parziale | CRUD agente e rete presenti; database live ha 0 agenti, quindi flusso non collaudato con dati reali. |
@@ -28,7 +29,7 @@ Stato generale:
 | Integrazioni | Parziale | Stato Worker, lingue, transazioni, webhook e record integrazione; non gestisce secrets per scelta corretta. |
 | Materiali | Buono base | CRUD materiali presente; manca collegamento diretto a portale agenti/cliente. |
 | Magazzino Business | Base | CRUD prodotto e movimenti presenti; nessun movimento reale registrato. |
-| NFC / Spedizioni | Non completa | E' una sezione di rimando, non una vera console spedizioni. |
+| NFC / Spedizioni | Buono (v133) | Console operativa pipeline produzione/stampa/spedizione; aggiornato rispetto audit 2026-07-14. |
 | Permessi | Base | Legenda permessi + checklist in Staff; manca audit trail e ruoli predefiniti. |
 
 Conclusione: il pannello e' utilizzabile per amministrazione interna minima, Moments stock-first e configurazioni base. Non e' ancora completo come centro operativo unico per vendita, produzione, spedizione, supporto, contabilità e test account.

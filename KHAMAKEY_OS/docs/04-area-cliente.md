@@ -1,15 +1,18 @@
 # 04 — Area Cliente
 
-## Business — flusso utente
+## Business — flusso utente (v147 — attivazione codice)
 
 ```text
-khamakey.it / khamakey-app.pages.dev
+Acquisto / codice prodotto KhamaKey Business
         │
         ▼
-Login Supabase (email + password)
+index.html — signup (codice → account) o login (+ codice se senza attività)
+        │     oppure ?code=XXX in URL
+        ▼
+RPC activate_business_code → crea attività + pagina /p/ + chip /k/
         │
         ▼
-Lista attività → Editor (editor.html)
+Editor (editor.html) via shell app.js — save bar, Account, Anteprima
         │
         ▼
 Pubblica → Pagina live su /p/{slug}
@@ -18,9 +21,18 @@ Pubblica → Pagina live su /p/{slug}
 Tag NFC /k/{code} → redirect a /p/{slug}
 ```
 
+> Dettaglio tecnico completo: [`20-business-activation-inventory-v147-v148.md`](20-business-activation-inventory-v147-v148.md)
+
+### Attivazione codice (parità Moments)
+
+- **Nuovi account**: codice obbligatorio da inventario `business_activation_codes` (generato in Admin → Magazzino NFC Business).
+- **Account pre-esistenti** (prima di v147): mantengono l'attività senza nuovo codice (grandfathered).
+- **Utente loggato senza business**: vede il form `#activationForm` finché non attiva un codice valido.
+- **Signup**: step 1 codice prodotto, step 2 email e password.
+
 ### Funzionalità cliente
-- Creare e gestire più attività
-- Editor con anteprima live
+- Attivare un'attività con codice NFC incluso nel prodotto
+- Editor con anteprima live e barra salvataggio sempre visibile
 - Pubblicazione bozza/live
 - Upload media (logo, galleria)
 - Prenotazioni con notifica email

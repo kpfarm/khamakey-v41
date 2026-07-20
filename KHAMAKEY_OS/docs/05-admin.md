@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v133** (console Spedizioni NFC operativa, supporto + CRM operativo, dashboard ordini/incassi, menu 4 intenti, modalità semplice, gestione provvigioni, magazzino NFC Moments con creazione SKU/stock).
+Versione attuale: **v148** (magazzino NFC Business, clienti Business arricchiti, provisioning staff; include v133 Spedizioni NFC, supporto + CRM operativo, dashboard ordini/incassi, menu 4 intenti, modalità semplice, gestione provvigioni, magazzino NFC Moments con creazione SKU/stock).
 
 ---
 
@@ -13,7 +13,8 @@ Versione attuale: **v133** (console Spedizioni NFC operativa, supporto + CRM ope
 | Sezione | Contenuto |
 |---------|-----------|
 | **Dashboard** | Alert operativi, KPI rapidi, grafici ordini/incassi |
-| **Clienti Business** | Account, attività, stato |
+| **Clienti Business** | Account, attività, email, codice NFC, slug, Analytics, drawer provisioning |
+| **Magazzino NFC Business** | Lotti codici Business, filtri, CSV, KPI stock (v148) |
 | **Clienti Moments** | Utenti, pagine, attivazioni |
 | **Moments** | Gestione pagine evento |
 | **Ordini** | `platform_orders` — Shopify, Stripe |
@@ -79,7 +80,7 @@ Versione attuale: **v133** (console Spedizioni NFC operativa, supporto + CRM ope
 
 ---
 
-## Magazzino NFC
+## Magazzino NFC Moments
 
 Flusso stock-first:
 
@@ -87,7 +88,28 @@ Flusso stock-first:
 2. Assegna codici all'ordine al momento della vendita
 3. Traccia `sold_channel` e `assigned_agent_id`
 
-Admin: ricerca, filtri, modifica singola, bulk, drawer ordine/codice.
+Admin: ricerca, filtri, modifica singola, bulk, drawer ordine/codice, export CSV/PDF etichette.
+
+---
+
+## Magazzino NFC Business v148
+
+Parità operativa con Moments, tab dedicata `Magazzino NFC Business`.
+
+- **Genera lotti**: RPC `create_business_product_batch` (prefisso default `KHAMA`, max 500 codici).
+- **KPI**: disponibili, claimati, sotto soglia — metrica `mBusinessStock` in Dashboard.
+- **Tabella**: codice, stato, SKU/linea, lotto, email cliente, slug `/p/`, link NFC `/k/`, canale, agente, ordine.
+- **Filtri + ricerca** + export **CSV** (PDF etichette: backlog).
+- **Drawer codice**: modifica stato, canale, agente (condiviso con drawer Moments dove possibile).
+- **Provisioning staff**: form `admin_provision_business_customer` — crea utente + attiva codice + business.
+
+### Clienti Business arricchiti (v148)
+
+- Tabella con email, codice NFC, slug pagina, pulsante Analytics.
+- Drawer: email, codice NFC, URL NFC, note, ticket, ordini.
+- Apri editor cliente: `index.html?business=<business_id>`.
+
+SQL: `sql/khamakey-business-inventory-v148.sql` · Dettaglio: [`20-business-activation-inventory-v147-v148.md`](20-business-activation-inventory-v147-v148.md)
 
 ---
 

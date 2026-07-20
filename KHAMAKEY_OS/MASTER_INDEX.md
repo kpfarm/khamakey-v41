@@ -65,6 +65,10 @@ KHAMAKEY_OS/
 | Creative Engine Antigravity | [`docs/17-creative-engine-antigravity.md`](docs/17-creative-engine-antigravity.md) |
 | Audit Admin | [`docs/18-admin-audit.md`](docs/18-admin-audit.md) |
 | Piano Admin Console Operativa | [`docs/19-admin-console-operativa.md`](docs/19-admin-console-operativa.md) |
+| Attivazione Business + Magazzino v147/v148 | [`docs/20-business-activation-inventory-v147-v148.md`](docs/20-business-activation-inventory-v147-v148.md) |
+| **Checklist operabilità Business + Admin** | [`docs/21-checklist-operabilita-business-admin.md`](docs/21-checklist-operabilita-business-admin.md) |
+| Officina NFC Moments | [`docs/21-moments-officina-nfc.md`](docs/21-moments-officina-nfc.md) |
+| Ops secrets / Auth checklist | [`docs/22-ops-secrets-auth-checklist.md`](docs/22-ops-secrets-auth-checklist.md) |
 
 ## Prompt operativi
 

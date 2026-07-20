@@ -12,6 +12,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 - **Moments v165 / Worker v155 — Sfumatura hero on/off (2026-07-20, Cursor)** — Pages + Worker
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
+### Changed
+- **Admin / Officina v169 — PDF etichette Cricut 4 sezioni (2026-07-20, Cursor)** — Pages only
+  - Export PDF: panoramica di controllo + ovali codice + rettangoli barcode + rettangoli link NFC; contorno nero per taglio Cricut Explore 4.
+
 ### Fixed
 - **Worker v157 — Contrasto menu sezioni pubblico (2026-07-20, Cursor)** — Worker only
   - Foglio menu sempre bianco con testo `#0F172A` (non più `ink` del tema chiaro-su-chiaro).

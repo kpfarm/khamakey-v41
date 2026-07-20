@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=168";
-import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=164";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=169";
+import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=169";
 import {
   generateMomentSku,
   generateMomentProductName,
@@ -1697,7 +1697,12 @@ async function runLabelExport(rows, filenameStem, triggerButton){
   buttons.forEach(btn=>{ btn.disabled = true; });
   if(triggerButton) triggerButton.textContent = "PDF in corso…";
   try{
-    await exportMomentLabelsPdf(rows, filenameStem);
+    const labeled = rows.map(row=>({
+      ...row,
+      nfc_url: momentNfcUrl(row),
+      catalog_sku: row.catalog_sku || row.sku || ""
+    }));
+    await exportMomentLabelsPdf(labeled, filenameStem);
   }catch(error){
     console.error(error);
     alert(error.message || "Generazione PDF non riuscita.");

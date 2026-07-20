@@ -7,7 +7,7 @@
 | Attività | Dove |
 |----------|------|
 | Modelli prodotto magazzino (codice MOM-…) | Officina NFC |
-| Generazione codici, etichette barcode | Officina NFC |
+| Generazione codici, PDF etichette Cricut (4 sezioni) | Officina NFC |
 | Link chip `/m/<slug>`, attivazione editor | Officina NFC |
 | Clienti attivati, pagine `/m/` | Officina NFC → Clienti |
 | Supporto tecnico (codice, NFC, pagina) | Officina NFC → Supporto |
@@ -17,8 +17,8 @@
 ```text
 Officina NFC
   Modello (MOM-KEY-WED) → genera pezzo/i
-  → CSV/PDF: codice attivazione (inserto) + Link NFC /m/slug (chip)
-  → programma chip con /m/slug · metti codice in confezione
+  → CSV + PDF 4 sezioni Cricut: panoramica · ovali codice · barcode · link /m/slug
+  → stampa/taglia etichette · programma chip con /m/slug · codice in inserto
   → scaffale
 
 Cliente
@@ -42,6 +42,15 @@ Prima il codice compariva sulla pagina pre-attivazione e spesso coincideva con `
 2. lo slug è **opaco** e diverso dal codice
 3. `/k/<codice>` non risolve pezzi `available` (solo dopo claim)
 4. CSV/PDF restano la fonte del codice per stampa inserto
+
+### PDF etichette Cricut (Admin v169)
+
+Export magazzino → un PDF A4 con **4 sezioni** (si ripaginano se il lotto è grande), stessa numerazione da 1:
+
+1. **Panoramica** — CATEGORIA / QUANTITÀ + `# · ovale codice · barcode · link` (foglio di controllo, non da tagliare)
+2. **Ovali codice** (48×18 mm) — inserto confezione, taglio Cricut sul contorno nero
+3. **Rettangoli barcode** (40×15 mm) — etichetta confezione / scan
+4. **Rettangoli link NFC** (55×16 mm) — programmazione chip `/m/slug`
 
 **Azione officina:** pezzi già in magazzino con chip vecchio `/k/CODICE` vanno **riprogrammati** con il nuovo Link NFC `/m/slug` dal magazzino.
 

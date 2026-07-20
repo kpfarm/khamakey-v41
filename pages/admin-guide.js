@@ -53,10 +53,10 @@ export const MOMENTS_CONSOLE_GUIDES = {
     tip: "Qui tieni solo il riferimento produzione NFC — non è il catalogo e-commerce."
   },
   momentInventory: {
-    subtitle: "Genera pezzi fisici, etichette barcode, export CSV/PDF.",
+    subtitle: "Genera pezzi fisici, PDF etichette Cricut 4 sezioni, export CSV.",
     steps: [
       "Quantità default 1 — anche un solo regalo o prova.",
-      "PDF lotto: etichette 40×15 mm (4×1,5 cm) in griglia numerata da 1 + tabella di controllo con la stessa numerazione.",
+      "PDF lotto 4 sezioni Cricut: panoramica · ovali codice · rettangoli barcode · link NFC (stessa numerazione da 1).",
       "Canale: Regalo, Vendita locale, Agente…",
       "Se la tabella sembra vuota: chip «Tutti» o «Mostra tutti» — i filtri a volte nascondono i pezzi."
     ],

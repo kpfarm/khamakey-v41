@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=168">
-  <link rel="stylesheet" href="moments-admin.css?v=168">
+  <link rel="stylesheet" href="admin.css?v=169">
+  <link rel="stylesheet" href="moments-admin.css?v=169">
 </head>
 <body>
   <main class="admin-shell locked" id="adminShell">
@@ -378,7 +378,7 @@
             <p class="system-note"><strong>Pronta consegna</strong> — crea anche <strong>1 solo pezzo</strong> (regalo, test, vendita locale). Ogni unità ha barcode univoco sulla confezione.</p>
             <ol class="admin-workflow-steps">
               <li><strong>1. Nuovo prodotto</strong><span>Linea + template → modello catalogo</span></li>
-              <li><strong>2. Genera pezzo/i</strong><span>Quantità 1 o più → PDF etichette con barcode</span></li>
+              <li><strong>2. Genera pezzo/i</strong><span>Quantità 1 o più → PDF 4 sezioni Cricut</span></li>
               <li><strong>3. Confeziona</strong><span>Programma chip /m/slug · inserto codice · etichetta barcode</span></li>
             </ol>
 
@@ -434,7 +434,7 @@
                   <input name="batch_label" type="text" placeholder="Es. Orsetti blu - luglio 2026" required>
                 </label>
                 <input name="prefix" type="hidden" value="AUTO">
-                <p class="field-hint wide-field">Alla generazione scarichi <strong>CSV + PDF</strong>: etichette rettangolari <strong>40×15 mm</strong> (4×1,5 cm) in griglia numerata da 1, più tabella di controllo con la stessa numerazione. Quantità minima: <strong>1 pezzo</strong>.</p>
+                <p class="field-hint wide-field">Alla generazione scarichi <strong>CSV + PDF</strong> a <strong>4 sezioni</strong>: panoramica di controllo, ovali codice, rettangoli barcode, rettangoli link NFC — numerati da 1, pronti per stampa + taglio Cricut. Quantità minima: <strong>1 pezzo</strong>.</p>
                 <button class="primary-action" type="submit">Genera pezzo/i + etichette barcode</button>
                 <p class="form-status" id="momentBatchStatus"></p>
               </form>
@@ -530,7 +530,7 @@
                 <button type="button" class="small-action primary-outline" id="momentLabelsSelected">PDF etichette (selezione)</button>
               </div>
             </div>
-            <p class="field-hint export-hint"><strong>Stampa / NFC:</strong> CSV = codice attivazione (inserto) + Link NFC <code>/m/slug</code> per programmare il chip. PDF etichette 40×15 mm = codice + barcode confezione. <strong>Non</strong> programmare il chip con il codice attivazione.</p>
+            <p class="field-hint export-hint"><strong>Stampa / NFC:</strong> CSV = codice attivazione (inserto) + Link NFC <code>/m/slug</code> per programmare il chip. <strong>PDF 4 sezioni</strong> · ovali codice · rettangoli barcode · link NFC · taglio Cricut (contorno nero). <strong>Non</strong> programmare il chip con il codice attivazione.</p>
             <div class="table-wrap inventory-table-wrap">
               <table class="inventory-table">
                 <thead><tr>
@@ -843,5 +843,5 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=168"></script>
+  <script type="module" src="admin.js?v=169"></script>
 </body>

@@ -92,9 +92,9 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v171** | Clienti↔ticket↔editor collegati; Supporto v170; PDF Cricut v169. |
+| **Admin / Officina Moments** | **v172** | Supporto: assegnazione + risposta Resend; clienti↔ticket↔editor v171. |
 | **Moments editor** | **v166** | Copy: codice solo in inserto confezione (non sul chip). |
-| **Worker NFC** | **v157-nav-contrast** | Menu sezioni: testo scuro su foglio bianco (contrasto); attivazione sicura v156. |
+| **Worker NFC** | **v158-support-reply** | Menu sezioni: testo scuro su foglio bianco (contrasto); attivazione sicura v156. |
 | **Business shell** | **app v167** | `APP_VERSION` in `app.js` — account Moments non finiscono nel flusso Business. Editor Business HTML può avere WIP locale non ancora allineato in tabella. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v160 (prod)** | Opaque slug Moments v160; security v75–v83; RSVP/guestbook; support sources v158; category lock v157; drop overload `activate_moment_code` v159. Business activation/inventory v147/v148 in repo. |

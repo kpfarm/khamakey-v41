@@ -300,3 +300,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Admin v169**: PDF magazzino 4 sezioni Cricut (panoramica · ovali codice · barcode · link NFC) |
 | 2026-07-21 | Cursor | **Admin v170**: Supporto operativo — coda Da lavorare, KPI cliccabili, note staff separate, email/link |
 | 2026-07-21 | Cursor | **Admin v171**: Clienti Moments collegati a ticket Supporto e Editor |
+| 2026-07-21 | Cursor | **Admin v172 / Worker v158**: assegnazione ticket + risposta cliente via Resend |

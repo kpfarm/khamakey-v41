@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v171** (supporto operativo v170; PDF Cricut v169; mobile UX v167; magazzino NFC Moments/Business).
+Versione attuale: **v172** (supporto operativo v170; PDF Cricut v169; mobile UX v167; magazzino NFC Moments/Business).
 
 ---
 
@@ -38,7 +38,8 @@ Versione attuale: **v171** (supporto operativo v170; PDF Cricut v169; mobile UX 
 - Lista ordinata per urgenza; pill colorate stato/priorità; layout a card su smartphone.
 - Cambio stato/priorità + nota interna; Business → timeline cliente; Moments → note append in descrizione (mostrate separate in UI).
 - Categorie ticket sotto modalità avanzata; creazione ticket anche dalla scheda cliente (Business).
-- Ancora in backlog: assegnazione responsabile, risposta email automatica, conversazione completa.
+- **v172:** assegnazione responsabile + invio risposta cliente via Resend (`/api/support/reply`).
+- Ancora in backlog: conversazione completa / thread bidirezionale automatico.
 
 ---
 

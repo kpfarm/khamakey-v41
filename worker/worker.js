@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v157-nav-contrast";
+const WORKER_VERSION = "v158-support-reply";
 
 export default {
   async fetch(request, env, ctx) {
@@ -53,6 +53,9 @@ export default {
       }
       if (url.pathname === "/api/moment/support-notify" && request.method === "POST") {
         return handleMomentSupportNotify(request, env);
+      }
+      if (url.pathname === "/api/support/reply" && request.method === "POST") {
+        return handleSupportReply(request, env);
       }
       if (url.pathname.startsWith("/cdn/")) {
         return handleMediaServe(request, env, url.pathname.slice(5));
@@ -3798,6 +3801,134 @@ async function verifyPlatformAdmin(env, jwt) {
     return user;
   }
   return null;
+}
+
+/** Staff con permesso supporto (o admin) — per risposta email ticket. */
+async function verifySupportStaff(env, jwt) {
+  const user = await supabaseUser(env, jwt);
+  if (!user?.email) return null;
+  const email = String(user.email).trim().toLowerCase();
+  if (ADMIN_EMAILS.has(email)) return user;
+  const headers = {
+    apikey: env.SUPABASE_PUBLISHABLE_KEY,
+    Authorization: `Bearer ${jwt}`
+  };
+  const response = await fetch(
+    `${env.SUPABASE_URL}/rest/v1/platform_members?email=eq.${encodeURIComponent(email)}&status=eq.active&select=id,permissions,role`,
+    { headers }
+  );
+  if (!response.ok) return null;
+  const rows = await response.json();
+  const member = rows?.[0];
+  if (!member) return null;
+  const perms = new Set(Array.isArray(member.permissions) ? member.permissions : []);
+  if (
+    member.role === "owner" ||
+    member.role === "admin" ||
+    perms.has("admin.full") ||
+    perms.has("support.write")
+  ) {
+    return { ...user, memberId: member.id || null };
+  }
+  return null;
+}
+
+/**
+ * Staff → cliente: invia risposta ticket via Resend.
+ * Body: { ticket_id, message, subject? }
+ * L'aggiornamento nota/stato resta a carico dell'admin UI (JWT utente).
+ */
+async function handleSupportReply(request, env) {
+  const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  if (!jwt) return cors(json({ error: "Accesso non autorizzato." }, 401));
+  const staff = await verifySupportStaff(env, jwt);
+  if (!staff?.email) return cors(json({ error: "Serve permesso support.write." }, 403));
+
+  if (!env.RESEND_API_KEY) {
+    return cors(json({ error: "Email non configurata (RESEND_API_KEY)." }, 503));
+  }
+
+  let body = {};
+  try {
+    body = await request.json();
+  } catch {
+    return cors(json({ error: "JSON non valido" }, 400));
+  }
+
+  const ticketId = String(body.ticket_id || "").trim();
+  const message = String(body.message || "").trim().slice(0, 6000);
+  const subjectOverride = String(body.subject || "").trim().slice(0, 180);
+  if (!ticketId || !message) {
+    return cors(json({ error: "ticket_id e message obbligatori" }, 400));
+  }
+
+  if (!await checkRateLimit(env, `support-reply:${staff.email}`, 20, 60)) {
+    return tooManyRequests();
+  }
+
+  const headers = {
+    apikey: env.SUPABASE_PUBLISHABLE_KEY,
+    Authorization: `Bearer ${jwt}`
+  };
+  const ticketRes = await fetch(
+    `${env.SUPABASE_URL}/rest/v1/platform_support_tickets?id=eq.${encodeURIComponent(ticketId)}&select=id,subject,description,source,profiles(email)`,
+    { headers }
+  );
+  if (!ticketRes.ok) return cors(json({ error: "Ticket non leggibile." }, 502));
+  const tickets = await ticketRes.json().catch(() => []);
+  const ticket = Array.isArray(tickets) ? tickets[0] : null;
+  if (!ticket) return cors(json({ error: "Ticket non trovato." }, 404));
+
+  let toEmail = String(ticket.profiles?.email || "").trim().toLowerCase();
+  if (!toEmail) {
+    toEmail = String(ticket.description || "").match(/Cliente:\s*([^\s\n]+@[^\s\n]+)/i)?.[1] || "";
+    toEmail = String(toEmail).trim().toLowerCase();
+  }
+  if (!toEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toEmail)) {
+    return cors(json({ error: "Email cliente non disponibile su questo ticket." }, 400));
+  }
+
+  const ticketSubject = String(ticket.subject || "Assistenza KhamaKey").replace(/[\r\n]+/g, " ");
+  const mailSubject = subjectOverride || `Re: ${ticketSubject}`;
+  const brand = String(ticket.source || "").includes("moment") ? "KhamaKey Moments" : "KhamaKey";
+  const text = [
+    `Ciao,`,
+    ``,
+    message,
+    ``,
+    `—`,
+    `Team ${brand}`,
+    `(risposta al ticket: ${ticketSubject})`
+  ].join("\n");
+  const html = `<div style="font-family:Arial,sans-serif;line-height:1.55;color:#172036;max-width:560px">
+    <p style="margin:0 0 14px">Ciao,</p>
+    <div style="white-space:pre-wrap;margin:0 0 18px">${escapeHtml(message)}</div>
+    <p style="margin:0;color:#64748B;font-size:13px">— Team ${escapeHtml(brand)}<br>
+    Risposta al ticket: ${escapeHtml(ticketSubject)}</p>
+  </div>`;
+
+  try {
+    const result = await sendResendEmail(env, {
+      to: toEmail,
+      subject: mailSubject,
+      html,
+      text,
+      tags: [
+        { name: "type", value: "support_reply" },
+        { name: "ticket_id", value: String(ticketId).slice(0, 64) }
+      ]
+    });
+    return cors(json({
+      ok: true,
+      to: toEmail,
+      subject: mailSubject,
+      resend_id: result?.id || null,
+      staff_email: staff.email
+    }));
+  } catch (error) {
+    console.error("support-reply", error);
+    return cors(json({ error: "Invio email non riuscito." }, 500));
+  }
 }
 
 async function verifyShopifyWebhook(request, secret) {

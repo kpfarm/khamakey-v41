@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=171">
+  <link rel="stylesheet" href="admin.css?v=172">
   <script>
     // Dominio Moments: questo è l'admin Business — vai subito all'Officina Moments.
     (function () {
@@ -1287,6 +1287,7 @@
               <button type="button" class="filter-chip" data-support-quick-priority="urgent">Urgenti</button>
               <button type="button" class="filter-chip" data-support-quick-priority="high">Alta priorità</button>
               <button type="button" class="filter-chip" data-support-quick-status="resolved">Da chiudere</button>
+              <button type="button" class="filter-chip" data-support-quick-mine="1">I miei</button>
               <button type="button" class="filter-chip" data-support-quick-status="">Tutti</button>
             </div>
             <div class="inventory-stat-grid support-stat-grid" id="supportStats">
@@ -1342,16 +1343,29 @@
                   <option value="urgent">Urgente</option>
                 </select>
               </label>
+              <label>Assegnato a
+                <select name="assigned_member_id" id="supportAssigneeSelect">
+                  <option value="">Non assegnato</option>
+                </select>
+              </label>
               <label class="wide-field">Nota interna (solo staff)
                 <input name="internal_note" type="text" placeholder="Es. chiamato cliente, in attesa materiale...">
               </label>
-              <button class="primary-action" type="submit">Salva aggiornamento</button>
-              <button class="small-action" type="button" id="supportTicketEditCancel">Chiudi</button>
+              <label class="wide-field">Risposta email al cliente
+                <textarea name="customer_reply" rows="5" placeholder="Testo che il cliente riceve via email…"></textarea>
+              </label>
+              <div class="support-reply-actions">
+                <button class="primary-action" type="submit">Salva aggiornamento</button>
+                <button class="small-action primary-outline" type="button" id="supportSendReplyBtn">Invia email (Resend)</button>
+                <button class="small-action" type="button" id="supportAssignMeBtn">Assegna a me</button>
+                <button class="small-action" type="button" id="supportTicketEditCancel">Chiudi</button>
+              </div>
+              <p class="field-hint wide-field">Invia email mette lo stato in «Attesa cliente» e salva la risposta tra le note staff. Serve <code>RESEND_API_KEY</code> sul Worker.</p>
               <p class="form-status" id="supportTicketEditStatus"></p>
             </form>
             <div class="table-wrap support-table-wrap">
               <table class="support-table">
-                <thead><tr><th>Ticket</th><th>Cliente</th><th>Priorità</th><th>Stato</th><th>Quando</th><th>Azioni</th></tr></thead>
+                <thead><tr><th>Ticket</th><th>Cliente</th><th>Assegnato</th><th>Priorità</th><th>Stato</th><th>Quando</th><th>Azioni</th></tr></thead>
                 <tbody id="supportTicketsTable"><tr><td colspan="6">Caricamento ticket...</td></tr></tbody>
               </table>
             </div>
@@ -2084,6 +2098,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=171"></script>
+  <script type="module" src="admin.js?v=172"></script>
 </body>
 </html>

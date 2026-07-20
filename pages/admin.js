@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=171";
-import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=171";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=172";
+import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=172";
 import {
   generateMomentSku,
   generateMomentProductName,
@@ -257,7 +257,12 @@ const supportStatResolved = document.getElementById("supportStatResolved");
 const supportTicketEditForm = document.getElementById("supportTicketEditForm");
 const supportTicketEditStatus = document.getElementById("supportTicketEditStatus");
 const supportTicketEditCancel = document.getElementById("supportTicketEditCancel");
+const supportSendReplyBtn = document.getElementById("supportSendReplyBtn");
+const supportAssignMeBtn = document.getElementById("supportAssignMeBtn");
+const supportAssigneeSelect = document.getElementById("supportAssigneeSelect");
 let activeSupportTicketId = "";
+let supportMemberRows = [];
+let supportMineOnly = false;
 const ticketCategoriesTable = document.getElementById("ticketCategoriesTable");
 const ticketCategoryForm = document.getElementById("ticketCategoryForm");
 const ticketCategoryStatus = document.getElementById("ticketCategoryStatus");
@@ -3511,15 +3516,54 @@ function supportCustomerLabel(row){
 function splitSupportDescription(description){
   const raw = String(description || "").trim();
   if(!raw) return { customer:"", notes:[] };
-  const chunks = raw.split(/\n\n(?=\[Nota staff )/i);
+  const chunks = raw.split(/\n\n(?=\[(?:Nota staff|Risposta email) )/i);
   const customerParts = [];
   const notes = [];
   chunks.forEach(chunk=>{
     const trimmed = chunk.trim();
-    if(/^\[Nota staff /i.test(trimmed)) notes.push(trimmed);
+    if(/^\[(?:Nota staff|Risposta email) /i.test(trimmed)) notes.push(trimmed);
     else if(trimmed) customerParts.push(trimmed);
   });
   return { customer:customerParts.join("\n\n").trim(), notes };
+}
+
+function supportMemberLabel(member){
+  if(!member) return "—";
+  const name = String(member.full_name || "").trim();
+  const email = String(member.email || "").trim();
+  if(name && email) return `${name} · ${email}`;
+  return name || email || "—";
+}
+
+function supportAssigneeLabel(row){
+  const member = row?.assignee || supportMemberRows.find(item=>item.id === row?.assigned_member_id);
+  return supportMemberLabel(member);
+}
+
+async function loadSupportMembers(){
+  try{
+    const { data,error } = await supabase
+      .from("platform_members")
+      .select("id,email,full_name,role,status")
+      .eq("status","active")
+      .order("full_name",{ascending:true});
+    if(error) throw error;
+    supportMemberRows = data || [];
+  }catch(error){
+    console.warn("Membri supporto non disponibili", error);
+    supportMemberRows = [];
+  }
+  populateSupportAssigneeSelect();
+}
+
+function populateSupportAssigneeSelect(selectedId = ""){
+  const select = supportAssigneeSelect || supportTicketEditForm?.elements?.assigned_member_id;
+  if(!select) return;
+  const current = selectedId || select.value || "";
+  select.innerHTML = `<option value="">Non assegnato</option>` + supportMemberRows.map(row=>`
+    <option value="${esc(row.id)}" ${row.id === current ? "selected" : ""}>${esc(supportMemberLabel(row))}</option>
+  `).join("");
+  if(current) select.value = current;
 }
 
 function formatSupportWhen(value){
@@ -3551,9 +3595,10 @@ function supportPriorityRank(priority){
 
 async function loadSupportTickets(){
   try{
+    if(!supportMemberRows.length) await loadSupportMembers();
     let query = supabase
       .from("platform_support_tickets")
-      .select("id,business_id,profile_id,subject,description,priority,status,source,created_at,updated_at,businesses(nome,slug),profiles(email)")
+      .select("id,business_id,profile_id,assigned_member_id,subject,description,priority,status,source,created_at,updated_at,businesses(nome,slug),profiles(email),assignee:platform_members!assigned_member_id(id,email,full_name)")
       .order("created_at",{ascending:false})
       .limit(150);
     // Console Moments: solo ticket Moments
@@ -3570,7 +3615,7 @@ async function loadSupportTickets(){
     }
   }catch(error){
     console.error(error);
-    supportTicketsTable.innerHTML = `<tr><td colspan="6">Ticket non disponibili.</td></tr>`;
+    supportTicketsTable.innerHTML = `<tr><td colspan="7">Ticket non disponibili.</td></tr>`;
   }
 }
 
@@ -3604,7 +3649,9 @@ function filteredSupportTickets(){
   const query = String(supportSearchInput?.value || "").trim().toLowerCase();
   const status = supportStatusFilter?.value || "";
   const priority = supportPriorityFilter?.value || "";
+  const myId = currentMember?.id || "";
   const rows = supportTicketRows.filter(row=>{
+    if(supportMineOnly && myId && row.assigned_member_id !== myId) return false;
     if(!supportStatusMatches(status, row.status)) return false;
     if(priority && row.priority !== priority) return false;
     if(query){
@@ -3614,6 +3661,7 @@ function filteredSupportTickets(){
         row.source,
         supportCustomerEmail(row),
         supportMomentSlug(row),
+        supportAssigneeLabel(row),
         row.businesses?.nome,
         row.businesses?.slug
       ].join(" ").toLowerCase();
@@ -3653,6 +3701,7 @@ function refreshSupportTicketsTable(){
     const preview = String(customer || row.description || "").replace(/\s+/g," ").trim();
     const short = preview.length > 90 ? `${preview.slice(0,90)}…` : preview;
     const activeClass = row.id === activeSupportTicketId ? " is-active" : "";
+    const assignee = supportAssigneeLabel(row);
     return `
     <tr class="support-row${activeClass}" data-support-row="${esc(row.id)}">
       <td class="col-ticket" data-label="Ticket">
@@ -3660,21 +3709,28 @@ function refreshSupportTicketsTable(){
         <small>${esc(short || "Nessun dettaglio")}</small>
       </td>
       <td class="col-client" data-label="Cliente">${esc(supportCustomerLabel(row))}</td>
+      <td class="col-assignee" data-label="Assegnato">${esc(assignee)}</td>
       <td class="col-priority" data-label="Priorità"><span class="status-pill ${esc(row.priority)}">${esc(supportPriorityLabel(row.priority))}</span></td>
       <td class="col-status" data-label="Stato"><span class="status-pill ${esc(row.status)}">${esc(supportStatusLabel(row.status))}</span></td>
       <td class="col-when" data-label="Quando" title="${esc(formatSupportWhen(row.created_at))}">${esc(formatSupportAge(row.created_at))}</td>
       <td class="col-actions" data-label="Azioni"><button class="small-action" type="button" data-support-ticket-edit="${esc(row.id)}">Apri</button></td>
     </tr>
   `;
-  }).join("") : `<tr><td colspan="6">Nessun ticket corrisponde ai filtri.</td></tr>`;
+  }).join("") : `<tr><td colspan="7">Nessun ticket corrisponde ai filtri.</td></tr>`;
 }
 
 function applySupportQuickFilter(chip){
   if(!chip) return;
-  if(chip.hasAttribute("data-support-quick-priority")){
+  if(chip.hasAttribute("data-support-quick-mine")){
+    supportMineOnly = true;
+    if(supportStatusFilter) supportStatusFilter.value = "active";
+    if(supportPriorityFilter) supportPriorityFilter.value = "";
+  }else if(chip.hasAttribute("data-support-quick-priority")){
+    supportMineOnly = false;
     if(supportPriorityFilter) supportPriorityFilter.value = chip.dataset.supportQuickPriority || "";
     if(supportStatusFilter) supportStatusFilter.value = "";
   }else if(chip.hasAttribute("data-support-quick-status")){
+    supportMineOnly = false;
     if(supportStatusFilter) supportStatusFilter.value = chip.dataset.supportQuickStatus || "";
     if(supportPriorityFilter) supportPriorityFilter.value = "";
   }
@@ -3685,12 +3741,15 @@ function applySupportQuickFilter(chip){
 function syncSupportQuickChips(){
   const current = supportStatusFilter?.value || "";
   const priority = supportPriorityFilter?.value || "";
+  document.querySelectorAll("#supportQuickFilters [data-support-quick-mine]").forEach(chip=>{
+    chip.classList.toggle("active", supportMineOnly);
+  });
   document.querySelectorAll("#supportQuickFilters [data-support-quick-status], #supportStats [data-support-quick-status]").forEach(chip=>{
     const isStatusChip = chip.hasAttribute("data-support-quick-status") && !chip.hasAttribute("data-support-quick-priority");
-    chip.classList.toggle("active", isStatusChip && (chip.dataset.supportQuickStatus || "") === current && !priority);
+    chip.classList.toggle("active", !supportMineOnly && isStatusChip && (chip.dataset.supportQuickStatus || "") === current && !priority);
   });
   document.querySelectorAll("#supportQuickFilters [data-support-quick-priority], #supportStats [data-support-quick-priority]").forEach(chip=>{
-    chip.classList.toggle("active",(chip.dataset.supportQuickPriority || "") === priority && !current);
+    chip.classList.toggle("active", !supportMineOnly && (chip.dataset.supportQuickPriority || "") === priority && !current);
   });
 }
 
@@ -3708,6 +3767,10 @@ function editSupportTicket(id, { keepScroll = false, quiet = false } = {}){
   supportTicketEditForm.elements.status.value = row.status || "open";
   supportTicketEditForm.elements.priority.value = row.priority || "normal";
   supportTicketEditForm.elements.internal_note.value = "";
+  if(supportTicketEditForm.elements.customer_reply){
+    supportTicketEditForm.elements.customer_reply.value = "";
+  }
+  populateSupportAssigneeSelect(row.assigned_member_id || "");
 
   const email = supportCustomerEmail(row);
   const slug = supportMomentSlug(row);
@@ -5404,9 +5467,11 @@ async function saveSupportTicketEdit(event){
   const ticketId = form.elements.ticket_id.value;
   const row = supportTicketRows.find(item=>item.id === ticketId);
   if(!row) return;
+  const assigned = String(form.elements.assigned_member_id?.value || "").trim() || null;
   const payload = {
     status:form.elements.status.value,
     priority:form.elements.priority.value,
+    assigned_member_id:assigned,
     updated_at:new Date().toISOString()
   };
   setFormStatus(supportTicketEditStatus,"Aggiornamento ticket...");
@@ -5444,6 +5509,86 @@ async function saveSupportTicketEdit(event){
   ]);
 }
 
+async function sendSupportCustomerReply(){
+  if(!hasPermission("support.write")){
+    setFormStatus(supportTicketEditStatus,"Non hai il permesso support.write.","error");
+    return;
+  }
+  if(!supportTicketEditForm) return;
+  const ticketId = supportTicketEditForm.elements.ticket_id.value;
+  const row = supportTicketRows.find(item=>item.id === ticketId);
+  if(!row) return;
+  const message = String(supportTicketEditForm.elements.customer_reply?.value || "").trim();
+  if(!message){
+    setFormStatus(supportTicketEditStatus,"Scrivi il testo della risposta email.","error");
+    return;
+  }
+  const email = supportCustomerEmail(row);
+  if(!email){
+    setFormStatus(supportTicketEditStatus,"Email cliente non disponibile su questo ticket.","error");
+    return;
+  }
+
+  if(supportSendReplyBtn) supportSendReplyBtn.disabled = true;
+  setFormStatus(supportTicketEditStatus,"Invio email in corso…");
+  try{
+    const { data:sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    if(!token) throw new Error("Sessione scaduta — accedi di nuovo.");
+    const response = await fetch(`${WORKER_BASE_URL}/api/support/reply`,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:`Bearer ${token}`
+      },
+      body:JSON.stringify({
+        ticket_id:ticketId,
+        message,
+        subject:`Re: ${row.subject || "Assistenza KhamaKey"}`
+      })
+    });
+    const result = await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(result.error || `Errore ${response.status}`);
+
+    const stamp = formatSupportWhen(new Date().toISOString());
+    const replyNote = `[Risposta email ${stamp}] A ${email}: ${message}`;
+    const nextDescription = `${row.description || ""}\n\n${replyNote}`.trim();
+    const assigned = String(supportTicketEditForm.elements.assigned_member_id?.value || "").trim()
+      || currentMember?.id
+      || null;
+    const { error } = await supabase
+      .from("platform_support_tickets")
+      .update({
+        description:nextDescription,
+        status:"waiting_customer",
+        assigned_member_id:assigned,
+        updated_at:new Date().toISOString()
+      })
+      .eq("id",ticketId);
+    if(error) throw error;
+
+    if(row.business_id){
+      await supabase.from("platform_client_notes").insert({
+        business_id:row.business_id,
+        note_type:"support",
+        body:`Risposta email ticket «${row.subject}»: ${message}`
+      }).then(({ error:noteError })=>{
+        if(noteError) console.warn("Nota Business risposta non salvata", noteError);
+      });
+    }
+
+    supportTicketEditForm.elements.customer_reply.value = "";
+    activeSupportTicketId = ticketId;
+    setFormStatus(supportTicketEditStatus,`Email inviata a ${email}. Stato: attesa cliente.`,"ok");
+    await loadSupportTickets();
+  }catch(error){
+    console.error(error);
+    setFormStatus(supportTicketEditStatus,error.message || "Invio email non riuscito.","error");
+  }finally{
+    if(supportSendReplyBtn) supportSendReplyBtn.disabled = false;
+  }
+}
+
 async function loadAdminSession(){
   const { data:userData,error:userError } = await supabase.auth.getUser();
   if(userError || !userData.user){
@@ -5464,6 +5609,7 @@ async function loadAdminSession(){
     loadMomentInventoryStats,
     loadMomentAgentInventoryStats,
     loadMomentCatalog,
+    loadSupportMembers,
     loadSupportTickets,
     loadTicketCategories
   ] : [
@@ -5478,6 +5624,7 @@ async function loadAdminSession(){
     loadMomentInventoryStats,
     loadMomentAgentInventoryStats,
     loadMembers,
+    loadSupportMembers,
     loadAgents,
     loadCommissions,
     loadCommissionRules,
@@ -5861,7 +6008,7 @@ document.getElementById("momentInventoryQuickFilters")?.addEventListener("click"
 });
 
 function onSupportQuickClick(event){
-  const chip = event.target.closest("[data-support-quick-status],[data-support-quick-priority]");
+  const chip = event.target.closest("[data-support-quick-status],[data-support-quick-priority],[data-support-quick-mine]");
   if(!chip) return;
   applySupportQuickFilter(chip);
 }
@@ -5872,6 +6019,7 @@ supportFilterClear?.addEventListener("click",()=>{
   if(supportSearchInput) supportSearchInput.value = "";
   if(supportStatusFilter) supportStatusFilter.value = "active";
   if(supportPriorityFilter) supportPriorityFilter.value = "";
+  supportMineOnly = false;
   syncSupportQuickChips();
   refreshSupportTicketsTable();
 });
@@ -5879,6 +6027,15 @@ supportRefreshBtn?.addEventListener("click", async ()=>{
   if(supportRefreshBtn) supportRefreshBtn.disabled = true;
   await loadSupportTickets();
   if(supportRefreshBtn) supportRefreshBtn.disabled = false;
+});
+supportSendReplyBtn?.addEventListener("click",()=>sendSupportCustomerReply());
+supportAssignMeBtn?.addEventListener("click",()=>{
+  if(!currentMember?.id){
+    setFormStatus(supportTicketEditStatus,"Il tuo account non è in Collaboratori — non posso assegnarti.","error");
+    return;
+  }
+  populateSupportAssigneeSelect(currentMember.id);
+  setFormStatus(supportTicketEditStatus,"Assegnato a te — clicca Salva per confermare.","ok");
 });
 
 supportStatusFilter?.addEventListener("change",()=>{

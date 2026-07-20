@@ -225,6 +225,8 @@ tr:last-child td{border-bottom:0}
 .support-ticket-meta strong{font-weight:800;margin-right:2px}
 .support-link-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 6px}
 .support-link-actions .small-action{min-height:40px}
+.support-reply-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.support-reply-actions .primary-action,.support-reply-actions .small-action{min-height:42px}
 .support-inline-link,.support-inline-btn{font-size:.72rem;font-weight:800;border:0;background:transparent;color:#175CD3;cursor:pointer;padding:0;text-decoration:underline}
 .support-inline-btn{text-decoration:none;border:1px solid #BFDBFE;border-radius:999px;padding:3px 8px;background:#fff}
 .support-notes-block{grid-column:1/-1;margin:0;padding:10px 12px;border-radius:10px;background:#FFFBEB;border:1px solid #FDE68A}
@@ -257,6 +259,7 @@ tr:last-child td{border-bottom:0}
     grid-template-areas:
       "ticket actions"
       "client client"
+      "assignee assignee"
       "priority status"
       "when when";
     gap:8px 10px;
@@ -269,10 +272,12 @@ tr:last-child td{border-bottom:0}
   .support-table-wrap .col-ticket{grid-area:ticket;min-width:0}
   .support-table-wrap .col-actions{grid-area:actions}
   .support-table-wrap .col-client{grid-area:client;font-size:.78rem;color:var(--muted);word-break:break-all}
+  .support-table-wrap .col-assignee{grid-area:assignee;font-size:.78rem;color:var(--muted)}
   .support-table-wrap .col-priority{grid-area:priority}
   .support-table-wrap .col-status{grid-area:status}
   .support-table-wrap .col-when{grid-area:when;font-size:.72rem;color:var(--muted)}
   .support-table-wrap .col-client::before,
+  .support-table-wrap .col-assignee::before,
   .support-table-wrap .col-when::before{
     content:attr(data-label) ": ";
     font-weight:800;

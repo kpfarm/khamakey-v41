@@ -1,7 +1,19 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-20** (Moments v144 galleria Cambia/Rimuovi; v143 palette; v142 no pageDecor)
+> Ultimo aggiornamento: **2026-07-20** (SSOT versioni allineato a codice live; audit SE basi — zero cambio runtime)
+
+### Fonte di verità versioni
+
+| Cosa | Dove leggere |
+|------|----------------|
+| Moments editor | `pages/moments.html` / `moments.js` / `moments.css` → `?v=` |
+| Admin / Officina Moments | `pages/admin.html`, `moments-admin.html` → `?v=` |
+| Business shell | `pages/app.js` → `APP_VERSION` |
+| Worker | `worker/worker.js` → `WORKER_VERSION` |
+| SQL applicata | file in `sql/` + RPC live su Supabase `cuxlwaocjqwzluycznyp` |
+
+Se questo file e il codice divergono, **vince il codice** — poi si aggiorna subito questa tabella.
 
 ---
 
@@ -76,16 +88,17 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 ---
 
-## Versioni attuali
+## Versioni attuali (allineate al codice 2026-07-20)
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin** | **v148** | Magazzino NFC Business (lotti, filtri, CSV, KPI), clienti Business arricchiti (email, codice, slug, Analytics), provisioning staff. Include v133 Spedizioni NFC operativa. |
-| **Editor Business** | **v148** | Sprint S1: barra shell mobile, chip stato pagina, account/logout, fix form finti, guard upload · include v147 attivazione |
-| **Moments editor** | **v115** | Overhaul visivo premium (sfondo radial, glassmorphism e card hover) + Raccordi copertina v114. |
-| **Worker NFC** | **v127** | Supporto a heroCut, unificazione di tutti i 21 sfondi premium e contrasto dinamico footer. |
-| **SQL Supabase** | **v148 (applicata)** | v147 attivazione Business (`business_activation_codes`, `activate_business_code`); v148 magazzino admin Business (batch RPC, RLS inventory, provisioning). Precedenti: v75-v83 security, v84 CRM, v85 provvigioni, v86-v88 rivenditori, v89 ticket utente |
-| **Prossima release piattaforma** | **v149** | Commit git v147/v148, PDF etichette Business, smoke test end-to-end attivazione + admin magazzino |
+| **Admin / Officina Moments** | **v165** | Redirect `/admin`→`moments-admin` su dominio Moments; dettaglio ticket Supporto; console Moments senza Shopify/Business. Include magazzino NFC Moments + fix loader v163. |
+| **Moments editor** | **v147** | Support notify email; galleria Cambia/Rimuovi (v144); RSVP WhatsApp obbligatorio (v145); no foto profilo tonda (v146); categoria bloccata NFC (v135/SQL v157). |
+| **Worker NFC** | **v144-support-notify** | `POST /api/moment/support-notify` → Resend staff; RSVP WA required in content check; preview rate limit; domini `link.khamakeymoments.com`. |
+| **Business shell** | **app v167** | `APP_VERSION` in `app.js` — account Moments non finiscono nel flusso Business. Editor Business HTML può avere WIP locale non ancora allineato in tabella. |
+| **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
+| **SQL Supabase** | **≥ v159 (prod)** | Security v75–v83; RSVP/guestbook; support sources v158; category lock v157; drop overload `activate_moment_code` v159. Business activation/inventory v147/v148 in repo. |
+| **Prossima release piattaforma** | **v166+** (solo se serve cambio runtime) | Non bumpare per sole doc. Priorità ops: secrets Stripe/Resend webhook, Auth leaked-password, smoke Moments. |
 
 ---
 
@@ -109,12 +122,14 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 - [x] Editor parità UX Business (sidebar, topbar, wizard post-attivazione)
 - [x] 21 categorie evento + template bilanciati per tipo
 - [x] Temi visivi (classic, celebration, minimal, memorial)
-- [x] RSVP configurabile per tipo evento
+- [x] RSVP configurabile per tipo evento (**WhatsApp obbligatorio** v145 / Worker content check)
 - [x] Attivazione codici NFC + PIN opzionale
 - [x] **Categoria bloccata al codice NFC (v135 / SQL v157)** — tipo da magazzino, badge editor, peek signup, save lock
+- [x] Guestbook + RSVP API Worker operative
+- [x] Ticket assistenza Moments → email staff (`support-notify` Worker v144)
 
 ### Admin
-- [x] Pannelli Business e Moments separati
+- [x] Pannelli Business e Moments separati (`moments-admin.html` su dominio Moments)
 - [x] Magazzino NFC Moments, lotti, codici, clienti Moments
 - [x] **Magazzino NFC Business v148** — lotti, filtri, CSV, provisioning clienti
 - [x] Catalogo vendita Shopify (sync bozza → live)
@@ -123,7 +138,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 - [x] UX v106: menu intenti, modalità semplice, guide
 - [x] CRM v84: pipeline clienti + note protette da RPC
 - [x] Provvigioni v85/v125: trigger ordini + gestione admin approva/paga/annulla
-- [x] Supporto v128/v89: console ticket operativa e apertura ticket da Business/Moments editor con RLS cliente
+- [x] Supporto: console ticket + dettaglio leggibile + filtro Moments (v164/v165)
 
 ### Integrazioni
 - [x] Shopify: sync catalogo + webhook ordini
@@ -138,11 +153,11 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Area | Stato | Priorità |
 |------|-------|----------|
 | Stripe secrets in produzione | Predisposto, secrets da configurare | Alta |
-| Portale rivenditori self-service | Completato v86, hardening v87 applicato, claim v88 preparato | Media |
-| Tabella risposte RSVP backend | Completato v70 — applicare SQL in prod | Alta |
+| Portale rivenditori self-service | Completato v86, hardening v87, claim v88 | Media |
 | Catalogo multilingua completo | Admin predisposto, sync Shopify parziale | Media |
-| Smoke test wizard 5 settori | Checklist aperta | Bassa |
-| **KhamaKey OS** (questo sistema) | Fase 1 — struttura creata | Alta |
+| Smoke test wizard 5 settori Business | Checklist aperta | Bassa |
+| Hardening ops (rate-limit fail-open PIN, drop overload `get_public_moment` 2-arg) | Documentato audit SE — **non toccare runtime** finché Moments è stabile | Media |
+| **KhamaKey OS** | Fase 1 — SSOT versioni riallineato 2026-07-20 | Alta |
 
 ---
 
@@ -151,40 +166,42 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | # | Problema | Impatto | Azione |
 |---|----------|---------|--------|
 | 1 | `STRIPE_SECRET_KEY` non in produzione | Pagamenti Business bloccati | Vedi `STRIPE-PERSONAL-SETUP.md` |
-| 2 | `RESEND_API_KEY` da verificare in prod | Email ordini potrebbero non partire | `wrangler secret put` |
-| 3 | Documentazione sparsa tra chat e file root | Perdita contesto tra sessioni AI | **KhamaKey OS** — checklist operabilità in `docs/21-checklist-operabilita-business-admin.md` |
-| 4 | Skill Codex punta a path vecchi | Rischio deploy su cartella sbagliata | Specificare sempre root v41 |
-| 5 | `RESEND_WEBHOOK_SECRET` non ancora impostato | Webhook Resend risponde 503 finché non configurato (sicuro, non urgente) | `wrangler secret put RESEND_WEBHOOK_SECRET` |
+| 2 | `RESEND_WEBHOOK_SECRET` non impostato | Webhook delivery Resend → 503 (sicuro) | `wrangler secret put RESEND_WEBHOOK_SECRET` |
+| 3 | Auth «Leaked Password Protection» disabilitata | Advisory Supabase | Dashboard → Authentication → Policies |
+| 4 | Working tree spesso sporco (Business WIP + demo) | Rischio commit accidentali | Non mescolare con fix Moments; commit mirati |
+| 5 | IDOR Business fix non E2E dual-account | Confidenza media | Test manuale due utenti quando possibile |
+
+RSVP backend (SQL v70) e guestbook: **operativi in prod** — rimossi dalla lista bloccanti.
 
 ---
 
-## Priorità correnti
+## Priorità correnti (Moments-first)
 
-1. **KhamaKey OS** — centralizzare conoscenza e regole AI
-2. **Stripe in produzione** — account personale temporaneo OK
-3. **Portale rivenditori** — brief personalizzazione Business
-4. **RSVP backend** — raccolta risposte strutturata
+1. **Non rompere Moments** — zero refactor runtime senza smoke
+2. **Ops secrets / Auth** — Stripe, Resend webhook, leaked-password
+3. **Igiene multi-agente** — lock aggiornati, commit solo file del task
+4. Business Sprint S1–S2 / Stripe — solo quando Moments è quiet
 
 ---
 
 ## Prossimo obiettivo
 
-> Eseguire **Sprint S1–S2** dalla checklist [`docs/21-checklist-operabilita-business-admin.md`](docs/21-checklist-operabilita-business-admin.md): mobile editor (Account/Logout/Salva) + admin Business NFC end-to-end (bulk, ordini, spedizioni).
+> Tenere Moments stabile. Prossimi miglioramenti **solo ops/docs** o fix mirati: secrets Worker, Auth dashboard, smoke PIN/RSVP/guestbook/ticket. Nessun cambio a `renderMomentPage` / RPC Moments senza test su slug reale.
 
-Poi: S3 chiarezza salvataggio, smoke test C1/C2 completi, commit git v147/v148.
+Audit SE 2026-07-20: basi solide; canvas `foundations-se-audit.canvas.tsx` (Cursor).
 
 ---
 
 ## Lock attivi (multi-agente)
 
-Vedi [`../CODEX-COLLAB.md`](../CODEX-COLLAB.md) sezione **Lock attivi**.
+Vedi [`../CODEX-COLLAB.md`](../CODEX-COLLAB.md) sezione **Lock attivi** (ripuliti 2026-07-20 — lock stale rilasciati).
 
 | Area | Stato |
 |------|-------|
-| Rete rivenditori v68 | Libero per fix minori |
+| Moments editor / Worker / Admin Moments | **Libero** — coordinarsi se si tocca |
 | Stripe secrets Worker | Da configurare |
-| Admin v125 | Libero per fix minori — coordinarsi su `admin.html`, `admin.js`, `admin.css` |
-| Editor contratto pubblico | Condiviso — coordinarsi |
+| Editor contratto pubblico Business | Condiviso — coordinarsi |
+| Working tree Business WIP | **Non toccare** senza owner esplicito |
 
 ---
 

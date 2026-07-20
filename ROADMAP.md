@@ -270,3 +270,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Moments v146**: rimossa foto profilo tonda dalla sezione Copertina (controllo inutilizzato) |
 | 2026-07-20 | Cursor | **Admin v164 / Moments v147 / Worker v144**: Supporto — dettaglio ticket leggibile + email avviso staff su nuovo ticket Moments |
 | 2026-07-20 | Cursor | **Admin v165**: su `khamakeymoments.com` `/admin` reindirizza a `moments-admin` (fix path senza .html) |
+| 2026-07-20 | Cursor | **Audit SE basi + SSOT**: versioni PROJECT_STATE/CODEX-COLLAB allineate al codice (Admin 165 / Moments 147 / Worker 144); lock stale rilasciati; **zero cambio runtime** |

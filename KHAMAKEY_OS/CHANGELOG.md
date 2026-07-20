@@ -8,6 +8,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **SSOT versioni / lock multi-agente (2026-07-20, Cursor)** — solo documentazione
+  - `PROJECT_STATE.md` e `CODEX-COLLAB.md` riallineati al codice live (Admin/Officina v165, Moments v147, Worker v144-support-notify, SQL ≥ v159).
+  - Lock stale (Antigravity worker, Claude admin, Moments July) rilasciati → **libero**.
+  - Nessuna modifica a `pages/`, `worker/`, `sql/` runtime.
+
 ### Fixed
 - **Moments v144 — Galleria rimuovi/sostituisci (2026-07-20, Cursor)** — Pages
   - Ogni foto in editor mostra azioni chiare **Cambia foto** e **Rimuovi**; replace mantiene titolo/descrizione e cancella il vecchio file R2.

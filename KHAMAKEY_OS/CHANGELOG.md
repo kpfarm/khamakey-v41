@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **Moments v158 — Account hub separato dall’editor (2026-07-20, Cursor)** — Pages only
+  - Schermata Account (profilo, prodotti NFC, piano, assistenza) fuori dall’editor; tab editor «Account» → «Pagina» (Riepilogo + Pubblica).
 - **Moments v157 — Menu account cliente (2026-07-20, Cursor)** — Pages only
   - Dropdown avatar: nome, email, prodotti NFC attivi, slot «Moments Free / piani in arrivo», Gestisci account, Assistenza, Esci.
   - Rimossi Apri/Condividi/Copia dal menu (restano nella barra editor della pagina).

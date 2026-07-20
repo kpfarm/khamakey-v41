@@ -143,6 +143,31 @@ textarea{min-height:86px;resize:vertical}
 .user-menu-item:hover{background:var(--soft)}
 .user-menu-item.danger{color:var(--red)}
 .main-panel{padding:16px;max-width:1280px;margin:0 auto}
+.account-hub{padding:16px;max-width:720px;margin:0 auto}
+.account-hub-inner{display:grid;gap:16px}
+.account-hub-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.account-hub-head h2{margin:4px 0 0;font-size:1.45rem}
+.account-hub-lead{margin:8px 0 0;color:var(--muted);font-size:.86rem;max-width:42ch;line-height:1.45}
+.account-hub-tabs{display:flex;gap:6px;flex-wrap:wrap;padding:4px;background:rgba(255,255,255,.72);border:1px solid var(--border);border-radius:14px}
+.account-tab{border:0;background:transparent;color:var(--muted);padding:10px 12px;border-radius:10px;font-size:.8rem;font-weight:700;cursor:pointer}
+.account-tab:hover{color:var(--navy);background:var(--soft)}
+.account-tab.active{background:var(--navy);color:#fff}
+.account-hub-panels{display:grid;gap:14px}
+.account-panel-card{padding:18px;background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 24px -10px rgba(7,26,60,.08)}
+.account-panel-card h3{margin:0 0 6px;font-size:1.05rem}
+.account-panel-card > p{margin:0 0 14px;color:var(--muted);font-size:.84rem;line-height:1.45}
+.account-profile-grid{display:grid;gap:10px}
+.account-profile-row{display:grid;gap:2px;padding:10px 12px;border-radius:10px;background:var(--soft);border:1px solid transparent}
+.account-profile-row span{font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.account-profile-row strong{font-size:.9rem;color:var(--navy);word-break:break-word}
+.account-plan-card{display:grid;gap:8px;padding:16px;border-radius:14px;border:1px solid rgba(170,98,108,.22);background:linear-gradient(135deg,rgba(217,140,149,.14),rgba(7,26,60,.06))}
+.account-plan-card strong{font-size:1.05rem;color:var(--navy)}
+.account-plan-card p{margin:0;color:var(--muted);font-size:.84rem;line-height:1.45}
+.moments-app.account-mode #momentDetail,
+.moments-app.account-mode #momentsSaveBar,
+.moments-app.account-mode #momentsBottomNav,
+.moments-app.account-mode #momentsPreviewFab{display:none!important}
+.moments-app.account-mode #momentsAccountHub{display:block}
 .empty-state{padding:24px;background:rgba(255,255,255,0.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:18px;text-align:center;box-shadow:0 4px 18px -4px rgba(27,42,94,0.04);transition:transform 0.2s ease, box-shadow 0.2s ease}
 .empty-state:hover{box-shadow:0 12px 28px -6px rgba(27,42,94,0.07);transform:translateY(-1px)}
 .empty-state h2{margin-bottom:8px}

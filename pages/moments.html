@@ -7,7 +7,7 @@
   <link rel="icon" href="khamakey-favicon.png">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="moments.css?v=157">
+  <link rel="stylesheet" href="moments.css?v=158">
 </head>
 <body class="session-pending">
   <main class="moments-boot" id="momentsBoot" aria-live="polite">
@@ -170,6 +170,26 @@
       </div>
     </section>
 
+    <section class="account-hub" id="momentsAccountHub" hidden>
+      <div class="account-hub-inner">
+        <div class="account-hub-head">
+          <div>
+            <p class="eyebrow">Il tuo account</p>
+            <h2>Account Moments</h2>
+            <p class="account-hub-lead">Profilo, prodotti NFC, piano e assistenza — separati dall’editor della pagina.</p>
+          </div>
+          <button type="button" class="ghost" id="momentsAccountBackToEditor">Torna all’editor</button>
+        </div>
+        <nav class="account-hub-tabs" id="momentsAccountTabs" aria-label="Sezioni account">
+          <button type="button" class="account-tab active" data-account-tab="profile">Profilo</button>
+          <button type="button" class="account-tab" data-account-tab="products">Prodotti</button>
+          <button type="button" class="account-tab" data-account-tab="plan">Piano</button>
+          <button type="button" class="account-tab" data-account-tab="support">Assistenza</button>
+        </nav>
+        <div class="account-hub-panels" id="momentsAccountPanels"></div>
+      </div>
+    </section>
+
     <div class="save-bar" id="momentsSaveBar">
       <div class="save-msg">Hai <strong>modifiche non salvate</strong></div>
       <div class="save-bar-actions">
@@ -184,6 +204,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=157"></script>
+  <script type="module" src="moments.js?v=158"></script>
 </body>
 </html>

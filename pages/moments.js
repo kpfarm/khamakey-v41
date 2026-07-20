@@ -78,6 +78,7 @@ import {
   SECTION_ICONS,
   NAV_GROUPS,
   designNavItems,
+  pageNavItems,
   accountNavItems,
   normalizeSectionOrder,
   migrateSections,
@@ -86,7 +87,7 @@ import {
   formatImageLines,
   sectionFieldHints,
   sectionHasContent
-} from "./moment-sections.js?v=152";
+} from "./moment-sections.js?v=158";
 import {
   TYPE_LABELS,
   renderCategorySelect,
@@ -130,7 +131,11 @@ const userAvatar = document.getElementById("momentsUserAvatar");
 const userMenu = document.getElementById("momentsUserMenu");
 const userMenuBtn = document.getElementById("momentsUserMenuBtn");
 const userMenuProducts = document.getElementById("momentsMenuProducts");
+const accountHub = document.getElementById("momentsAccountHub");
+const accountPanels = document.getElementById("momentsAccountPanels");
 const PUBLIC_BASE_URL = WORKER_BASE_URL;
+let activeAccountTab = "products";
+let appView = "editor"; // editor | account
 
 const EDITOR_PANELS = {
   overview:{title:"Riepilogo",subtitle:"Stato pagina, link e statistiche RSVP / libro ospiti"},
@@ -590,6 +595,141 @@ function accountDisplayName(user = currentUser){
   return email.split("@")[0] || "Account Moments";
 }
 
+function showEditorView(){
+  appView = "editor";
+  app?.classList.remove("account-mode");
+  if(accountHub) accountHub.hidden = true;
+  if(detail) detail.hidden = false;
+  setEditorChromeVisible(Boolean(document.getElementById("momentEditorShell")));
+}
+
+function showAccountHub(tab = "products"){
+  appView = "account";
+  activeAccountTab = tab || "products";
+  app?.classList.add("account-mode");
+  if(detail) detail.hidden = true;
+  if(accountHub) accountHub.hidden = false;
+  setEditorChromeVisible(false);
+  document.querySelectorAll("#momentsAccountTabs .account-tab").forEach(button=>{
+    button.classList.toggle("active", button.dataset.accountTab === activeAccountTab);
+  });
+  renderAccountPanels();
+  const backBtn = document.getElementById("momentsAccountBackToEditor");
+  if(backBtn){
+    backBtn.hidden = !rows.length;
+    if(backBtn.dataset.bound !== "1"){
+      backBtn.dataset.bound = "1";
+      backBtn.addEventListener("click",async()=>{
+        if(!rows.length) return;
+        showEditorView();
+        if(activeId){
+          try{
+            await ensureEventPageState(activeId);
+            renderDetail(activeId);
+          }catch(error){
+            showAppLoadError(error);
+          }
+        }
+      });
+    }
+  }
+  if(document.getElementById("momentsAccountTabs")?.dataset.bound !== "1"){
+    const tabs = document.getElementById("momentsAccountTabs");
+    tabs.dataset.bound = "1";
+    tabs.addEventListener("click",event=>{
+      const button = event.target.closest("[data-account-tab]");
+      if(!button) return;
+      activeAccountTab = button.dataset.accountTab || "products";
+      tabs.querySelectorAll(".account-tab").forEach(node=>{
+        node.classList.toggle("active", node.dataset.accountTab === activeAccountTab);
+      });
+      renderAccountPanels();
+    });
+  }
+}
+
+function renderAccountPanels(){
+  if(!accountPanels) return;
+  const name = accountDisplayName(currentUser);
+  const email = String(currentUser?.email || "").trim();
+  const createdAt = currentUser?.created_at
+    ? new Date(currentUser.created_at).toLocaleDateString("it-IT")
+    : "—";
+  if(activeAccountTab === "profile"){
+    accountPanels.innerHTML = `
+      <div class="account-panel-card">
+        <h3>Profilo</h3>
+        <p>Dati del tuo account Moments. Da qui gestisci anche l’uscita.</p>
+        <div class="account-profile-grid">
+          <div class="account-profile-row"><span>Nome</span><strong>${esc(name)}</strong></div>
+          <div class="account-profile-row"><span>Email</span><strong>${esc(email || "—")}</strong></div>
+          <div class="account-profile-row"><span>Account creato</span><strong>${esc(createdAt)}</strong></div>
+        </div>
+        <div style="margin-top:14px">
+          <button type="button" class="ghost" id="accountHubLogout">Esci dall’account</button>
+        </div>
+      </div>`;
+    document.getElementById("accountHubLogout")?.addEventListener("click",()=>{
+      document.getElementById("momentsLogout")?.click();
+    });
+    return;
+  }
+  if(activeAccountTab === "plan"){
+    accountPanels.innerHTML = `
+      <div class="account-panel-card">
+        <h3>Piano</h3>
+        <p>Qui compariranno i piani a pagamento quando saranno disponibili.</p>
+        <div class="account-plan-card">
+          <strong>Moments Free</strong>
+          <p>Incluso con il tuo oggetto NFC: editor pagina, pubblicazione e assistenza base.</p>
+        </div>
+      </div>`;
+    return;
+  }
+  if(activeAccountTab === "support"){
+    accountPanels.innerHTML = `
+      <div class="account-panel-card">
+        <h3>Assistenza</h3>
+        <p>Apri un ticket al team KhamaKey se qualcosa non funziona sulla pagina o sull’account.</p>
+        <form class="support-inline-form" id="momentSupportForm">
+          <label>Oggetto<input name="subject" type="text" placeholder="Es. Non riesco a pubblicare" required></label>
+          <label>Priorità
+            <select name="priority">
+              <option value="normal">Normale</option>
+              <option value="high">Alta</option>
+              <option value="urgent">Urgente</option>
+              <option value="low">Bassa</option>
+            </select>
+          </label>
+          <label>Dettagli<textarea name="description" rows="4" placeholder="Scrivi cosa succede e cosa stavi facendo." required></textarea></label>
+          <button type="submit" class="primary">Invia ticket</button>
+          <p class="status" id="momentSupportStatus" aria-live="polite"></p>
+        </form>
+      </div>`;
+    const supportForm = document.getElementById("momentSupportForm");
+    const row = rows.find(item=>item.id === activeId) || rows[0] || null;
+    supportForm?.addEventListener("submit",event=>submitMomentSupportTicket(event, row));
+    return;
+  }
+  accountPanels.innerHTML = `
+    <div class="account-panel-card">
+      <h3>Prodotti attivi</h3>
+      <p>Oggetti NFC collegati al tuo account. Tocca una pagina per aprirla nell’editor.</p>
+      <div class="side-head">
+        <strong>Pagine collegate</strong>
+        <span class="objects-count">${rows.length}</span>
+      </div>
+      <div class="objects-switcher" id="objectsSwitcher">${renderObjectsListHtml()}</div>
+    </div>
+    <div class="account-panel-card">
+      <h3>${rows.length ? "Attiva un altro oggetto" : "Attiva il primo oggetto"}</h3>
+      <p>Serve un codice Moments dalla confezione NFC — non un codice Business.</p>
+      ${renderActivationFormHtml("accountActivationForm","accountActivationStatus")}
+    </div>`;
+  bindObjectSwitcher(accountPanels);
+  bindActivationForm(document.getElementById("accountActivationForm"), document.getElementById("accountActivationStatus"));
+}
+
 function refreshAccountMenu(){
   const email = String(currentUser?.email || "").trim();
   const name = accountDisplayName(currentUser);
@@ -601,7 +741,7 @@ function refreshAccountMenu(){
   }
   if(!userMenuProducts) return;
   if(!rows.length){
-    userMenuProducts.innerHTML = `<p class="user-menu-empty">Nessun prodotto attivo. Attiva un codice NFC dall’account.</p>`;
+    userMenuProducts.innerHTML = `<p class="user-menu-empty">Nessun prodotto attivo. Aprilo da Gestisci account.</p>`;
     return;
   }
   userMenuProducts.innerHTML = rows.map(row=>{
@@ -626,15 +766,10 @@ function refreshAccountMenu(){
       userMenu?.classList.remove("open");
       const nextId = button.dataset.menuObjectId;
       if(!nextId) return;
-      if(nextId === activeId){
-        activeNavGroup = "account";
-        setEditorPanel("objects");
-        return;
-      }
-      if(editorDirty && !confirm("Hai modifiche non salvate. Vuoi cambiare oggetto senza salvare?")) return;
-      activeEditorPanel = "cover";
+      if(editorDirty && activeId && nextId !== activeId && !confirm("Hai modifiche non salvate. Vuoi cambiare oggetto senza salvare?")) return;
       try{
         await ensureEventPageState(nextId);
+        showEditorView();
         renderDetail(nextId);
       }catch(error){
         showAppLoadError(error);
@@ -692,9 +827,7 @@ function bindGlobalAppChrome(){
     accountBtn.dataset.bound = "1";
     accountBtn.addEventListener("click",()=>{
       userMenu?.classList.remove("open");
-      activeNavGroup = "account";
-      setEditorPanel("objects");
-      document.getElementById("objectsSwitcher")?.scrollIntoView({behavior:"smooth",block:"start"});
+      showAccountHub("products");
     });
   }
   const supportBtn = document.getElementById("momentsMenuSupport");
@@ -702,16 +835,24 @@ function bindGlobalAppChrome(){
     supportBtn.dataset.bound = "1";
     supportBtn.addEventListener("click",()=>{
       userMenu?.classList.remove("open");
-      activeNavGroup = "account";
-      setEditorPanel("objects");
-      document.getElementById("momentSupportForm")?.scrollIntoView({behavior:"smooth",block:"center"});
+      showAccountHub("support");
+    });
+  }
+  const planBlock = document.getElementById("momentsMenuPlan");
+  if(planBlock && planBlock.dataset.bound !== "1"){
+    planBlock.dataset.bound = "1";
+    planBlock.style.cursor = "pointer";
+    planBlock.title = "Apri piano account";
+    planBlock.addEventListener("click",()=>{
+      userMenu?.classList.remove("open");
+      showAccountHub("plan");
     });
   }
 }
 
 function navItemsForGroup(groupId, formNode){
   if(groupId === "design") return designNavItems();
-  if(groupId === "account") return accountNavItems();
+  if(groupId === "page" || groupId === "account") return pageNavItems();
   const enabled = enabledMapFromForm(formNode);
   return contentNavItems(sectionOrder, currentMomentType, pinnedExtraSections, enabled);
 }
@@ -848,7 +989,7 @@ function setNavGroup(groupId){
   document.querySelectorAll("#momentsGrpNav .grp-btn").forEach(button=>{
     button.classList.toggle("active",button.dataset.navGroup === groupId);
   });
-  if(groupId === "account" && !["overview","objects","privacy"].includes(activeEditorPanel)){
+  if((groupId === "page" || groupId === "account") && !["overview","privacy"].includes(activeEditorPanel)){
     setEditorPanel("overview");
   }
   renderSubNav(groupId);
@@ -878,9 +1019,9 @@ function renderSubNav(groupId, formNode){
 }
 
 function syncMobileNav(panelId){
-  const groupForPanel = panelId === "counter" || panelId.startsWith("section-") ? "content"
+  const groupForPanel = panelId === "counter" || panelId.startsWith("section-") || panelId === "extras" ? "content"
     : ["cover","styling","order"].includes(panelId) ? "design"
-    : ["overview","objects","privacy"].includes(panelId) ? "account"
+    : ["overview","privacy"].includes(panelId) ? "page"
     : activeNavGroup;
   if(groupForPanel !== activeNavGroup){
     activeNavGroup = groupForPanel;
@@ -928,20 +1069,24 @@ async function tryPendingActivation(user){
       return;
     }catch(error){
       console.error(error);
-      activeEditorPanel = "objects";
-      renderEmptyState(
-        error.message || "Attivazione Moments non riuscita. Riprova con il modulo sotto (non serve un codice Business).",
-        pendingCode
-      );
+      showAccountHub("products");
+      const status = document.getElementById("accountActivationStatus");
+      if(status) setStatus(status, error.message || "Attivazione Moments non riuscita. Riprova dal modulo sotto.","error");
+      const codeInput = document.querySelector("#accountActivationForm [name='code']");
+      if(codeInput) codeInput.value = formatMomentCodeDisplay(pendingCode);
       return;
     }
   }
-  activeEditorPanel = "objects";
-  if(activeId) renderDetail(activeId);
-  else renderEmptyState(
-    `Hai il codice Moments ${formatMomentCodeDisplay(pendingCode)} da collegare. Inserisci nome pagina e PIN sotto — non è richiesto nessun codice Business.`,
-    pendingCode
-  );
+  if(activeId){
+    showEditorView();
+    renderDetail(activeId);
+  }else{
+    showAccountHub("products");
+    const codeInput = document.querySelector("#accountActivationForm [name='code']");
+    if(codeInput) codeInput.value = formatMomentCodeDisplay(pendingCode);
+    const status = document.getElementById("accountActivationStatus");
+    if(status) setStatus(status, `Hai il codice ${formatMomentCodeDisplay(pendingCode)} da collegare. Inserisci nome pagina e PIN.`);
+  }
 }
 
 function renderObjectsListHtml(){
@@ -982,44 +1127,8 @@ function renderOverviewPanel(row, state, publicUrl){
 }
 
 function renderObjectsPanel(){
-  return `<div class="editor-panel ${activeEditorPanel === "objects" ? "active" : ""}" data-editor-panel="objects">
-    ${renderSectionHeader(EDITOR_PANELS.objects.title,EDITOR_PANELS.objects.subtitle)}
-    <div class="editor-card">
-      <div class="side-head">
-        <strong>Pagine collegate</strong>
-        <span class="objects-count">${rows.length}</span>
-      </div>
-      <div class="objects-switcher" id="objectsSwitcher">${renderObjectsListHtml()}</div>
-      <div class="activation-inline">
-        <h3>${rows.length ? "Attiva un altro oggetto Moments" : "Attiva il primo oggetto Moments"}</h3>
-        <p class="field-hint">Serve un codice Moments dalla confezione NFC — non un codice Business.</p>
-        ${renderActivationFormHtml()}
-      </div>
-    </div>
-    <div class="editor-card account-card">
-      <p class="eyebrow">Account</p>
-      <p>${esc(currentUser?.email || "")}</p>
-      <button type="button" class="ghost" id="editorLogout">Esci dall'account</button>
-    </div>
-    <div class="editor-card account-card">
-      <p class="eyebrow">Assistenza</p>
-      <p>Apri un ticket al team KhamaKey se qualcosa non funziona o serve supporto sulla pagina.</p>
-      <form class="support-inline-form" id="momentSupportForm">
-        <label>Oggetto<input name="subject" type="text" placeholder="Es. Non riesco a pubblicare" required></label>
-        <label>Priorità
-          <select name="priority">
-            <option value="normal">Normale</option>
-            <option value="high">Alta</option>
-            <option value="urgent">Urgente</option>
-            <option value="low">Bassa</option>
-          </select>
-        </label>
-        <label>Dettagli<textarea name="description" rows="4" placeholder="Scrivi cosa succede e cosa stavi facendo." required></textarea></label>
-        <button type="submit" class="primary">Invia ticket</button>
-        <p class="status" id="momentSupportStatus" aria-live="polite"></p>
-      </form>
-    </div>
-  </div>`;
+  // Legacy stub: prodotti/account vivono in #momentsAccountHub
+  return "";
 }
 
 async function submitMomentSupportTicket(event,row){
@@ -1131,18 +1240,20 @@ async function loadObjects({ render = true } = {}){
   if(rows.length && !rows.some(row=>row.id === activeId)) activeId = rows[0].id;
   refreshAccountMenu();
   if(!render){
-    refreshObjectsSwitcher();
+    if(appView === "account") renderAccountPanels();
+    else refreshObjectsSwitcher();
     return;
   }
   if(activeId){
     try{
       await ensureEventPageState(activeId);
+      showEditorView();
       renderDetail(activeId);
     }catch(error){
       showAppLoadError(error);
     }
   }else{
-    renderEmptyState();
+    showAccountHub("products");
   }
 }
 
@@ -1150,7 +1261,7 @@ function refreshObjectsSwitcher(){
   const node = document.getElementById("objectsSwitcher");
   if(node) node.innerHTML = renderObjectsListHtml();
   document.querySelectorAll(".objects-count").forEach(node=>{ node.textContent = String(rows.length); });
-  bindObjectSwitcher(detail);
+  bindObjectSwitcher(accountPanels || detail);
 }
 
 function bindObjectSwitcher(root){
@@ -1158,12 +1269,14 @@ function bindObjectSwitcher(root){
     if(button.dataset.bound === "1") return;
     button.dataset.bound = "1";
     button.addEventListener("click",async()=>{
-      if(button.dataset.objectId === activeId) return;
-      if(editorDirty && !confirm("Hai modifiche non salvate. Vuoi cambiare oggetto senza salvare?")) return;
-      activeEditorPanel = "objects";
       const nextId = button.dataset.objectId;
+      if(!nextId) return;
+      if(nextId === activeId && appView === "editor") return;
+      if(editorDirty && activeId && nextId !== activeId && !confirm("Hai modifiche non salvate. Vuoi cambiare oggetto senza salvare?")) return;
+      activeEditorPanel = "cover";
       try{
         await ensureEventPageState(nextId);
+        showEditorView();
         renderDetail(nextId);
       }catch(error){
         console.error(error);
@@ -1512,12 +1625,12 @@ function renderEditorSidebar(activePanel, momentType = currentMomentType, pinned
       <span class="editor-nav-icon">${esc(SECTION_ICONS[key] || "•")}</span>${esc(sectionLabelForType(momentType, key))}
     </button>`).join("")}${extrasBtn}`;
   return `<nav class="editor-sidebar" aria-label="Sezioni editor">
-    <div class="editor-sidebar-group">Account</div>
+    <div class="editor-sidebar-group">Pagina</div>
     <button type="button" class="editor-nav-item ${activePanel === "overview" ? "active" : ""}" data-editor-panel="overview">
       <span class="editor-nav-icon">📊</span>Riepilogo
     </button>
-    <button type="button" class="editor-nav-item ${activePanel === "objects" ? "active" : ""}" data-editor-panel="objects">
-      <span class="editor-nav-icon">◉</span>Pagine
+    <button type="button" class="editor-nav-item ${activePanel === "privacy" ? "active" : ""}" data-editor-panel="privacy">
+      <span class="editor-nav-icon">🔒</span>Pubblica
     </button>
     <div class="editor-sidebar-group">Design</div>
     <button type="button" class="editor-nav-item ${activePanel === "cover" ? "active" : ""}" data-editor-panel="cover">
@@ -1531,10 +1644,6 @@ function renderEditorSidebar(activePanel, momentType = currentMomentType, pinned
     </button>
     <div class="editor-sidebar-group">Contenuti</div>
     ${contentItems}
-    <div class="editor-sidebar-group">Impostazioni</div>
-    <button type="button" class="editor-nav-item ${activePanel === "privacy" ? "active" : ""}" data-editor-panel="privacy">
-      <span class="editor-nav-icon">🔒</span>Pubblica
-    </button>
   </nav>`;
 }
 
@@ -1983,7 +2092,7 @@ function renderOnboardingWizard(row){
 }
 
 function editorProgressStep(){
-  if(activeNavGroup === "account") return 4;
+  if(activeNavGroup === "page" || activeEditorPanel === "privacy" || activeEditorPanel === "overview") return 4;
   if(activeNavGroup === "content") return 3;
   if(activeEditorPanel === "styling" || activeEditorPanel === "order") return 2;
   return 1;
@@ -2004,7 +2113,7 @@ function renderEditorProgress(){
     { n:1, label:"Copertina", panel:"cover", group:"design" },
     { n:2, label:"Colori", panel:"styling", group:"design" },
     { n:3, label:"Contenuti", panel:"content", group:"content" },
-    { n:4, label:"Pubblica", panel:"privacy", group:"account" }
+    { n:4, label:"Pubblica", panel:"privacy", group:"page" }
   ];
   return `<nav class="editor-progress" aria-label="Passi rapidi">${steps.map(step=>`<button type="button" class="editor-progress-step ${current === step.n ? "active" : ""} ${current > step.n ? "done" : ""}" data-progress-step="${step.n}" data-progress-panel="${esc(step.panel)}" data-progress-group="${esc(step.group)}"><span class="editor-progress-num">${step.n}</span><span class="editor-progress-label">${esc(step.label)}</span></button>`).join("")}</nav>`;
 }
@@ -2299,9 +2408,11 @@ function renderDetail(id){
   activeId = id;
   const row = rows.find(item=>item.id === id);
   if(!row){
-    renderEmptyState("Pagina non trovata. Ricarica o seleziona un'altra pagina.");
+    showAccountHub("products");
     return;
   }
+  showEditorView();
+  if(activeEditorPanel === "objects") activeEditorPanel = "cover";
   let state;
   try{
     state = mergedState(row);
@@ -2358,7 +2469,6 @@ function renderDetail(id){
         ${renderEditorSidebar(activeEditorPanel, state.type, state.pinned_sections || [], Object.fromEntries(Object.entries(state.sections || {}).map(([k,v])=>[k, Boolean(v?.enabled)])))}
         <div class="editor-main">
           ${renderOverviewPanel(row, state, publicUrl)}
-          ${renderObjectsPanel()}
           <form id="momentEditorForm" class="editor-form-inner" novalidate>
             <input type="hidden" name="pinned_sections" id="pinnedSectionsInput" value="${esc((state.pinned_sections || []).join(","))}">
             ${renderCoverPanel(state)}
@@ -2417,7 +2527,6 @@ function renderDetail(id){
       saveMoment({ preventDefault(){}, currentTarget:editorForm }, row);
     });
   });
-  document.getElementById("momentSupportForm")?.addEventListener("submit",event=>submitMomentSupportTicket(event,row));
   syncRsvpWhatsappWarn(editorForm);
   editorForm.addEventListener("input",event=>{
     markEditorDirty(editorForm);
@@ -2432,9 +2541,6 @@ function renderDetail(id){
     if(event.target?.name === "theme_variant") updateDesignSwatch(editorForm);
     schedulePreviewUpdate(editorForm,{immediate:isSectionToggle || event.target?.name === "theme_variant"});
   });
-  bindObjectSwitcher(detail);
-  bindActivationForm(document.getElementById("editorActivationForm"),document.getElementById("editorActivationStatus"));
-  document.getElementById("editorLogout")?.addEventListener("click",()=>document.getElementById("momentsLogout")?.click());
   document.getElementById("applyMomentTemplate")?.addEventListener("click",()=>{
     const type = lockedMomentType(row);
     if(!confirmApplyMomentTemplate(type)) return;

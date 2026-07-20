@@ -234,7 +234,7 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Admin / Officina Moments** | **Libero** (live **v165**) | `admin.html`, `moments-admin.html`, `admin.js`, `admin.css`, `admin-guide.js` — coordinarsi se stesso pannello |
 | **Moments editor** | **Libero** (live **v164**) | `moments.js`, `moments.html`, `moment-*.js` — prendere lock prima di refactor ampi |
 | **Security hardening (audit 2026-07-11)** | Completato e deployato (vedi `PROJECT_STATE.md`) | Regole assolute CSP/RLS/dati restano vincolanti |
-| **`worker/worker.js`** | **Libero** (live **v150-gallery-scroll**) — file più conteso | Chi tocca `worker.js` prende lock esplicito e non parallelizza |
+| **`worker/worker.js`** | **Libero** (live **v151-gallery-scroll**) — file più conteso | Chi tocca `worker.js` prende lock esplicito e non parallelizza |
 | **Editor Business — upload media** | Completato v124 — libero | PDF catalogo / docs base64→R2 ancora pendenti (`docs/03-editor.md`) |
 | **Business WIP locale (working tree)** | **Non toccare** senza owner | `editor.html`, `editor-*.js`, SQL v147/v148 untracked, demo landing — commit separati |
 

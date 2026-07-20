@@ -107,7 +107,7 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js?v=149";
+} from "./moment-editor-kit.js?v=150";
 import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderGuestbookModerationShell, bindGuestbookModerationPanel } from "./moment-guestbook-kit.js";
@@ -199,6 +199,24 @@ function setStatus(node,message="",type=""){
   if(!node) return;
   node.textContent = message;
   node.className = `status ${type}`.trim();
+}
+
+/** Errori salvataggio: topbar + status form (il banner mobile altrimenti sembra “morto”). */
+function showEditorSaveFeedback(message, type = "error"){
+  const editorStatus = document.getElementById("editorStatus");
+  setStatus(editorStatus, message, type);
+  const saveStatus = document.getElementById("editorSaveStatus");
+  if(saveStatus){
+    saveStatus.textContent = type === "ok" ? "Salvato" : (type === "error" ? "Salva non riuscito" : message);
+    saveStatus.classList.toggle("dirty", type !== "ok");
+  }
+  const barMsg = document.querySelector("#momentsSaveBar .save-msg");
+  if(barMsg && type === "error" && message){
+    barMsg.innerHTML = `<strong>Attenzione:</strong> ${esc(message)}`;
+  }
+  if(type === "error"){
+    editorStatus?.scrollIntoView({ behavior:"smooth", block:"nearest" });
+  }
 }
 
 function esc(value){
@@ -2287,7 +2305,7 @@ function renderDetail(id){
         <div class="editor-main">
           ${renderOverviewPanel(row, state, publicUrl)}
           ${renderObjectsPanel()}
-          <form id="momentEditorForm" class="editor-form-inner">
+          <form id="momentEditorForm" class="editor-form-inner" novalidate>
             <input type="hidden" name="pinned_sections" id="pinnedSectionsInput" value="${esc((state.pinned_sections || []).join(","))}">
             ${renderCoverPanel(state)}
             ${renderDesignPanel(state)}
@@ -2335,7 +2353,21 @@ function renderDetail(id){
     document.getElementById("editorUndoBtnMobile")?.addEventListener("click",revertEditorChanges);
   }
   editorForm.addEventListener("submit",event=>saveMoment(event,row));
+  // Pulsanti Salva fuori dal form: click esplicito (oltre a type=submit form=…)
+  document.querySelectorAll('button[type="submit"][form="momentEditorForm"]').forEach(button=>{
+    if(button.dataset.momentsSaveBound === "1") return;
+    button.dataset.momentsSaveBound = "1";
+    button.addEventListener("click",event=>{
+      event.preventDefault();
+      if(typeof editorForm.requestSubmit === "function"){
+        editorForm.requestSubmit();
+      }else{
+        saveMoment({ preventDefault(){}, currentTarget:editorForm }, row);
+      }
+    });
+  });
   document.getElementById("momentSupportForm")?.addEventListener("submit",event=>submitMomentSupportTicket(event,row));
+  syncRsvpWhatsappWarn(editorForm);
   editorForm.addEventListener("input",event=>{
     markEditorDirty(editorForm);
     const coverField = event.target?.name === "cover_url" || event.target?.name?.startsWith("cover_focus") || event.target?.name === "cover_zoom";
@@ -3139,10 +3171,12 @@ function syncRsvpWhatsappRequiredAttr(formNode){
   const input = formNode?.querySelector('[name="section_rsvp_whatsapp_number"]');
   if(!input) return;
   const enabled = isRsvpSectionEnabled(formNode);
-  // required HTML solo se RSVP è attivo — altrimenti il browser blocca Salva in silenzio
-  input.required = enabled;
+  // Mai HTML required: con pannello nascosto il browser blocca Salva senza messaggio.
+  // Obbligo WhatsApp solo in saveMoment() quando RSVP è attivo.
+  input.required = false;
+  input.removeAttribute("required");
   input.setAttribute("aria-required", enabled ? "true" : "false");
-  if(!enabled) input.setCustomValidity("");
+  input.setCustomValidity("");
 }
 
 function syncRsvpWhatsappWarn(formNode){
@@ -3451,13 +3485,13 @@ async function renderPreview(state,options = {}){
 
 async function saveMoment(event,row){
   event.preventDefault();
-  const formNode = event.currentTarget;
-  const editorStatus = document.getElementById("editorStatus");
+  const formNode = event.currentTarget || document.getElementById("momentEditorForm");
+  if(!formNode) return;
   let state;
   try{
     state = sanitizeStateForSave(readFormState(formNode));
   }catch(error){
-    setStatus(editorStatus,error.message || "Controlla i campi e riprova.","error");
+    showEditorSaveFeedback(error.message || "Controlla i campi e riprova.","error");
     return;
   }
   if(!adminMode){
@@ -3466,15 +3500,15 @@ async function saveMoment(event,row){
   const pin = String(new FormData(formNode).get("access_pin") || "").trim();
   const publicVisible = new FormData(formNode).get("public_visible") === "true";
   const pinEnabled = new FormData(formNode).get("pin_enabled") === "true";
-  if(!state.title) return setStatus(editorStatus,"Inserisci il titolo della pagina.","error");
+  if(!state.title) return showEditorSaveFeedback("Inserisci il titolo della pagina.","error");
   if(state.sections?.letter_future?.enabled){
     const letter = state.sections.letter_future;
     const hasLetter = Boolean(String(letter.body || "").trim() || letter.unlock_date || migrateLetterMediaSection(letter).length);
     if(!hasLetter){
-      return setStatus(editorStatus,"Lettera al futuro: scrivi il testo, la data di apertura o un allegato.","error");
+      return showEditorSaveFeedback("Lettera al futuro: scrivi il testo, la data di apertura o un allegato.","error");
     }
     if(letter.media?.some(item=>String(item?.url || "").startsWith("blob:"))){
-      return setStatus(editorStatus,"Lettera al futuro: attendi il caricamento degli allegati o ricaricali prima di salvare.","error");
+      return showEditorSaveFeedback("Lettera al futuro: attendi il caricamento degli allegati o ricaricali prima di salvare.","error");
     }
   }
   if(state.sections?.rsvp?.enabled){
@@ -3483,11 +3517,11 @@ async function saveMoment(event,row){
       setEditorPanel("section-rsvp");
       syncRsvpWhatsappWarn(formNode);
       formNode.querySelector('[name="section_rsvp_whatsapp_number"]')?.focus();
-      return setStatus(editorStatus,"RSVP: inserisci il numero WhatsApp (obbligatorio). Senza WhatsApp la sezione non compare in pagina.","error");
+      return showEditorSaveFeedback("RSVP attivo: inserisci il WhatsApp oppure spegni «Visibile in pagina» su RSVP, poi Salva.","error");
     }
     state.sections.rsvp.whatsapp_number = wa;
   }
-  setStatus(editorStatus,"Salvataggio...");
+  showEditorSaveFeedback("Salvataggio...","");
   try{
     let pinHash = null;
     if(pin){
@@ -3517,13 +3551,7 @@ async function saveMoment(event,row){
         });
     if(error){
       console.error(error);
-      setStatus(editorStatus,error.message || "Salvataggio non riuscito.","error");
-      const saveStatus = document.getElementById("editorSaveStatus");
-      if(saveStatus){
-        saveStatus.textContent = "Errore salvataggio";
-        saveStatus.classList.add("dirty");
-      }
-      document.getElementById("editorStatus")?.scrollIntoView({behavior:"smooth",block:"nearest"});
+      showEditorSaveFeedback(error.message || "Salvataggio non riuscito.","error");
       return;
     }
     savedEditorSnapshot = JSON.stringify(state);
@@ -3532,8 +3560,10 @@ async function saveMoment(event,row){
     currentMomentType = lastSavedMomentType;
     editorDirty = false;
     updateSaveStatus(true);
+    const barMsg = document.querySelector("#momentsSaveBar .save-msg");
+    if(barMsg) barMsg.innerHTML = "Hai <strong>modifiche non salvate</strong>";
     localStorage.setItem(onboardingKey(row.id),"done");
-    setStatus(editorStatus,"Pagina salvata.","ok");
+    showEditorSaveFeedback("Pagina salvata.","ok");
     const hint = document.getElementById("editorActionHint");
     if(hint) hint.hidden = true;
     // Soft update: niente reload completo dell'editor (più fluido)
@@ -3575,7 +3605,7 @@ async function saveMoment(event,row){
     const msg = String(error?.message || "").includes("Load failed")
       ? "Connessione interrotta durante il salvataggio. Controlla la rete e riprova."
       : (error?.message || "Salvataggio non riuscito.");
-    setStatus(editorStatus,msg,"error");
+    showEditorSaveFeedback(msg,"error");
   }
 }
 

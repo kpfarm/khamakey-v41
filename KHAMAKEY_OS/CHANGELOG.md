@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Moments v150 — Salva non faceva nulla (2026-07-20, Cursor)** — Pages only
+  - Con RSVP attivo e WhatsApp vuoto (caso reale in prod) il browser bloccava il submit su campo nascosto, senza feedback.
+  - Form `novalidate`; validazione WhatsApp solo in JS con messaggio sul banner/topbar; click Salva esplicito.
 - **Moments v149 — Salva bloccato dopo aver spento sezioni (2026-07-20, Cursor)** — Pages only
   - Campo WhatsApp RSVP aveva `required` HTML anche con RSVP spento → il browser bloccava submit senza messaggio.
   - `required` / avviso solo se RSVP è «Visibile in pagina»; validazione JS al salva resta se RSVP attivo.

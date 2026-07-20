@@ -275,3 +275,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **WIP hygiene**: commit Moments assets/SQL v156–v159 + docs vault + Business editor/SQL v147–v148 in git; demo landing e .obsidian lasciati fuori; **no deploy** |
 | 2026-07-20 | Cursor | **Moments v148**: sezioni da «Altre sezioni» si possono di nuovo spegnere/togliere dal menu (unpin + nav solo se enabled) — solo editor, no Worker |
 | 2026-07-20 | Cursor | **Moments v149**: fix Salva bloccato in silenzio — WhatsApp RSVP `required` solo con RSVP attivo |
+| 2026-07-20 | Cursor | **Moments v150**: Salva sempre eseguibile (`novalidate`) + messaggio se RSVP attivo senza WhatsApp |

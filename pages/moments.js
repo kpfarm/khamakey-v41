@@ -107,7 +107,7 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js?v=148";
+} from "./moment-editor-kit.js?v=149";
 import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderGuestbookModerationShell, bindGuestbookModerationPanel } from "./moment-guestbook-kit.js";
@@ -654,6 +654,7 @@ function activateExtraSection(key, formNode){
     pinnedExtraSections = [...pinnedExtraSections, key];
     syncPinnedSectionsInput(formNode);
   }
+  if(key === "rsvp") syncRsvpWhatsappWarn(formNode);
   syncEditorKitUi(formNode);
   setEditorPanel(`section-${key}`);
   markEditorDirty(formNode);
@@ -1311,6 +1312,7 @@ function bindSectionEnableHandlers(formNode){
           markEditorDirty(formNode);
         }
       }
+      if(key === "rsvp") syncRsvpWhatsappWarn(formNode);
       schedulePreviewUpdate(formNode,{immediate:true,force:true});
       syncEditorKitUi(formNode);
     });
@@ -3059,7 +3061,7 @@ function sectionEditor(key,section,standalone=false){
     <div class="editor-card smart-card" data-rsvp-wa-card>
       <p class="ecard-title"><span class="step-badge">1</span> WhatsApp organizzatore <span class="field-required">obbligatorio</span></p>
       <p class="rsvp-wa-warn" id="rsvpWaWarn" ${normalizeWhatsAppDigits(safe.whatsapp_number) ? "hidden" : ""}>Senza numero WhatsApp la sezione RSVP <strong>non compare</strong> nella pagina finale. Inseriscilo e clicca Salva.</p>
-      <label>Numero WhatsApp<input name="section_${esc(key)}_whatsapp_number" id="rsvpWhatsappInput" value="${esc(safe.whatsapp_number || "")}" placeholder="393331234567" inputmode="tel" autocomplete="tel" required aria-required="true"></label>
+      <label>Numero WhatsApp<input name="section_${esc(key)}_whatsapp_number" id="rsvpWhatsappInput" value="${esc(safe.whatsapp_number || "")}" placeholder="393331234567" inputmode="tel" autocomplete="tel"></label>
       <p class="field-hint">Prefisso internazionale senza + (es. 39333… per Italia). Gli invitati compilano il modulo e ti inviano il messaggio su WhatsApp.</p>
     </div>
     ${renderRsvpFieldsEditor(safe)}` : "";
@@ -3129,11 +3131,31 @@ function normalizeWhatsAppDigits(raw){
   return wa;
 }
 
+function isRsvpSectionEnabled(formNode){
+  return Boolean(formNode?.querySelector('[name="section_rsvp_enabled"]')?.checked);
+}
+
+function syncRsvpWhatsappRequiredAttr(formNode){
+  const input = formNode?.querySelector('[name="section_rsvp_whatsapp_number"]');
+  if(!input) return;
+  const enabled = isRsvpSectionEnabled(formNode);
+  // required HTML solo se RSVP è attivo — altrimenti il browser blocca Salva in silenzio
+  input.required = enabled;
+  input.setAttribute("aria-required", enabled ? "true" : "false");
+  if(!enabled) input.setCustomValidity("");
+}
+
 function syncRsvpWhatsappWarn(formNode){
   const input = formNode?.querySelector('[name="section_rsvp_whatsapp_number"]');
   const warn = formNode?.querySelector("#rsvpWaWarn");
   const card = formNode?.querySelector("[data-rsvp-wa-card]");
   if(!input) return;
+  syncRsvpWhatsappRequiredAttr(formNode);
+  if(!isRsvpSectionEnabled(formNode)){
+    if(warn) warn.hidden = true;
+    card?.classList.remove("is-missing-wa");
+    return;
+  }
   const ok = normalizeWhatsAppDigits(input.value).length >= 10;
   if(warn) warn.hidden = ok;
   card?.classList.toggle("is-missing-wa", !ok);

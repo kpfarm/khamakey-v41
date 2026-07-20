@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Moments v149 — Salva bloccato dopo aver spento sezioni (2026-07-20, Cursor)** — Pages only
+  - Campo WhatsApp RSVP aveva `required` HTML anche con RSVP spento → il browser bloccava submit senza messaggio.
+  - `required` / avviso solo se RSVP è «Visibile in pagina»; validazione JS al salva resta se RSVP attivo.
 - **Moments v148 — Togliere sezioni aggiunte (2026-07-20, Cursor)** — Pages only
   - Bug: sezioni da «Altre sezioni» restavano pinnate in menu anche dopo «Non visibile».
   - Fix: nav optional solo se `enabled`; allo spegnimento si rimuove il pin. Torna in Altre sezioni. Nessun cambio Worker/SQL.

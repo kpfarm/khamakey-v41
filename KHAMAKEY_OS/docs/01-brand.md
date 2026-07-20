@@ -1,6 +1,6 @@
 # 01 — Brand
 
-> **Stato:** da completare con asset ufficiali.
+> **Stato:** Moments brand ufficiale aggiornato 2026-07-20 (logo + palette).
 
 ---
 
@@ -28,7 +28,34 @@
 
 Logo, palette e mockup vanno in [`../assets/`](../assets/).
 
-### Linee Guida Grafiche Moments (Adattivo)
+### Brand ufficiale KhamaKey Moments (2026-07-20)
+
+Asset in [`../assets/brand/`](../assets/brand/):
+
+| File | Uso |
+|------|-----|
+| `khamakey-moments-brand-guide.jpg` | Style guide completa |
+| `khamakey-moments-wordmark-horizontal.jpg` | Wordmark orizzontale |
+| `khamakey-moments-wordmark-stacked.jpg` | Wordmark stacked |
+| `pages/khamakey-moments-wordmark.jpg` | Topbar editor (deploy Pages) |
+| `pages/khamakey-moments-wordmark-stacked.jpg` | Auth / boot |
+
+**Palette Moments**
+
+| Nome | Hex | Ruolo |
+|------|-----|--------|
+| Rosa Ricordo | `#AA626C` | Primario — affetto, calore |
+| Blu Notte | `#071A3C` | Secondario — tecnologia, profondità |
+| Rosa Luce | `#D98C95` | Accent CTA / icone / dettagli |
+| Antracite | `#18202F` | Testi e pittogrammi |
+| Rosa Cipria | `#F3E3DE` | Sfondi delicati |
+| Avorio Caldo | `#FFF9F5` | Sfondi puliti |
+
+Gradienti: Rosa Ricordo → Blu Notte; Rosa Cipria → Rosa Luce.
+
+UI Moments (`moments.css`): `--navy` = Blu Notte, CTA (`--green`) = Rosa Luce, `--green-dark` = Rosa Ricordo, `--bg` = Avorio.
+
+### Linee Guida Grafiche Moments (Adattivo — pagina pubblica)
 
 Per preservare l'estetica premium senza alterare la struttura HTML, le modifiche grafiche si basano su un **Design System Adattivo** definito in `momentPageCss` (`worker/worker.js`):
 

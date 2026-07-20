@@ -8,6 +8,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **Moments v153 — Brand ufficiale logo + palette (2026-07-20, Cursor)** — Pages + vault
+  - Wordmark Moments in auth/topbar; CSS tokens Rosa Ricordo / Blu Notte / Rosa Luce / Avorio.
+  - Style guide e asset in `KHAMAKEY_OS/assets/brand/`. Solo chrome editor — nessuna logica.
+
 ### Fixed
 - **Moments v152 — RSVP auto-off senza WhatsApp (2026-07-20, Cursor)** — Pages only
   - Al Salva, se RSVP è attivo ma manca WhatsApp: switch OFF, sezione fuori dal menu, salvataggio ok + messaggio chiaro.

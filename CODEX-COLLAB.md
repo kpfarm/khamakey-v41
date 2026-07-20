@@ -232,7 +232,7 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Shopify Moments** | Operativo — libero | webhook ordini, catalogo vendita, sync bozze |
 | **Editor Business — contratto pubblico** | Condiviso | `publicStateFromEditor`, renderer `/p/` nel Worker |
 | **Admin / Officina Moments** | **Libero** (live **v165**) | `admin.html`, `moments-admin.html`, `admin.js`, `admin.css`, `admin-guide.js` — coordinarsi se stesso pannello |
-| **Moments editor** | **Libero** (live **v152**) | `moments.js`, `moments.html`, `moment-*.js` — prendere lock prima di refactor ampi |
+| **Moments editor** | **Libero** (live **v153**) | `moments.js`, `moments.html`, `moment-*.js` — prendere lock prima di refactor ampi |
 | **Security hardening (audit 2026-07-11)** | Completato e deployato (vedi `PROJECT_STATE.md`) | Regole assolute CSP/RLS/dati restano vincolanti |
 | **`worker/worker.js`** | **Libero** (live **v144-support-notify**) — file più conteso | Chi tocca `worker.js` prende lock esplicito e non parallelizza |
 | **Editor Business — upload media** | Completato v124 — libero | PDF catalogo / docs base64→R2 ancora pendenti (`docs/03-editor.md`) |
@@ -319,7 +319,7 @@ Percorsi skill: `pages/` (non `khamakey-test-app`), `worker/` (non `khamakey-clo
 ## Convenzioni versione
 
 - Un solo contatore release piattaforma: `?v=NN` su HTML/JS (bump solo se cambia runtime)
-- **SSOT live** (2026-07-20): Admin/Officina **v165** · Moments **v151** · Worker **v144-support-notify** · Business shell `APP_VERSION` **167**
+- **SSOT live** (2026-07-20): Admin/Officina **v165** · Moments **v153** · Worker **v144-support-notify** · Business shell `APP_VERSION` **167**
 - Worker: `WORKER_VERSION` in `worker/worker.js`
 - Tabella ufficiale: `KHAMAKEY_OS/PROJECT_STATE.md` → se diverge, vince il codice
 - Dettaglio workflow: `.cursor/rules/git-commit-workflow.mdc`

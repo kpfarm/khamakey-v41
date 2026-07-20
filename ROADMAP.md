@@ -269,3 +269,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Moments v145 / Worker v143**: RSVP — WhatsApp obbligatorio (avviso editor + blocco salva); senza numero la sezione non compare in pagina |
 | 2026-07-20 | Cursor | **Moments v146**: rimossa foto profilo tonda dalla sezione Copertina (controllo inutilizzato) |
 | 2026-07-20 | Cursor | **Admin v164 / Moments v147 / Worker v144**: Supporto — dettaglio ticket leggibile + email avviso staff su nuovo ticket Moments |
+| 2026-07-20 | Cursor | **Admin v165**: su `khamakeymoments.com` `/admin` reindirizza a `moments-admin` (fix path senza .html) |

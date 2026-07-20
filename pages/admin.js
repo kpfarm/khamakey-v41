@@ -19,13 +19,18 @@ const IS_MOMENTS_CONSOLE = document.documentElement.dataset.adminProduct === "mo
 const ADMIN_HOME = IS_MOMENTS_CONSOLE ? "./moments-admin.html" : "./admin.html";
 
 // Su app.khamakeymoments.com l'admin Business non va usato: porta alla Officina Moments.
+// Path tipici Pages: /admin, /admin/, /admin.html
 if(
   !IS_MOMENTS_CONSOLE
   && typeof location !== "undefined"
   && /(?:^|\.)khamakeymoments\.com$/i.test(location.hostname)
-  && /admin\.html$/i.test(location.pathname)
+  && /\/admin(?:\.html)?\/?$/i.test(location.pathname)
 ){
-  location.replace(`./moments-admin.html${location.search}${location.hash}`);
+  const hash = location.hash || "";
+  const momentsHash = /^#(platformOrders|clients|crm|inventory|billing|plans|integrations|nfc|materials|team)$/i.test(hash)
+    ? "#dashboard"
+    : hash;
+  location.replace(`./moments-admin.html${location.search}${momentsHash}`);
 }
 
 const SIMPLE_MODE_KEY = "khamakey_admin_simple_mode";

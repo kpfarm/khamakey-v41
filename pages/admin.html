@@ -8,7 +8,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=164">
+  <link rel="stylesheet" href="admin.css?v=165">
+  <script>
+    // Dominio Moments: questo è l'admin Business — vai subito all'Officina Moments.
+    (function () {
+      try {
+        if (!/(?:^|\.)khamakeymoments\.com$/i.test(location.hostname)) return;
+        if (!/\/admin(?:\.html)?\/?$/i.test(location.pathname)) return;
+        var hash = location.hash || "";
+        if (/^#(platformOrders|clients|crm|inventory|billing|plans|integrations|nfc|materials|team)$/i.test(hash)) {
+          hash = "#dashboard";
+        }
+        location.replace("./moments-admin.html" + location.search + hash);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <main class="admin-shell locked" id="adminShell">
@@ -2043,6 +2057,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=164"></script>
+  <script type="module" src="admin.js?v=165"></script>
 </body>
 </html>

@@ -107,7 +107,7 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js";
+} from "./moment-editor-kit.js?v=148";
 import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderGuestbookModerationShell, bindGuestbookModerationPanel } from "./moment-guestbook-kit.js";
@@ -1302,6 +1302,14 @@ function bindSectionEnableHandlers(formNode){
         }
         setEditorPanel(`section-${key}`);
         syncMobileNav(activeEditorPanel);
+      }else{
+        // Optional aggiunte da «Altre sezioni»: togli pin così tornano nella lista extra
+        const kit = editorKitForType(currentTypeFromForm(formNode));
+        if(kit.optional.includes(key) && pinnedExtraSections.includes(key)){
+          pinnedExtraSections = pinnedExtraSections.filter(item => item !== key);
+          syncPinnedSectionsInput(formNode);
+          markEditorDirty(formNode);
+        }
       }
       schedulePreviewUpdate(formNode,{immediate:true,force:true});
       syncEditorKitUi(formNode);
@@ -1787,7 +1795,7 @@ function renderExtrasPanel(state){
   return `<div class="editor-panel ${activeEditorPanel === "extras" ? "active" : ""}" data-editor-panel="extras">
     ${renderSectionHeader("Altre sezioni","Tutte le sezioni extra per questo template — attiva solo quelle che ti servono.")}
     <div class="editor-card smart-card">
-      <p class="field-hint">Le sezioni consigliate compaiono nel menu quando sono attive. Qui trovi <strong>tutte le altre</strong> (e quelle consigliate che hai spento): tocca per attivarle e compila solo se ti serve.</p>
+      <p class="field-hint">Le sezioni consigliate compaiono nel menu quando sono attive. Qui trovi <strong>tutte le altre</strong> (e quelle che hai spento): tocca per aggiungerle. Per toglierle di nuovo dal menu, apri la sezione e spegni <strong>Visibile in pagina</strong>.</p>
       <div class="extras-grid">${cards}</div>
     </div>
   </div>`;

@@ -8,6 +8,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **Moments v148 — Togliere sezioni aggiunte (2026-07-20, Cursor)** — Pages only
+  - Bug: sezioni da «Altre sezioni» restavano pinnate in menu anche dopo «Non visibile».
+  - Fix: nav optional solo se `enabled`; allo spegnimento si rimuove il pin. Torna in Altre sezioni. Nessun cambio Worker/SQL.
+
 ### Changed
 - **Ops checklist secrets/Auth (2026-07-20, Cursor)** — solo documentazione
   - Nuovo `docs/22-ops-secrets-auth-checklist.md` da health live Worker v144 (Resend/Shopify active; Stripe off).

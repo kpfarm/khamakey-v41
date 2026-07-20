@@ -25,7 +25,7 @@ Un solo contatore release per tutta la piattaforma (Moments, Business, Admin, Wo
 - Annotare in `ROADMAP.md` (sezione changelog)
 
 SSOT versioni: `KHAMAKEY_OS/PROJECT_STATE.md` (se diverge, vince il codice).
-Live tipico (2026-07-20): Admin/Officina **v165** · Moments **v147** · Worker **v144** · Business shell **167**.
+Live tipico (2026-07-20): Admin/Officina **v165** · Moments **v148** · Worker **v144** · Business shell **167**.
 Bump `?v=` / `WORKER_VERSION` **solo** se cambia runtime — non per sole doc.
 Prossima release runtime: **v166+** quando serve un cambio prodotto.
 

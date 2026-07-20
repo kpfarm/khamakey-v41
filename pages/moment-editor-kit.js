@@ -501,7 +501,9 @@ function sectionVisibleInNav(type, sectionKey, pinned = [], enabled = {}){
   const on = Boolean(enabled[sectionKey]);
   if(kit.sections.includes(sectionKey)) return on;
   if(!kit.optional.includes(sectionKey)) return false;
-  return pinned.includes(sectionKey) || on;
+  // Optional: in menu solo se attive. `pinned` resta per compatibilità salvataggio,
+  // ma non tiene più bloccata una sezione spenta (prima non si poteva più togliere).
+  return on;
 }
 
 export function navSectionsForEditor(type, order = [], pinned = [], enabled = {}){

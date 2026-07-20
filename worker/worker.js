@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v146-bg-palettes";
+const WORKER_VERSION = "v147-dense-bg";
 
 export default {
   async fetch(request, env, ctx) {
@@ -1065,77 +1065,74 @@ function renderMomentDecor(_state){
 
 function resolveMomentPalette(state) {
   const palettes = {
-    amore:{go:"#BE123C",g2:"#9F1239",ro:"#E11D48",bl:"#FECDD3",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#BE123C",mu:"#475569"},
-    rubino:{go:"#B91C1C",g2:"#7F1D1D",ro:"#DC2626",bl:"#FECACA",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#B91C1C",mu:"#475569"},
-    gentleman:{go:"#38BDF8",g2:"#0EA5E9",ro:"#64748B",bl:"#0F172A",bl2:"#1E293B",card:"#1E293B",in:"#F8FAFC",hero:"#020617",mu:"#94A3B8"},
-    uomo:{go:"#1E40AF",g2:"#1E3A8A",ro:"#2563EB",bl:"#BFDBFE",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#1E40AF",mu:"#475569"},
-    aurora:{go:"#6D28D9",g2:"#4C1D95",ro:"#7C3AED",bl:"#DDD6FE",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#6D28D9",mu:"#475569"},
-    terracotta:{go:"#C2410C",g2:"#9A3412",ro:"#EA580C",bl:"#FED7AA",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#C2410C",mu:"#475569"},
-    rosa:{go:"#BE185D",g2:"#9D174D",ro:"#DB2777",bl:"#FBCFE8",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#BE185D",mu:"#475569"},
-    blu:{go:"#0369A1",g2:"#0C4A6E",ro:"#0284C7",bl:"#BAE6FD",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#0369A1",mu:"#475569"},
-    salvia:{go:"#047857",g2:"#064E3B",ro:"#059669",bl:"#A7F3D0",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#047857",mu:"#475569"},
-    bordeaux:{go:"#F43F5E",g2:"#9F1239",ro:"#BE123C",bl:"#4C0519",bl2:"#881337",card:"#881337",in:"#FFF1F2",hero:"#4C0519",mu:"#FDA4AF"},
-    perla:{go:"#A8A29E",g2:"#57534E",ro:"#78716C",bl:"#292524",bl2:"#44403C",card:"#44403C",in:"#FAFAF9",hero:"#1C1917",mu:"#A8A29E"},
-    lavanda:{go:"#6D28D9",g2:"#5B21B6",ro:"#7C3AED",bl:"#C4B5FD",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#6D28D9",mu:"#475569"},
-    cipria:{go:"#B45309",g2:"#92400E",ro:"#D97706",bl:"#FDE68A",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#B45309",mu:"#57534E"},
-    corallo:{go:"#EA580C",g2:"#C2410C",ro:"#F97316",bl:"#FDBA74",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#EA580C",mu:"#475569"},
-    miele:{go:"#A16207",g2:"#854D0E",ro:"#CA8A04",bl:"#FDE047",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#A16207",mu:"#475569"},
-    notte:{go:"#38BDF8",g2:"#0284C7",ro:"#0EA5E9",bl:"#020617",bl2:"#0F172A",card:"#0F172A",in:"#F8FAFC",hero:"#020617",mu:"#94A3B8"},
-    neve:{go:"#0369A1",g2:"#0C4A6E",ro:"#0284C7",bl:"#E2E8F0",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#0369A1",mu:"#475569"},
-    classic:{go:"#15803D",g2:"#14532D",ro:"#16A34A",bl:"#BBF7D0",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#15803D",mu:"#475569"},
+    rosso:{bl:"#DC2626",g2:"#991B1B",hero:"#B91C1C",go:"#B91C1C",ro:"#F87171",bl2:"#FFFFFF",card:"#FFFFFF",in:"#FFFFFF",mu:"#FEE2E2"},
+    rosa:{bl:"#DB2777",g2:"#9D174D",hero:"#BE185D",go:"#BE185D",ro:"#F472B6",bl2:"#FFFFFF",card:"#FFFFFF",in:"#FFFFFF",mu:"#FCE7F3"},
+    bordeaux:{bl:"#7F1D1D",g2:"#450A0A",hero:"#991B1B",go:"#9F1239",ro:"#FB7185",bl2:"#FFFFFF",card:"#FFFFFF",in:"#FFF1F2",mu:"#FECDD3"},
+    arancio:{bl:"#EA580C",g2:"#9A3412",hero:"#C2410C",go:"#C2410C",ro:"#FB923C",bl2:"#FFFFFF",card:"#FFFFFF",in:"#FFFFFF",mu:"#FFEDD5"},
+    ambra:{bl:"#B45309",g2:"#78350F",hero:"#92400E",go:"#92400E",ro:"#FBBF24",bl2:"#FFFFFF",card:"#FFFFFF",in:"#FFFBEB",mu:"#FEF3C7"},
+    verde:{bl:"#15803D",g2:"#14532D",hero:"#166534",go:"#166534",ro:"#4ADE80",bl2:"#FFFFFF",card:"#FFFFFF",in:"#FFFFFF",mu:"#DCFCE7"},
+    blu:{bl:"#1D4ED8",g2:"#1E3A8A",hero:"#1E40AF",go:"#1E40AF",ro:"#60A5FA",bl2:"#FFFFFF",card:"#FFFFFF",in:"#FFFFFF",mu:"#DBEAFE"},
+    azzurro:{bl:"#0369A1",g2:"#0C4A6E",hero:"#0284C7",go:"#0C4A6E",ro:"#38BDF8",bl2:"#FFFFFF",card:"#FFFFFF",in:"#FFFFFF",mu:"#E0F2FE"},
+    viola:{bl:"#7C3AED",g2:"#4C1D95",hero:"#6D28D9",go:"#5B21B6",ro:"#A78BFA",bl2:"#FFFFFF",card:"#FFFFFF",in:"#FFFFFF",mu:"#EDE9FE"},
+    nero:{bl:"#0A0A0A",g2:"#000000",hero:"#171717",go:"#334155",ro:"#94A3B8",bl2:"#FFFFFF",card:"#FFFFFF",in:"#FAFAFA",mu:"#CBD5E1"},
+    antracite:{bl:"#1E293B",g2:"#020617",hero:"#0F172A",go:"#334155",ro:"#94A3B8",bl2:"#FFFFFF",card:"#FFFFFF",in:"#F8FAFC",mu:"#CBD5E1"},
+    crema:{bl:"#FFF7ED",g2:"#FFEDD5",hero:"#FED7AA",go:"#C2410C",ro:"#FB923C",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",mu:"#9A3412"}
+  };
+  const aliases = {
+    amore:"rosso",rubino:"rosso",terracotta:"arancio",corallo:"arancio",
+    cipria:"ambra",miele:"ambra",classic:"verde",salvia:"verde",
+    uomo:"blu",neve:"azzurro",aurora:"viola",lavanda:"viola",
+    notte:"nero",gentleman:"antracite",perla:"antracite"
   };
   const variants = {
     caldo:{
-      amore:{bl:"#FDA4AF",hero:"#BE123C",go:"#E11D48"},
-      rubino:{bl:"#F87171",hero:"#B91C1C",go:"#DC2626"},
-      rosa:{bl:"#F9A8D4",hero:"#BE185D",go:"#DB2777"},
-      bordeaux:{bl:"#881337",hero:"#4C0519",go:"#F43F5E",card:"#9F1239",bl2:"#9F1239",in:"#FFF1F2"},
-      terracotta:{bl:"#FB923C",hero:"#C2410C",go:"#EA580C"},
-      corallo:{bl:"#FB923C",hero:"#EA580C",go:"#F97316"},
-      cipria:{bl:"#FBBF24",hero:"#B45309",go:"#D97706"},
-      miele:{bl:"#FACC15",hero:"#A16207",go:"#CA8A04"},
-      classic:{bl:"#86EFAC",hero:"#15803D",go:"#16A34A"},
-      blu:{bl:"#7DD3FC",hero:"#0369A1",go:"#0284C7"},
-      salvia:{bl:"#6EE7B7",hero:"#047857",go:"#059669"},
-      aurora:{bl:"#C4B5FD",hero:"#6D28D9",go:"#7C3AED"},
-      lavanda:{bl:"#A78BFA",hero:"#6D28D9",go:"#7C3AED"}
+      rosso:{bl:"#EF4444",hero:"#DC2626",go:"#B91C1C"},
+      rosa:{bl:"#EC4899",hero:"#DB2777",go:"#BE185D"},
+      arancio:{bl:"#F97316",hero:"#EA580C",go:"#C2410C"},
+      ambra:{bl:"#D97706",hero:"#B45309",go:"#92400E",in:"#FFFBEB"},
+      verde:{bl:"#16A34A",hero:"#15803D",go:"#166534"},
+      crema:{bl:"#FFEDD5",hero:"#FDBA74",go:"#C2410C",in:"#111111"}
     },
     scuro:{
-      notte:{bl:"#020617",hero:"#020617",go:"#38BDF8",g2:"#0284C7",card:"#0F172A",bl2:"#0F172A",in:"#F8FAFC",ro:"#0EA5E9"},
-      gentleman:{bl:"#020617",hero:"#020617",go:"#38BDF8",card:"#0F172A",bl2:"#0F172A",in:"#F8FAFC"},
-      perla:{bl:"#1C1917",hero:"#0C0A09",go:"#A8A29E",card:"#292524",bl2:"#292524",in:"#FAFAF9"},
-      bordeaux:{bl:"#3F0A1A",hero:"#4C0519",go:"#FB7185",card:"#881337",bl2:"#881337",in:"#FFF1F2"}
+      nero:{bl:"#000000",hero:"#0A0A0A",go:"#64748B"},
+      antracite:{bl:"#020617",hero:"#0F172A",go:"#0284C7"},
+      bordeaux:{bl:"#450A0A",hero:"#7F1D1D",go:"#BE123C"},
+      rosso:{bl:"#991B1B",hero:"#7F1D1D",go:"#DC2626"}
     }
   };
-  const legacy = { celebration:"corallo", minimal:"neve", memorial:"perla" };
-  const darkKeys = new Set(["gentleman","notte","perla","bordeaux"]);
-  const paletteKey = state.colorPalette || legacy[state.theme] || "classic";
-  const base = { ...(palettes[paletteKey] || palettes.classic) };
+  const legacy = { celebration:"arancio", minimal:"crema", memorial:"antracite" };
+  const rawKey = state.colorPalette || legacy[state.theme] || "verde";
+  const paletteKey = aliases[rawKey] || (palettes[rawKey] ? rawKey : "verde");
+  const base = { ...(palettes[paletteKey] || palettes.verde) };
   const variant = state.themeVariant === "scuro" || state.themeVariant === "caldo" ? state.themeVariant : "chiaro";
   const overrides = variants[variant]?.[paletteKey];
   if(overrides) Object.assign(base, overrides);
-  const dark = darkKeys.has(paletteKey) || variant === "scuro";
-  if(dark){
-    base.surface = base.bl;
-    base.cardSoft = base.card || base.bl2 || base.bl;
-    base.ink = base.in || "#F8FAFC";
-    base.muted = base.mu || "#94A3B8";
-    base.line = "rgba(255,255,255,.12)";
-    base.lineStrong = "rgba(255,255,255,.2)";
+  const lum = (hex)=>{
+    const raw = String(hex||"").replace("#","");
+    if(raw.length !== 6) return 255;
+    const n = Number.parseInt(raw,16);
+    if(Number.isNaN(n)) return 255;
+    return (((n>>16)&255)*299 + ((n>>8)&255)*587 + (n&255)*114) / 1000;
+  };
+  const darkPage = lum(base.bl) < 160 || variant === "scuro";
+  base.card = "#FFFFFF";
+  base.bl2 = "#FFFFFF";
+  base.cardInk = "#111111";
+  base.cardSoft = "#FFFFFF";
+  base.surface = base.bl;
+  if(darkPage){
+    base.ink = (base.in && lum(base.in) >= 160) ? base.in : "#F8FAFC";
+    base.muted = base.mu || "#E2E8F0";
+    base.line = "rgba(255,255,255,.14)";
+    base.lineStrong = "rgba(255,255,255,.22)";
   }else{
-    base.card = "#FFFFFF";
-    base.bl2 = "#FFFFFF";
-    base.surface = base.bl;
-    base.cardSoft = "#FFFFFF";
     base.ink = "#111111";
-    base.muted = "#475569";
+    base.muted = base.mu || "#475569";
     base.line = "rgba(15,23,42,.08)";
     base.lineStrong = "rgba(15,23,42,.12)";
-    base.in = base.ink;
-    base.mu = base.muted;
   }
-  base.in = base.ink || base.in;
-  base.mu = base.muted || base.mu;
+  base.in = base.ink;
+  base.mu = base.muted;
   return base;
 }
 
@@ -1750,6 +1747,7 @@ document.addEventListener("keydown",function(e){if(!lb.classList.contains("open"
 function momentPageCss(colors, fonts) {
   const c = colors;
   const f = fonts || resolveMomentFontPair("classic");
+  const cardInk = c.cardInk || "#111111";
   return `@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Special+Elite&family=Shadows+Into+Light&display=swap');
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:72px}
 body{margin:0;font-family:${f.body};background:radial-gradient(circle at 12% 24%, color-mix(in srgb, ${c.go} 8%, transparent) 0%, transparent 45%), radial-gradient(circle at 88% 76%, color-mix(in srgb, ${c.go} 12%, transparent) 0%, transparent 52%), linear-gradient(180deg, ${c.surface} 0%, ${c.bl} 100%)!important;color:${c.ink};-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
@@ -1786,7 +1784,7 @@ body.nav-open{overflow:hidden}
 .moment-decor-item{display:none!important}
 @keyframes momentDecorFloat{0%,100%{transform:translate3d(0,0,0) rotate(0deg)}50%{transform:translate3d(0,-12px,0) rotate(6deg)}}
 .moment-page{width:100%;max-width:100%;min-height:100dvh;margin:0;background:transparent;overflow-x:clip;position:relative}
-.moment-hero{position:relative;min-height:min(94dvh,760px);padding:max(120px,env(safe-area-inset-top) + 40px) 24px max(80px,env(safe-area-inset-bottom));text-align:center;color:#fff;background:linear-gradient(145deg,${c.hero},${c.go});overflow:hidden;display:grid;align-content:end}
+.moment-hero{position:relative;min-height:min(94dvh,760px);padding:max(120px,env(safe-area-inset-top) + 40px) 24px max(80px,env(safe-area-inset-bottom));text-align:center;color:#fff;background:linear-gradient(145deg,${c.bl},${c.g2 || c.hero});overflow:hidden;display:grid;align-content:end}
 .hero-fullscreen .moment-hero{min-height:min(100dvh,780px)}
 .hero-romantico .moment-hero{min-height:min(88dvh,700px)}
 .hero-romantico .moment-hero-overlay{background:linear-gradient(180deg,rgba(10,10,20,.1) 0%,rgba(10,10,20,.52) 60%,rgba(10,10,20,.85) 100%)}
@@ -1828,7 +1826,7 @@ body.nav-open{overflow:hidden}
 
 .moment-card p, .moment-journey-text, .moment-rsvp-intro, .moment-guestbook-intro, .moment-letter p {
   opacity: 0.96 !important;
-  color: ${c.ink} !important;
+  color: ${cardInk} !important;
   line-height: 1.62;
 }
 
@@ -1870,7 +1868,7 @@ body.nav-open{overflow:hidden}
   box-shadow: 0 12px 24px -4px rgba(17,32,65,0.14), inset 0 1px 0 rgba(255,255,255,0.8) !important;
 }
 
-.moment-card-head strong{display:block;color:${c.ink};font-size:clamp(1.1rem,4.5vw,1.3rem);font-family:${f.ui};font-weight:800;letter-spacing:.02em;line-height:1.25;text-transform:none}
+.moment-card-head strong{display:block;color:${cardInk};font-size:clamp(1.1rem,4.5vw,1.3rem);font-family:${f.ui};font-weight:800;letter-spacing:.02em;line-height:1.25;text-transform:none}
 .moment-card-head strong::before,.moment-card-head strong::after{content:"";display:inline-block;width:14px;height:1px;background:${c.lineStrong};opacity:0.8;vertical-align:middle;margin:0 8px;border-radius:999px}
 .moment-card-empty{text-align:center;padding:48px 24px}
 .moment-card-message p{font-style:italic;text-align:center;font-size:clamp(1.05rem,4vw,1.2rem)}
@@ -1886,11 +1884,11 @@ body.nav-open{overflow:hidden}
 .moment-journey-photo{width:100%;max-height:220px;object-fit:cover;border-radius:14px;border:1px solid ${c.line};box-shadow:0 6px 18px rgba(0,0,0,.04)}
 .moment-journey-copy{display:grid;gap:6px;min-width:0}
 .moment-journey-date{font-family:${f.ui};font-size:.62rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:${c.go}}
-.moment-journey-place{display:block;font-size:1.08rem;color:${c.ink};font-weight:800;line-height:1.25;font-family:${f.ui}}
+.moment-journey-place{display:block;font-size:1.08rem;color:${cardInk};font-weight:800;line-height:1.25;font-family:${f.ui}}
 .moment-journey-map{display:inline-flex;align-items:center;gap:4px;font-family:${f.ui};font-size:.78rem;font-weight:700;color:${c.go};text-decoration:underline;text-underline-offset:3px;margin-top:4px;opacity:.88}
 @media(min-width:560px){.moment-journey-item{grid-template-columns:120px minmax(0,1fr);align-items:start}.moment-journey-photo{width:120px;height:120px;max-height:none}}
 .moment-meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
-.moment-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid ${c.line};border-radius:999px;padding:10px 18px;font-family:${f.ui};font-size:.78rem;color:${c.ink};background:#FFFFFF;text-decoration:none;font-weight:700;min-height:44px;transition:background .2s,border-color .2s}
+.moment-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid ${c.line};border-radius:999px;padding:10px 18px;font-family:${f.ui};font-size:.78rem;color:${cardInk};background:#FFFFFF;text-decoration:none;font-weight:700;min-height:44px;transition:background .2s,border-color .2s}
 .moment-chip:hover{background:${c.cardSoft};border-color:${c.lineStrong}}
 .moment-chip-action{background:${c.go};color:#FFFFFF;border-color:${c.go};box-shadow:0 4px 12px ${c.go}33}
 .moment-chip-action:hover{background:${c.g2};border-color:${c.g2}}
@@ -1921,13 +1919,13 @@ body.nav-open{overflow:hidden}
 
 .moment-video-wrap{margin-top:12px;display:grid;gap:10px}
 .moment-video-wrap video{width:100%;border-radius:16px;border:1px solid ${c.line};background:#111;aspect-ratio:16/9;object-fit:cover}
-.moment-video-title{font-family:${f.body};font-size:1.1rem;margin:0;color:${c.ink}}
+.moment-video-title{font-family:${f.body};font-size:1.1rem;margin:0;color:${cardInk}}
 .moment-video-desc{font-size:.92rem;opacity:.82;margin:0;line-height:1.5;color:${c.muted}}
 .moment-youtube{margin-top:12px;border-radius:18px;overflow:hidden;border:1px solid ${c.line};aspect-ratio:16/9;background:#111}
 .moment-youtube iframe{display:block;width:100%;height:100%;border:0}
 .moment-audio{margin-top:12px;border-radius:18px;padding:16px;background:${c.cardSoft};border:1px solid ${c.line};box-shadow:none}
 .moment-audio audio{width:100%}
-.moment-audio-title{font-family:${f.body};font-size:1.1rem;margin:0 0 6px;color:${c.ink}}
+.moment-audio-title{font-family:${f.body};font-size:1.1rem;margin:0 0 6px;color:${cardInk}}
 .moment-audio-desc{font-size:.92rem;opacity:.82;margin:0 0 10px;line-height:1.5;color:${c.muted}}
 .moment-sealed{text-align:center;padding:32px 20px;margin-top:8px}
 .moment-sealed-icon{font-size:2rem;margin-bottom:10px;color:${c.go};opacity:.85;animation:scrollPulse 3s ease-in-out infinite}
@@ -1936,7 +1934,7 @@ body.nav-open{overflow:hidden}
 .moment-ritual{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:${c.cardSoft};border:1px solid ${c.line};border-left:3px solid ${c.go};box-shadow:none}
 .moment-pet-card{display:grid;justify-items:center;text-align:center;gap:12px;margin-top:8px}
 .moment-pet-photo{width:120px;height:120px;border-radius:999px;object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 12px 32px rgba(15,23,42,.12)}
-.moment-pet-name{font-family:${f.body};font-size:1.35rem;margin:0;color:${c.ink};font-weight:600}
+.moment-pet-name{font-family:${f.body};font-size:1.35rem;margin:0;color:${cardInk};font-weight:600}
 .moment-numbers{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:12px}
 .moment-number{flex:1 1 100px;max-width:140px;text-align:center;padding:16px 10px;border-radius:18px;background:${c.cardSoft};border:1px solid ${c.line};border-top:3px solid ${c.go};box-shadow:none}
 .moment-number b{display:block;font-size:clamp(1.6rem,7vw,2rem);font-weight:700;font-style:normal;color:${c.go};line-height:1;font-family:${f.ui}}
@@ -1962,7 +1960,7 @@ body.nav-open{overflow:hidden}
 .moment-dreams{display:grid;gap:10px;margin-top:10px}
 .moment-dream{display:flex;gap:10px;align-items:center;font-size:1.02rem;padding:8px 0;border-bottom:1px solid ${c.line}}
 .moment-dream:last-child{border-bottom:0}
-.moment-dream-mark{width:24px;height:24px;border-radius:999px;border:2px solid ${c.lineStrong};display:grid;place-items:center;font-size:.72rem;color:${c.ink};flex-shrink:0;background:#FFFFFF}
+.moment-dream-mark{width:24px;height:24px;border-radius:999px;border:2px solid ${c.lineStrong};display:grid;place-items:center;font-size:.72rem;color:${cardInk};flex-shrink:0;background:#FFFFFF}
 .moment-dream.done .moment-dream-mark{background:${c.go}!important;color:#FFFFFF!important;border-color:${c.go}!important}
 .moment-dream.done .moment-dream-text{opacity:.55;text-decoration:line-through;color:${c.muted}}
 .moment-countdown{text-align:center;padding:36px 20px}
@@ -1970,22 +1968,22 @@ body.nav-open{overflow:hidden}
 .moment-music-photo{width:min(100%,320px);height:180px;object-fit:cover;border-radius:16px;margin:0 auto 16px;display:block;border:1px solid ${c.line};box-shadow:0 10px 28px rgba(0,0,0,.08)}
 .moment-list-intro{font-size:14px;color:${c.muted};margin:0 0 14px;line-height:1.5}
 .moment-countdown-label{font-family:${f.ui};font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:${c.go};margin-bottom:14px}
-.moment-countdown-event{font-size:1.15rem;font-style:italic;margin:0 0 18px;color:${c.ink}}
-.moment-countdown-note{margin:0 0 16px;color:${c.ink};opacity:.82;line-height:1.6;font-size:.98rem}
-.moment-rsvp-intro{margin:0 0 16px;line-height:1.75;color:${c.ink};font-size:1.02rem;font-weight:500;opacity:.88}
+.moment-countdown-event{font-size:1.15rem;font-style:italic;margin:0 0 18px;color:${cardInk}}
+.moment-countdown-note{margin:0 0 16px;color:${cardInk};opacity:.82;line-height:1.6;font-size:.98rem}
+.moment-rsvp-intro{margin:0 0 16px;line-height:1.75;color:${cardInk};font-size:1.02rem;font-weight:500;opacity:.88}
 .moment-rsvp-event{text-align:center;margin:0 0 20px;padding:8px 0 0}
 .moment-rsvp-event-eyebrow{font-family:${f.ui};font-size:.62rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:${c.muted};margin:0 0 8px}
-.moment-rsvp-event-title{font-family:${f.display};font-size:clamp(1.65rem,7vw,2.35rem);color:${c.ink};margin:0;line-height:1.15;font-weight:400}
+.moment-rsvp-event-title{font-family:${f.display};font-size:clamp(1.65rem,7vw,2.35rem);color:${cardInk};margin:0;line-height:1.15;font-weight:400}
 .moment-rsvp-form{padding:24px 20px}
-.moment-rsvp-form label{display:grid;gap:8px;font-family:${f.ui};font-size:.88rem;font-weight:700;color:${c.ink}}
-.moment-rsvp-form input,.moment-rsvp-form textarea,.moment-guestbook-form input,.moment-guestbook-form textarea{width:100%;border:1px solid ${c.lineStrong};border-radius:12px;padding:13px 14px;font:inherit;background:#FFFFFF;color:${c.ink};font-size:1rem;line-height:1.4;-webkit-text-fill-color:${c.ink};box-shadow:inset 0 1px 2px rgba(15,23,42,.02);transition:border-color .2s,box-shadow .2s}
+.moment-rsvp-form label{display:grid;gap:8px;font-family:${f.ui};font-size:.88rem;font-weight:700;color:${cardInk}}
+.moment-rsvp-form input,.moment-rsvp-form textarea,.moment-guestbook-form input,.moment-guestbook-form textarea{width:100%;border:1px solid ${c.lineStrong};border-radius:12px;padding:13px 14px;font:inherit;background:#FFFFFF;color:${cardInk};font-size:1rem;line-height:1.4;-webkit-text-fill-color:${cardInk};box-shadow:inset 0 1px 2px rgba(15,23,42,.02);transition:border-color .2s,box-shadow .2s}
 .moment-rsvp-form input::placeholder,.moment-rsvp-form textarea::placeholder,.moment-guestbook-form input::placeholder,.moment-guestbook-form textarea::placeholder{color:${c.muted};opacity:1;-webkit-text-fill-color:${c.muted}}
 .moment-rsvp-form input:focus,.moment-rsvp-form textarea:focus,.moment-guestbook-form input:focus,.moment-guestbook-form textarea:focus{outline:0;border-color:${c.go};box-shadow:0 0 0 4px ${c.go}24}
 .moment-rsvp-attending{border:0;padding:0;margin:0;display:grid;gap:10px}
 .moment-rsvp-attending legend{font-family:${f.ui};font-size:.78rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:${c.muted};margin-bottom:6px}
-.moment-rsvp-attending label{font-weight:600;display:flex;align-items:center;gap:10px;color:${c.ink};font-size:.95rem}
+.moment-rsvp-attending label{font-weight:600;display:flex;align-items:center;gap:10px;color:${cardInk};font-size:.95rem}
 .moment-rsvp-attending input[type=radio]{width:18px;height:18px;margin:0;flex-shrink:0;accent-color:${c.go}}
-.moment-card-head strong{color:${c.ink}}
+.moment-card-head strong{color:${cardInk}}
 
 .moment-rsvp-submit, .moment-guestbook-submit {
   display:inline-flex;
@@ -2034,17 +2032,17 @@ body.nav-open{overflow:hidden}
   transform:translateY(0);
 }
 
-.moment-guestbook-intro{margin:0 0 16px;line-height:1.75;color:${c.ink};font-size:1.02rem;font-weight:500;opacity:.88}
+.moment-guestbook-intro{margin:0 0 16px;line-height:1.75;color:${cardInk};font-size:1.02rem;font-weight:500;opacity:.88}
 .moment-guestbook-form{padding:24px 20px}
-.moment-guestbook-form label{display:grid;gap:8px;font-family:${f.ui};font-size:.88rem;font-weight:700;color:${c.ink}}
-.moment-guestbook-form label{display:grid;gap:8px;font-family:${f.ui};font-size:.88rem;font-weight:700;color:${c.ink}}
+.moment-guestbook-form label{display:grid;gap:8px;font-family:${f.ui};font-size:.88rem;font-weight:700;color:${cardInk}}
+.moment-guestbook-form label{display:grid;gap:8px;font-family:${f.ui};font-size:.88rem;font-weight:700;color:${cardInk}}
 .moment-guestbook-status{margin:12px 0 0;padding:10px 12px;border-radius:12px;font-size:.86rem;line-height:1.45}
 .moment-guestbook-status.ok{background:#ECFDF3;border:1px solid #A7F3D0;color:#166534}
 .moment-guestbook-status.error{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B}
 .moment-guestbook-list{display:grid;gap:12px;margin-top:18px}
 .moment-guestbook-empty{margin:0;padding:14px;border-radius:14px;background:${c.cardSoft};border:1px dashed ${c.line};color:${c.muted};font-size:.92rem;text-align:center}
 .moment-guestbook-card{padding:18px 16px;border-radius:16px;background:#FFFFFF;border:1px solid ${c.line};box-shadow:none}
-.moment-guestbook-quote{margin:0 0 10px;font-family:${f.display};font-size:clamp(1.15rem,4.8vw,1.45rem);line-height:1.45;color:${c.ink}}
+.moment-guestbook-quote{margin:0 0 10px;font-family:${f.display};font-size:clamp(1.15rem,4.8vw,1.45rem);line-height:1.45;color:${cardInk}}
 .moment-guestbook-author{margin:0;font-family:${f.ui};font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:${c.muted}}
 .moment-card-head .moment-card-icon{font-size:1.15rem;line-height:1;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:${c.cardSoft};border:1px solid ${c.line};flex-shrink:0;color:${c.go}}
 .moment-countdown-grid{display:flex;justify-content:center;gap:0}
@@ -2064,7 +2062,7 @@ body.nav-open{overflow:hidden}
 .moment-quote-wrap{text-align:center;padding:42px 20px}
 .moment-quote-wrap::before{content:"";display:block;width:40px;height:2px;margin:0 auto 18px;border-radius:999px;background:${c.lineStrong}}
 .moment-quote-mark{font-family:${f.ui};font-size:2.4rem;line-height:1;color:${c.go};opacity:.55;margin-bottom:-8px;font-weight:800}
-.moment-quote-text{font-size:clamp(1.05rem,4.5vw,1.28rem);font-style:italic;line-height:1.65;margin:0;color:${c.ink};font-family:${f.body};font-weight:500}
+.moment-quote-text{font-size:clamp(1.05rem,4.5vw,1.28rem);font-style:italic;line-height:1.65;margin:0;color:${cardInk};font-family:${f.body};font-weight:500}
 .moment-quote-author{display:block;margin-top:16px;font-family:${f.ui};font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:${c.muted}}
 .moment-signature{text-align:center;padding:42px 20px 48px}
 .moment-signature-label{font-family:${f.ui};font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:${c.muted};margin:0 0 10px}
@@ -2095,7 +2093,7 @@ body.nav-open{overflow:hidden}
 .moment-gallery-group-items{display:grid;gap:12px}
 .moment-media-list{display:grid;gap:12px}
 .moment-gallery-figure{margin:0;display:grid;gap:6px;justify-items:center}
-.moment-gallery-caption{font-family:${f.ui};font-size:.72rem;font-weight:700;color:${c.ink};text-align:center;max-width:240px;line-height:1.35}
+.moment-gallery-caption{font-family:${f.ui};font-size:.72rem;font-weight:700;color:${cardInk};text-align:center;max-width:240px;line-height:1.35}
 .moment-media-list .moment-media-card{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:76px;padding:12px;background:${c.cardSoft};border:1px solid ${c.line};border-radius:14px;box-shadow:none;transition:border-color .2s,background .2s}
 .moment-media-list .moment-media-card:hover{background:${c.surface};border-color:${c.lineStrong}}
 .moment-media-card-audio{min-height:88px}

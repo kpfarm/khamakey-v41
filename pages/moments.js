@@ -58,6 +58,7 @@ import { journeyStepId, MAX_JOURNEY_STEPS, normalizeJourneyStep, resolveJourneyS
 import {
   COLOR_PALETTES,
   PALETTE_LABELS,
+  PALETTE_PICKER_ORDER,
   VARIANT_LABELS,
   HERO_STYLES,
   FONT_PAIRS,
@@ -65,12 +66,13 @@ import {
   DARK_PAGE_PALETTES,
   normalizeDesignState,
   legacyThemeToPalette,
+  canonicalizePalette,
   resolvePalette,
   resolveFontPair,
   findLookForDesign,
   suggestLookForMomentType,
   looksForMomentType
-} from "./moment-themes.js?v=161";
+} from "./moment-themes.js?v=162";
 import {
   SECTION_ORDER_DEFAULT,
   DEFAULT_SECTIONS,
@@ -1653,7 +1655,7 @@ function renderSectionHeader(title,subtitle){
 
 function readDesignFields(formNode){
   return {
-    colorPalette: formNode.querySelector("#colorPaletteInput")?.value || "classic",
+    colorPalette: canonicalizePalette(formNode.querySelector("#colorPaletteInput")?.value || "verde"),
     themeVariant: formNode.querySelector('[name="theme_variant"]')?.value || "chiaro",
     fontPair: formNode.querySelector('[name="font_pair"]')?.value || "classic",
     heroStyle: formNode.querySelector('[name="hero_style"]')?.value || "classico",
@@ -1729,8 +1731,9 @@ function resetCoverZoomIfNeeded(formNode){
 function syncPaletteButtons(formNode, palette){
   const stylingPanel = formNode.querySelector('[data-editor-panel="styling"]');
   if(!stylingPanel) return;
+  const active = canonicalizePalette(palette);
   stylingPanel.querySelectorAll(".palette-btn").forEach(button=>{
-    button.classList.toggle("active", button.dataset.palette === palette);
+    button.classList.toggle("active", button.dataset.palette === active);
   });
 }
 
@@ -1753,10 +1756,11 @@ function renderLookPicker(currentLook, momentType = "free"){
 }
 
 function renderPalettePicker(current){
-  return `<div class="palette-row">${Object.keys(COLOR_PALETTES).filter(k=>k!=="classic").map(key=>{
+  const active = canonicalizePalette(current);
+  return `<div class="palette-row">${PALETTE_PICKER_ORDER.map(key=>{
     const c = COLOR_PALETTES[key];
-    return `<button type="button" class="palette-btn ${current === key ? "active" : ""}" data-palette="${esc(key)}" title="${esc(PALETTE_LABELS[key] || key)} — sfondo"><span style="background:${c.bl};box-shadow:inset 0 0 0 2px ${c.go}"></span></button>`;
-  }).join("")}<button type="button" class="palette-btn ${current === "classic" ? "active" : ""}" data-palette="classic" title="Verde KhamaKey — sfondo"><span style="background:#BBF7D0;box-shadow:inset 0 0 0 2px #15803D"></span></button></div><input type="hidden" name="color_palette" id="colorPaletteInput" value="${esc(current)}">`;
+    return `<button type="button" class="palette-btn ${active === key ? "active" : ""}" data-palette="${esc(key)}" title="${esc(PALETTE_LABELS[key] || key)} — sfondo pagina"><span style="background:${c.bl}"></span></button>`;
+  }).join("")}</div><input type="hidden" name="color_palette" id="colorPaletteInput" value="${esc(active)}">`;
 }
 
 function updateDesignSwatch(formNode){
@@ -1799,10 +1803,11 @@ function bindDesignPanelHandlers(formNode){
 
   stylingPanel.querySelectorAll(".palette-btn").forEach(button=>{
     button.addEventListener("click",()=>{
-      const key = button.dataset.palette || "classic";
+      const key = canonicalizePalette(button.dataset.palette || "verde");
       const input = formNode.querySelector("#colorPaletteInput");
       if(input) input.value = key;
       const variantSelect = formNode.querySelector('[name="theme_variant"]');
+      // Solo nero/antracite impostano «scuro»; rosso/verde/ecc. restano sfondo colorato
       if(variantSelect){
         if(DARK_PAGE_PALETTES.has(key)) variantSelect.value = "scuro";
         else if(variantSelect.value === "scuro") variantSelect.value = "chiaro";
@@ -1827,7 +1832,7 @@ function renderDesignSuggestBanner(momentType, currentLook){
 }
 
 function renderDesignPanel(state){
-  const palette = state.colorPalette || legacyThemeToPalette(state.theme);
+  const palette = canonicalizePalette(state.colorPalette || legacyThemeToPalette(state.theme));
   const variant = state.themeVariant || "chiaro";
   const colors = resolvePalette(palette, variant);
   const fontPair = state.fontPair || "classic";
@@ -1841,7 +1846,7 @@ function renderDesignPanel(state){
     ${renderSectionHeader(EDITOR_PANELS.styling.title,EDITOR_PANELS.styling.subtitle)}
     <div class="editor-card">
       <p class="ecard-title">Scegli lo stile</p>
-      <p class="design-intro">Stili per <strong>${esc(TYPE_LABELS[state.type] || "questa categoria")}</strong>. Colori classici: sfondo forte, riquadri bianchi, testi neri.</p>
+      <p class="design-intro">Stili per <strong>${esc(TYPE_LABELS[state.type] || "questa categoria")}</strong>. Il colore scelto è lo <strong>sfondo</strong> della pagina; i riquadri restano bianchi con testo nero.</p>
       ${renderDesignSuggestBanner(state.type, currentLook)}
       <div class="look-picker-host">${renderLookPicker(currentLook, state.type)}</div>
     </div>
@@ -1857,7 +1862,7 @@ function renderDesignPanel(state){
       <label>Colore di sfondo
         ${renderPalettePicker(palette)}
       </label>
-      <p class="field-hint">Il cerchio è lo sfondo della pagina. Nero/antracite = pagina scura; i colori vivaci tinteggiano tutto lo sfondo.</p>
+      <p class="field-hint">Ogni cerchio è uno sfondo diverso (incluso il rosso). Nero e antracite = pagina scura.</p>
       <label>Atmosfera
         <select name="theme_variant">
           ${Object.entries(VARIANT_LABELS).map(([value,label])=>option(value,label,variant)).join("")}
@@ -3481,7 +3486,7 @@ function readFormState(formNode){
     cover_focus_y:Number(form.get("cover_focus_y") || 50),
     cover_zoom:Number(form.get("cover_zoom") || 100),
     profile_photo:"",
-    colorPalette:String(form.get("color_palette") || "classic"),
+    colorPalette:canonicalizePalette(String(form.get("color_palette") || "verde")),
     themeVariant:String(form.get("theme_variant") || "chiaro"),
     heroStyle:String(form.get("hero_style") || "classico"),
     heroCut:String(form.get("hero_cut") || "dritto"),

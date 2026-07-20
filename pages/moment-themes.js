@@ -1,28 +1,50 @@
-/** Palette e varianti pagina Moments — colori saturi e leggibili (editor + anteprima). */
+/**
+ * Palette Moments (v162)
+ * - bl = sfondo pagina (ciò che vedi nel cerchio) — colori densi e distinti
+ * - go = accenti su card bianche (bottoni, date, icone) — stesso tono, più scuro
+ * - card sempre bianche; cardInk sempre #111 (testo leggibile)
+ */
 export const COLOR_PALETTES = {
-  // bl = sfondo pagina (ciò che vedi nei cerchi) · go/hero = accenti · card/in si adattano in resolvePalette
-  amore     : { go:"#BE123C", g2:"#9F1239", ro:"#E11D48", bl:"#FECDD3", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#BE123C", mu:"#475569" },
-  rubino    : { go:"#B91C1C", g2:"#7F1D1D", ro:"#DC2626", bl:"#FECACA", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#B91C1C", mu:"#475569" },
-  gentleman : { go:"#38BDF8", g2:"#0EA5E9", ro:"#64748B", bl:"#0F172A", bl2:"#1E293B", card:"#1E293B", in:"#F8FAFC", hero:"#020617", mu:"#94A3B8" },
-  uomo      : { go:"#1E40AF", g2:"#1E3A8A", ro:"#2563EB", bl:"#BFDBFE", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#1E40AF", mu:"#475569" },
-  aurora    : { go:"#6D28D9", g2:"#4C1D95", ro:"#7C3AED", bl:"#DDD6FE", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#6D28D9", mu:"#475569" },
-  terracotta: { go:"#C2410C", g2:"#9A3412", ro:"#EA580C", bl:"#FED7AA", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#C2410C", mu:"#475569" },
-  rosa      : { go:"#BE185D", g2:"#9D174D", ro:"#DB2777", bl:"#FBCFE8", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#BE185D", mu:"#475569" },
-  blu       : { go:"#0369A1", g2:"#0C4A6E", ro:"#0284C7", bl:"#BAE6FD", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#0369A1", mu:"#475569" },
-  salvia    : { go:"#047857", g2:"#064E3B", ro:"#059669", bl:"#A7F3D0", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#047857", mu:"#475569" },
-  bordeaux  : { go:"#F43F5E", g2:"#9F1239", ro:"#BE123C", bl:"#4C0519", bl2:"#881337", card:"#881337", in:"#FFF1F2", hero:"#4C0519", mu:"#FDA4AF" },
-  perla     : { go:"#A8A29E", g2:"#57534E", ro:"#78716C", bl:"#292524", bl2:"#44403C", card:"#44403C", in:"#FAFAF9", hero:"#1C1917", mu:"#A8A29E" },
-  lavanda   : { go:"#6D28D9", g2:"#5B21B6", ro:"#7C3AED", bl:"#C4B5FD", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#6D28D9", mu:"#475569" },
-  cipria    : { go:"#B45309", g2:"#92400E", ro:"#D97706", bl:"#FDE68A", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#B45309", mu:"#57534E" },
-  corallo   : { go:"#EA580C", g2:"#C2410C", ro:"#F97316", bl:"#FDBA74", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#EA580C", mu:"#475569" },
-  miele     : { go:"#A16207", g2:"#854D0E", ro:"#CA8A04", bl:"#FDE047", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#A16207", mu:"#475569" },
-  notte     : { go:"#38BDF8", g2:"#0284C7", ro:"#0EA5E9", bl:"#020617", bl2:"#0F172A", card:"#0F172A", in:"#F8FAFC", hero:"#020617", mu:"#94A3B8" },
-  neve      : { go:"#0369A1", g2:"#0C4A6E", ro:"#0284C7", bl:"#E2E8F0", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#0369A1", mu:"#475569" },
-  classic   : { go:"#15803D", g2:"#14532D", ro:"#16A34A", bl:"#BBF7D0", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#15803D", mu:"#475569" },
+  rosso     : { bl:"#DC2626", g2:"#991B1B", hero:"#B91C1C", go:"#B91C1C", ro:"#F87171", bl2:"#FFFFFF", card:"#FFFFFF", in:"#FFFFFF", mu:"#FEE2E2" },
+  rosa      : { bl:"#DB2777", g2:"#9D174D", hero:"#BE185D", go:"#BE185D", ro:"#F472B6", bl2:"#FFFFFF", card:"#FFFFFF", in:"#FFFFFF", mu:"#FCE7F3" },
+  bordeaux  : { bl:"#7F1D1D", g2:"#450A0A", hero:"#991B1B", go:"#9F1239", ro:"#FB7185", bl2:"#FFFFFF", card:"#FFFFFF", in:"#FFF1F2", mu:"#FECDD3" },
+  arancio   : { bl:"#EA580C", g2:"#9A3412", hero:"#C2410C", go:"#C2410C", ro:"#FB923C", bl2:"#FFFFFF", card:"#FFFFFF", in:"#FFFFFF", mu:"#FFEDD5" },
+  ambra     : { bl:"#B45309", g2:"#78350F", hero:"#92400E", go:"#92400E", ro:"#FBBF24", bl2:"#FFFFFF", card:"#FFFFFF", in:"#FFFBEB", mu:"#FEF3C7" },
+  verde     : { bl:"#15803D", g2:"#14532D", hero:"#166534", go:"#166534", ro:"#4ADE80", bl2:"#FFFFFF", card:"#FFFFFF", in:"#FFFFFF", mu:"#DCFCE7" },
+  blu       : { bl:"#1D4ED8", g2:"#1E3A8A", hero:"#1E40AF", go:"#1E40AF", ro:"#60A5FA", bl2:"#FFFFFF", card:"#FFFFFF", in:"#FFFFFF", mu:"#DBEAFE" },
+  azzurro   : { bl:"#0369A1", g2:"#0C4A6E", hero:"#0284C7", go:"#0C4A6E", ro:"#38BDF8", bl2:"#FFFFFF", card:"#FFFFFF", in:"#FFFFFF", mu:"#E0F2FE" },
+  viola     : { bl:"#7C3AED", g2:"#4C1D95", hero:"#6D28D9", go:"#5B21B6", ro:"#A78BFA", bl2:"#FFFFFF", card:"#FFFFFF", in:"#FFFFFF", mu:"#EDE9FE" },
+  nero      : { bl:"#0A0A0A", g2:"#000000", hero:"#171717", go:"#334155", ro:"#94A3B8", bl2:"#FFFFFF", card:"#FFFFFF", in:"#FAFAFA", mu:"#CBD5E1" },
+  antracite : { bl:"#1E293B", g2:"#020617", hero:"#0F172A", go:"#334155", ro:"#94A3B8", bl2:"#FFFFFF", card:"#FFFFFF", in:"#F8FAFC", mu:"#CBD5E1" },
+  crema     : { bl:"#FFF7ED", g2:"#FFEDD5", hero:"#FED7AA", go:"#C2410C", ro:"#FB923C", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", mu:"#9A3412" }
 };
 
-/** Palette con sfondo scuro: testo chiaro, card tonali. */
-export const DARK_PAGE_PALETTES = new Set(["gentleman", "notte", "perla", "bordeaux"]);
+const PALETTE_ALIASES = {
+  amore:"rosso", rubino:"rosso",
+  terracotta:"arancio", corallo:"arancio",
+  cipria:"ambra", miele:"ambra",
+  classic:"verde", salvia:"verde",
+  uomo:"blu", neve:"azzurro",
+  aurora:"viola", lavanda:"viola",
+  notte:"nero", gentleman:"antracite", perla:"antracite"
+};
+
+for(const [alias, canon] of Object.entries(PALETTE_ALIASES)){
+  COLOR_PALETTES[alias] = { ...COLOR_PALETTES[canon] };
+}
+
+/** Ordine cerchi nel picker (12 colori distinti, con rosso vero). */
+export const PALETTE_PICKER_ORDER = [
+  "rosso","rosa","bordeaux","arancio","ambra","verde","blu","azzurro","viola","nero","antracite","crema"
+];
+
+export function canonicalizePalette(key = "verde"){
+  if(PALETTE_PICKER_ORDER.includes(key)) return key;
+  return PALETTE_ALIASES[key] || "verde";
+}
+
+/** Solo nero/antracite forzano atmosfera «scuro» al tap; gli altri restano «chiaro» con sfondo colorato. */
+export const DARK_PAGE_PALETTES = new Set(["nero","antracite"]);
 
 export function isDarkPageBackground(hex = ""){
   const raw = String(hex || "").replace("#","").trim();
@@ -32,41 +54,35 @@ export function isDarkPageBackground(hex = ""){
   const r = (n >> 16) & 255;
   const g = (n >> 8) & 255;
   const b = n & 255;
-  return ((r * 299) + (g * 587) + (b * 114)) / 1000 < 145;
+  return ((r * 299) + (g * 587) + (b * 114)) / 1000 < 160;
 }
 
 export const PALETTE_VARIANTS = {
   chiaro: {},
-  // "Caldo" = sfondo più avvolgente, non un blocco scuro piatto (prima sembrava "colore morto")
   caldo: {
-    amore:    { bl:"#FDA4AF", hero:"#BE123C", go:"#E11D48" },
-    rubino:   { bl:"#F87171", hero:"#B91C1C", go:"#DC2626", in:"#111111" },
-    rosa:     { bl:"#F9A8D4", hero:"#BE185D", go:"#DB2777" },
-    bordeaux: { bl:"#881337", hero:"#4C0519", go:"#F43F5E", card:"#9F1239", bl2:"#9F1239", in:"#FFF1F2" },
-    terracotta:{ bl:"#FB923C", hero:"#C2410C", go:"#EA580C" },
-    corallo:  { bl:"#FB923C", hero:"#EA580C", go:"#F97316" },
-    cipria:   { bl:"#FBBF24", hero:"#B45309", go:"#D97706" },
-    miele:    { bl:"#FACC15", hero:"#A16207", go:"#CA8A04" },
-    classic:  { bl:"#86EFAC", hero:"#15803D", go:"#16A34A" },
-    blu:      { bl:"#7DD3FC", hero:"#0369A1", go:"#0284C7" },
-    salvia:   { bl:"#6EE7B7", hero:"#047857", go:"#059669" },
-    aurora:   { bl:"#C4B5FD", hero:"#6D28D9", go:"#7C3AED" },
-    lavanda:  { bl:"#A78BFA", hero:"#6D28D9", go:"#7C3AED" }
+    rosso: { bl:"#EF4444", hero:"#DC2626", go:"#B91C1C" },
+    rosa: { bl:"#EC4899", hero:"#DB2777", go:"#BE185D" },
+    arancio: { bl:"#F97316", hero:"#EA580C", go:"#C2410C" },
+    ambra: { bl:"#D97706", hero:"#B45309", go:"#92400E", in:"#FFFBEB" },
+    verde: { bl:"#16A34A", hero:"#15803D", go:"#166534" },
+    crema: { bl:"#FFEDD5", hero:"#FDBA74", go:"#C2410C", in:"#111111" }
   },
   scuro: {
-    notte: { bl:"#020617", hero:"#020617", go:"#38BDF8", g2:"#0284C7", card:"#0F172A", bl2:"#0F172A", in:"#F8FAFC", ro:"#0EA5E9" },
-    gentleman: { bl:"#020617", hero:"#020617", go:"#38BDF8", card:"#0F172A", bl2:"#0F172A", in:"#F8FAFC" },
-    perla: { bl:"#1C1917", hero:"#0C0A09", go:"#A8A29E", card:"#292524", bl2:"#292524", in:"#FAFAF9" },
-    bordeaux: { bl:"#3F0A1A", hero:"#4C0519", go:"#FB7185", card:"#881337", bl2:"#881337", in:"#FFF1F2" }
+    nero: { bl:"#000000", hero:"#0A0A0A", go:"#64748B" },
+    antracite: { bl:"#020617", hero:"#0F172A", go:"#0284C7" },
+    bordeaux: { bl:"#450A0A", hero:"#7F1D1D", go:"#BE123C" },
+    rosso: { bl:"#991B1B", hero:"#7F1D1D", go:"#DC2626" }
   }
 };
 
 export const PALETTE_LABELS = {
-  amore:"Rosso vivo", rubino:"Rubino", gentleman:"Antracite", uomo:"Blu royal",
-  aurora:"Viola", terracotta:"Arancio terracotta",
-  rosa:"Rosa acceso", blu:"Azzurro oceano", salvia:"Verde smeraldo", bordeaux:"Bordeaux",
-  perla:"Pietra naturale", lavanda:"Lavanda", cipria:"Ambra", corallo:"Corallo tramonto",
-  miele:"Oro sole",   notte:"Nero notte", neve:"Grigio ghiaccio", classic:"Verde KhamaKey"
+  rosso:"Rosso", rosa:"Rosa", bordeaux:"Bordeaux", arancio:"Arancio",
+  ambra:"Ambra", verde:"Verde", blu:"Blu", azzurro:"Azzurro",
+  viola:"Viola", nero:"Nero", antracite:"Antracite", crema:"Crema",
+  amore:"Rosso", rubino:"Rosso", classic:"Verde", salvia:"Verde",
+  gentleman:"Antracite", notte:"Nero", perla:"Antracite", uomo:"Blu",
+  neve:"Azzurro", aurora:"Viola", lavanda:"Viola", terracotta:"Arancio",
+  corallo:"Arancio", cipria:"Ambra", miele:"Ambra"
 };
 
 export const VARIANT_LABELS = { chiaro:"Chiaro", caldo:"Caldo", scuro:"Scuro" };
@@ -166,31 +182,33 @@ export const CREATOR_SERVICES_GAP = {
   ]
 };
 
-export function resolvePalette(palette = "classic", variant = "chiaro"){
-  const base = { ...(COLOR_PALETTES[palette] || COLOR_PALETTES.classic) };
-  const overrides = PALETTE_VARIANTS[variant]?.[palette];
+export function resolvePalette(palette = "verde", variant = "chiaro"){
+  const key = canonicalizePalette(palette);
+  const base = { ...(COLOR_PALETTES[key] || COLOR_PALETTES.verde) };
+  const overrides = PALETTE_VARIANTS[variant]?.[key];
   if(overrides) Object.assign(base, overrides);
-  const dark = DARK_PAGE_PALETTES.has(palette) || isDarkPageBackground(base.bl) || variant === "scuro";
-  if(dark){
-    base.in = base.in && base.in !== "#111111" ? base.in : "#F8FAFC";
-    base.mu = base.mu || "#94A3B8";
-    base.card = base.card && base.card !== "#FFFFFF" ? base.card : (base.bl2 || base.bl);
-    base.bl2 = base.bl2 || base.card || base.bl;
+  // Card sempre bianche + testo scuro (mai ink chiaro sulle card)
+  base.card = "#FFFFFF";
+  base.bl2 = "#FFFFFF";
+  base.cardInk = "#111111";
+  const darkPage = isDarkPageBackground(base.bl) || variant === "scuro";
+  if(darkPage){
+    if(!base.in || base.in === "#111111" || isDarkPageBackground(base.in)) base.in = "#F8FAFC";
+    base.mu = base.mu || "#E2E8F0";
   }else{
     base.in = "#111111";
     base.mu = base.mu || "#475569";
-    base.card = "#FFFFFF";
-    base.bl2 = "#FFFFFF";
   }
+  base.ink = base.in;
   return base;
 }
 
 export function legacyThemeToPalette(theme){
-  return ({ celebration:"corallo", minimal:"neve", memorial:"perla" })[theme] || "classic";
+  return ({ celebration:"arancio", minimal:"crema", memorial:"antracite" })[theme] || "verde";
 }
 
 export function normalizeDesignState(state = {}){
-  const palette = state.colorPalette || legacyThemeToPalette(state.theme);
+  const palette = canonicalizePalette(state.colorPalette || legacyThemeToPalette(state.theme));
   const variant = ["chiaro","caldo","scuro"].includes(state.themeVariant) ? state.themeVariant : "chiaro";
   const heroStyle = Object.keys(HERO_STYLES).includes(state.heroStyle) ? state.heroStyle : "classico";
   const fontPair = Object.keys(FONT_PAIRS).includes(state.fontPair) ? state.fontPair : "classic";
@@ -202,8 +220,8 @@ export const PAGE_LOOKS = {
   classic:{
     label:"KhamaKey",
     emoji:"💚",
-    hint:"Verde e blu — pulito e universale",
-    palette:"classic",
+    hint:"Verde pieno · riquadri bianchi · testi neri",
+    palette:"verde",
     variant:"chiaro",
     fontPair:"classic",
     heroStyle:"classico"
@@ -211,26 +229,26 @@ export const PAGE_LOOKS = {
   amore:{
     label:"Amore",
     emoji:"❤️",
-    hint:"Rosso classico · riquadri bianchi · testi neri",
-    palette:"amore",
-    variant:"caldo",
+    hint:"Rosso vivo · riquadri bianchi · testi neri",
+    palette:"rosso",
+    variant:"chiaro",
     fontPair:"romantic",
     heroStyle:"romantico"
   },
   passion:{
     label:"Passione",
     emoji:"🔥",
-    hint:"Rosso scuro · riquadri bianchi · testi neri",
-    palette:"rubino",
-    variant:"caldo",
+    hint:"Bordeaux · riquadri bianchi · testi neri",
+    palette:"bordeaux",
+    variant:"chiaro",
     fontPair:"romantic",
     heroStyle:"romantico"
   },
   gentleman:{
     label:"Sartoriale",
     emoji:"🎩",
-    hint:"Grigio antracite · card bianche",
-    palette:"gentleman",
+    hint:"Antracite · card bianche",
+    palette:"antracite",
     variant:"chiaro",
     fontPair:"modern",
     heroStyle:"classico"
@@ -238,44 +256,44 @@ export const PAGE_LOOKS = {
   uomo:{
     label:"Uomo",
     emoji:"🧔",
-    hint:"Navy forte · card bianche · bronzo",
-    palette:"uomo",
+    hint:"Blu reale · card bianche",
+    palette:"blu",
     variant:"chiaro",
     fontPair:"modern",
     heroStyle:"classico"
   },
   romantic:{
-    label:"Rosa gold",
+    label:"Rosa",
     emoji:"💕",
-    hint:"Magenta · riquadri bianchi · testi neri",
+    hint:"Rosa pieno · riquadri bianchi · testi neri",
     palette:"rosa",
-    variant:"caldo",
+    variant:"chiaro",
     fontPair:"romantic",
     heroStyle:"classico"
   },
   elegant:{
-    label:"Viola aurora",
+    label:"Viola",
     emoji:"✨",
     hint:"Viola intenso · riquadri bianchi · testi neri",
-    palette:"aurora",
+    palette:"viola",
     variant:"chiaro",
     fontPair:"elegant",
     heroStyle:"classico"
   },
   party:{
-    label:"Festa corallo",
+    label:"Festa",
     emoji:"🎉",
     hint:"Arancio vivo · riquadri bianchi · testi neri",
-    palette:"corallo",
-    variant:"caldo",
+    palette:"arancio",
+    variant:"chiaro",
     fontPair:"modern",
     heroStyle:"classico"
   },
   festive:{
     label:"Natale",
     emoji:"🎄",
-    hint:"Verde e oro · riquadri bianchi · testi neri",
-    palette:"miele",
+    hint:"Ambra e verde · riquadri bianchi · testi neri",
+    palette:"ambra",
     variant:"caldo",
     fontPair:"modern",
     heroStyle:"classico"
@@ -284,16 +302,16 @@ export const PAGE_LOOKS = {
     label:"Verde natura",
     emoji:"🌿",
     hint:"Verde bosco · riquadri bianchi · testi neri",
-    palette:"salvia",
+    palette:"verde",
     variant:"chiaro",
     fontPair:"classic",
     heroStyle:"profilo"
   },
   voyage:{
-    label:"Viaggio terra",
+    label:"Viaggio",
     emoji:"✈️",
-    hint:"Terracotta · riquadri bianchi · testi neri",
-    palette:"terracotta",
+    hint:"Arancio terra · riquadri bianchi · testi neri",
+    palette:"arancio",
     variant:"caldo",
     fontPair:"modern",
     heroStyle:"classico"
@@ -301,8 +319,8 @@ export const PAGE_LOOKS = {
   ocean:{
     label:"Oceano",
     emoji:"🌊",
-    hint:"Blu profondo · riquadri bianchi · testi neri",
-    palette:"blu",
+    hint:"Azzurro pieno · riquadri bianchi · testi neri",
+    palette:"azzurro",
     variant:"chiaro",
     fontPair:"modern",
     heroStyle:"classico"
@@ -310,9 +328,9 @@ export const PAGE_LOOKS = {
   savana:{
     label:"Savana",
     emoji:"🦁",
-    hint:"Verde safari · riquadri bianchi · testi neri",
-    palette:"salvia",
-    variant:"caldo",
+    hint:"Ambra · riquadri bianchi · testi neri",
+    palette:"ambra",
+    variant:"chiaro",
     fontPair:"classic",
     heroStyle:"profilo"
   },
@@ -320,16 +338,16 @@ export const PAGE_LOOKS = {
     label:"Tramonto",
     emoji:"🌅",
     hint:"Arancio tramonto · riquadri bianchi · testi neri",
-    palette:"corallo",
+    palette:"arancio",
     variant:"caldo",
     fontPair:"modern",
     heroStyle:"classico"
   },
   pop:{
-    label:"Pop lavanda",
+    label:"Pop",
     emoji:"💜",
     hint:"Viola acceso · riquadri bianchi · testi neri",
-    palette:"lavanda",
+    palette:"viola",
     variant:"chiaro",
     fontPair:"modern",
     heroStyle:"classico"
@@ -337,8 +355,8 @@ export const PAGE_LOOKS = {
   night:{
     label:"Notte",
     emoji:"🌙",
-    hint:"Nero classico · riquadri bianchi · testi neri",
-    palette:"notte",
+    hint:"Nero · riquadri bianchi · testi neri",
+    palette:"nero",
     variant:"scuro",
     fontPair:"elegant",
     heroStyle:"romantico"
@@ -348,15 +366,15 @@ export const PAGE_LOOKS = {
     emoji:"💍",
     hint:"Bordeaux · riquadri bianchi · testi neri",
     palette:"bordeaux",
-    variant:"caldo",
+    variant:"chiaro",
     fontPair:"romantic",
     heroStyle:"romantico"
   },
   memory:{
     label:"Ricordi",
     emoji:"📸",
-    hint:"Marrone caldo · riquadri bianchi · testi neri",
-    palette:"cipria",
+    hint:"Crema calda · riquadri bianchi · testi neri",
+    palette:"crema",
     variant:"caldo",
     fontPair:"classic",
     heroStyle:"intimo"
@@ -364,8 +382,8 @@ export const PAGE_LOOKS = {
   neve:{
     label:"Neve",
     emoji:"❄️",
-    hint:"Grigio ghiaccio · card bianche",
-    palette:"neve",
+    hint:"Crema chiara · accenti arancio",
+    palette:"crema",
     variant:"chiaro",
     fontPair:"modern",
     heroStyle:"classico"
@@ -422,8 +440,9 @@ export const LOOK_FOR_MOMENT_TYPE = {
 };
 
 export function findLookForDesign({ colorPalette, themeVariant, fontPair, heroStyle } = {}){
+  const palette = canonicalizePalette(colorPalette);
   const match = Object.entries(PAGE_LOOKS).find(([, look]) =>
-    look.palette === colorPalette
+    look.palette === palette
     && look.variant === themeVariant
     && look.fontPair === fontPair
     && look.heroStyle === heroStyle

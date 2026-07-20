@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **Moments v162 / Worker v147 — Sfondi densi + rosso + contrasto card (2026-07-20, Cursor)** — Pages + Worker
+  - 12 colori distinti (incluso rosso `#DC2626`); il cerchio è lo sfondo pieno; anteprima mostra `bl` non solo accenti; testo sulle card sempre nero (`cardInk`).
 - **Moments v161 / Worker v146 — Cerchi = sfondo pagina (2026-07-20, Cursor)** — Pages + Worker
   - I cerchi mostrano e applicano lo **sfondo** (nero/antracite → pagina scura); non solo gli accenti.
 - **Moments v160 / Worker v145 — Palette più decise (2026-07-20, Cursor)** — Pages + Worker

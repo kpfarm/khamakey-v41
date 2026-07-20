@@ -285,3 +285,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Moments v159**: fix mobile — stop scroll nel vuoto rosa, menu fisso in basso |
 | 2026-07-20 | Cursor | **Moments v160 / Worker v145**: palette colori più sature e swatch go→g2 |
 | 2026-07-20 | Cursor | **Moments v161 / Worker v146**: cerchi = colore di sfondo pagina (nero→scuro) |
+| 2026-07-20 | Cursor | **Moments v162 / Worker v147**: 12 sfondi densi distinti + rosso vero; card con testo nero leggibile |

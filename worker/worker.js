@@ -2160,7 +2160,7 @@ body.nav-open{overflow:hidden}
 .moment-media-list .moment-media-card{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:76px;padding:12px;background:${c.cardSoft};border:1px solid ${c.line};border-radius:14px;box-shadow:none;transition:border-color .2s,background .2s}
 .moment-media-list .moment-media-card:hover{background:${c.surface};border-color:${c.lineStrong}}
 .moment-media-card-audio{min-height:88px}
-.moment-footer{text-align:center;color:color-mix(in srgb, ${c.bl} 35%, ${c.in}) !important;opacity:0.75;font-family:${f.ui};font-size:12px;padding:16px 20px max(28px,env(safe-area-inset-bottom))}
+.moment-footer{text-align:center;color:${c.ink}!important;opacity:.9;font-family:${f.ui};font-size:12px;font-weight:600;letter-spacing:.02em;padding:16px 20px max(28px,env(safe-area-inset-bottom));text-shadow:0 1px 2px rgba(0,0,0,.18)}
 @media(prefers-reduced-motion:reduce){.hero-in,.rv{opacity:1;transform:none;transition:none}.rv.on .moment-journey-item,.rv.on .moment-promise,.rv.on .moment-ritual,.rv.on .moment-number,.rv.on .moment-dream{animation:none}.moment-sealed-icon,.moment-decor-item{animation:none}.moment-decor{display:none}}
 @media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:24px;box-shadow:0 24px 70px rgba(17,32,65,.08);background:${c.surface}}.moment-content{padding:20px 20px 36px}}
 .moment-cut-arco #moment-hero {

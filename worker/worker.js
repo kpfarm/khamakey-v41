@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v126-moments-counter-label";
+const WORKER_VERSION = "v143-rsvp-wa";
 
 export default {
   async fetch(request, env, ctx) {
@@ -141,7 +141,7 @@ async function handlePublicPage(request, env, ctx, slug) {
 
   ctx.waitUntil(track(env, request, page.business_id, "page_view", "public_page").catch(() => {}));
   return html(renderPage(localizedPage, new URL(request.url).origin, env, locale), 200, {
-    "Cache-Control": "public, max-age=30, s-maxage=60"
+    "Cache-Control": "public, max-age=10, s-maxage=15"
   });
 }
 
@@ -343,7 +343,7 @@ async function handleMomentGuestbookSubmit(request, env) {
     return cors(json({ ok: true, id: result?.id || null, status: result?.status || "pending" }));
   } catch (error) {
     console.error("submit_moment_guestbook", error);
-    return cors(json({ error: "Invio messaggio non riuscito" }, 500));
+    return cors(json({ error: guestbookErrorMessage(error) }, 500));
   }
 }
 
@@ -374,9 +374,29 @@ async function rpc(env, name, body) {
     },
     body: JSON.stringify(body)
   });
-  if (!response.ok) throw new Error(`Supabase RPC ${name}: ${response.status}`);
   const text = await response.text();
+  if (!response.ok) {
+    let message = `Supabase RPC ${name}: ${response.status}`;
+    try {
+      const parsed = JSON.parse(text);
+      message = String(parsed.message || parsed.error || parsed.details || message);
+    } catch {
+      if (text) message = text.slice(0, 240);
+    }
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
+  }
   return text ? JSON.parse(text) : null;
+}
+
+function guestbookErrorMessage(error) {
+  const msg = String(error?.message || "").toLowerCase();
+  if (msg.includes("non attivo")) return "Il libro degli ospiti non è attivo. Attivalo nell'editor e salva la pagina.";
+  if (msg.includes("non pubblicata")) return "Pagina non pubblicata. Pubblica la pagina prima di raccogliere messaggi.";
+  if (msg.includes("ingest") || msg.includes("chiave ingest")) return "Servizio temporaneamente non disponibile. Riprova più tardi.";
+  if (msg.includes("obbligatori")) return "Nome e messaggio sono obbligatori.";
+  return "Invio messaggio non riuscito. Riprova tra poco.";
 }
 
 // Rate limiting su Postgres (check_rate_limit, sql/khamakey-rate-limit-v76.sql): niente infra nuova.
@@ -408,8 +428,8 @@ const MEDIA_LIMITS = {
 
 const MEDIA_MIME = {
   image: new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]),
-  video: new Set(["video/mp4", "video/webm", "video/quicktime"]),
-  audio: new Set(["audio/mpeg", "audio/mp4", "audio/wav", "audio/webm", "audio/x-m4a", "audio/aac"])
+  video: new Set(["video/mp4", "video/webm", "video/quicktime", "video/3gpp", "video/x-m4v"]),
+  audio: new Set(["audio/mpeg", "audio/mp4", "audio/wav", "audio/webm", "audio/x-m4a", "audio/aac", "audio/ogg", "audio/x-caf"])
 };
 
 function mediaKindFromMime(mime) {
@@ -429,8 +449,10 @@ function mimeFromFilename(name) {
   if (/\.webm$/.test(file)) return "video/webm";
   if (/\.mov$/.test(file)) return "video/quicktime";
   if (/\.(mp4|m4v)$/.test(file)) return "video/mp4";
+  if (/\.3gp$/.test(file)) return "video/3gpp";
   if (/\.wav$/.test(file)) return "audio/wav";
-  if (/\.ogg$/.test(file)) return "audio/webm";
+  if (/\.ogg$/.test(file)) return "audio/ogg";
+  if (/\.caf$/.test(file)) return "audio/x-caf";
   if (/\.aac$/.test(file)) return "audio/aac";
   if (/\.m4a$/.test(file)) return "audio/x-m4a";
   if (/\.mp3$/.test(file)) return "audio/mpeg";
@@ -486,15 +508,17 @@ async function verifyMediaScope(env, jwt, scope, scopeId) {
     Authorization: `Bearer ${jwt}`
   };
   if (cleanScope === "moments") {
-    const ownerResponse = await fetch(`${env.SUPABASE_URL}/rest/v1/moment_events?id=eq.${encodeURIComponent(cleanId)}&owner_email=eq.${encodeURIComponent(email)}&select=id`, { headers });
-    if (ownerResponse.ok) {
-      const ownerRows = await ownerResponse.json();
-      if (Array.isArray(ownerRows) && ownerRows.length) return true;
-    }
-    const accessResponse = await fetch(`${env.SUPABASE_URL}/rest/v1/moment_events?id=eq.${encodeURIComponent(cleanId)}&select=id`, { headers });
+    const accessResponse = await fetch(
+      `${env.SUPABASE_URL}/rest/v1/moment_events?id=eq.${encodeURIComponent(cleanId)}&select=id,owner_email`,
+      { headers }
+    );
     if (!accessResponse.ok) return false;
     const accessRows = await accessResponse.json();
-    return Array.isArray(accessRows) && accessRows.length > 0;
+    if (!Array.isArray(accessRows) || !accessRows.length) return false;
+    const ownerEmail = String(accessRows[0].owner_email || "").trim().toLowerCase();
+    if (ownerEmail && ownerEmail === email) return true;
+    if (await verifyPlatformAdmin(env, jwt)) return true;
+    return false;
   }
   if (cleanScope === "business") {
     // SICUREZZA: non rimuovere il filtro profile_id. La RLS "Pagine pubbliche B2B visibili a
@@ -522,7 +546,7 @@ async function handleMediaUpload(request, env) {
     if (!jwt) return cors(json({ error: "Accesso non autorizzato." }, 401));
     const user = await supabaseUser(env, jwt);
     if (!user?.email) return cors(json({ error: "Sessione non valida." }, 401));
-    if (!await checkRateLimit(env, `media-upload:${user.email}`, 30, 60)) {
+    if (!await checkRateLimit(env, `media-upload:${user.email}`, 60, 60)) {
       return tooManyRequests();
     }
 
@@ -594,9 +618,21 @@ async function handleMediaDelete(request, env) {
 }
 
 async function handleMomentPreview(request, env) {
-  const body = await request.json().catch(() => ({}));
+  const ip = request.headers.get("cf-connecting-ip") || "anon";
+  if (!await checkRateLimit(env, `moment-preview:${ip}`, 45, 1)) {
+    return tooManyRequests();
+  }
+  const raw = await request.text();
+  if (raw.length > 900_000) {
+    return cors(json({ error: "Anteprima troppo grande." }, 413));
+  }
+  const body = (() => {
+    try { return JSON.parse(raw || "{}"); }
+    catch { return {}; }
+  })();
   const pageState = body.page_state && typeof body.page_state === "object" ? body.page_state : body;
   const page = {
+    slug: String(body.slug || pageState.slug || "").trim(),
     title: String(body.title || pageState.title || "KhamaKey Moments").trim(),
     description: String(body.description || pageState.subtitle || pageState.description || "").trim(),
     state: pageState
@@ -680,8 +716,8 @@ a{text-decoration:none;color:inherit}.page{width:min(100%,520px);min-height:100v
 .hero.clean:after{background:transparent}.hero-content{position:relative;z-index:1;width:100%}.hero.clean .hero-content{display:none}
 .logo{display:block;width:76px;height:76px;object-fit:contain;padding:5px;border:1px solid rgba(255,255,255,.78);border-radius:22px;margin:0 auto 12px;background:#fff;box-shadow:0 12px 28px rgba(0,0,0,.2)}
 .logo-small .logo{width:58px;height:58px;border-radius:17px}.logo-large .logo{width:96px;height:96px;border-radius:26px}.hero h1{margin:0 0 9px;font-size:27px;line-height:1.08}.hero p{margin:0 auto;line-height:1.46;max-width:390px;font-weight:600}
-.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;border-bottom:1px solid #e5eaf1}.action{min-height:74px;border:1px solid #e5eaf1;border-radius:14px;display:grid;place-items:center;padding:9px 6px;font-size:12px;font-weight:800;color:#1b2a5e;background:#fff}
-.buttons-solid .action{border-radius:10px;background:var(--accent);color:#fff;border-color:transparent}.buttons-outline .action{border-radius:12px;box-shadow:none}
+.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px;border-bottom:1px solid #e5eaf1}.action{min-height:74px;border:1px solid #e5eaf1;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:9px 6px;font-size:12px;font-weight:800;color:#1b2a5e;background:#fff;text-align:center}.action svg{width:22px;height:22px;flex-shrink:0}
+.buttons-solid .action{border-radius:10px;background:var(--accent);color:#fff;border-color:transparent}.buttons-solid .action svg{filter:brightness(0) invert(1)}.buttons-outline .action{border-radius:12px;box-shadow:none}
 .content{padding:0 12px 40px}.block{border:1px solid #e5eaf1;border-radius:18px;padding:17px;margin:12px 0;box-shadow:0 8px 24px rgba(27,42,94,.06);background:#fff}.cards-sharp .block{border-radius:8px;box-shadow:none}.cards-glass .block{background:rgba(255,255,255,.78);box-shadow:0 14px 34px rgba(27,42,94,.09)}.block h2{font-size:18px;margin:0 0 9px}.block p{color:#5c6880;line-height:1.6;margin:0}.footer{text-align:center;color:#7b879b;font-size:12px;padding:25px}
 @media(min-width:700px){body{padding:22px}.page{border-radius:8px;overflow:hidden;box-shadow:0 20px 60px rgba(17,32,65,.15)}}
 </style>
@@ -710,7 +746,7 @@ function renderSnapshotPage(page, origin, env = {}, locale = "it") {
   const title = String(fields.nome || "KhamaKey").trim() || "KhamaKey";
   const className = String(snapshot.className || "phone-preview-inner").replace(/[^a-zA-Z0-9 _-]/g, "");
   const style = String(snapshot.style || "").replace(/[^a-zA-Z0-9:#;().,% _-]/g, "");
-  const pagesBase = String(env.PAGES_ASSET_BASE || "https://khamakey-app.pages.dev").replace(/\/$/, "");
+  const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
   const showCookieBanner = fields.tCookie !== false;
   return `<!doctype html>
 <html lang="${attr(locale)}">
@@ -790,7 +826,7 @@ function renderMomentPage(page, origin) {
   const fonts = resolveMomentFontPair(state.fontPair);
   const heroStyle = ["classico", "profilo", "romantico", "intimo", "fullscreen"].includes(state.heroStyle) ? state.heroStyle : "classico";
   const sections = resolveMomentSections(state);
-  const defaultOrder = ["intro","dedication","timeline","rsvp","guestbook","gallery","promises","dreams","countdown","music","letter_future","rituals","pet","numbers","quote","signature"];
+  const defaultOrder = ["intro","dedication","timeline","rsvp","guestbook","gallery","video","promises","dreams","countdown","music","letter_future","rituals","pet","numbers","quote","signature"];
   const rawOrder = Array.isArray(state.sectionOrder) && state.sectionOrder.length ? state.sectionOrder : defaultOrder;
   const legacyMap = { schedule:"timeline", location:"places", places:null, message:"dedication", details:"intro", contacts:null };
   const mapped = [...new Set(rawOrder.map(key => legacyMap[key] ?? key).filter(key => key && key !== "places" && sections[key]))];
@@ -905,6 +941,7 @@ const MOMENT_NAV_LABELS = {
   rsvp:"RSVP",
   guestbook:"Ospiti",
   gallery:"Foto",
+  video:"Video",
   promises:"Promesse",
   dreams:"Sogni",
   countdown:"Conto",
@@ -951,51 +988,46 @@ function renderMomentNav(title, ordered, hasCounter){
 </div>`;
 }
 
-function renderMomentDecor(state){
-  const preset = PAGE_DECOR_PRESETS[state.pageDecor] || PAGE_DECOR_PRESETS.none;
-  if(!preset.emojis.length) return "";
-  const items = Array.from({ length: 14 }, (_, index) => {
-    const emoji = preset.emojis[index % preset.emojis.length];
-    const left = (index * 17 + 7) % 94 + 3;
-    const top = (index * 23 + 11) % 88 + 6;
-    const delay = ((index * 0.65) % 5).toFixed(2);
-    const duration = 4 + (index % 3);
-    return `<span class="moment-decor-item" style="left:${left}%;top:${top}%;animation-delay:${delay}s;animation-duration:${duration}s">${emoji}</span>`;
-  }).join("");
-  return `<div class="moment-decor" aria-hidden="true">${items}</div>`;
+function renderMomentDecor(_state){
+  // Feature adesivi rimossa: nessuna decorazione emoji sulla pagina pubblica
+  return "";
 }
 
 function resolveMomentPalette(state) {
   const palettes = {
-    amore:{go:"#9f1c30",g2:"#72101e",ro:"#DDDDDD",bl:"#fcf2f4",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#9f1c30",mu:"#64748b"},
-    rubino:{go:"#881337",g2:"#4c0519",ro:"#DDDDDD",bl:"#fff1f2",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#881337",mu:"#64748b"},
-    gentleman:{go:"#475569",g2:"#1e293b",ro:"#DDDDDD",bl:"#f8fafc",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#334155",mu:"#64748b"},
-    uomo:{go:"#1e3a8a",g2:"#172554",ro:"#CCCCCC",bl:"#eff6ff",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#1e3a8a",mu:"#64748b"},
-    aurora:{go:"#6b21a8",g2:"#4a044e",ro:"#DDDDDD",bl:"#faf5ff",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#6b21a8",mu:"#64748b"},
-    terracotta:{go:"#b23b18",g2:"#8b2609",ro:"#DDDDDD",bl:"#f4efe6",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#b23b18",mu:"#64748b"},
-    rosa:{go:"#be185d",g2:"#831843",ro:"#DDDDDD",bl:"#fdf2f8",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#be185d",mu:"#64748b"},
-    blu:{go:"#1d4ed8",g2:"#1e3a8a",ro:"#CCCCCC",bl:"#eff6ff",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#1d4ed8",mu:"#64748b"},
-    salvia:{go:"#5a7164",g2:"#3b4d42",ro:"#CCCCCC",bl:"#e9edea",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#5a7164",mu:"#64748b"},
-    bordeaux:{go:"#800c2a",g2:"#500315",ro:"#DDDDDD",bl:"#faf2f4",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#800c2a",mu:"#64748b"},
-    perla:{go:"#4b5563",g2:"#374151",ro:"#DDDDDD",bl:"#f3f4f6",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#4b5563",mu:"#64748b"},
-    lavanda:{go:"#7c5295",g2:"#4a2c5d",ro:"#DDDDDD",bl:"#f7f4fa",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#7c5295",mu:"#64748b"},
-    cipria:{go:"#a87c66",g2:"#704a37",ro:"#DDDDDD",bl:"#FAF5F2",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#a87c66",mu:"#64748b"},
-    corallo:{go:"#e05a47",g2:"#ab3525",ro:"#DDDDDD",bl:"#fdf4f2",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#e05a47",mu:"#64748b"},
-    miele:{go:"#c69214",g2:"#2b4237",ro:"#DDDDDD",bl:"#fdfbf2",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#c69214",mu:"#64748b"},
-    notte:{go:"#334155",g2:"#0f172a",ro:"#DDDDDD",bl:"#0f172a",bl2:"#FFFFFF",card:"#1e293b",in:"#f8fafc",hero:"#0f172a",mu:"#94a3b8"},
-    neve:{go:"#475569",g2:"#64748b",ro:"#DDDDDD",bl:"#f8fafc",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#475569",mu:"#64748b"},
-    classic:{go:"#059669",g2:"#022c22",ro:"#DDDDDD",bl:"#f0fdf4",bl2:"#FFFFFF",card:"#FFFFFF",in:"#0f172a",hero:"#059669",mu:"#64748b"},
+    amore:{go:"#E11D48",g2:"#9F1239",ro:"#FDA4AF",bl:"#FFF1F2",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#E11D48",mu:"#64748B"},
+    rubino:{go:"#BE123C",g2:"#881337",ro:"#FB7185",bl:"#FFF1F2",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#BE123C",mu:"#64748B"},
+    gentleman:{go:"#334155",g2:"#0F172A",ro:"#94A3B8",bl:"#F8FAFC",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#1E293B",mu:"#64748B"},
+    uomo:{go:"#1D4ED8",g2:"#1E3A8A",ro:"#93C5FD",bl:"#EFF6FF",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#1D4ED8",mu:"#64748B"},
+    aurora:{go:"#7C3AED",g2:"#5B21B6",ro:"#C4B5FD",bl:"#F5F3FF",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#7C3AED",mu:"#64748B"},
+    terracotta:{go:"#EA580C",g2:"#C2410C",ro:"#FDBA74",bl:"#FFF7ED",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#EA580C",mu:"#64748B"},
+    rosa:{go:"#DB2777",g2:"#9D174D",ro:"#F9A8D4",bl:"#FDF2F8",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#DB2777",mu:"#64748B"},
+    blu:{go:"#0284C7",g2:"#0369A1",ro:"#7DD3FC",bl:"#F0F9FF",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#0284C7",mu:"#64748B"},
+    salvia:{go:"#059669",g2:"#047857",ro:"#6EE7B7",bl:"#ECFDF5",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#059669",mu:"#64748B"},
+    bordeaux:{go:"#9F1239",g2:"#4C0519",ro:"#FB7185",bl:"#FFF1F2",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#9F1239",mu:"#64748B"},
+    perla:{go:"#57534E",g2:"#292524",ro:"#D6D3D1",bl:"#FAFAF9",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#44403C",mu:"#78716C"},
+    lavanda:{go:"#8B5CF6",g2:"#6D28D9",ro:"#DDD6FE",bl:"#F5F3FF",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#8B5CF6",mu:"#64748B"},
+    cipria:{go:"#D97706",g2:"#B45309",ro:"#FCD34D",bl:"#FFFBEB",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#D97706",mu:"#78716C"},
+    corallo:{go:"#F97316",g2:"#EA580C",ro:"#FDBA74",bl:"#FFF7ED",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#F97316",mu:"#64748B"},
+    miele:{go:"#CA8A04",g2:"#A16207",ro:"#FDE047",bl:"#FEFCE8",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#CA8A04",mu:"#64748B"},
+    notte:{go:"#38BDF8",g2:"#0EA5E9",ro:"#7DD3FC",bl:"#0F172A",bl2:"#FFFFFF",card:"#1E293B",in:"#F8FAFC",hero:"#0F172A",mu:"#94A3B8"},
+    neve:{go:"#0EA5E9",g2:"#0284C7",ro:"#BAE6FD",bl:"#F8FAFC",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#0369A1",mu:"#64748B"},
+    classic:{go:"#16A34A",g2:"#15803D",ro:"#86EFAC",bl:"#F0FDF4",bl2:"#FFFFFF",card:"#FFFFFF",in:"#111111",hero:"#16A34A",mu:"#64748B"},
   };
   const variants = {
     caldo:{
-      amore:{bl:"#B22222",hero:"#B22222"},
-      rubino:{bl:"#4A0000"},
-      rosa:{bl:"#7A0040"},
-      bordeaux:{bl:"#3A0008"},
-      miele:{bl:"#004400"}
+      amore:{bl:"#FFE4E6",hero:"#E11D48",go:"#E11D48"},
+      rubino:{bl:"#FFE4E6",hero:"#BE123C",go:"#BE123C"},
+      rosa:{bl:"#FCE7F3",hero:"#DB2777",go:"#DB2777"},
+      bordeaux:{bl:"#FFE4E6",hero:"#9F1239",go:"#9F1239"},
+      terracotta:{bl:"#FFEDD5",hero:"#EA580C",go:"#EA580C"},
+      corallo:{bl:"#FFEDD5",hero:"#F97316",go:"#F97316"},
+      cipria:{bl:"#FEF3C7",hero:"#D97706",go:"#D97706"},
+      miele:{bl:"#FEF9C3",hero:"#CA8A04",go:"#CA8A04"},
+      classic:{bl:"#DCFCE7",hero:"#16A34A",go:"#16A34A"}
     },
     scuro:{
-      notte:{bl:"#000000",hero:"#000000"}
+      notte:{bl:"#020617",hero:"#020617",go:"#38BDF8",g2:"#0EA5E9",ro:"#7DD3FC"}
     }
   };
   const legacy = { celebration:"corallo", minimal:"neve", memorial:"perla" };
@@ -1005,10 +1037,10 @@ function resolveMomentPalette(state) {
   const overrides = variants[variant]?.[paletteKey];
   if(overrides) Object.assign(base, overrides);
   const surfaceTints = {
-    amore:"#FBF3F3", rubino:"#FAF2F2", rosa:"#FBF2F7", bordeaux:"#FAF2F4", miele:"#F3F8F3",
-    corallo:"#FFF7F2", terracotta:"#FBF6F1", cipria:"#FBF7F2", classic:"#F4F6FA", blu:"#F2F6FB",
-    salvia:"#F2F8F3", aurora:"#F6F2FB", lavanda:"#F7F2FC", perla:"#F7F7F7", neve:"#F8F8F8",
-    notte:"#F2F2F2", uomo:"#F0F3F8", gentleman:"#F4F4F4"
+    amore:"#FFF1F2", rubino:"#FFF1F2", rosa:"#FDF2F8", bordeaux:"#FFF1F2", miele:"#FEFCE8",
+    corallo:"#FFF7ED", terracotta:"#FFF7ED", cipria:"#FFFBEB", classic:"#F0FDF4", blu:"#F0F9FF",
+    salvia:"#ECFDF5", aurora:"#F5F3FF", lavanda:"#F5F3FF", perla:"#FAFAF9", neve:"#F8FAFC",
+    notte:"#F1F5F9", uomo:"#EFF6FF", gentleman:"#F8FAFC"
   };
   base.card = "#FFFFFF";
   base.bl2 = "#FFFFFF";
@@ -1086,12 +1118,13 @@ function resolveMomentSections(state) {
     rsvp:{enabled:false,title:"",body:"",whatsapp_number:"",event_name:"",ask_guests:true,ask_notes:true,images:[]},
     guestbook:{enabled:false,title:"",body:"",images:[]},
     gallery:{enabled:false,title:"",body:"",images:[]},
+    video:{enabled:false,title:"",body:"",video_url:"",video_title:"",video_description:"",images:[]},
     promises:{enabled:false,title:"",body:"",images:[]},
     places:{enabled:false,title:"",body:"",images:[]},
     dreams:{enabled:false,title:"",body:"",images:[]},
     countdown:{enabled:false,title:"",body:"",event_label:"",target_date:"",image_url:"",images:[]},
     music:{enabled:false,title:"",body:"",spotify_url:"",youtube_url:"",audio_url:"",audio_title:"",audio_description:"",images:[]},
-    letter_future:{enabled:false,title:"",body:"",recipient:"",unlock_date:"",media_type:"",media_url:"",media_title:"",images:[]},
+    letter_future:{enabled:false,title:"",body:"",recipient:"",unlock_date:"",media:[],media_type:"",media_url:"",media_title:"",images:[]},
     rituals:{enabled:false,title:"",body:"",images:[]},
     pet:{enabled:false,title:"",body:"",pet_name:"",pet_emoji:"🐾",pet_photo:"",images:[]},
     numbers:{enabled:false,title:"",body:"",images:[]},
@@ -1111,9 +1144,18 @@ function resolveMomentSections(state) {
   }
   if (raw.details?.body && !base.intro.body) base.intro.body = [base.intro.body, raw.details.body].filter(Boolean).join("\n\n");
   if (base.gallery) {
-    const media = normalizeMomentMedia(base.gallery);
-    base.gallery.media = media;
-    base.gallery.images = media.filter(item => item.type === "image").map(item => item.url);
+    const allMedia = normalizeMomentMedia(base.gallery);
+    const galleryVideos = allMedia.filter(item => item.type === "video");
+    const galleryImages = allMedia.filter(item => item.type === "image");
+    base.gallery.media = galleryImages;
+    base.gallery.images = galleryImages.map(item => item.url);
+    if (!base.video) base.video = { enabled: false, title: "", body: "", video_url: "", video_title: "", video_description: "", images: [] };
+    if (galleryVideos.length && !String(base.video.video_url || "").trim()) {
+      const first = galleryVideos[0];
+      base.video.video_url = first.url;
+      base.video.video_title = first.title || base.video.video_title || "";
+      base.video.video_description = first.description || base.video.video_description || "";
+    }
   }
   const journeySteps = resolveJourneyStepsWorker(base.timeline, base.places);
   base.timeline.items = journeySteps;
@@ -1146,22 +1188,25 @@ function momentSectionHasContent(key, section) {
     case "timeline":
       return resolveJourneyStepsWorker(section).length > 0;
     case "gallery":
-      return normalizeMomentMedia(section).length > 0;
+      return normalizeMomentMedia(section).some(item => item.type === "image");
+    case "video":
+      return Boolean(String(section.video_url || "").trim());
     case "rsvp":
+      // RSVP pubblico solo con WhatsApp organizzatore (obbligatorio).
       return Boolean(normalizeWhatsAppDigits(section.whatsapp_number));
     case "guestbook":
-      return Boolean(section?.enabled);
+      return true;
     case "promises":
     case "dreams":
     case "rituals":
     case "numbers":
-      return Boolean(String(section.body || "").trim());
+      return resolveListItems(section, key === "promises" ? "promise" : key === "dreams" ? "dream" : key === "rituals" ? "ritual" : "number").length > 0 || Boolean(String(section.body || "").trim());
     case "countdown":
       return Boolean(section.target_date);
     case "music":
-      return Boolean(section.spotify_url || section.youtube_url || section.audio_url);
+      return Boolean(section.spotify_url || section.youtube_url || section.audio_url || section.image_url);
     case "letter_future":
-      return Boolean(section.body || section.unlock_date || section.media_url);
+      return Boolean(section.body || section.unlock_date || letterMediaItems(section).length);
     case "pet":
       return Boolean(section.pet_name || section.body || section.pet_photo);
     case "quote":
@@ -1171,6 +1216,24 @@ function momentSectionHasContent(key, section) {
     default:
       return Boolean(section.title || section.body || (Array.isArray(section.images) && section.images.length));
   }
+}
+
+function resolveListItems(section, mode) {
+  if (Array.isArray(section?.items) && section.items.length) {
+    return section.items.map(item => {
+      if (mode === "promise") return { emoji: String(item.emoji || "✦"), text: String(item.text || "").trim() };
+      if (mode === "dream") return { done: Boolean(item.done), text: String(item.text || "").trim() };
+      if (mode === "ritual") return { emoji: String(item.emoji || "🕯"), text: String(item.text || "").trim() };
+      if (mode === "number") return { value: String(item.value || "").trim(), label: String(item.label || "").trim() };
+      return { text: String(item.text || "").trim() };
+    }).filter(item => Object.values(item).some(Boolean));
+  }
+  return parseMomentLines(section?.body || "", mode);
+}
+
+function listIntroHtml(body) {
+  const intro = String(body || "").trim();
+  return intro ? `<p class="moment-list-intro">${escapeHtml(intro)}</p>` : "";
 }
 
 function parseMomentLines(body, mode) {
@@ -1256,18 +1319,39 @@ function isLetterUnlocked(unlockDate) {
   return Date.now() >= target.getTime();
 }
 
-function renderLetterFutureMedia(section) {
+function letterMediaItems(section) {
+  if (Array.isArray(section.media) && section.media.length) {
+    return section.media
+      .map(item => ({
+        type: ["image", "video", "audio"].includes(item?.type) ? item.type : "image",
+        url: String(item?.url || "").trim(),
+        title: String(item?.title || "").trim()
+      }))
+      .filter(item => item.url && safeUrl(item.url) !== "#")
+      .slice(0, 4);
+  }
   const type = String(section.media_type || "").trim();
   const url = String(section.media_url || "").trim();
   const title = String(section.media_title || "").trim();
-  if (!url || !["image", "video", "audio"].includes(type)) return "";
-  if (type === "video") {
-    return `<div class="moment-letter-media">${title ? `<p class="moment-letter-media-title">${escapeHtml(title)}</p>` : ""}<video src="${attr(url)}" controls playsinline></video></div>`;
+  if (url && safeUrl(url) !== "#" && ["image", "video", "audio"].includes(type)) {
+    return [{ type, url, title }];
   }
-  if (type === "audio") {
-    return `<div class="moment-letter-media moment-audio">${title ? `<p class="moment-audio-title">${escapeHtml(title)}</p>` : ""}<audio src="${attr(url)}" controls></audio></div>`;
-  }
-  return `<div class="moment-letter-media">${title ? `<p class="moment-letter-media-title">${escapeHtml(title)}</p>` : ""}<img src="${attr(url)}" alt="${attr(title || "Allegato")}" loading="lazy"></div>`;
+  return [];
+}
+
+function renderLetterFutureMedia(section) {
+  const items = letterMediaItems(section);
+  if (!items.length) return "";
+  return items.map(item => {
+    const title = item.title ? `<p class="moment-letter-media-title">${escapeHtml(item.title)}</p>` : "";
+    if (item.type === "video") {
+      return `<div class="moment-letter-media">${title}<video src="${attr(item.url)}" controls playsinline></video></div>`;
+    }
+    if (item.type === "audio") {
+      return `<div class="moment-letter-media moment-audio">${title ? `<p class="moment-audio-title">${escapeHtml(item.title)}</p>` : ""}<audio src="${attr(item.url)}" controls></audio></div>`;
+    }
+    return `<div class="moment-letter-media">${title}<img src="${attr(item.url)}" alt="${attr(item.title || "Allegato")}" loading="lazy"></div>`;
+  }).join("");
 }
 
 function renderTogetherCounter(state, colors) {
@@ -1349,6 +1433,7 @@ function momentPageScript(state, ordered = [], hasCounter = false, slug = "") {
   syncNavState();
 })();` : "";
   return `(function(){
+var momentPageSlug="${momentSlug}";
 var momentPin=(new URLSearchParams(location.search).get("pin")||"").trim();
 if(momentPin&&history.replaceState){
   try{history.replaceState(null,"",location.pathname+location.hash);}catch(e){}
@@ -1429,9 +1514,11 @@ var cd=document.querySelector(".moment-countdown");if(cd){var target=new Date(cd
 document.querySelectorAll("[data-rsvp-form]").forEach(function(form){
   form.addEventListener("submit",function(e){
     e.preventDefault();
-    var card=form.closest("[data-rsvp-wa]");
-    var wa=card&&card.getAttribute("data-rsvp-wa");
-    if(!wa)return;
+    var card=form.closest(".moment-rsvp")||form.closest("[data-rsvp-wa]");
+    if(!card)return;
+    var wa=(card.getAttribute("data-rsvp-wa")||"").replace(/\\D/g,"");
+    var status=card.querySelector("[data-rsvp-status]");
+    var submitBtn=form.querySelector(".moment-rsvp-submit");
     var fd=new FormData(form);
     var eventName=card.getAttribute("data-rsvp-event")||document.title.replace(/ · KhamaKey Moments$/,"");
     var intro=card.getAttribute("data-rsvp-intro")||("RSVP · "+eventName);
@@ -1463,16 +1550,46 @@ document.querySelectorAll("[data-rsvp-form]").forEach(function(form){
         source:"public_page"
       }
     };
-    fetch("/api/moment/rsvp",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).catch(function(){});
-    window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(lines.join("\\n")),"_blank","noopener");
+    if(!payload.values.name||!payload.values.attending){
+      if(status){status.hidden=false;status.textContent="Compila nome e presenza.";status.className="moment-rsvp-status error";}
+      return;
+    }
+    if(submitBtn){submitBtn.disabled=true;submitBtn.textContent="Invio…";}
+    if(status){status.hidden=false;status.textContent="Invio in corso…";status.className="moment-rsvp-status";}
+    fetch("/api/moment/rsvp",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+      .then(function(res){return res.json().then(function(data){return {ok:res.ok,data:data};});})
+      .then(function(result){
+        if(!result.ok)throw new Error((result.data&&result.data.error)||"Invio non riuscito");
+        if(wa){
+          if(status){status.hidden=false;status.textContent="Conferma salvata. Apro WhatsApp…";status.className="moment-rsvp-status ok";}
+          window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(lines.join("\\n")),"_blank","noopener");
+        }else{
+          if(status){status.hidden=false;status.textContent="Grazie! La tua conferma è stata inviata.";status.className="moment-rsvp-status ok";}
+          form.reset();
+        }
+      })
+      .catch(function(err){
+        if(status){status.hidden=false;status.textContent=err.message||"Invio non riuscito. Riprova.";status.className="moment-rsvp-status error";}
+      })
+      .finally(function(){
+        if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=wa?"Invia su WhatsApp":"Invia conferma";}
+      });
   });
 });
-document.querySelectorAll("[data-guestbook-slug]").forEach(function(section){
-  var slug=section.getAttribute("data-guestbook-slug")||"";
+document.querySelectorAll(".moment-guestbook").forEach(function(section){
+  var slug=(section.getAttribute("data-guestbook-slug")||momentPageSlug||"").trim();
   var list=section.querySelector("[data-guestbook-list]");
   var status=section.querySelector("[data-guestbook-status]");
   var form=section.querySelector("[data-guestbook-form]");
-  if(!slug||!list)return;
+  var submitBtn=form?form.querySelector(".moment-guestbook-submit"):null;
+  function showStatus(message,type){
+    if(!status)return;
+    status.hidden=false;
+    status.textContent=message;
+    status.className="moment-guestbook-status"+(type?" "+type:"");
+    status.scrollIntoView({block:"nearest",behavior:"smooth"});
+  }
+  if(!list)return;
   function escText(value){return String(value||"").replace(/[&<>"']/g,function(ch){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch];});}
   function formatDate(value){try{return new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(value));}catch(e){return "";}}
   function paintMessages(messages){
@@ -1482,6 +1599,7 @@ document.querySelectorAll("[data-guestbook-slug]").forEach(function(section){
     }).join("");
   }
   function loadMessages(){
+    if(!slug)return;
     var pin=momentPin;
     var url="/api/moment/guestbook?slug="+encodeURIComponent(slug)+(pin?"&pin="+encodeURIComponent(pin):"");
     fetch(url).then(function(res){return res.json();}).then(function(data){if(data&&data.ok)paintMessages(data.messages||[]);}).catch(function(){});
@@ -1490,6 +1608,10 @@ document.querySelectorAll("[data-guestbook-slug]").forEach(function(section){
   if(form){
     form.addEventListener("submit",function(e){
       e.preventDefault();
+      if(!slug){
+        showStatus("Il guestbook funziona sulla pagina pubblicata. Pubblica la pagina e apri il link condiviso.","error");
+        return;
+      }
       var fd=new FormData(form);
       var pin=momentPin;
       var payload={
@@ -1500,16 +1622,24 @@ document.querySelectorAll("[data-guestbook-slug]").forEach(function(section){
           message:String(fd.get("guestbook_message")||"").trim()
         }
       };
-      if(status){status.hidden=false;status.textContent="Invio in corso…";status.className="moment-guestbook-status";}
+      if(!payload.values.name||!payload.values.message){
+        showStatus("Scrivi nome e messaggio prima di inviare.","error");
+        return;
+      }
+      if(submitBtn){submitBtn.disabled=true;submitBtn.textContent="Invio in corso…";}
+      showStatus("Invio in corso…","");
       fetch("/api/moment/guestbook",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
         .then(function(res){return res.json().then(function(data){return {ok:res.ok,data:data};});})
         .then(function(result){
           if(!result.ok)throw new Error((result.data&&result.data.error)||"Invio non riuscito");
           form.reset();
-          if(status){status.textContent="Grazie! Il messaggio è in attesa di approvazione.";status.className="moment-guestbook-status ok";}
+          showStatus("Grazie! Il messaggio è stato inviato e apparirà dopo l'approvazione.","ok");
         })
         .catch(function(err){
-          if(status){status.textContent=err.message||"Invio non riuscito. Riprova.";status.className="moment-guestbook-status error";}
+          showStatus(err.message||"Invio non riuscito. Riprova.","error");
+        })
+        .finally(function(){
+          if(submitBtn){submitBtn.disabled=false;submitBtn.textContent="Invia messaggio";}
         });
     });
   }
@@ -1579,19 +1709,19 @@ body.nav-open{overflow:hidden}
 .hero-intimo .moment-hero{min-height:min(78dvh,620px)}
 .hero-intimo .moment-cover-wrap,.hero-intimo .moment-cover{object-position:center 32%}
 .hero-profilo .moment-hero{padding-top:max(88px,env(safe-area-inset-top))}
-.moment-cover-wrap{position:absolute;inset:0;transform-origin:center center;will-change:transform}
+.moment-cover-wrap{position:absolute;inset:0;transform-origin:center center;will-change:transform;z-index:0}
 .moment-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:kenBurns 22s ease-in-out infinite alternate}
 @keyframes kenBurns{0%{transform:scale(1)}100%{transform:scale(1.09)}}
-.moment-hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,23,42,0.08) 0%,rgba(15,23,42,0.48) 55%,rgba(15,23,42,0.85) 100%)}
-.moment-hero-content{position:relative;z-index:1;max-width:520px;margin:0 auto}
+.moment-hero-overlay{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(15,23,42,0.08) 0%,rgba(15,23,42,0.48) 55%,rgba(15,23,42,0.85) 100%)}
+.moment-hero-content{position:relative;z-index:2;max-width:520px;margin:0 auto;isolation:isolate}
 .hero-in,.rv{opacity:0;transform:translateY(24px) scale(0.98);transition:opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)}
 .hero-in.on,.rv.on{opacity:1;transform:none}
 .moment-pill{display:inline-block;font-family:${f.ui};font-size:.62rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.92);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:8px 18px;margin-bottom:16px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .moment-hero small{display:block;font-family:${f.ui};font-weight:800;text-transform:uppercase;letter-spacing:.16em;opacity:.88;margin-bottom:12px}
 .moment-profile{width:104px;height:104px;border-radius:999px;object-fit:cover;border:4px solid rgba(255,255,255,0.9);box-shadow:0 12px 32px rgba(15,23,42,0.18);margin:0 auto 20px;display:block;transition:transform .3s ease}
 .moment-profile:hover{transform:scale(1.05)}
-.moment-hero h1{font-family:${f.display};font-size:clamp(2.4rem,9vw,4.2rem);font-weight:800;line-height:1.12;margin:8px 0;text-shadow:0 2px 24px rgba(0,0,0,0.3)}
-.moment-hero p{font-family:${f.body};font-size:clamp(1.05rem,4vw,1.2rem);font-style:italic;line-height:1.75;margin:0 auto;max-width:480px;opacity:.96;text-shadow:0 1px 12px rgba(0,0,0,0.2)}
+.moment-hero h1{font-family:${f.display};font-size:clamp(2.4rem,9vw,4.2rem);font-weight:800;line-height:1.12;margin:8px 0;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.45),0 8px 32px rgba(0,0,0,0.35)}
+.moment-hero p{font-family:${f.body};font-size:clamp(1.05rem,4vw,1.2rem);font-style:italic;line-height:1.75;margin:0 auto;max-width:480px;color:rgba(255,255,255,.98);text-shadow:0 1px 6px rgba(0,0,0,0.4),0 4px 16px rgba(0,0,0,0.28)}
 @keyframes scrollPulse{0%,100%{opacity:.5;transform:scaleY(1)}50%{opacity:.15;transform:scaleY(.55)}}
 @keyframes momentItemIn{from{opacity:0;transform:translateY(16px) scale(0.98)}to{opacity:1;transform:none}}
 .moment-content{padding:24px 20px 48px;display:grid;gap:24px;background:transparent}
@@ -1633,6 +1763,7 @@ body.nav-open{overflow:hidden}
 .moment-counter-unit b{display:block;font-size:clamp(1.8rem,8vw,2.4rem);font-weight:700;font-style:normal;line-height:1;color:${c.go}!important;font-family:${f.ui}}
 .moment-counter-unit small{display:block;font-family:${f.ui};font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:${c.muted};margin-top:8px}
 .moment-card{position:relative;overflow:hidden;padding:32px 20px 28px;margin:0;max-width:none}
+.moment-card-gallery{overflow:visible}
 .moment-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,rgba(15,23,42,.03),rgba(15,23,42,.01))}
 .moment-card-head{display:grid;justify-items:center;text-align:center;margin-bottom:20px;padding-top:4px}
 
@@ -1682,12 +1813,9 @@ body.nav-open{overflow:hidden}
 .moment-gallery-scroll{margin:14px -4px 0;padding:0 12px 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x mandatory;scroll-padding-inline:12px;mask-image:linear-gradient(90deg,transparent,black 6%,black 94%,transparent)}
 .moment-gallery-scroll::-webkit-scrollbar{display:none}
 .moment-gallery-track{display:flex;gap:12px;width:max-content;padding-bottom:2px}
-.moment-gallery-scroll img,.moment-gallery-scroll video,.moment-gallery-scroll .moment-media-card,.moment-gallery-scroll .moment-gallery-figure{width:78vw;max-width:280px;height:calc(78vw * 1.22);max-height:340px;object-fit:cover;border-radius:20px;scroll-snap-align:center;box-shadow:0 10px 28px rgba(0,0,0,.08);border:0;padding:0;background:${c.bl2};cursor:pointer;transition:transform .2s ease}
-
-/* Lightbox & Gallery Styles */
-.moment-gallery-scroll img:active,.moment-gallery-scroll .moment-media-card:active{transform:scale(.98)}
-.moment-gallery-scroll .moment-gallery-figure{height:auto;min-height:calc(78vw * 1.22);max-height:none;display:grid;align-content:start;gap:8px;background:transparent;box-shadow:none}
-.moment-gallery-scroll .moment-gallery-figure img{width:78vw;max-width:280px;height:calc(78vw * 1.22);max-height:340px;border-radius:20px;box-shadow:0 10px 28px rgba(0,0,0,.08)}
+.moment-gallery-scroll img,.moment-gallery-scroll video,.moment-gallery-scroll .moment-media-card{width:min(72vw,240px);aspect-ratio:4/3;height:auto;max-height:none;object-fit:cover;border-radius:16px;scroll-snap-align:center;box-shadow:0 8px 22px rgba(0,0,0,.08);border:0;padding:0;background:${c.bl2};cursor:pointer;transition:transform .2s ease}
+.moment-gallery-scroll .moment-gallery-figure{width:min(72vw,240px);height:auto;min-height:0;max-height:none;display:grid;align-content:start;gap:8px;background:transparent;box-shadow:none;scroll-snap-align:center;margin:0}
+.moment-gallery-scroll .moment-gallery-figure img{width:100%;aspect-ratio:4/3;height:auto;max-height:none;border-radius:16px;box-shadow:0 8px 22px rgba(0,0,0,.08);object-fit:cover}
 .moment-media-card{display:grid;place-items:center;color:${c.go};font-family:${f.ui};font-size:.78rem;font-weight:700;min-height:88px;border-radius:20px;border:1px solid ${c.line};transition:border-color .2s,background .2s}
 .moment-media-card:hover{background:${c.cardSoft};border-color:${c.lineStrong}}
 .moment-media-card small{display:block;margin-top:8px;opacity:.75;padding:0 10px;text-align:center}
@@ -1707,6 +1835,10 @@ body.nav-open{overflow:hidden}
 .moment-lightbox-next{right:12px}
 .moment-lightbox-counter{font-family:${f.ui};font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;opacity:.72;margin:0 0 8px}
 
+.moment-video-wrap{margin-top:12px;display:grid;gap:10px}
+.moment-video-wrap video{width:100%;border-radius:16px;border:1px solid ${c.line};background:#111;aspect-ratio:16/9;object-fit:cover}
+.moment-video-title{font-family:${f.body};font-size:1.1rem;margin:0;color:${c.ink}}
+.moment-video-desc{font-size:.92rem;opacity:.82;margin:0;line-height:1.5;color:${c.muted}}
 .moment-youtube{margin-top:12px;border-radius:18px;overflow:hidden;border:1px solid ${c.line};aspect-ratio:16/9;background:#111}
 .moment-youtube iframe{display:block;width:100%;height:100%;border:0}
 .moment-audio{margin-top:12px;border-radius:18px;padding:16px;background:${c.cardSoft};border:1px solid ${c.line};box-shadow:none}
@@ -1725,8 +1857,10 @@ body.nav-open{overflow:hidden}
 .moment-number{flex:1 1 100px;max-width:140px;text-align:center;padding:16px 10px;border-radius:18px;background:${c.cardSoft};border:1px solid ${c.line};border-top:3px solid ${c.go};box-shadow:none}
 .moment-number b{display:block;font-size:clamp(1.6rem,7vw,2rem);font-weight:700;font-style:normal;color:${c.go};line-height:1;font-family:${f.ui}}
 .moment-number small{display:block;font-family:${f.ui};font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:${c.muted};margin-top:8px;line-height:1.35}
-.moment-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
-.moment-gallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:18px;border:1px solid ${c.line};box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.moment-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.moment-gallery img,.moment-gallery .moment-gallery-figure img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;border:1px solid ${c.line};box-shadow:0 6px 18px rgba(0,0,0,.06);height:auto;max-height:none;display:block}
+.moment-gallery .moment-gallery-figure{margin:0;display:grid;gap:6px;min-width:0;width:100%}
+.moment-gallery .moment-gallery-caption{font-size:.68rem;max-width:100%;padding:0 2px}
 .moment-letter{padding:26px 20px;margin-top:8px;border-left:3px solid ${c.go}!important;position:relative;box-shadow:none}
 .moment-letter-to{font-style:italic;color:${c.muted};font-weight:600;margin:0 0 12px}
 .moment-letter-sign{display:block;margin-top:18px;font-family:${f.display};font-size:1.6rem;color:${c.go}}
@@ -1749,6 +1883,8 @@ body.nav-open{overflow:hidden}
 .moment-dream.done .moment-dream-text{opacity:.55;text-decoration:line-through;color:${c.muted}}
 .moment-countdown{text-align:center;padding:36px 20px}
 .moment-countdown-photo{width:min(100%,280px);height:160px;object-fit:cover;border-radius:16px;margin:0 auto 16px;display:block;border:1px solid ${c.line};box-shadow:0 10px 28px rgba(0,0,0,.08)}
+.moment-music-photo{width:min(100%,320px);height:180px;object-fit:cover;border-radius:16px;margin:0 auto 16px;display:block;border:1px solid ${c.line};box-shadow:0 10px 28px rgba(0,0,0,.08)}
+.moment-list-intro{font-size:14px;color:${c.muted};margin:0 0 14px;line-height:1.5}
 .moment-countdown-label{font-family:${f.ui};font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:${c.go};margin-bottom:14px}
 .moment-countdown-event{font-size:1.15rem;font-style:italic;margin:0 0 18px;color:${c.ink}}
 .moment-countdown-note{margin:0 0 16px;color:${c.ink};opacity:.82;line-height:1.6;font-size:.98rem}
@@ -1881,7 +2017,7 @@ body.nav-open{overflow:hidden}
 .moment-media-card-audio{min-height:88px}
 .moment-footer{text-align:center;color:color-mix(in srgb, ${c.bl} 35%, ${c.in}) !important;opacity:0.75;font-family:${f.ui};font-size:12px;padding:16px 20px max(28px,env(safe-area-inset-bottom))}
 @media(prefers-reduced-motion:reduce){.hero-in,.rv{opacity:1;transform:none;transition:none}.rv.on .moment-journey-item,.rv.on .moment-promise,.rv.on .moment-ritual,.rv.on .moment-number,.rv.on .moment-dream{animation:none}.moment-sealed-icon,.moment-decor-item{animation:none}.moment-decor{display:none}}
-@media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:24px;box-shadow:0 24px 70px rgba(17,32,65,.08);background:${c.surface}}.moment-content{padding:20px 20px 36px}.moment-gallery-scroll img,.moment-gallery-scroll .moment-gallery-figure img{width:260px;height:320px}}
+@media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:24px;box-shadow:0 24px 70px rgba(17,32,65,.08);background:${c.surface}}.moment-content{padding:20px 20px 36px}.moment-gallery-scroll img,.moment-gallery-scroll .moment-gallery-figure,.moment-gallery-scroll .moment-gallery-figure img{width:220px}.moment-gallery{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}}
 .moment-cut-arco #moment-hero {
   clip-path: ellipse(95% 100% at 50% 0%) !important;
   margin-bottom: -15px !important;
@@ -1931,6 +2067,12 @@ main.moment-type-anniversary {
 .moment-type-wedding .moment-hero-overlay,
 .moment-type-anniversary .moment-hero-overlay {
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.45) 60%, rgba(15, 23, 42, 0.82) 100%) !important;
+  z-index: 1 !important;
+}
+
+.moment-type-love .moment-hero-content,
+.moment-type-wedding .moment-hero-content,
+.moment-type-anniversary .moment-hero-content {
   z-index: 2 !important;
 }
 
@@ -2136,7 +2278,7 @@ main.moment-type-travel {
 
 .moment-type-travel .moment-hero-overlay {
   background: linear-gradient(180deg, rgba(16, 11, 38, 0.1) 0%, rgba(16, 11, 38, 0.4) 60%, rgba(16, 11, 38, 0.85) 100%) !important;
-  z-index: 2 !important;
+  z-index: 1 !important;
 }
 
 
@@ -2871,6 +3013,7 @@ const MOMENT_SECTION_ICONS = {
   rsvp: "📲",
   guestbook: "📖",
   gallery: "📸",
+  video: "🎬",
   promises: "💍",
   places: "📍",
   dreams: "🌟",
@@ -3019,11 +3162,13 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   const rv = `moment-card moment-card-${escapeHtml(key)} rv`;
 
   if (key === "quote" && section.body) {
-    return `<article class="${rv} moment-quote-wrap"><span class="moment-quote-mark">"</span><p class="moment-quote-text">${escapeHtml(section.body)}</p>${section.author ? `<span class="moment-quote-author">— ${escapeHtml(section.author)}</span>` : ""}</article>`;
+    const titleHead = section.title ? head(section.title) : "";
+    return `<article class="${rv} moment-quote-wrap">${titleHead}<span class="moment-quote-mark">"</span><p class="moment-quote-text">${escapeHtml(section.body)}</p>${section.author ? `<span class="moment-quote-author">— ${escapeHtml(section.author)}</span>` : ""}</article>`;
   }
 
   if (key === "signature") {
-    return `<article class="${rv} moment-signature"><p class="moment-signature-label">Questo momento appartiene a</p><p class="moment-signature-name">${escapeHtml(section.sign_name || section.title || "Voi")}</p>${section.sign_subtitle ? `<p class="moment-signature-sub">${escapeHtml(section.sign_subtitle)}</p>` : section.body ? `<p class="moment-signature-sub">${escapeHtml(section.body)}</p>` : ""}</article>`;
+    const label = section.title || "Questo momento appartiene a";
+    return `<article class="${rv} moment-signature"><p class="moment-signature-label">${escapeHtml(label)}</p><p class="moment-signature-name">${escapeHtml(section.sign_name || "Voi")}</p>${section.sign_subtitle ? `<p class="moment-signature-sub">${escapeHtml(section.sign_subtitle)}</p>` : section.body ? `<p class="moment-signature-sub">${escapeHtml(section.body)}</p>` : ""}</article>`;
   }
 
   if (key === "dedication" && (section.body || section.recipient)) {
@@ -3038,18 +3183,18 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     const wa = normalizeWhatsAppDigits(section.whatsapp_number);
     const eventName = String(section.event_name || section.title || "Evento").trim();
     if (!wa) {
-      return `<article class="${rv}">${head(section.title || "Conferma presenza")}<p class="moment-empty-hint">Aggiungi il numero WhatsApp dell'organizzatore nell'editor.</p></article>`;
+      return `<article class="${rv}">${head(section.title || "Conferma presenza")}<p class="moment-empty-hint">Inserisci il numero WhatsApp dell'organizzatore nell'editor e salva: senza WhatsApp la sezione non appare agli invitati.</p></article>`;
     }
     const { html: optionalFields, customFields } = renderRsvpOptionalFields(section);
     const eventBadge = renderRsvpEventBadge(eventName, fonts);
     const rsvpIntro = rsvpWhatsAppIntro(momentType, eventName);
     const customAttr = attr(JSON.stringify(customFields.map(field => ({ id: field.id, label: field.label }))));
-    return `<article class="${rv} moment-rsvp" data-rsvp-wa="${attr(wa)}" data-rsvp-event="${attr(eventName)}" data-rsvp-intro="${attr(rsvpIntro)}" data-rsvp-custom="${customAttr}">${head(section.title || "Conferma presenza")}${eventBadge}${section.body ? `<p class="moment-rsvp-intro">${escapeHtml(section.body)}</p>` : ""}<form class="moment-rsvp-form" data-rsvp-form><label>Nome e cognome<input type="text" name="rsvp_name" required placeholder="Es. Marco Rossi" autocomplete="name"></label><fieldset class="moment-rsvp-attending"><legend>Vieni?</legend><label><input type="radio" name="rsvp_attending" value="Sì, ci sarò" checked> Sì, ci sarò</label><label><input type="radio" name="rsvp_attending" value="No, non posso"> No, non posso</label><label><input type="radio" name="rsvp_attending" value="Forse"> Forse</label></fieldset>${optionalFields}<button type="submit" class="moment-rsvp-submit">Invia su WhatsApp</button></form></article>`;
+    return `<article class="${rv} moment-rsvp" data-rsvp-wa="${attr(wa)}" data-rsvp-event="${attr(eventName)}" data-rsvp-intro="${attr(rsvpIntro)}" data-rsvp-custom="${customAttr}">${head(section.title || "Conferma presenza")}${eventBadge}${section.body ? `<p class="moment-rsvp-intro">${escapeHtml(section.body)}</p>` : ""}<p class="moment-rsvp-status" data-rsvp-status hidden role="status" aria-live="polite"></p><form class="moment-rsvp-form" data-rsvp-form><label>Nome e cognome<input type="text" name="rsvp_name" required placeholder="Es. Marco Rossi" autocomplete="name"></label><fieldset class="moment-rsvp-attending"><legend>Vieni?</legend><label><input type="radio" name="rsvp_attending" value="Sì, ci sarò" checked> Sì, ci sarò</label><label><input type="radio" name="rsvp_attending" value="No, non posso"> No, non posso</label><label><input type="radio" name="rsvp_attending" value="Forse"> Forse</label></fieldset>${optionalFields}<button type="submit" class="moment-rsvp-submit">Invia su WhatsApp</button></form></article>`;
   }
 
   if (key === "guestbook") {
     const pageSlug = String(slug || "").trim();
-    return `<article class="${rv} moment-guestbook" data-guestbook-slug="${attr(pageSlug)}">${head(section.title || "Libro degli ospiti")}${section.body ? `<p class="moment-guestbook-intro">${escapeHtml(section.body)}</p>` : ""}<form class="moment-guestbook-form" data-guestbook-form><label>Il tuo nome<input type="text" name="guestbook_name" required placeholder="Es. Laura Bianchi" autocomplete="name"></label><label>Il tuo messaggio<textarea name="guestbook_message" rows="4" required placeholder="Scrivi un pensiero, un augurio o un ricordo…"></textarea></label><button type="submit" class="moment-guestbook-submit">Invia messaggio</button></form><p class="moment-guestbook-status" data-guestbook-status hidden></p><div class="moment-guestbook-list" data-guestbook-list aria-live="polite"></div></article>`;
+    return `<article class="${rv} moment-guestbook" data-guestbook-slug="${attr(pageSlug)}">${head(section.title || "Libro degli ospiti")}${section.body ? `<p class="moment-guestbook-intro">${escapeHtml(section.body)}</p>` : ""}<p class="moment-guestbook-status" data-guestbook-status hidden role="status" aria-live="polite"></p><form class="moment-guestbook-form" data-guestbook-form><label>Il tuo nome<input type="text" name="guestbook_name" required placeholder="Es. Laura Bianchi" autocomplete="name"></label><label>Il tuo messaggio<textarea name="guestbook_message" rows="4" required placeholder="Scrivi un pensiero, un augurio o un ricordo…"></textarea></label><button type="submit" class="moment-guestbook-submit">Invia messaggio</button></form><div class="moment-guestbook-list" data-guestbook-list aria-live="polite"></div></article>`;
   }
 
   if (key === "timeline") {
@@ -3073,14 +3218,28 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     return `<article class="${rv}">${head(section.title || "Tappe & luoghi")}<div class="moment-journey">${items}</div></article>`;
   }
 
-  if (key === "promises" && section.body) {
-    const items = parseMomentLines(section.body, "promise");
-    return `<article class="${rv}">${head(section.title)}<div class="moment-promises">${items.map(item => `<div class="moment-promise"><span class="moment-promise-emoji">${escapeHtml(item.emoji)}</span><span>${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
+  if (key === "promises") {
+    const items = resolveListItems(section, "promise");
+    if (!items.length) return `<article class="${rv}">${head(section.title || "Promesse")}<p class="moment-empty-hint">Aggiungi le promesse, una card ciascuna.</p></article>`;
+    return `<article class="${rv}">${head(section.title || "Promesse")}${listIntroHtml(section.body)}<div class="moment-promises">${items.map(item => `<div class="moment-promise"><span class="moment-promise-emoji">${escapeHtml(item.emoji)}</span><span>${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
   }
 
-  if (key === "dreams" && section.body) {
-    const items = parseMomentLines(section.body, "dream");
-    return `<article class="${rv}">${head(section.title)}<div class="moment-dreams">${items.map(item => `<div class="moment-dream ${item.done ? "done" : ""}"><span class="moment-dream-mark">${item.done ? "✓" : ""}</span><span class="moment-dream-text">${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
+  if (key === "dreams") {
+    const items = resolveListItems(section, "dream");
+    if (!items.length) return `<article class="${rv}">${head(section.title || "Sogni")}<p class="moment-empty-hint">Aggiungi i sogni da realizzare insieme.</p></article>`;
+    return `<article class="${rv}">${head(section.title || "Sogni")}${listIntroHtml(section.body)}<div class="moment-dreams">${items.map(item => `<div class="moment-dream ${item.done ? "done" : ""}"><span class="moment-dream-mark">${item.done ? "✓" : ""}</span><span class="moment-dream-text">${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
+  }
+
+  if (key === "rituals") {
+    const items = resolveListItems(section, "ritual");
+    if (!items.length) return `<article class="${rv}">${head(section.title || "Rituali")}<p class="moment-empty-hint">Aggiungi i rituali quotidiani.</p></article>`;
+    return `<article class="${rv}">${head(section.title)}${listIntroHtml(section.body)}<div class="moment-rituals">${items.map(item => `<div class="moment-ritual"><span class="moment-promise-emoji">${escapeHtml(item.emoji)}</span><span>${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
+  }
+
+  if (key === "numbers") {
+    const items = resolveListItems(section, "number");
+    if (!items.length) return `<article class="${rv}">${head(section.title || "I nostri numeri")}<p class="moment-empty-hint">Es. «365 · giorni insieme».</p></article>`;
+    return `<article class="${rv}">${head(section.title)}${listIntroHtml(section.body)}<div class="moment-numbers">${items.map(item => `<div class="moment-number">${item.value ? `<b>${escapeHtml(item.value)}</b>` : ""}${item.label ? `<small>${escapeHtml(item.label)}</small>` : ""}</div>`).join("")}</div></article>`;
   }
 
   if (key === "countdown" && section.target_date) {
@@ -3090,16 +3249,18 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     return `<section class="moment-countdown rv" data-target="${attr(target.length > 10 ? target : target + "T12:00:00")}">${photo}<p class="moment-countdown-label">${escapeHtml(section.title || "Conto alla rovescia")}</p>${section.event_label ? `<p class="moment-countdown-event">${escapeHtml(section.event_label)}</p>` : ""}${section.body ? `<p class="moment-countdown-note">${escapeHtml(section.body)}</p>` : ""}<div class="moment-countdown-grid"><span class="moment-countdown-unit"><b data-cd="days">0</b><small>giorni</small></span><span class="moment-countdown-unit"><b data-cd="hours">0</b><small>ore</small></span><span class="moment-countdown-unit"><b data-cd="minutes">0</b><small>minuti</small></span></div></section>`;
   }
 
-  if (key === "music" && (section.spotify_url || section.youtube_url || section.audio_url)) {
+  if (key === "music" && (section.spotify_url || section.youtube_url || section.audio_url || section.image_url)) {
     const spotify = spotifyEmbedFromUrl(section.spotify_url);
     const youtube = youtubeEmbedFromUrl(section.youtube_url);
+    const imageUrl = safeUrl(section.image_url || "") !== "#" ? safeUrl(section.image_url || "") : "";
+    const photo = imageUrl ? `<img class="moment-music-photo" src="${attr(imageUrl)}" alt="" loading="lazy">` : "";
     const audioBlock = section.audio_url
       ? `<div class="moment-audio">${section.audio_title ? `<p class="moment-audio-title">${escapeHtml(section.audio_title)}</p>` : ""}${section.audio_description ? `<p class="moment-audio-desc">${escapeHtml(section.audio_description)}</p>` : ""}<audio src="${attr(section.audio_url)}" controls></audio></div>`
       : "";
-    return `<article class="${rv}">${head(section.title || "La nostra canzone")}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${spotify ? `<div class="moment-spotify"><iframe src="${attr(spotify)}" loading="lazy" allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture"></iframe></div>` : ""}${youtube ? `<div class="moment-youtube"><iframe src="${attr(youtube)}" loading="lazy" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen title="Video YouTube"></iframe></div>` : ""}${audioBlock}</article>`;
+    return `<article class="${rv}">${head(section.title || "La nostra canzone")}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${photo}${spotify ? `<div class="moment-spotify"><iframe src="${attr(spotify)}" loading="lazy" allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture"></iframe></div>` : ""}${youtube ? `<div class="moment-youtube"><iframe src="${attr(youtube)}" loading="lazy" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen title="Video YouTube"></iframe></div>` : ""}${audioBlock}</article>`;
   }
 
-  if (key === "letter_future" && (section.body || section.unlock_date || section.media_url)) {
+  if (key === "letter_future" && (section.body || section.unlock_date || letterMediaItems(section).length)) {
     const unlocked = isLetterUnlocked(section.unlock_date);
     const when = formatUnlockDate(section.unlock_date);
     if (!unlocked) {
@@ -3110,11 +3271,6 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<div class="moment-letter">${recipient}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${media}<span class="moment-letter-heart" aria-hidden="true">♥</span></div></article>`;
   }
 
-  if (key === "rituals" && section.body) {
-    const items = parseMomentLines(section.body, "ritual");
-    return `<article class="${rv}">${head(section.title)}<div class="moment-rituals">${items.map(item => `<div class="moment-ritual"><span class="moment-promise-emoji">${escapeHtml(item.emoji)}</span><span>${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
-  }
-
   if (key === "pet" && (section.pet_name || section.body || section.pet_photo)) {
     const photo = safeUrl(section.pet_photo || "") !== "#" ? `<img class="moment-pet-photo" src="${attr(section.pet_photo)}" alt="${attr(section.pet_name || "Pet")}">` : "";
     const name = section.pet_name ? `<p class="moment-pet-name">${escapeHtml(section.pet_emoji || "🐾")} ${escapeHtml(section.pet_name)}</p>` : "";
@@ -3122,75 +3278,46 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     return `<article class="${rv}">${head(section.title || "Il nostro compagno")}<div class="moment-pet-card">${photo}${name}${body}</div></article>`;
   }
 
-  if (key === "numbers" && section.body) {
-    const items = parseMomentLines(section.body, "number");
-    return `<article class="${rv}">${head(section.title)}<div class="moment-numbers">${items.map(item => `<div class="moment-number">${item.value ? `<b>${escapeHtml(item.value)}</b>` : ""}${item.label ? `<small>${escapeHtml(item.label)}</small>` : ""}</div>`).join("")}</div></article>`;
+  if (key === "gallery") {
+    const media = normalizeMomentMedia(section).filter(item => item.type === "image");
+    const headBlock = head(section.title || "Galleria foto");
+    if (!media.length) {
+      return `<article class="${rv}">${headBlock}<p class="moment-gallery-empty">Le foto verranno aggiunte presto.</p></article>`;
+    }
+    const cards = media.map((item, idx) => {
+      const caption = item.title ? `<span class="moment-gallery-caption">${escapeHtml(item.title)}</span>` : "";
+      return `<figure class="moment-gallery-figure"><img src="${attr(item.url)}" alt="${attr(item.title || "")}" loading="lazy" data-media-open="${idx}">${caption}</figure>`;
+    }).join("");
+    const json = escapeHtml(JSON.stringify(media));
+    return `<article class="${rv}">${head(section.title || "Galleria foto")}<div class="moment-gallery">${cards}</div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
   }
 
-
-  if (key === "gallery") {
-    const media = normalizeMomentMedia(section);
-    const headBlock = head(section.title || "Foto & video");
-    if (!media.length) {
-      return `<article class="${rv}">${headBlock}<p class="moment-gallery-empty">I ricordi verranno aggiunti presto.</p></article>`;
+  if (key === "video") {
+    const videoUrl = safeUrl(section.video_url || "") !== "#" ? safeUrl(section.video_url || "") : "";
+    if (!videoUrl) {
+      return `<article class="${rv}">${head(section.title || "Video")}<p class="moment-empty-hint">Carica un video MP4 o MOV nell'editor.</p></article>`;
     }
-    const groups = [
-      { type: "image", label: "Foto" },
-      { type: "video", label: "Video" },
-      { type: "audio", label: "Audio" }
-    ];
-    const blocks = groups.map(group => {
-      const items = media.map((item, idx) => ({ item, idx })).filter(({ item }) => item.type === group.type);
-      if (!items.length) return "";
-      const cards = items.map(({ item, idx }) => {
-        if (item.type === "video") {
-          return `<button type="button" class="moment-media-card" data-media-open="${idx}" aria-label="${escapeHtml(item.title || "Video")}"><span>▶ ${escapeHtml(item.title || "Video")}</span>${item.description ? `<small>${escapeHtml(item.description)}</small>` : ""}</button>`;
-        }
-        if (item.type === "audio") {
-          return `<button type="button" class="moment-media-card moment-media-card-audio" data-media-open="${idx}" aria-label="${escapeHtml(item.title || "Audio")}"><span>♫ ${escapeHtml(item.title || "Audio")}</span>${item.description ? `<small>${escapeHtml(item.description)}</small>` : ""}</button>`;
-        }
-        const caption = item.title ? `<span class="moment-gallery-caption">${escapeHtml(item.title)}</span>` : "";
-        return `<figure class="moment-gallery-figure"><img src="${attr(item.url)}" alt="${attr(item.title || "")}" loading="lazy" data-media-open="${idx}">${caption}</figure>`;
-      }).join("");
-      const track = group.type === "image" && items.length >= 2
-        ? `<div class="moment-gallery-scroll"><div class="moment-gallery-track">${cards}</div></div>`
-        : `<div class="moment-gallery-group-items ${group.type === "image" ? "moment-gallery" : "moment-media-list"}">${cards}</div>`;
-      return `<div class="moment-gallery-group"><p class="moment-gallery-group-label">${escapeHtml(group.label)}</p>${track}</div>`;
-    }).filter(Boolean).join("");
-    const json = escapeHtml(JSON.stringify(media));
-    return `<article class="${rv}">${head(section.title)}${blocks}<script type="application/json" class="moment-gallery-data">${json}</script></article>`;
+    const title = section.video_title ? `<p class="moment-video-title">${escapeHtml(section.video_title)}</p>` : "";
+    const desc = section.video_description ? `<p class="moment-video-desc">${escapeHtml(section.video_description)}</p>` : "";
+    const body = section.body ? `<p>${escapeHtml(section.body)}</p>` : "";
+    return `<article class="${rv}">${head(section.title || "Video")}${body}<div class="moment-video-wrap"><video src="${attr(videoUrl)}" controls playsinline preload="metadata"></video>${title}${desc}</div></article>`;
   }
 
   if (key === "quote" && !section.body) {
-    return `<article class="${rv} moment-quote-wrap"><span class="moment-quote-mark">"</span><p class="moment-quote-text moment-empty-hint">Aggiungi la citazione nell'editor.</p></article>`;
+    const titleHead = section.title ? head(section.title) : "";
+    return `<article class="${rv} moment-quote-wrap">${titleHead}<span class="moment-quote-mark">"</span><p class="moment-quote-text moment-empty-hint">Aggiungi la citazione nell'editor.</p></article>`;
   }
 
-  if (key === "promises" && !section.body) {
-    return `<article class="${rv}">${head(section.title || "Promesse")}<p class="moment-empty-hint">Aggiungi le promesse, una riga ciascuna.</p></article>`;
-  }
-
-  if (key === "dreams" && !section.body) {
-    return `<article class="${rv}">${head(section.title || "Sogni")}<p class="moment-empty-hint">Aggiungi i sogni da realizzare insieme.</p></article>`;
-  }
-
-  if (key === "music" && !section.spotify_url && !section.youtube_url && !section.audio_url) {
-    return `<article class="${rv}">${head(section.title || "Musica")}<p class="moment-empty-hint">Aggiungi Spotify, YouTube o un audio.</p></article>`;
-  }
-
-  if (key === "rituals" && !section.body) {
-    return `<article class="${rv}">${head(section.title || "Rituali")}<p class="moment-empty-hint">Aggiungi i rituali quotidiani.</p></article>`;
-  }
-
-  if (key === "numbers" && !section.body) {
-    return `<article class="${rv}">${head(section.title || "I nostri numeri")}<p class="moment-empty-hint">Es. «365 · giorni insieme».</p></article>`;
+  if (key === "music" && !section.spotify_url && !section.youtube_url && !section.audio_url && !section.image_url) {
+    return `<article class="${rv}">${head(section.title || "Musica")}<p class="moment-empty-hint">Aggiungi Spotify, YouTube, un audio o un'immagine.</p></article>`;
   }
 
   if (key === "pet" && !section.pet_name && !section.body && !section.pet_photo) {
     return `<article class="${rv}">${head(section.title || "Il nostro compagno")}<p class="moment-empty-hint">Aggiungi nome, foto e racconto.</p></article>`;
   }
 
-  if (key === "letter_future" && !section.body && !section.unlock_date && !section.media_url) {
-    return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<p class="moment-empty-hint">Scrivi la lettera, scegli la data di apertura e opzionalmente allega foto, video o audio.</p></article>`;
+  if (key === "letter_future" && !section.body && !section.unlock_date && !letterMediaItems(section).length) {
+    return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<p class="moment-empty-hint">Scrivi la lettera, scegli la data di apertura e opzionalmente allega fino a 2 foto, 1 video e 1 audio.</p></article>`;
   }
 
   if (key === "countdown" && !section.target_date) {
@@ -3202,7 +3329,8 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   }
 
   if (key === "signature" && !section.sign_name && !section.sign_subtitle) {
-    return `<article class="${rv} moment-signature"><p class="moment-signature-label">Questo momento appartiene a</p><p class="moment-empty-hint">Aggiungi i nomi nella firma finale.</p></article>`;
+    const label = section.title || "Questo momento appartiene a";
+    return `<article class="${rv} moment-signature"><p class="moment-signature-label">${escapeHtml(label)}</p><p class="moment-empty-hint">Aggiungi i nomi nella firma finale.</p></article>`;
   }
 
   if (key === "intro" && !section.body) {
@@ -3211,9 +3339,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
 
   let gallery = "";
   if (images.length) {
-    gallery = images.length >= 2
-      ? `<div class="moment-gallery-scroll"><div class="moment-gallery-track">${images.map(url => `<img src="${attr(url)}" alt="" loading="lazy">`).join("")}</div></div>`
-      : `<div class="moment-gallery">${images.map(url => `<img src="${attr(url)}" alt="" loading="lazy">`).join("")}</div>`;
+    gallery = `<div class="moment-gallery">${images.map(url => `<img src="${attr(url)}" alt="" loading="lazy">`).join("")}</div>`;
   }
   const body = section.body ? `<p>${escapeHtml(section.body)}</p>` : "";
   return `<article class="${rv}">${head(section.title)}${body}${gallery}</article>`;
@@ -3234,7 +3360,7 @@ function normalizeMomentMedia(section) {
 
 function renderMomentActivationPage(product, origin, env = {}) {
   const code = String(product.code || "");
-  const pagesBase = String(env.PAGES_ASSET_BASE || "https://khamakey-app.pages.dev").replace(/\/$/, "");
+  const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
   const typeLabel = {
     free: "Evento generale",
     love: "Amore",
@@ -3265,8 +3391,18 @@ function renderMomentActivationPage(product, origin, env = {}) {
 <body><main class="card"><div class="eyebrow">KhamaKey Moments</div><h1>Prodotto pronto da attivare</h1><p>Questo oggetto NFC è già collegato al suo link pubblico. Crea o apri il tuo account Moments e inserisci questo codice per iniziare a costruire la pagina privata.</p><span class="code">${escapeHtml(code)}</span><p><strong>${escapeHtml(typeLabel)}</strong></p><a class="button" href="${attr(pagesBase)}/moments.html">Attiva in Area Moments</a><p class="hint">Dopo l’attivazione, questo stesso link mostrerà la pagina creata con l’editor.</p></main></body></html>`;
 }
 
+function actionIcon(kind){
+  const icons = {
+    wa:'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14.5" fill="#25D366"/><path fill="#fff" d="M16.1 7.6a8.3 8.3 0 0 0-7.2 12.4l-1.1 4.2 4.3-1.1a8.3 8.3 0 1 0 4-15.5Zm0 15a6.8 6.8 0 0 1-3.5-1l-.25-.15-2.55.67.68-2.48-.17-.26A6.78 6.78 0 1 1 16.1 22.6Z"/></svg>',
+    phone:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#1B2A5E" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.86.3 1.7.54 2.5a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.58-1.11a2 2 0 0 1 2.11-.45c.8.24 1.64.42 2.5.54A2 2 0 0 1 22 16.92Z"/></svg>',
+    maps:'<svg viewBox="0 0 32 32" aria-hidden="true"><path fill="#4285F4" d="M16 3a10 10 0 0 0-10 10c0 7.5 10 16 10 16s10-8.5 10-16A10 10 0 0 0 16 3Z"/><circle cx="16" cy="13" r="4" fill="#fff"/></svg>',
+    reviews:'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="#fff"/><path fill="#4285F4" d="M27 16.3c0-.9-.1-1.7-.2-2.5H16v4.5h6.2a5.3 5.3 0 0 1-2.3 3.4v3h3.8c2.2-2.1 3.3-5 3.3-8.4Z"/></svg>'
+  };
+  return icons[kind] || '';
+}
+
 function action(label, href, eventType, className) {
-  return `<a class="action ${className}" href="${attr(href)}" data-event="${eventType}">${escapeHtml(label)}</a>`;
+  return `<a class="action brand-action-${className}" href="${attr(href)}" data-event="${eventType}">${actionIcon(className)}<span>${escapeHtml(label)}</span></a>`;
 }
 
 function notFound(message) {
@@ -3308,10 +3444,10 @@ function cors(response) {
 const PUBLIC_PAGE_CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://khamakey-app.pages.dev",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://app.khamakeymoments.com https://khamakey-app.pages.dev",
   "font-src 'self' https://fonts.gstatic.com",
-  "img-src 'self' data: blob: https://img.youtube.com https://cuxlwaocjqwzluycznyp.supabase.co",
-  "media-src 'self' blob: https://cuxlwaocjqwzluycznyp.supabase.co",
+  "img-src 'self' data: blob: https://img.youtube.com https://cuxlwaocjqwzluycznyp.supabase.co https://link.khamakeymoments.com https://khamakey-nfc.khamakey-nfc.workers.dev",
+  "media-src 'self' blob: https://cuxlwaocjqwzluycznyp.supabase.co https://link.khamakeymoments.com https://khamakey-nfc.khamakey-nfc.workers.dev",
   "connect-src 'self'",
   "frame-src https://www.youtube.com https://open.spotify.com",
   "object-src 'none'",
@@ -4370,7 +4506,7 @@ async function handleStripeCheckoutSession(request, env) {
   const planKey = String(body.plan_key || "").trim();
   const billingCycle = String(body.billing_cycle || "monthly").trim();
   const customerEmail = String(body.customer_email || admin.email || "").trim();
-  const pagesBase = String(env.PAGES_ASSET_BASE || "https://khamakey-app.pages.dev").replace(/\/$/, "");
+  const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
   const successUrl = String(body.success_url || `${pagesBase}/index.html?stripe=success`).trim();
   const cancelUrl = String(body.cancel_url || `${pagesBase}/index.html?stripe=cancel`).trim();
 
@@ -4605,8 +4741,8 @@ async function sendMomentOrderEmail(env, orderPayload, ingestResult) {
   const t = orderEmailLocale(orderPayload);
   const orderCode = ingestResult?.order_code || orderPayload.order_number || "";
   const customerName = orderPayload.customer_name || "Cliente";
-  const pagesBase = String(env.PAGES_ASSET_BASE || "https://khamakey-app.pages.dev").replace(/\/$/, "");
-  const workerBase = String(env.WORKER_PUBLIC_BASE || "https://khamakey-nfc.khamakey-nfc.workers.dev").replace(/\/$/, "");
+  const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
+  const workerBase = String(env.WORKER_PUBLIC_BASE || "https://link.khamakeymoments.com").replace(/\/$/, "");
   const codes = Array.isArray(ingestResult?.activation_codes) ? ingestResult.activation_codes : [];
   const subject = t.subject(orderCode);
 
@@ -4731,7 +4867,7 @@ async function runMomentAnniversaryJob(env, dayOverride = null) {
     return null;
   });
   const rows = Array.isArray(due) ? due : [];
-  const origin = env.WORKER_PUBLIC_BASE || "https://khamakey-nfc.khamakey-nfc.workers.dev";
+  const origin = env.WORKER_PUBLIC_BASE || "https://link.khamakeymoments.com";
   let sent = 0;
   let failed = 0;
 
@@ -4804,7 +4940,7 @@ async function runMomentLetterUnlockJob(env, dayOverride = null) {
     return null;
   });
   const rows = Array.isArray(due) ? due : [];
-  const origin = env.WORKER_PUBLIC_BASE || "https://khamakey-nfc.khamakey-nfc.workers.dev";
+  const origin = env.WORKER_PUBLIC_BASE || "https://link.khamakeymoments.com";
   let sent = 0;
   let failed = 0;
 

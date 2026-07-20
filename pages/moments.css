@@ -58,6 +58,9 @@ body.session-pending #momentsApp{display:none}
 .form-intro p{margin:0;color:var(--muted);font-size:.84rem}
 label{display:grid;gap:6px;font-size:.8rem;font-weight:900;color:var(--navy)}
 .field-hint{font-size:.72rem;font-weight:600;color:var(--muted);line-height:1.35}
+.field-required{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:#FEF2F2;color:#B91C1C;font-size:.68rem;font-weight:800;letter-spacing:.02em;text-transform:uppercase;vertical-align:middle}
+.rsvp-wa-warn{margin:0 0 10px;padding:10px 12px;border-radius:10px;border:1px solid #FECACA;background:#FEF2F2;color:#991B1B;font-size:.8rem;font-weight:650;line-height:1.45}
+[data-rsvp-wa-card].is-missing-wa{border-color:#F87171;box-shadow:0 0 0 1px #FECACA}
 input,textarea,select{
   width:100%;
   border:1.5px solid var(--border);

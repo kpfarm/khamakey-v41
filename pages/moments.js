@@ -86,7 +86,7 @@ import {
   formatImageLines,
   sectionFieldHints,
   sectionHasContent
-} from "./moment-sections.js";
+} from "./moment-sections.js?v=145";
 import {
   TYPE_LABELS,
   renderCategorySelect,
@@ -2441,6 +2441,7 @@ function renderDetail(id){
     state,
     copyText
   });
+  bindRsvpWhatsappRequired(editorForm);
   bindRsvpFieldsEditor(editorForm,()=>{
     markEditorDirty(editorForm);
     schedulePreviewUpdate(editorForm);
@@ -3098,10 +3099,11 @@ function sectionEditor(key,section,standalone=false){
     <label>Data di apertura<input type="datetime-local" name="section_${esc(key)}_unlock_date" value="${esc(safe.unlock_date || "")}"></label>
     ${renderGalleryUploadPanel(safe, "letter_future")}` : "";
   const rsvpFields = key === "rsvp" ? `
-    <div class="editor-card smart-card">
-      <p class="ecard-title"><span class="step-badge">1</span> WhatsApp organizzatore</p>
-      <label>Numero WhatsApp<input name="section_${esc(key)}_whatsapp_number" value="${esc(safe.whatsapp_number || "")}" placeholder="393331234567" inputmode="tel" autocomplete="tel"></label>
-      <p class="field-hint">Prefisso internazionale senza + (39 = Italia). Gli invitati inviano il RSVP a questo numero.</p>
+    <div class="editor-card smart-card" data-rsvp-wa-card>
+      <p class="ecard-title"><span class="step-badge">1</span> WhatsApp organizzatore <span class="field-required">obbligatorio</span></p>
+      <p class="rsvp-wa-warn" id="rsvpWaWarn" ${normalizeWhatsAppDigits(safe.whatsapp_number) ? "hidden" : ""}>Senza numero WhatsApp la sezione RSVP <strong>non compare</strong> nella pagina finale. Inseriscilo e clicca Salva.</p>
+      <label>Numero WhatsApp<input name="section_${esc(key)}_whatsapp_number" id="rsvpWhatsappInput" value="${esc(safe.whatsapp_number || "")}" placeholder="393331234567" inputmode="tel" autocomplete="tel" required aria-required="true"></label>
+      <p class="field-hint">Prefisso internazionale senza + (es. 39333… per Italia). Gli invitati compilano il modulo e ti inviano il messaggio su WhatsApp.</p>
     </div>
     ${renderRsvpFieldsEditor(safe)}` : "";
   const petFields = key === "pet" ? `
@@ -3168,6 +3170,30 @@ function normalizeWhatsAppDigits(raw){
   if(wa.startsWith("0")) wa = wa.replace(/^0+/, "");
   if((wa.length === 9 || wa.length === 10) && wa.startsWith("3")) wa = `39${wa}`;
   return wa;
+}
+
+function syncRsvpWhatsappWarn(formNode){
+  const input = formNode?.querySelector('[name="section_rsvp_whatsapp_number"]');
+  const warn = formNode?.querySelector("#rsvpWaWarn");
+  const card = formNode?.querySelector("[data-rsvp-wa-card]");
+  if(!input) return;
+  const ok = normalizeWhatsAppDigits(input.value).length >= 10;
+  if(warn) warn.hidden = ok;
+  card?.classList.toggle("is-missing-wa", !ok);
+}
+
+function bindRsvpWhatsappRequired(formNode){
+  const input = formNode?.querySelector('[name="section_rsvp_whatsapp_number"]');
+  if(!input || input.dataset.waBound === "1") return;
+  input.dataset.waBound = "1";
+  const sync = ()=>{
+    syncRsvpWhatsappWarn(formNode);
+    markEditorDirty(formNode);
+    schedulePreviewUpdate(formNode);
+  };
+  input.addEventListener("input", sync);
+  input.addEventListener("change", sync);
+  syncRsvpWhatsappWarn(formNode);
 }
 
 function sanitizeStateForSave(state){
@@ -3471,6 +3497,16 @@ async function saveMoment(event,row){
     if(letter.media?.some(item=>String(item?.url || "").startsWith("blob:"))){
       return setStatus(editorStatus,"Lettera al futuro: attendi il caricamento degli allegati o ricaricali prima di salvare.","error");
     }
+  }
+  if(state.sections?.rsvp?.enabled){
+    const wa = normalizeWhatsAppDigits(state.sections.rsvp.whatsapp_number);
+    if(!wa || wa.length < 10){
+      setEditorPanel("section-rsvp");
+      syncRsvpWhatsappWarn(formNode);
+      formNode.querySelector('[name="section_rsvp_whatsapp_number"]')?.focus();
+      return setStatus(editorStatus,"RSVP: inserisci il numero WhatsApp (obbligatorio). Senza WhatsApp la sezione non compare in pagina.","error");
+    }
+    state.sections.rsvp.whatsapp_number = wa;
   }
   setStatus(editorStatus,"Salvataggio...");
   try{

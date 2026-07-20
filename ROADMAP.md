@@ -266,3 +266,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Moments v142 / Worker v141**: rimosso selettore «Icone e adesivi» (pageDecor); pagine pubbliche senza decor emoji |
 | 2026-07-20 | Cursor | **Moments v143 / Worker v142**: palette colori rinfrescate (meno grigi morti, accenti saturi); variante Caldo = sfondo caldo non blocco scuro |
 | 2026-07-20 | Cursor | **Moments v144**: galleria — pulsanti visibili **Cambia foto** e **Rimuovi** per sostituire/cancellare immagini (titolo/desc preservati al replace) |
+| 2026-07-20 | Cursor | **Moments v145 / Worker v143**: RSVP — WhatsApp obbligatorio (avviso editor + blocco salva); senza numero la sezione non compare in pagina |

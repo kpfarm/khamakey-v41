@@ -272,7 +272,6 @@ export function sectionHasContent(key, section){
     case "video":
       return Boolean(String(section.video_url || "").trim());
     case "rsvp":
-      return Boolean(String(section.whatsapp_number || "").replace(/\D/g, ""));
     case "guestbook":
       return Boolean(section?.enabled);
     case "promises":
@@ -412,7 +411,7 @@ export function sectionFillGuide(key){
     numbers:"Tocca «Aggiungi numero» — es. 365 + «giorni insieme».",
     quote:"Titolo facoltativo, citazione e autore — testo grande in pagina.",
     signature:"Titolo della chiusura (es. «Con amore»), poi nomi e sottotitolo.",
-    rsvp:"Inserisci il tuo numero WhatsApp (39…). Gli invitati compilano il modulo e inviano un messaggio pronto.",
+    rsvp:"WhatsApp obbligatorio (39… senza +). Senza numero la sezione non compare in pagina. Gli invitati compilano e ti inviano il messaggio.",
     guestbook:"Attiva la sezione e scrivi un invito. Gli ospiti lasciano messaggi che approvi dall'editor."
   };
   return guides[key] || "Compila i campi sotto, attiva la sezione e clicca Salva.";

@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **Moments v160 / Worker v145 — Palette più decise (2026-07-20, Cursor)** — Pages + Worker
+  - Cerchi tonalità: gradiente saturo (vivo→scuro) invece di vivo→pastello; accenti hero più forti anche in pagina pubblica.
+
 ### Fixed
 - **Moments v159 — Scroll mobile nel vuoto rosa (2026-07-20, Cursor)** — Pages only
   - Su cellulare lo scroll resta nel pannello editor; menu in basso sempre visibile; niente pagina rosa vuota sotto.

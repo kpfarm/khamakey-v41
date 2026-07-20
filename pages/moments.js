@@ -69,7 +69,7 @@ import {
   findLookForDesign,
   suggestLookForMomentType,
   looksForMomentType
-} from "./moment-themes.js?v=143";
+} from "./moment-themes.js?v=160";
 import {
   SECTION_ORDER_DEFAULT,
   DEFAULT_SECTIONS,
@@ -79,7 +79,6 @@ import {
   NAV_GROUPS,
   designNavItems,
   pageNavItems,
-  accountNavItems,
   normalizeSectionOrder,
   migrateSections,
   readSectionFromForm,
@@ -1755,8 +1754,8 @@ function renderLookPicker(currentLook, momentType = "free"){
 function renderPalettePicker(current){
   return `<div class="palette-row">${Object.keys(COLOR_PALETTES).filter(k=>k!=="classic").map(key=>{
     const c = COLOR_PALETTES[key];
-    return `<button type="button" class="palette-btn ${current === key ? "active" : ""}" data-palette="${esc(key)}" title="${esc(PALETTE_LABELS[key] || key)}"><span style="background:linear-gradient(135deg,${c.go},${c.ro})"></span></button>`;
-  }).join("")}<button type="button" class="palette-btn ${current === "classic" ? "active" : ""}" data-palette="classic" title="KhamaKey"><span style="background:linear-gradient(135deg,#4CAF27,#1B2A5E)"></span></button></div><input type="hidden" name="color_palette" id="colorPaletteInput" value="${esc(current)}">`;
+    return `<button type="button" class="palette-btn ${current === key ? "active" : ""}" data-palette="${esc(key)}" title="${esc(PALETTE_LABELS[key] || key)}"><span style="background:linear-gradient(145deg,${c.go} 0%,${c.g2} 100%)"></span></button>`;
+  }).join("")}<button type="button" class="palette-btn ${current === "classic" ? "active" : ""}" data-palette="classic" title="KhamaKey"><span style="background:linear-gradient(145deg,#16A34A 0%,#14532D 100%)"></span></button></div><input type="hidden" name="color_palette" id="colorPaletteInput" value="${esc(current)}">`;
 }
 
 function updateDesignSwatch(formNode){

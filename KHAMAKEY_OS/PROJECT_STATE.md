@@ -93,8 +93,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v165** | Redirect `/admin`→`moments-admin` su dominio Moments; dettaglio ticket Supporto; console Moments senza Shopify/Business. Include magazzino NFC Moments + fix loader v163. |
-| **Moments editor** | **v159** | Fix mobile: niente scroll nel vuoto rosa; menu fisso in basso; account hub separato (v158). |
-| **Worker NFC** | **v144-support-notify** | `POST /api/moment/support-notify` → Resend staff; RSVP WA required in content check; preview rate limit; domini `link.khamakeymoments.com`. |
+| **Moments editor** | **v160** | Palette più decise (swatch go→g2); account hub + fix scroll mobile. |
+| **Worker NFC** | **v145-bold-palettes** | Palette Moments pubbliche più sature; support-notify + RSVP WA check restano. |
 | **Business shell** | **app v167** | `APP_VERSION` in `app.js` — account Moments non finiscono nel flusso Business. Editor Business HTML può avere WIP locale non ancora allineato in tabella. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v159 (prod)** | Security v75–v83; RSVP/guestbook; support sources v158; category lock v157; drop overload `activate_moment_code` v159. Business activation/inventory v147/v148 in repo. |

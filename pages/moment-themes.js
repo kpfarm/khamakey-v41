@@ -1,42 +1,63 @@
 /** Palette e varianti pagina Moments — colori saturi e leggibili (editor + anteprima). */
 export const COLOR_PALETTES = {
-  // go/hero = accento vivo · g2 = scuro correlato · ro = tinta media (non pastello) · bl = sfondo pagina
-  amore     : { go:"#E11D48", g2:"#9F1239", ro:"#F43F5E", bl:"#FFF1F2", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#BE123C", mu:"#475569" },
-  rubino    : { go:"#DC2626", g2:"#7F1D1D", ro:"#EF4444", bl:"#FEF2F2", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#B91C1C", mu:"#475569" },
-  gentleman : { go:"#1E293B", g2:"#020617", ro:"#334155", bl:"#F1F5F9", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#0F172A", mu:"#475569" },
-  uomo      : { go:"#1D4ED8", g2:"#1E3A8A", ro:"#2563EB", bl:"#EFF6FF", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#1E40AF", mu:"#475569" },
-  aurora    : { go:"#7C3AED", g2:"#4C1D95", ro:"#8B5CF6", bl:"#F5F3FF", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#6D28D9", mu:"#475569" },
-  terracotta: { go:"#EA580C", g2:"#9A3412", ro:"#F97316", bl:"#FFF7ED", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#C2410C", mu:"#475569" },
-  rosa      : { go:"#DB2777", g2:"#9D174D", ro:"#EC4899", bl:"#FDF2F8", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#BE185D", mu:"#475569" },
-  blu       : { go:"#0284C7", g2:"#0C4A6E", ro:"#0EA5E9", bl:"#F0F9FF", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#0369A1", mu:"#475569" },
-  salvia    : { go:"#059669", g2:"#064E3B", ro:"#10B981", bl:"#ECFDF5", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#047857", mu:"#475569" },
-  bordeaux  : { go:"#9F1239", g2:"#4C0519", ro:"#BE123C", bl:"#FFF1F2", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#881337", mu:"#475569" },
-  perla     : { go:"#44403C", g2:"#1C1917", ro:"#57534E", bl:"#FAFAF9", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#292524", mu:"#57534E" },
-  lavanda   : { go:"#7C3AED", g2:"#5B21B6", ro:"#8B5CF6", bl:"#F5F3FF", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#6D28D9", mu:"#475569" },
-  cipria    : { go:"#D97706", g2:"#92400E", ro:"#F59E0B", bl:"#FFFBEB", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#B45309", mu:"#57534E" },
-  corallo   : { go:"#F97316", g2:"#C2410C", ro:"#FB923C", bl:"#FFF7ED", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#EA580C", mu:"#475569" },
-  miele     : { go:"#CA8A04", g2:"#854D0E", ro:"#EAB308", bl:"#FEFCE8", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#A16207", mu:"#475569" },
-  notte     : { go:"#38BDF8", g2:"#0284C7", ro:"#0EA5E9", bl:"#0F172A", bl2:"#FFFFFF", card:"#1E293B", in:"#F8FAFC", hero:"#020617", mu:"#94A3B8" },
-  neve      : { go:"#0284C7", g2:"#0C4A6E", ro:"#0EA5E9", bl:"#F8FAFC", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#0369A1", mu:"#475569" },
-  classic   : { go:"#16A34A", g2:"#14532D", ro:"#22C55E", bl:"#F0FDF4", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#15803D", mu:"#475569" },
+  // bl = sfondo pagina (ciò che vedi nei cerchi) · go/hero = accenti · card/in si adattano in resolvePalette
+  amore     : { go:"#BE123C", g2:"#9F1239", ro:"#E11D48", bl:"#FECDD3", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#BE123C", mu:"#475569" },
+  rubino    : { go:"#B91C1C", g2:"#7F1D1D", ro:"#DC2626", bl:"#FECACA", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#B91C1C", mu:"#475569" },
+  gentleman : { go:"#38BDF8", g2:"#0EA5E9", ro:"#64748B", bl:"#0F172A", bl2:"#1E293B", card:"#1E293B", in:"#F8FAFC", hero:"#020617", mu:"#94A3B8" },
+  uomo      : { go:"#1E40AF", g2:"#1E3A8A", ro:"#2563EB", bl:"#BFDBFE", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#1E40AF", mu:"#475569" },
+  aurora    : { go:"#6D28D9", g2:"#4C1D95", ro:"#7C3AED", bl:"#DDD6FE", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#6D28D9", mu:"#475569" },
+  terracotta: { go:"#C2410C", g2:"#9A3412", ro:"#EA580C", bl:"#FED7AA", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#C2410C", mu:"#475569" },
+  rosa      : { go:"#BE185D", g2:"#9D174D", ro:"#DB2777", bl:"#FBCFE8", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#BE185D", mu:"#475569" },
+  blu       : { go:"#0369A1", g2:"#0C4A6E", ro:"#0284C7", bl:"#BAE6FD", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#0369A1", mu:"#475569" },
+  salvia    : { go:"#047857", g2:"#064E3B", ro:"#059669", bl:"#A7F3D0", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#047857", mu:"#475569" },
+  bordeaux  : { go:"#F43F5E", g2:"#9F1239", ro:"#BE123C", bl:"#4C0519", bl2:"#881337", card:"#881337", in:"#FFF1F2", hero:"#4C0519", mu:"#FDA4AF" },
+  perla     : { go:"#A8A29E", g2:"#57534E", ro:"#78716C", bl:"#292524", bl2:"#44403C", card:"#44403C", in:"#FAFAF9", hero:"#1C1917", mu:"#A8A29E" },
+  lavanda   : { go:"#6D28D9", g2:"#5B21B6", ro:"#7C3AED", bl:"#C4B5FD", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#6D28D9", mu:"#475569" },
+  cipria    : { go:"#B45309", g2:"#92400E", ro:"#D97706", bl:"#FDE68A", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#B45309", mu:"#57534E" },
+  corallo   : { go:"#EA580C", g2:"#C2410C", ro:"#F97316", bl:"#FDBA74", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#EA580C", mu:"#475569" },
+  miele     : { go:"#A16207", g2:"#854D0E", ro:"#CA8A04", bl:"#FDE047", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#A16207", mu:"#475569" },
+  notte     : { go:"#38BDF8", g2:"#0284C7", ro:"#0EA5E9", bl:"#020617", bl2:"#0F172A", card:"#0F172A", in:"#F8FAFC", hero:"#020617", mu:"#94A3B8" },
+  neve      : { go:"#0369A1", g2:"#0C4A6E", ro:"#0284C7", bl:"#E2E8F0", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#0369A1", mu:"#475569" },
+  classic   : { go:"#15803D", g2:"#14532D", ro:"#16A34A", bl:"#BBF7D0", bl2:"#FFFFFF", card:"#FFFFFF", in:"#111111", hero:"#15803D", mu:"#475569" },
 };
+
+/** Palette con sfondo scuro: testo chiaro, card tonali. */
+export const DARK_PAGE_PALETTES = new Set(["gentleman", "notte", "perla", "bordeaux"]);
+
+export function isDarkPageBackground(hex = ""){
+  const raw = String(hex || "").replace("#","").trim();
+  if(raw.length !== 6) return false;
+  const n = Number.parseInt(raw, 16);
+  if(Number.isNaN(n)) return false;
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  return ((r * 299) + (g * 587) + (b * 114)) / 1000 < 145;
+}
 
 export const PALETTE_VARIANTS = {
   chiaro: {},
   // "Caldo" = sfondo più avvolgente, non un blocco scuro piatto (prima sembrava "colore morto")
   caldo: {
-    amore:    { bl:"#FECDD3", hero:"#BE123C", go:"#E11D48", ro:"#F43F5E" },
-    rubino:   { bl:"#FECACA", hero:"#B91C1C", go:"#DC2626", ro:"#EF4444" },
-    rosa:     { bl:"#FBCFE8", hero:"#BE185D", go:"#DB2777", ro:"#EC4899" },
-    bordeaux: { bl:"#FECDD3", hero:"#881337", go:"#9F1239", ro:"#BE123C" },
-    terracotta:{ bl:"#FED7AA", hero:"#C2410C", go:"#EA580C", ro:"#F97316" },
-    corallo:  { bl:"#FED7AA", hero:"#EA580C", go:"#F97316", ro:"#FB923C" },
-    cipria:   { bl:"#FDE68A", hero:"#B45309", go:"#D97706", ro:"#F59E0B" },
-    miele:    { bl:"#FEF08A", hero:"#A16207", go:"#CA8A04", ro:"#EAB308" },
-    classic:  { bl:"#BBF7D0", hero:"#15803D", go:"#16A34A", ro:"#22C55E" }
+    amore:    { bl:"#FDA4AF", hero:"#BE123C", go:"#E11D48" },
+    rubino:   { bl:"#F87171", hero:"#B91C1C", go:"#DC2626", in:"#111111" },
+    rosa:     { bl:"#F9A8D4", hero:"#BE185D", go:"#DB2777" },
+    bordeaux: { bl:"#881337", hero:"#4C0519", go:"#F43F5E", card:"#9F1239", bl2:"#9F1239", in:"#FFF1F2" },
+    terracotta:{ bl:"#FB923C", hero:"#C2410C", go:"#EA580C" },
+    corallo:  { bl:"#FB923C", hero:"#EA580C", go:"#F97316" },
+    cipria:   { bl:"#FBBF24", hero:"#B45309", go:"#D97706" },
+    miele:    { bl:"#FACC15", hero:"#A16207", go:"#CA8A04" },
+    classic:  { bl:"#86EFAC", hero:"#15803D", go:"#16A34A" },
+    blu:      { bl:"#7DD3FC", hero:"#0369A1", go:"#0284C7" },
+    salvia:   { bl:"#6EE7B7", hero:"#047857", go:"#059669" },
+    aurora:   { bl:"#C4B5FD", hero:"#6D28D9", go:"#7C3AED" },
+    lavanda:  { bl:"#A78BFA", hero:"#6D28D9", go:"#7C3AED" }
   },
   scuro: {
-    notte: { bl:"#020617", hero:"#020617", go:"#38BDF8", g2:"#0284C7", card:"#FFFFFF", bl2:"#FFFFFF", in:"#111111", ro:"#0EA5E9" }
+    notte: { bl:"#020617", hero:"#020617", go:"#38BDF8", g2:"#0284C7", card:"#0F172A", bl2:"#0F172A", in:"#F8FAFC", ro:"#0EA5E9" },
+    gentleman: { bl:"#020617", hero:"#020617", go:"#38BDF8", card:"#0F172A", bl2:"#0F172A", in:"#F8FAFC" },
+    perla: { bl:"#1C1917", hero:"#0C0A09", go:"#A8A29E", card:"#292524", bl2:"#292524", in:"#FAFAF9" },
+    bordeaux: { bl:"#3F0A1A", hero:"#4C0519", go:"#FB7185", card:"#881337", bl2:"#881337", in:"#FFF1F2" }
   }
 };
 
@@ -45,7 +66,7 @@ export const PALETTE_LABELS = {
   aurora:"Viola", terracotta:"Arancio terracotta",
   rosa:"Rosa acceso", blu:"Azzurro oceano", salvia:"Verde smeraldo", bordeaux:"Bordeaux",
   perla:"Pietra naturale", lavanda:"Lavanda", cipria:"Ambra", corallo:"Corallo tramonto",
-  miele:"Oro sole", notte:"Notte con accento cielo", neve:"Ghiaccio chiaro", classic:"Verde KhamaKey"
+  miele:"Oro sole",   notte:"Nero notte", neve:"Grigio ghiaccio", classic:"Verde KhamaKey"
 };
 
 export const VARIANT_LABELS = { chiaro:"Chiaro", caldo:"Caldo", scuro:"Scuro" };
@@ -149,10 +170,18 @@ export function resolvePalette(palette = "classic", variant = "chiaro"){
   const base = { ...(COLOR_PALETTES[palette] || COLOR_PALETTES.classic) };
   const overrides = PALETTE_VARIANTS[variant]?.[palette];
   if(overrides) Object.assign(base, overrides);
-  base.mu = base.mu || "#666666";
-  base.card = "#FFFFFF";
-  base.bl2 = "#FFFFFF";
-  base.in = "#111111";
+  const dark = DARK_PAGE_PALETTES.has(palette) || isDarkPageBackground(base.bl) || variant === "scuro";
+  if(dark){
+    base.in = base.in && base.in !== "#111111" ? base.in : "#F8FAFC";
+    base.mu = base.mu || "#94A3B8";
+    base.card = base.card && base.card !== "#FFFFFF" ? base.card : (base.bl2 || base.bl);
+    base.bl2 = base.bl2 || base.card || base.bl;
+  }else{
+    base.in = "#111111";
+    base.mu = base.mu || "#475569";
+    base.card = "#FFFFFF";
+    base.bl2 = "#FFFFFF";
+  }
   return base;
 }
 

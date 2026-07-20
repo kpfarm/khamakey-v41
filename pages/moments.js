@@ -62,6 +62,7 @@ import {
   HERO_STYLES,
   FONT_PAIRS,
   PAGE_LOOKS,
+  DARK_PAGE_PALETTES,
   normalizeDesignState,
   legacyThemeToPalette,
   resolvePalette,
@@ -69,7 +70,7 @@ import {
   findLookForDesign,
   suggestLookForMomentType,
   looksForMomentType
-} from "./moment-themes.js?v=160";
+} from "./moment-themes.js?v=161";
 import {
   SECTION_ORDER_DEFAULT,
   DEFAULT_SECTIONS,
@@ -1754,8 +1755,8 @@ function renderLookPicker(currentLook, momentType = "free"){
 function renderPalettePicker(current){
   return `<div class="palette-row">${Object.keys(COLOR_PALETTES).filter(k=>k!=="classic").map(key=>{
     const c = COLOR_PALETTES[key];
-    return `<button type="button" class="palette-btn ${current === key ? "active" : ""}" data-palette="${esc(key)}" title="${esc(PALETTE_LABELS[key] || key)}"><span style="background:linear-gradient(145deg,${c.go} 0%,${c.g2} 100%)"></span></button>`;
-  }).join("")}<button type="button" class="palette-btn ${current === "classic" ? "active" : ""}" data-palette="classic" title="KhamaKey"><span style="background:linear-gradient(145deg,#16A34A 0%,#14532D 100%)"></span></button></div><input type="hidden" name="color_palette" id="colorPaletteInput" value="${esc(current)}">`;
+    return `<button type="button" class="palette-btn ${current === key ? "active" : ""}" data-palette="${esc(key)}" title="${esc(PALETTE_LABELS[key] || key)} — sfondo"><span style="background:${c.bl};box-shadow:inset 0 0 0 2px ${c.go}"></span></button>`;
+  }).join("")}<button type="button" class="palette-btn ${current === "classic" ? "active" : ""}" data-palette="classic" title="Verde KhamaKey — sfondo"><span style="background:#BBF7D0;box-shadow:inset 0 0 0 2px #15803D"></span></button></div><input type="hidden" name="color_palette" id="colorPaletteInput" value="${esc(current)}">`;
 }
 
 function updateDesignSwatch(formNode){
@@ -1798,9 +1799,15 @@ function bindDesignPanelHandlers(formNode){
 
   stylingPanel.querySelectorAll(".palette-btn").forEach(button=>{
     button.addEventListener("click",()=>{
+      const key = button.dataset.palette || "classic";
       const input = formNode.querySelector("#colorPaletteInput");
-      if(input) input.value = button.dataset.palette || "classic";
-      syncPaletteButtons(formNode, input?.value || "classic");
+      if(input) input.value = key;
+      const variantSelect = formNode.querySelector('[name="theme_variant"]');
+      if(variantSelect){
+        if(DARK_PAGE_PALETTES.has(key)) variantSelect.value = "scuro";
+        else if(variantSelect.value === "scuro") variantSelect.value = "chiaro";
+      }
+      syncPaletteButtons(formNode, key);
       onDesignChange();
     });
   });
@@ -1847,15 +1854,16 @@ function renderDesignPanel(state){
     </div>
     <details class="design-advanced editor-card">
       <summary>Vuoi cambiare qualcosa in più? (facoltativo)</summary>
-      <label>Tonalità colori
+      <label>Colore di sfondo
         ${renderPalettePicker(palette)}
       </label>
-      <label>Sfondo pagina
+      <p class="field-hint">Il cerchio è lo sfondo della pagina. Nero/antracite = pagina scura; i colori vivaci tinteggiano tutto lo sfondo.</p>
+      <label>Atmosfera
         <select name="theme_variant">
           ${Object.entries(VARIANT_LABELS).map(([value,label])=>option(value,label,variant)).join("")}
         </select>
       </label>
-      <p class="field-hint">Chiaro = luminoso · Caldo = avvolgente · Scuro = elegante di sera</p>
+      <p class="field-hint">Chiaro · Caldo (sfondo più intenso) · Scuro (pagina di sera)</p>
       <label>Stile scritte
         <select name="font_pair">
           ${Object.entries(FONT_PAIRS).map(([value,meta])=>option(value,meta.label,fontPair)).join("")}

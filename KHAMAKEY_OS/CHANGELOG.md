@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **Moments v161 / Worker v146 — Cerchi = sfondo pagina (2026-07-20, Cursor)** — Pages + Worker
+  - I cerchi mostrano e applicano lo **sfondo** (nero/antracite → pagina scura); non solo gli accenti.
 - **Moments v160 / Worker v145 — Palette più decise (2026-07-20, Cursor)** — Pages + Worker
   - Cerchi tonalità: gradiente saturo (vivo→scuro) invece di vivo→pastello; accenti hero più forti anche in pagina pubblica.
 

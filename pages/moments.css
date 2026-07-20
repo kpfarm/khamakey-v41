@@ -457,6 +457,7 @@ body.media-modal-open{overflow:hidden}
 .design-swatch{border-radius:14px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px}
 .design-swatch-hero{background:linear-gradient(145deg,var(--sw-hero),var(--sw-go));color:#fff;padding:28px 18px;text-align:center;font-weight:600;font-size:.92rem;min-height:88px;display:grid;place-items:center}
 .design-swatch-body{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--sw-bl);color:var(--sw-in);font-size:.72rem;font-weight:700}
+.design-swatch{background:var(--sw-bl)}
 .design-swatch-body span{padding:14px 12px}
 .design-swatch-body span:first-child{background:var(--sw-bl)}
 .design-swatch-body span:last-child{background:linear-gradient(135deg,var(--sw-go),var(--sw-g2));color:#fff;text-align:right}
@@ -480,7 +481,7 @@ body.media-modal-open{overflow:hidden}
 .look-card{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:12px;border:2px solid var(--border);border-radius:16px;background:var(--surface);cursor:pointer;text-align:left;transition:border-color .15s,transform .12s,box-shadow .15s;font:inherit;color:inherit;width:100%}
 .look-card:hover{border-color:rgba(76,175,39,.45);transform:translateY(-1px)}
 .look-card.active{border-color:var(--green);box-shadow:0 0 0 3px rgba(76,175,39,.14)}
-.look-card-preview{width:100%;height:52px;border-radius:10px;margin-bottom:6px;background:linear-gradient(180deg,var(--lk-go,var(--lk-hero)) 0 52%,var(--lk-bl) 52% 100%);border:1px solid rgba(0,0,0,.06);position:relative;overflow:hidden}
+.look-card-preview{width:100%;height:52px;border-radius:10px;margin-bottom:6px;background:linear-gradient(180deg,var(--lk-bl) 0 62%,var(--lk-go,var(--lk-hero)) 62% 100%);border:1px solid rgba(0,0,0,.06);position:relative;overflow:hidden}
 .look-card-preview::after{content:"";position:absolute;left:10%;right:10%;bottom:8px;height:14px;border-radius:6px;background:var(--lk-card,var(--lk-bl));box-shadow:0 1px 0 rgba(0,0,0,.06)}
 .look-card.look-suggested:not(.active){border-color:rgba(76,175,39,.35)}
 .look-card-emoji{font-size:1.35rem;line-height:1}

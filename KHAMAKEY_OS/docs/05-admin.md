@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v170** (supporto operativo v170; PDF Cricut v169; mobile UX v167; magazzino NFC Moments/Business).
+Versione attuale: **v171** (supporto operativo v170; PDF Cricut v169; mobile UX v167; magazzino NFC Moments/Business).
 
 ---
 
@@ -24,6 +24,12 @@ Versione attuale: **v170** (supporto operativo v170; PDF Cricut v169; mobile UX 
 | **Agenti / Rete** | Rivenditori, tier, listini |
 | **Integration Hub** | Shopify, Stripe, PayPal, Resend |
 | **Piani** | Abbonamenti Business (Stripe) |
+
+## Collegamento clienti · ticket · editor (v171)
+
+- **Clienti Moments**: azioni Oggetti / Editor / Ticket (conteggio aperti).
+- **Supporto**: da dettaglio ticket → Apri cliente, Apri editor, Vedi oggetti (via email / ID evento / slug).
+- **Scheda oggetto**: mostra ticket aperti del cliente + pulsante Vedi ticket.
 
 ## Console supporto v170
 

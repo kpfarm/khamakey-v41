@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=170";
-import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=170";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=171";
+import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=171";
 import {
   generateMomentSku,
   generateMomentProductName,
@@ -1331,16 +1331,28 @@ function refreshMomentCustomersTable(){
   const search = String(momentCustomerSearchInput?.value || "").trim().toLowerCase();
   const rows = momentCustomerRows.filter(row=>haystackIncludes(row, search, ["display_name","email","status"]));
   if(momentCustomerTableCount) momentCustomerTableCount.textContent = `${fmt(rows.length)} account`;
-  momentCustomersTable.innerHTML = rows.length ? rows.map(row=>`
-    <tr>
-      <td><strong>${esc(row.display_name || row.email)}</strong></td>
-      <td>${esc(row.email)}</td>
-      <td>${fmt(row.object_count)}</td>
-      <td>${fmt(row.published_count)}</td>
-      <td>${dateShort(row.last_activated_at)}</td>
-      <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
-    </tr>
-  `).join("") : `<tr><td colspan="6">${momentCustomerRows.length ? "Nessun account corrisponde alla ricerca." : "Nessun account Moments. Crea il primo cliente dal form sopra."}</td></tr>`;
+  momentCustomersTable.innerHTML = rows.length ? rows.map(row=>{
+    const email = String(row.email || "").trim();
+    const openTickets = openTicketsForEmail(email).length;
+    const objects = Number(row.object_count || 0);
+    return `
+    <tr class="moment-customer-row">
+      <td data-label="Cliente"><strong>${esc(row.display_name || row.email)}</strong>
+        <small class="muted-cell">${esc(row.status || "")}${row.published_count ? ` · ${fmt(row.published_count)} pub.` : ""}</small>
+      </td>
+      <td data-label="Email">${esc(email)}</td>
+      <td data-label="Oggetti">${fmt(objects)}</td>
+      <td data-label="Ticket">${openTickets ? `<span class="status-pill ${openTickets ? "urgent" : "open"}">${fmt(openTickets)} aperti</span>` : `<span class="muted-cell">0</span>`}</td>
+      <td data-label="Ultima">${dateShort(row.last_activated_at)}</td>
+      <td data-label="Azioni">
+        <div class="row-actions">
+          ${objects ? `<button type="button" class="small-action" data-moment-client-objects="${esc(email)}">Oggetti</button>` : ""}
+          ${objects ? `<button type="button" class="small-action" data-moment-client-editor="${esc(email)}">Editor</button>` : ""}
+          <button type="button" class="small-action" data-moment-client-tickets="${esc(email)}">Ticket${openTickets ? ` (${openTickets})` : ""}</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="6">${momentCustomerRows.length ? "Nessun account corrisponde alla ricerca." : "Nessun account Moments. Crea il primo cliente dal form sopra."}</td></tr>`;
 }
 
 function momentPublicUrl(slug){
@@ -1370,6 +1382,7 @@ async function loadMoments(){
     momentRows = data || [];
     populateMomentObjectTypeFilter();
     refreshMomentsTable();
+    refreshMomentCustomersTable();
   }catch(error){
     console.error(error);
     momentsTable.innerHTML = `<tr><td colspan="7">Oggetti Moments non disponibili. Verifica permessi moments.read.</td></tr>`;
@@ -3407,6 +3420,85 @@ function supportMomentSlug(row){
   return String(row?.description || "").match(/Pagina Moments:\s*([A-Za-z0-9_-]+)/i)?.[1] || "";
 }
 
+function supportEventId(row){
+  return String(row?.description || "").match(/ID evento:\s*([0-9a-f-]{8}-[0-9a-f-]{4}-[0-9a-f-]{4}-[0-9a-f-]{4}-[0-9a-f-]{12})/i)?.[1] || "";
+}
+
+function normalizeEmailKey(value){
+  return String(value || "").trim().toLowerCase();
+}
+
+function momentsForEmail(email){
+  const key = normalizeEmailKey(email);
+  if(!key) return [];
+  return momentRows.filter(row=>normalizeEmailKey(row.owner_email) === key);
+}
+
+function ticketsForEmail(email){
+  const key = normalizeEmailKey(email);
+  if(!key) return [];
+  return supportTicketRows.filter(row=>{
+    if(normalizeEmailKey(supportCustomerEmail(row)) === key) return true;
+    return normalizeEmailKey(row.profiles?.email) === key;
+  });
+}
+
+function openTicketsForEmail(email){
+  return ticketsForEmail(email).filter(row=>!["resolved","closed"].includes(row.status));
+}
+
+function resolveMomentFromTicket(row){
+  const eventId = supportEventId(row);
+  if(eventId){
+    const byId = momentRows.find(item=>item.id === eventId);
+    if(byId) return byId;
+  }
+  const slug = supportMomentSlug(row);
+  if(slug){
+    const bySlug = momentRows.find(item=>String(item.slug || "") === slug);
+    if(bySlug) return bySlug;
+  }
+  const email = supportCustomerEmail(row);
+  const owned = momentsForEmail(email);
+  return owned[0] || null;
+}
+
+function focusMomentClientWorkspace(email, { objects = false, support = false, editor = false, eventId = "" } = {}){
+  const clean = String(email || "").trim();
+  if(support){
+    if(supportSearchInput) supportSearchInput.value = clean;
+    if(supportStatusFilter) supportStatusFilter.value = "";
+    if(supportPriorityFilter) supportPriorityFilter.value = "";
+    switchTab("support");
+    syncSupportQuickChips();
+    refreshSupportTicketsTable();
+    return;
+  }
+  switchTab("momentClients");
+  if(momentCustomerSearchInput){
+    momentCustomerSearchInput.value = clean;
+    refreshMomentCustomersTable();
+  }
+  if(objects || editor){
+    if(momentObjectSearchInput){
+      momentObjectSearchInput.value = clean;
+      refreshMomentsTable();
+    }
+    const target = eventId
+      ? momentRows.find(row=>row.id === eventId)
+      : momentsForEmail(clean)[0];
+    if(editor && target){
+      openMomentDrawer(target.id, "editor");
+      return;
+    }
+    const objectsTitle = document.querySelector('[data-panel="momentClients"] .section-title:nth-of-type(2)')
+      || [...document.querySelectorAll('[data-panel="momentClients"] .section-title')].find(node=>/oggetti/i.test(node.textContent || ""));
+    objectsTitle?.scrollIntoView({ behavior:"smooth", block:"start" });
+  }else{
+    momentCustomerSearchInput?.closest(".admin-card")?.querySelector("#momentCustomersTable")?.scrollIntoView({ behavior:"smooth", block:"nearest" });
+  }
+}
+
 function supportCustomerLabel(row){
   const email = supportCustomerEmail(row);
   const business = row.businesses?.nome || row.businesses?.slug || "";
@@ -3472,6 +3564,7 @@ async function loadSupportTickets(){
     if(error) throw error;
     supportTicketRows = data || [];
     refreshSupportTicketsTable();
+    refreshMomentCustomersTable();
     if(activeSupportTicketId && supportTicketRows.some(row=>row.id === activeSupportTicketId)){
       editSupportTicket(activeSupportTicketId, { keepScroll:true, quiet:true });
     }
@@ -3651,9 +3744,22 @@ function editSupportTicket(id, { keepScroll = false, quiet = false } = {}){
     notesList.innerHTML = split.notes.map(note=>`<li>${esc(note)}</li>`).join("");
   }
 
+  const linkActions = supportTicketEditForm.querySelector("[data-support-link-actions]");
+  const linkedMoment = resolveMomentFromTicket(row);
+  const canLinkClient = Boolean(email || linkedMoment);
+  if(linkActions){
+    linkActions.hidden = !canLinkClient;
+    linkActions.dataset.supportEmail = email || linkedMoment?.owner_email || "";
+    linkActions.dataset.supportEventId = linkedMoment?.id || supportEventId(row) || "";
+    const editorBtn = linkActions.querySelector("[data-support-open-editor]");
+    const objectsBtn = linkActions.querySelector("[data-support-open-objects]");
+    if(editorBtn) editorBtn.hidden = !linkedMoment && !momentsForEmail(email).length;
+    if(objectsBtn) objectsBtn.hidden = !email && !linkedMoment;
+  }
+
   refreshSupportTicketsTable();
   if(!quiet){
-    setFormStatus(supportTicketEditStatus,"Ticket aperto: messaggio cliente sopra, note staff sotto. Aggiorna stato e salva.","ok");
+    setFormStatus(supportTicketEditStatus,"Ticket aperto: messaggio cliente sopra, note staff sotto. Usa Apri cliente / Editor per intervenire.","ok");
   }
   if(!keepScroll) supportTicketEditForm.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
@@ -4072,6 +4178,19 @@ function openMomentDrawer(eventId,view="summary"){
   }
   if(openEditor){
     openEditor.href = editorUrl;
+  }
+  const openTickets = openTicketsForEmail(row.owner_email);
+  const ticketsNode = document.getElementById("momentDrawerTickets");
+  const ticketsBtn = document.getElementById("momentOpenSupportTickets");
+  if(ticketsNode){
+    ticketsNode.textContent = openTickets.length
+      ? `${openTickets.length} aperti · ${ticketsForEmail(row.owner_email).length} totali`
+      : (ticketsForEmail(row.owner_email).length ? `${ticketsForEmail(row.owner_email).length} (nessuno aperto)` : "Nessuno");
+  }
+  if(ticketsBtn){
+    ticketsBtn.hidden = !row.owner_email;
+    ticketsBtn.dataset.supportEmail = row.owner_email || "";
+    ticketsBtn.textContent = openTickets.length ? `Vedi ticket (${openTickets.length})` : "Vedi ticket";
   }
   if(momentDrawerPublicFrame) momentDrawerPublicFrame.src = publicUrl || "about:blank";
   if(momentDrawerEditorFrame) momentDrawerEditorFrame.src = editorUrl;
@@ -5774,15 +5893,56 @@ bindSearchInput(supportSearchInput, refreshSupportTicketsTable);
 
 supportTicketEditForm?.addEventListener("click", async event=>{
   const copyBtn = event.target.closest("[data-support-copy-email]");
-  if(!copyBtn || !supportTicketEditForm) return;
-  const email = String(supportTicketEditForm.querySelector("[data-support-email]")?.textContent || "").trim();
-  if(!email || email === "—") return;
-  try{
-    await navigator.clipboard.writeText(email);
-    setFormStatus(supportTicketEditStatus,"Email copiata.","ok");
-  }catch{
-    setFormStatus(supportTicketEditStatus,"Copia non riuscita — seleziona l’email a mano.","error");
+  if(copyBtn){
+    const email = String(supportTicketEditForm.querySelector("[data-support-email]")?.textContent || "").trim();
+    if(!email || email === "—") return;
+    try{
+      await navigator.clipboard.writeText(email);
+      setFormStatus(supportTicketEditStatus,"Email copiata.","ok");
+    }catch{
+      setFormStatus(supportTicketEditStatus,"Copia non riuscita — seleziona l’email a mano.","error");
+    }
+    return;
   }
+  const linkHost = event.target.closest("[data-support-link-actions]");
+  if(!linkHost) return;
+  const email = linkHost.dataset.supportEmail || "";
+  const eventId = linkHost.dataset.supportEventId || "";
+  if(event.target.closest("[data-support-open-client]")){
+    focusMomentClientWorkspace(email, { objects:false });
+    return;
+  }
+  if(event.target.closest("[data-support-open-objects]")){
+    focusMomentClientWorkspace(email, { objects:true, eventId });
+    return;
+  }
+  if(event.target.closest("[data-support-open-editor]")){
+    focusMomentClientWorkspace(email, { editor:true, eventId });
+  }
+});
+
+momentCustomersTable?.addEventListener("click", event=>{
+  const ticketsBtn = event.target.closest("[data-moment-client-tickets]");
+  if(ticketsBtn){
+    focusMomentClientWorkspace(ticketsBtn.dataset.momentClientTickets, { support:true });
+    return;
+  }
+  const objectsBtn = event.target.closest("[data-moment-client-objects]");
+  if(objectsBtn){
+    focusMomentClientWorkspace(objectsBtn.dataset.momentClientObjects, { objects:true });
+    return;
+  }
+  const editorBtn = event.target.closest("[data-moment-client-editor]");
+  if(editorBtn){
+    focusMomentClientWorkspace(editorBtn.dataset.momentClientEditor, { editor:true });
+  }
+});
+
+document.getElementById("momentOpenSupportTickets")?.addEventListener("click", event=>{
+  const email = event.currentTarget.dataset.supportEmail || "";
+  if(!email) return;
+  closeMomentDrawer();
+  focusMomentClientWorkspace(email, { support:true });
 });
 crmQuickFilters?.addEventListener("click",event=>{
   const chip = event.target.closest("[data-crm-quick]");

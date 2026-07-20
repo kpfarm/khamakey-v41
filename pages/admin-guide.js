@@ -85,9 +85,9 @@ export const MOMENTS_CONSOLE_GUIDES = {
     subtitle: "Assistenza Moments — ticket clienti (codici, attivazione, pagina /m/).",
     steps: [
       "Parti da «Da lavorare» o clicca i KPI (urgenti / attesa cliente / da chiudere).",
-      "Apri il ticket: messaggio cliente, note staff separate, email e link /m/.",
+      "Apri il ticket → Apri cliente / Apri editor / Vedi oggetti (collegati per email o ID evento).",
       "Aggiorna stato/priorità, aggiungi nota interna e salva — il dettaglio resta aperto.",
-      "Problema codice/NFC → Clienti Moments; problema pagina → Apri /m/ dal ticket."
+      "Da Clienti Moments puoi tornare ai Ticket o aprire l’Editor in un click."
     ],
     legend: [
       { pill: "urgent", label: "Urgente — cliente bloccato" },

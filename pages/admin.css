@@ -223,6 +223,8 @@ tr:last-child td{border-bottom:0}
 .support-ticket-meta{display:grid;gap:6px;margin:0 0 4px;padding:10px 12px;border-radius:10px;background:#EFF6FF;border:1px solid #BFDBFE;font-size:.8rem;color:var(--navy)}
 .support-ticket-meta p{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
 .support-ticket-meta strong{font-weight:800;margin-right:2px}
+.support-link-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 6px}
+.support-link-actions .small-action{min-height:40px}
 .support-inline-link,.support-inline-btn{font-size:.72rem;font-weight:800;border:0;background:transparent;color:#175CD3;cursor:pointer;padding:0;text-decoration:underline}
 .support-inline-btn{text-decoration:none;border:1px solid #BFDBFE;border-radius:999px;padding:3px 8px;background:#fff}
 .support-notes-block{grid-column:1/-1;margin:0;padding:10px 12px;border-radius:10px;background:#FFFBEB;border:1px solid #FDE68A}

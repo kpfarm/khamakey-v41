@@ -13,6 +13,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
 ### Changed
+- **Admin / Officina v171 — Clienti ↔ ticket ↔ editor (2026-07-21, Cursor)** — Pages only
+  - Da Clienti: Oggetti / Editor / Ticket; da Supporto: Apri cliente / Editor / Vedi oggetti; da scheda oggetto: Vedi ticket.
 - **Admin / Officina v170 — Supporto operativo (2026-07-21, Cursor)** — Pages only
   - Coda default «Da lavorare», KPI/chip cliccabili, età ticket, messaggio cliente vs note staff, mailto/copia email, link `/m/`, tabella a card su mobile.
 - **Admin / Officina v169 — PDF etichette Cricut 4 sezioni (2026-07-20, Cursor)** — Pages only

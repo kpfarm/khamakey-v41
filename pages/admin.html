@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=170">
+  <link rel="stylesheet" href="admin.css?v=171">
   <script>
     // Dominio Moments: questo è l'admin Business — vai subito all'Officina Moments.
     (function () {
@@ -308,7 +308,7 @@
             <p class="inventory-table-meta"><span id="momentCustomerTableCount">0 account</span></p>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Cliente</th><th>Email</th><th>Oggetti</th><th>Pubblicate</th><th>Ultima attivazione</th><th>Stato</th></tr></thead>
+                <thead><tr><th>Cliente</th><th>Email</th><th>Oggetti</th><th>Ticket</th><th>Ultima attivazione</th><th>Azioni</th></tr></thead>
                 <tbody id="momentCustomersTable"><tr><td colspan="6">Caricamento account Moments...</td></tr></tbody>
               </table>
             </div>
@@ -1310,6 +1310,11 @@
                 <p><strong>Origine</strong> <span data-support-source>—</span></p>
                 <p><strong>Aperto il</strong> <span data-support-created>—</span></p>
               </div>
+              <div class="support-link-actions" data-support-link-actions hidden>
+                <button type="button" class="small-action" data-support-open-client>Apri cliente</button>
+                <button type="button" class="small-action primary-outline" data-support-open-editor>Apri editor</button>
+                <button type="button" class="small-action" data-support-open-objects>Vedi oggetti</button>
+              </div>
               <label>Oggetto
                 <input name="ticket_title" type="text" readonly>
               </label>
@@ -1924,11 +1929,13 @@
           <span>Pubblicata</span><strong id="momentDrawerPublished">-</strong>
           <span>PIN</span><strong id="momentDrawerPin">-</strong>
           <span>Link pubblico</span><strong id="momentDrawerPublicUrl">-</strong>
+          <span>Ticket aperti</span><strong id="momentDrawerTickets">-</strong>
         </div>
         <div class="row-actions" style="margin-top:12px">
           <button type="button" class="small-action" id="momentCopyPublicUrl">Copia link</button>
           <a class="small-action" id="momentOpenPublicUrl" href="#" target="_blank" rel="noopener">Apri pagina</a>
           <a class="small-action" id="momentOpenEditorUrl" href="#" target="_blank" rel="noopener">Apri editor</a>
+          <button type="button" class="small-action" id="momentOpenSupportTickets" hidden>Vedi ticket</button>
         </div>
       </div>
       <div class="drawer-view" id="moment-drawer-public">
@@ -2077,6 +2084,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=170"></script>
+  <script type="module" src="admin.js?v=171"></script>
 </body>
 </html>

@@ -231,7 +231,7 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Stripe webhook / ingest** | Predisposto — libero | handler Stripe in `worker/worker.js`, RPC `ingest_stripe_checkout_event` |
 | **Shopify Moments** | Operativo — libero | webhook ordini, catalogo vendita, sync bozze |
 | **Editor Business — contratto pubblico** | Condiviso | `publicStateFromEditor`, renderer `/p/` nel Worker |
-| **Admin / Officina Moments** | **Libero** (live **v170**) | `admin.html`, `moments-admin.html`, `admin.js`, `admin.css`, `admin-guide.js`, `admin-moment-labels.js` — coordinarsi se stesso pannello |
+| **Admin / Officina Moments** | **Libero** (live **v171**) | `admin.html`, `moments-admin.html`, `admin.js`, `admin.css`, `admin-guide.js`, `admin-moment-labels.js` — coordinarsi se stesso pannello |
 | **Moments editor** | **Libero** (live **v166**) | `moments.js`, `moments.html`, `moment-*.js` — prendere lock prima di refactor ampi |
 | **Security hardening (audit 2026-07-11)** | Completato e deployato (vedi `PROJECT_STATE.md`) | Regole assolute CSP/RLS/dati restano vincolanti |
 | **`worker/worker.js`** | **Libero** (live **v157-nav-contrast**) — file più conteso | Chi tocca `worker.js` prende lock esplicito e non parallelizza |
@@ -319,7 +319,7 @@ Percorsi skill: `pages/` (non `khamakey-test-app`), `worker/` (non `khamakey-clo
 ## Convenzioni versione
 
 - Un solo contatore release piattaforma: `?v=NN` su HTML/JS (bump solo se cambia runtime)
-- **SSOT live** (2026-07-21): Admin/Officina **v170** · Moments **v166** · Worker **v157-nav-contrast** · Business shell `APP_VERSION` **167** · SQL **v160**
+- **SSOT live** (2026-07-21): Admin/Officina **v171** · Moments **v166** · Worker **v157-nav-contrast** · Business shell `APP_VERSION` **167** · SQL **v160**
 - Worker: `WORKER_VERSION` in `worker/worker.js`
 - Tabella ufficiale: `KHAMAKEY_OS/PROJECT_STATE.md` → se diverge, vince il codice
 - Dettaglio workflow: `.cursor/rules/git-commit-workflow.mdc`

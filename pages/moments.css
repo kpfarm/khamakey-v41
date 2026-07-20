@@ -560,7 +560,7 @@ body.media-modal-open{overflow:hidden}
 .btn-save{border:0;background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;font-weight:800;font-size:.82rem;padding:10px 20px;border-radius:10px;cursor:pointer;white-space:nowrap}
 .preview-fab{display:none;position:fixed;right:12px;bottom:calc(var(--bottomnav-h) + 12px);z-index:280;border:0;background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;border-radius:999px;padding:11px 15px;font-weight:800;font-size:.8rem;box-shadow:0 8px 24px rgba(76,175,39,.35);cursor:pointer}
 .save-bar.visible ~ .preview-fab{bottom:calc(var(--bottomnav-h) + 68px)}
-.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:2px solid var(--border);z-index:400;box-shadow:0 -8px 24px rgba(27,42,94,.08);flex-direction:column}
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:2px solid var(--border);z-index:400;box-shadow:0 -8px 24px rgba(27,42,94,.08);flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
 .sub-nav{display:flex;gap:4px;padding:6px 8px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;min-height:0;max-height:0;opacity:0;transition:max-height .25s,opacity .2s,padding .2s}
 .sub-nav.open{min-height:38px;max-height:44px;opacity:1}
 .snav-btn{display:flex;align-items:center;gap:5px;padding:6px 10px;border:0;border-radius:999px;background:transparent;color:var(--muted);font-size:.62rem;font-weight:700;white-space:nowrap;cursor:pointer;flex-shrink:0}
@@ -582,22 +582,54 @@ body.media-modal-open{overflow:hidden}
 .preview-list-item.done{color:var(--muted);text-decoration:line-through}
 
 @media(max-width:768px){
-  :root{--topbar-h:52px;--bottomnav-h:96px}
-  .moments-app.has-editor{padding-bottom:var(--bottomnav-h)}
+  :root{
+    --topbar-h:52px;
+    --bottomnav-h:calc(96px + env(safe-area-inset-bottom,0px));
+  }
+  /* Shell mobile: niente scroll “nel vuoto rosa” — scorre solo il pannello */
+  html:has(.moments-app:not([hidden])),
+  body:has(.moments-app:not([hidden])){
+    height:100%;
+    overflow:hidden;
+    overscroll-behavior:none;
+  }
+  .moments-app{
+    height:100dvh;
+    max-height:100dvh;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    padding-bottom:0;
+  }
+  .moments-app.has-editor{padding-bottom:0}
+  .moments-app > .topbar{flex:0 0 auto}
+  .moments-app > .main-panel,
+  .moments-app > .account-hub{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-x:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    padding:10px 10px calc(var(--bottomnav-h) + 16px);
+  }
+  .moments-app.account-mode > .account-hub{
+    padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  }
   .moments-auth{grid-template-columns:1fr}
   .auth-brand{padding:24px 20px}
   .auth-steps{display:none}
-  .main-panel{padding:10px 10px calc(var(--bottomnav-h) + 20px)}
   .section-title{font-size:1.15rem}
   .section-sub{font-size:.78rem}
   .detail-head{display:none}
   .editor-topbar{display:none}
   .editor-shell{border-radius:12px}
-  .editor-layout{grid-template-columns:1fr}
+  .editor-layout{grid-template-columns:1fr;min-height:0}
   .editor-sidebar{display:none}
   .editor-main{padding:12px}
   .bottom-nav{display:flex}
-  .preview-fab{display:block}
+  .preview-fab{display:block;bottom:calc(var(--bottomnav-h) + 12px)}
   .field-row,.pin-row{grid-template-columns:1fr}
   .signup-actions{flex-direction:column;align-items:stretch}
   .signup-actions .primary{margin-left:0}
@@ -605,9 +637,15 @@ body.media-modal-open{overflow:hidden}
   textarea{min-height:100px}
   .editor-shell .preview-card{display:none;border-left:0;border-top:1px solid var(--border);max-height:none;position:static;border-radius:0 0 12px 12px}
   .editor-shell.show-preview .editor-main{display:none}
-  .editor-shell.show-preview .preview-card{display:flex;flex-direction:column;max-height:none}
-  .editor-shell.show-preview .preview-live-wrap{padding:0}
-  .editor-shell.show-preview .preview-live-iframe{max-width:100%;min-height:calc(100vh - 150px);height:calc(100vh - 150px);border-radius:0;box-shadow:none}
+  .editor-shell.show-preview .preview-card{display:flex;flex-direction:column;max-height:none;min-height:0}
+  .editor-shell.show-preview .preview-live-wrap{padding:0;flex:1 1 auto;min-height:0}
+  .editor-shell.show-preview .preview-live-iframe{
+    max-width:100%;
+    min-height:calc(100dvh - var(--topbar-h) - var(--bottomnav-h) - 48px);
+    height:calc(100dvh - var(--topbar-h) - var(--bottomnav-h) - 48px);
+    border-radius:0;
+    box-shadow:none;
+  }
   .save-bar.visible{bottom:var(--bottomnav-h)}
   .object-pick{padding:14px}
   .editor-card{padding:12px}

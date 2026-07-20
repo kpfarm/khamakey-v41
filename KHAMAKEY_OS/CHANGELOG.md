@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **Moments v159 — Scroll mobile nel vuoto rosa (2026-07-20, Cursor)** — Pages only
+  - Su cellulare lo scroll resta nel pannello editor; menu in basso sempre visibile; niente pagina rosa vuota sotto.
+
 ### Changed
 - **Moments v158 — Account hub separato dall’editor (2026-07-20, Cursor)** — Pages only
   - Schermata Account (profilo, prodotti NFC, piano, assistenza) fuori dall’editor; tab editor «Account» → «Pagina» (Riepilogo + Pubblica).

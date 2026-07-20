@@ -86,7 +86,7 @@ import {
   formatImageLines,
   sectionFieldHints,
   sectionHasContent
-} from "./moment-sections.js?v=145";
+} from "./moment-sections.js?v=151";
 import {
   TYPE_LABELS,
   renderCategorySelect,
@@ -107,7 +107,7 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js?v=150";
+} from "./moment-editor-kit.js?v=151";
 import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderGuestbookModerationShell, bindGuestbookModerationPanel } from "./moment-guestbook-kit.js";
@@ -2353,17 +2353,14 @@ function renderDetail(id){
     document.getElementById("editorUndoBtnMobile")?.addEventListener("click",revertEditorChanges);
   }
   editorForm.addEventListener("submit",event=>saveMoment(event,row));
-  // Pulsanti Salva fuori dal form: click esplicito (oltre a type=submit form=…)
-  document.querySelectorAll('button[type="submit"][form="momentEditorForm"]').forEach(button=>{
+  // Pulsanti Salva fuori dal form: chiama direttamente saveMoment (no validation HTML)
+  document.querySelectorAll('button[type="submit"][form="momentEditorForm"], .editor-save-btn, #momentsSaveBar .btn-save').forEach(button=>{
     if(button.dataset.momentsSaveBound === "1") return;
     button.dataset.momentsSaveBound = "1";
     button.addEventListener("click",event=>{
       event.preventDefault();
-      if(typeof editorForm.requestSubmit === "function"){
-        editorForm.requestSubmit();
-      }else{
-        saveMoment({ preventDefault(){}, currentTarget:editorForm }, row);
-      }
+      event.stopPropagation();
+      saveMoment({ preventDefault(){}, currentTarget:editorForm }, row);
     });
   });
   document.getElementById("momentSupportForm")?.addEventListener("submit",event=>submitMomentSupportTicket(event,row));
@@ -3092,7 +3089,7 @@ function sectionEditor(key,section,standalone=false){
   const rsvpFields = key === "rsvp" ? `
     <div class="editor-card smart-card" data-rsvp-wa-card>
       <p class="ecard-title"><span class="step-badge">1</span> WhatsApp organizzatore <span class="field-required">obbligatorio</span></p>
-      <p class="rsvp-wa-warn" id="rsvpWaWarn" ${normalizeWhatsAppDigits(safe.whatsapp_number) ? "hidden" : ""}>Senza numero WhatsApp la sezione RSVP <strong>non compare</strong> nella pagina finale. Inseriscilo e clicca Salva.</p>
+      <p class="rsvp-wa-warn" id="rsvpWaWarn" ${normalizeWhatsAppDigits(safe.whatsapp_number) ? "hidden" : ""}>Avviso: senza WhatsApp la sezione RSVP <strong>non compare</strong> in pagina pubblica. Puoi comunque salvare il resto.</p>
       <label>Numero WhatsApp<input name="section_${esc(key)}_whatsapp_number" id="rsvpWhatsappInput" value="${esc(safe.whatsapp_number || "")}" placeholder="393331234567" inputmode="tel" autocomplete="tel"></label>
       <p class="field-hint">Prefisso internazionale senza + (es. 39333… per Italia). Gli invitati compilano il modulo e ti inviano il messaggio su WhatsApp.</p>
     </div>
@@ -3511,22 +3508,28 @@ async function saveMoment(event,row){
       return showEditorSaveFeedback("Lettera al futuro: attendi il caricamento degli allegati o ricaricali prima di salvare.","error");
     }
   }
-  if(state.sections?.rsvp?.enabled){
+  // WhatsApp RSVP: solo avviso, mai blocco salvataggio (la pagina pubblica già nasconde RSVP senza WA)
+  if(state.sections?.rsvp){
     const wa = normalizeWhatsAppDigits(state.sections.rsvp.whatsapp_number);
-    if(!wa || wa.length < 10){
-      setEditorPanel("section-rsvp");
-      syncRsvpWhatsappWarn(formNode);
-      formNode.querySelector('[name="section_rsvp_whatsapp_number"]')?.focus();
-      return showEditorSaveFeedback("RSVP attivo: inserisci il WhatsApp oppure spegni «Visibile in pagina» su RSVP, poi Salva.","error");
-    }
     state.sections.rsvp.whatsapp_number = wa;
+    if(state.sections.rsvp.enabled && (!wa || wa.length < 10)){
+      syncRsvpWhatsappWarn(formNode);
+      const barMsg = document.querySelector("#momentsSaveBar .save-msg");
+      if(barMsg){
+        barMsg.innerHTML = "<strong>Avviso RSVP:</strong> senza WhatsApp non compare in pagina — salvataggio in corso…";
+      }
+    }
   }
   showEditorSaveFeedback("Salvataggio...","");
   try{
     let pinHash = null;
     if(pin){
-      pinHash = await momentPinHash(row.slug,validatePin(pin));
-      rememberPin(row.id,pin);
+      try{
+        pinHash = await momentPinHash(row.slug,validatePin(pin));
+        rememberPin(row.id,pin);
+      }catch(pinError){
+        return showEditorSaveFeedback(pinError.message || "PIN non valido (minimo 4 caratteri), oppure lascia il campo vuoto.","error");
+      }
     }
     const { error } = adminMode
       ? await supabase.rpc("admin_save_moment_page",{

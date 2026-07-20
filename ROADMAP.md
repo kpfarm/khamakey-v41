@@ -272,3 +272,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Admin v165**: su `khamakeymoments.com` `/admin` reindirizza a `moments-admin` (fix path senza .html) |
 | 2026-07-20 | Cursor | **Audit SE basi + SSOT**: versioni PROJECT_STATE/CODEX-COLLAB allineate al codice (Admin 165 / Moments 147 / Worker 144); lock stale rilasciati; **zero cambio runtime** |
 | 2026-07-20 | Cursor | **Ops checklist secrets/Auth**: `docs/22` da `/health` live (Resend+Shopify OK; Stripe off; leaked-password WARN) — solo doc, zero deploy |
+| 2026-07-20 | Cursor | **WIP hygiene**: commit Moments assets/SQL v156–v159 + docs vault + Business editor/SQL v147–v148 in git; demo landing e .obsidian lasciati fuori; **no deploy** |

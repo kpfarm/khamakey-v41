@@ -124,7 +124,11 @@ export function coverFocusStyle(state = {}){
   const x = clampNumber(state.cover_focus_x,0,100,50);
   const y = clampNumber(state.cover_focus_y,0,100,50);
   const zoom = clampNumber(state.cover_zoom,100,200,100);
-  return { x,y,zoom,css:`object-position:${x}% ${y}%;transform:scale(${zoom/100})` };
+  // Zoom sul punto di fuoco (non sul centro del riquadro)
+  return {
+    x,y,zoom,
+    css:`object-position:${x}% ${y}%;transform-origin:${x}% ${y}%;transform:scale(${zoom/100})`
+  };
 }
 
 export function clampNumber(value,min,max,fallback){

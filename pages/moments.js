@@ -35,7 +35,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=144";
+} from "./moments-media-ui.js?v=163";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -45,7 +45,7 @@ import {
   bindJourneyEditor,
   uploadJourneyStepPhoto
 } from "./moments-journey-ui.js?v=144";
-import { migrateLetterMediaSection } from "./moment-media.js?v=144";
+import { migrateLetterMediaSection } from "./moment-media.js?v=163";
 import { LIST_SECTION_MODES, itemsFromSection } from "./moment-list-items.js";
 import {
   renderListItemsPanel,
@@ -1722,10 +1722,8 @@ function applyPageLook(formNode, lookId, { preview = true, resetZoom = true } = 
 }
 
 function resetCoverZoomIfNeeded(formNode){
-  const zoomInput = formNode?.elements?.cover_zoom;
-  if(!zoomInput || Number(zoomInput.value) <= 110) return;
-  zoomInput.value = 100;
-  syncCoverFramer(formNode);
+  // Lo zoom copertina è indipendente dallo stile pagina: non resettarlo al cambio look.
+  void formNode;
 }
 
 function syncPaletteButtons(formNode, palette){
@@ -3484,7 +3482,7 @@ function readFormState(formNode){
     cover_url:String(form.get("cover_url") || "").trim(),
     cover_focus_x:Number(form.get("cover_focus_x") || 50),
     cover_focus_y:Number(form.get("cover_focus_y") || 50),
-    cover_zoom:Number(form.get("cover_zoom") || 100),
+    cover_zoom:Math.min(200, Math.max(100, Number(form.get("cover_zoom") || 100))),
     profile_photo:"",
     colorPalette:canonicalizePalette(String(form.get("color_palette") || "verde")),
     themeVariant:String(form.get("theme_variant") || "chiaro"),

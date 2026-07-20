@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v147-dense-bg";
+const WORKER_VERSION = "v148-cover-zoom";
 
 export default {
   async fetch(request, env, ctx) {
@@ -914,9 +914,9 @@ function renderMomentPage(page, origin) {
   const decorHtml = renderMomentDecor(state);
   const coverFocusX = clampNumber(state.cover_focus_x, 0, 100, 50);
   const coverFocusY = clampNumber(state.cover_focus_y, 0, 100, 50);
-  const coverZoom = clampNumber(state.cover_zoom, 100, 150, 100);
+  const coverZoom = clampNumber(state.cover_zoom, 100, 200, 100);
   const heroCover = coverUrl
-    ? `<div class="moment-cover-wrap" style="transform:scale(${coverZoom / 100})"><img class="moment-cover" src="${attr(coverUrl)}" alt="" style="object-position:${coverFocusX}% ${coverFocusY}%"></div>`
+    ? `<div class="moment-cover-wrap${coverZoom > 100 ? " is-zoomed" : ""}" style="transform:scale(${coverZoom / 100});transform-origin:${coverFocusX}% ${coverFocusY}%"><img class="moment-cover" src="${attr(coverUrl)}" alt="" style="object-position:${coverFocusX}% ${coverFocusY}%"></div>`
     : "";
   const profileBlock = profileUrl && heroStyle === "profilo"
     ? `<img class="moment-profile" src="${attr(profileUrl)}" alt="">` : "";
@@ -1793,7 +1793,9 @@ body.nav-open{overflow:hidden}
 .hero-profilo .moment-hero{padding-top:max(88px,env(safe-area-inset-top))}
 .moment-cover-wrap{position:absolute;inset:0;transform-origin:center center;will-change:transform;z-index:0}
 .moment-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:kenBurns 22s ease-in-out infinite alternate}
+.moment-cover-wrap.is-zoomed .moment-cover{animation-name:kenBurnsSoft}
 @keyframes kenBurns{0%{transform:scale(1)}100%{transform:scale(1.09)}}
+@keyframes kenBurnsSoft{0%{transform:scale(1)}100%{transform:scale(1.03)}}
 .moment-hero-overlay{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(15,23,42,0.08) 0%,rgba(15,23,42,0.48) 55%,rgba(15,23,42,0.85) 100%)}
 .moment-hero-content{position:relative;z-index:2;max-width:520px;margin:0 auto;isolation:isolate}
 .hero-in,.rv{opacity:0;transform:translateY(24px) scale(0.98);transition:opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)}

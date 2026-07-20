@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **Moments v163 / Worker v148 — Zoom copertina migliorato (2026-07-20, Cursor)** — Pages + Worker
+  - Slider continuo 100–200% (step 5); zoom sul punto di fuoco toccato; pagina pubblica allineata fino a 200%.
 - **Moments v162 / Worker v147 — Sfondi densi + rosso + contrasto card (2026-07-20, Cursor)** — Pages + Worker
   - 12 colori distinti (incluso rosso `#DC2626`); il cerchio è lo sfondo pieno; anteprima mostra `bl` non solo accenti; testo sulle card sempre nero (`cardInk`).
 - **Moments v161 / Worker v146 — Cerchi = sfondo pagina (2026-07-20, Cursor)** — Pages + Worker

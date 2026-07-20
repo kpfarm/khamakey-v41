@@ -13,7 +13,7 @@ import {
   mediaId,
   mediaLimitsForKey,
   VIDEO_SECTION_HINT
-} from "./moment-media.js?v=144";
+} from "./moment-media.js?v=163";
 
 let mediaEditContext = null;
 
@@ -303,11 +303,15 @@ const COVER_QUICK = [
   { id:"bottom", x:50, y:88, label:"Basso" }
 ];
 
-const COVER_ZOOM_STEPS = [100, 115, 130];
+const COVER_ZOOM_MIN = 100;
+const COVER_ZOOM_MAX = 200;
+const COVER_ZOOM_STEP = 5;
 
 function nearestZoomStep(zoom){
-  const value = Number(zoom) || 100;
-  return COVER_ZOOM_STEPS.reduce((best,step)=>Math.abs(step - value) < Math.abs(best - value) ? step : best, COVER_ZOOM_STEPS[0]);
+  const value = Number(zoom);
+  const raw = Number.isFinite(value) ? value : COVER_ZOOM_MIN;
+  const clamped = Math.min(COVER_ZOOM_MAX, Math.max(COVER_ZOOM_MIN, raw));
+  return Math.round(clamped / COVER_ZOOM_STEP) * COVER_ZOOM_STEP;
 }
 
 function activeQuickPositionId(x,y){
@@ -339,9 +343,7 @@ function setCoverZoom(formNode,zoom){
 
 function stepCoverZoom(formNode,direction){
   const current = nearestZoomStep(formNode.elements.cover_zoom?.value || 100);
-  const idx = COVER_ZOOM_STEPS.indexOf(current);
-  const next = COVER_ZOOM_STEPS[Math.min(COVER_ZOOM_STEPS.length - 1, Math.max(0, idx + direction))];
-  setCoverZoom(formNode, next);
+  setCoverZoom(formNode, current + (direction * COVER_ZOOM_STEP));
 }
 
 export function bindCoverFramer(formNode){
@@ -370,6 +372,10 @@ export function bindCoverFramer(formNode){
         stepCoverZoom(formNode, Number(zoomStep.dataset.coverZoomStep));
       }
     });
+    slot.addEventListener("input",event=>{
+      if(event.target?.name !== "cover_zoom" && event.target?.id !== "coverZoomRange") return;
+      setCoverZoom(formNode, event.target.value);
+    });
   }
   syncCoverFramer(formNode);
 }
@@ -395,13 +401,16 @@ export function syncCoverFramer(formNode){
     btn.classList.toggle("active",active);
     btn.setAttribute("aria-pressed",active ? "true" : "false");
   });
-  const zoomLabel = document.getElementById("coverZoomLabel");
   const normalizedZoom = nearestZoomStep(zoom);
+  const zoomLabel = document.getElementById("coverZoomLabel");
   if(zoomLabel) zoomLabel.textContent = `${normalizedZoom}%`;
+  const range = formNode.querySelector("#coverZoomRange") || formNode.elements.cover_zoom;
+  if(range && range.type === "range") range.value = String(normalizedZoom);
+  else if(formNode.elements.cover_zoom) formNode.elements.cover_zoom.value = String(normalizedZoom);
   const minus = formNode.querySelector("[data-cover-zoom-step='-1']");
   const plus = formNode.querySelector("[data-cover-zoom-step='1']");
-  if(minus) minus.disabled = normalizedZoom <= COVER_ZOOM_STEPS[0];
-  if(plus) plus.disabled = normalizedZoom >= COVER_ZOOM_STEPS[COVER_ZOOM_STEPS.length - 1];
+  if(minus) minus.disabled = normalizedZoom <= COVER_ZOOM_MIN;
+  if(plus) plus.disabled = normalizedZoom >= COVER_ZOOM_MAX;
 }
 
 export function renderCoverFramer(state){
@@ -422,18 +431,18 @@ export function renderCoverFramer(state){
   </div>
   <input type="hidden" name="cover_focus_x" value="${x}">
   <input type="hidden" name="cover_focus_y" value="${y}">
-  <input type="hidden" name="cover_zoom" value="${normalizedZoom}">
   <div class="cover-picker">
     <p class="cover-picker-label">Scorciatoie</p>
     <div class="cover-quick-row" role="group" aria-label="Posizione rapida">${quick}</div>
   </div>
   <div class="cover-picker cover-picker-zoom">
-    <p class="cover-picker-label">Zoom</p>
+    <p class="cover-picker-label">Zoom <span class="cover-zoom-label" id="coverZoomLabel">${normalizedZoom}%</span></p>
     <div class="cover-zoom-stepper" role="group" aria-label="Zoom copertina">
-      <button type="button" class="cover-zoom-step-btn" data-cover-zoom-step="-1" aria-label="Riduci zoom" ${normalizedZoom <= COVER_ZOOM_STEPS[0] ? "disabled" : ""}>−</button>
-      <span class="cover-zoom-label" id="coverZoomLabel">${normalizedZoom}%</span>
-      <button type="button" class="cover-zoom-step-btn" data-cover-zoom-step="1" aria-label="Aumenta zoom" ${normalizedZoom >= COVER_ZOOM_STEPS[COVER_ZOOM_STEPS.length - 1] ? "disabled" : ""}>+</button>
+      <button type="button" class="cover-zoom-step-btn" data-cover-zoom-step="-1" aria-label="Riduci zoom" ${normalizedZoom <= COVER_ZOOM_MIN ? "disabled" : ""}>−</button>
+      <input id="coverZoomRange" class="cover-zoom-range" type="range" name="cover_zoom" min="${COVER_ZOOM_MIN}" max="${COVER_ZOOM_MAX}" step="${COVER_ZOOM_STEP}" value="${normalizedZoom}" aria-valuemin="${COVER_ZOOM_MIN}" aria-valuemax="${COVER_ZOOM_MAX}" aria-valuenow="${normalizedZoom}" aria-label="Livello zoom copertina">
+      <button type="button" class="cover-zoom-step-btn" data-cover-zoom-step="1" aria-label="Aumenta zoom" ${normalizedZoom >= COVER_ZOOM_MAX ? "disabled" : ""}>+</button>
     </div>
+    <p class="cover-picker-hint">Da 100% a 200%. Tocca la foto per il fuoco, poi avvicina volti o dettagli.</p>
   </div>`;
 }
 

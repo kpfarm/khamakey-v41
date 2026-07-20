@@ -35,10 +35,10 @@ Asset in [`../assets/brand/`](../assets/brand/):
 | File | Uso |
 |------|-----|
 | `khamakey-moments-brand-guide.jpg` | Style guide completa |
-| `khamakey-moments-wordmark-horizontal.jpg` | Wordmark orizzontale |
+| `khamakey-moments-wordmark-horizontal-on-dark.jpg` | Wordmark rosa+bianco su nero (UI scura) |
+| `khamakey-moments-wordmark-horizontal.jpg` | Variante precedente |
 | `khamakey-moments-wordmark-stacked.jpg` | Wordmark stacked |
-| `pages/khamakey-moments-wordmark.jpg` | Topbar editor (deploy Pages) |
-| `pages/khamakey-moments-wordmark-stacked.jpg` | Auth / boot |
+| `pages/khamakey-moments-wordmark.jpg` | Auth / topbar / boot (deploy Pages) |
 
 **Palette Moments**
 

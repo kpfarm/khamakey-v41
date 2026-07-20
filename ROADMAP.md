@@ -290,3 +290,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Moments v164 / Worker v149**: galleria con foto grandi, descrizioni visibili, lightbox |
 | 2026-07-20 | Cursor | **Worker v150**: galleria scroll laterale + descrizioni leggibili (stesso colore testo) |
 | 2026-07-20 | Cursor | **Worker v152**: fix scroll touch galleria su smartphone (swipe vs tap) |
+| 2026-07-20 | Cursor | **Worker v153**: galleria contenuta — stop pagina larghissima su mobile |

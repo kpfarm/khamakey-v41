@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v152-gallery-touch";
+const WORKER_VERSION = "v153-gallery-contain";
 
 export default {
   async fetch(request, env, ctx) {
@@ -1805,8 +1805,8 @@ function momentPageCss(colors, fonts) {
   const f = fonts || resolveMomentFontPair("classic");
   const cardInk = c.cardInk || "#111111";
   return `@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Special+Elite&family=Shadows+Into+Light&display=swap');
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:72px}
-body{margin:0;font-family:${f.body};background:radial-gradient(circle at 12% 24%, color-mix(in srgb, ${c.go} 8%, transparent) 0%, transparent 45%), radial-gradient(circle at 88% 76%, color-mix(in srgb, ${c.go} 12%, transparent) 0%, transparent 52%), linear-gradient(180deg, ${c.surface} 0%, ${c.bl} 100%)!important;color:${c.ink};-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:72px;overflow-x:hidden;max-width:100%}
+body{margin:0;width:100%;max-width:100%;overflow-x:hidden;font-family:${f.body};background:radial-gradient(circle at 12% 24%, color-mix(in srgb, ${c.go} 8%, transparent) 0%, transparent 45%), radial-gradient(circle at 88% 76%, color-mix(in srgb, ${c.go} 12%, transparent) 0%, transparent 52%), linear-gradient(180deg, ${c.surface} 0%, ${c.bl} 100%)!important;color:${c.ink};-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 #moment-hero,.moment-section-anchor,#moment-section-counter{scroll-margin-top:72px}
 .moment-nav-backdrop{position:fixed;inset:0;background:rgba(12,16,24,.22);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:38}
 .moment-nav-backdrop.open{opacity:1;pointer-events:auto}
@@ -1839,8 +1839,7 @@ body.nav-open{overflow:hidden}
 .moment-decor{display:none!important}
 .moment-decor-item{display:none!important}
 @keyframes momentDecorFloat{0%,100%{transform:translate3d(0,0,0) rotate(0deg)}50%{transform:translate3d(0,-12px,0) rotate(6deg)}}
-.moment-page{width:100%;max-width:100%;min-height:100dvh;margin:0;background:transparent;overflow-x:visible;position:relative}
-.moment-content{overflow-x:visible;max-width:100%}
+.moment-page{width:100%;max-width:100%;min-height:100dvh;margin:0;background:transparent;overflow-x:hidden;position:relative}
 .moment-hero{position:relative;min-height:min(94dvh,760px);padding:max(120px,env(safe-area-inset-top) + 40px) 24px max(80px,env(safe-area-inset-bottom));text-align:center;color:#fff;background:linear-gradient(145deg,${c.bl},${c.g2 || c.hero});overflow:hidden;display:grid;align-content:end}
 .hero-fullscreen .moment-hero{min-height:min(100dvh,780px)}
 .hero-romantico .moment-hero{min-height:min(88dvh,700px)}
@@ -1865,7 +1864,8 @@ body.nav-open{overflow:hidden}
 .moment-hero p{font-family:${f.body};font-size:clamp(1.05rem,4vw,1.2rem);font-style:italic;line-height:1.75;margin:0 auto;max-width:480px;color:rgba(255,255,255,.98);text-shadow:0 1px 6px rgba(0,0,0,0.4),0 4px 16px rgba(0,0,0,0.28)}
 @keyframes scrollPulse{0%,100%{opacity:.5;transform:scaleY(1)}50%{opacity:.15;transform:scaleY(.55)}}
 @keyframes momentItemIn{from{opacity:0;transform:translateY(16px) scale(0.98)}to{opacity:1;transform:none}}
-.moment-content{padding:24px 20px 48px;display:grid;gap:24px;background:transparent}
+.moment-content{padding:24px 20px 48px;display:grid;gap:24px;background:transparent;width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+.moment-section-anchor{min-width:0;max-width:100%;overflow-x:hidden}
 
 .moment-counter, .moment-card, .moment-countdown, .moment-quote-wrap, .moment-signature, .moment-rsvp-form, .moment-guestbook-form, .moment-sealed, .moment-letter {
   background: rgba(255,255,255,.82)!important;
@@ -1903,8 +1903,8 @@ body.nav-open{overflow:hidden}
 .moment-counter-unit:not(:last-child){border-right:1px solid ${c.line}}
 .moment-counter-unit b{display:block;font-size:clamp(1.8rem,8vw,2.4rem);font-weight:700;font-style:normal;line-height:1;color:${c.go}!important;font-family:${f.ui}}
 .moment-counter-unit small{display:block;font-family:${f.ui};font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:${c.muted};margin-top:8px}
-.moment-card{position:relative;overflow:hidden;padding:32px 20px 28px;margin:0;max-width:none}
-.moment-card-gallery{overflow:visible;touch-action:manipulation}
+.moment-card{position:relative;overflow:hidden;padding:32px 20px 28px;margin:0;max-width:100%;min-width:0;width:100%}
+.moment-card-gallery{overflow:hidden;max-width:100%;min-width:0}
 .moment-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,rgba(15,23,42,.03),rgba(15,23,42,.01))}
 .moment-card-head{display:grid;justify-items:center;text-align:center;margin-bottom:20px;padding-top:4px}
 
@@ -1995,20 +1995,20 @@ body.nav-open{overflow:hidden}
 .moment-number b{display:block;font-size:clamp(1.6rem,7vw,2rem);font-weight:700;font-style:normal;color:${c.go};line-height:1;font-family:${f.ui}}
 .moment-number small{display:block;font-family:${f.ui};font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:${c.muted};margin-top:8px;line-height:1.35}
 .moment-gallery-hint{margin:4px 0 0;font-family:${f.ui};font-size:.78rem;font-weight:600;color:${c.muted};text-align:center}
-.moment-gallery{margin-top:10px;max-width:100%}
-.moment-gallery-scroll{margin:10px -20px 0;padding:0 20px 14px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain;scrollbar-width:none;scroll-snap-type:x mandatory;scroll-padding-inline:20px}
+.moment-gallery{margin-top:10px;width:100%;max-width:100%;min-width:0;overflow:hidden}
+.moment-gallery-scroll{display:block;width:100%;max-width:100%;min-width:0;margin:12px 0 0;padding:0 0 12px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:0}
 .moment-gallery-scroll::-webkit-scrollbar{display:none}
-.moment-gallery-track{display:flex;gap:14px;width:max-content;align-items:start}
-.moment-gallery-figure{margin:0;display:grid;gap:8px;width:min(72vw,260px);flex:0 0 auto;scroll-snap-align:center;outline:none;border:0;background:transparent;padding:0;text-align:left;touch-action:pan-x}
-.moment-gallery-frame{position:relative;overflow:hidden;border-radius:18px;aspect-ratio:4/5;background:#111;box-shadow:0 10px 28px rgba(15,23,42,.12);touch-action:pan-x;cursor:pointer}
+.moment-gallery-track{display:flex;flex-wrap:nowrap;gap:12px;width:max-content;max-width:none;align-items:flex-start}
+.moment-gallery-figure{margin:0;display:grid;gap:8px;flex:0 0 220px;width:220px;max-width:70vw;scroll-snap-align:start;outline:none;border:0;background:transparent;padding:0;text-align:left;touch-action:pan-x}
+.moment-gallery-frame{position:relative;overflow:hidden;border-radius:18px;width:100%;aspect-ratio:4/5;background:#111;box-shadow:0 10px 28px rgba(15,23,42,.12);touch-action:pan-x;cursor:pointer}
 .moment-gallery-frame[data-media-open]:focus-visible{box-shadow:0 0 0 3px ${c.go}66}
 .moment-gallery-frame img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
 .moment-gallery-zoom-hint{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border:0;border-radius:999px;background:rgba(255,255,255,.96);color:#111;display:grid;place-items:center;font-size:1.2rem;font-weight:800;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.22);cursor:pointer;touch-action:manipulation;z-index:2;padding:0}
 .moment-gallery-zoom-hint:focus-visible{outline:2px solid ${c.go};outline-offset:2px}
 .moment-gallery-meta{display:grid;gap:3px;padding:0 2px;min-width:0;pointer-events:none}
-.moment-gallery-caption{font-family:${f.ui};font-size:.88rem;font-weight:600;color:${cardInk};line-height:1.3;max-width:100%}
-.moment-gallery-desc{font-family:${f.body};font-size:.88rem;font-weight:400;color:${cardInk};line-height:1.45;max-width:100%;opacity:.92}
-@media(min-width:720px){.moment-gallery-figure{width:240px}.moment-gallery-frame{aspect-ratio:1/1}}
+.moment-gallery-caption{font-family:${f.ui};font-size:.88rem;font-weight:600;color:#111111;line-height:1.3;max-width:100%}
+.moment-gallery-desc{font-family:${f.body};font-size:.88rem;font-weight:400;color:#111111;line-height:1.45;max-width:100%}
+@media(min-width:720px){.moment-gallery-figure{flex-basis:240px;width:240px;max-width:240px}.moment-gallery-frame{aspect-ratio:1/1}}
 .moment-letter{padding:26px 20px;margin-top:8px;border-left:3px solid ${c.go}!important;position:relative;box-shadow:none}
 .moment-letter-to{font-style:italic;color:${c.muted};font-weight:600;margin:0 0 12px}
 .moment-letter-sign{display:block;margin-top:18px;font-family:${f.display};font-size:1.6rem;color:${c.go}}
@@ -2266,6 +2266,23 @@ main.moment-type-anniversary {
   background: rgba(255, 255, 255, 0.85) !important;
   box-shadow: 
     0 35px 70px -12px color-mix(in srgb, ${colors.go} 14%, rgba(0,0,0,0.04)) !important;
+}
+/* Galleria contenuta: non allargare la pagina anche con card love/wedding */
+.moment-type-love .moment-card-gallery,
+.moment-type-wedding .moment-card-gallery,
+.moment-type-anniversary .moment-card-gallery {
+  overflow: hidden !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+.moment-type-love .moment-gallery,
+.moment-type-wedding .moment-gallery,
+.moment-type-anniversary .moment-gallery,
+.moment-type-love .moment-gallery-scroll,
+.moment-type-wedding .moment-gallery-scroll,
+.moment-type-anniversary .moment-gallery-scroll {
+  max-width: 100% !important;
+  min-width: 0 !important;
 }
 
 .moment-type-love .moment-card-title,

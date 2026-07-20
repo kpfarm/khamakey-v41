@@ -9,8 +9,8 @@ Se l'utente scrive **cose da fare** (anche con varianti tipo «che cose da fare�
 
 ## Checklist da ricordare (aggiorna se un punto è chiuso)
 
-1. **Supabase Auth** — abilitare *Leaked Password Protection* (Dashboard → Authentication)
-2. **Chip magazzino** — riprogrammare pezzi ancora su `/k/CODICE` con Link NFC `/m/slug` (sicurezza scaffale)
+1. **Supabase Auth** — *Leaked Password Protection*: su piano **FREE non disponibile** (serve Pro) → saltato / documentato
+2. ~~**Chip magazzino**~~ — fatto (2026-07-21): Link NFC `/m/slug` (admin già allineato)
 3. **Smoke test Moments** — pezzo reale: attivazione → editor → `/m/` → ticket Supporto → PDF Cricut
 4. **Supporto** — provare assegnazione ticket + invio risposta Resend (Admin v172 / Worker v158)
 5. Prossimo backlog prodotto solo se ops sopra ok (es. report rivenditori, hub spedizioni)

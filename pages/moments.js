@@ -193,7 +193,6 @@ const SECTION_PHOTO_FIELDS = {
   music:{ field:"image_url", previewId:"musicPhotoPreview", fileId:"musicPhotoFile", label:"Carica immagine" }
 };
 const LIST_SECTION_KEYS = new Set(Object.keys(LIST_SECTION_MODES));
-const PROFILE_PHOTO_FIELD = { previewId:"profilePhotoPreview", fileId:"profilePhotoFile", label:"Carica foto profilo" };
 let uploadBusy = false;
 
 function setStatus(node,message="",type=""){
@@ -1703,13 +1702,6 @@ function renderCoverPanel(state){
         <label>Frase sotto il titolo<input name="subtitle" value="${esc(state.subtitle)}" placeholder="Es. Per sempre insieme"></label>
         <label>Descrizione breve<textarea name="description" placeholder="Breve frase per chi apre la pagina — non incollare link o indirizzi tecnici">${esc(state.description)}</textarea></label>
       </details>
-      <details class="design-advanced cover-extra">
-        <summary>Foto profilo tonda (solo stile Natura)</summary>
-        <input type="hidden" name="profile_photo" id="profilePhotoInput" value="${esc(state.profile_photo)}">
-        <div class="section-photo-preview" id="profilePhotoPreview">${profilePhotoPreviewHtml(state.profile_photo)}</div>
-        <input type="file" id="profilePhotoFile" accept="${IMAGE_ACCEPT}" hidden>
-        <p class="field-hint">Opzionale — compare nella copertina con lo stile Profilo/Natura.</p>
-      </details>
       <p class="field-hint">I colori si scelgono in <strong>Design → Colori</strong> — un tap e la pagina cambia look.</p>
     </div>
   </div>`;
@@ -2475,52 +2467,6 @@ function setCoverUrl(formNode, url){
   if(hidden) hidden.value = url || "";
 }
 
-function profilePhotoPreviewHtml(url){
-  const label = PROFILE_PHOTO_FIELD.label;
-  if(url){
-    return `<img src="${esc(url)}" alt=""><button type="button" class="ghost" data-profile-photo-remove>Rimuovi</button>`;
-  }
-  return `<button type="button" class="primary section-photo-btn" data-profile-photo-upload>📷 ${esc(label)}</button>`;
-}
-
-function refreshProfilePhotoPreview(url){
-  const preview = document.getElementById("profilePhotoPreview");
-  if(preview) preview.innerHTML = profilePhotoPreviewHtml(url);
-}
-
-async function uploadProfilePhoto(file,row,formNode){
-  uploadBusy = true;
-  try{
-    validateImageFile(file);
-    const url = await uploadImage(supabase,{scope:"moments",scopeId:row.id,file});
-    const input = formNode.querySelector("#profilePhotoInput") || formNode.elements.profile_photo;
-    const oldUrl = input?.value || "";
-    if(input) input.value = url;
-    refreshProfilePhotoPreview(url);
-    markEditorDirty(formNode);
-    schedulePreviewUpdate(formNode,{immediate:true,force:true});
-    if(oldUrl && isCloudflareMediaUrl(oldUrl) && oldUrl !== url){
-      deleteStorageObject(supabase,oldUrl).catch(()=>{});
-    }
-  }catch(error){
-    alert(error.message || "Upload foto profilo non riuscito.");
-  }finally{
-    uploadBusy = false;
-  }
-}
-
-function removeProfilePhoto(formNode){
-  const input = formNode.querySelector("#profilePhotoInput") || formNode.elements.profile_photo;
-  const oldUrl = input?.value || "";
-  if(input) input.value = "";
-  refreshProfilePhotoPreview("");
-  markEditorDirty(formNode);
-  schedulePreviewUpdate(formNode,{immediate:true,force:true});
-  if(oldUrl && isCloudflareMediaUrl(oldUrl)){
-    deleteStorageObject(supabase,oldUrl).catch(()=>{});
-  }
-}
-
 async function uploadCoverImage(file,row,formNode){
   const status = document.getElementById("coverUploadStatus");
   setUploadStatus(status,"Caricamento in corso...");
@@ -2865,12 +2811,6 @@ function bindMediaUploads(root,row){
     if(!file || uploadBusy) return;
     await uploadSectionPhoto("music",file,row,formNode);
   });
-  document.getElementById("profilePhotoFile")?.addEventListener("change",async event=>{
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if(!file || uploadBusy) return;
-    await uploadProfilePhoto(file,row,formNode);
-  });
 }
 
 let journeyUploadStepId = null;
@@ -3016,14 +2956,6 @@ function bindMediaUploadDelegation(){
       const key = sectionPhotoUpload.dataset.sectionPhotoUpload;
       const config = SECTION_PHOTO_FIELDS[key];
       if(config) document.getElementById(config.fileId)?.click();
-      return;
-    }
-    if(event.target.closest("[data-profile-photo-upload]")){
-      document.getElementById("profilePhotoFile")?.click();
-      return;
-    }
-    if(event.target.closest("[data-profile-photo-remove]")){
-      removeProfilePhoto(formNode);
       return;
     }
     const sectionPhotoRemove = event.target.closest("[data-section-photo-remove]");
@@ -3303,7 +3235,7 @@ function readFormState(formNode){
     cover_focus_x:Number(form.get("cover_focus_x") || 50),
     cover_focus_y:Number(form.get("cover_focus_y") || 50),
     cover_zoom:Number(form.get("cover_zoom") || 100),
-    profile_photo:String(form.get("profile_photo") || "").trim(),
+    profile_photo:"",
     colorPalette:String(form.get("color_palette") || "classic"),
     themeVariant:String(form.get("theme_variant") || "chiaro"),
     heroStyle:String(form.get("hero_style") || "classico"),

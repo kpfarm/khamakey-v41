@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v150-gallery-scroll";
+const WORKER_VERSION = "v151-gallery-scroll";
 
 export default {
   async fetch(request, env, ctx) {
@@ -1940,12 +1940,7 @@ body.nav-open{overflow:hidden}
 .moment-chip:hover{background:${c.cardSoft};border-color:${c.lineStrong}}
 .moment-chip-action{background:${c.go};color:#FFFFFF;border-color:${c.go};box-shadow:0 4px 12px ${c.go}33}
 .moment-chip-action:hover{background:${c.g2};border-color:${c.g2}}
-.moment-gallery-scroll{margin:14px -4px 0;padding:0 12px 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x mandatory;scroll-padding-inline:12px;mask-image:linear-gradient(90deg,transparent,black 6%,black 94%,transparent)}
-.moment-gallery-scroll::-webkit-scrollbar{display:none}
-.moment-gallery-track{display:flex;gap:12px;width:max-content;padding-bottom:2px}
-.moment-gallery-scroll img,.moment-gallery-scroll video,.moment-gallery-scroll .moment-media-card{width:min(72vw,240px);aspect-ratio:4/3;height:auto;max-height:none;object-fit:cover;border-radius:16px;scroll-snap-align:center;box-shadow:0 8px 22px rgba(0,0,0,.08);border:0;padding:0;background:${c.bl2};cursor:pointer;transition:transform .2s ease}
-.moment-gallery-scroll .moment-gallery-figure{width:min(72vw,240px);height:auto;min-height:0;max-height:none;display:grid;align-content:start;gap:8px;background:transparent;box-shadow:none;scroll-snap-align:center;margin:0}
-.moment-gallery-scroll .moment-gallery-figure img{width:100%;aspect-ratio:4/3;height:auto;max-height:none;border-radius:16px;box-shadow:0 8px 22px rgba(0,0,0,.08);object-fit:cover}
+.moment-gallery-scroll video,.moment-gallery-scroll .moment-media-card{width:min(72vw,240px);aspect-ratio:4/3;height:auto;object-fit:cover;border-radius:16px;scroll-snap-align:center;box-shadow:0 8px 22px rgba(0,0,0,.08);border:0;padding:0;background:${c.bl2};cursor:pointer}
 .moment-media-card{display:grid;place-items:center;color:${c.go};font-family:${f.ui};font-size:.78rem;font-weight:700;min-height:88px;border-radius:20px;border:1px solid ${c.line};transition:border-color .2s,background .2s}
 .moment-media-card:hover{background:${c.cardSoft};border-color:${c.lineStrong}}
 .moment-media-card small{display:block;margin-top:8px;opacity:.75;padding:0 10px;text-align:center}

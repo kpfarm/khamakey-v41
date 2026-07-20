@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v153-gallery-contain";
+const WORKER_VERSION = "v154-footer-contrast";
 
 export default {
   async fetch(request, env, ctx) {

@@ -291,3 +291,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Worker v150**: galleria scroll laterale + descrizioni leggibili (stesso colore testo) |
 | 2026-07-20 | Cursor | **Worker v152**: fix scroll touch galleria su smartphone (swipe vs tap) |
 | 2026-07-20 | Cursor | **Worker v153**: galleria contenuta — stop pagina larghissima su mobile |
+| 2026-07-20 | Cursor | **Worker v154**: contrasto footer Moments (ink del tema, leggibile su sfondi densi) |

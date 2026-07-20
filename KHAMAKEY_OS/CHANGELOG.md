@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Worker v154 — Contrasto footer Moments (2026-07-20, Cursor)** — Worker only
+  - Testo footer usa `ink` del tema (opacità alta + peso 600), leggibile su sfondi densi.
 - **Worker v153 — Galleria non allarga più la pagina (2026-07-20, Cursor)** — Worker only
   - Overflow contenuto sulla pagina; lo scroll laterale resta solo dentro la galleria; testi descrizione neri leggibili.
 - **Worker v152 — Scroll touch galleria mobile (2026-07-20, Cursor)** — Worker only

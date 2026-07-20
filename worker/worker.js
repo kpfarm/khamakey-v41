@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v143-rsvp-wa";
+const WORKER_VERSION = "v144-support-notify";
 
 export default {
   async fetch(request, env, ctx) {
@@ -50,6 +50,9 @@ export default {
       }
       if (url.pathname === "/api/moment/guestbook" && request.method === "POST") {
         return handleMomentGuestbookSubmit(request, env);
+      }
+      if (url.pathname === "/api/moment/support-notify" && request.method === "POST") {
+        return handleMomentSupportNotify(request, env);
       }
       if (url.pathname.startsWith("/cdn/")) {
         return handleMediaServe(request, env, url.pathname.slice(5));
@@ -397,6 +400,73 @@ function guestbookErrorMessage(error) {
   if (msg.includes("ingest") || msg.includes("chiave ingest")) return "Servizio temporaneamente non disponibile. Riprova più tardi.";
   if (msg.includes("obbligatori")) return "Nome e messaggio sono obbligatori.";
   return "Invio messaggio non riuscito. Riprova tra poco.";
+}
+
+/** Avvisa lo staff per email quando un cliente Moments apre un ticket assistenza. */
+async function handleMomentSupportNotify(request, env) {
+  const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  if (!jwt) return cors(json({ error: "Accesso richiesto" }, 401));
+  const user = await supabaseUser(env, jwt);
+  if (!user?.email) return cors(json({ error: "Sessione non valida" }, 401));
+
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object") return cors(json({ error: "Richiesta non valida" }, 400));
+
+  const subject = String(body.subject || "").trim().slice(0, 180);
+  const description = String(body.description || "").trim().slice(0, 4000);
+  const priority = String(body.priority || "normal").trim().slice(0, 40);
+  if (!subject || !description) return cors(json({ error: "Oggetto e dettagli obbligatori" }, 400));
+
+  const visitor = await visitorId(request, env.VISITOR_SALT || "khamakey");
+  if (!await checkRateLimit(env, `support-notify:${user.id || visitor}`, 8, 60)) {
+    return tooManyRequests();
+  }
+
+  if (!env.RESEND_API_KEY) {
+    return cors(json({ ok: false, skipped: true, reason: "email_not_configured" }));
+  }
+
+  const extra = String(env.SUPPORT_NOTIFY_EMAIL || "").trim().toLowerCase();
+  const recipients = [...ADMIN_EMAILS];
+  if (extra && !recipients.includes(extra)) recipients.push(extra);
+  if (!recipients.length) return cors(json({ ok: false, skipped: true, reason: "no_recipients" }));
+
+  const adminBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
+  const consoleUrl = `${adminBase}/moments-admin.html#support`;
+  const safeSubject = subject.replace(/[\r\n]+/g, " ");
+  const text = [
+    "Nuovo ticket assistenza Moments",
+    "",
+    `Cliente: ${user.email}`,
+    `Priorità: ${priority}`,
+    `Oggetto: ${safeSubject}`,
+    "",
+    description,
+    "",
+    `Apri consolle: ${consoleUrl}`
+  ].join("\n");
+  const html = `<div style="font-family:Arial,sans-serif;line-height:1.5;color:#172036">
+    <h2 style="margin:0 0 12px">Nuovo ticket Moments</h2>
+    <p><strong>Cliente:</strong> ${escapeHtml(user.email)}<br>
+    <strong>Priorità:</strong> ${escapeHtml(priority)}<br>
+    <strong>Oggetto:</strong> ${escapeHtml(safeSubject)}</p>
+    <pre style="white-space:pre-wrap;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:14px;font:inherit">${escapeHtml(description)}</pre>
+    <p><a href="${escapeHtml(consoleUrl)}">Apri Supporto in Officina NFC</a></p>
+  </div>`;
+
+  try {
+    await sendResendEmail(env, {
+      to: recipients,
+      subject: `[Moments ${priority}] ${safeSubject}`,
+      html,
+      text,
+      tags: [{ name: "type", value: "moments_support_ticket" }]
+    });
+    return cors(json({ ok: true }));
+  } catch (error) {
+    console.error("support-notify", error);
+    return cors(json({ error: "Invio avviso non riuscito" }, 500));
+  }
 }
 
 // Rate limiting su Postgres (check_rate_limit, sql/khamakey-rate-limit-v76.sql): niente infra nuova.

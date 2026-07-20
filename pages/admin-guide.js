@@ -7,6 +7,93 @@ export const COMMON_STATUS_LEGEND = [
   { pill: "disabled cancelled archived error", label: "Rosso — disattivato, errore o annullato" }
 ];
 
+/** Guide dedicate alla consolle Moments-only (`moments-admin.html`). */
+export const MOMENTS_CONSOLE_GUIDES = {
+  dashboard: {
+    subtitle: "Officina NFC — stock, modelli prodotto, ticket clienti Moments.",
+    steps: [
+      "Controlla codici disponibili — sotto soglia genera nuovi pezzi in Magazzino NFC.",
+      "Flusso: Modello → genera pezzo/i con etichetta barcode → confeziona → consegna al cliente.",
+      "Ticket aperti = clienti con problemi su codice, attivazione o pagina /m/.",
+      "Il codice modello (es. MOM-KEY-WED) identifica la linea in magazzino e sulle etichette."
+    ],
+    legend: [
+      { pill: "alert-danger", label: "Rosso — stock zero o blocco urgente" },
+      { pill: "alert-warn", label: "Giallo — stock basso o ticket da gestire" },
+      { pill: "alert-info", label: "Blu — informativo" }
+    ],
+    tip: "Questa consolle gestisce solo produzione NFC Moments e assistenza prodotto — non attività Business."
+  },
+  momentNewProduct: {
+    subtitle: "Crea modello + opzionalmente 1 pezzo fisico con etichetta barcode.",
+    steps: [
+      "Linea oggetto + template pagina → codice modello automatico (es. MOM-KEY-WED).",
+      "«Crea + 1 pezzo con etichetta barcode» = modello + codice NFC + PDF pronto (regalo, test, vendita locale).",
+      "Canale Regalo/prova o Vendita locale per tracciare origine in magazzino.",
+      "Poi genera altri pezzi dal Magazzino NFC quando serve stock."
+    ],
+    legend: [
+      { pill: "active", label: "Modello attivo — usabile in magazzino" },
+      { pill: "available", label: "Codice disponibile — in confezione non ancora attivato" }
+    ],
+    tip: "Codice attivazione per il cliente (es. M7K2-9XPL-H3WN) · Barcode numerico solo magazzino · Chip NFC = /k/CODICE"
+  },
+  momentCatalog: {
+    subtitle: "Anagrafica modelli magazzino per produrre pezzi NFC.",
+    steps: [
+      "Ogni riga = un tipo di oggetto (linea + template + codice modello).",
+      "Modifica bundle fisici/codici NFC per confezione se serve.",
+      "«Genera pezzi» apre Magazzino con modello già selezionato.",
+      "Usa lo stesso codice modello sulle etichette e nella produzione."
+    ],
+    legend: [
+      { pill: "active", label: "Modello in uso" },
+      { pill: "hidden archived", label: "Non usare per nuova produzione" }
+    ],
+    tip: "Qui tieni solo il riferimento produzione NFC — non è il catalogo e-commerce."
+  },
+  momentInventory: {
+    subtitle: "Genera pezzi fisici, etichette barcode, export CSV/PDF.",
+    steps: [
+      "Quantità default 1 — anche un solo regalo o prova.",
+      "PDF lotto: etichette 40×15 mm (4×1,5 cm) in griglia numerata da 1 + tabella di controllo con la stessa numerazione.",
+      "Canale: Regalo, Vendita locale, Agente…",
+      "Se la tabella sembra vuota: chip «Tutti» o «Mostra tutti» — i filtri a volte nascondono i pezzi."
+    ],
+    legend: [
+      { pill: "available", label: "Disponibile — in scaffale o pronto spedizione" },
+      { pill: "claimed active", label: "Attivato dal cliente" },
+      { pill: "paused archived", label: "Fuori rotazione" }
+    ],
+    tip: "Link chip NFC = /k/CODICE · Editor cliente = moments.html · Pagina live = /m/slug."
+  },
+  momentClients: {
+    subtitle: "Account e oggetti attivati: editor admin, pagine /m/ e supporto cliente.",
+    steps: [
+      "Crea account con email — opzionale: incolla codice dal magazzino per attivazione immediata.",
+      "Tabella Oggetti: Editor apre moments.html come admin · Pagina = anteprima /m/.",
+      "Filtra «Pubblicata = No» per trovare chi deve ancora completare la pagina.",
+      "Scheda oggetto: copia link pubblico o PIN se il cliente ha problemi ad accedere."
+    ],
+    legend: [
+      { pill: "active", label: "Pagina Moments pubblicata e visibile" },
+      { pill: "draft pending", label: "Bozza o non ancora pubblicata" }
+    ],
+    tip: "Puoi aiutare il cliente senza aspettare: apri Editor dalla riga oggetto e modifica tu la pagina."
+  },
+  support: {
+    subtitle: "Assistenza Moments — ticket clienti (codici, attivazione, pagina /m/).",
+    steps: [
+      "Ricevi un’email a ogni nuovo ticket; in consolle filtra Aperti o Urgenti.",
+      "Clicca «Apri ticket» per leggere messaggio completo, email cliente e dettagli.",
+      "Aggiorna stato/priorità e salva; le note interne restano nel ticket.",
+      "Problema codice/NFC → Clienti Moments; problema pagina → Editor dalla riga oggetto."
+    ],
+    legend: COMMON_STATUS_LEGEND,
+    tip: "Non serve Shopify né Business qui: solo assistenza Moments. Priorità urgente = cliente bloccato."
+  }
+};
+
 export const PANEL_GUIDES = {
   dashboard: {
     subtitle: "La tua bacheca: cosa fare oggi, in ordine di priorità.",
@@ -24,14 +111,15 @@ export const PANEL_GUIDES = {
     tip: "Non serve esperienza software: segui gli alert e i pulsanti evidenziati in blu."
   },
   clients: {
-    subtitle: "Elenco attività Business con pagina pubblica /p/ e editor.",
+    subtitle: "Attività Business con pagina /p/, codice NFC e editor.",
     steps: [
-      "Cerca per nome, slug o categoria nella barra in alto.",
-      "Clicca Editor per modificare la pagina del cliente.",
-      "Clicca Pagina per vedere come la vedono i visitatori."
+      "Cerca per nome, slug, email o codice NFC nella barra in alto.",
+      "Clicca Editor per modificare la pagina del cliente (o apri index.html?business=<id>).",
+      "Clicca Pagina o Analytics per vedere visitatori e performance.",
+      "Nel drawer: email, codice NFC, link /k/ e note cliente."
     ],
     legend: COMMON_STATUS_LEGEND,
-    tip: "Business e Moments sono due sistemi separati — qui vedi solo le attività commerciali."
+    tip: "Ogni cliente Business ha un codice NFC dal Magazzino NFC Business — senza codice attivo non può usare l'editor (account nuovi)."
   },
   momentClients: {
     subtitle: "Clienti che hanno attivato un oggetto NFC Moments.",
@@ -75,6 +163,22 @@ export const PANEL_GUIDES = {
       { pill: "archived", label: "Archiviato" }
     ],
     tip: "Quando arriva un ordine Shopify, il sistema assegna codici disponibili in automatico."
+  },
+  businessInventory: {
+    subtitle: "Magazzino codici NFC Business: disponibili, attivati, collegati ai clienti.",
+    steps: [
+      "Genera lotti di codici con il modulo in alto (prefisso KHAMA, SKU opzionale).",
+      "Filtra per stato Disponibili per vedere cosa puoi vendere o spedire.",
+      "Esporta CSV dal pulsante in alto per stampare o archiviare i codici.",
+      "Dopo Provisioning cliente, copia i link al cliente dalla scheda Clienti Business."
+    ],
+    legend: [
+      { pill: "available", label: "Disponibile — pronto per vendita o attivazione" },
+      { pill: "claimed active", label: "Attivato dal cliente" },
+      { pill: "paused", label: "In pausa — non usare" },
+      { pill: "archived", label: "Archiviato" }
+    ],
+    tip: "I codici Business aprono l'editor su index.html — il chip fisico punta a /k/<codice> che reindirizza alla pagina /p/."
   },
   platformOrders: {
     subtitle: "Tutti gli ordini interni: Shopify, Stripe, NFC, setup manuale.",
@@ -237,8 +341,13 @@ export function setGuideCollapsed(collapsed){
   }catch{ /* ignore */ }
 }
 
+export function getActivePanelGuides(){
+  const product = document.documentElement?.dataset?.adminProduct;
+  return product === "moments" ? MOMENTS_CONSOLE_GUIDES : PANEL_GUIDES;
+}
+
 export function renderPanelGuide(tab, elements){
-  const guide = PANEL_GUIDES[tab];
+  const guide = getActivePanelGuides()[tab];
   const root = elements.panelGuide;
   const subtitle = elements.adminSubtitle;
   if(!root || !guide){
@@ -274,7 +383,7 @@ export function renderPanelGuide(tab, elements){
     elements.panelGuideToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
   }
   document.querySelectorAll("[data-admin-tab]").forEach(button=>{
-    const g = PANEL_GUIDES[button.dataset.adminTab];
+    const g = getActivePanelGuides()[button.dataset.adminTab];
     if(g?.subtitle) button.title = g.subtitle;
   });
 }

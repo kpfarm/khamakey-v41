@@ -1,15 +1,42 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js";
-import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=106";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=163";
+import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=164";
+import {
+  generateMomentSku,
+  generateMomentProductName,
+  wireMomentProductAutofill,
+  normalizeMomentSku
+} from "./moments-admin-helpers.js?v=163";
+import {
+  TYPE_LABELS,
+  normalizeMomentType,
+  renderCategorySelect
+} from "./moment-categories.js";
+import { formatMomentCodeDisplay, packagingBarcodeForRow } from "./moment-codes.js";
+
+const IS_MOMENTS_CONSOLE = document.documentElement.dataset.adminProduct === "moments";
+const ADMIN_HOME = IS_MOMENTS_CONSOLE ? "./moments-admin.html" : "./admin.html";
+
+// Su app.khamakeymoments.com l'admin Business non va usato: porta alla Officina Moments.
+if(
+  !IS_MOMENTS_CONSOLE
+  && typeof location !== "undefined"
+  && /(?:^|\.)khamakeymoments\.com$/i.test(location.hostname)
+  && /admin\.html$/i.test(location.pathname)
+){
+  location.replace(`./moments-admin.html${location.search}${location.hash}`);
+}
 
 const SIMPLE_MODE_KEY = "khamakey_admin_simple_mode";
 
 const TAB_PAGE_TITLES = {
   dashboard: "Oggi",
   platformOrders: "Ordini",
-  momentCatalog: "Catalogo online",
-  momentInventory: "Magazzino NFC",
+  momentNewProduct: IS_MOMENTS_CONSOLE ? "Nuovo pezzo" : "Nuovo prodotto",
+  momentCatalog: IS_MOMENTS_CONSOLE ? "Modelli prodotto" : "Catalogo online",
+  momentInventory: IS_MOMENTS_CONSOLE ? "Magazzino NFC" : "Magazzino NFC Moments",
+  businessInventory: "Magazzino NFC Business",
   nfc: "Spedizioni NFC",
   billing: "Piani e pagamenti",
   clients: "Attività Business",
@@ -112,6 +139,8 @@ const momentProvisionStatus = document.getElementById("momentProvisionStatus");
 const momentCustomersTable = document.getElementById("momentCustomersTable");
 const momentQuickCatalogForm = document.getElementById("momentQuickCatalogForm");
 const momentQuickCatalogStatus = document.getElementById("momentQuickCatalogStatus");
+const momentNewProductForm = document.getElementById("momentNewProductForm");
+const momentNewProductStatus = document.getElementById("momentNewProductStatus");
 const momentBatchForm = document.getElementById("momentBatchForm");
 const momentBatchStatus = document.getElementById("momentBatchStatus");
 const momentBatchCatalog = document.getElementById("momentBatchCatalog");
@@ -143,6 +172,22 @@ const momentLabelsFiltered = document.getElementById("momentLabelsFiltered");
 const momentLabelsSelected = document.getElementById("momentLabelsSelected");
 const momentAgentStats = document.getElementById("momentAgentStats");
 const momentProductsTable = document.getElementById("momentProductsTable");
+const businessBatchForm = document.getElementById("businessBatchForm");
+const businessBatchStatus = document.getElementById("businessBatchStatus");
+const businessBatchSku = document.getElementById("businessBatchSku");
+const businessBatchAgent = document.getElementById("businessBatchAgent");
+const businessInventoryStats = document.getElementById("businessInventoryStats");
+const businessSearchInput = document.getElementById("businessSearchInput");
+const businessSearchClear = document.getElementById("businessSearchClear");
+const businessFilterStatus = document.getElementById("businessFilterStatus");
+const businessFilterBatch = document.getElementById("businessFilterBatch");
+const businessFilterSku = document.getElementById("businessFilterSku");
+const businessFilterLine = document.getElementById("businessFilterLine");
+const businessTableCount = document.getElementById("businessTableCount");
+const businessExportFiltered = document.getElementById("businessExportFiltered");
+const businessProductsTable = document.getElementById("businessProductsTable");
+const businessProvisionForm = document.getElementById("businessProvisionForm");
+const businessProvisionStatus = document.getElementById("businessProvisionStatus");
 const codeDrawer = document.getElementById("codeDrawer");
 const codeEditForm = document.getElementById("codeEditForm");
 const codeEditFormStatus = document.getElementById("codeEditFormStatus");
@@ -292,12 +337,17 @@ let productRows = [];
 let momentRows = [];
 let momentCustomerRows = [];
 let momentProductRows = [];
+let businessProductRows = [];
+let businessInventoryRows = [];
+let currentCodeKind = "moment";
 let currentMoment = null;
 let momentInventoryRows = [];
 let momentAgentInventoryRows = [];
 let selectedMomentCodes = new Set();
 let currentCodeRow = null;
 let currentPlatformOrder = null;
+let momentProductsLoadSeq = 0;
+let momentProductsLoaded = false;
 
 const PRODUCT_LINE_LABELS = {
   orsetto:"Orsetto NFC",
@@ -361,22 +411,24 @@ function setGate(message,type=""){
 }
 
 function showLoginGate(message="Accedi con un account admin KhamaKey."){
-  shell.classList.add("locked");
-  sidebar.hidden = true;
-  topbar.hidden = true;
-  gate.hidden = false;
-  content.hidden = true;
-  adminLoginForm.hidden = false;
+  shell?.classList.add("locked");
+  document.documentElement.classList.add("admin-auth-locked");
+  if(sidebar) sidebar.hidden = true;
+  if(topbar) topbar.hidden = true;
+  if(gate) gate.hidden = false;
+  if(content) content.hidden = true;
+  if(adminLoginForm) adminLoginForm.hidden = false;
   setGate(message);
 }
 
 function showAdmin(user,member){
-  shell.classList.remove("locked");
-  sidebar.hidden = false;
-  topbar.hidden = false;
-  gate.hidden = true;
-  adminLoginForm.hidden = true;
-  content.hidden = false;
+  shell?.classList.remove("locked");
+  document.documentElement.classList.remove("admin-auth-locked");
+  if(sidebar) sidebar.hidden = false;
+  if(topbar) topbar.hidden = false;
+  if(gate) gate.hidden = true;
+  if(adminLoginForm) adminLoginForm.hidden = true;
+  if(content) content.hidden = false;
   populateMomentTypeSelects();
   applySimpleMode();
   const label = member?.role ? `${user.email} · ${member.role}` : user.email;
@@ -384,12 +436,13 @@ function showAdmin(user,member){
 }
 
 function showDenied(email){
-  shell.classList.add("locked");
-  sidebar.hidden = true;
-  topbar.hidden = true;
-  gate.hidden = false;
-  adminLoginForm.hidden = false;
-  content.hidden = true;
+  shell?.classList.add("locked");
+  document.documentElement.classList.add("admin-auth-locked");
+  if(sidebar) sidebar.hidden = true;
+  if(topbar) topbar.hidden = true;
+  if(gate) gate.hidden = false;
+  if(adminLoginForm) adminLoginForm.hidden = false;
+  if(content) content.hidden = true;
   adminEmail.textContent = email || "Non autorizzato";
   setGate("Accesso non autorizzato. Questa pagina è riservata ad admin e collaboratori KhamaKey autorizzati.","denied");
 }
@@ -507,6 +560,7 @@ function renderStatusChart(rows){
 }
 
 function renderDashboardOrderInsights(rows){
+  if(IS_MOMENTS_CONSOLE) return;
   const today = startOfLocalDay(new Date());
   const first7 = addDays(today,-6);
   const first30 = addDays(today,-29);
@@ -517,6 +571,7 @@ function renderDashboardOrderInsights(rows){
   const avgOrder = rows.length ? rows.reduce((sum,row)=>sum + Number(row.total || 0),0) / rows.length : 0;
   dashboardSetText("dOrders7",fmt(rows7.length));
   dashboardSetText("dFulfillment",fmt(fulfillmentRows.length));
+  dashboardSetText("mPendingOrdersDash",fmt(fulfillmentRows.length));
   dashboardSetText("dRevenue30",money(revenue30));
   dashboardSetText("dAvgOrder",money(avgOrder));
 
@@ -632,6 +687,7 @@ function renderAgentOptions(selectedId=""){
   if(momentBulkAgent) momentBulkAgent.innerHTML = `<option value="">Agente…</option>` + agentRows.map(row=>`
     <option value="${esc(row.id)}">${esc(row.contact_name || row.email)}</option>
   `).join("");
+  if(businessBatchAgent) businessBatchAgent.innerHTML = options;
   populateMomentAgentFilter();
   renderAgentHierarchySelects(selectedId);
 }
@@ -676,6 +732,7 @@ function agentLabelById(id){
 }
 
 function renderPermissions(){
+  if(!permissionGrid || !memberPermissionChecklist) return;
   permissionGrid.innerHTML = PERMISSIONS.map(([key,label]) => `
     <div class="permission-item">
       <strong>${key}</strong>
@@ -818,8 +875,41 @@ async function loadCurrentMember(user){
   return null;
 }
 
+function setMetric(id, value){
+  const node = document.getElementById(id);
+  if(node) node.textContent = value;
+}
+
 async function loadDashboard(){
-  const [clients,published,nfc,events,agents,orders,pendingCommissions,moments,momentsAvailable,pendingOrders,openTickets,orderOverview] = await Promise.all([
+  if(IS_MOMENTS_CONSOLE){
+    const [moments,momentsAvailable,openTickets,catalogModels] = await Promise.all([
+      safeCount("moment_events"),
+      safeCount("moment_activation_codes",query=>query.eq("status","available")),
+      countOpenSupportTickets(),
+      safeCount("platform_moment_catalog",query=>query.eq("status","active"))
+    ]);
+    setMetric("mMoments", fmt(moments));
+    const momentStockNode = document.getElementById("mMomentStock");
+    if(momentStockNode) momentStockNode.textContent = fmt(momentsAvailable);
+    setMetric("mOpenTickets", fmt(openTickets));
+    setMetric("mCatalogModels", fmt(catalogModels));
+    renderDashboardAlerts({
+      momentsAvailable,
+      businessAvailable:0,
+      pendingOrders:0,
+      openTickets,
+      lowStockProducts:0,
+      pendingCommissions:0
+    });
+    return;
+  }
+
+  const orderOverviewPromise = supabase
+    .from("platform_orders")
+    .select("id,created_at,total,status,payment_status")
+    .order("created_at",{ascending:false})
+    .limit(500);
+  const [clients,published,nfc,events,agents,orders,pendingCommissions,moments,momentsAvailable,businessAvailable,pendingOrders,openTickets,orderOverview] = await Promise.all([
     safeCount("businesses"),
     safeCount("business_public_pages",query=>query.eq("published",true)),
     safeCount("nfc_tags"),
@@ -829,13 +919,10 @@ async function loadDashboard(){
     safeCount("platform_commission_events",query=>query.eq("status","pending")),
     safeCount("moment_events"),
     safeCount("moment_activation_codes",query=>query.eq("status","available")),
+    safeCount("business_activation_codes",query=>query.eq("status","available")),
     safeCount("platform_orders",query=>query.in("status",["pending","paid","production","ready"])),
     countOpenSupportTickets(),
-    supabase
-      .from("platform_orders")
-      .select("id,created_at,total,status,payment_status")
-      .order("created_at",{ascending:false})
-      .limit(500)
+    orderOverviewPromise
   ]);
   const orderOverviewRows = orderOverview?.error ? [] : (orderOverview?.data || []);
   if(orderOverview?.error) console.warn("Andamento ordini non disponibile",orderOverview.error);
@@ -855,20 +942,24 @@ async function loadDashboard(){
   }catch(error){
     console.warn("Stock non disponibile",error);
   }
-  document.getElementById("mClients").textContent = fmt(clients);
-  document.getElementById("mPublished").textContent = fmt(published);
-  document.getElementById("mNfc").textContent = fmt(nfc);
-  document.getElementById("mEvents").textContent = fmt(events);
-  document.getElementById("mStock").textContent = fmt(stock);
-  document.getElementById("mPlatformOrders").textContent = fmt(orders);
-  document.getElementById("mAgents").textContent = fmt(agents);
-  document.getElementById("mPendingCommissions").textContent = fmt(pendingCommissions);
-  document.getElementById("mMoments").textContent = fmt(moments);
+  setMetric("mClients", fmt(clients));
+  setMetric("mPublished", fmt(published));
+  setMetric("mNfc", fmt(nfc));
+  setMetric("mEvents", fmt(events));
+  setMetric("mStock", fmt(stock));
+  setMetric("mPlatformOrders", fmt(orders));
+  setMetric("mAgents", fmt(agents));
+  setMetric("mPendingCommissions", fmt(pendingCommissions));
+  setMetric("mMoments", fmt(moments));
   const momentStockNode = document.getElementById("mMomentStock");
   if(momentStockNode) momentStockNode.textContent = fmt(momentsAvailable);
+  setMetric("mOpenTickets", fmt(openTickets));
+  const businessStockNode = document.getElementById("mBusinessStock");
+  if(businessStockNode) businessStockNode.textContent = fmt(businessAvailable);
   renderDashboardOrderInsights(orderOverviewRows);
   renderDashboardAlerts({
     momentsAvailable,
+    businessAvailable,
     pendingOrders,
     openTickets,
     lowStockProducts,
@@ -880,25 +971,39 @@ async function loadClients(){
   try{
     const { data,error } = await supabase
       .from("businesses")
-      .select("id,profile_id,nome,slug,categoria")
+      .select("id,profile_id,nome,slug,categoria,pubblicato,created_at,profiles(email),nfc_tags(code,url,stato)")
       .order("created_at",{ascending:false})
-      .limit(200);
+      .limit(300);
     if(error) throw error;
     clientRows = data || [];
     const businessOptions = `<option value="">Nessun cliente collegato</option>` + clientRows.map(row=>`
       <option value="${esc(row.id)}">${esc(row.nome || row.slug || row.id)}</option>
     `).join("");
-    orderBusinessSelect.innerHTML = businessOptions;
-    momentBusinessSelect.innerHTML = businessOptions;
+    if(orderBusinessSelect) orderBusinessSelect.innerHTML = businessOptions;
+    if(momentBusinessSelect) momentBusinessSelect.innerHTML = businessOptions;
     populateClientCategoryFilter();
+    if(!clientsTable) return;
     refreshClientsTable();
   }catch(error){
     console.error(error);
+    if(!clientsTable) return;
     const hint = String(error?.message || "").includes("permission") || String(error?.code || "") === "42501"
-      ? "Accesso negato dal database. Ricarica la pagina: se persiste, verifica SQL v63."
+      ? "Accesso negato dal database. Ricarica la pagina: se persiste, verifica SQL v63/v148."
       : (error?.message || "Errore caricamento clienti.");
-    clientsTable.innerHTML = `<tr><td colspan="4">Clienti non disponibili: ${esc(hint)}</td></tr>`;
+    clientsTable.innerHTML = `<tr><td colspan="5">Clienti non disponibili: ${esc(hint)}</td></tr>`;
   }
+}
+
+function clientProfileEmail(row){
+  const profile = row?.profiles;
+  if(Array.isArray(profile)) return profile[0]?.email || "";
+  return profile?.email || "";
+}
+
+function clientPrimaryNfc(row){
+  const tags = row?.nfc_tags;
+  if(Array.isArray(tags)) return tags.find(tag=>tag?.code) || tags[0] || null;
+  return tags?.code ? tags : null;
 }
 
 function populateClientCategoryFilter(){
@@ -915,23 +1020,28 @@ function refreshClientsTable(){
   const category = clientFilterCategory?.value || "";
   const rows = clientRows.filter(row=>{
     if(category && (row.categoria || "") !== category) return false;
-    return haystackIncludes(row, search, ["nome","slug","categoria","id"]);
+    return haystackIncludes(row, search, ["nome","slug","categoria","id", r=>clientProfileEmail(r), r=>clientPrimaryNfc(r)?.code]);
   });
   if(clientTableCount) clientTableCount.textContent = `${fmt(rows.length)} clienti`;
-  clientsTable.innerHTML = rows.length ? rows.map(row => `
-    <tr>
-      <td><strong>${esc(row.nome || "Senza nome")}</strong></td>
-      <td>${esc(row.slug || "-")}</td>
-      <td>${esc(row.categoria || "-")}</td>
+  clientsTable.innerHTML = rows.length ? rows.map(row => {
+    const nfc = clientPrimaryNfc(row);
+    const email = clientProfileEmail(row);
+    const pageUrl = publicUrlFor(row);
+    return `<tr>
+      <td><strong>${esc(row.nome || "Senza nome")}</strong><div class="muted-cell">${esc(row.categoria || "—")}</div></td>
+      <td>${esc(email || "—")}</td>
+      <td>${nfc?.code ? `<code>${esc(nfc.code)}</code>` : "—"}</td>
+      <td>${row.slug ? `<span class="muted-cell">/p/${esc(row.slug)}</span>` : "—"}</td>
       <td>
         <div class="row-actions">
           <button type="button" data-client-open="${esc(row.id)}" data-client-view="summary">Scheda</button>
-          ${row.slug ? `<button type="button" data-client-open="${esc(row.id)}" data-client-view="public">Pagina</button>` : ""}
+          ${pageUrl ? `<button type="button" data-client-open="${esc(row.id)}" data-client-view="public">Pagina</button>` : ""}
           <button type="button" data-client-open="${esc(row.id)}" data-client-view="editor">Editor</button>
+          <button type="button" data-client-open="${esc(row.id)}" data-client-view="analytics">Analytics</button>
         </div>
       </td>
-    </tr>
-  `).join("") : `<tr><td colspan="4">${clientRows.length ? "Nessun cliente corrisponde ai filtri." : "Nessun cliente trovato o permessi database non ancora configurati."}</td></tr>`;
+    </tr>`;
+  }).join("") : `<tr><td colspan="5">${clientRows.length ? "Nessun cliente corrisponde ai filtri." : "Nessun cliente trovato o permessi database non ancora configurati."}</td></tr>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -1268,6 +1378,7 @@ function refreshMomentsTable(){
     ]);
   });
   if(momentObjectTableCount) momentObjectTableCount.textContent = `${fmt(rows.length)} oggetti`;
+  if(!momentsTable) return;
   momentsTable.innerHTML = rows.length ? rows.map(row=>{
     const type = momentTemplateLabel(row.moment_type || row.event_type);
     const publicUrl = momentPublicUrl(row.slug);
@@ -1297,11 +1408,52 @@ function momentTemplateLabel(value){
   return TYPE_LABELS[normalizeMomentType(value)] || value || "-";
 }
 
+function existingMomentSkus(){
+  return momentCatalogRows.map(row=>row.sku).filter(Boolean);
+}
+
+function resolveProductLine(form){
+  const line = form.elements.product_line?.value || "portachiavi";
+  if(line !== "altro") return line;
+  const custom = String(form.elements.product_line_custom?.value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+  return custom || "altro";
+}
+
+function ensureMomentCatalogFields(form){
+  const lineSelect = form.elements.product_line?.value || "portachiavi";
+  const customLine = form.elements.product_line_custom?.value || "";
+  const product_line = resolveProductLine(form);
+  const product_type = normalizeMomentType(form.elements.product_type?.value);
+  let sku = normalizeMomentSku(form.elements.sku?.value);
+  let name = String(form.elements.name?.value || "").trim();
+  if(!sku){
+    sku = generateMomentSku({
+      productLine: lineSelect,
+      productType: product_type,
+      customLine,
+      existingSkus: existingMomentSkus()
+    });
+    if(form.elements.sku) form.elements.sku.value = sku;
+  }
+  if(!name){
+    name = generateMomentProductName(lineSelect, product_type, customLine);
+    if(form.elements.name) form.elements.name.value = name;
+  }
+  return { sku, name, product_line, product_type };
+}
+
+function wireAllMomentProductAutofill(){
+  document.querySelectorAll("[data-moment-auto-form]").forEach(form=>{
+    wireMomentProductAutofill(form, existingMomentSkus);
+  });
+}
+
 function populateMomentTypeSelects(){
   document.querySelectorAll("[data-moment-type-select]").forEach(select=>{
     const current = select.value || select.dataset.defaultValue || "free";
     select.innerHTML = renderCategorySelect(current);
   });
+  wireAllMomentProductAutofill();
 }
 
 function haystackIncludes(row, search, parts){
@@ -1335,7 +1487,17 @@ function renderDashboardAlerts(stats){
       tab:"momentInventory"
     });
   }
-  if(stats.pendingOrders > 0){
+  if(!IS_MOMENTS_CONSOLE && (stats.businessAvailable ?? 999) <= 10){
+    alerts.push({
+      level:stats.businessAvailable === 0 ? "danger" : "warn",
+      title:"Stock NFC Business",
+      text:stats.businessAvailable === 0
+        ? "Nessun codice Business disponibile — genera un nuovo lotto."
+        : `Solo ${fmt(stats.businessAvailable)} codici Business disponibili.`,
+      tab:"businessInventory"
+    });
+  }
+  if(!IS_MOMENTS_CONSOLE && stats.pendingOrders > 0){
     alerts.push({
       level:"warn",
       title:"Ordini da evadere",
@@ -1343,7 +1505,15 @@ function renderDashboardAlerts(stats){
       tab:"nfc"
     });
   }
-  if(stats.openTickets > 0){
+  if(IS_MOMENTS_CONSOLE && stats.openTickets > 0){
+    alerts.push({
+      level: stats.openTickets >= 5 ? "warn" : "info",
+      title:"Ticket supporto",
+      text:`${fmt(stats.openTickets)} richieste clienti da gestire.`,
+      tab:"support"
+    });
+  }
+  if(!IS_MOMENTS_CONSOLE && stats.openTickets > 0){
     alerts.push({
       level:"warn",
       title:"Ticket supporto aperti",
@@ -1351,7 +1521,7 @@ function renderDashboardAlerts(stats){
       tab:"support"
     });
   }
-  if(stats.lowStockProducts > 0){
+  if(!IS_MOMENTS_CONSOLE && stats.lowStockProducts > 0){
     alerts.push({
       level:"warn",
       title:"Magazzino Business sotto soglia",
@@ -1359,7 +1529,7 @@ function renderDashboardAlerts(stats){
       tab:"inventory"
     });
   }
-  if(stats.pendingCommissions > 0){
+  if(!IS_MOMENTS_CONSOLE && stats.pendingCommissions > 0){
     alerts.push({
       level:"info",
       title:"Provvigioni da approvare",
@@ -1368,10 +1538,13 @@ function renderDashboardAlerts(stats){
     });
   }
   if(!alerts.length){
+    const okText = IS_MOMENTS_CONSOLE
+      ? `Nessun alert urgente. Codici disponibili: ${fmt(stats.momentsAvailable)} · Ticket aperti: ${fmt(stats.openTickets)}.`
+      : `Nessun alert urgente. Stock Moments: ${fmt(stats.momentsAvailable)} · Ordini attivi: ${fmt(stats.pendingOrders)} · Ticket aperti: ${fmt(stats.openTickets)}.`;
     dashboardAlerts.innerHTML = `
       <div class="alert-item alert-ok" data-admin-tab-jump="dashboard">
         <strong>Tutto ok</strong>
-        <span>Nessun alert urgente. Stock Moments: ${fmt(stats.momentsAvailable)} · Ordini attivi: ${fmt(stats.pendingOrders)} · Ticket aperti: ${fmt(stats.openTickets)}.</span>
+        <span>${okText}</span>
       </div>`;
     return;
   }
@@ -1423,12 +1596,15 @@ function applyMomentBatchCatalog(){
   if(!momentBatchForm || !momentBatchCatalog) return;
   const row = momentCatalogRows.find(item=>item.id === momentBatchCatalog.value);
   if(!row) return;
-  momentBatchForm.elements.product_line.value = row.product_line || "portachiavi";
+  const knownLines = ["portachiavi","orsetto","card","magnete","tag","confezione","altro"];
+  momentBatchForm.elements.product_line.value = knownLines.includes(row.product_line) ? row.product_line : "altro";
   momentBatchForm.elements.product_type.value = normalizeMomentType(row.product_type || "free");
   momentBatchForm.elements.prefix.value = String(row.sku || "MOMENT").replace(/[^A-Z0-9]/gi,"").toUpperCase().slice(0,12) || "MOMENT";
-  if(!String(momentBatchForm.elements.batch_label.value || "").trim()){
+  momentBatchForm.elements.prefix.dataset.autoFilled = "1";
+  if(!String(momentBatchForm.elements.batch_label.value || "").trim() || momentBatchForm.elements.batch_label.dataset.autoFilled === "1"){
     const today = new Date().toISOString().slice(0,10);
     momentBatchForm.elements.batch_label.value = `${row.sku} · ${today}`;
+    momentBatchForm.elements.batch_label.dataset.autoFilled = "1";
   }
 }
 
@@ -1444,9 +1620,10 @@ function momentExportRows(rows,filenameStem="khamakey-moments"){
   }
   const header = [
     "Codice attivazione",
-    "Link NFC",
+    "Codice confezione barcode",
+    "Modello catalogo",
+    "Link NFC chip",
     "Link attivazione",
-    "Codice confezione",
     "Slug pagina",
     "Linea prodotto",
     "Lotto",
@@ -1461,10 +1638,11 @@ function momentExportRows(rows,filenameStem="khamakey-moments"){
   const lines = [header.map(csvCell).join(",")];
   rows.forEach(row=>{
     lines.push([
-      row.code,
+      formatMomentCodeDisplay(row.code),
+      packagingBarcodeForRow(row),
+      row.catalog_sku || "",
       momentNfcUrl(row),
       momentActivationUrl(row),
-      row.code,
       row.public_slug || "",
       productLineLabel(row.product_line || "non_specificato"),
       row.batch_label || "",
@@ -1553,7 +1731,12 @@ function momentCatalogMatchesCode(row,catalogId){
   const sku = normalizedSku(catalog.sku);
   const code = normalizedSku(row.code);
   const label = normalizedSku(`${row.product_label || ""} ${row.batch_label || ""}`);
-  return Boolean(sku && (code.startsWith(sku) || label.includes(sku)));
+  // Legacy: codice iniziava con lo SKU. Da v156 i codici sono random → match su etichetta/lotto.
+  if(sku && (code.startsWith(sku) || label.includes(sku))) return true;
+  // Modello catalogo: stessa linea oggetto + stesso template pagina
+  const sameLine = String(row.product_line || "") === String(catalog.product_line || "");
+  const sameType = normalizeMomentType(row.product_type) === normalizeMomentType(catalog.product_type);
+  return sameLine && sameType;
 }
 
 function momentRowMatchesCreatedDate(row,from,to){
@@ -1592,10 +1775,41 @@ function filteredMomentProducts(){
   });
 }
 
+function hasActiveMomentProductFilters(){
+  const f = getMomentProductFilters();
+  return Boolean(f.line || f.batch || f.status || f.sku || f.dateFrom || f.dateTo || f.agent || f.channel || f.order || f.search);
+}
+
+function clearMomentInventoryFilters({ refresh = true } = {}){
+  if(momentSearchInput) momentSearchInput.value = "";
+  if(momentFilterLine) momentFilterLine.value = "";
+  if(momentFilterBatch) momentFilterBatch.value = "";
+  if(momentFilterStatus) momentFilterStatus.value = "";
+  if(momentFilterSku) momentFilterSku.value = "";
+  if(momentFilterDateFrom) momentFilterDateFrom.value = "";
+  if(momentFilterDateTo) momentFilterDateTo.value = "";
+  if(momentFilterAgent) momentFilterAgent.value = "";
+  if(momentFilterChannel) momentFilterChannel.value = "";
+  if(momentFilterOrder) momentFilterOrder.value = "";
+  syncMomentQuickChips();
+  if(refresh) refreshMomentTable();
+}
+
 function refreshMomentTable(){
   const rows = filteredMomentProducts();
   renderMomentProductsTable(rows);
-  if(momentTableCount) momentTableCount.textContent = `${fmt(rows.length)} codici visibili`;
+  if(momentTableCount){
+    const total = momentProductRows.length;
+    if(!momentProductsLoaded){
+      momentTableCount.textContent = "Caricamento…";
+    }else if(!total){
+      momentTableCount.textContent = "0 codici in magazzino";
+    }else if(rows.length === total){
+      momentTableCount.textContent = `${fmt(rows.length)} codici`;
+    }else{
+      momentTableCount.textContent = `${fmt(rows.length)} di ${fmt(total)} (filtri attivi)`;
+    }
+  }
   updateMomentBulkBar();
 }
 
@@ -1626,7 +1840,7 @@ function renderMomentProductsTable(rows){
     ].filter(value=>value && value !== "-" && value !== "Non specificato").join(" · ") || "-";
     return `<tr>
       <td>${claimed ? "" : `<input type="checkbox" data-moment-select="${esc(row.code)}" ${checked} aria-label="Seleziona ${esc(row.code)}">`}</td>
-      <td><strong>${esc(row.code)}</strong><div class="muted-cell">${esc(catalog ? `${catalog.sku} · ${catalog.name}` : (row.product_label || momentTemplateLabel(row.product_type)))}</div></td>
+      <td><strong>${esc(formatMomentCodeDisplay(row.code))}</strong><div class="muted-cell">${esc(catalog ? `${catalog.sku} · ${catalog.name}` : (row.product_label || momentTemplateLabel(row.product_type)))}${row.packaging_barcode ? `<br>Barcode confezione: ${esc(row.packaging_barcode)}` : ""}</div></td>
       <td>${nfcUrl ? `<a href="${esc(nfcUrl)}" target="_blank" rel="noopener">/k/${esc(row.code)}</a>` : "-"}</td>
       <td>${activationUrl ? `<a href="${esc(activationUrl)}" target="_blank" rel="noopener">/m/${esc(row.public_slug)}</a>` : "-"}</td>
       <td>${esc(productLineLabel(row.product_line || "non_specificato"))}</td>
@@ -1637,7 +1851,18 @@ function renderMomentProductsTable(rows){
       <td>${esc(row.claimed_by_email || "-")}</td>
       <td><button class="small-action" type="button" data-code-edit="${esc(row.code)}">Modifica</button></td>
     </tr>`;
-  }).join("") : `<tr><td colspan="11">Nessun codice corrisponde ai filtri selezionati.</td></tr>`;
+  }).join("") : `<tr><td colspan="11">${
+    !momentProductsLoaded
+      ? "Caricamento codici…"
+      : !momentProductRows.length
+        ? "Nessun codice in magazzino. Genera un lotto sopra."
+        : `Nessun codice con questi filtri (${fmt(momentProductRows.length)} in magazzino). <button type="button" class="link-button" data-moment-clear-filters>Mostra tutti</button>`
+  }</td></tr>`;
+}
+
+function selectHasValue(select, value){
+  if(!select || value == null || value === "") return true;
+  return [...select.options].some(option=>option.value === value);
 }
 
 function populateMomentFilters(){
@@ -1645,6 +1870,7 @@ function populateMomentFilters(){
   const lineValue = momentFilterLine.value;
   const batchValue = momentFilterBatch.value;
   const skuValue = momentFilterSku?.value || "";
+  const agentValue = momentFilterAgent?.value || "";
   const lines = [...new Set(momentProductRows.map(row=>row.product_line || "non_specificato"))].sort();
   const batches = [...new Set(momentProductRows.map(row=>row.batch_label || "senza_lotto"))].sort();
   momentFilterLine.innerHTML = `<option value="">Tutte le linee</option>` + lines.map(value=>`
@@ -1653,13 +1879,22 @@ function populateMomentFilters(){
   momentFilterBatch.innerHTML = `<option value="">Tutti i lotti</option>` + batches.map(value=>`
     <option value="${esc(value)}" ${value === batchValue ? "selected" : ""}>${esc(value === "senza_lotto" ? "Senza lotto" : value)}</option>
   `).join("");
+  if(!selectHasValue(momentFilterLine, lineValue)) momentFilterLine.value = "";
+  if(!selectHasValue(momentFilterBatch, batchValue)) momentFilterBatch.value = "";
   if(momentFilterSku){
     const active = momentCatalogRows.filter(row=>row.status === "active");
     momentFilterSku.innerHTML = `<option value="">Tutti gli SKU/modelli</option>` + active.map(row=>`
       <option value="${esc(row.id)}" ${row.id === skuValue ? "selected" : ""}>${esc(row.sku)} · ${esc(row.name)}</option>
     `).join("");
+    if(!selectHasValue(momentFilterSku, skuValue)) momentFilterSku.value = "";
   }
   populateMomentAgentFilter();
+  if(momentFilterAgent && !selectHasValue(momentFilterAgent, agentValue)) momentFilterAgent.value = "";
+  // Filtri orfani (SKU/lotto/canale) non devono nascondere i pezzi in silenzio
+  if(momentProductsLoaded && momentProductRows.length && !filteredMomentProducts().length && hasActiveMomentProductFilters()){
+    console.warn("Filtri magazzino Moments senza risultati — reset automatico.");
+    clearMomentInventoryFilters({ refresh: false });
+  }
 }
 
 function populateMomentAgentFilter(){
@@ -1716,21 +1951,285 @@ async function loadMomentInventoryStats(){
 
 async function loadMomentProducts(){
   if(!momentProductsTable) return;
+  const seq = ++momentProductsLoadSeq;
   try{
     const { data,error } = await supabase
       .from("moment_activation_codes")
-      .select("code,status,public_slug,product_type,product_line,batch_label,product_label,public_url,claimed_by_email,claimed_at,created_at,sold_channel,assigned_agent_id,platform_order_id")
+      .select("code,packaging_barcode,status,public_slug,product_type,product_line,batch_label,product_label,public_url,claimed_by_email,claimed_at,created_at,sold_channel,assigned_agent_id,platform_order_id")
       .order("created_at",{ascending:false})
       .limit(2000);
     if(error) throw error;
+    if(seq !== momentProductsLoadSeq) return; // risposta stale: ignora
     momentProductRows = data || [];
-    populateMomentFilters();
+    momentProductsLoaded = true;
+    try{
+      populateMomentFilters();
+    }catch(filterError){
+      console.warn("Filtri magazzino Moments non aggiornati", filterError);
+    }
     refreshMomentTable();
-    refreshNfcShippingConsole();
+    try{ refreshNfcShippingConsole(); }catch{ /* pannello NFC assente in Moments console */ }
+  }catch(error){
+    if(seq !== momentProductsLoadSeq) return;
+    console.error(error);
+    momentProductsLoaded = true;
+    momentProductsTable.innerHTML = `<tr><td colspan="11">Prodotti Moments non disponibili. ${esc(error.message || "Ricarica la pagina.")}</td></tr>`;
+    if(momentTableCount) momentTableCount.textContent = "Errore caricamento";
+  }
+}
+
+function filteredBusinessProducts(){
+  const search = String(businessSearchInput?.value || "").trim().toLowerCase();
+  const status = businessFilterStatus?.value || "";
+  const batch = businessFilterBatch?.value || "";
+  const sku = businessFilterSku?.value || "";
+  const line = businessFilterLine?.value || "";
+  return businessProductRows.filter(row=>{
+    const rowBatch = row.batch_label || "senza_lotto";
+    const rowSku = row.sku || "non_specificato";
+    const rowLine = row.product_line || "non_specificato";
+    if(status && row.status !== status) return false;
+    if(batch && rowBatch !== batch) return false;
+    if(sku && rowSku !== sku) return false;
+    if(line && rowLine !== line) return false;
+    if(search){
+      const biz = row.businesses;
+      const bizName = Array.isArray(biz) ? biz[0]?.nome : biz?.nome;
+      const bizSlug = Array.isArray(biz) ? biz[0]?.slug : biz?.slug;
+      if(!haystackIncludes(row, search, [
+        "code","sku","batch_label","product_line","product_label","claimed_by_email","public_slug",
+        r=>bizName,r=>bizSlug,r=>businessNfcUrl(r),r=>businessPageUrl(r)
+      ])) return false;
+    }
+    return true;
+  });
+}
+
+function renderBusinessProductsTable(rows){
+  if(!businessProductsTable) return;
+  businessProductsTable.innerHTML = rows.length ? rows.map(row=>{
+    const nfcUrl = businessNfcUrl(row);
+    const pageUrl = businessPageUrl(row);
+    const biz = row.businesses;
+    const bizName = Array.isArray(biz) ? biz[0]?.nome : biz?.nome;
+    const trace = [
+      row.sku || "—",
+      row.batch_label || "senza lotto",
+      soldChannelLabel(row.sold_channel || "non_specificato")
+    ].join(" · ");
+    return `<tr>
+      <td><strong>${esc(row.code)}</strong><div class="muted-cell">${esc(row.product_label || trace)}</div></td>
+      <td>${nfcUrl ? `<a href="${esc(nfcUrl)}" target="_blank" rel="noopener">/k/${esc(row.code)}</a>` : "-"}</td>
+      <td>${esc(trace)}</td>
+      <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
+      <td>${esc(row.claimed_by_email || "-")}</td>
+      <td>${esc(bizName || "-")}${pageUrl ? `<div class="muted-cell"><a href="${esc(pageUrl)}" target="_blank" rel="noopener">/p/</a></div>` : ""}</td>
+      <td>${esc(row.created_at ? dateShort(row.created_at) : "-")}</td>
+      <td><button class="small-action" type="button" data-business-code-edit="${esc(row.code)}">Modifica</button></td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="8">Nessun codice corrisponde ai filtri.</td></tr>`;
+}
+
+function refreshBusinessTable(){
+  const rows = filteredBusinessProducts();
+  if(businessTableCount) businessTableCount.textContent = `${fmt(rows.length)} codici`;
+  renderBusinessProductsTable(rows);
+}
+
+function populateBusinessFilters(){
+  if(!businessFilterBatch || !businessFilterSku || !businessFilterLine) return;
+  const batchValue = businessFilterBatch.value;
+  const skuValue = businessFilterSku.value;
+  const lineValue = businessFilterLine.value;
+  const batches = [...new Set(businessProductRows.map(row=>row.batch_label || "senza_lotto"))].sort();
+  const skus = [...new Set(businessProductRows.map(row=>row.sku || "non_specificato"))].sort();
+  const lines = [...new Set(businessProductRows.map(row=>row.product_line || "non_specificato"))].sort();
+  businessFilterBatch.innerHTML = `<option value="">Tutti</option>` + batches.map(value=>`
+    <option value="${esc(value)}" ${value === batchValue ? "selected" : ""}>${esc(value === "senza_lotto" ? "Senza lotto" : value)}</option>
+  `).join("");
+  businessFilterSku.innerHTML = `<option value="">Tutti</option>` + skus.map(value=>`
+    <option value="${esc(value)}" ${value === skuValue ? "selected" : ""}>${esc(value)}</option>
+  `).join("");
+  businessFilterLine.innerHTML = `<option value="">Tutte</option>` + lines.map(value=>`
+    <option value="${esc(value)}" ${value === lineValue ? "selected" : ""}>${esc(value)}</option>
+  `).join("");
+}
+
+function renderBusinessInventoryStats(){
+  if(!businessInventoryStats) return;
+  if(!businessInventoryRows.length){
+    businessInventoryStats.innerHTML = `<p class="inventory-stats-empty">Nessun lotto Business. Genera il primo batch di codici NFC.</p>`;
+    return;
+  }
+  businessInventoryStats.innerHTML = businessInventoryRows.map(row=>{
+    const claimed = Number(row.claimed_count || 0);
+    const total = Number(row.total_count || 0);
+    const pct = total ? Math.round((claimed / total) * 100) : 0;
+    return `<article class="inventory-stat-card">
+      <div class="inventory-stat-head">
+        <strong>${esc(row.sku || "SKU")}</strong>
+        <span>${esc(row.batch_label === "senza_lotto" ? "Senza lotto" : row.batch_label)}</span>
+      </div>
+      <div class="inventory-stat-meta">Linea: ${esc(row.product_line || "—")}</div>
+      <div class="inventory-stat-grid">
+        <div><span>Totale</span><strong>${fmt(row.total_count)}</strong></div>
+        <div><span>Disponibili</span><strong class="available">${fmt(row.available_count)}</strong></div>
+        <div><span>Attivati</span><strong class="claimed">${fmt(row.claimed_count)}</strong></div>
+        <div><span>In pausa</span><strong>${fmt(row.paused_count)}</strong></div>
+      </div>
+      <div class="inventory-progress" aria-hidden="true"><span style="width:${pct}%"></span></div>
+      <p class="inventory-stat-foot">${fmt(claimed)} attivati su ${fmt(total)} (${pct}%)</p>
+    </article>`;
+  }).join("");
+}
+
+async function loadBusinessInventoryStats(){
+  if(!businessInventoryStats) return;
+  try{
+    const { data,error } = await supabase.rpc("get_business_product_inventory_stats");
+    if(error) throw error;
+    businessInventoryRows = data || [];
+    renderBusinessInventoryStats();
   }catch(error){
     console.error(error);
-    momentProductsTable.innerHTML = `<tr><td colspan="11">Prodotti Moments non disponibili. Applica SQL v61/v62.</td></tr>`;
+    businessInventoryStats.innerHTML = `<p class="inventory-stats-empty">Statistiche lotti Business non disponibili. Applica SQL v148.</p>`;
   }
+}
+
+async function loadBusinessProducts(){
+  if(!businessProductsTable) return;
+  try{
+    const { data,error } = await supabase
+      .from("business_activation_codes")
+      .select("code,status,sku,product_line,product_label,batch_label,public_slug,public_url,claimed_by_email,claimed_business_id,claimed_at,created_at,sold_channel,assigned_agent_id,platform_order_id,businesses(nome,slug)")
+      .order("created_at",{ascending:false})
+      .limit(2000);
+    if(error) throw error;
+    businessProductRows = data || [];
+    populateBusinessFilters();
+    refreshBusinessTable();
+  }catch(error){
+    console.error(error);
+    businessProductsTable.innerHTML = `<tr><td colspan="8">Codici Business non disponibili. Applica SQL v148.</td></tr>`;
+  }
+}
+
+function populateBusinessBatchSkuSelect(){
+  if(!businessBatchSku) return;
+  const current = businessBatchSku.value;
+  const nfcProducts = productRows.filter(row=>row.category === "nfc" || row.status === "active");
+  businessBatchSku.innerHTML = `<option value="">Manuale — scrivi SKU sotto</option>` + nfcProducts.map(row=>`
+    <option value="${esc(row.sku)}" data-name="${esc(row.name)}" ${row.sku === current ? "selected" : ""}>${esc(row.sku)} · ${esc(row.name)}</option>
+  `).join("");
+}
+
+function businessExportRows(rows,filenameStem="khamakey-business-codes"){
+  if(!rows.length){
+    alert("Nessun codice da esportare.");
+    return;
+  }
+  const header = ["Codice","Link NFC","Link pagina","SKU","Linea","Lotto","Stato","Cliente","Attività","Creato il"];
+  const lines = [header.map(csvCell).join(",")];
+  rows.forEach(row=>{
+    const biz = row.businesses;
+    const bizName = Array.isArray(biz) ? biz[0]?.nome : biz?.nome;
+    lines.push([
+      row.code,
+      businessNfcUrl(row),
+      businessPageUrl(row),
+      row.sku || "",
+      row.product_line || "",
+      row.batch_label || "",
+      row.status,
+      row.claimed_by_email || "",
+      bizName || "",
+      row.created_at ? dateShort(row.created_at) : ""
+    ].map(csvCell).join(","));
+  });
+  const blob = new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${filenameStem}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function saveBusinessBatch(event){
+  event.preventDefault();
+  if(!hasPermission("inventory.write")){
+    setFormStatus(businessBatchStatus,"Non hai il permesso inventory.write.","error");
+    return;
+  }
+  const form = event.currentTarget;
+  const quantity = Math.min(500,Math.max(1,Number(form.elements.quantity.value || 1)));
+  const skuSelect = businessBatchSku?.selectedOptions?.[0];
+  const sku = String(form.elements.sku?.value || skuSelect?.value || "").trim().toUpperCase();
+  const prefix = String(form.elements.prefix.value || sku || "KHAMA").trim().toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,12) || "KHAMA";
+  const productLine = String(form.elements.product_line.value || "").trim();
+  const batchLabel = String(form.elements.batch_label.value || "").trim();
+  const productLabel = String(form.elements.product_label.value || "").trim() || (skuSelect?.dataset?.name ? `${skuSelect.dataset.name}` : "");
+  const soldChannel = form.elements.sold_channel.value || null;
+  const assignedAgentId = form.elements.assigned_agent_id.value || null;
+  if(!batchLabel){
+    setFormStatus(businessBatchStatus,"Inserisci un nome lotto.","error");
+    return;
+  }
+  setFormStatus(businessBatchStatus,`Generazione ${quantity} codici Business (${batchLabel})...`);
+  const { data,error } = await supabase.rpc("create_business_product_batch",{
+    p_quantity:quantity,
+    p_prefix:prefix,
+    p_sku:sku || null,
+    p_batch_label:batchLabel,
+    p_product_line:productLine || null,
+    p_product_label:productLabel || null,
+    p_sold_channel:soldChannel,
+    p_assigned_agent_id:assignedAgentId || null
+  });
+  if(error){
+    console.error(error);
+    setFormStatus(businessBatchStatus,error.message || "Generazione non riuscita.","error");
+    return;
+  }
+  const rows = data || [];
+  setFormStatus(businessBatchStatus,`Creati ${rows.length} codici · lotto «${batchLabel}». CSV scaricato.`,"ok");
+  if(rows.length){
+    businessExportRows(rows.map(row=>({
+      code:row.out_code || row.code,
+      sku:row.sku || sku,
+      product_line:row.product_line || productLine,
+      batch_label:row.batch_label || batchLabel,
+      status:"available",
+      public_url:row.public_url,
+      created_at:new Date().toISOString()
+    })),`khamakey-business-${batchLabel.replace(/[^a-z0-9]+/gi,"-").slice(0,24).toLowerCase() || "stock"}`);
+  }
+  await Promise.all([loadBusinessProducts(),loadBusinessInventoryStats(),loadDashboard(),loadClients()]);
+}
+
+async function provisionBusinessCustomer(event){
+  event.preventDefault();
+  if(!hasPermission("pages.write") && !hasPermission("inventory.write")){
+    setFormStatus(businessProvisionStatus,"Permesso pages.write richiesto.","error");
+    return;
+  }
+  const form = event.currentTarget;
+  const email = String(form.elements.email.value || "").trim().toLowerCase();
+  const businessName = String(form.elements.business_name.value || "").trim();
+  const code = String(form.elements.code.value || "").trim().toUpperCase().replace(/[^A-Z0-9]/g,"");
+  setFormStatus(businessProvisionStatus,"Elaborazione...");
+  const { data,error } = await supabase.rpc("admin_provision_business_customer",{
+    p_email:email,
+    p_business_name:businessName,
+    p_code:code || null
+  });
+  if(error){
+    setFormStatus(businessProvisionStatus,error.message || "Provisioning non riuscito.","error");
+    return;
+  }
+  const row = Array.isArray(data) ? data[0] : data;
+  setFormStatus(businessProvisionStatus,row?.status_message || "Operazione completata.", row?.business_id ? "ok" : "error");
+  if(row?.business_id) form.elements.code.value = "";
+  await Promise.all([loadClients(),loadBusinessProducts(),loadBusinessInventoryStats(),loadDashboard()]);
 }
 
 async function loadMomentAgentInventoryStats(){
@@ -1804,7 +2303,7 @@ async function loadAgents(){
     agentRows = data || [];
     renderAgentOptions(currentClientRecord?.assigned_agent_id || "");
     refreshAgentsTable();
-    if(momentProductRows.length) refreshMomentTable();
+    if(momentProductsLoaded) refreshMomentTable();
   }catch(error){
     console.error(error);
     agentsTable.innerHTML = `<tr><td colspan="7">Agenti non disponibili. Verifica permessi agents.read.</td></tr>`;
@@ -2134,8 +2633,24 @@ async function loadMomentCatalog(){
     momentCatalogRows = data || [];
     populateMomentBatchCatalogSelect();
     populateMomentFilters();
-    refreshMomentTable();
+    // Evita di azzerare la tabella mentre i codici sono ancora in caricamento (race Promise.all)
+    if(momentProductsLoaded) refreshMomentTable();
     momentCatalogTable.innerHTML = momentCatalogRows.length ? momentCatalogRows.map(row=>{
+      if(IS_MOMENTS_CONSOLE){
+        return `
+        <tr>
+          <td><strong>${esc(row.name)}</strong></td>
+          <td><code>${esc(row.sku)}</code></td>
+          <td>${esc(productLineLabel(row.product_line))}</td>
+          <td>${esc(momentTemplateLabel(row.product_type))}</td>
+          <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
+          <td>
+            <button class="small-action" type="button" data-moment-catalog-edit="${esc(row.id)}">Modifica</button>
+            <button class="small-action" type="button" data-moment-catalog-stock="${esc(row.id)}">Genera pezzi</button>
+          </td>
+        </tr>
+      `;
+      }
       const syncLabel = {
         draft:"Bozza",
         pending:"In coda",
@@ -2158,31 +2673,44 @@ async function loadMomentCatalog(){
           </td>
         </tr>
       `;
-    }).join("") : `<tr><td colspan="8">Nessun prodotto in catalogo. Applica SQL v64 o crea il primo SKU.</td></tr>`;
+    }).join("") : `<tr><td colspan="${IS_MOMENTS_CONSOLE ? 6 : 8}">${IS_MOMENTS_CONSOLE ? "Nessun modello — crea il primo da Nuovo pezzo." : "Nessun prodotto in catalogo. Applica SQL v64 o crea il primo SKU."}</td></tr>`;
   }catch(error){
     console.error(error);
-    momentCatalogTable.innerHTML = `<tr><td colspan="8">Catalogo non disponibile. Applica sql/khamakey-moments-sales-channels-v64.sql su Supabase.</td></tr>`;
+    momentCatalogTable.innerHTML = `<tr><td colspan="${IS_MOMENTS_CONSOLE ? 6 : 8}">Catalogo non disponibile. Applica sql/khamakey-moments-sales-channels-v64.sql su Supabase.</td></tr>`;
   }
 }
 
 function editMomentCatalog(id){
   const row = momentCatalogRows.find(item=>item.id === id);
   if(!row || !momentCatalogForm) return;
+  const knownLines = ["portachiavi","orsetto","card","magnete","tag","confezione","altro"];
+  const line = knownLines.includes(row.product_line) ? row.product_line : "altro";
   editingMomentCatalogId = row.id;
   momentCatalogForm.elements.sku.value = row.sku || "";
+  momentCatalogForm.elements.sku.dataset.autoFilled = "0";
   momentCatalogForm.elements.name.value = row.name || "";
-  momentCatalogForm.elements.product_line.value = row.product_line || "portachiavi";
+  momentCatalogForm.elements.name.dataset.autoFilled = "0";
+  momentCatalogForm.elements.product_line.value = line;
+  if(momentCatalogForm.elements.product_line_custom){
+    momentCatalogForm.elements.product_line_custom.value = line === "altro" ? (row.product_line || "") : "";
+  }
+  const customWrap = momentCatalogForm.querySelector("[data-product-line-custom-wrap]");
+  if(customWrap) customWrap.hidden = line !== "altro";
   momentCatalogForm.elements.product_type.innerHTML = renderCategorySelect(row.product_type || "free");
   momentCatalogForm.elements.product_type.value = normalizeMomentType(row.product_type || "free");
   momentCatalogForm.elements.sale_price.value = row.sale_price || 0;
   momentCatalogForm.elements.unit_cost.value = row.unit_cost || 0;
   momentCatalogForm.elements.physical_units.value = row.physical_units || 1;
   momentCatalogForm.elements.activation_codes.value = row.activation_codes || 1;
-  momentCatalogForm.elements.publish_shopify.value = row.publish_shopify ? "true" : "false";
-  momentCatalogForm.elements.shopify_live.value = row.shopify_live ? "true" : "false";
+  if(momentCatalogForm.elements.publish_shopify){
+    momentCatalogForm.elements.publish_shopify.value = row.publish_shopify ? "true" : "false";
+  }
+  if(momentCatalogForm.elements.shopify_live){
+    momentCatalogForm.elements.shopify_live.value = row.shopify_live ? "true" : "false";
+  }
+  if(momentCatalogForm.elements.image_url) momentCatalogForm.elements.image_url.value = row.image_url || "";
+  if(momentCatalogForm.elements.description) momentCatalogForm.elements.description.value = row.description || "";
   momentCatalogForm.elements.status.value = row.status || "active";
-  momentCatalogForm.elements.image_url.value = row.image_url || "";
-  momentCatalogForm.elements.description.value = row.description || "";
   focusForm(momentCatalogForm,momentCatalogFormStatus,`Stai modificando ${row.name || row.sku}.`);
 }
 
@@ -2275,20 +2803,21 @@ async function saveMomentCatalog(event){
     return;
   }
   const form = event.currentTarget;
-  const description = String(form.elements.description.value || "").trim();
-  const imageUrl = String(form.elements.image_url.value || "").trim();
-  const publishShopify = form.elements.publish_shopify.value === "true";
-  const shopifyLive = form.elements.shopify_live.value === "true";
-  if(shopifyLive && (description.length < 20 || !imageUrl)){
+  const description = String(form.elements.description?.value || "").trim();
+  const imageUrl = String(form.elements.image_url?.value || "").trim();
+  const publishShopify = IS_MOMENTS_CONSOLE ? false : form.elements.publish_shopify?.value === "true";
+  const shopifyLive = IS_MOMENTS_CONSOLE ? false : form.elements.shopify_live?.value === "true";
+  if(!IS_MOMENTS_CONSOLE && shopifyLive && (description.length < 20 || !imageUrl)){
     setFormStatus(momentCatalogFormStatus,"Per pubblicare online servono immagine e descrizione (min. 20 caratteri).","error");
     return;
   }
+  const { sku, name, product_line, product_type } = ensureMomentCatalogFields(form);
   const payload = {
-    sku:String(form.elements.sku.value || "").trim().toUpperCase(),
-    name:String(form.elements.name.value || "").trim(),
+    sku,
+    name,
     description:description || null,
-    product_line:form.elements.product_line.value,
-    product_type:normalizeMomentType(form.elements.product_type.value),
+    product_line,
+    product_type,
     sale_price:Number(form.elements.sale_price.value || 0),
     unit_cost:Number(form.elements.unit_cost.value || 0),
     physical_units:Math.max(1,Number(form.elements.physical_units.value || 1)),
@@ -2326,9 +2855,9 @@ async function saveMomentCatalog(event){
   form.elements.shopify_live.value = "false";
   form.elements.status.value = "active";
   populateMomentTypeSelects();
-  setFormStatus(momentCatalogFormStatus,"Prodotto catalogo salvato.","ok");
+  setFormStatus(momentCatalogFormStatus, IS_MOMENTS_CONSOLE ? "Modello salvato." : "Prodotto catalogo salvato.","ok");
   await loadMomentCatalog();
-  if((payload.publish_shopify || payload.shopify_live) && catalogId){
+  if(!IS_MOMENTS_CONSOLE && (payload.publish_shopify || payload.shopify_live) && catalogId){
     await syncMomentCatalogToShopify(catalogId);
   }
 }
@@ -2340,18 +2869,17 @@ async function saveQuickMomentCatalog(event){
     return;
   }
   const form = event.currentTarget;
-  const sku = String(form.elements.sku.value || "").trim().toUpperCase();
-  const name = String(form.elements.name.value || "").trim();
-  if(!sku || !name){
-    setFormStatus(momentQuickCatalogStatus,"Inserisci SKU e nome modello.","error");
+  const { sku, name, product_line, product_type } = ensureMomentCatalogFields(form);
+  if(!name){
+    setFormStatus(momentQuickCatalogStatus,"Scegli linea oggetto e template — il nome si compila da solo.","error");
     return;
   }
   const payload = {
     sku,
     name,
     description:null,
-    product_line:form.elements.product_line.value,
-    product_type:normalizeMomentType(form.elements.product_type.value),
+    product_line,
+    product_type,
     sale_price:Number(form.elements.sale_price.value || 0),
     unit_cost:Number(form.elements.unit_cost.value || 0),
     physical_units:Math.max(1,Number(form.elements.physical_units.value || 1)),
@@ -2388,6 +2916,87 @@ async function saveQuickMomentCatalog(event){
     applyMomentBatchCatalog();
   }
   setFormStatus(momentQuickCatalogStatus,`Modello ${sku} creato. Ora puoi generare lo stock NFC sotto.`,"ok");
+}
+
+async function saveMomentNewProduct(event, { goToInventory = false, createSingleLabel = false } = {}){
+  event.preventDefault();
+  if(!hasPermission("inventory.write")){
+    setFormStatus(momentNewProductStatus,"Non hai il permesso inventory.write.","error");
+    return;
+  }
+  const form = event.currentTarget;
+  const { sku, name, product_line, product_type } = ensureMomentCatalogFields(form);
+  if(!name){
+    setFormStatus(momentNewProductStatus,"Scegli linea oggetto e template pagina.","error");
+    return;
+  }
+  const payload = {
+    sku,
+    name,
+    description:null,
+    product_line,
+    product_type,
+    sale_price:Number(form.elements.sale_price?.value || 0),
+    unit_cost:Number(form.elements.unit_cost?.value || 0),
+    physical_units:Math.max(1,Number(form.elements.physical_units?.value || 1)),
+    activation_codes:Math.max(1,Number(form.elements.activation_codes?.value || 1)),
+    image_url:null,
+    publish_shopify: IS_MOMENTS_CONSOLE ? false : form.elements.publish_shopify?.value === "true",
+    shopify_live:false,
+    status:form.elements.status?.value || "active",
+    sync_status:"draft",
+    updated_at:new Date().toISOString()
+  };
+  setFormStatus(momentNewProductStatus,"Creazione prodotto...");
+  const { data, error } = await supabase
+    .from("platform_moment_catalog")
+    .insert(payload)
+    .select("id")
+    .single();
+  if(error){
+    console.error(error);
+    const duplicate = String(error.message || "").toLowerCase().includes("duplicate");
+    setFormStatus(momentNewProductStatus,duplicate ? "SKU già esistente — clicca Rigenera e riprova." : (error.message || "Creazione non riuscita."),"error");
+    return;
+  }
+  form.reset();
+  if(form.elements.sale_price) form.elements.sale_price.value = "0";
+  if(form.elements.unit_cost) form.elements.unit_cost.value = "0";
+  if(form.elements.physical_units) form.elements.physical_units.value = "1";
+  if(form.elements.activation_codes) form.elements.activation_codes.value = "1";
+  if(form.elements.status) form.elements.status.value = "active";
+  if(form.elements.publish_shopify) form.elements.publish_shopify.value = "false";
+  populateMomentTypeSelects();
+  await loadMomentCatalog();
+  if(data?.id && momentBatchCatalog){
+    momentBatchCatalog.value = data.id;
+    applyMomentBatchCatalog();
+  }
+  const soldChannel = form.elements.sold_channel?.value || "gift";
+  if(createSingleLabel){
+    if(!hasPermission("moments.write")){
+      setFormStatus(momentNewProductStatus,"Serve permesso moments.write per generare codici ed etichette.","error");
+      return;
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const batchLabel = String(form.elements.batch_label?.value || "").trim() || `${sku} · ${today}`;
+    await createMomentUnitsAndExport({
+      quantity: 1,
+      prefix: sku,
+      productType: product_type,
+      productLine: product_line,
+      batchLabel,
+      soldChannel,
+      catalogSku: sku,
+      statusNode: momentNewProductStatus,
+      filenameStem: `khamakey-1pezzo-${sku.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`
+    });
+  }else if(goToInventory){
+    switchTab("momentInventory");
+    setFormStatus(momentNewProductStatus, `Prodotto ${sku} creato — genera lo stock NFC qui sotto.`, "ok");
+  }else{
+    setFormStatus(momentNewProductStatus, `Prodotto ${sku} creato. Vai al Magazzino NFC per generare i codici.`, "ok");
+  }
 }
 
 async function loadProducts(){
@@ -2427,6 +3036,7 @@ async function loadProducts(){
         </tr>
       `;
     }).join("") : `<tr><td colspan="10">Nessun prodotto registrato.</td></tr>`;
+    populateBusinessBatchSkuSelect();
   }catch(error){
     console.error(error);
     productsTable.innerHTML = `<tr><td colspan="10">Prodotti non disponibili. Verifica permessi inventory.read.</td></tr>`;
@@ -2469,7 +3079,7 @@ async function loadPlatformOrders(){
     platformOrderRows = data || [];
     refreshOrdersTable();
     refreshNfcShippingConsole();
-    if(momentProductRows.length) refreshMomentTable();
+    if(momentProductsLoaded) refreshMomentTable();
   }catch(error){
     console.error(error);
     platformOrdersTable.innerHTML = `<tr><td colspan="8">Ordini non disponibili. Verifica permessi orders.read.</td></tr>`;
@@ -2746,13 +3356,48 @@ async function loadTicketCategories(){
   }
 }
 
+function supportSourceLabel(source){
+  return ({
+    moments_editor:"Editor Moments",
+    business_editor:"Editor Business",
+    admin:"Creato da admin"
+  })[source] || source || "—";
+}
+
+function supportCustomerLabel(row){
+  const email = row.profiles?.email
+    || String(row.description || "").match(/Cliente:\s*([^\s\n]+@[^\s\n]+)/i)?.[1]
+    || "";
+  const business = row.businesses?.nome || row.businesses?.slug || "";
+  if(email && business) return `${email} · ${business}`;
+  if(email) return email;
+  if(business) return business;
+  return IS_MOMENTS_CONSOLE ? "Cliente Moments" : "Cliente";
+}
+
+function formatSupportWhen(value){
+  if(!value) return "—";
+  try{
+    return new Intl.DateTimeFormat("it-IT",{
+      day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"
+    }).format(new Date(value));
+  }catch{
+    return String(value);
+  }
+}
+
 async function loadSupportTickets(){
   try{
-    const { data,error } = await supabase
+    let query = supabase
       .from("platform_support_tickets")
-      .select("id,business_id,profile_id,subject,description,priority,status,source,created_at,updated_at,businesses(nome,slug)")
+      .select("id,business_id,profile_id,subject,description,priority,status,source,created_at,updated_at,businesses(nome,slug),profiles(email)")
       .order("created_at",{ascending:false})
       .limit(80);
+    // Console Moments: solo ticket Moments
+    if(IS_MOMENTS_CONSOLE){
+      query = query.eq("source","moments_editor");
+    }
+    const { data,error } = await query;
     if(error) throw error;
     supportTicketRows = data || [];
     refreshSupportTicketsTable();
@@ -2793,6 +3438,7 @@ function filteredSupportTickets(){
         row.subject,
         row.description,
         row.source,
+        row.profiles?.email,
         row.businesses?.nome,
         row.businesses?.slug
       ].join(" ").toLowerCase();
@@ -2818,19 +3464,23 @@ function refreshSupportTicketsTable(){
   const rows = filteredSupportTickets();
   updateSupportStats();
   if(supportVisibleCount) supportVisibleCount.textContent = `${rows.length} ticket visibili`;
-  supportTicketsTable.innerHTML = rows.length ? rows.map(row=>`
+  supportTicketsTable.innerHTML = rows.length ? rows.map(row=>{
+    const preview = String(row.description || "").replace(/\s+/g," ").trim();
+    const short = preview.length > 90 ? `${preview.slice(0,90)}…` : preview;
+    return `
     <tr>
       <td>
         <strong>${esc(row.subject)}</strong>
-        <small>${esc(row.description || "")}</small>
+        <small>${esc(short || "Nessun dettaglio")}</small>
       </td>
-      <td>${esc(row.businesses?.nome || row.businesses?.slug || "Account Moments")}</td>
+      <td>${esc(supportCustomerLabel(row))}</td>
       <td><span class="status-pill ${esc(row.priority)}">${esc(supportPriorityLabel(row.priority))}</span></td>
       <td><span class="status-pill ${esc(row.status)}">${esc(supportStatusLabel(row.status))}</span></td>
-      <td>${esc(row.source || "-")}</td>
-      <td><button class="small-action" type="button" data-support-ticket-edit="${esc(row.id)}">Gestisci</button></td>
+      <td>${esc(supportSourceLabel(row.source))}</td>
+      <td><button class="small-action" type="button" data-support-ticket-edit="${esc(row.id)}">Apri ticket</button></td>
     </tr>
-  `).join("") : `<tr><td colspan="6">Nessun ticket corrisponde ai filtri.</td></tr>`;
+  `;
+  }).join("") : `<tr><td colspan="6">Nessun ticket corrisponde ai filtri.</td></tr>`;
 }
 
 function syncSupportQuickChips(){
@@ -2850,10 +3500,19 @@ function editSupportTicket(id){
   supportTicketEditForm.hidden = false;
   supportTicketEditForm.elements.ticket_id.value = row.id;
   supportTicketEditForm.elements.ticket_title.value = row.subject || "";
+  if(supportTicketEditForm.elements.ticket_description){
+    supportTicketEditForm.elements.ticket_description.value = row.description || "";
+  }
   supportTicketEditForm.elements.status.value = row.status || "open";
   supportTicketEditForm.elements.priority.value = row.priority || "normal";
   supportTicketEditForm.elements.internal_note.value = "";
-  setFormStatus(supportTicketEditStatus,`Ticket ${row.subject || row.id} pronto per aggiornamento.`,"ok");
+  const customerNode = supportTicketEditForm.querySelector("[data-support-customer]");
+  const sourceNode = supportTicketEditForm.querySelector("[data-support-source]");
+  const createdNode = supportTicketEditForm.querySelector("[data-support-created]");
+  if(customerNode) customerNode.textContent = supportCustomerLabel(row);
+  if(sourceNode) sourceNode.textContent = supportSourceLabel(row.source);
+  if(createdNode) createdNode.textContent = formatSupportWhen(row.created_at);
+  setFormStatus(supportTicketEditStatus,"Ticket aperto: leggi il messaggio, aggiorna stato/priorità e salva.","ok");
   supportTicketEditForm.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 
@@ -3288,12 +3947,17 @@ function closeMomentDrawer(){
   currentMoment = null;
 }
 
-function openCodeDrawer(code){
-  const row = momentProductRows.find(item=>item.code === code);
+function openCodeDrawer(code,kind="moment"){
+  const row = kind === "business"
+    ? businessProductRows.find(item=>item.code === code)
+    : momentProductRows.find(item=>item.code === code);
   if(!row || !codeDrawer) return;
   currentCodeRow = row;
+  currentCodeKind = kind;
   document.getElementById("codeDrawerTitle").textContent = row.code;
-  document.getElementById("codeDrawerMeta").textContent = productLineLabel(row.product_line || "non_specificato");
+  document.getElementById("codeDrawerMeta").textContent = kind === "business"
+    ? `${row.sku || "Business"} · ${row.batch_label || "senza lotto"}`
+    : productLineLabel(row.product_line || "non_specificato");
   document.getElementById("codeEditCode").value = row.code;
   const statusSelect = document.getElementById("codeEditStatus");
   statusSelect.value = row.status;
@@ -3303,12 +3967,18 @@ function openCodeDrawer(code){
   renderAgentOptions(row.assigned_agent_id || "");
   document.getElementById("codeEditBatch").value = row.batch_label || "";
   document.getElementById("codeEditOrder").value = row.platform_order_id ? orderLabelById(row.platform_order_id) : "";
-  document.getElementById("codeEditPublicUrl").value = momentActivationUrl(row);
-  document.getElementById("codeEditNfcUrl").value = momentNfcUrl(row);
-  document.getElementById("codeEditActivationUrl").value = momentActivationUrl(row);
+  document.getElementById("codeEditPublicUrl").value = kind === "business" ? businessPageUrl(row) : momentActivationUrl(row);
+  document.getElementById("codeEditNfcUrl").value = kind === "business" ? businessNfcUrl(row) : momentNfcUrl(row);
+  document.getElementById("codeEditActivationUrl").value = kind === "business"
+    ? `${LOCAL_PAGES_BASE}/index.html?code=${encodeURIComponent(row.code)}`
+    : momentActivationUrl(row);
   setFormStatus(codeEditFormStatus,"");
   codeDrawer.classList.add("open");
   codeDrawer.setAttribute("aria-hidden","false");
+}
+
+function openBusinessCodeDrawer(code){
+  openCodeDrawer(code,"business");
 }
 
 function closeCodeDrawer(){
@@ -3320,13 +3990,17 @@ function closeCodeDrawer(){
 
 async function saveCodeEdit(event){
   event.preventDefault();
-  if(!hasPermission("moments.write")){
-    setFormStatus(codeEditFormStatus,"Non hai il permesso moments.write.","error");
+  const isBusiness = currentCodeKind === "business";
+  const writePerm = isBusiness ? "inventory.write" : "moments.write";
+  if(!hasPermission(writePerm)){
+    setFormStatus(codeEditFormStatus,`Non hai il permesso ${writePerm}.`,"error");
     return;
   }
   const form = event.currentTarget;
   const code = String(form.elements.code.value || "").trim().toUpperCase();
-  const row = momentProductRows.find(item=>item.code === code);
+  const rows = isBusiness ? businessProductRows : momentProductRows;
+  const table = isBusiness ? "business_activation_codes" : "moment_activation_codes";
+  const row = rows.find(item=>item.code === code);
   if(row?.status === "claimed"){
     setFormStatus(codeEditFormStatus,"Codice già attivato: non modificabile.","error");
     return;
@@ -3339,14 +4013,18 @@ async function saveCodeEdit(event){
     updated_at:new Date().toISOString()
   };
   setFormStatus(codeEditFormStatus,"Salvataggio...");
-  const { error } = await supabase.from("moment_activation_codes").update(payload).eq("code",code);
+  const { error } = await supabase.from(table).update(payload).eq("code",code);
   if(error){
     console.error(error);
     setFormStatus(codeEditFormStatus,error.message || "Salvataggio non riuscito.","error");
     return;
   }
   setFormStatus(codeEditFormStatus,"Codice aggiornato.","ok");
-  await Promise.all([loadMomentProducts(),loadMomentInventoryStats(),loadMomentAgentInventoryStats()]);
+  if(isBusiness){
+    await Promise.all([loadBusinessProducts(),loadBusinessInventoryStats()]);
+  }else{
+    await Promise.all([loadMomentProducts(),loadMomentInventoryStats(),loadMomentAgentInventoryStats()]);
+  }
   closeCodeDrawer();
 }
 
@@ -3586,7 +4264,23 @@ async function provisionMomentCustomer(event){
 }
 
 function publicUrlFor(row){
+  const nfc = clientPrimaryNfc(row);
+  if(nfc?.url) return nfc.url;
+  if(nfc?.code) return `${PUBLIC_BASE_URL}/k/${encodeURIComponent(nfc.code)}`;
   return row?.slug ? `${PUBLIC_BASE_URL}/p/${encodeURIComponent(row.slug)}` : "";
+}
+
+function businessNfcUrl(row){
+  const code = String(row?.code || "").trim();
+  if(row?.public_url && row.public_url.startsWith("http")) return row.public_url;
+  return code ? `${PUBLIC_BASE_URL}/k/${encodeURIComponent(code)}` : "";
+}
+
+function businessPageUrl(row){
+  if(row?.public_slug) return `${PUBLIC_BASE_URL}/p/${encodeURIComponent(row.public_slug)}`;
+  const biz = row?.businesses;
+  const slug = Array.isArray(biz) ? biz[0]?.slug : biz?.slug;
+  return slug ? `${PUBLIC_BASE_URL}/p/${encodeURIComponent(slug)}` : "";
 }
 
 function setDrawerView(view="summary"){
@@ -3604,9 +4298,14 @@ function openClientDrawer(clientId,view="summary"){
   currentClient = row;
   currentClientRecord = null;
   const publicUrl = publicUrlFor(row);
+  const nfc = clientPrimaryNfc(row);
+  const email = clientProfileEmail(row);
   document.getElementById("drawerClientName").textContent = row.nome || "Senza nome";
   document.getElementById("drawerClientMeta").textContent = row.categoria || "Categoria non indicata";
   document.getElementById("drawerSlug").textContent = row.slug || "-";
+  document.getElementById("drawerClientEmail").textContent = email || "-";
+  document.getElementById("drawerNfcCode").textContent = nfc?.code || "-";
+  document.getElementById("drawerNfcUrl").textContent = nfc?.url || (nfc?.code ? businessNfcUrl({code:nfc.code}) : "-");
   document.getElementById("drawerCategory").textContent = row.categoria || "-";
   document.getElementById("drawerPublicUrl").textContent = publicUrl || "Pagina pubblica non disponibile";
   drawerFrame.src = publicUrl || "about:blank";
@@ -3951,6 +4650,86 @@ async function saveMoment(event){
   await Promise.all([loadMoments(),loadDashboard()]);
 }
 
+async function createMomentUnitsAndExport({
+  quantity = 1,
+  prefix,
+  productType,
+  productLine,
+  batchLabel,
+  soldChannel = null,
+  catalogSku = null,
+  statusNode = momentBatchStatus,
+  filenameStem = "khamakey-etichetta"
+}){
+  const qty = Math.min(500, Math.max(1, Number(quantity || 1)));
+  const cleanPrefix = String(prefix || "MOMENT").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12) || "MOMENT";
+  if(!productLine || !batchLabel){
+    if(statusNode) setFormStatus(statusNode, "Linea oggetto e nome lotto obbligatori.", "error");
+    return null;
+  }
+  if(statusNode) setFormStatus(statusNode, `Generazione ${qty} pezzo/i (${batchLabel})...`);
+  const { data, error } = await supabase.rpc("create_moment_product_batch", {
+    p_quantity: qty,
+    p_prefix: cleanPrefix,
+    p_product_type: productType,
+    p_batch_label: batchLabel,
+    p_product_line: productLine,
+    p_sold_channel: soldChannel || null,
+    p_assigned_agent_id: null
+  });
+  if(error){
+    console.error(error);
+    if(statusNode) setFormStatus(statusNode, error.message || "Generazione non riuscita.", "error");
+    return null;
+  }
+  const rows = data || [];
+  if(!rows.length){
+    if(statusNode) setFormStatus(statusNode, "Nessun codice generato.", "error");
+    return null;
+  }
+  const exportRows = rows.map(row=>({
+    code: row.out_code || row.code,
+    packaging_barcode: row.packaging_barcode || null,
+    public_slug: row.public_slug,
+    product_type: row.product_type || productType,
+    product_line: row.product_line || productLine,
+    batch_label: row.batch_label || batchLabel,
+    catalog_sku: catalogSku || null,
+    status: "available",
+    sold_channel: row.sold_channel || soldChannel || null,
+    assigned_agent_id: null,
+    platform_order_id: null,
+    claimed_by_email: "",
+    created_at: new Date().toISOString()
+  }));
+  // Traccia SKU sul product_label (i codici random non lo contengono più)
+  if(catalogSku){
+    const codes = exportRows.map(row=>row.code).filter(Boolean);
+    if(codes.length){
+      const label = `${productLine || "Moments"} · ${catalogSku}`;
+      const { error:labelError } = await supabase
+        .from("moment_activation_codes")
+        .update({ product_label: label })
+        .in("code", codes);
+      if(labelError) console.warn("product_label SKU non aggiornato", labelError);
+      else exportRows.forEach(row=>{ row.product_label = label; });
+    }
+  }
+  momentExportRows(exportRows, filenameStem);
+  await runLabelExport(exportRows, filenameStem);
+  if(statusNode){
+    setFormStatus(
+      statusNode,
+      qty === 1
+        ? `1 pezzo creato · codice ${formatMomentCodeDisplay(exportRows[0].code)} · PDF etichetta scaricato.`
+        : `Creati ${rows.length} codici · lotto «${batchLabel}» · CSV + PDF etichette.`,
+      "ok"
+    );
+  }
+  await Promise.all([loadMomentProducts(), loadMomentInventoryStats(), loadMomentAgentInventoryStats(), loadMomentCustomers(), loadMoments(), loadDashboard()]);
+  return exportRows;
+}
+
 async function createMomentBatch(event){
   event.preventDefault();
   if(!hasPermission("moments.write")){
@@ -3965,43 +4744,18 @@ async function createMomentBatch(event){
   const productLine = String(catalog?.product_line || form.elements.product_line.value || "").trim();
   const productType = normalizeMomentType(catalog?.product_type || form.elements.product_type.value);
   const batchLabel = String(form.elements.batch_label.value || "").trim();
-  if(!productLine || !batchLabel){
-    setFormStatus(momentBatchStatus,"Seleziona la linea oggetto e inserisci un nome lotto.","error");
-    return;
-  }
-  setFormStatus(momentBatchStatus,`Generazione ${quantity} ${productLineLabel(productLine)} (${batchLabel})...`);
-  const { data,error } = await supabase.rpc("create_moment_product_batch",{
-    p_quantity:quantity,
-    p_prefix:prefix,
-    p_product_type:productType,
-    p_batch_label:batchLabel,
-    p_product_line:productLine
+  const soldChannel = String(form.elements.sold_channel?.value || "").trim() || null;
+  await createMomentUnitsAndExport({
+    quantity,
+    prefix,
+    productType,
+    productLine,
+    batchLabel,
+    soldChannel,
+    catalogSku: catalog?.sku || null,
+    statusNode: momentBatchStatus,
+    filenameStem: `khamakey-lotto-${batchLabel.replace(/[^a-z0-9]+/gi,"-").slice(0,24).toLowerCase() || "stock"}`
   });
-  if(error){
-    console.error(error);
-    setFormStatus(momentBatchStatus,error.message || "Generazione prodotti non riuscita.","error");
-    return;
-  }
-  const rows = data || [];
-  setFormStatus(momentBatchStatus,`Creati ${rows.length} codici in stock · lotto «${batchLabel}». Assegna agente/ordine quando serve.`,"ok");
-  if(rows.length){
-    const exportRows = rows.map(row=>({
-      code:row.out_code || row.code,
-      public_slug:row.public_slug,
-      product_type:row.product_type || productType,
-      product_line:row.product_line || productLine,
-      batch_label:row.batch_label || batchLabel,
-      status:"available",
-      sold_channel:null,
-      assigned_agent_id:null,
-      platform_order_id:null,
-      claimed_by_email:"",
-      created_at:new Date().toISOString()
-    }));
-    momentExportRows(exportRows,`khamakey-lotto-${batchLabel.replace(/[^a-z0-9]+/gi,"-").slice(0,24).toLowerCase() || "stock"}`);
-    await runLabelExport(exportRows, `khamakey-etichette-${batchLabel.replace(/[^a-z0-9]+/gi,"-").slice(0,24).toLowerCase() || "stock"}`);
-  }
-  await Promise.all([loadMomentProducts(),loadMomentInventoryStats(),loadMomentAgentInventoryStats(),loadMomentCustomers(),loadMoments(),loadDashboard()]);
 }
 
 async function saveProduct(event){
@@ -4389,6 +5143,14 @@ async function saveSupportTicketEdit(event){
       body:`Ticket ${row.subject}: ${noteBody}`
     });
     if(noteError) console.warn("Nota ticket non salvata",noteError);
+  }else if(noteBody){
+    const stamp = formatSupportWhen(new Date().toISOString());
+    const nextDescription = `${row.description || ""}\n\n[Nota staff ${stamp}] ${noteBody}`.trim();
+    const { error:noteError } = await supabase
+      .from("platform_support_tickets")
+      .update({ description:nextDescription, updated_at:new Date().toISOString() })
+      .eq("id",ticketId);
+    if(noteError) console.warn("Nota ticket Moments non salvata",noteError);
   }
   form.hidden = true;
   form.reset();
@@ -4411,37 +5173,51 @@ async function loadAdminSession(){
     return;
   }
   showAdmin(userData.user,currentMember);
-  await Promise.all([
-    loadDashboard(),
-    loadClients(),
-    loadCrm(),
-    loadMoments(),
-    loadMomentCustomers(),
-    loadMomentProducts(),
-    loadMomentInventoryStats(),
-    loadMomentAgentInventoryStats(),
-    loadMembers(),
-    loadAgents(),
-    loadCommissions(),
-    loadCommissionRules(),
-    loadTierRules(),
-    loadPriceLists(),
-    loadNetworkTree(),
-    loadDeliveries(),
-    loadMomentCatalog(),
-    loadProducts(),
-    loadStockMovements(),
-    loadPlatformOrders(),
-    loadPlans(),
-    loadMaterials(),
-    loadTicketCategories(),
-    loadSupportTickets(),
-    loadIntegrations(),
-    loadIntegrationHealth(),
-    loadSupportedLocales(),
-    loadPaymentTransactions(),
-    loadWebhookEvents()
-  ]);
+  const loaders = IS_MOMENTS_CONSOLE ? [
+    loadDashboard,
+    loadMoments,
+    loadMomentCustomers,
+    loadMomentProducts,
+    loadMomentInventoryStats,
+    loadMomentAgentInventoryStats,
+    loadMomentCatalog,
+    loadSupportTickets,
+    loadTicketCategories
+  ] : [
+    loadDashboard,
+    loadClients,
+    loadCrm,
+    loadMoments,
+    loadMomentCustomers,
+    loadMomentProducts,
+    loadBusinessProducts,
+    loadBusinessInventoryStats,
+    loadMomentInventoryStats,
+    loadMomentAgentInventoryStats,
+    loadMembers,
+    loadAgents,
+    loadCommissions,
+    loadCommissionRules,
+    loadTierRules,
+    loadPriceLists,
+    loadNetworkTree,
+    loadDeliveries,
+    loadMomentCatalog,
+    loadProducts,
+    loadStockMovements,
+    loadPlatformOrders,
+    loadPlans,
+    loadMaterials,
+    loadTicketCategories,
+    loadSupportTickets,
+    loadIntegrations,
+    loadIntegrationHealth,
+    loadSupportedLocales,
+    loadPaymentTransactions,
+    loadWebhookEvents
+  ];
+  // loaders sono funzioni: vanno invocate, altrimenti Promise.all le tratta come valori già risolti
+  await Promise.all(loaders.map(fn => fn()));
   renderAgentHierarchySelects("");
   const hashTab = String(location.hash || "").replace(/^#/, "").trim();
   if(hashTab && document.querySelector(`[data-panel="${hashTab}"]`)){
@@ -4487,12 +5263,12 @@ document.querySelectorAll("[data-nav-toggle]").forEach(button=>{
   });
 });
 
-document.getElementById("adminLogout").addEventListener("click",async()=>{
+document.getElementById("adminLogout")?.addEventListener("click",async()=>{
   if(supabase) await supabase.auth.signOut();
-  location.href = "./admin.html";
+  location.href = ADMIN_HOME;
 });
 
-adminLoginForm.addEventListener("submit",async event=>{
+adminLoginForm?.addEventListener("submit",async event=>{
   event.preventDefault();
   if(!supabase) return;
   const email = document.getElementById("adminLoginEmail").value.trim().toLowerCase();
@@ -4508,14 +5284,14 @@ adminLoginForm.addEventListener("submit",async event=>{
   await loadAdminSession();
 });
 
-adminResetPassword.addEventListener("click",async()=>{
+adminResetPassword?.addEventListener("click",async()=>{
   if(!supabase) return;
   const email = document.getElementById("adminLoginEmail").value.trim().toLowerCase();
   if(!email){
     setGate("Inserisci prima l’email admin per recuperare la password.","denied");
     return;
   }
-  const redirectTo = location.protocol === "file:" ? undefined : `${location.origin}/admin.html`;
+  const redirectTo = authRedirectTo(IS_MOMENTS_CONSOLE ? "/moments-admin.html" : "/admin.html");
   const { error } = await supabase.auth.resetPasswordForEmail(email,{ redirectTo });
   if(error){
     console.error(error);
@@ -4525,18 +5301,18 @@ adminResetPassword.addEventListener("click",async()=>{
   setGate("Email di recupero inviata. Controlla la casella dell’account admin.");
 });
 
-clientsTable.addEventListener("click",event=>{
+clientsTable?.addEventListener("click",event=>{
   const button = event.target.closest("[data-client-open]");
   if(!button) return;
   openClientDrawer(button.dataset.clientOpen,button.dataset.clientView || "summary");
 });
 
-productsTable.addEventListener("click",event=>{
+productsTable?.addEventListener("click",event=>{
   const button = event.target.closest("[data-product-edit]");
   if(button) editProduct(button.dataset.productEdit);
 });
 
-momentsTable.addEventListener("click",event=>{
+momentsTable?.addEventListener("click",event=>{
   const button = event.target.closest("[data-moment-open]");
   if(button) openMomentDrawer(button.dataset.momentOpen,button.dataset.momentView || "summary");
 });
@@ -4570,7 +5346,7 @@ if(commissionsTable) commissionsTable.addEventListener("click",event=>{
   if(btn) setCommissionStatus(btn.dataset.commissionSet, btn.dataset.commissionStatus);
 });
 
-platformOrdersTable.addEventListener("click",event=>{
+platformOrdersTable?.addEventListener("click",event=>{
   const saveBtn = event.target.closest("[data-order-save]");
   if(saveBtn) return updatePlatformOrder(saveBtn.dataset.orderSave);
   const openBtn = event.target.closest("[data-order-open]");
@@ -4592,7 +5368,7 @@ nfcShippingTable?.addEventListener("click",event=>{
   if(stageBtn) advanceNfcShippingOrder(stageBtn.dataset.nfcOrderStage,stageBtn.dataset.nextStatus);
 });
 
-plansTable.addEventListener("click",event=>{
+plansTable?.addEventListener("click",event=>{
   const stripeBtn = event.target.closest("[data-plan-stripe]");
   if(stripeBtn){
     createStripeCheckoutForPlan(stripeBtn.dataset.planStripe, stripeBtn.dataset.cycle || "monthly");
@@ -4602,12 +5378,12 @@ plansTable.addEventListener("click",event=>{
   if(button) editPlan(button.dataset.planEdit);
 });
 
-materialsTable.addEventListener("click",event=>{
+materialsTable?.addEventListener("click",event=>{
   const button = event.target.closest("[data-material-edit]");
   if(button) editMaterial(button.dataset.materialEdit);
 });
 
-ticketCategoriesTable.addEventListener("click",event=>{
+ticketCategoriesTable?.addEventListener("click",event=>{
   const button = event.target.closest("[data-ticket-category-edit]");
   if(button) editTicketCategory(button.dataset.ticketCategoryEdit);
 });
@@ -4617,7 +5393,7 @@ supportTicketsTable?.addEventListener("click",event=>{
   if(button) editSupportTicket(button.dataset.supportTicketEdit);
 });
 
-integrationsTable.addEventListener("click",event=>{
+integrationsTable?.addEventListener("click",event=>{
   const button = event.target.closest("[data-integration-edit]");
   if(button) editIntegration(button.dataset.integrationEdit);
 });
@@ -4635,6 +5411,17 @@ momentCatalogTable?.addEventListener("click",event=>{
   const syncBtn = event.target.closest("[data-moment-catalog-sync]");
   if(syncBtn){
     syncMomentCatalogToShopify(syncBtn.dataset.momentCatalogSync);
+    return;
+  }
+  const stockBtn = event.target.closest("[data-moment-catalog-stock]");
+  if(stockBtn){
+    const row = momentCatalogRows.find(item=>item.id === stockBtn.dataset.momentCatalogStock);
+    if(row && momentBatchCatalog && momentBatchForm){
+      momentBatchCatalog.value = row.id;
+      applyMomentBatchCatalog();
+      if(momentBatchForm.elements.quantity) momentBatchForm.elements.quantity.value = "1";
+      switchTab("momentInventory");
+    }
   }
 });
 
@@ -4659,6 +5446,15 @@ document.querySelectorAll("[data-reset-form]").forEach(button=>{
       if(form.elements.shopify_live) form.elements.shopify_live.value = "false";
       populateMomentTypeSelects();
     }
+    if(form.id === "momentNewProductForm"){
+      if(form.elements.sale_price) form.elements.sale_price.value = "0";
+      if(form.elements.unit_cost) form.elements.unit_cost.value = "0";
+      if(form.elements.physical_units) form.elements.physical_units.value = "1";
+      if(form.elements.activation_codes) form.elements.activation_codes.value = "1";
+      if(form.elements.status) form.elements.status.value = "active";
+      if(form.elements.publish_shopify) form.elements.publish_shopify.value = "false";
+      populateMomentTypeSelects();
+    }
     if(form.id === "momentBatchForm"){
       populateMomentTypeSelects();
       populateMomentBatchCatalogSelect();
@@ -4677,7 +5473,7 @@ document.querySelectorAll("[data-drawer-view]").forEach(button=>{
   button.addEventListener("click",()=>setDrawerView(button.dataset.drawerView));
 });
 
-document.getElementById("copyPublicUrl").addEventListener("click",async()=>{
+document.getElementById("copyPublicUrl")?.addEventListener("click",async()=>{
   const url = drawer.dataset.publicUrl || "";
   if(!url) return;
   try{
@@ -4754,13 +5550,18 @@ nfcShippingSearchClear?.addEventListener("click",()=>{
 document.getElementById("momentInventoryQuickFilters")?.addEventListener("click",event=>{
   const chip = event.target.closest("[data-moment-quick]");
   if(!chip) return;
+  // I chip rapidi ripartono da zero: evita filtri SKU/lotto/date “appiccicati” che svuotano la tabella
+  clearMomentInventoryFilters({ refresh: false });
   if(momentFilterStatus) momentFilterStatus.value = chip.dataset.momentQuickStatus || "";
-  if(momentFilterOrder && chip.dataset.momentQuickOrder !== undefined){
-    momentFilterOrder.value = chip.dataset.momentQuickOrder || "";
+  if(momentFilterOrder){
+    momentFilterOrder.value = chip.dataset.momentQuickOrder !== undefined
+      ? (chip.dataset.momentQuickOrder || "")
+      : "";
   }
   chip.closest(".filter-chip-bar")?.querySelectorAll(".filter-chip").forEach(node=>{
     node.classList.toggle("active", node === chip);
   });
+  syncMomentQuickChips();
   refreshMomentTable();
 });
 
@@ -4812,18 +5613,7 @@ if(momentSearchInput){
   });
 }
 momentSearchClear?.addEventListener("click",()=>{
-  if(momentSearchInput) momentSearchInput.value = "";
-  if(momentFilterLine) momentFilterLine.value = "";
-  if(momentFilterBatch) momentFilterBatch.value = "";
-  if(momentFilterStatus) momentFilterStatus.value = "";
-  if(momentFilterSku) momentFilterSku.value = "";
-  if(momentFilterDateFrom) momentFilterDateFrom.value = "";
-  if(momentFilterDateTo) momentFilterDateTo.value = "";
-  if(momentFilterAgent) momentFilterAgent.value = "";
-  if(momentFilterChannel) momentFilterChannel.value = "";
-  if(momentFilterOrder) momentFilterOrder.value = "";
-  syncMomentQuickChips();
-  refreshMomentTable();
+  clearMomentInventoryFilters();
 });
 
 [momentFilterLine,momentFilterBatch,momentFilterStatus,momentFilterSku,momentFilterDateFrom,momentFilterDateTo,momentFilterAgent,momentFilterChannel,momentFilterOrder].forEach(node=>{
@@ -4850,6 +5640,10 @@ momentProductsTable?.addEventListener("change",event=>{
 });
 
 momentProductsTable?.addEventListener("click",event=>{
+  if(event.target.closest("[data-moment-clear-filters]")){
+    clearMomentInventoryFilters();
+    return;
+  }
   const editBtn = event.target.closest("[data-code-edit]");
   if(editBtn) return openCodeDrawer(editBtn.dataset.codeEdit);
   const orderBtn = event.target.closest("[data-order-open]");
@@ -4913,24 +5707,73 @@ if(deliveryForm) deliveryForm.addEventListener("submit",saveDelivery);
 platformOrderForm?.elements?.order_type?.addEventListener("change",syncNfcOrderFieldsVisibility);
 syncNfcOrderFieldsVisibility();
 
-memberForm.addEventListener("submit",saveMember);
-agentForm.addEventListener("submit",saveAgent);
+memberForm?.addEventListener("submit",saveMember);
+agentForm?.addEventListener("submit",saveAgent);
 if(momentForm) momentForm.addEventListener("submit",saveMoment);
 if(momentQuickCatalogForm) momentQuickCatalogForm.addEventListener("submit",saveQuickMomentCatalog);
+if(momentNewProductForm){
+  momentNewProductForm.addEventListener("submit",event=>{
+    const goToInventory = event.currentTarget.dataset.goToInventory === "1";
+    const createSingleLabel = event.currentTarget.dataset.createSingleLabel === "1";
+    delete event.currentTarget.dataset.goToInventory;
+    delete event.currentTarget.dataset.createSingleLabel;
+    saveMomentNewProduct(event, { goToInventory, createSingleLabel });
+  });
+  momentNewProductForm.querySelector("[data-submit-and-stock]")?.addEventListener("click",()=>{
+    momentNewProductForm.dataset.goToInventory = "1";
+    momentNewProductForm.requestSubmit();
+  });
+  momentNewProductForm.querySelector("[data-submit-and-label]")?.addEventListener("click",()=>{
+    momentNewProductForm.dataset.createSingleLabel = "1";
+    momentNewProductForm.requestSubmit();
+  });
+}
+
+document.querySelectorAll("[data-batch-qty]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    const input = momentBatchForm?.elements?.quantity;
+    if(input) input.value = button.dataset.batchQty || "1";
+  });
+});
 if(momentBatchForm) momentBatchForm.addEventListener("submit",createMomentBatch);
+if(businessBatchForm) businessBatchForm.addEventListener("submit",saveBusinessBatch);
+if(businessProvisionForm) businessProvisionForm.addEventListener("submit",provisionBusinessCustomer);
+businessSearchInput?.addEventListener("input",refreshBusinessTable);
+businessSearchClear?.addEventListener("click",()=>{
+  if(businessSearchInput) businessSearchInput.value = "";
+  refreshBusinessTable();
+});
+[businessFilterStatus,businessFilterBatch,businessFilterSku,businessFilterLine].forEach(node=>{
+  node?.addEventListener("change",refreshBusinessTable);
+});
+businessExportFiltered?.addEventListener("click",()=>{
+  businessExportRows(filteredBusinessProducts(),"khamakey-business-magazzino");
+});
+businessProductsTable?.addEventListener("click",event=>{
+  const editBtn = event.target.closest("[data-business-code-edit]");
+  if(editBtn) openBusinessCodeDrawer(editBtn.dataset.businessCodeEdit);
+});
+businessBatchSku?.addEventListener("change",()=>{
+  const opt = businessBatchSku.selectedOptions?.[0];
+  if(!opt?.value || !businessBatchForm) return;
+  businessBatchForm.elements.prefix.value = String(opt.value).replace(/[^A-Z0-9]/g,"").slice(0,12);
+  if(!businessBatchForm.elements.product_label.value){
+    businessBatchForm.elements.product_label.value = opt.dataset.name || opt.textContent.split("·").pop()?.trim() || "";
+  }
+});
 if(momentCatalogForm) momentCatalogForm.addEventListener("submit",saveMomentCatalog);
-productForm.addEventListener("submit",saveProduct);
-stockForm.addEventListener("submit",saveStockMovement);
-platformOrderForm.addEventListener("submit",savePlatformOrder);
-clientRecordForm.addEventListener("submit",saveClientRecord);
-clientNoteForm.addEventListener("submit",saveClientNote);
-ticketForm.addEventListener("submit",saveTicket);
+productForm?.addEventListener("submit",saveProduct);
+stockForm?.addEventListener("submit",saveStockMovement);
+platformOrderForm?.addEventListener("submit",savePlatformOrder);
+clientRecordForm?.addEventListener("submit",saveClientRecord);
+clientNoteForm?.addEventListener("submit",saveClientNote);
+ticketForm?.addEventListener("submit",saveTicket);
 supportTicketEditForm?.addEventListener("submit",saveSupportTicketEdit);
-planForm.addEventListener("submit",savePlan);
-materialForm.addEventListener("submit",saveMaterial);
-ticketCategoryForm.addEventListener("submit",saveTicketCategory);
+planForm?.addEventListener("submit",savePlan);
+materialForm?.addEventListener("submit",saveMaterial);
+ticketCategoryForm?.addEventListener("submit",saveTicketCategory);
 if(refreshIntegrationHealthBtn) refreshIntegrationHealthBtn.addEventListener("click",loadIntegrationHealth);
-integrationForm.addEventListener("submit",saveIntegration);
+integrationForm?.addEventListener("submit",saveIntegration);
 
 bindSearchInput(clientSearchInput, refreshClientsTable);
 document.getElementById("clientSearchClear")?.addEventListener("click",()=>{
@@ -5010,5 +5853,5 @@ function syncMomentQuickChips(){
 
 init().catch(error=>{
   console.error(error);
-  setGate(error.message || "Errore apertura admin.","denied");
+  showLoginGate(error.message || "Errore apertura consolle. Accedi di nuovo.");
 });

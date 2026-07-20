@@ -22,7 +22,31 @@ html,body{
 button,a{font:inherit}
 button{cursor:pointer}
 .admin-shell{min-height:100dvh;display:grid;grid-template-columns:260px 1fr}
-.admin-shell.locked{grid-template-columns:1fr}
+.admin-shell.locked{
+  grid-template-columns:1fr;
+  min-height:100dvh;
+}
+.admin-shell.locked > .admin-sidebar,
+.admin-shell.locked .admin-topbar,
+.admin-shell.locked #adminContent{
+  display:none !important;
+}
+.admin-shell.locked .admin-main{
+  grid-column:1 / -1;
+  min-height:100dvh;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:clamp(28px,8vh,72px) 16px 32px;
+}
+.admin-shell.locked #adminGate{
+  display:block !important;
+  width:min(520px,100%);
+  margin:0;
+}
+.admin-shell:not(.locked) #adminGate{
+  display:none !important;
+}
 .admin-sidebar{background:#091024;color:white;padding:18px 14px;display:flex;flex-direction:column;gap:20px}
 .admin-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:white}
 .admin-logo img{width:136px;background:white;border-radius:9px;padding:7px 10px}
@@ -162,7 +186,12 @@ tr:last-child td{border-bottom:0}
 .denied{color:var(--red)}
 .admin-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0 18px;padding:14px;border:1px solid var(--border);border-radius:14px;background:#F8FAFC}
 .admin-form label{display:grid;gap:6px;font-size:.74rem;font-weight:900;color:var(--navy)}
-.admin-form input,.admin-form select{width:100%;border:1px solid var(--border);border-radius:10px;background:white;color:var(--text);padding:10px 11px;font:inherit;font-size:.84rem}
+.admin-form input,.admin-form select,.admin-form textarea{width:100%;border:1px solid var(--border);border-radius:10px;background:white;color:var(--text);padding:10px 11px;font:inherit;font-size:.84rem}
+.admin-form textarea{min-height:120px;resize:vertical;line-height:1.45}
+.support-ticket-detail{border-color:#BFDBFE;background:#F8FBFF}
+.support-ticket-meta{display:grid;gap:6px;margin:0 0 4px;padding:10px 12px;border-radius:10px;background:#EFF6FF;border:1px solid #BFDBFE;font-size:.8rem;color:var(--navy)}
+.support-ticket-meta p{margin:0}
+.support-ticket-meta strong{font-weight:800;margin-right:6px}
 .admin-form > div{grid-column:1/-1}
 .admin-form button{justify-self:start}
 .admin-form.compact-form{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -295,7 +324,7 @@ textarea{width:100%;border:1px solid var(--border);border-radius:10px;background
 .note-item p{margin:0;color:var(--text);font-size:.82rem;line-height:1.45}
 .small-action[disabled]{opacity:.55;cursor:wait}
 @media(max-width:900px){
-  .admin-shell{grid-template-columns:1fr}
+  .admin-shell:not(.locked){grid-template-columns:1fr}
   .admin-workflow-steps{grid-template-columns:1fr}
   .admin-sidebar{position:static}
   .admin-nav{grid-template-columns:repeat(2,minmax(0,1fr))}

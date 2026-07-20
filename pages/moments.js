@@ -961,6 +961,7 @@ async function submitMomentSupportTicket(event,row){
   if(!subject || !description) return setStatus(status,"Compila oggetto e dettagli.","error");
   setStatus(status,"Invio ticket...");
   const detail = [
+    `Cliente: ${currentUser.email || ""}`,
     description,
     row?.slug ? `Pagina Moments: ${row.slug}` : "",
     row?.id ? `ID evento: ${row.id}` : ""
@@ -978,8 +979,24 @@ async function submitMomentSupportTicket(event,row){
     setStatus(status,error.message || "Ticket non inviato.","error");
     return;
   }
+  try{
+    const { data:sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    if(token){
+      await fetch(`${WORKER_BASE_URL}/api/moment/support-notify`,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          Authorization:`Bearer ${token}`
+        },
+        body:JSON.stringify({ subject, description:detail, priority })
+      });
+    }
+  }catch(notifyError){
+    console.warn("Avviso email supporto non inviato", notifyError);
+  }
   form.reset();
-  setStatus(status,"Ticket inviato. Il team KhamaKey lo vede nella console Supporto.","ok");
+  setStatus(status,"Ticket inviato. Il team KhamaKey riceve un’email e lo vede in Officina NFC → Supporto.","ok");
 }
 
 function renderEmptyState(message = "",prefillCode = ""){

@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="it" data-admin-product="moments" class="admin-auth-locked">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KhamaKey Moments — Officina NFC</title>
+  <link rel="icon" href="khamakey-favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css?v=164">
+  <link rel="stylesheet" href="moments-admin.css?v=164">
+</head>
+<body>
+  <main class="admin-shell locked" id="adminShell">
+    <aside class="admin-sidebar" id="adminSidebar" hidden>
+      <a class="admin-logo" href="./moments-admin.html" aria-label="KhamaKey Moments Admin">
+        <img src="khamakey-wordmark-dark.png" alt="KhamaKey">
+        <span>Moments</span>
+      </a>
+      <p class="admin-logo-badge">Officina NFC</p>
+      <nav class="admin-nav grouped intent-nav" aria-label="Navigazione Officina NFC">
+        <section class="nav-group nav-intent open" data-nav-group data-nav-intent="today">
+          <button class="nav-group-toggle" type="button" data-nav-toggle aria-expanded="true">Oggi</button>
+          <div class="nav-group-items">
+            <button class="active" data-admin-tab="dashboard">Cosa fare oggi</button>
+          </div>
+        </section>
+        <section class="nav-group nav-intent open" data-nav-group data-nav-intent="production">
+          <button class="nav-group-toggle" type="button" data-nav-toggle aria-expanded="true">Produzione</button>
+          <p class="nav-group-desc">Modelli, codici NFC ed etichette barcode</p>
+          <div class="nav-group-items">
+            <button class="nav-highlight" data-admin-tab="momentNewProduct">+ Nuovo pezzo</button>
+            <button data-admin-tab="momentCatalog">Modelli prodotto</button>
+            <button data-admin-tab="momentInventory">Magazzino NFC</button>
+          </div>
+        </section>
+        <section class="nav-group nav-intent" data-nav-group data-nav-intent="clients">
+          <button class="nav-group-toggle" type="button" data-nav-toggle aria-expanded="false">Clienti</button>
+          <p class="nav-group-desc">Attivazioni, pagine /m/ e assistenza</p>
+          <div class="nav-group-items">
+            <button data-admin-tab="momentClients">Clienti Moments</button>
+            <button data-admin-tab="support">Supporto</button>
+          </div>
+        </section>
+      </nav>
+    </aside>
+
+    <section class="admin-main">
+      <header class="admin-topbar" id="adminTopbar" hidden>
+        <div>
+          <p class="eyebrow">KhamaKey Moments</p>
+          <h1 id="adminTitle">Oggi <span class="moments-console-tag">Officina NFC</span></h1>
+          <p class="admin-subtitle" id="adminSubtitle">Panoramica e priorità del giorno.</p>
+        </div>
+        <div class="admin-user">
+          <button type="button" class="simple-mode-toggle" id="simpleModeToggle" aria-pressed="true" title="Nasconde opzioni tecniche">Modalità semplice</button>
+          <button type="button" class="small-action guide-toggle-top" id="panelGuideToggleTop" title="Mostra o nascondi la guida">Guida sezione</button>
+          <span id="adminEmail">Verifica sessione...</span>
+          <a href="./moments.html" class="ghost-link moments-link" target="_blank" rel="noopener">Area clienti</a>
+          <button id="adminLogout" type="button">Esci</button>
+        </div>
+      </header>
+
+      <section id="adminGate" class="gate-card">
+        <img src="khamakey-wordmark-dark.png" alt="KhamaKey">
+        <h2>Accesso Officina NFC</h2>
+        <p id="adminGateText">Sto verificando sessione e autorizzazioni.</p>
+        <p class="field-hint gate-hint">Accesso riservato al team KhamaKey. Usa l’email e la password amministratore.</p>
+        <form class="admin-login-form" id="adminLoginForm" hidden>
+          <label>Email admin
+            <input id="adminLoginEmail" type="email" autocomplete="email" required>
+          </label>
+          <label>Password
+            <input id="adminLoginPassword" type="password" autocomplete="current-password" minlength="6" required>
+          </label>
+          <button class="primary-action" type="submit">Accedi alla consolle</button>
+          <button class="ghost-button" id="adminResetPassword" type="button">Recupera password</button>
+        </form>
+        <div class="gate-actions">
+          <a href="./moments.html" id="adminLoginLink">Apri area clienti Moments</a>
+        </div>
+      </section>
+
+      <div id="adminContent" hidden>
+        <aside class="panel-guide" id="panelGuide" aria-label="Guida sezione">
+          <div class="panel-guide-head">
+            <div>
+              <strong>Come usare questa sezione</strong>
+              <p id="panelGuideSubtitle">—</p>
+            </div>
+            <button type="button" class="small-action" id="panelGuideToggle" aria-expanded="true">Nascondi guida</button>
+          </div>
+          <div class="panel-guide-body" id="panelGuideBody">
+            <ol class="guide-steps" id="panelGuideSteps"></ol>
+            <div class="panel-legend" id="panelGuideLegend"></div>
+            <p class="guide-tip" id="panelGuideTip"></p>
+          </div>
+        </aside>
+
+        <section class="admin-panel active" data-panel="dashboard">
+          <div class="admin-card panel-welcome moments-welcome">
+            <h2>Officina NFC KhamaKey Moments</h2>
+            <p class="field-hint">Qui produci oggetti fisici con codici, link NFC ed etichette barcode. Poi il cliente attiva la pagina Moments dal codice sulla confezione.</p>
+            <div class="moments-flow-card" aria-label="Flusso officina NFC">
+              <p class="moments-flow-title">Produzione → confezione → attivazione cliente</p>
+              <ol class="moments-flow-steps">
+                <li><strong>1 · Modello</strong><span>Linea + template pagina</span></li>
+                <li><strong>2 · Pezzo/i</strong><span>Genera codice + etichetta barcode</span></li>
+                <li><strong>3 · Confezione</strong><span>Chip /k/ · etichetta · a scaffale</span></li>
+                <li><strong>4 · Consegna</strong><span>Cliente riceve l’oggetto NFC</span></li>
+                <li><strong>5 · Cliente</strong><span>moments.html → pagina /m/ live</span></li>
+              </ol>
+            </div>
+            <div class="welcome-actions">
+              <button type="button" class="welcome-chip welcome-chip-primary" data-admin-tab-jump="momentNewProduct">+ Nuovo pezzo</button>
+              <button type="button" class="welcome-chip" data-admin-tab-jump="momentInventory">Magazzino NFC</button>
+              <button type="button" class="welcome-chip" data-admin-tab-jump="momentCatalog">Modelli prodotto</button>
+              <button type="button" class="welcome-chip" data-admin-tab-jump="momentClients">Clienti Moments</button>
+              <button type="button" class="welcome-chip" data-admin-tab-jump="support">Supporto</button>
+            </div>
+          </div>
+          <div class="metric-grid moments-metrics">
+            <article><strong id="mMomentStock">0</strong><span>Codici disponibili</span></article>
+            <article><strong id="mMoments">0</strong><span>Pagine attivate</span></article>
+            <article><strong id="mOpenTickets">0</strong><span>Ticket aperti</span></article>
+            <article><strong id="mCatalogModels">0</strong><span>Modelli prodotto</span></article>
+          </div>
+          <div class="admin-card">
+            <h2>Priorità operative</h2>
+            <p class="field-hint">Stock basso, ticket clienti e attivazioni — clicca per aprire la sezione.</p>
+            <div class="task-list" id="dashboardAlerts">
+              <p class="inventory-stats-empty">Caricamento alert...</p>
+            </div>
+          </div>
+        </section>
+        <section class="admin-panel" data-panel="momentClients">
+          <div class="admin-card">
+            <h2>Clienti Moments</h2>
+            <p class="system-note">Ogni oggetto NFC attivato ha la sua pagina pubblica <code>/m/</code> e il suo editor. Qui controlli clienti, schede e pagine senza aspettare il cliente.</p>
+            <form class="admin-form" id="momentProvisionForm">
+              <label>Email cliente Moments
+                <input name="email" type="email" placeholder="cliente@email.it" required>
+              </label>
+              <label>Nome visualizzato
+                <input name="display_name" type="text" placeholder="Nome cliente (opzionale)">
+              </label>
+              <label>Codice NFC da attivare (opzionale)
+                <input name="code" type="text" placeholder="MOMENT... (dal magazzino NFC)">
+              </label>
+              <label>Titolo pagina (se attivi codice)
+                <input name="title" type="text" placeholder="Es. Matrimonio Anna e Marco">
+              </label>
+              <label>Template pagina
+                <select name="moment_type" data-moment-type-select data-default-value="free"></select>
+              </label>
+              <button class="primary-action" type="submit">Crea / collega cliente</button>
+              <p class="form-status" id="momentProvisionStatus"></p>
+            </form>
+            <h3 class="section-title">Account registrati</h3>
+            <div class="inventory-toolbar">
+              <label class="inventory-search">Cerca cliente Moments
+                <input type="search" id="momentCustomerSearchInput" placeholder="Es. email@..., nome...">
+              </label>
+              <button type="button" class="small-action" id="momentCustomerSearchClear">Pulisci</button>
+            </div>
+            <p class="inventory-table-meta"><span id="momentCustomerTableCount">0 account</span></p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Cliente</th><th>Email</th><th>Oggetti</th><th>Pubblicate</th><th>Ultima attivazione</th><th>Stato</th></tr></thead>
+                <tbody id="momentCustomersTable"><tr><td colspan="6">Caricamento account Moments...</td></tr></tbody>
+              </table>
+            </div>
+            <h3 class="section-title">Oggetti attivati</h3>
+            <p>Ogni riga è un prodotto NFC con pagina pubblica. Da qui apri Editor o la pagina live.</p>
+            <div class="inventory-toolbar">
+              <label class="inventory-search">Cerca oggetto, cliente o codice NFC
+                <input type="search" id="momentObjectSearchInput" placeholder="Es. Matrimonio, MOMENT..., email@...">
+              </label>
+              <button type="button" class="small-action" id="momentObjectSearchClear">Pulisci</button>
+            </div>
+            <div class="inventory-filters inventory-filters-2">
+              <label>Tipo pagina
+                <select id="momentFilterType"><option value="">Tutti</option></select>
+              </label>
+              <label>Pubblicata
+                <select id="momentFilterPublished">
+                  <option value="">Tutte</option>
+                  <option value="yes">Sì</option>
+                  <option value="no">No</option>
+                </select>
+              </label>
+            </div>
+            <p class="inventory-table-meta"><span id="momentObjectTableCount">0 oggetti</span></p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Oggetto</th><th>Cliente</th><th>Tipo</th><th>NFC</th><th>Pubblicata</th><th>Stato</th><th>Azioni</th></tr></thead>
+                <tbody id="momentsTable"><tr><td colspan="7">Caricamento oggetti...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="momentNewProduct">
+          <div class="admin-card moment-wizard-card">
+            <h2>Nuovo pezzo NFC</h2>
+            <p class="system-note">Scegli linea e template — il <strong>codice confezione</strong> (barcode) si genera per ogni pezzo. Puoi creare anche <strong>1 solo oggetto</strong> per regali, test o vendita locale.</p>
+            <div class="moment-wizard-layout">
+              <form class="admin-form moment-wizard-form" id="momentNewProductForm" data-moment-auto-form>
+                <fieldset class="moment-wizard-step">
+                  <legend>1 · Oggetto e template</legend>
+                  <label>Linea oggetto
+                    <select name="product_line">
+                      <option value="portachiavi">Portachiavi NFC</option>
+                      <option value="orsetto">Orsetto NFC</option>
+                      <option value="card">Card NFC</option>
+                      <option value="magnete">Magnete NFC</option>
+                      <option value="tag">Tag / tessera NFC</option>
+                      <option value="confezione">Confezione regalo</option>
+                      <option value="altro">Altra linea (personalizzata)</option>
+                    </select>
+                  </label>
+                  <p class="field-hint wide-field" data-product-line-hint>Oggetto più venduto — coppia, regalo, eventi.</p>
+                  <label class="wide-field" data-product-line-custom-wrap hidden>Nome nuova linea
+                    <input name="product_line_custom" type="text" placeholder="Es. Ciondolo, Portafoto, Cornice…">
+                  </label>
+                  <label class="wide-field">Template pagina Moments
+                    <select name="product_type" data-moment-type-select data-default-value="wedding"></select>
+                  </label>
+                </fieldset>
+                <fieldset class="moment-wizard-step">
+                  <legend>2 · SKU e nome (automatici)</legend>
+                  <label>SKU
+                    <div class="input-with-action">
+                      <input name="sku" type="text" placeholder="MOM-KEY-WED" aria-describedby="skuAutoHint">
+                      <button type="button" class="small-action" data-moment-auto-sku>Rigenera</button>
+                    </div>
+                  </label>
+                  <p class="field-hint wide-field" id="skuAutoHint">Formato <code>MOM-LINEA-TEMPLATE</code> (es. MOM-KEY-WED). Se esiste già, aggiunge -02, -03…</p>
+                  <label class="wide-field">Nome prodotto
+                    <div class="input-with-action">
+                      <input name="name" type="text" required placeholder="KhamaKey Matrimonio — Portachiavi">
+                      <button type="button" class="small-action" data-moment-auto-name>Suggerisci</button>
+                    </div>
+                  </label>
+                </fieldset>
+                <fieldset class="moment-wizard-step">
+                  <legend>3 · Prezzi e bundle (opzionale)</legend>
+                  <label>Prezzo vendita €
+                    <input name="sale_price" type="number" min="0" step="0.01" value="0">
+                  </label>
+                  <label>Costo unitario €
+                    <input name="unit_cost" type="number" min="0" step="0.01" value="0">
+                  </label>
+                  <label>Fisici spediti
+                    <input name="physical_units" type="number" min="1" step="1" value="1" title="Es. bundle 2 portachiavi = 2">
+                  </label>
+                  <label>Codici NFC
+                    <input name="activation_codes" type="number" min="1" step="1" value="1" title="Es. bundle coppia con 1 pagina = 1">
+                  </label>
+                  <label>Canale (per etichetta singola)
+                    <select name="sold_channel">
+                      <option value="gift">Regalo / prova interna</option>
+                      <option value="direct">Vendita locale / diretta</option>
+                      <option value="agent">Agente</option>
+                      <option value="reseller">Rivenditore</option>
+                      <option value="other">Altro</option>
+                    </select>
+                  </label>
+                  <label class="wide-field">Nota lotto (opzionale, per etichetta)
+                    <input name="batch_label" type="text" placeholder="Es. Regalo test luglio, Fiera Roma…">
+                  </label>
+                </fieldset>
+                <div class="moment-wizard-actions">
+                  <button class="primary-action" type="submit">Crea prodotto (solo catalogo)</button>
+                  <button class="primary-action primary-outline" type="button" data-submit-and-label>Crea + 1 pezzo con etichetta barcode</button>
+                  <button class="ghost-button" type="button" data-submit-and-stock">Crea e vai al magazzino</button>
+                  <button class="ghost-button" type="button" data-reset-form="momentNewProductForm">Pulisci form</button>
+                </div>
+                <p class="form-status" id="momentNewProductStatus"></p>
+              </form>
+              <aside class="product-lines-reference" aria-label="Linee prodotto disponibili">
+                <h3>Linee prodotto</h3>
+                <p class="field-hint">Non serve inventare codici: le linee sono predefinite. Per oggetti nuovi scegli «Altra linea».</p>
+                <ul class="product-lines-list">
+                  <li><strong>Portachiavi</strong><span>Regalo coppia, eventi</span></li>
+                  <li><strong>Orsetto</strong><span>Nascite, bambini</span></li>
+                  <li><strong>Card</strong><span>Matrimoni, inviti</span></li>
+                  <li><strong>Magnete</strong><span>Famiglia, casa</span></li>
+                  <li><strong>Tag</strong><span>Eventi, badge</span></li>
+                  <li><strong>Confezione</strong><span>Kit regalo</span></li>
+                  <li><strong>Altra linea</strong><span>Nuovo oggetto — scrivi il nome</span></li>
+                </ul>
+                <p class="guide-tip-inline">Ogni etichetta PDF include <strong>barcode codice confezione</strong>, QR chip NFC (/k/) e URL editor. Per test usa «Crea + 1 pezzo con etichetta barcode».</p>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="momentCatalog">
+          <div class="admin-card">
+            <h2>Modelli prodotto (magazzino)</h2>
+            <p class="system-note"><strong>Anagrafica magazzino</strong> — definisce linea oggetto, template pagina e codice modello (es. MOM-KEY-WED) per produrre pezzi NFC.</p>
+            <form class="admin-form" id="momentCatalogForm" data-moment-auto-form>
+              <label>Codice modello
+                <div class="input-with-action">
+                  <input name="sku" type="text" placeholder="Si genera da linea + template">
+                  <button type="button" class="small-action" data-moment-auto-sku>Rigenera</button>
+                </div>
+              </label>
+              <label>Nome modello
+                <div class="input-with-action">
+                  <input name="name" type="text" placeholder="KhamaKey Matrimonio — Portachiavi" required>
+                  <button type="button" class="small-action" data-moment-auto-name>Suggerisci</button>
+                </div>
+              </label>
+              <label>Linea oggetto
+                <select name="product_line">
+                  <option value="portachiavi">Portachiavi NFC</option>
+                  <option value="orsetto">Orsetto NFC</option>
+                  <option value="card">Card NFC</option>
+                  <option value="magnete">Magnete NFC</option>
+                  <option value="tag">Tag / tessera NFC</option>
+                  <option value="confezione">Confezione regalo</option>
+                  <option value="altro">Altra linea (personalizzata)</option>
+                </select>
+              </label>
+              <label class="wide-field" data-product-line-custom-wrap hidden>Nome nuova linea
+                <input name="product_line_custom" type="text" placeholder="Es. Ciondolo, Portafoto…">
+              </label>
+              <p class="field-hint wide-field" data-product-line-hint></p>
+              <label>Template pagina
+                <select name="product_type" data-moment-type-select data-default-value="wedding"></select>
+              </label>
+              <label>Costo unitario € (opzionale)
+                <input name="unit_cost" type="number" min="0" step="0.01" value="0">
+              </label>
+              <label>Fisici per confezione
+                <input name="physical_units" type="number" min="1" step="1" value="1" title="Es. bundle 2 portachiavi = 2">
+              </label>
+              <label>Codici NFC per confezione
+                <input name="activation_codes" type="number" min="1" step="1" value="1" title="Es. bundle coppia = 1 pagina condivisa">
+              </label>
+              <label>Stato
+                <select name="status">
+                  <option value="active">Attivo</option>
+                  <option value="hidden">Nascosto</option>
+                  <option value="archived">Archiviato</option>
+                </select>
+              </label>
+              <input type="hidden" name="sale_price" value="0">
+              <input type="hidden" name="publish_shopify" value="false">
+              <input type="hidden" name="shopify_live" value="false">
+              <input type="hidden" name="image_url" value="">
+              <textarea name="description" hidden></textarea>
+              <button class="primary-action" type="submit">Salva modello</button>
+              <button class="ghost-button" type="button" data-reset-form="momentCatalogForm">Nuovo modello</button>
+              <p class="form-status" id="momentCatalogFormStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Modello</th><th>Codice</th><th>Linea</th><th>Template</th><th>Stato</th><th>Azioni</th></tr></thead>
+                <tbody id="momentCatalogTable"><tr><td colspan="6">Caricamento modelli...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel" data-panel="momentInventory">
+          <div class="admin-card">
+            <h2>Magazzino NFC Moments</h2>
+            <p class="system-note"><strong>Pronta consegna</strong> — crea anche <strong>1 solo pezzo</strong> (regalo, test, vendita locale). Ogni unità ha barcode univoco sulla confezione.</p>
+            <ol class="admin-workflow-steps">
+              <li><strong>1. Nuovo prodotto</strong><span>Linea + template → modello catalogo</span></li>
+              <li><strong>2. Genera pezzo/i</strong><span>Quantità 1 o più → PDF etichette con barcode</span></li>
+              <li><strong>3. Confeziona</strong><span>Programma chip /k/ · incolla etichetta · spedisci o consegna</span></li>
+            </ol>
+
+            <details class="admin-details">
+              <summary>Crea modello oggetto / SKU</summary>
+              <p class="field-hint wide-field">Usa <strong>Nuovo prodotto</strong> nel menu — SKU, nome e prefisso codici si compilano da soli in base a linea e template.</p>
+              <button type="button" class="primary-action primary-outline" data-admin-tab-jump="momentNewProduct">Vai a Nuovo prodotto</button>
+            </details>
+
+            <details class="admin-details" open>
+              <summary>Genera nuovo stock in magazzino</summary>
+              <form class="admin-form compact-form moment-batch-form" id="momentBatchForm" data-moment-auto-form>
+                <label class="wide-field">Modello oggetto / SKU
+                  <select name="catalog_id" id="momentBatchCatalog">
+                    <option value="">Manuale — scegli linea e template sotto</option>
+                  </select>
+                </label>
+                <label>Linea oggetto fisico
+                  <select name="product_line" required>
+                    <option value="orsetto">Orsetto NFC</option>
+                    <option value="portachiavi">Portachiavi NFC</option>
+                    <option value="card">Card NFC</option>
+                    <option value="magnete">Magnete NFC</option>
+                    <option value="tag">Tag / tessera NFC</option>
+                    <option value="confezione">Confezione regalo</option>
+                    <option value="altro">Altro oggetto</option>
+                  </select>
+                </label>
+                <label>Quantità
+                  <input name="quantity" type="number" min="1" max="500" value="1">
+                </label>
+                <div class="qty-preset-bar wide-field" aria-label="Quantità rapida">
+                  <span class="filter-chip-label">Rapido:</span>
+                  <button type="button" class="filter-chip" data-batch-qty="1">1 pezzo</button>
+                  <button type="button" class="filter-chip" data-batch-qty="5">5</button>
+                  <button type="button" class="filter-chip" data-batch-qty="10">10</button>
+                  <button type="button" class="filter-chip" data-batch-qty="50">50</button>
+                </div>
+                <label>Canale vendita
+                  <select name="sold_channel">
+                    <option value="">— Stock generico —</option>
+                    <option value="direct">Vendita locale / diretta</option>
+                    <option value="gift">Regalo / prova interna</option>
+                    <option value="agent">Agente</option>
+                    <option value="reseller">Rivenditore</option>
+                    <option value="other">Altro</option>
+                  </select>
+                </label>
+                <label>Template pagina predefinito
+                  <select name="product_type" data-moment-type-select data-default-value="free"></select>
+                </label>
+                <label class="wide-field">Nome lotto / produzione
+                  <input name="batch_label" type="text" placeholder="Es. Orsetti blu - luglio 2026" required>
+                </label>
+                <input name="prefix" type="hidden" value="AUTO">
+                <p class="field-hint wide-field">Alla generazione scarichi <strong>CSV + PDF</strong>: etichette rettangolari <strong>40×15 mm</strong> (4×1,5 cm) in griglia numerata da 1, più tabella di controllo con la stessa numerazione. Quantità minima: <strong>1 pezzo</strong>.</p>
+                <button class="primary-action" type="submit">Genera pezzo/i + etichette barcode</button>
+                <p class="form-status" id="momentBatchStatus"></p>
+              </form>
+            </details>
+
+            <div class="inventory-stats" id="momentInventoryStats">
+              <p class="inventory-stats-empty">Caricamento statistiche lotti...</p>
+            </div>
+
+            <div class="inventory-toolbar">
+              <label class="inventory-search">Cerca codice, link, SKU, lotto o cliente
+                <input type="search" id="momentSearchInput" placeholder="Es. SKU, MOMENT, /k/codice, /m/slug, email@...">
+              </label>
+              <button type="button" class="small-action" id="momentSearchClear">Pulisci</button>
+            </div>
+            <div class="filter-chip-bar" id="momentInventoryQuickFilters" aria-label="Filtri rapidi magazzino">
+              <span class="filter-chip-label">Vista rapida</span>
+              <button type="button" class="filter-chip active" data-moment-quick data-moment-quick-status="">Tutti</button>
+              <button type="button" class="filter-chip" data-moment-quick data-moment-quick-status="available">Solo disponibili</button>
+              <button type="button" class="filter-chip" data-moment-quick data-moment-quick-status="claimed">Già attivati</button>
+            </div>
+            <p class="filter-hint">Per filtri più precisi (lotto, agente, canale) usa i menu sotto. Seleziona più righe per azioni in blocco.</p>
+            <div class="inventory-filters inventory-filters-4" id="momentInventoryFilters">
+              <label>Linea
+                <select id="momentFilterLine"><option value="">Tutte</option></select>
+              </label>
+              <label>Lotto
+                <select id="momentFilterBatch"><option value="">Tutti</option></select>
+              </label>
+              <label>Stato
+                <select id="momentFilterStatus">
+                  <option value="">Tutti</option>
+                  <option value="available">Disponibili</option>
+                  <option value="claimed">Attivati</option>
+                  <option value="paused">In pausa</option>
+                  <option value="archived">Archiviati</option>
+                </select>
+              </label>
+              <label>SKU / modello
+                <select id="momentFilterSku"><option value="">Tutti</option></select>
+              </label>
+              <label>Creato dal
+                <input type="date" id="momentFilterDateFrom" autocomplete="off">
+              </label>
+              <label>Creato al
+                <input type="date" id="momentFilterDateTo" autocomplete="off">
+              </label>
+              <label>Canale
+                <select id="momentFilterChannel">
+                  <option value="">Tutti</option>
+                  <option value="__none__">Non assegnato</option>
+                  <option value="direct">Diretto / sito</option>
+                  <option value="agent">Agente</option>
+                  <option value="reseller">Rivenditore</option>
+                  <option value="gift">Regalo</option>
+                  <option value="other">Altro</option>
+                </select>
+              </label>
+              <label>Agente
+                <select id="momentFilterAgent"><option value="">Tutti</option></select>
+              </label>
+            </div>
+
+            <div class="inventory-bulk-bar" id="momentBulkBar" hidden>
+              <span id="momentBulkCount">0 selezionati</span>
+              <select id="momentBulkAgent"><option value="">Agente…</option></select>
+              <select id="momentBulkChannel">
+                <option value="">Canale…</option>
+                <option value="direct">Diretto</option>
+                <option value="agent">Agente</option>
+                <option value="reseller">Rivenditore</option>
+                <option value="gift">Regalo</option>
+                <option value="other">Altro</option>
+              </select>
+              <select id="momentBulkStatus">
+                <option value="">Stato…</option>
+                <option value="available">Disponibile</option>
+                <option value="paused">In pausa</option>
+                <option value="archived">Archiviato</option>
+              </select>
+              <button type="button" class="small-action" id="momentBulkApply">Applica ai selezionati</button>
+              <button type="button" class="small-action" id="momentBulkClearAgent">Rimuovi agente</button>
+              <button type="button" class="small-action" id="momentBulkClearOrder">Scollega ordine</button>
+            </div>
+
+            <div class="inventory-table-meta">
+              <h3 class="section-title">Codici in magazzino</h3>
+              <div class="inventory-export-actions">
+                <span id="momentTableCount">—</span>
+                <button type="button" class="small-action" id="momentExportFiltered">CSV (filtri)</button>
+                <button type="button" class="small-action" id="momentExportSelected">CSV (selezione)</button>
+                <button type="button" class="small-action primary-outline" id="momentLabelsFiltered">PDF etichette (filtri)</button>
+                <button type="button" class="small-action primary-outline" id="momentLabelsSelected">PDF etichette (selezione)</button>
+              </div>
+            </div>
+            <p class="field-hint export-hint"><strong>Stampa / NFC:</strong> CSV per Excel · <strong>PDF etichette</strong> 40×15 mm numerate da 1 (codice attivazione + barcode confezione) + tabella di controllo. Dopo ogni lotto scarichi CSV + PDF automaticamente.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr>
+                  <th><input type="checkbox" id="momentSelectAll" aria-label="Seleziona tutti"></th>
+                  <th>Codice</th><th>Link NFC</th><th>Attivazione</th><th>Linea</th><th>Lotto</th><th>Creato</th><th>Tracciabilita'</th><th>Stato</th><th>Cliente</th><th>Azioni</th>
+                </tr></thead>
+                <tbody id="momentProductsTable"><tr><td colspan="11">Caricamento prodotti...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+        <section class="admin-panel" data-panel="support">
+          <div class="admin-card">
+            <h2>Supporto clienti Moments</h2>
+            <p class="system-note">Codici NFC, attivazione editor, pagina /m/ non pubblicata — gestisci i ticket di assistenza Moments qui.</p>
+            <div class="inventory-toolbar">
+              <label class="inventory-search">Cerca ticket
+                <input type="search" id="supportSearchInput" placeholder="Oggetto, cliente, descrizione...">
+              </label>
+              <label>Stato
+                <select id="supportStatusFilter">
+                  <option value="">Tutti</option>
+                  <option value="open">Aperti</option>
+                  <option value="in_progress">In lavorazione</option>
+                  <option value="waiting_customer">In attesa cliente</option>
+                  <option value="resolved">Risolti</option>
+                  <option value="closed">Chiusi</option>
+                </select>
+              </label>
+              <label>Priorità
+                <select id="supportPriorityFilter">
+                  <option value="">Tutte</option>
+                  <option value="low">Bassa</option>
+                  <option value="normal">Normale</option>
+                  <option value="high">Alta</option>
+                  <option value="urgent">Urgente</option>
+                </select>
+              </label>
+              <button class="small-action" type="button" id="supportFilterClear">Pulisci</button>
+            </div>
+            <div class="filter-chip-bar" id="supportQuickFilters">
+              <span class="filter-chip-label">Vista rapida</span>
+              <button type="button" class="filter-chip active" data-support-quick-status="">Tutti</button>
+              <button type="button" class="filter-chip" data-support-quick-status="open">Aperti</button>
+              <button type="button" class="filter-chip" data-support-quick-status="in_progress">In lavorazione</button>
+              <button type="button" class="filter-chip" data-support-quick-status="waiting_customer">Attesa cliente</button>
+              <button type="button" class="filter-chip" data-support-quick-priority="urgent">Urgenti</button>
+              <button type="button" class="filter-chip" data-support-quick-priority="high">Alta priorità</button>
+              <button type="button" class="filter-chip" data-support-quick-status="closed">Chiusi</button>
+            </div>
+            <div class="inventory-stat-grid support-stat-grid" id="supportStats">
+              <div><span>Aperti</span><strong id="supportStatOpen">0</strong></div>
+              <div><span>Urgenti</span><strong id="supportStatUrgent">0</strong></div>
+              <div><span>Attesa cliente</span><strong id="supportStatWaiting">0</strong></div>
+              <div><span>Da chiudere</span><strong id="supportStatResolved">0</strong></div>
+            </div>
+            <div class="inventory-meta"><strong id="supportVisibleCount">0 ticket visibili</strong></div>
+            <form class="admin-form compact-form support-ticket-detail" id="supportTicketEditForm" hidden>
+              <input type="hidden" name="ticket_id">
+              <div class="support-ticket-meta">
+                <p><strong>Cliente</strong> <span data-support-customer>—</span></p>
+                <p><strong>Origine</strong> <span data-support-source>—</span></p>
+                <p><strong>Aperto il</strong> <span data-support-created>—</span></p>
+              </div>
+              <label>Oggetto
+                <input name="ticket_title" type="text" readonly>
+              </label>
+              <label class="wide-field">Messaggio del cliente
+                <textarea name="ticket_description" rows="7" readonly placeholder="Nessun dettaglio"></textarea>
+              </label>
+              <label>Stato
+                <select name="status">
+                  <option value="open">Aperto</option>
+                  <option value="in_progress">In lavorazione</option>
+                  <option value="waiting_customer">In attesa cliente</option>
+                  <option value="resolved">Risolto</option>
+                  <option value="closed">Chiuso</option>
+                </select>
+              </label>
+              <label>Priorità
+                <select name="priority">
+                  <option value="low">Bassa</option>
+                  <option value="normal">Normale</option>
+                  <option value="high">Alta</option>
+                  <option value="urgent">Urgente</option>
+                </select>
+              </label>
+              <label class="wide-field">Nota interna (solo staff)
+                <input name="internal_note" type="text" placeholder="Es. chiamato cliente, verificato codice NFC...">
+              </label>
+              <button class="primary-action" type="submit">Salva aggiornamento</button>
+              <button class="small-action" type="button" id="supportTicketEditCancel">Chiudi</button>
+              <p class="form-status" id="supportTicketEditStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Ticket</th><th>Cliente</th><th>Priorità</th><th>Stato</th><th>Origine</th><th>Azioni</th></tr></thead>
+                <tbody id="supportTicketsTable"><tr><td colspan="6">Caricamento ticket...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="admin-card">
+            <h2>Categorie ticket</h2>
+            <form class="admin-form" id="ticketCategoryForm">
+              <label>Codice
+                <input name="category_key" type="text" placeholder="technical" required>
+              </label>
+              <label>Nome
+                <input name="name" type="text" placeholder="Problema tecnico" required>
+              </label>
+              <label>Priorità default
+                <select name="default_priority">
+                  <option value="low">Bassa</option>
+                  <option value="normal">Normale</option>
+                  <option value="high">Alta</option>
+                  <option value="urgent">Urgente</option>
+                </select>
+              </label>
+              <button class="primary-action" type="submit">Salva categoria</button>
+              <p class="form-status" id="ticketCategoryStatus"></p>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Categoria</th><th>Codice</th><th>Priorità</th><th>Stato</th><th>Azioni</th></tr></thead>
+                <tbody id="ticketCategoriesTable"><tr><td colspan="5">Caricamento categorie...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </section>
+  </main>
+
+<aside class="client-drawer moment-drawer" id="momentDrawer" aria-hidden="true">
+    <div class="client-drawer-backdrop" data-moment-drawer-close></div>
+    <section class="client-drawer-panel" role="dialog" aria-label="Scheda oggetto Moments">
+      <header class="client-drawer-head">
+        <div>
+          <p class="eyebrow">KhamaKey Moments</p>
+          <h2 id="momentDrawerTitle">Oggetto Moments</h2>
+          <span id="momentDrawerMeta">Cliente e dettagli NFC</span>
+        </div>
+        <button type="button" data-moment-drawer-close>Chiudi</button>
+      </header>
+      <div class="drawer-actions">
+        <button type="button" data-moment-drawer-view="summary" class="active">Scheda</button>
+        <button type="button" data-moment-drawer-view="public">Pagina pubblica</button>
+        <button type="button" data-moment-drawer-view="editor">Editor Moments</button>
+      </div>
+      <div class="drawer-view active" id="moment-drawer-summary">
+        <div class="client-kv">
+          <span>Cliente</span><strong id="momentDrawerEmail">-</strong>
+          <span>Slug pagina</span><strong id="momentDrawerSlug">-</strong>
+          <span>Codice NFC</span><strong id="momentDrawerNfc">-</strong>
+          <span>Tipo</span><strong id="momentDrawerType">-</strong>
+          <span>Pubblicata</span><strong id="momentDrawerPublished">-</strong>
+          <span>PIN</span><strong id="momentDrawerPin">-</strong>
+          <span>Link pubblico</span><strong id="momentDrawerPublicUrl">-</strong>
+        </div>
+        <div class="row-actions" style="margin-top:12px">
+          <button type="button" class="small-action" id="momentCopyPublicUrl">Copia link</button>
+          <a class="small-action" id="momentOpenPublicUrl" href="#" target="_blank" rel="noopener">Apri pagina</a>
+          <a class="small-action" id="momentOpenEditorUrl" href="#" target="_blank" rel="noopener">Apri editor</a>
+        </div>
+      </div>
+      <div class="drawer-view" id="moment-drawer-public">
+        <iframe id="momentDrawerPublicFrame" title="Pagina pubblica Moments" loading="lazy"></iframe>
+      </div>
+      <div class="drawer-view" id="moment-drawer-editor">
+        <iframe id="momentDrawerEditorFrame" title="Editor Moments admin" loading="lazy"></iframe>
+      </div>
+    </section>
+  </aside>
+
+  <aside class="client-drawer" id="codeDrawer" aria-hidden="true">
+    <div class="client-drawer-backdrop" data-code-drawer-close></div>
+    <section class="client-drawer-panel" role="dialog" aria-label="Modifica codice NFC">
+      <header class="client-drawer-head">
+        <div>
+          <p class="eyebrow">Codice NFC</p>
+          <h2 id="codeDrawerTitle">—</h2>
+          <span id="codeDrawerMeta">Modifica stato, agente e canale</span>
+        </div>
+        <button type="button" data-code-drawer-close>Chiudi</button>
+      </header>
+      <div class="drawer-view active" id="code-drawer-form">
+        <form class="admin-form compact-form" id="codeEditForm">
+          <input type="hidden" name="code" id="codeEditCode">
+          <label>Stato
+            <select name="status" id="codeEditStatus">
+              <option value="available">Disponibile</option>
+              <option value="paused">In pausa</option>
+              <option value="archived">Archiviato</option>
+              <option value="claimed" disabled>Attivato (non modificabile)</option>
+            </select>
+          </label>
+          <label>Canale vendita
+            <select name="sold_channel" id="codeEditChannel">
+              <option value="">Non assegnato</option>
+              <option value="direct">Diretto / sito</option>
+              <option value="agent">Agente</option>
+              <option value="reseller">Rivenditore</option>
+              <option value="gift">Regalo</option>
+              <option value="other">Altro</option>
+            </select>
+          </label>
+          <label>Agente / rivenditore
+            <select name="assigned_agent_id" id="codeEditAgent"><option value="">Nessuno</option></select>
+          </label>
+          <label>Nome lotto
+            <input name="batch_label" type="text" id="codeEditBatch" placeholder="Lotto produzione">
+          </label>
+          <label>Ordine collegato
+            <input name="platform_order_id" type="text" id="codeEditOrder" readonly placeholder="Nessun ordine">
+          </label>
+          <label class="wide-field">Link pubblico
+            <input type="text" id="codeEditPublicUrl" readonly>
+          </label>
+          <label class="wide-field">Link NFC fisico
+            <input type="text" id="codeEditNfcUrl" readonly>
+          </label>
+          <label class="wide-field">Link attivazione / pagina
+            <input type="text" id="codeEditActivationUrl" readonly>
+          </label>
+          <button class="primary-action" type="submit">Salva modifiche</button>
+          <button class="small-action" type="button" id="codeEditUnlinkOrder">Scollega ordine</button>
+          <p class="form-status" id="codeEditFormStatus"></p>
+        </form>
+      </div>
+    </section>
+  </aside>
+
+  <aside class="client-drawer" id="orderDrawer" aria-hidden="true">
+    <div class="client-drawer-backdrop" data-order-drawer-close></div>
+    <section class="client-drawer-panel" role="dialog" aria-label="Gestione ordine">
+      <header class="client-drawer-head">
+        <div>
+          <p class="eyebrow">Ordine KhamaKey</p>
+          <h2 id="orderDrawerTitle">—</h2>
+          <span id="orderDrawerMeta">—</span>
+        </div>
+        <button type="button" data-order-drawer-close>Chiudi</button>
+      </header>
+      <div class="drawer-actions">
+        <button type="button" data-order-drawer-view="summary" class="active">Riepilogo</button>
+        <button type="button" data-order-drawer-view="codes">Codici NFC</button>
+      </div>
+      <div class="drawer-view active" id="order-drawer-summary">
+        <div class="client-kv" id="orderDrawerKv"></div>
+        <form class="admin-form compact-form" id="orderEditForm">
+          <input type="hidden" name="id" id="orderEditId">
+          <label>Stato ordine
+            <select name="status" id="orderEditStatus"></select>
+          </label>
+          <label>Pagamento
+            <select name="payment_status" id="orderEditPayment"></select>
+          </label>
+          <label class="wide-field">Note
+            <textarea name="notes" id="orderEditNotes" rows="3"></textarea>
+          </label>
+          <button class="primary-action" type="submit">Salva ordine</button>
+          <p class="form-status" id="orderEditStatus"></p>
+        </form>
+      </div>
+      <div class="drawer-view" id="order-drawer-codes">
+        <div class="admin-card compact">
+          <h3>Assegna codici da magazzino</h3>
+          <p class="field-hint">Preleva codici <strong>disponibili</strong> già in stock e collegali a questo ordine.</p>
+          <form class="admin-form compact-form" id="orderAssignForm">
+            <input type="hidden" name="order_id" id="orderAssignOrderId">
+            <label>Quantità
+              <input name="quantity" type="number" min="1" max="500" value="1" required>
+            </label>
+            <label>Linea oggetto
+              <select name="product_line">
+                <option value="">Qualsiasi disponibile</option>
+                <option value="orsetto">Orsetto NFC</option>
+                <option value="portachiavi">Portachiavi NFC</option>
+                <option value="card">Card NFC</option>
+                <option value="magnete">Magnete NFC</option>
+                <option value="tag">Tag / tessera NFC</option>
+                <option value="confezione">Confezione regalo</option>
+                <option value="altro">Altro oggetto</option>
+              </select>
+            </label>
+            <label>Agente (opzionale)
+              <select name="agent_id" id="orderAssignAgent"><option value="">Usa agente ordine</option></select>
+            </label>
+            <label>Canale
+              <select name="sold_channel">
+                <option value="agent">Agente</option>
+                <option value="reseller">Rivenditore</option>
+                <option value="direct">Diretto</option>
+                <option value="gift">Regalo</option>
+              </select>
+            </label>
+            <button class="primary-action" type="submit">Assegna codici</button>
+            <p class="form-status" id="orderAssignStatus"></p>
+          </form>
+          <h3 class="section-title">Codici collegati</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Codice</th><th>Linea</th><th>Stato</th><th>Link</th></tr></thead>
+              <tbody id="orderCodesTable"><tr><td colspan="4">Nessun codice collegato.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </aside>
+
+  <script type="module" src="admin.js?v=164"></script>
+</body>

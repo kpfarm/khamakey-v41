@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=163";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=166";
 import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=164";
 import {
   generateMomentSku,
@@ -1571,8 +1571,9 @@ function renderDashboardAlerts(stats){
 }
 
 function momentNfcUrl(row){
-  const code = String(row?.code || row?.out_code || "").trim();
-  return code ? `${PUBLIC_BASE_URL}/k/${encodeURIComponent(code)}` : "";
+  // Chip NFC = link pagina opaco /m/<slug>. Mai /k/<codice attivazione> (rubabile in negozio).
+  const slug = String(row?.public_slug || "").trim();
+  return slug ? `${PUBLIC_BASE_URL}/m/${encodeURIComponent(slug)}` : "";
 }
 
 function momentActivationUrl(row){
@@ -1624,11 +1625,11 @@ function momentExportRows(rows,filenameStem="khamakey-moments"){
     return;
   }
   const header = [
-    "Codice attivazione",
+    "Codice attivazione (inserto confezione)",
     "Codice confezione barcode",
     "Modello catalogo",
-    "Link NFC chip",
-    "Link attivazione",
+    "Link NFC chip (programmazione /m/)",
+    "Link pagina pubblica",
     "Slug pagina",
     "Linea prodotto",
     "Lotto",
@@ -1846,7 +1847,7 @@ function renderMomentProductsTable(rows){
     return `<tr>
       <td>${claimed ? "" : `<input type="checkbox" data-moment-select="${esc(row.code)}" ${checked} aria-label="Seleziona ${esc(row.code)}">`}</td>
       <td><strong>${esc(formatMomentCodeDisplay(row.code))}</strong><div class="muted-cell">${esc(catalog ? `${catalog.sku} · ${catalog.name}` : (row.product_label || momentTemplateLabel(row.product_type)))}${row.packaging_barcode ? `<br>Barcode confezione: ${esc(row.packaging_barcode)}` : ""}</div></td>
-      <td>${nfcUrl ? `<a href="${esc(nfcUrl)}" target="_blank" rel="noopener">/k/${esc(row.code)}</a>` : "-"}</td>
+      <td>${nfcUrl ? `<a href="${esc(nfcUrl)}" target="_blank" rel="noopener">/m/${esc(row.public_slug)}</a>` : "-"}</td>
       <td>${activationUrl ? `<a href="${esc(activationUrl)}" target="_blank" rel="noopener">/m/${esc(row.public_slug)}</a>` : "-"}</td>
       <td>${esc(productLineLabel(row.product_line || "non_specificato"))}</td>
       <td>${esc(row.batch_label || "-")}</td>

@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=165">
-  <link rel="stylesheet" href="moments-admin.css?v=165">
+  <link rel="stylesheet" href="admin.css?v=166">
+  <link rel="stylesheet" href="moments-admin.css?v=166">
 </head>
 <body>
   <main class="admin-shell locked" id="adminShell">
@@ -107,7 +107,7 @@
               <ol class="moments-flow-steps">
                 <li><strong>1 · Modello</strong><span>Linea + template pagina</span></li>
                 <li><strong>2 · Pezzo/i</strong><span>Genera codice + etichetta barcode</span></li>
-                <li><strong>3 · Confezione</strong><span>Chip /k/ · etichetta · a scaffale</span></li>
+                <li><strong>3 · Confezione</strong><span>Chip /m/slug · codice in inserto · a scaffale</span></li>
                 <li><strong>4 · Consegna</strong><span>Cliente riceve l’oggetto NFC</span></li>
                 <li><strong>5 · Cliente</strong><span>moments.html → pagina /m/ live</span></li>
               </ol>
@@ -291,7 +291,7 @@
                   <li><strong>Confezione</strong><span>Kit regalo</span></li>
                   <li><strong>Altra linea</strong><span>Nuovo oggetto — scrivi il nome</span></li>
                 </ul>
-                <p class="guide-tip-inline">Ogni etichetta PDF include <strong>barcode codice confezione</strong>, QR chip NFC (/k/) e URL editor. Per test usa «Crea + 1 pezzo con etichetta barcode».</p>
+                <p class="guide-tip-inline">CSV/PDF: <strong>codice attivazione</strong> solo per l’inserto in confezione. Programma il chip con <strong>Link NFC /m/…</strong> (mai col codice). Dopo v160 riprogramma i pezzi già in magazzino.</p>
               </aside>
             </div>
           </div>
@@ -373,7 +373,7 @@
             <ol class="admin-workflow-steps">
               <li><strong>1. Nuovo prodotto</strong><span>Linea + template → modello catalogo</span></li>
               <li><strong>2. Genera pezzo/i</strong><span>Quantità 1 o più → PDF etichette con barcode</span></li>
-              <li><strong>3. Confeziona</strong><span>Programma chip /k/ · incolla etichetta · spedisci o consegna</span></li>
+              <li><strong>3. Confeziona</strong><span>Programma chip /m/slug · inserto codice · etichetta barcode</span></li>
             </ol>
 
             <details class="admin-details">
@@ -524,7 +524,7 @@
                 <button type="button" class="small-action primary-outline" id="momentLabelsSelected">PDF etichette (selezione)</button>
               </div>
             </div>
-            <p class="field-hint export-hint"><strong>Stampa / NFC:</strong> CSV per Excel · <strong>PDF etichette</strong> 40×15 mm numerate da 1 (codice attivazione + barcode confezione) + tabella di controllo. Dopo ogni lotto scarichi CSV + PDF automaticamente.</p>
+            <p class="field-hint export-hint"><strong>Stampa / NFC:</strong> CSV = codice attivazione (inserto) + Link NFC <code>/m/slug</code> per programmare il chip. PDF etichette 40×15 mm = codice + barcode confezione. <strong>Non</strong> programmare il chip con il codice attivazione.</p>
             <div class="table-wrap">
               <table>
                 <thead><tr>
@@ -744,10 +744,10 @@
           <label class="wide-field">Link pubblico
             <input type="text" id="codeEditPublicUrl" readonly>
           </label>
-          <label class="wide-field">Link NFC fisico
+          <label class="wide-field">Link NFC chip (programmazione)
             <input type="text" id="codeEditNfcUrl" readonly>
           </label>
-          <label class="wide-field">Link attivazione / pagina
+          <label class="wide-field">Link pagina / attivazione
             <input type="text" id="codeEditActivationUrl" readonly>
           </label>
           <button class="primary-action" type="submit">Salva modifiche</button>
@@ -837,5 +837,5 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=165"></script>
+  <script type="module" src="admin.js?v=166"></script>
 </body>

@@ -7,7 +7,7 @@
   <link rel="icon" href="khamakey-favicon.png">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="moments.css?v=165">
+  <link rel="stylesheet" href="moments.css?v=166">
 </head>
 <body class="session-pending">
   <main class="moments-boot" id="momentsBoot" aria-live="polite">
@@ -22,9 +22,9 @@
     <section class="auth-brand">
       <img src="khamakey-moments-wordmark.png" alt="KhamaKey Moments" class="brand-logo">
       <h1>Il tuo spazio privato collegato all’NFC.</h1>
-      <p>Ogni oggetto KhamaKey Moments ha già il suo link pubblico. Inserisci il codice ricevuto con il prodotto per attivarlo e costruire la pagina.</p>
+      <p>Ogni oggetto KhamaKey Moments ha già il suo link pubblico. Il <strong>codice di attivazione</strong> è nell’inserto della confezione — non sul chip NFC.</p>
       <div class="auth-steps">
-        <div class="auth-step"><span>1</span><div><strong>Inserisci il codice</strong><p>Trovi il codice sulla confezione o sull’oggetto NFC.</p></div></div>
+        <div class="auth-step"><span>1</span><div><strong>Inserisci il codice</strong><p>Lo trovi sul biglietto dentro la confezione del prodotto.</p></div></div>
         <div class="auth-step"><span>2</span><div><strong>Crea l’account</strong><p>Collega il codice al tuo profilo Moments.</p></div></div>
         <div class="auth-step"><span>3</span><div><strong>Personalizza la pagina</strong><p>Sezioni, testi, PIN e pubblicazione.</p></div></div>
       </div>
@@ -93,9 +93,9 @@
             <span class="signup-step" data-step="2">2. Account</span>
           </div>
           <div class="signup-panel" data-signup-panel="1">
-            <label>Codice Moments (sulla confezione)
+            <label>Codice Moments (inserto confezione)
               <input id="momentsSignupCode" type="text" autocomplete="off" placeholder="Es. M7K2-9XPL-H3WN" required>
-              <span class="field-hint">Lo trovi sull’etichetta / confezione dell’oggetto NFC Moments. Senza codice non si apre lo step account — è normale.</span>
+              <span class="field-hint">Sul biglietto dentro la confezione — non è sul chip NFC. Senza codice non si apre lo step account.</span>
             </label>
             <button type="button" class="primary" id="signupNextStep">Continua</button>
           </div>
@@ -204,6 +204,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=165"></script>
+  <script type="module" src="moments.js?v=166"></script>
 </body>
 </html>

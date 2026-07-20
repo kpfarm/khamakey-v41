@@ -36,7 +36,7 @@ export const MOMENTS_CONSOLE_GUIDES = {
       { pill: "active", label: "Modello attivo — usabile in magazzino" },
       { pill: "available", label: "Codice disponibile — in confezione non ancora attivato" }
     ],
-    tip: "Codice attivazione per il cliente (es. M7K2-9XPL-H3WN) · Barcode numerico solo magazzino · Chip NFC = /k/CODICE"
+    tip: "Codice attivazione = inserto confezione · Chip NFC = /m/slug (mai /k/codice) · Barcode numerico solo magazzino"
   },
   momentCatalog: {
     subtitle: "Anagrafica modelli magazzino per produrre pezzi NFC.",
@@ -65,7 +65,7 @@ export const MOMENTS_CONSOLE_GUIDES = {
       { pill: "claimed active", label: "Attivato dal cliente" },
       { pill: "paused archived", label: "Fuori rotazione" }
     ],
-    tip: "Link chip NFC = /k/CODICE · Editor cliente = moments.html · Pagina live = /m/slug."
+    tip: "Link chip NFC = /m/slug · Codice attivazione solo in confezione · Pagina live = stesso /m/slug dopo attivazione."
   },
   momentClients: {
     subtitle: "Account e oggetti attivati: editor admin, pagine /m/ e supporto cliente.",

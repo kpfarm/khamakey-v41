@@ -13,6 +13,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
 ### Fixed
+- **Moments Admin v166 / Worker v156 / SQL v160 — Codice attivazione non più pubblico via NFC (2026-07-20, Cursor)** — Pages + Worker + SQL
+  - Pagina pre-attivazione brand Moments **senza** codice; slug opaco ≠ codice; chip = `/m/slug`; codice solo CSV/PDF inserto; `/k/codice` non risolve pezzi available.
 - **Worker v154 — Contrasto footer Moments (2026-07-20, Cursor)** — Worker only
   - Testo footer usa `ink` del tema (opacità alta + peso 600), leggibile su sfondi densi.
 - **Worker v153 — Galleria non allarga più la pagina (2026-07-20, Cursor)** — Worker only

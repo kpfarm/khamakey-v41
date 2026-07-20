@@ -113,8 +113,8 @@ function drawLabelSheetPages(doc, rows, lotTitle, barcodeCache){
     if(page > 0) doc.addPage();
     drawSheetHeader(
       doc,
-      "Etichette NFC · 40 × 15 mm",
-      `${lotTitle} · ${rows.length} pezzi · foglio ${page + 1}/${pageCount} · ${grid.cols} colonne`
+      "Etichette confezione · 40 × 15 mm",
+      `${lotTitle} · ${rows.length} pezzi · foglio ${page + 1}/${pageCount} · codice attivazione (inserto)`
     );
 
     const start = page * grid.perPage;

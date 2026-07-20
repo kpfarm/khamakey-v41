@@ -75,8 +75,8 @@ Versione attuale: **v148** (magazzino NFC Business, clienti Business arricchiti,
 - Generazione stock da modello/SKU del catalogo Moments oppure manuale.
 - Il form di generazione stock e' aperto e visibile: non e' piu' nascosto dietro un passaggio ambiguo.
 - I filtri includono linea, lotto, stato, SKU/modello, data creazione, canale, agente e ordine.
-- In tabella sono distinti: codice attivazione, link NFC fisico `/k/<codice>`, link attivazione/pagina `/m/<slug>`, data creazione e tracciabilita' canale/agente/ordine.
-- Export CSV/PDF etichette usa il link NFC fisico `/k/<codice>`, non il link pagina `/m/<slug>`.
+- In tabella sono distinti: codice attivazione (inserto), link NFC chip `/m/<slug opaco>`, link pagina `/m/<slug>`, data creazione e tracciabilita' canale/agente/ordine.
+- Export CSV/PDF: codice per confezione; programmazione chip usa `/m/<slug>`, non `/k/<codice>`.
 
 ---
 

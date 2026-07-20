@@ -293,3 +293,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Worker v153**: galleria contenuta — stop pagina larghissima su mobile |
 | 2026-07-20 | Cursor | **Worker v154**: contrasto footer Moments (ink del tema, leggibile su sfondi densi) |
 | 2026-07-20 | Cursor | **Moments v165 / Worker v155**: toggle sfumatura hero (colore pagina / taglio netto) |
+| 2026-07-20 | Cursor | **Admin/Moments v166 / Worker v156 / SQL v160**: codice attivazione solo in confezione; chip `/m/slug` opaco |

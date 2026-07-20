@@ -92,12 +92,12 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v165** | Redirect `/admin`→`moments-admin` su dominio Moments; dettaglio ticket Supporto; console Moments senza Shopify/Business. Include magazzino NFC Moments + fix loader v163. |
-| **Moments editor** | **v165** | Toggle sfumatura sotto foto (`heroFade`, default on, colore `bl`). |
-| **Worker NFC** | **v155-hero-fade** | Toggle sfumatura hero (`heroFade`) colore `bl`; footer contrasto; galleria contenuta. |
+| **Admin / Officina Moments** | **v166** | NFC = `/m/slug`; codice solo CSV/PDF inserto; hint riprogrammazione stock. |
+| **Moments editor** | **v166** | Copy: codice solo in inserto confezione (non sul chip). |
+| **Worker NFC** | **v156-activation-secure** | Pagina pre-attivazione brand Moments senza codice; slug opaco SQL v160. |
 | **Business shell** | **app v167** | `APP_VERSION` in `app.js` — account Moments non finiscono nel flusso Business. Editor Business HTML può avere WIP locale non ancora allineato in tabella. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
-| **SQL Supabase** | **≥ v159 (prod)** | Security v75–v83; RSVP/guestbook; support sources v158; category lock v157; drop overload `activate_moment_code` v159. Business activation/inventory v147/v148 in repo. |
+| **SQL Supabase** | **≥ v160 (prod)** | Opaque slug Moments v160; security v75–v83; RSVP/guestbook; support sources v158; category lock v157; drop overload `activate_moment_code` v159. Business activation/inventory v147/v148 in repo. |
 | **Prossima release piattaforma** | **v166+** (solo se serve cambio runtime) | Non bumpare per sole doc. Priorità ops: secrets Stripe/Resend webhook, Auth leaked-password, smoke Moments. |
 
 ---

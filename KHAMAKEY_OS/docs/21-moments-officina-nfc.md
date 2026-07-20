@@ -1,6 +1,6 @@
 # 21 — Officina NFC Moments
 
-> Aggiornamento 2026-07-18: `moments-admin.html` è la consolle **solo Moments** (produzione NFC + clienti + assistenza). Non mostra Attività Business né integrazioni Shopify.
+> Aggiornamento 2026-07-20: sicurezza scaffale — codice attivazione **solo in confezione**; chip NFC = `/m/<slug opaco>`.
 
 ## Cosa fa questa consolle
 
@@ -8,7 +8,7 @@
 |----------|------|
 | Modelli prodotto magazzino (codice MOM-…) | Officina NFC |
 | Generazione codici, etichette barcode | Officina NFC |
-| Link chip `/k/`, attivazione editor | Officina NFC |
+| Link chip `/m/<slug>`, attivazione editor | Officina NFC |
 | Clienti attivati, pagine `/m/` | Officina NFC → Clienti |
 | Supporto tecnico (codice, NFC, pagina) | Officina NFC → Supporto |
 
@@ -16,22 +16,36 @@
 
 ```text
 Officina NFC
-  Modello (MOM-KEY-WED) → genera pezzo/i → etichetta barcode → confezione a scaffale
-  → consegna al cliente
+  Modello (MOM-KEY-WED) → genera pezzo/i
+  → CSV/PDF: codice attivazione (inserto) + Link NFC /m/slug (chip)
+  → programma chip con /m/slug · metti codice in confezione
+  → scaffale
 
 Cliente
-  moments.html + codice attivazione in confezione → editor → pagina /m/ live
+  apre confezione → codice sull’inserto → moments.html → editor → pagina /m/ live
 ```
 
-## Formato codici (v156)
+## Formato codici (v156 + sicurezza v160)
 
 | Uso | Formato | Chi lo usa |
 |-----|---------|------------|
-| **Attivazione** | 12 caratteri alfanumerici, stampati `XXXX-XXXX-XXXX` | Cliente (digitazione su moments.html) |
+| **Attivazione** | 12 caratteri alfanumerici, stampati `XXXX-XXXX-XXXX` | Cliente (digitazione su moments.html) — **solo inserto confezione** |
 | **Barcode confezione** | 12 cifre numeriche | Solo magazzino (scan etichetta) |
-| **Chip NFC** | QR → `/k/{codice attivazione}` | Programmazione chip in officina |
+| **Chip NFC** | URL → `/m/{slug opaco}` | Programmazione chip — **mai** il codice attivazione |
+| **Slug pubblico** | 12 caratteri opachi ≠ codice (SQL v160) | Link pagina pre/post attivazione |
 
-Lo script SQL `sql/khamakey-moments-activation-codes-v156.sql` va applicato su Supabase prima di generare nuovi pezzi.
+### Perché
+
+Prima il codice compariva sulla pagina pre-attivazione e spesso coincideva con `/k/codice` o `/m/codice`: in negozio bastava scansionare per rubare l’attivazione. Ora:
+
+1. la pagina `/m/` pre-attivazione **non mostra** il codice (brand Moments)
+2. lo slug è **opaco** e diverso dal codice
+3. `/k/<codice>` non risolve pezzi `available` (solo dopo claim)
+4. CSV/PDF restano la fonte del codice per stampa inserto
+
+**Azione officina:** pezzi già in magazzino con chip vecchio `/k/CODICE` vanno **riprogrammati** con il nuovo Link NFC `/m/slug` dal magazzino.
+
+SQL: `sql/khamakey-moments-opaque-slug-v160.sql` (applicato su Supabase).
 
 ## Entry point
 

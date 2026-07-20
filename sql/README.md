@@ -46,6 +46,7 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 40 | `khamakey-moments-category-lock-v157.sql` | Categoria bloccata al codice NFC: peek, activate, save lock, batch tutte le categorie v59 |
 | 41 | `khamakey-support-ticket-sources-v158.sql` | CHECK `source` ticket: consente `moments_editor` / `business_editor` (fix insert clienti) |
 | 42 | `khamakey-moments-activate-overload-drop-v159.sql` | Drop overload `activate_moment_code` a 4 args (resta firma con `p_pin_hash`) |
+| 43 | `khamakey-moments-opaque-slug-v160.sql` | Slug pubblico opaco ≠ codice; pagina pre-attivazione senza code; `/k/` non resolve available |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 

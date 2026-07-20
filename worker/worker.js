@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v155-hero-fade";
+const WORKER_VERSION = "v156-activation-secure";
 
 export default {
   async fetch(request, env, ctx) {
@@ -3508,8 +3508,8 @@ function normalizeMomentMedia(section) {
 }
 
 function renderMomentActivationPage(product, origin, env = {}) {
-  const code = String(product.code || "");
   const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
+  const logoSrc = `${pagesBase}/khamakey-moments-wordmark-on-light.png`;
   const typeLabel = {
     free: "Evento generale",
     love: "Amore",
@@ -3533,11 +3533,44 @@ function renderMomentActivationPage(product, origin, env = {}) {
     memorial: "Memoriale",
     portfolio: "Portfolio"
   }[product.product_type] || "KhamaKey Moments";
+  const lineLabel = String(product.product_label || product.product_line || "").trim();
   return `<!doctype html>
 <html lang="it">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Attiva KhamaKey Moments</title>
-<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:Arial,sans-serif;background:#f5f7fa;color:#172036;padding:18px}.card{width:min(100%,460px);background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:26px;box-shadow:0 18px 60px rgba(27,42,94,.12);text-align:center}.eyebrow{color:#4caf27;font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}h1{color:#1b2a5e;font-size:34px;line-height:1;margin:8px 0 12px}p{color:#64748b;line-height:1.55}.code{display:block;margin:18px 0;padding:13px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;color:#1b2a5e;font-size:20px;font-weight:900;letter-spacing:.08em}.button{display:inline-flex;justify-content:center;width:100%;border-radius:12px;background:#1b2a5e;color:#fff;padding:13px 16px;text-decoration:none;font-weight:900}.hint{font-size:13px}</style></head>
-<body><main class="card"><div class="eyebrow">KhamaKey Moments</div><h1>Prodotto pronto da attivare</h1><p>Questo oggetto NFC è già collegato al suo link pubblico. Crea o apri il tuo account Moments e inserisci questo codice per iniziare a costruire la pagina privata.</p><span class="code">${escapeHtml(code)}</span><p><strong>${escapeHtml(typeLabel)}</strong></p><a class="button" href="${attr(pagesBase)}/moments.html">Attiva in Area Moments</a><p class="hint">Dopo l’attivazione, questo stesso link mostrerà la pagina creata con l’editor.</p></main></body></html>`;
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071A3C">
+<title>Attiva KhamaKey Moments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#18202F;padding:20px;
+background:radial-gradient(circle at 12% 8%,rgba(217,140,149,.18) 0%,transparent 42%),radial-gradient(circle at 90% 90%,rgba(170,98,108,.12) 0%,transparent 45%),#FFF9F5}
+.card{width:min(100%,440px);background:#fff;border:1px solid #E8D4CE;border-radius:22px;padding:28px 24px 24px;box-shadow:0 18px 50px rgba(7,26,60,.10);text-align:center}
+.logo{display:block;width:min(240px,78%);height:auto;margin:0 auto 18px}
+.eyebrow{color:#AA626C;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin:0 0 8px}
+h1{color:#071A3C;font-size:clamp(1.45rem,5vw,1.85rem);line-height:1.2;margin:0 0 12px;font-weight:700}
+p{color:#6B6470;line-height:1.55;margin:0 0 12px}
+.badge{display:inline-block;margin:8px 0 16px;padding:8px 14px;border-radius:999px;background:#F3E3DE;color:#071A3C;font-size:13px;font-weight:650;border:1px solid #E0B8B6}
+.button{display:inline-flex;justify-content:center;align-items:center;width:100%;border-radius:12px;background:linear-gradient(135deg,#AA626C 0%,#071A3C 100%);color:#fff;padding:14px 16px;text-decoration:none;font-weight:700;margin-top:8px}
+.hint{font-size:13px;color:#6B6470;margin-top:14px}
+.steps{text-align:left;margin:16px 0 8px;padding:14px 14px 10px;border-radius:14px;background:#FFF9F5;border:1px solid #E8D4CE}
+.steps li{margin:0 0 8px;color:#18202F;font-size:14px;line-height:1.4}
+.steps strong{color:#071A3C}
+</style></head>
+<body><main class="card">
+<img class="logo" src="${attr(logoSrc)}" alt="KhamaKey Moments">
+<p class="eyebrow">Prodotto NFC</p>
+<h1>Pronto da attivare</h1>
+<p>Il link di questo oggetto è già riservato. Il <strong>codice di attivazione</strong> non è sul chip: lo trovi nell’inserto dentro la confezione.</p>
+${lineLabel ? `<span class="badge">${escapeHtml(lineLabel)}</span>` : ""}
+<span class="badge">${escapeHtml(typeLabel)}</span>
+<ol class="steps">
+<li><strong>Apri la confezione</strong> e prendi il biglietto con il codice.</li>
+<li><strong>Entra in Area Moments</strong> e inserisci il codice.</li>
+<li>Crea la pagina: dopo, questo stesso link mostrerà il tuo ricordo.</li>
+</ol>
+<a class="button" href="${attr(pagesBase)}/moments.html">Attiva in Area Moments</a>
+<p class="hint">Senza il codice della confezione non si può attivare la pagina — così il prodotto resta sicuro in negozio.</p>
+</main></body></html>`;
 }
 
 function actionIcon(kind){
@@ -3595,7 +3628,7 @@ const PUBLIC_PAGE_CSP = [
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://app.khamakeymoments.com https://khamakey-app.pages.dev",
   "font-src 'self' https://fonts.gstatic.com",
-  "img-src 'self' data: blob: https://img.youtube.com https://cuxlwaocjqwzluycznyp.supabase.co https://link.khamakeymoments.com https://khamakey-nfc.khamakey-nfc.workers.dev",
+  "img-src 'self' data: blob: https://img.youtube.com https://cuxlwaocjqwzluycznyp.supabase.co https://link.khamakeymoments.com https://khamakey-nfc.khamakey-nfc.workers.dev https://app.khamakeymoments.com https://khamakey-app.pages.dev",
   "media-src 'self' blob: https://cuxlwaocjqwzluycznyp.supabase.co https://link.khamakeymoments.com https://khamakey-nfc.khamakey-nfc.workers.dev",
   "connect-src 'self'",
   "frame-src https://www.youtube.com https://open.spotify.com",

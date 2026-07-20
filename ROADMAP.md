@@ -295,3 +295,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Moments v165 / Worker v155**: toggle sfumatura hero (colore pagina / taglio netto) |
 | 2026-07-20 | Cursor | **Admin/Moments v166 / Worker v156 / SQL v160**: codice attivazione solo in confezione; chip `/m/slug` opaco |
 | 2026-07-20 | Cursor | **Admin v167**: Officina/Admin usabili da smartphone (menu off-canvas, topbar sticky, filtri/tabelle touch) |
+| 2026-07-20 | Cursor | **Admin v168**: fix Modifica magazzino Officina + lista magazzino a card su mobile |

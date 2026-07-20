@@ -12,6 +12,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 - **Moments v165 / Worker v155 — Sfumatura hero on/off (2026-07-20, Cursor)** — Pages + Worker
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
+### Fixed
+- **Admin / Officina v168 — Modifica magazzino (2026-07-20, Cursor)** — Pages only
+  - `renderAgentOptions` non crasha più su moments-admin (select Business assenti); drawer codice si apre; lista magazzino a card su smartphone.
+
 ### Changed
 - **Admin / Officina v167 — Mobile UX (2026-07-20, Cursor)** — Pages only
   - Menu laterale off-canvas, topbar sticky, pulsanti/filtri touch, tabelle scrollabili, drawer a foglio dal basso su smartphone.

@@ -437,9 +437,71 @@ textarea{width:100%;border:1px solid var(--border);border-radius:10px;background
   .inventory-filters,.inventory-filters-4,.inventory-filters-2{grid-template-columns:1fr}
   .automation-status{grid-template-columns:1fr}
   .drawer-grid{grid-template-columns:1fr}
-  .table-wrap table{min-width:560px}
+  .table-wrap:not(.inventory-table-wrap) table{min-width:560px}
   .admin-card{padding:14px}
   .gate-card{margin:24px auto;padding:22px 18px}
+
+  /* Magazzino: card stack invece di tabella orizzontale rotta */
+  .inventory-table-wrap{
+    border:0;
+    overflow:visible;
+  }
+  .inventory-table-wrap table.inventory-table{
+    min-width:0;
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0 10px;
+  }
+  .inventory-table-wrap thead{display:none}
+  .inventory-table-wrap tbody tr.inventory-row{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    grid-template-areas:
+      "select code actions"
+      "status status status"
+      "client client client"
+      "nfc nfc nfc"
+      "meta meta meta";
+    gap:8px 10px;
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:#fff;
+    box-shadow:0 6px 18px rgba(27,42,94,.05);
+  }
+  .inventory-table-wrap tbody tr.inventory-row > td{
+    display:block;
+    border:0;
+    padding:0;
+    white-space:normal;
+  }
+  .inventory-table-wrap .col-select{grid-area:select;align-self:center}
+  .inventory-table-wrap .col-code{grid-area:code;min-width:0}
+  .inventory-table-wrap .col-actions{grid-area:actions;align-self:center}
+  .inventory-table-wrap .col-actions .small-action{min-height:42px;min-width:88px}
+  .inventory-table-wrap .col-status{grid-area:status}
+  .inventory-table-wrap .col-client{grid-area:client;font-size:.78rem;color:var(--muted);word-break:break-all}
+  .inventory-table-wrap .col-nfc{grid-area:nfc;font-size:.78rem}
+  .inventory-table-wrap .col-page{display:none!important}
+  .inventory-table-wrap .col-line,
+  .inventory-table-wrap .col-batch,
+  .inventory-table-wrap .col-created,
+  .inventory-table-wrap .col-trace{
+    grid-area:meta;
+    font-size:.72rem;
+    color:var(--muted);
+  }
+  .inventory-table-wrap .col-nfc::before,
+  .inventory-table-wrap .col-client::before,
+  .inventory-table-wrap .col-status::before,
+  .inventory-table-wrap .col-line::before,
+  .inventory-table-wrap .col-batch::before,
+  .inventory-table-wrap .col-created::before,
+  .inventory-table-wrap .col-trace::before{
+    content:attr(data-label) ": ";
+    font-weight:800;
+    color:var(--navy);
+  }
 }
 .integration-health-actions{margin:0 0 12px}
 .integration-health-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:0 0 18px}

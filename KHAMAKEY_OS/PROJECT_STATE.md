@@ -92,7 +92,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v167** | Mobile: menu off-canvas, topbar sticky, tabelle/filtri touch; NFC `/m/slug` + codice in confezione. |
+| **Admin / Officina Moments** | **v168** | Fix Modifica magazzino su Officina (null-safe agent selects); card list mobile; menu off-canvas. |
 | **Moments editor** | **v166** | Copy: codice solo in inserto confezione (non sul chip). |
 | **Worker NFC** | **v156-activation-secure** | Pagina pre-attivazione brand Moments senza codice; slug opaco SQL v160. |
 | **Business shell** | **app v167** | `APP_VERSION` in `app.js` — account Moments non finiscono nel flusso Business. Editor Business HTML può avere WIP locale non ancora allineato in tabella. |

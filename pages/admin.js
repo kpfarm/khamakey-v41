@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=167";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=168";
 import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=164";
 import {
   generateMomentSku,
@@ -683,8 +683,9 @@ function renderAgentOptions(selectedId=""){
   const options = `<option value="">Nessun agente</option>` + agentRows.map(row=>`
     <option value="${esc(row.id)}" ${row.id === selectedId ? "selected" : ""}>${esc(row.contact_name || row.email)} · ${esc(row.referral_code)}</option>
   `).join("");
-  orderAgentSelect.innerHTML = options;
-  clientAgentSelect.innerHTML = options;
+  // Su moments-admin molti select Business/ordini non esistono: non crashare.
+  if(orderAgentSelect) orderAgentSelect.innerHTML = options;
+  if(clientAgentSelect) clientAgentSelect.innerHTML = options;
   if(codeEditAgent) codeEditAgent.innerHTML = options;
   if(orderAssignAgent) orderAssignAgent.innerHTML = `<option value="">Usa agente ordine</option>` + agentRows.map(row=>`
     <option value="${esc(row.id)}">${esc(row.contact_name || row.email)} · ${esc(row.referral_code)}</option>
@@ -1849,37 +1850,37 @@ function toggleMomentCodeSelection(code,checked){
 
 function renderMomentProductsTable(rows){
   if(!momentProductsTable) return;
+  const emptyMsg = !momentProductsLoaded
+    ? "Caricamento codici…"
+    : !momentProductRows.length
+      ? "Nessun codice in magazzino. Genera un lotto sopra."
+      : `Nessun codice con questi filtri (${fmt(momentProductRows.length)} in magazzino). <button type="button" class="link-button" data-moment-clear-filters>Mostra tutti</button>`;
   momentProductsTable.innerHTML = rows.length ? rows.map(row=>{
     const nfcUrl = momentNfcUrl(row);
     const activationUrl = momentActivationUrl(row);
     const catalog = catalogForMomentCode(row);
     const claimed = row.status === "claimed";
     const checked = selectedMomentCodes.has(row.code) ? "checked" : "";
+    const productLabel = catalog ? `${catalog.sku} · ${catalog.name}` : (row.product_label || momentTemplateLabel(row.product_type));
     const trace = [
       soldChannelLabel(row.sold_channel || "non_specificato"),
       agentLabelById(row.assigned_agent_id),
       row.platform_order_id ? orderLabelById(row.platform_order_id) : ""
     ].filter(value=>value && value !== "-" && value !== "Non specificato").join(" · ") || "-";
-    return `<tr>
-      <td>${claimed ? "" : `<input type="checkbox" data-moment-select="${esc(row.code)}" ${checked} aria-label="Seleziona ${esc(row.code)}">`}</td>
-      <td><strong>${esc(formatMomentCodeDisplay(row.code))}</strong><div class="muted-cell">${esc(catalog ? `${catalog.sku} · ${catalog.name}` : (row.product_label || momentTemplateLabel(row.product_type)))}${row.packaging_barcode ? `<br>Barcode confezione: ${esc(row.packaging_barcode)}` : ""}</div></td>
-      <td>${nfcUrl ? `<a href="${esc(nfcUrl)}" target="_blank" rel="noopener">/m/${esc(row.public_slug)}</a>` : "-"}</td>
-      <td>${activationUrl ? `<a href="${esc(activationUrl)}" target="_blank" rel="noopener">/m/${esc(row.public_slug)}</a>` : "-"}</td>
-      <td>${esc(productLineLabel(row.product_line || "non_specificato"))}</td>
-      <td>${esc(row.batch_label || "-")}</td>
-      <td>${esc(row.created_at ? dateShort(row.created_at) : "-")}</td>
-      <td>${row.platform_order_id ? `<button type="button" class="link-button" data-order-open="${esc(row.platform_order_id)}">${esc(trace)}</button>` : esc(trace)}</td>
-      <td><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
-      <td>${esc(row.claimed_by_email || "-")}</td>
-      <td><button class="small-action" type="button" data-code-edit="${esc(row.code)}">Modifica</button></td>
+    return `<tr class="inventory-row">
+      <td class="col-select">${claimed ? "" : `<input type="checkbox" data-moment-select="${esc(row.code)}" ${checked} aria-label="Seleziona ${esc(row.code)}">`}</td>
+      <td class="col-code" data-label="Codice"><strong>${esc(formatMomentCodeDisplay(row.code))}</strong><div class="muted-cell">${esc(productLabel)}${row.packaging_barcode ? `<br>Barcode: ${esc(row.packaging_barcode)}` : ""}</div></td>
+      <td class="col-nfc" data-label="Link NFC">${nfcUrl ? `<a href="${esc(nfcUrl)}" target="_blank" rel="noopener">/m/${esc(row.public_slug)}</a>` : "-"}</td>
+      <td class="col-page" data-label="Pagina">${activationUrl ? `<a href="${esc(activationUrl)}" target="_blank" rel="noopener">/m/${esc(row.public_slug)}</a>` : "-"}</td>
+      <td class="col-line" data-label="Linea">${esc(productLineLabel(row.product_line || "non_specificato"))}</td>
+      <td class="col-batch" data-label="Lotto">${esc(row.batch_label || "-")}</td>
+      <td class="col-created" data-label="Creato">${esc(row.created_at ? dateShort(row.created_at) : "-")}</td>
+      <td class="col-trace" data-label="Traccia">${row.platform_order_id ? `<button type="button" class="link-button" data-order-open="${esc(row.platform_order_id)}">${esc(trace)}</button>` : esc(trace)}</td>
+      <td class="col-status" data-label="Stato"><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
+      <td class="col-client" data-label="Cliente">${esc(row.claimed_by_email || "-")}</td>
+      <td class="col-actions"><button class="small-action" type="button" data-code-edit="${esc(row.code)}">Modifica</button></td>
     </tr>`;
-  }).join("") : `<tr><td colspan="11">${
-    !momentProductsLoaded
-      ? "Caricamento codici…"
-      : !momentProductRows.length
-        ? "Nessun codice in magazzino. Genera un lotto sopra."
-        : `Nessun codice con questi filtri (${fmt(momentProductRows.length)} in magazzino). <button type="button" class="link-button" data-moment-clear-filters>Mostra tutti</button>`
-  }</td></tr>`;
+  }).join("") : `<tr><td colspan="11">${emptyMsg}</td></tr>`;
 }
 
 function selectHasValue(select, value){
@@ -3970,30 +3971,53 @@ function closeMomentDrawer(){
 }
 
 function openCodeDrawer(code,kind="moment"){
+  const clean = String(code || "").trim().toUpperCase();
   const row = kind === "business"
-    ? businessProductRows.find(item=>item.code === code)
-    : momentProductRows.find(item=>item.code === code);
-  if(!row || !codeDrawer) return;
+    ? businessProductRows.find(item=>String(item.code || "").toUpperCase() === clean)
+    : momentProductRows.find(item=>String(item.code || "").toUpperCase() === clean);
+  if(!row || !codeDrawer){
+    console.warn("openCodeDrawer: codice o drawer non trovato", clean, kind);
+    return;
+  }
   currentCodeRow = row;
   currentCodeKind = kind;
-  document.getElementById("codeDrawerTitle").textContent = row.code;
-  document.getElementById("codeDrawerMeta").textContent = kind === "business"
-    ? `${row.sku || "Business"} · ${row.batch_label || "senza lotto"}`
-    : productLineLabel(row.product_line || "non_specificato");
-  document.getElementById("codeEditCode").value = row.code;
+  const titleEl = document.getElementById("codeDrawerTitle");
+  const metaEl = document.getElementById("codeDrawerMeta");
+  const codeInput = document.getElementById("codeEditCode");
   const statusSelect = document.getElementById("codeEditStatus");
-  statusSelect.value = row.status;
-  statusSelect.querySelector('option[value="claimed"]').disabled = row.status !== "claimed";
-  if(row.status === "claimed") statusSelect.value = "claimed";
-  document.getElementById("codeEditChannel").value = row.sold_channel || "";
-  renderAgentOptions(row.assigned_agent_id || "");
-  document.getElementById("codeEditBatch").value = row.batch_label || "";
-  document.getElementById("codeEditOrder").value = row.platform_order_id ? orderLabelById(row.platform_order_id) : "";
-  document.getElementById("codeEditPublicUrl").value = kind === "business" ? businessPageUrl(row) : momentActivationUrl(row);
-  document.getElementById("codeEditNfcUrl").value = kind === "business" ? businessNfcUrl(row) : momentNfcUrl(row);
-  document.getElementById("codeEditActivationUrl").value = kind === "business"
-    ? `${LOCAL_PAGES_BASE}/index.html?code=${encodeURIComponent(row.code)}`
-    : momentActivationUrl(row);
+  const channelSelect = document.getElementById("codeEditChannel");
+  if(titleEl) titleEl.textContent = formatMomentCodeDisplay(row.code);
+  if(metaEl){
+    metaEl.textContent = kind === "business"
+      ? `${row.sku || "Business"} · ${row.batch_label || "senza lotto"}`
+      : productLineLabel(row.product_line || "non_specificato");
+  }
+  if(codeInput) codeInput.value = row.code;
+  if(statusSelect){
+    const claimedOpt = statusSelect.querySelector('option[value="claimed"]');
+    if(claimedOpt) claimedOpt.disabled = row.status !== "claimed";
+    statusSelect.value = row.status === "claimed" ? "claimed" : (row.status || "available");
+  }
+  if(channelSelect) channelSelect.value = row.sold_channel || "";
+  try{
+    renderAgentOptions(row.assigned_agent_id || "");
+  }catch(error){
+    console.warn("renderAgentOptions", error);
+  }
+  const batchInput = document.getElementById("codeEditBatch");
+  const orderInput = document.getElementById("codeEditOrder");
+  const publicUrlInput = document.getElementById("codeEditPublicUrl");
+  const nfcUrlInput = document.getElementById("codeEditNfcUrl");
+  const activationUrlInput = document.getElementById("codeEditActivationUrl");
+  if(batchInput) batchInput.value = row.batch_label || "";
+  if(orderInput) orderInput.value = row.platform_order_id ? orderLabelById(row.platform_order_id) : "";
+  if(publicUrlInput) publicUrlInput.value = kind === "business" ? businessPageUrl(row) : momentActivationUrl(row);
+  if(nfcUrlInput) nfcUrlInput.value = kind === "business" ? businessNfcUrl(row) : momentNfcUrl(row);
+  if(activationUrlInput){
+    activationUrlInput.value = kind === "business"
+      ? `${LOCAL_PAGES_BASE}/index.html?code=${encodeURIComponent(row.code)}`
+      : momentActivationUrl(row);
+  }
   setFormStatus(codeEditFormStatus,"");
   codeDrawer.classList.add("open");
   codeDrawer.setAttribute("aria-hidden","false");
@@ -5679,7 +5703,10 @@ momentProductsTable?.addEventListener("click",event=>{
     return;
   }
   const editBtn = event.target.closest("[data-code-edit]");
-  if(editBtn) return openCodeDrawer(editBtn.dataset.codeEdit);
+  if(editBtn){
+    event.preventDefault();
+    return openCodeDrawer(editBtn.getAttribute("data-code-edit") || editBtn.dataset.codeEdit);
+  }
   const orderBtn = event.target.closest("[data-order-open]");
   if(orderBtn) return openOrderDrawer(orderBtn.dataset.orderOpen,"codes");
 });

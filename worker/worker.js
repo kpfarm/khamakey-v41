@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v154-footer-contrast";
+const WORKER_VERSION = "v155-hero-fade";
 
 export default {
   async fetch(request, env, ctx) {
@@ -932,6 +932,7 @@ function renderMomentPage(page, origin) {
       heroCut = "dritto";
     }
   }
+  const heroFade = state.heroFade !== false;
 
   let dividerHtml = "";
   if (heroCut === "divider") {
@@ -975,7 +976,7 @@ ${ogImage ? `<meta property="og:image" content="${attr(ogImage)}">` : ""}
 <link href="https://fonts.googleapis.com/css2?${fonts.google}&display=swap" rel="stylesheet">
 <style>${momentPageCss(colors, fonts)}</style></head>
 <body>${navHtml}
-<main class="moment-page hero-${attr(heroStyle)}${navClass} moment-type-${attr(momentType)}${extraTypeClass} moment-palette-${attr(paletteKey)} moment-cut-${attr(heroCut)}">
+<main class="moment-page hero-${attr(heroStyle)}${navClass} moment-type-${attr(momentType)}${extraTypeClass} moment-palette-${attr(paletteKey)} moment-cut-${attr(heroCut)} moment-fade-${heroFade ? "on" : "off"}">
 ${decorHtml}
 <section class="moment-hero" id="moment-hero">${heroCover}<div class="moment-hero-overlay"></div><div class="moment-hero-content hero-in">
 ${pill ? `<span class="moment-pill">${escapeHtml(pill)}</span>` : `<small>KhamaKey Moments</small>`}
@@ -1843,7 +1844,6 @@ body.nav-open{overflow:hidden}
 .moment-hero{position:relative;min-height:min(94dvh,760px);padding:max(120px,env(safe-area-inset-top) + 40px) 24px max(80px,env(safe-area-inset-bottom));text-align:center;color:#fff;background:linear-gradient(145deg,${c.bl},${c.g2 || c.hero});overflow:hidden;display:grid;align-content:end}
 .hero-fullscreen .moment-hero{min-height:min(100dvh,780px)}
 .hero-romantico .moment-hero{min-height:min(88dvh,700px)}
-.hero-romantico .moment-hero-overlay{background:linear-gradient(180deg,rgba(10,10,20,.1) 0%,rgba(10,10,20,.52) 60%,rgba(10,10,20,.85) 100%)}
 .hero-intimo .moment-hero{min-height:min(78dvh,620px)}
 .hero-intimo .moment-cover-wrap,.hero-intimo .moment-cover{object-position:center 32%}
 .hero-profilo .moment-hero{padding-top:max(88px,env(safe-area-inset-top))}
@@ -1852,7 +1852,9 @@ body.nav-open{overflow:hidden}
 .moment-cover-wrap.is-zoomed .moment-cover{animation-name:kenBurnsSoft}
 @keyframes kenBurns{0%{transform:scale(1)}100%{transform:scale(1.09)}}
 @keyframes kenBurnsSoft{0%{transform:scale(1)}100%{transform:scale(1.03)}}
-.moment-hero-overlay{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(15,23,42,0.08) 0%,rgba(15,23,42,0.48) 55%,rgba(15,23,42,0.85) 100%)}
+.moment-hero-overlay{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.06) 0%,rgba(0,0,0,.26) 50%,color-mix(in srgb, ${c.bl} 55%, transparent) 78%,${c.bl} 100%)}
+.moment-fade-on .moment-hero-overlay{background:linear-gradient(180deg,rgba(0,0,0,.06) 0%,rgba(0,0,0,.26) 50%,color-mix(in srgb, ${c.bl} 55%, transparent) 78%,${c.bl} 100%)!important}
+.moment-fade-off .moment-hero-overlay{background:linear-gradient(180deg,rgba(0,0,0,.1) 0%,rgba(0,0,0,.34) 68%,rgba(0,0,0,.2) 100%)!important}
 .moment-hero-content{position:relative;z-index:2;max-width:520px;margin:0 auto;isolation:isolate}
 .hero-in,.rv{opacity:0;transform:translateY(24px) scale(0.98);transition:opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)}
 .hero-in.on,.rv.on{opacity:1;transform:none}
@@ -2211,7 +2213,6 @@ main.moment-type-anniversary {
 .moment-type-love .moment-hero-overlay,
 .moment-type-wedding .moment-hero-overlay,
 .moment-type-anniversary .moment-hero-overlay {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.45) 60%, rgba(15, 23, 42, 0.82) 100%) !important;
   z-index: 1 !important;
 }
 
@@ -2439,7 +2440,6 @@ main.moment-type-travel {
 }
 
 .moment-type-travel .moment-hero-overlay {
-  background: linear-gradient(180deg, rgba(16, 11, 38, 0.1) 0%, rgba(16, 11, 38, 0.4) 60%, rgba(16, 11, 38, 0.85) 100%) !important;
   z-index: 1 !important;
 }
 

@@ -89,6 +89,7 @@ Definiti in `moment-themes.js` e `worker.js`:
 - Tipografia serif, scroll reveal, galleria swipe
 - 11 palette + 3 varianti atmosfera
 - Raccordo fondo copertina (heroCut) configurabile dall'editor: Dritto classico, Divisore con icona, Taglio ad arco, Taglio diagonale
+- Sfumatura sotto la foto (heroFade, default on): fonde la copertina con il colore sfondo pagina (`bl`); off = taglio netto
 - Sfondo sfumato chiaro-scuro globale con auree radiali luminose in tutti i 21 template
 - Stili grafici premium coordinati per tutti i gruppi di categorie (Amore, Viaggi, Bambini, Feste, Famiglia, Pet, Polaroid/Ricordi, Cerimonie, Collage/Amicizia, Natale, Minimal/Generale)
 

@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **Moments v165 / Worker v155 — Sfumatura hero on/off (2026-07-20, Cursor)** — Pages + Worker
+  - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
+
 ### Fixed
 - **Worker v154 — Contrasto footer Moments (2026-07-20, Cursor)** — Worker only
   - Testo footer usa `ink` del tema (opacità alta + peso 600), leggibile su sfondi densi.

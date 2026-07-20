@@ -540,6 +540,7 @@ function mergedState(row){
     themeVariant:state.themeVariant || "chiaro",
     heroStyle:state.heroStyle || "classico",
     heroCut:state.heroCut || "dritto",
+    heroFade:state.heroFade !== false,
     fontPair:Object.keys(FONT_PAIRS).includes(state.fontPair) ? state.fontPair : "classic",
     pageDecor:"none",
     show_together_counter:Boolean(state.show_together_counter),
@@ -1659,7 +1660,8 @@ function readDesignFields(formNode){
     themeVariant: formNode.querySelector('[name="theme_variant"]')?.value || "chiaro",
     fontPair: formNode.querySelector('[name="font_pair"]')?.value || "classic",
     heroStyle: formNode.querySelector('[name="hero_style"]')?.value || "classico",
-    heroCut: formNode.querySelector('[name="hero_cut"]')?.value || "dritto"
+    heroCut: formNode.querySelector('[name="hero_cut"]')?.value || "dritto",
+    heroFade: formNode.querySelector('[name="hero_fade"]')?.value !== "off"
   };
 }
 
@@ -1887,7 +1889,15 @@ function renderDesignPanel(state){
           ].map(([value,label])=>option(value,label,state.heroCut || "dritto")).join("")}
         </select>
       </label>
-      <p class="field-hint">Scegli come si raccorda la foto con il corpo della pagina su smartphone.</p>
+      <label>Sfumatura sotto la foto
+        <select name="hero_fade">
+          ${[
+            ["on", "Attiva (colore pagina)"],
+            ["off", "Spenta (taglio netto)"]
+          ].map(([value,label])=>option(value,label,state.heroFade === false ? "off" : "on")).join("")}
+        </select>
+      </label>
+      <p class="field-hint">La sfumatura fonde la foto con lo sfondo della pagina. Puoi spegnerla per un distacco netto.</p>
     </details>
   </div>`;
 }
@@ -3488,6 +3498,7 @@ function readFormState(formNode){
     themeVariant:String(form.get("theme_variant") || "chiaro"),
     heroStyle:String(form.get("hero_style") || "classico"),
     heroCut:String(form.get("hero_cut") || "dritto"),
+    heroFade:String(form.get("hero_fade") || "on") !== "off",
     fontPair:String(form.get("font_pair") || "classic"),
     pageDecor:"none",
     show_together_counter:form.get("show_together_counter") === "on",

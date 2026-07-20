@@ -292,3 +292,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Worker v152**: fix scroll touch galleria su smartphone (swipe vs tap) |
 | 2026-07-20 | Cursor | **Worker v153**: galleria contenuta — stop pagina larghissima su mobile |
 | 2026-07-20 | Cursor | **Worker v154**: contrasto footer Moments (ink del tema, leggibile su sfondi densi) |
+| 2026-07-20 | Cursor | **Moments v165 / Worker v155**: toggle sfumatura hero (colore pagina / taglio netto) |

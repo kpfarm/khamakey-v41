@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v156-activation-secure";
+const WORKER_VERSION = "v157-nav-contrast";
 
 export default {
   async fetch(request, env, ctx) {
@@ -1827,15 +1827,15 @@ body.nav-open{overflow:hidden}
 .moment-nav-links a.active,.moment-nav-links a:hover{color:${c.ink};background:rgba(15,23,42,.06)}
 .moment-nav-burger{width:38px;height:38px;border:1px solid ${c.line};border-radius:999px;background:rgba(255,255,255,.8);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-content:center;gap:4px;cursor:pointer;padding:0;transition:background .2s,border-color .2s}
 .moment-nav-burger span{display:block;width:16px;height:1.5px;background:${c.ink};border-radius:999px;opacity:.88}
-.moment-nav-sheet{position:fixed;left:10px;right:10px;bottom:10px;max-height:min(52vh,380px);background:rgba(255,255,255,.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid ${c.lineStrong};border-radius:20px;transform:translateY(105%);transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:39;padding:0 16px max(16px,env(safe-area-inset-bottom));box-shadow:0 10px 40px rgba(17,32,65,.12);overflow:auto}
+.moment-nav-sheet{position:fixed;left:10px;right:10px;bottom:10px;max-height:min(52vh,380px);background:#FFFFFF;color:${cardInk};backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid #E2E8F0;border-radius:20px;transform:translateY(105%);transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:39;padding:0 16px max(16px,env(safe-area-inset-bottom));box-shadow:0 10px 40px rgba(17,32,65,.16);overflow:auto}
 .moment-nav-sheet.open{transform:translateY(0)}
-.moment-nav-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 4px 12px;border-bottom:1px solid ${c.line};margin-bottom:8px}
-.moment-nav-sheet-head span{font-family:${f.ui};font-size:.78rem;font-weight:800;color:${c.ink};opacity:.82;text-transform:uppercase;letter-spacing:.05em}
-.moment-nav-sheet-close{width:34px;height:34px;border:0;border-radius:999px;background:${c.cardSoft};color:${c.ink};font-size:1.25rem;line-height:1;cursor:pointer;display:grid;place-items:center;transition:background .2s}
-.moment-nav-sheet-close:hover{background:${c.line}}
+.moment-nav-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 4px 12px;border-bottom:1px solid #E2E8F0;margin-bottom:8px}
+.moment-nav-sheet-head span{font-family:${f.ui};font-size:.78rem;font-weight:800;color:#0F172A!important;-webkit-text-fill-color:#0F172A;opacity:1;text-transform:uppercase;letter-spacing:.05em}
+.moment-nav-sheet-close{width:34px;height:34px;border:0;border-radius:999px;background:#F1F5F9;color:#0F172A!important;font-size:1.25rem;line-height:1;cursor:pointer;display:grid;place-items:center;transition:background .2s}
+.moment-nav-sheet-close:hover{background:#E2E8F0}
 .moment-nav-sheet ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
-.moment-nav-sheet a{display:flex;align-items:center;min-height:44px;padding:0 14px;border-radius:12px;font-family:${f.ui};font-size:.86rem;font-weight:600;color:${c.ink};text-decoration:none;background:transparent;border:0;transition:background .15s,color .15s}
-.moment-nav-sheet a.active,.moment-nav-sheet a:hover{background:${c.cardSoft};color:${c.ink}}
+.moment-nav-sheet a{display:flex;align-items:center;min-height:44px;padding:0 14px;border-radius:12px;font-family:${f.ui};font-size:.9rem;font-weight:650;color:#0F172A!important;-webkit-text-fill-color:#0F172A;text-decoration:none;background:transparent;border:0;transition:background .15s,color .15s}
+.moment-nav-sheet a.active,.moment-nav-sheet a:hover{background:#F1F5F9;color:#0F172A!important;-webkit-text-fill-color:#0F172A}
 @media(min-width:760px){.moment-nav-links{display:flex}.moment-nav-burger{display:none}.moment-nav-brand{max-width:160px}.moment-nav-sheet{display:none}.moment-nav-backdrop{display:none}}
 .moment-decor{display:none!important}
 .moment-decor-item{display:none!important}

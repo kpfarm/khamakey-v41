@@ -296,3 +296,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Admin/Moments v166 / Worker v156 / SQL v160**: codice attivazione solo in confezione; chip `/m/slug` opaco |
 | 2026-07-20 | Cursor | **Admin v167**: Officina/Admin usabili da smartphone (menu off-canvas, topbar sticky, filtri/tabelle touch) |
 | 2026-07-20 | Cursor | **Admin v168**: fix Modifica magazzino Officina + lista magazzino a card su mobile |
+| 2026-07-20 | Cursor | **Worker v157**: contrasto menu sezioni pagina pubblica (testo scuro su foglio bianco) |

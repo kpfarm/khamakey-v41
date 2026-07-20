@@ -13,6 +13,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
 ### Fixed
+- **Worker v157 — Contrasto menu sezioni pubblico (2026-07-20, Cursor)** — Worker only
+  - Foglio menu sempre bianco con testo `#0F172A` (non più `ink` del tema chiaro-su-chiaro).
 - **Admin / Officina v168 — Modifica magazzino (2026-07-20, Cursor)** — Pages only
   - `renderAgentOptions` non crasha più su moments-admin (select Business assenti); drawer codice si apre; lista magazzino a card su smartphone.
 

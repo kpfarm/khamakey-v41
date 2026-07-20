@@ -12,6 +12,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 - **Moments v165 / Worker v155 — Sfumatura hero on/off (2026-07-20, Cursor)** — Pages + Worker
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
+### Changed
+- **Admin / Officina v167 — Mobile UX (2026-07-20, Cursor)** — Pages only
+  - Menu laterale off-canvas, topbar sticky, pulsanti/filtri touch, tabelle scrollabili, drawer a foglio dal basso su smartphone.
+
 ### Fixed
 - **Moments Admin v166 / Worker v156 / SQL v160 — Codice attivazione non più pubblico via NFC (2026-07-20, Cursor)** — Pages + Worker + SQL
   - Pagina pre-attivazione brand Moments **senza** codice; slug opaco ≠ codice; chip = `/m/slug`; codice solo CSV/PDF inserto; `/k/codice` non risolve pezzi available.

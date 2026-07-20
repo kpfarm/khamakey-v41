@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=166";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=167";
 import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=164";
 import {
   generateMomentSku,
@@ -803,6 +803,21 @@ function isAdvancedTab(tab){
   return Boolean(button?.hasAttribute("data-advanced-only"));
 }
 
+function setAdminNavOpen(open){
+  const shell = document.getElementById("adminShell");
+  const toggle = document.getElementById("adminMenuToggle");
+  if(!shell) return;
+  shell.classList.toggle("nav-open", Boolean(open));
+  if(toggle){
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    toggle.setAttribute("aria-label", open ? "Chiudi menu" : "Apri menu");
+  }
+}
+
+function closeAdminNav(){
+  setAdminNavOpen(false);
+}
+
 function switchTab(tab){
   if(isSimpleMode() && isAdvancedTab(tab)){
     tab = SIMPLE_TAB_REDIRECT[tab] || "dashboard";
@@ -822,6 +837,7 @@ function switchTab(tab){
   if(panelGuide && !panelGuide.hidden){
     panelGuide.classList.toggle("collapsed", isGuideCollapsed());
   }
+  closeAdminNav();
   try{
     history.replaceState(null, "", `#${tab}`);
   }catch{ /* ignore */ }
@@ -5253,6 +5269,18 @@ async function init(){
 
 document.querySelectorAll("[data-admin-tab]").forEach(button=>{
   button.addEventListener("click",()=>switchTab(button.dataset.adminTab));
+});
+
+document.getElementById("adminMenuToggle")?.addEventListener("click",()=>{
+  const shell = document.getElementById("adminShell");
+  setAdminNavOpen(!shell?.classList.contains("nav-open"));
+});
+document.getElementById("adminNavBackdrop")?.addEventListener("click",closeAdminNav);
+window.addEventListener("keydown",event=>{
+  if(event.key === "Escape") closeAdminNav();
+});
+window.addEventListener("resize",()=>{
+  if(window.matchMedia("(min-width:901px)").matches) closeAdminNav();
 });
 
 simpleModeToggle?.addEventListener("click",()=>{

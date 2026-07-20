@@ -294,3 +294,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-20 | Cursor | **Worker v154**: contrasto footer Moments (ink del tema, leggibile su sfondi densi) |
 | 2026-07-20 | Cursor | **Moments v165 / Worker v155**: toggle sfumatura hero (colore pagina / taglio netto) |
 | 2026-07-20 | Cursor | **Admin/Moments v166 / Worker v156 / SQL v160**: codice attivazione solo in confezione; chip `/m/slug` opaco |
+| 2026-07-20 | Cursor | **Admin v167**: Officina/Admin usabili da smartphone (menu off-canvas, topbar sticky, filtri/tabelle touch) |

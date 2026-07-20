@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v148** (magazzino NFC Business, clienti Business arricchiti, provisioning staff; include v133 Spedizioni NFC, supporto + CRM operativo, dashboard ordini/incassi, menu 4 intenti, modalità semplice, gestione provvigioni, magazzino NFC Moments con creazione SKU/stock).
+Versione attuale: **v167** (mobile UX: menu off-canvas + topbar sticky; magazzino NFC Moments/Business; supporto; dashboard; modalità semplice).
 
 ---
 

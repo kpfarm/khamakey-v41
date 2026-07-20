@@ -9,6 +9,22 @@ html[data-admin-product="moments"] .admin-shell:not(.locked){
   grid-template-columns:272px 1fr;
 }
 
+@media(max-width:900px){
+  html[data-admin-product="moments"] .admin-shell:not(.locked){
+    grid-template-columns:1fr;
+  }
+  html[data-admin-product="moments"] .moments-flow-steps{
+    grid-template-columns:1fr;
+  }
+  html[data-admin-product="moments"] .input-with-action{
+    flex-direction:column;
+  }
+  html[data-admin-product="moments"] .moment-wizard-actions .primary-action,
+  html[data-admin-product="moments"] .moment-wizard-actions .ghost-button{
+    width:100%;
+  }
+}
+
 html[data-admin-product="moments"] .admin-sidebar{
   background:linear-gradient(180deg,#0a1228 0%,#091024 100%);
   border-right:1px solid rgba(159,232,112,0.12);

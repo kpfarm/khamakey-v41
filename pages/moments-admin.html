@@ -2,14 +2,14 @@
 <html lang="it" data-admin-product="moments" class="admin-auth-locked">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>KhamaKey Moments — Officina NFC</title>
   <link rel="icon" href="khamakey-favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=166">
-  <link rel="stylesheet" href="moments-admin.css?v=166">
+  <link rel="stylesheet" href="admin.css?v=167">
+  <link rel="stylesheet" href="moments-admin.css?v=167">
 </head>
 <body>
   <main class="admin-shell locked" id="adminShell">
@@ -45,17 +45,23 @@
         </section>
       </nav>
     </aside>
+    <button type="button" class="admin-nav-backdrop" id="adminNavBackdrop" aria-label="Chiudi menu" tabindex="-1"></button>
 
     <section class="admin-main">
       <header class="admin-topbar" id="adminTopbar" hidden>
-        <div>
-          <p class="eyebrow">KhamaKey Moments</p>
-          <h1 id="adminTitle">Oggi <span class="moments-console-tag">Officina NFC</span></h1>
-          <p class="admin-subtitle" id="adminSubtitle">Panoramica e priorità del giorno.</p>
+        <div class="admin-topbar-lead">
+          <button type="button" class="admin-menu-toggle" id="adminMenuToggle" aria-controls="adminSidebar" aria-expanded="false" aria-label="Apri menu">
+            <span class="admin-menu-bars" aria-hidden="true"></span>
+          </button>
+          <div class="admin-topbar-titles">
+            <p class="eyebrow">KhamaKey Moments</p>
+            <h1 id="adminTitle">Oggi <span class="moments-console-tag">Officina NFC</span></h1>
+            <p class="admin-subtitle" id="adminSubtitle">Panoramica e priorità del giorno.</p>
+          </div>
         </div>
         <div class="admin-user">
           <button type="button" class="simple-mode-toggle" id="simpleModeToggle" aria-pressed="true" title="Nasconde opzioni tecniche">Modalità semplice</button>
-          <button type="button" class="small-action guide-toggle-top" id="panelGuideToggleTop" title="Mostra o nascondi la guida">Guida sezione</button>
+          <button type="button" class="small-action guide-toggle-top" id="panelGuideToggleTop" title="Mostra o nascondi la guida">Guida</button>
           <span id="adminEmail">Verifica sessione...</span>
           <a href="./moments.html" class="ghost-link moments-link" target="_blank" rel="noopener">Area clienti</a>
           <button id="adminLogout" type="button">Esci</button>
@@ -837,5 +843,5 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=166"></script>
+  <script type="module" src="admin.js?v=167"></script>
 </body>

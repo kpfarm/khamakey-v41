@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v148-cover-zoom";
+const WORKER_VERSION = "v149-gallery";
 
 export default {
   async fetch(request, env, ctx) {
@@ -1731,15 +1731,61 @@ var lb=document.getElementById("momentLightbox");
 if(lb){
 var media=[];document.querySelectorAll(".moment-gallery-data").forEach(function(node){try{media=media.concat(JSON.parse(node.textContent||"[]"));}catch(e){}});
 var currentIndex=0;
-function paintMedia(){var item=media[currentIndex];if(!item)return;var wrap=document.getElementById("momentLightboxMedia");document.getElementById("momentLightboxTitle").textContent=item.title||"";document.getElementById("momentLightboxDesc").textContent=item.description||"";var counter=document.getElementById("momentLightboxCounter");if(counter)counter.textContent=media.length>1?(currentIndex+1)+" / "+media.length:"";wrap.innerHTML=item.type==="video"?'<video src="'+item.url+'" controls playsinline autoplay></video>':item.type==="audio"?'<audio src="'+item.url+'" controls autoplay></audio>':'<img src="'+item.url+'" alt="">';}
-function openMedia(i){if(!media.length)return;currentIndex=(i+media.length)%media.length;paintMedia();lb.classList.add("open");lb.setAttribute("aria-hidden","false");}
-function closeLightbox(){lb.classList.remove("open");lb.setAttribute("aria-hidden","true");document.getElementById("momentLightboxMedia").innerHTML="";}
-document.querySelectorAll("[data-media-open]").forEach(function(node){node.addEventListener("click",function(){openMedia(Number(node.getAttribute("data-media-open")));});});
+function paintMedia(){
+  var item=media[currentIndex];
+  if(!item)return;
+  var wrap=document.getElementById("momentLightboxMedia");
+  var titleEl=document.getElementById("momentLightboxTitle");
+  var descEl=document.getElementById("momentLightboxDesc");
+  var counter=document.getElementById("momentLightboxCounter");
+  titleEl.textContent=item.title||"";
+  titleEl.hidden=!item.title;
+  descEl.textContent=item.description||"";
+  descEl.hidden=!item.description;
+  if(counter)counter.textContent=media.length>1?(currentIndex+1)+" / "+media.length:"";
+  wrap.innerHTML=item.type==="video"
+    ?'<video src="'+item.url+'" controls playsinline autoplay></video>'
+    :item.type==="audio"
+      ?'<audio src="'+item.url+'" controls autoplay></audio>'
+      :'<img src="'+item.url+'" alt="'+(item.title||"").replace(/"/g,"&quot;")+'">';
+}
+function openMedia(i){
+  if(!media.length)return;
+  currentIndex=(i+media.length)%media.length;
+  paintMedia();
+  lb.classList.add("open");
+  lb.setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden";
+}
+function closeLightbox(){
+  lb.classList.remove("open");
+  lb.setAttribute("aria-hidden","true");
+  document.getElementById("momentLightboxMedia").innerHTML="";
+  document.body.style.overflow="";
+}
+document.addEventListener("click",function(e){
+  if(e.target.closest(".moment-lightbox"))return;
+  var node=e.target.closest("[data-media-open]");
+  if(!node)return;
+  e.preventDefault();
+  openMedia(Number(node.getAttribute("data-media-open")));
+});
+document.addEventListener("keydown",function(e){
+  var node=e.target.closest("[data-media-open]");
+  if(node&&(e.key==="Enter"||e.key===" ")){
+    e.preventDefault();
+    openMedia(Number(node.getAttribute("data-media-open")));
+    return;
+  }
+  if(!lb.classList.contains("open"))return;
+  if(e.key==="Escape")closeLightbox();
+  if(e.key==="ArrowLeft")openMedia(currentIndex-1);
+  if(e.key==="ArrowRight")openMedia(currentIndex+1);
+});
 document.getElementById("momentLightboxClose")?.addEventListener("click",closeLightbox);
 document.getElementById("momentLightboxPrev")?.addEventListener("click",function(e){e.stopPropagation();openMedia(currentIndex-1);});
 document.getElementById("momentLightboxNext")?.addEventListener("click",function(e){e.stopPropagation();openMedia(currentIndex+1);});
 lb.addEventListener("click",function(e){if(e.target===lb)closeLightbox();});
-document.addEventListener("keydown",function(e){if(!lb.classList.contains("open"))return;if(e.key==="Escape")closeLightbox();if(e.key==="ArrowLeft")openMedia(currentIndex-1);if(e.key==="ArrowRight")openMedia(currentIndex+1);});
 }
 })();`;
 }
@@ -1907,10 +1953,11 @@ body.nav-open{overflow:hidden}
 .moment-lightbox.open{opacity:1;pointer-events:auto}
 .moment-lightbox-card{max-width:min(94vw,760px);width:100%;text-align:center;color:#fff;transform:scale(.95);transition:transform .28s cubic-bezier(.22,1,.36,1)}
 .moment-lightbox.open .moment-lightbox-card{transform:scale(1)}
-.moment-lightbox-card img,.moment-lightbox-card video{max-width:100%;max-height:62vh;border-radius:16px;object-fit:contain;background:#111;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.moment-lightbox-card img,.moment-lightbox-card video{max-width:100%;max-height:min(72vh,720px);border-radius:16px;object-fit:contain;background:#111;box-shadow:0 12px 40px rgba(0,0,0,.5)}
 .moment-lightbox-card audio{width:100%;margin-top:12px}
 .moment-lightbox-title{font-family:${f.body};font-size:1.35rem;margin:14px 0 6px;text-shadow:0 1px 4px rgba(0,0,0,.5)}
-.moment-lightbox-desc{font-size:.95rem;opacity:.85;line-height:1.55;margin:0 auto;max-width:520px}
+.moment-lightbox-title[hidden],.moment-lightbox-desc[hidden]{display:none!important}
+.moment-lightbox-desc{font-size:.98rem;opacity:.92;line-height:1.55;margin:0 auto;max-width:520px;color:rgba(255,255,255,.92)}
 .moment-lightbox-close{position:absolute;top:max(16px,env(safe-area-inset-top));right:16px;width:44px;height:44px;border:0;border-radius:999px;background:#fff;color:#111;font-size:1.4rem;cursor:pointer;z-index:2;display:grid;place-items:center;transition:background .2s,transform .2s}
 .moment-lightbox-close:hover{background:#eee;transform:scale(1.05)}
 .moment-lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border:0;border-radius:999px;background:rgba(255,255,255,.92);color:#111;font-size:1.8rem;line-height:1;cursor:pointer;z-index:2;display:grid;place-items:center;transition:background .2s,transform .2s}
@@ -1941,10 +1988,18 @@ body.nav-open{overflow:hidden}
 .moment-number{flex:1 1 100px;max-width:140px;text-align:center;padding:16px 10px;border-radius:18px;background:${c.cardSoft};border:1px solid ${c.line};border-top:3px solid ${c.go};box-shadow:none}
 .moment-number b{display:block;font-size:clamp(1.6rem,7vw,2rem);font-weight:700;font-style:normal;color:${c.go};line-height:1;font-family:${f.ui}}
 .moment-number small{display:block;font-family:${f.ui};font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:${c.muted};margin-top:8px;line-height:1.35}
-.moment-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
-.moment-gallery img,.moment-gallery .moment-gallery-figure img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;border:1px solid ${c.line};box-shadow:0 6px 18px rgba(0,0,0,.06);height:auto;max-height:none;display:block}
-.moment-gallery .moment-gallery-figure{margin:0;display:grid;gap:6px;min-width:0;width:100%}
-.moment-gallery .moment-gallery-caption{font-size:.68rem;max-width:100%;padding:0 2px}
+.moment-gallery-hint{margin:4px 0 0;font-family:${f.ui};font-size:.78rem;font-weight:600;color:${c.muted};text-align:center}
+.moment-gallery{display:grid;grid-template-columns:1fr;gap:18px;margin-top:14px}
+.moment-gallery-figure{margin:0;display:grid;gap:10px;min-width:0;width:100%;cursor:pointer;outline:none;border:0;background:transparent;padding:0;text-align:left}
+.moment-gallery-figure:focus-visible .moment-gallery-frame{box-shadow:0 0 0 3px ${c.go}66}
+.moment-gallery-frame{position:relative;overflow:hidden;border-radius:18px;aspect-ratio:4/5;background:#111;box-shadow:0 10px 28px rgba(15,23,42,.12)}
+.moment-gallery-frame img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
+.moment-gallery-figure:hover .moment-gallery-frame img,.moment-gallery-figure:focus-visible .moment-gallery-frame img{transform:scale(1.03)}
+.moment-gallery-zoom-hint{position:absolute;right:10px;bottom:10px;width:34px;height:34px;border-radius:999px;background:rgba(255,255,255,.94);color:#111;display:grid;place-items:center;font-size:1.15rem;font-weight:800;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.moment-gallery-meta{display:grid;gap:4px;padding:0 2px}
+.moment-gallery-caption{font-family:${f.ui};font-size:.95rem;font-weight:800;color:${cardInk};line-height:1.3;max-width:100%}
+.moment-gallery-desc{font-family:${f.body};font-size:.9rem;font-weight:500;color:${c.muted};line-height:1.5;max-width:100%}
+@media(min-width:560px){.moment-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.moment-gallery-frame{aspect-ratio:1/1}}
 .moment-letter{padding:26px 20px;margin-top:8px;border-left:3px solid ${c.go}!important;position:relative;box-shadow:none}
 .moment-letter-to{font-style:italic;color:${c.muted};font-weight:600;margin:0 0 12px}
 .moment-letter-sign{display:block;margin-top:18px;font-family:${f.display};font-size:1.6rem;color:${c.go}}
@@ -2094,14 +2149,12 @@ body.nav-open{overflow:hidden}
 .moment-gallery-group-label{font-family:${f.ui};font-size:.62rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${c.muted};text-align:center;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid ${c.line}}
 .moment-gallery-group-items{display:grid;gap:12px}
 .moment-media-list{display:grid;gap:12px}
-.moment-gallery-figure{margin:0;display:grid;gap:6px;justify-items:center}
-.moment-gallery-caption{font-family:${f.ui};font-size:.72rem;font-weight:700;color:${cardInk};text-align:center;max-width:240px;line-height:1.35}
 .moment-media-list .moment-media-card{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:76px;padding:12px;background:${c.cardSoft};border:1px solid ${c.line};border-radius:14px;box-shadow:none;transition:border-color .2s,background .2s}
 .moment-media-list .moment-media-card:hover{background:${c.surface};border-color:${c.lineStrong}}
 .moment-media-card-audio{min-height:88px}
 .moment-footer{text-align:center;color:color-mix(in srgb, ${c.bl} 35%, ${c.in}) !important;opacity:0.75;font-family:${f.ui};font-size:12px;padding:16px 20px max(28px,env(safe-area-inset-bottom))}
 @media(prefers-reduced-motion:reduce){.hero-in,.rv{opacity:1;transform:none;transition:none}.rv.on .moment-journey-item,.rv.on .moment-promise,.rv.on .moment-ritual,.rv.on .moment-number,.rv.on .moment-dream{animation:none}.moment-sealed-icon,.moment-decor-item{animation:none}.moment-decor{display:none}}
-@media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:24px;box-shadow:0 24px 70px rgba(17,32,65,.08);background:${c.surface}}.moment-content{padding:20px 20px 36px}.moment-gallery-scroll img,.moment-gallery-scroll .moment-gallery-figure,.moment-gallery-scroll .moment-gallery-figure img{width:220px}.moment-gallery{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}}
+@media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:24px;box-shadow:0 24px 70px rgba(17,32,65,.08);background:${c.surface}}.moment-content{padding:20px 20px 36px}.moment-gallery-scroll img,.moment-gallery-scroll .moment-gallery-figure,.moment-gallery-scroll .moment-gallery-figure img{width:220px}.moment-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}}
 .moment-cut-arco #moment-hero {
   clip-path: ellipse(95% 100% at 50% 0%) !important;
   margin-bottom: -15px !important;
@@ -2674,40 +2727,37 @@ main.moment-type-travel {
   box-shadow: 0 14px 28px -2px color-mix(in srgb, ${colors.go} 40%, transparent) !important;
 }
 
-/* Widescreen Asymmetric Gallery */
+/* Travel gallery — foto grandi, caption sempre visibili (niente overflow sul figure) */
 .moment-type-travel .moment-gallery {
   display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-columns: 1fr !important;
   gap: 20px !important;
 }
-
+@media(min-width:560px){
+  .moment-type-travel .moment-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .moment-type-travel .moment-gallery figure:nth-child(3n) {
+    grid-column: span 2 !important;
+  }
+}
 .moment-type-travel .moment-gallery figure {
   margin: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+.moment-type-travel .moment-gallery .moment-gallery-frame {
   border-radius: 20px !important;
   box-shadow: 0 15px 35px -5px rgba(15,23,42,0.06) !important;
   border: 1px solid rgba(255,255,255,0.8) !important;
 }
-
-.moment-type-travel .moment-gallery figure:nth-child(3n) {
-  grid-column: span 2 !important;
+.moment-type-travel .moment-gallery figure:nth-child(3n) .moment-gallery-frame {
+  aspect-ratio: 16/10 !important;
 }
-
-.moment-type-travel .moment-gallery img {
-  border-radius: 0 !important;
-  aspect-ratio: 1.1 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-.moment-type-travel .moment-gallery figure:nth-child(3n) img {
-  aspect-ratio: 1.8 !important;
-}
-
-.moment-type-travel .moment-gallery figure:hover img {
-  transform: scale(1.05) !important;
+.moment-type-travel .moment-gallery figure:hover .moment-gallery-frame img {
+  transform: scale(1.04) !important;
 }
 
 /* Dreams Bucket List */
@@ -3366,14 +3416,24 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     const media = normalizeMomentMedia(section).filter(item => item.type === "image");
     const headBlock = head(section.title || "Galleria foto");
     if (!media.length) {
-      return `<article class="${rv}">${headBlock}<p class="moment-gallery-empty">Le foto verranno aggiunte presto.</p></article>`;
+      return `<article class="${rv} moment-card-gallery">${headBlock}<p class="moment-gallery-empty">Le foto verranno aggiunte presto.</p></article>`;
     }
     const cards = media.map((item, idx) => {
-      const caption = item.title ? `<span class="moment-gallery-caption">${escapeHtml(item.title)}</span>` : "";
-      return `<figure class="moment-gallery-figure"><img src="${attr(item.url)}" alt="${attr(item.title || "")}" loading="lazy" data-media-open="${idx}">${caption}</figure>`;
+      const title = item.title ? `<strong class="moment-gallery-caption">${escapeHtml(item.title)}</strong>` : "";
+      const desc = item.description ? `<span class="moment-gallery-desc">${escapeHtml(item.description)}</span>` : "";
+      const meta = (title || desc) ? `<figcaption class="moment-gallery-meta">${title}${desc}</figcaption>` : "";
+      const label = item.title || "Apri foto a schermo intero";
+      return `<figure class="moment-gallery-figure" role="button" tabindex="0" data-media-open="${idx}" aria-label="${attr(label)}">
+        <div class="moment-gallery-frame">
+          <img src="${attr(item.url)}" alt="${attr(item.title || "")}" loading="lazy" decoding="async">
+          <span class="moment-gallery-zoom-hint" aria-hidden="true">＋</span>
+        </div>
+        ${meta}
+      </figure>`;
     }).join("");
-    const json = escapeHtml(JSON.stringify(media));
-    return `<article class="${rv}">${head(section.title || "Galleria foto")}<div class="moment-gallery">${cards}</div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
+    const payload = media.map(({ type, url, title, description }) => ({ type, url, title, description }));
+    const json = JSON.stringify(payload).replace(/</g, "\\u003c");
+    return `<article class="${rv} moment-card-gallery">${headBlock}<p class="moment-gallery-hint">Tocca una foto per ingrandirla</p><div class="moment-gallery">${cards}</div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
   }
 
   if (key === "video") {

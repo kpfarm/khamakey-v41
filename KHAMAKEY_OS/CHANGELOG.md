@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **Moments v164 / Worker v149 — Galleria foto leggibile (2026-07-20, Cursor)** — Pages + Worker
+  - Foto più grandi, titolo+descrizione sotto ciascuna, tap per lightbox a schermo intero (fix overflow che tagliava i testi).
 - **Moments v163 / Worker v148 — Zoom copertina migliorato (2026-07-20, Cursor)** — Pages + Worker
   - Slider continuo 100–200% (step 5); zoom sul punto di fuoco toccato; pagina pubblica allineata fino a 200%.
 - **Moments v162 / Worker v147 — Sfondi densi + rosso + contrasto card (2026-07-20, Cursor)** — Pages + Worker

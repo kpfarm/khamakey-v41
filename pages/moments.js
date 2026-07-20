@@ -35,7 +35,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=163";
+} from "./moments-media-ui.js?v=164";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -45,7 +45,7 @@ import {
   bindJourneyEditor,
   uploadJourneyStepPhoto
 } from "./moments-journey-ui.js?v=144";
-import { migrateLetterMediaSection } from "./moment-media.js?v=163";
+import { migrateLetterMediaSection } from "./moment-media.js?v=164";
 import { LIST_SECTION_MODES, itemsFromSection } from "./moment-list-items.js";
 import {
   renderListItemsPanel,

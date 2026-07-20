@@ -13,7 +13,7 @@ export const MAX_LETTER_AUDIO = 1;
 export const MAX_LETTER_ITEMS = MAX_LETTER_IMAGES + MAX_LETTER_VIDEOS + MAX_LETTER_AUDIO;
 
 export const MEDIA_LIMITS_HINT =
-  `Fino a ${MAX_GALLERY_ITEMS} foto (8 MB) — titolo e descrizione visibili ingrandendo in pagina.`;
+  `Fino a ${MAX_GALLERY_ITEMS} foto (8 MB) — titolo e descrizione compaiono sotto ogni foto e nell’ingrandimento.`;
 
 export const VIDEO_SECTION_HINT =
   `Un solo video (MP4/MOV, max 25 MB) con titolo e descrizione. Per audio usa la sezione Musica.`;

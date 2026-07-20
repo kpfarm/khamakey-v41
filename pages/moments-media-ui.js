@@ -13,7 +13,7 @@ import {
   mediaId,
   mediaLimitsForKey,
   VIDEO_SECTION_HINT
-} from "./moment-media.js?v=163";
+} from "./moment-media.js?v=164";
 
 let mediaEditContext = null;
 
@@ -50,7 +50,7 @@ export function renderGalleryGrid(formNode,key){
     const hint = group.addHint
       ? `<p class="field-hint gallery-type-hint">${group.addHint}</p>`
       : key === "gallery" && group.type === "image"
-        ? `<p class="field-hint gallery-type-hint">In pagina le foto si aprono ingrandite con titolo e descrizione.</p>`
+        ? `<p class="field-hint gallery-type-hint">In pagina: foto grandi, titolo e descrizione sotto ciascuna; tap per ingrandire.</p>`
         : "";
     return `<section class="gallery-type-block" data-gallery-type="${group.type}">
       <div class="gallery-type-head">

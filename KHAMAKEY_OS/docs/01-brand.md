@@ -35,10 +35,12 @@ Asset in [`../assets/brand/`](../assets/brand/):
 | File | Uso |
 |------|-----|
 | `khamakey-moments-brand-guide.jpg` | Style guide completa |
-| `khamakey-moments-wordmark-horizontal-on-dark.jpg` | Wordmark rosa+bianco su nero (UI scura) |
-| `khamakey-moments-wordmark-horizontal.jpg` | Variante precedente |
-| `khamakey-moments-wordmark-stacked.jpg` | Wordmark stacked |
-| `pages/khamakey-moments-wordmark.jpg` | Auth / topbar / boot (deploy Pages) |
+| `khamakey-moments-wordmark.png` | Wordmark rosa+bianco, fondo **trasparente** (topbar navy / auth scura) |
+| `khamakey-moments-wordmark-on-light.png` | Stesso wordmark con “key Moments” in Blu Notte (boot / sfondi chiari) |
+| `khamakey-moments-wordmark-horizontal-on-dark.jpg` | Sorgente JPG su nero (archivio) |
+| `khamakey-moments-wordmark-stacked.jpg` | Wordmark stacked (archivio) |
+| `pages/khamakey-moments-wordmark.png` | Deploy Pages — topbar + auth |
+| `pages/khamakey-moments-wordmark-on-light.png` | Deploy Pages — boot screen |
 
 **Palette Moments**
 

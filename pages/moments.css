@@ -23,7 +23,7 @@
   --brand-gradient:linear-gradient(135deg,var(--rosa-ricordo) 0%,var(--blu-notte) 100%);
 }
 *{box-sizing:border-box}body{margin:0;min-height:100dvh;font-family:var(--font-ui);background:radial-gradient(circle at 12% 8%, rgba(217,140,149,0.14) 0%, transparent 42%), radial-gradient(circle at 90% 90%, rgba(170,98,108,0.10) 0%, transparent 45%), var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}button,input,textarea,select{font:inherit;font-family:var(--font-ui)}button{cursor:pointer}a{color:inherit}[hidden]{display:none!important}
-.auth-brand .brand-logo{display:block;width:min(300px,78%);height:auto;object-fit:contain;margin-bottom:28px;background:none;border-radius:0;padding:0;position:relative;z-index:1}.eyebrow{margin:0 0 6px;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--rosa-luce)}h1,h2,h3{font-family:var(--font-ui);color:var(--navy);margin:0;font-weight:600;letter-spacing:0}p{line-height:1.55}
+.auth-brand .brand-logo{display:block;width:min(320px,86%);height:auto;object-fit:contain;margin:0 0 28px;background:transparent;border-radius:0;padding:0;position:relative;z-index:1;box-shadow:none}.eyebrow{margin:0 0 6px;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--rosa-luce)}h1,h2,h3{font-family:var(--font-ui);color:var(--navy);margin:0;font-weight:600;letter-spacing:0}p{line-height:1.55}
 .auth-brand h1,.auth-brand h2,.auth-brand h3{color:#fff;position:relative;z-index:1}
 
 /* Auth */
@@ -31,7 +31,7 @@ body.session-pending #momentsAuth,
 body.session-pending #momentsApp{display:none}
 .moments-boot{min-height:100dvh;display:grid;place-items:center;background:radial-gradient(circle at 12% 8%, rgba(217,140,149,0.16) 0%, transparent 42%), radial-gradient(circle at 90% 90%, rgba(7,26,60,0.06) 0%, transparent 45%), var(--bg);padding:24px}
 .moments-boot .boot-card{max-width:420px;width:100%;padding:28px 24px;background:rgba(255,249,245,0.96);border:1px solid var(--border);border-radius:18px;text-align:center;box-shadow:0 8px 28px -8px rgba(7,26,60,0.10)}
-.moments-boot .boot-card .brand-logo{height:36px;width:auto;margin:0 auto 12px;display:block;border-radius:8px}
+.moments-boot .boot-card .brand-logo{height:40px;width:auto;max-width:min(280px,90%);margin:0 auto 14px;display:block;border-radius:0;background:transparent;box-shadow:none}
 .moments-boot .boot-card h2{margin:8px 0;font-size:1.35rem;color:var(--navy)}
 .moments-boot .boot-card p{color:var(--muted);margin:0}
 .moments-auth{min-height:100dvh;display:grid;grid-template-columns:minmax(360px,.95fr) minmax(400px,1.05fr)}
@@ -117,7 +117,7 @@ textarea{min-height:86px;resize:vertical}
 .moments-app{min-height:100dvh;background:radial-gradient(circle at 10% 10%, rgba(77,184,232,0.04) 0%, transparent 40%), radial-gradient(circle at 90% 90%, rgba(76,175,39,0.04) 0%, transparent 40%), var(--bg)}
 .topbar{position:sticky;top:0;z-index:200;height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 12px;background:var(--navy);color:#fff;box-shadow:0 2px 12px rgba(27,42,94,.25)}
 .topbar-left{display:flex;align-items:center;gap:8px;min-width:0}
-.topbar-logo{display:block;width:148px;height:28px;object-fit:contain;object-position:left center;border-radius:6px}
+.topbar-logo{display:block;width:168px;height:30px;object-fit:contain;object-position:left center;border-radius:0;background:transparent;box-shadow:none}
 .topbar-title{margin:0;font-family:var(--font-ui);font-size:.92rem;font-weight:600;color:rgba(255,255,255,.92);white-space:nowrap}
 .topbar-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .user-menu-wrap{position:relative}

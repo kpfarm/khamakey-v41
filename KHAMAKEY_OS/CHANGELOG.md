@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- **Moments v156 — Logo senza rettangolo / senza doppio Moments (2026-07-20, Cursor)** — Pages only
+  - Wordmark PNG con nero → trasparente; topbar/auth senza titolo “Moments” duplicato; boot usa variante on-light.
 - **Moments v153 — Brand ufficiale logo + palette (2026-07-20, Cursor)** — Pages + vault
   - Wordmark Moments in auth/topbar; CSS tokens Rosa Ricordo / Blu Notte / Rosa Luce / Avorio.
   - Style guide e asset in `KHAMAKEY_OS/assets/brand/`. Solo chrome editor — nessuna logica.

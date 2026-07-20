@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Moments v151 — WhatsApp non blocca più Salva (2026-07-20, Cursor)** — Pages only
+  - Mancanza WhatsApp = avviso (banner/UI); il salvataggio procede sempre. RSVP senza WA resta nascosto in pagina pubblica.
+  - Pulsanti Salva chiamano direttamente `saveMoment` (niente blocco HTML).
 - **Moments v150 — Salva non faceva nulla (2026-07-20, Cursor)** — Pages only
   - Con RSVP attivo e WhatsApp vuoto (caso reale in prod) il browser bloccava il submit su campo nascosto, senza feedback.
   - Form `novalidate`; validazione WhatsApp solo in JS con messaggio sul banner/topbar; click Salva esplicito.

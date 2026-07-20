@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **Worker v152 — Scroll touch galleria mobile (2026-07-20, Cursor)** — Worker only
+  - Swipe laterale funziona di nuovo su iPhone; tap/＋ apre lightbox solo se non stavi scorrendo; overflow pagina non blocca più lo scroll.
+
 ### Changed
 - **Worker v150 — Galleria scroll laterale (2026-07-20, Cursor)** — Worker only
   - Galleria a scorrimento orizzontale (meno spazio verticale); descrizioni con contrasto cardInk, senza bold; lightbox ＋ invariato.

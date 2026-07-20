@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v151-gallery-scroll";
+const WORKER_VERSION = "v152-gallery-touch";
 
 export default {
   async fetch(request, env, ctx) {
@@ -1763,12 +1763,22 @@ function closeLightbox(){
   document.getElementById("momentLightboxMedia").innerHTML="";
   document.body.style.overflow="";
 }
-document.addEventListener("click",function(e){
-  if(e.target.closest(".moment-lightbox"))return;
-  var node=e.target.closest("[data-media-open]");
-  if(!node)return;
-  e.preventDefault();
-  openMedia(Number(node.getAttribute("data-media-open")));
+/* Tap vs swipe: lo scroll laterale deve vincere sul telefono */
+document.querySelectorAll(".moment-gallery-scroll").forEach(function(scroller){
+  var startX=0,startY=0,dragging=false;
+  scroller.addEventListener("pointerdown",function(e){
+    startX=e.clientX;startY=e.clientY;dragging=false;
+  },{passive:true});
+  scroller.addEventListener("pointermove",function(e){
+    if(Math.abs(e.clientX-startX)>12||Math.abs(e.clientY-startY)>12)dragging=true;
+  },{passive:true});
+  scroller.addEventListener("click",function(e){
+    var node=e.target.closest("[data-media-open]");
+    if(!node||!scroller.contains(node))return;
+    if(dragging){e.preventDefault();e.stopPropagation();return;}
+    e.preventDefault();
+    openMedia(Number(node.getAttribute("data-media-open")));
+  });
 });
 document.addEventListener("keydown",function(e){
   var node=e.target.closest("[data-media-open]");
@@ -1829,7 +1839,8 @@ body.nav-open{overflow:hidden}
 .moment-decor{display:none!important}
 .moment-decor-item{display:none!important}
 @keyframes momentDecorFloat{0%,100%{transform:translate3d(0,0,0) rotate(0deg)}50%{transform:translate3d(0,-12px,0) rotate(6deg)}}
-.moment-page{width:100%;max-width:100%;min-height:100dvh;margin:0;background:transparent;overflow-x:clip;position:relative}
+.moment-page{width:100%;max-width:100%;min-height:100dvh;margin:0;background:transparent;overflow-x:visible;position:relative}
+.moment-content{overflow-x:visible;max-width:100%}
 .moment-hero{position:relative;min-height:min(94dvh,760px);padding:max(120px,env(safe-area-inset-top) + 40px) 24px max(80px,env(safe-area-inset-bottom));text-align:center;color:#fff;background:linear-gradient(145deg,${c.bl},${c.g2 || c.hero});overflow:hidden;display:grid;align-content:end}
 .hero-fullscreen .moment-hero{min-height:min(100dvh,780px)}
 .hero-romantico .moment-hero{min-height:min(88dvh,700px)}
@@ -1893,7 +1904,7 @@ body.nav-open{overflow:hidden}
 .moment-counter-unit b{display:block;font-size:clamp(1.8rem,8vw,2.4rem);font-weight:700;font-style:normal;line-height:1;color:${c.go}!important;font-family:${f.ui}}
 .moment-counter-unit small{display:block;font-family:${f.ui};font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:${c.muted};margin-top:8px}
 .moment-card{position:relative;overflow:hidden;padding:32px 20px 28px;margin:0;max-width:none}
-.moment-card-gallery{overflow:visible}
+.moment-card-gallery{overflow:visible;touch-action:manipulation}
 .moment-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,rgba(15,23,42,.03),rgba(15,23,42,.01))}
 .moment-card-head{display:grid;justify-items:center;text-align:center;margin-bottom:20px;padding-top:4px}
 
@@ -1984,17 +1995,17 @@ body.nav-open{overflow:hidden}
 .moment-number b{display:block;font-size:clamp(1.6rem,7vw,2rem);font-weight:700;font-style:normal;color:${c.go};line-height:1;font-family:${f.ui}}
 .moment-number small{display:block;font-family:${f.ui};font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:${c.muted};margin-top:8px;line-height:1.35}
 .moment-gallery-hint{margin:4px 0 0;font-family:${f.ui};font-size:.78rem;font-weight:600;color:${c.muted};text-align:center}
-.moment-gallery{margin-top:10px}
-.moment-gallery-scroll{margin:10px -12px 0;padding:0 16px 14px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x mandatory;scroll-padding-inline:16px}
+.moment-gallery{margin-top:10px;max-width:100%}
+.moment-gallery-scroll{margin:10px -20px 0;padding:0 20px 14px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain;scrollbar-width:none;scroll-snap-type:x mandatory;scroll-padding-inline:20px}
 .moment-gallery-scroll::-webkit-scrollbar{display:none}
 .moment-gallery-track{display:flex;gap:14px;width:max-content;align-items:start}
-.moment-gallery-figure{margin:0;display:grid;gap:8px;width:min(72vw,260px);flex:0 0 auto;scroll-snap-align:center;cursor:pointer;outline:none;border:0;background:transparent;padding:0;text-align:left}
-.moment-gallery-figure:focus-visible .moment-gallery-frame{box-shadow:0 0 0 3px ${c.go}66}
-.moment-gallery-frame{position:relative;overflow:hidden;border-radius:18px;aspect-ratio:4/5;background:#111;box-shadow:0 10px 28px rgba(15,23,42,.12)}
-.moment-gallery-frame img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
-.moment-gallery-figure:hover .moment-gallery-frame img,.moment-gallery-figure:focus-visible .moment-gallery-frame img{transform:scale(1.03)}
-.moment-gallery-zoom-hint{position:absolute;right:10px;bottom:10px;width:34px;height:34px;border-radius:999px;background:rgba(255,255,255,.94);color:#111;display:grid;place-items:center;font-size:1.15rem;font-weight:800;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.22)}
-.moment-gallery-meta{display:grid;gap:3px;padding:0 2px;min-width:0}
+.moment-gallery-figure{margin:0;display:grid;gap:8px;width:min(72vw,260px);flex:0 0 auto;scroll-snap-align:center;outline:none;border:0;background:transparent;padding:0;text-align:left;touch-action:pan-x}
+.moment-gallery-frame{position:relative;overflow:hidden;border-radius:18px;aspect-ratio:4/5;background:#111;box-shadow:0 10px 28px rgba(15,23,42,.12);touch-action:pan-x;cursor:pointer}
+.moment-gallery-frame[data-media-open]:focus-visible{box-shadow:0 0 0 3px ${c.go}66}
+.moment-gallery-frame img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
+.moment-gallery-zoom-hint{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border:0;border-radius:999px;background:rgba(255,255,255,.96);color:#111;display:grid;place-items:center;font-size:1.2rem;font-weight:800;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.22);cursor:pointer;touch-action:manipulation;z-index:2;padding:0}
+.moment-gallery-zoom-hint:focus-visible{outline:2px solid ${c.go};outline-offset:2px}
+.moment-gallery-meta{display:grid;gap:3px;padding:0 2px;min-width:0;pointer-events:none}
 .moment-gallery-caption{font-family:${f.ui};font-size:.88rem;font-weight:600;color:${cardInk};line-height:1.3;max-width:100%}
 .moment-gallery-desc{font-family:${f.body};font-size:.88rem;font-weight:400;color:${cardInk};line-height:1.45;max-width:100%;opacity:.92}
 @media(min-width:720px){.moment-gallery-figure{width:240px}.moment-gallery-frame{aspect-ratio:1/1}}
@@ -3400,10 +3411,10 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
       const desc = item.description ? `<span class="moment-gallery-desc">${escapeHtml(item.description)}</span>` : "";
       const meta = (title || desc) ? `<figcaption class="moment-gallery-meta">${title}${desc}</figcaption>` : "";
       const label = item.title || "Apri foto a schermo intero";
-      return `<figure class="moment-gallery-figure" role="button" tabindex="0" data-media-open="${idx}" aria-label="${attr(label)}">
-        <div class="moment-gallery-frame">
-          <img src="${attr(item.url)}" alt="${attr(item.title || "")}" loading="lazy" decoding="async">
-          <span class="moment-gallery-zoom-hint" aria-hidden="true">＋</span>
+      return `<figure class="moment-gallery-figure">
+        <div class="moment-gallery-frame" data-media-open="${idx}">
+          <img src="${attr(item.url)}" alt="${attr(item.title || "")}" loading="lazy" decoding="async" draggable="false">
+          <button type="button" class="moment-gallery-zoom-hint" data-media-open="${idx}" aria-label="${attr(label)}">＋</button>
         </div>
         ${meta}
       </figure>`;

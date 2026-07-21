@@ -12,7 +12,12 @@ create table if not exists app_private.khamakey_secrets (
 );
 
 revoke all on table app_private.khamakey_secrets from public, anon, authenticated;
-revoke all on schema app_private from public, anon, authenticated;
+-- NON revocare USAGE sullo schema app_private ad authenticated/service_role:
+-- serve a RLS e agli helper usati da create_moment_product_batch (vedi v166).
+revoke all on schema app_private from public, anon;
+grant usage on schema app_private to authenticated, service_role, postgres;
+revoke all on table app_private.khamakey_secrets from service_role;
+grant select, insert, update on table app_private.khamakey_secrets to postgres, service_role;
 
 create or replace function app_private.webhook_ingest_key()
 returns text

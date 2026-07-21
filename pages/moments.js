@@ -3420,7 +3420,7 @@ function sectionEditor(key,section,standalone=false){
       return `<div class="editor-card"><p class="ecard-title">${icon} RSVP invitati</p><p class="field-hint">${esc(guide)}</p>${titleField}${rsvpFields}${bodyField}</div>`;
     }
     if(key === "guestbook"){
-      return `<div class="editor-card"><p class="ecard-title"><span class="step-badge">1</span> ${icon} Libro degli ospiti</p><p class="field-hint">${esc(guide)}</p>${titleField}<label>Invito agli ospiti<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></div>`;
+      return `<div class="editor-card"><p class="ecard-title"><span class="step-badge">1</span> ${icon} Libro degli ospiti</p><p class="rsvp-wa-warn">Pubblico temporaneamente in pausa (stabilità piattaforma). Puoi tenere la sezione pronta in editor; i visitatori non inviano messaggi finché non lo riattiviamo.</p><p class="field-hint">${esc(guide)}</p>${titleField}<label>Invito agli ospiti<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></div>`;
     }
     return `<div class="editor-card"><p class="ecard-title">${icon} ${esc(guide.split(".")[0])}</p>${fields.replace(galleryField,"").replace(journeyField,"")}</div>`;
   }

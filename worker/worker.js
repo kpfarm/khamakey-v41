@@ -10,7 +10,8 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v165-guestbook-ingest";
+const WORKER_VERSION = "v166-safe-guestbook-off";
+const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // oscurato: priorità stabilità magazzino/admin
 
 export default {
   async fetch(request, env, ctx) {
@@ -46,9 +47,15 @@ export default {
         return handleMomentRsvp(request, env);
       }
       if (url.pathname === "/api/moment/guestbook" && request.method === "GET") {
+        if (!MOMENT_GUESTBOOK_PUBLIC_ENABLED) {
+          return cors(json({ ok: true, messages: [], disabled: true }));
+        }
         return handleMomentGuestbookList(request, env, url);
       }
       if (url.pathname === "/api/moment/guestbook" && request.method === "POST") {
+        if (!MOMENT_GUESTBOOK_PUBLIC_ENABLED) {
+          return cors(json({ error: "Libro degli ospiti temporaneamente non disponibile. Riprova più avanti." }, 503));
+        }
         return handleMomentGuestbookSubmit(request, env);
       }
       if (url.pathname === "/api/moment/support-notify" && request.method === "POST") {
@@ -3576,6 +3583,9 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
 
   if (key === "guestbook") {
     const pageSlug = String(slug || "").trim();
+    if (!MOMENT_GUESTBOOK_PUBLIC_ENABLED) {
+      return `<article class="${rv} moment-guestbook is-disabled" data-guestbook-slug="${attr(pageSlug)}">${head(section.title || "Libro degli ospiti")}<p class="moment-guestbook-intro">Il libro degli ospiti è temporaneamente in pausa. Tornerà disponibile a breve.</p></article>`;
+    }
     return `<article class="${rv} moment-guestbook" data-guestbook-slug="${attr(pageSlug)}">${head(section.title || "Libro degli ospiti")}${section.body ? `<p class="moment-guestbook-intro">${escapeHtml(section.body)}</p>` : ""}<p class="moment-guestbook-status" data-guestbook-status hidden role="status" aria-live="polite"></p><form class="moment-guestbook-form" data-guestbook-form><label>Il tuo nome<input type="text" name="guestbook_name" required placeholder="Es. Laura Bianchi" autocomplete="name"></label><label>Il tuo messaggio<textarea name="guestbook_message" rows="4" required placeholder="Scrivi un pensiero, un augurio o un ricordo…"></textarea></label><button type="submit" class="moment-guestbook-submit">Invia messaggio</button></form><div class="moment-guestbook-list" data-guestbook-list aria-live="polite"></div></article>`;
   }
 

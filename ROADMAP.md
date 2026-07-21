@@ -307,3 +307,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-21 | Cursor | **Moments v176**: messaggio ticket assistenza solo user-facing (niente Officina admin) |
 | 2026-07-21 | Cursor | **Worker v164-guestbook**: fix invio guestbook in anteprima (API assoluta); card sezione più definita |
 | 2026-07-21 | Cursor | **Moments v177 / Worker v165 / SQL v165**: guestbook ingest store; WhatsApp RSVP persistente; contrasto card |
+| 2026-07-21 | Cursor | **SQL v166 / Worker v166 / Moments v178**: ripristino USAGE app_private (fix magazzino); guestbook pubblico oscurato |

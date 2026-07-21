@@ -49,6 +49,7 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 43 | `khamakey-moments-opaque-slug-v160.sql` | Slug pubblico opaco ≠ codice; pagina pre-attivazione senza code; `/k/` non resolve available |
 | 44 | `khamakey-moments-plans-v161.sql` | Piani Moments Free/Plus/Pro: `plan_key`, `moment_media_usage`, seed `platform_plans.limits`, RPC entitlements / record bytes / apply plan |
 | 45 | `khamakey-webhook-ingest-store-v165.sql` | Store `app_private.khamakey_secrets` per WEBHOOK_INGEST; guestbook/RSVP usano `app_private.webhook_ingest_key()` |
+| 46 | `khamakey-restore-app-private-usage-v166.sql` | FIX: ripristina `USAGE` su `app_private` per authenticated/service_role (magazzino Moments) |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 

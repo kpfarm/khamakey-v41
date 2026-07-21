@@ -25,6 +25,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
 ### Fixed
+- **SQL v166 + Worker v166 — Stabilità magazzino (2026-07-21, Cursor)** — SQL + Worker
+  - Causa: v165 aveva revocato `USAGE` su schema `app_private` → `permission denied for function create_moment_product_batch`.
+  - Ripristinato `GRANT USAGE` a `authenticated`/`service_role`.
+  - Guestbook pubblico **oscurato** (`MOMENT_GUESTBOOK_PUBLIC_ENABLED=false`) finché non riattivato in sicurezza.
 - **Moments v177 / Worker v165 / SQL v165 — Guestbook + WhatsApp RSVP (2026-07-21, Cursor)** — Pages + Worker + SQL
   - Guestbook: store `app_private.khamakey_secrets` per chiave ingest (GUC `ALTER DATABASE` non disponibile via MCP); allineata a Worker `WEBHOOK_INGEST_KEY`.
   - WhatsApp RSVP: lettura dal DOM live al salvataggio (non solo FormData).

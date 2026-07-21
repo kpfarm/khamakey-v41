@@ -9,6 +9,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Moments v184 / Worker v168 — Oroscopo multi-persona (2026-07-22, Cursor)** — Pages + Worker
+  - Sezione opzionale `horoscope`: fino a 5 persone (nome facoltativo + segno) fissate in editor.
+  - Worker chiama AstroWay `POST /v1/horoscope/daily` (lingua `it`) con secret `ASTROWAY_API_KEY`; cache Cache API per segno/data (Europe/Rome).
+  - Bundle 2–5 persone: una card per persona sulla pagina pubblica `/m/`.
 - **Moments v175 / Worker v161 — Privacy + Termini Moments (2026-07-21, Cursor)** — Pages + Worker
   - Pagine `moments-privacy.html` / `moments-terms.html` + CSS legale.
   - Link su auth, consenso signup, account hub; footer/notice su `/m/`, PIN gate e pagina attivazione.

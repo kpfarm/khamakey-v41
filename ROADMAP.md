@@ -315,3 +315,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-22 | Cursor | **Moments v181**: fix boot bloccato — cache-bust import moment-sections/editor-kit |
 | 2026-07-22 | Cursor | **Moments v182**: nasconde tipologia in Copertina; riepilogo senza prezzo Plus non disponibile |
 | 2026-07-22 | Cursor | **Moments v183**: mostra limiti piano Free in Riepilogo e Account (senza prezzi Plus) |
+| 2026-07-22 | Cursor | **Moments v184 / Worker v168**: Oroscopo daily AstroWay — max 5 persone/segni in editor; cache Worker |

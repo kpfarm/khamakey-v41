@@ -10,8 +10,19 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v167-guestbook-excluded";
+const WORKER_VERSION = "v168-horoscope";
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
+const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
+const HOROSCOPE_CACHE_HOST = "https://horoscope-cache.khamakey.internal";
+const ZODIAC_SIGN_SET = new Set([
+  "aries", "taurus", "gemini", "cancer", "leo", "virgo",
+  "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"
+]);
+const ZODIAC_SIGN_LABELS = {
+  aries: "Ariete", taurus: "Toro", gemini: "Gemelli", cancer: "Cancro",
+  leo: "Leone", virgo: "Vergine", libra: "Bilancia", scorpio: "Scorpione",
+  sagittarius: "Sagittario", capricorn: "Capricorno", aquarius: "Acquario", pisces: "Pesci"
+};
 
 export default {
   async fetch(request, env, ctx) {
@@ -182,7 +193,7 @@ async function handleMomentPage(request, env, ctx, slug) {
     return html(renderMomentPinGate(page, url.origin, Boolean(pin), env), 401, { "Cache-Control": "no-store" });
   }
 
-  return html(renderMomentPage(page, url.origin, env), 200, {
+  return html(await renderMomentPage(page, url.origin, env), 200, {
     "Cache-Control": pinRequired ? "private, no-store" : "public, max-age=30, s-maxage=60"
   });
 }
@@ -836,8 +847,8 @@ async function handleMomentPreview(request, env) {
     state: pageState
   };
   const origin = new URL(request.url).origin;
-  const html = renderMomentPage(page, origin, env);
-  return cors(new Response(html, {
+  const pageHtml = await renderMomentPage(page, origin, env);
+  return cors(new Response(pageHtml, {
     status: 200,
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }
   }));
@@ -1013,7 +1024,7 @@ function renderMomentPinGate(page, origin, failed = false, env = {}) {
 <body><form class="card" method="GET"><h1>${escapeHtml(page.title || "Moment protetto")}</h1><p>Inserisci il PIN per aprire questa pagina KhamaKey Moments.</p>${failed ? `<p class="error">PIN non corretto.</p>` : ""}<input name="pin" inputmode="numeric" autocomplete="one-time-code" placeholder="PIN" required><button type="submit">Apri pagina</button><p class="legal"><a href="${attr(pagesBase)}/moments-privacy.html" target="_blank" rel="noopener">Privacy</a><a href="${attr(pagesBase)}/moments-terms.html" target="_blank" rel="noopener">Termini</a></p></form></body></html>`;
 }
 
-function renderMomentPage(page, origin, env = {}) {
+async function renderMomentPage(page, origin, env = {}) {
   const state = page.state || {};
   const title = String(state.title || page.title || "KhamaKey Moments").trim();
   const description = String(state.subtitle || page.description || state.description || "").trim();
@@ -1025,7 +1036,7 @@ function renderMomentPage(page, origin, env = {}) {
   const fonts = resolveMomentFontPair(state.fontPair);
   const heroStyle = ["classico", "profilo", "romantico", "intimo", "fullscreen"].includes(state.heroStyle) ? state.heroStyle : "classico";
   const sections = resolveMomentSections(state);
-  const defaultOrder = ["intro","dedication","timeline","rsvp","guestbook","gallery","video","promises","dreams","countdown","music","letter_future","rituals","pet","numbers","quote","signature"];
+  const defaultOrder = ["intro","dedication","timeline","rsvp","guestbook","gallery","video","promises","dreams","countdown","music","horoscope","letter_future","rituals","pet","numbers","quote","signature"];
   const rawOrder = Array.isArray(state.sectionOrder) && state.sectionOrder.length ? state.sectionOrder : defaultOrder;
   const legacyMap = { schedule:"timeline", location:"places", places:null, message:"dedication", details:"intro", contacts:null };
   const mapped = [...new Set(rawOrder.map(key => legacyMap[key] ?? key).filter(key => key && key !== "places" && sections[key]))];
@@ -1036,8 +1047,10 @@ function renderMomentPage(page, origin, env = {}) {
   const hasCounter = Boolean(state.show_together_counter && state.together_since);
   const counterHtml = renderTogetherCounter(state, colors);
   const momentType = String(state.type || page.moment_type || "free").trim().toLowerCase();
+  const horoscopeReadings = await loadHoroscopeReadingsForSections(sections, env);
+  const live = { horoscopeReadings };
   const sectionHtml = ordered.length
-    ? ordered.map(({ key, section }) => `<div class="moment-section-anchor" id="moment-section-${escapeHtml(key)}">${renderMomentSection(key, section, colors, momentType, fonts, page.slug || "")}</div>`).join("")
+    ? ordered.map(({ key, section }) => `<div class="moment-section-anchor" id="moment-section-${escapeHtml(key)}">${renderMomentSection(key, section, colors, momentType, fonts, page.slug || "", live)}</div>`).join("")
     : `<div class="moment-card moment-card-empty rv"><strong>Pagina in preparazione</strong><p>Il proprietario sta ancora scegliendo i contenuti da mostrare.</p></div>`;
   const navHtml = renderMomentNav(title, ordered, hasCounter);
   const decorHtml = renderMomentDecor(state);
@@ -1162,6 +1175,7 @@ const MOMENT_NAV_LABELS = {
   dreams:"Sogni",
   countdown:"Conto",
   music:"Musica",
+  horoscope:"Oroscopo",
   letter_future:"Lettera",
   rituals:"Rituali",
   pet:"Pet",
@@ -1335,6 +1349,137 @@ function resolveJourneyStepsWorker(timelineSection = {}, placesSection = null) {
   return [...fromTimeline, ...fromPlaces].slice(0, 24);
 }
 
+function normalizeZodiacSignWorker(value) {
+  const key = String(value || "").trim().toLowerCase();
+  return ZODIAC_SIGN_SET.has(key) ? key : "";
+}
+
+function normalizeHoroscopePeopleWorker(section = {}) {
+  const fromPeople = Array.isArray(section.people)
+    ? section.people.map(raw => ({
+        name: String(raw?.name || "").trim().slice(0, 48),
+        sign: normalizeZodiacSignWorker(raw?.sign)
+      })).filter(person => person.sign)
+    : [];
+  if (fromPeople.length) return fromPeople.slice(0, 5);
+  const legacy = normalizeZodiacSignWorker(section.sign);
+  return legacy ? [{ name: "", sign: legacy }] : [];
+}
+
+function horoscopeDateRome() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Rome",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date());
+}
+
+async function fetchAstroWayDaily(env, sign, language = "it") {
+  const cleanSign = normalizeZodiacSignWorker(sign);
+  if (!cleanSign) return null;
+  const date = horoscopeDateRome();
+  const lang = String(language || "it").trim().toLowerCase() || "it";
+  const cacheUrl = `${HOROSCOPE_CACHE_HOST}/daily/${encodeURIComponent(cleanSign)}/${encodeURIComponent(lang)}/${date}`;
+  try {
+    const cache = caches.default;
+    const cached = await cache.match(new Request(cacheUrl, { method: "GET" }));
+    if (cached) {
+      const payload = await cached.json();
+      if (payload?.text) return payload;
+    }
+  } catch (error) {
+    console.error("horoscope cache match", error);
+  }
+
+  const apiKey = String(env.ASTROWAY_API_KEY || "").trim();
+  if (!apiKey) {
+    return {
+      text: "",
+      disclaimer: "",
+      unavailable: true,
+      reason: "missing_key",
+      sign: cleanSign,
+      date,
+      language: lang
+    };
+  }
+
+  try {
+    const response = await fetch(ASTROWAY_DAILY_URL, {
+      method: "POST",
+      headers: {
+        "X-Api-Key": apiKey,
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      body: JSON.stringify({ sign: cleanSign, date, language: lang })
+    });
+    if (!response.ok) {
+      console.error("astroway daily", response.status, await response.text().catch(() => ""));
+      return {
+        text: "",
+        disclaimer: "",
+        unavailable: true,
+        reason: `http_${response.status}`,
+        sign: cleanSign,
+        date,
+        language: lang
+      };
+    }
+    const body = await response.json();
+    const data = body?.data && typeof body.data === "object" ? body.data : body;
+    const text = String(data?.horoscope || data?.text || "").trim();
+    const disclaimer = String(data?.disclaimer || "").trim();
+    const payload = {
+      text,
+      disclaimer,
+      model: String(data?.model || "").trim(),
+      sign: cleanSign,
+      date,
+      language: String(data?.language || lang).trim() || lang,
+      unavailable: !text
+    };
+    if (text) {
+      try {
+        const ttl = 60 * 60 * 26; // ~26h — copre il giorno + buffer
+        const cacheReq = new Request(cacheUrl, { method: "GET" });
+        const toCache = new Response(JSON.stringify(payload), {
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": `public, max-age=${ttl}`
+          }
+        });
+        await caches.default.put(cacheReq, toCache);
+      } catch (error) {
+        console.error("horoscope cache put", error);
+      }
+    }
+    return payload;
+  } catch (error) {
+    console.error("astroway daily fetch", error);
+    return {
+      text: "",
+      disclaimer: "",
+      unavailable: true,
+      reason: "fetch_error",
+      sign: cleanSign,
+      date,
+      language: lang
+    };
+  }
+}
+
+async function loadHoroscopeReadingsForSections(sections, env) {
+  const people = normalizeHoroscopePeopleWorker(sections?.horoscope || {});
+  const uniqueSigns = [...new Set(people.map(person => person.sign))];
+  const readings = {};
+  await Promise.all(uniqueSigns.map(async sign => {
+    readings[sign] = await fetchAstroWayDaily(env, sign, "it");
+  }));
+  return readings;
+}
+
 function resolveMomentSections(state) {
   const raw = state.sections && typeof state.sections === "object" ? state.sections : {};
   const base = {};
@@ -1351,6 +1496,7 @@ function resolveMomentSections(state) {
     dreams:{enabled:false,title:"",body:"",images:[]},
     countdown:{enabled:false,title:"",body:"",event_label:"",target_date:"",image_url:"",images:[]},
     music:{enabled:false,title:"",body:"",spotify_url:"",youtube_url:"",audio_url:"",audio_title:"",audio_description:"",media:[],images:[]},
+    horoscope:{enabled:false,title:"",body:"",people:[],images:[]},
     letter_future:{enabled:false,title:"",body:"",recipient:"",unlock_date:"",media:[],media_type:"",media_url:"",media_title:"",images:[]},
     rituals:{enabled:false,title:"",body:"",images:[]},
     pet:{enabled:false,title:"",body:"",pet_name:"",pet_emoji:"🐾",pet_photo:"",images:[]},
@@ -1361,6 +1507,9 @@ function resolveMomentSections(state) {
   for (const key of Object.keys(defaults)) {
     const incoming = raw[key] || {};
     base[key] = { ...defaults[key], ...incoming, images: Array.isArray(incoming.images) ? incoming.images.filter(Boolean) : [] };
+  }
+  if (base.horoscope) {
+    base.horoscope.people = normalizeHoroscopePeopleWorker(base.horoscope);
   }
   if (raw.schedule && !raw.timeline) base.timeline = { ...base.timeline, ...raw.schedule };
   if (raw.message && !raw.dedication) base.dedication = { ...base.dedication, ...raw.message };
@@ -1433,6 +1582,8 @@ function momentSectionHasContent(key, section) {
       return Boolean(section.target_date);
     case "music":
       return Boolean(section.spotify_url || section.youtube_url || section.image_url || migrateMusicSectionMedia(section).length);
+    case "horoscope":
+      return normalizeHoroscopePeopleWorker(section).length > 0;
     case "letter_future":
       return Boolean(section.body || section.unlock_date || letterMediaItems(section).length);
     case "pet":
@@ -2334,6 +2485,15 @@ body.nav-open{overflow:hidden}
 .moment-guestbook-card{padding:18px 16px;border-radius:16px;background:#FFFFFF;border:1px solid ${c.line};box-shadow:none}
 .moment-guestbook-quote{margin:0 0 10px;font-family:${f.display};font-size:clamp(1.15rem,4.8vw,1.45rem);line-height:1.45;color:${cardInk}}
 .moment-guestbook-author{margin:0;font-family:${f.ui};font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:${c.muted}}
+.moment-horoscope{padding:22px 18px 20px;display:grid;gap:12px;background:#FFFFFF!important}
+.moment-horoscope-intro{margin:0;line-height:1.75;color:${cardInk};font-size:1.02rem;font-weight:500;opacity:.88}
+.moment-horoscope-date{margin:0;font-family:${f.ui};font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:${c.muted};font-weight:700}
+.moment-horoscope-list{display:grid;gap:14px}
+.moment-horoscope-card{padding:16px 14px;border-radius:16px;background:${c.cardSoft};border:1px solid ${c.line}}
+.moment-horoscope-person{margin:0 0 10px;font-family:${f.ui};font-size:.92rem;font-weight:800;color:${cardInk}}
+.moment-horoscope-text{margin:0 0 10px;font-family:${f.display};font-size:clamp(1.05rem,4.2vw,1.28rem);line-height:1.55;color:${cardInk}}
+.moment-horoscope-empty{margin:0 0 10px;color:${c.muted};font-size:.95rem;line-height:1.5}
+.moment-horoscope-disclaimer{margin:0;font-size:.72rem;line-height:1.4;color:${c.muted}}
 .moment-card-head .moment-card-icon{font-size:1.15rem;line-height:1;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:${c.cardSoft};border:1px solid ${c.line};flex-shrink:0;color:${c.go}}
 .moment-countdown-grid{display:flex;justify-content:center;gap:0}
 .moment-countdown-unit{flex:1;max-width:100px;padding:0 14px}
@@ -3409,6 +3569,7 @@ const MOMENT_SECTION_ICONS = {
   dreams: "🌟",
   countdown: "⏳",
   music: "🎵",
+  horoscope: "🔮",
   letter_future: "🔐",
   rituals: "🕯️",
   pet: "🐾",
@@ -3512,7 +3673,7 @@ function rsvpWhatsAppIntro(momentType, eventName) {
   return hooks[type] || `Ciao! ${emoji} RSVP · ${label}`;
 }
 
-function renderMomentSection(key, section, colors, momentType = "free", fonts = null, slug = "") {
+function renderMomentSection(key, section, colors, momentType = "free", fonts = null, slug = "", live = {}) {
   const images = Array.isArray(section.images) ? section.images.filter(url => safeUrl(url) !== "#").slice(0, 24) : [];
   let icon = MOMENT_SECTION_ICONS[key] || "•";
   if (momentType === "travel") {
@@ -3588,6 +3749,27 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
       return `<article class="${rv} moment-guestbook is-disabled" data-guestbook-slug="${attr(pageSlug)}">${head(section.title || "Libro degli ospiti")}<p class="moment-guestbook-intro">Il libro degli ospiti è temporaneamente in pausa. Tornerà disponibile a breve.</p></article>`;
     }
     return `<article class="${rv} moment-guestbook" data-guestbook-slug="${attr(pageSlug)}">${head(section.title || "Libro degli ospiti")}${section.body ? `<p class="moment-guestbook-intro">${escapeHtml(section.body)}</p>` : ""}<p class="moment-guestbook-status" data-guestbook-status hidden role="status" aria-live="polite"></p><form class="moment-guestbook-form" data-guestbook-form><label>Il tuo nome<input type="text" name="guestbook_name" required placeholder="Es. Laura Bianchi" autocomplete="name"></label><label>Il tuo messaggio<textarea name="guestbook_message" rows="4" required placeholder="Scrivi un pensiero, un augurio o un ricordo…"></textarea></label><button type="submit" class="moment-guestbook-submit">Invia messaggio</button></form><div class="moment-guestbook-list" data-guestbook-list aria-live="polite"></div></article>`;
+  }
+
+  if (key === "horoscope") {
+    const people = normalizeHoroscopePeopleWorker(section);
+    const readings = live?.horoscopeReadings && typeof live.horoscopeReadings === "object" ? live.horoscopeReadings : {};
+    const dateLabel = horoscopeDateRome();
+    const cards = people.map(person => {
+      const reading = readings[person.sign] || {};
+      const signLabel = ZODIAC_SIGN_LABELS[person.sign] || person.sign;
+      const titleLine = person.name
+        ? `${escapeHtml(person.name)} · ${escapeHtml(signLabel)}`
+        : escapeHtml(signLabel);
+      const body = reading.text
+        ? `<p class="moment-horoscope-text">${escapeHtml(reading.text)}</p>`
+        : `<p class="moment-horoscope-empty">L’oroscopo di oggi non è ancora disponibile. Riprova tra poco.</p>`;
+      const disclaimer = reading.disclaimer
+        ? `<p class="moment-horoscope-disclaimer">${escapeHtml(reading.disclaimer)}</p>`
+        : `<p class="moment-horoscope-disclaimer">Solo a scopo di intrattenimento.</p>`;
+      return `<div class="moment-horoscope-card"><p class="moment-horoscope-person">${titleLine}</p>${body}${disclaimer}</div>`;
+    }).join("");
+    return `<article class="${rv} moment-horoscope">${head(section.title || "Oroscopo del giorno")}${section.body ? `<p class="moment-horoscope-intro">${escapeHtml(section.body)}</p>` : ""}<p class="moment-horoscope-date">Oggi · ${escapeHtml(dateLabel)}</p><div class="moment-horoscope-list">${cards}</div></article>`;
   }
 
   if (key === "timeline") {

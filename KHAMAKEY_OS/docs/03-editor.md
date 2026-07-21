@@ -74,6 +74,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 - Sezioni evento (programma, storia, messaggi…)
 - Galleria media (foto, video, audio) — ogni riga ha **Cambia foto** e **Rimuovi** (v144)
 - RSVP configurabile per tipo evento
+- Oroscopo giornaliero (AstroWay): fino a 5 persone/segni fissati in editor; testo live su `/m/` via Worker + cache giorno
 - Privacy (PIN opzionale)
 - Lettera / messaggio speciale
 - Contatore con etichetta personalizzabile (es. «Insieme da», «Ti sopporto da»)

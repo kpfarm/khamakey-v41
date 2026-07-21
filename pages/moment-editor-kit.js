@@ -1,6 +1,6 @@
 /** Kit editor — sezioni consigliate, opzionali e etichette adattive per tipo pagina. */
 import { MOMENT_TYPE_GROUPS, normalizeMomentType } from "./moment-categories.js?v=180";
-import { SECTION_ORDER_DEFAULT, sectionFillGuide, SECTION_ICONS, isSectionExcluded } from "./moment-sections.js?v=180";
+import { SECTION_ORDER_DEFAULT, sectionFillGuide, SECTION_ICONS, isSectionExcluded } from "./moment-sections.js?v=184";
 
 export { SECTION_ICONS };
 
@@ -19,6 +19,7 @@ const BASE_SECTION_LABELS = {
   dreams:"Sogni insieme",
   countdown:"Countdown",
   music:"Musica",
+  horoscope:"Oroscopo",
   letter_future:"Lettera al futuro",
   rituals:"Rituali",
   pet:"Animale",
@@ -39,6 +40,7 @@ const BASE_SECTION_SUBTITLES = {
   dreams:"Sogni da realizzare insieme",
   countdown:"Quanto manca all'evento",
   music:"Canzone o video preferito",
+  horoscope:"Oroscopo del giorno — fino a 5 persone / segni",
   letter_future:"Messaggio da aprire in futuro — riceverai un'email il giorno dell'apertura.",
   rituals:"Piccole abitudini quotidiane",
   pet:"Il tuo amico a quattro zampe",

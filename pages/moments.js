@@ -105,7 +105,7 @@ import {
   sectionFieldHints,
   sectionHasContent,
   isSectionExcluded
-} from "./moment-sections.js?v=180";
+} from "./moment-sections.js?v=184";
 import {
   TYPE_LABELS,
   renderCategorySelect,
@@ -126,11 +126,16 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js?v=180";
+} from "./moment-editor-kit.js?v=184";
 import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderMomentDashboardShell, bindMomentDashboard } from "./moment-editor-dashboard.js";
 import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=177";
+import {
+  renderHoroscopePeoplePanel,
+  bindHoroscopePeopleEditor,
+  refreshHoroscopePeopleEditor
+} from "./moment-horoscope.js?v=184";
 
 const auth = document.getElementById("momentsAuth");
 const app = document.getElementById("momentsApp");
@@ -2731,6 +2736,8 @@ function renderDetail(id){
     renderListItems(editorForm,key);
   }
   bindListItemsEditor(editorForm);
+  bindHoroscopePeopleEditor(editorForm);
+  refreshHoroscopePeopleEditor(editorForm);
   const journeySteps = resolveJourneySteps(state.sections.timeline,state.sections.places);
   writeJourneySteps(editorForm,"timeline",journeySteps);
   renderJourneySteps(editorForm,"timeline");
@@ -3385,9 +3392,14 @@ function sectionEditor(key,section,standalone=false){
   const signatureFields = key === "signature" ? `
     <label>Nome firma<input name="section_${esc(key)}_sign_name" value="${esc(safe.sign_name || "")}" placeholder="Es. Marco & Giulia"></label>
     <label>Sottotitolo<input name="section_${esc(key)}_sign_subtitle" value="${esc(safe.sign_subtitle || "")}" placeholder="Es. Per sempre"></label>` : "";
+  const horoscopeFields = key === "horoscope" ? `
+    <div class="editor-card">
+      <p class="ecard-title"><span class="step-badge">1</span> Persone e segni</p>
+      ${renderHoroscopePeoplePanel(safe)}
+    </div>` : "";
   const bodyLabel = key === "quote" ? "Citazione" : key === "dedication" || key === "letter_future" ? "Testo della lettera" : key === "pet" ? "Racconto" : "Contenuto";
-  const bodyField = key === "timeline" || key === "gallery" || key === "video" || key === "countdown" || key === "rsvp" || key === "guestbook" || LIST_SECTION_KEYS.has(key)
-    ? (key === "countdown" || key === "rsvp" || key === "guestbook" ? `<details class="design-advanced editor-card"><summary>Testo extra (facoltativo)</summary><label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></details>` : "")
+  const bodyField = key === "timeline" || key === "gallery" || key === "video" || key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" || LIST_SECTION_KEYS.has(key)
+    ? (key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" ? `<details class="design-advanced editor-card"><summary>Testo extra (facoltativo)</summary><label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></details>` : "")
     : `<label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label>`;
   const titleField = renderSectionTitleField(key, safe);
   const fields = `
@@ -3401,6 +3413,7 @@ function sectionEditor(key,section,standalone=false){
     ${videoFields}
     ${letterFutureFields}
     ${rsvpFields}
+    ${horoscopeFields}
     ${petFields}
     ${quoteFields}
     ${signatureFields}
@@ -3421,6 +3434,9 @@ function sectionEditor(key,section,standalone=false){
     }
     if(key === "rsvp"){
       return `<div class="editor-card"><p class="ecard-title">${icon} RSVP invitati</p><p class="field-hint">${esc(guide)}</p>${titleField}${rsvpFields}${bodyField}</div>`;
+    }
+    if(key === "horoscope"){
+      return `<div class="editor-card"><p class="ecard-title">${icon} Oroscopo</p><p class="field-hint">${esc(guide)}</p>${titleField}${horoscopeFields}${bodyField}</div>`;
     }
     if(isSectionExcluded(key)) return "";
     return `<div class="editor-card"><p class="ecard-title">${icon} ${esc(guide.split(".")[0])}</p>${fields.replace(galleryField,"").replace(journeyField,"")}</div>`;

@@ -4,6 +4,11 @@ import { normalizeMediaList, parseMediaList, migrateLetterMediaSection } from ".
 import { parseListItems, itemsFromSection, LIST_SECTION_MODES, normalizeListItems } from "./moment-list-items.js";
 import { mergePlacesIntoTimeline, resolveJourneySteps, parseJourneySteps } from "./moment-journey.js";
 import { readRsvpFieldsFromForm } from "./moment-rsvp-fields.js?v=177";
+import {
+  normalizeHoroscopePeople,
+  parseHoroscopePeople,
+  normalizeZodiacSign
+} from "./moment-horoscope.js?v=184";
 
 /**
  * Sezioni escluse dal prodotto (non in menu editor, non in anteprima/pubblico).
@@ -27,6 +32,7 @@ export const SECTION_ORDER_DEFAULT = [
   "dreams",
   "countdown",
   "music",
+  "horoscope",
   "letter_future",
   "rituals",
   "pet",
@@ -48,6 +54,7 @@ export const DEFAULT_SECTIONS = {
   dreams:{ enabled:false, title:"Sogni insieme", body:"", items:[], images:[] },
   countdown:{ enabled:false, title:"Conto alla rovescia", body:"", event_label:"", target_date:"", image_url:"", images:[] },
   music:{ enabled:false, title:"La nostra canzone", body:"", spotify_url:"", youtube_url:"", audio_url:"", audio_title:"", audio_description:"", media:[], image_url:"", images:[] },
+  horoscope:{ enabled:false, title:"Oroscopo del giorno", body:"", people:[], images:[] },
   letter_future:{ enabled:false, title:"Lettera al futuro", body:"", recipient:"", unlock_date:"", media:[], media_type:"", media_url:"", media_title:"", images:[] },
   rituals:{ enabled:false, title:"I nostri rituali", body:"", items:[], images:[] },
   pet:{ enabled:false, title:"Il nostro compagno", body:"", pet_name:"", pet_emoji:"🐾", pet_photo:"", images:[] },
@@ -69,6 +76,7 @@ export const SECTION_LABELS = {
   dreams:"Sogni insieme",
   countdown:"Countdown",
   music:"Musica",
+  horoscope:"Oroscopo",
   letter_future:"Lettera al futuro",
   rituals:"Rituali",
   pet:"Animale",
@@ -88,11 +96,12 @@ export const SECTION_SUBTITLES = {
   promises:"Lista di promesse con emoji",
   places:"I posti che contano per voi",
   dreams:"Sogni da realizzare insieme",
-    countdown:"Quanto manca all'evento",
-    rsvp:"Inserisci il tuo WhatsApp — gli invitati compilano e inviano un messaggio pronto.",
-    guestbook:"Gli invitati lasciano un messaggio; tu approvi prima che appaia in pagina.",
-    music:"Canzone o video preferito",
-    letter_future:"Messaggio da aprire in futuro — riceverai un'email il giorno dell'apertura.",
+  countdown:"Quanto manca all'evento",
+  rsvp:"Inserisci il tuo WhatsApp — gli invitati compilano e inviano un messaggio pronto.",
+  guestbook:"Gli invitati lasciano un messaggio; tu approvi prima che appaia in pagina.",
+  music:"Canzone o video preferito",
+  horoscope:"Oroscopo giornaliero per fino a 5 persone — si aggiorna ogni giorno",
+  letter_future:"Messaggio da aprire in futuro — riceverai un'email il giorno dell'apertura.",
   rituals:"Piccole abitudini quotidiane",
   pet:"Il tuo amico a quattro zampe",
   numbers:"Numeri simbolo (giorni, km…)",
@@ -113,6 +122,7 @@ export const SECTION_ICONS = {
   dreams:"🌟",
   countdown:"⏳",
   music:"🎵",
+  horoscope:"🔮",
   letter_future:"🔐",
   rituals:"🕯️",
   pet:"🐾",
@@ -181,6 +191,7 @@ function shortNavLabel(key){
     dreams:"Sogni",
     countdown:"Timer",
     music:"Musica",
+    horoscope:"Oroscopo",
     letter_future:"Futuro",
     rituals:"Rituali",
     pet:"Pet",
@@ -261,6 +272,10 @@ export function migrateSections(rawSections = {}){
       sections.letter_future.media_title = first.title || "";
     }
   }
+  if(sections.horoscope){
+    sections.horoscope.people = normalizeHoroscopePeople(sections.horoscope);
+    delete sections.horoscope.sign;
+  }
   for(const key of Object.keys(LIST_SECTION_MODES)){
     if(!sections[key]) continue;
     const hadItems = Array.isArray(sections[key].items) && sections[key].items.length;
@@ -303,6 +318,8 @@ export function sectionHasContent(key, section){
       return Boolean(section.target_date || section.image_url || section.images?.length);
     case "music":
       return Boolean(section.spotify_url || section.youtube_url || section.audio_url || section.image_url);
+    case "horoscope":
+      return normalizeHoroscopePeople(section).length > 0;
     case "letter_future":
       return Boolean(section.body || section.unlock_date || migrateLetterMediaSection(section).length);
     case "pet":
@@ -370,6 +387,17 @@ export function readSectionFromForm(form, key, formNode = null){
     base.audio_title = String(form.get(`section_${key}_audio_title`) || "").trim();
     base.audio_description = String(form.get(`section_${key}_audio_description`) || "").trim();
     base.image_url = String(form.get(`section_${key}_image_url`) || "").trim();
+  }
+  if(key === "horoscope"){
+    const rawPeople = liveFieldValue(form, formNode, `section_${key}_people`)
+      || form.get(`section_${key}_people`)
+      || "[]";
+    base.people = parseHoroscopePeople(rawPeople);
+    // Compat: vecchio campo singolo segno
+    if(!base.people.length){
+      const legacy = normalizeZodiacSign(val(`section_${key}_sign`));
+      if(legacy) base.people = normalizeHoroscopePeople({ sign: legacy });
+    }
   }
   if(LIST_SECTION_MODES[key]){
     base.items = normalizeListItems(parseListItems(form.get(`section_${key}_items`)), LIST_SECTION_MODES[key]);
@@ -445,6 +473,7 @@ export function sectionFillGuide(key){
     dreams:"Tocca «Aggiungi sogno» — puoi segnare quelli già realizzati.",
     countdown:"Scegli data e ora — compare il timer live. Puoi aggiungere anche una foto.",
     music:"Spotify, YouTube, audio caricato o foto copertina — combina come preferite.",
+    horoscope:"Aggiungi fino a 5 persone (nome facoltativo + segno). In pagina compare l’oroscopo del giorno per ciascuno, aggiornato automaticamente.",
     letter_future:"Scrivi la lettera, scegli la data di apertura e allega foto, video, audio o PDF (limiti dal piano). Riceverai un'email il giorno dell'apertura.",
     rituals:"Tocca «Aggiungi rituale» per ogni abitudine quotidiana.",
     pet:"Nome, emoji e foto del vostro compagno a quattro zampe.",

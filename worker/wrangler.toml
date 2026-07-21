@@ -33,6 +33,7 @@ bucket_name = "khamakey-media"
 # OPENAI_MODEL            (opzionale, default gpt-4o-mini)
 # SUPABASE_SERVICE_ROLE_KEY (opzionale, log webhook in DB)
 # WEBHOOK_INGEST_KEY (RSVP, guestbook, anniversari, webhook Shopify)
+# ASTROWAY_API_KEY        (Moments — oroscopo giornaliero sezione horoscope)
 
 [triggers]
 crons = ["0 7 * * *"]

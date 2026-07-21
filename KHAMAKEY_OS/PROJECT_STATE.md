@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-21** (piani Moments Free/Plus/Pro + quota storage + video/lettera multi + PDF)
+> Ultimo aggiornamento: **2026-07-22** (Oroscopo multi-persona AstroWay — Moments v184 / Worker v168)
 
 ### Fonte di verità versioni
 
@@ -72,6 +72,8 @@ Restano innocue e verificate: `RLS Policy Always True` su `ritrovare_centro_lead
 
 `RESEND_WEBHOOK_SECRET` (dashboard Resend → webhook → signing secret), opzionale `PAYPAL_ENV=sandbox` in test. Finché mancano, i relativi endpoint rispondono 503 invece di accettare payload non verificati (comportamento sicuro di default).
 
+`ASTROWAY_API_KEY` — obbligatorio per la sezione Oroscopo Moments (`wrangler secret put ASTROWAY_API_KEY` da `worker/`). Senza chiave la sezione mostra un messaggio «non ancora disponibile» (nessun leak della chiave al browser).
+
 ---
 
 ## Coordinamento agenti AI
@@ -88,13 +90,13 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 ---
 
-## Versioni attuali (allineate al codice 2026-07-21)
+## Versioni attuali (allineate al codice 2026-07-22)
 
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v177** | PDF: ovale con testo “a cosa serve” + codice; barcode solo barcode; URL NFC completo. |
-| **Moments editor** | **v183** | Limiti Free in Riepilogo/Account; niente tipologia Copertina; no prezzi Plus. |
-| **Worker NFC** | **v167-guestbook-excluded** | Guestbook escluso (API off + sezione non renderizzata). |
+| **Moments editor** | **v184** | Sezione Oroscopo: fino a 5 persone (nome + segno); daily AstroWay. |
+| **Worker NFC** | **v168-horoscope** | Fetch/cache oroscopo giornaliero; guestbook resta escluso. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v166 (prod)** | v166 ripristina USAGE `app_private` (fix magazzino); v165 ingest store. |

@@ -292,6 +292,7 @@ textarea{min-height:86px;resize:vertical}
 .journey-step-fields input,.journey-step-fields textarea{font-size:.88rem;font-weight:500;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;width:100%;font-family:inherit;line-height:1.45}
 .journey-step-fields textarea{resize:vertical;min-height:72px}
 .list-items-panel{display:grid;gap:12px;margin-top:4px}
+.horoscope-people-panel .horoscope-person-card{display:grid;gap:10px}
 .list-intro-label{display:grid;gap:6px;font-size:.78rem;font-weight:800;color:var(--navy);margin-top:8px}
 .list-intro-label textarea{font-size:.88rem;font-weight:500;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;width:100%;font-family:inherit;line-height:1.45;resize:vertical;min-height:56px}
 .list-item-check{display:flex!important;align-items:center;gap:8px;font-size:.82rem!important;font-weight:700!important;color:var(--ink)!important}

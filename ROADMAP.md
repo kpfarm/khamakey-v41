@@ -304,3 +304,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-21 | Cursor | **Moments/Admin v173 / Worker v159 / SQL v161**: piani Free/Plus/Pro (250MB·1GB·3GB), quota R2, video/lettera multi+PDF, Stripe stub |
 | 2026-07-21 | Cursor | **Moments v174 / Worker v160**: switch opt-in scorrimento laterale tappe (default lista verticale invariata) |
 | 2026-07-21 | Cursor | **Moments v175 / Worker v161**: Privacy + Termini + consenso signup + footer/notice `/m/` (no cookie marketing) |
+| 2026-07-21 | Cursor | **Moments v176**: messaggio ticket assistenza solo user-facing (niente Officina admin) |

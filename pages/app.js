@@ -35,7 +35,7 @@ let hydrationRetryTimer = null;
 let hydrationAttempt = 0;
 const messageOrigin = location.protocol === "file:" ? "*" : location.origin;
 const EDITOR_POST_TARGET = "*";
-const APP_VERSION = "167";
+const APP_VERSION = "168";
 const EDITOR_BOOTSTRAP_KEY = "khamakey:editor-bootstrap";
 const WORKSPACE_META_KEY = "khamakey:workspace-meta";
 
@@ -1069,7 +1069,7 @@ async function createSupportTicketFromEditor(message){
     ok:!error,
     message:error
       ? (error.message || "Ticket non inviato.")
-      : "Ticket inviato. Il team KhamaKey lo vede nella console Supporto."
+      : "Ticket inviato. Ti risponderemo al più presto via email."
   });
 }
 

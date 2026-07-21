@@ -1262,7 +1262,7 @@ async function submitMomentSupportTicket(event,row){
     console.warn("Avviso email supporto non inviato", notifyError);
   }
   form.reset();
-  setStatus(status,"Ticket inviato. Il team KhamaKey riceve un’email e lo vede in Officina NFC → Supporto.","ok");
+  setStatus(status,"Ticket inviato. Ti risponderemo al più presto via email.","ok");
 }
 
 function renderEmptyState(message = "",prefillCode = ""){

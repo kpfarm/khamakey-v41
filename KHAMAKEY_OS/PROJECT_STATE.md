@@ -93,9 +93,9 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v173** | Override piano Moments su drawer cliente; `platform_plans.limits` editabile. |
-| **Moments editor** | **v175** | Privacy/Termini + consenso signup; scroll tappe v174; piani Free/Plus/Pro v173. |
+| **Moments editor** | **v176** | Messaggio ticket assistenza user-facing; Privacy/Termini v175; piani Free/Plus/Pro. |
 | **Worker NFC** | **v161-legal** | Footer Privacy/Termini su `/m/`, notice sicurezza (no cookie marketing), link attivazione/PIN. |
-| **Business shell** | **app v167** | `APP_VERSION` in `app.js` — account Moments non finiscono nel flusso Business. Editor Business HTML può avere WIP locale non ancora allineato in tabella. |
+| **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v161 (prod)** | Piani Moments v161 (`plan_key`, usage, RPC); opaque slug v160; security v75–v83. |
 | **Prossima release piattaforma** | **collegare Stripe** sui `moments_plus` / `moments_pro` | Prezzi già in seed (€4,90/€39 Plus · €9,90/€79 Pro). |

@@ -7,9 +7,10 @@ import JsBarcode from "https://esm.sh/jsbarcode@3.11.6";
 const A4 = { w: 210, h: 297 };
 
 /** Forme etichette Cricut (contorno = percorso di taglio) */
-const OVAL = { w: 48, h: 18 };
-/** Confezione: codice attivazione + barcode + cifre packaging */
-const BAR_RECT = { w: 42, h: 20 };
+/** Inserto confezione: testo “a cosa serve” + codice attivazione */
+const OVAL = { w: 52, h: 22 };
+/** Solo barcode magazzino (esterno confezione) */
+const BAR_RECT = { w: 42, h: 16 };
 /** Chip NFC: URL completo da copiare sul tag */
 const LINK_RECT = { w: 72, h: 18 };
 const NUM_BOX = { w: 10, h: 10 };
@@ -129,52 +130,58 @@ function drawNumberBadge(doc, x, y, n, size = NUM_BOX){
   doc.text(String(n), x + size.w / 2, y + size.h / 2 + 1.1, { align: "center" });
 }
 
+/**
+ * Inserto in confezione: spiega a cosa serve il codice + il codice stesso.
+ * (Non mischiare con barcode o URL NFC.)
+ */
 function drawOvalLabel(doc, x, y, index1, row){
   const cx = x + OVAL.w / 2;
-  const cy = y + OVAL.h / 2;
   setCutStroke(doc);
-  doc.ellipse(cx, cy, OVAL.w / 2, OVAL.h / 2, "S");
+  doc.ellipse(cx, y + OVAL.h / 2, OVAL.w / 2, OVAL.h / 2, "S");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(5.5);
+  doc.setFontSize(4.8);
   doc.setTextColor(100, 116, 139);
-  doc.text(String(index1), x + 3.5, y + 5);
+  doc.text(String(index1), x + 3.2, y + 4.2);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5.2);
+  doc.setTextColor(71, 85, 105);
+  doc.text("Per attivare la pagina", cx, y + 7.2, { align: "center" });
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.2);
+  doc.setFontSize(7.4);
   doc.setTextColor(15, 23, 42);
   const code = activationCodeDisplay(row);
   const lines = doc.splitTextToSize(code, OVAL.w - 8);
-  doc.text(lines.slice(0, 1), cx, cy + 1.2, { align: "center" });
+  doc.text(lines.slice(0, 1), cx, y + 13.8, { align: "center" });
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(4.6);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Inseriscilo nell'app Moments", cx, y + 18.2, { align: "center" });
 }
 
 /**
- * Etichetta confezione: codice attivazione (inserto) + barcode magazzino.
- * Niente numero d'ordine nel riquadro — resta solo in panoramica/ovali.
+ * Etichetta esterna confezione: solo barcode magazzino (+ cifre).
+ * Niente codice attivazione e niente numero d'ordine nel riquadro.
  */
 function drawBarcodeRectLabel(doc, x, y, _index1, row, barcodeImg){
   setCutStroke(doc);
   doc.rect(x, y, BAR_RECT.w, BAR_RECT.h, "S");
 
-  const code = activationCodeDisplay(row);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.2);
-  doc.setTextColor(15, 23, 42);
-  const codeLines = doc.splitTextToSize(code, BAR_RECT.w - 3);
-  doc.text(codeLines.slice(0, 1), x + BAR_RECT.w / 2, y + 4.2, { align: "center" });
-
   const packageCode = packagingBarcode(row);
   if(barcodeImg){
-    const pad = 1.4;
+    const pad = 1.2;
     const barW = BAR_RECT.w - pad * 2;
-    const barH = 7;
-    doc.addImage(barcodeImg, "PNG", x + pad, y + 5.8, barW, barH);
+    const barH = 7.5;
+    doc.addImage(barcodeImg, "PNG", x + pad, y + 2.2, barW, barH);
   }
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(5);
-  doc.setTextColor(71, 85, 105);
-  doc.text(packageCode || "—", x + BAR_RECT.w / 2, y + BAR_RECT.h - 1.6, { align: "center" });
+  doc.setTextColor(15, 23, 42);
+  doc.text(packageCode || "—", x + BAR_RECT.w / 2, y + BAR_RECT.h - 1.8, { align: "center" });
 }
 
 /** Etichetta programmazione chip: solo URL completo. */
@@ -277,7 +284,7 @@ function drawOverviewSection(doc, rows, meta, barcodeCache){
     hx += colNumW + gap;
     doc.text("CODICE DI ATTIVAZIONE", hx, headY);
     hx += colCodeW + gap;
-    doc.text("CONFEZIONE", hx, headY);
+    doc.text("BARCODE", hx, headY);
     hx += colBarW + gap;
     doc.text("LINK NFC (URL completo)", hx, headY);
 
@@ -327,7 +334,7 @@ function drawOvalCutSection(doc, rows, meta){
 
 function drawBarcodeCutSection(doc, rows, meta, barcodeCache){
   drawGridSection(doc, rows, meta, {
-    sectionTitle: "3 · Etichette confezione (codice + barcode) · Cricut",
+    sectionTitle: "3 · Etichette barcode confezione · Cricut",
     cellW: BAR_RECT.w,
     cellH: BAR_RECT.h,
     cutSheet: true,
@@ -349,7 +356,7 @@ function drawLinkCutSection(doc, rows, meta){
 }
 
 /**
- * PDF 4 sezioni: panoramica · ovali codice · confezione (codice+barcode) · URL NFC
+ * PDF 4 sezioni: panoramica · ovali (testo+codice) · barcode · URL NFC
  * Numerazione continua da 1 in panoramica/ovali.
  */
 export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etichette"){

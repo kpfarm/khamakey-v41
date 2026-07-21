@@ -56,7 +56,7 @@ export const MOMENTS_CONSOLE_GUIDES = {
     subtitle: "Genera pezzi fisici, PDF etichette Cricut 4 sezioni, export CSV.",
     steps: [
       "Quantità default 1 — anche un solo regalo o prova.",
-      "PDF lotto 4 sezioni Cricut: panoramica · ovali codice · confezione (codice+barcode) · URL NFC completo (stessa numerazione da 1).",
+      "PDF lotto 4 sezioni Cricut: panoramica · ovali (spiega+codice) · barcode · URL NFC completo (stessa numerazione da 1).",
       "Canale: Regalo, Vendita locale, Agente…",
       "Se la tabella sembra vuota: chip «Tutti» o «Mostra tutti» — i filtri a volte nascondono i pezzi."
     ],

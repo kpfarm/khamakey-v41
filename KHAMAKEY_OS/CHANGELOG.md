@@ -25,6 +25,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
 ### Changed
+- **Admin v177 — PDF etichette: testo “a cosa serve” (2026-07-21, Cursor)** — Pages
+  - Ovale inserto: «Per attivare la pagina» + codice + «Inseriscilo nell'app Moments».
+  - Barcode: solo barcode (niente codice attivazione nello stesso riquadro).
+  - Link NFC resta URL completo.
 - **Admin v176 — PDF etichette Cricut (2026-07-21, Cursor)** — Pages
   - Link NFC = URL completo `https://link.khamakeymoments.com/m/<slug>` (copia-incolla sul chip).
   - Riquadro confezione: codice di attivazione + barcode (niente numero d’ordine nel rettangolo).

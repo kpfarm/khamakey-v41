@@ -92,7 +92,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v176** | PDF Cricut: URL NFC completo, codice attivazione nel riquadro confezione, niente # sul barcode. |
+| **Admin / Officina Moments** | **v177** | PDF: ovale con testo “a cosa serve” + codice; barcode solo barcode; URL NFC completo. |
 | **Moments editor** | **v178** | Avviso guestbook in pausa; WhatsApp RSVP DOM; ingest store. |
 | **Worker NFC** | **v166-safe-guestbook-off** | Guestbook pubblico oscurato; USAGE app_private ripristinato (v166). |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |

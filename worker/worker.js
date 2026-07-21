@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v163-resend-moments";
+const WORKER_VERSION = "v164-guestbook";
 
 export default {
   async fetch(request, env, ctx) {
@@ -1127,7 +1127,7 @@ ${dividerHtml}
 <button type="button" class="moment-lightbox-nav moment-lightbox-next" id="momentLightboxNext" aria-label="Successivo">›</button>
 <button type="button" class="moment-lightbox-close" id="momentLightboxClose" aria-label="Chiudi">×</button>
 <div class="moment-lightbox-card"><div id="momentLightboxMedia"></div><p class="moment-lightbox-counter" id="momentLightboxCounter"></p><h3 class="moment-lightbox-title" id="momentLightboxTitle"></h3><p class="moment-lightbox-desc" id="momentLightboxDesc"></p></div></div>
-<script>${momentPageScript(state, ordered, hasCounter, page.slug || "")}</script>
+<script>${momentPageScript(state, ordered, hasCounter, page.slug || "", String(env.WORKER_PUBLIC_BASE || "https://link.khamakeymoments.com").replace(/\/$/, ""))}</script>
 </body></html>`;
 }
 
@@ -1626,8 +1626,9 @@ function renderTogetherCounter(state, colors) {
 <div class="moment-counter-grid">${grid}</div></section>`;
 }
 
-function momentPageScript(state, ordered = [], hasCounter = false, slug = "") {
+function momentPageScript(state, ordered = [], hasCounter = false, slug = "", apiBase = "") {
   const momentSlug = String(slug || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const momentApiBase = String(apiBase || "https://link.khamakeymoments.com").replace(/\/$/, "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   const navItems = buildMomentNavItems(ordered, hasCounter);
   const navIds = navItems.map(item => item.id);
   const navScript = navIds.length >= 2 ? `
@@ -1687,6 +1688,8 @@ function momentPageScript(state, ordered = [], hasCounter = false, slug = "") {
 })();` : "";
   return `(function(){
 var momentPageSlug="${momentSlug}";
+var momentApiBase="${momentApiBase}";
+function momentApi(path){return momentApiBase+path;}
 var momentPin=(new URLSearchParams(location.search).get("pin")||"").trim();
 if(momentPin&&history.replaceState){
   try{history.replaceState(null,"",location.pathname+location.hash);}catch(e){}
@@ -1809,7 +1812,7 @@ document.querySelectorAll("[data-rsvp-form]").forEach(function(form){
     }
     if(submitBtn){submitBtn.disabled=true;submitBtn.textContent="Invio…";}
     if(status){status.hidden=false;status.textContent="Invio in corso…";status.className="moment-rsvp-status";}
-    fetch("/api/moment/rsvp",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+    fetch(momentApi("/api/moment/rsvp"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
       .then(function(res){return res.json().then(function(data){return {ok:res.ok,data:data};});})
       .then(function(result){
         if(!result.ok)throw new Error((result.data&&result.data.error)||"Invio non riuscito");
@@ -1854,7 +1857,7 @@ document.querySelectorAll(".moment-guestbook").forEach(function(section){
   function loadMessages(){
     if(!slug)return;
     var pin=momentPin;
-    var url="/api/moment/guestbook?slug="+encodeURIComponent(slug)+(pin?"&pin="+encodeURIComponent(pin):"");
+    var url=momentApi("/api/moment/guestbook?slug="+encodeURIComponent(slug)+(pin?"&pin="+encodeURIComponent(pin):""));
     fetch(url).then(function(res){return res.json();}).then(function(data){if(data&&data.ok)paintMessages(data.messages||[]);}).catch(function(){});
   }
   loadMessages();
@@ -1881,15 +1884,19 @@ document.querySelectorAll(".moment-guestbook").forEach(function(section){
       }
       if(submitBtn){submitBtn.disabled=true;submitBtn.textContent="Invio in corso…";}
       showStatus("Invio in corso…","");
-      fetch("/api/moment/guestbook",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
-        .then(function(res){return res.json().then(function(data){return {ok:res.ok,data:data};});})
+      fetch(momentApi("/api/moment/guestbook"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+        .then(function(res){return res.json().then(function(data){return {ok:res.ok,data:data};}).catch(function(){return {ok:false,data:{error:"Risposta non valida dal server"}}});})
         .then(function(result){
           if(!result.ok)throw new Error((result.data&&result.data.error)||"Invio non riuscito");
           form.reset();
           showStatus("Grazie! Il messaggio è stato inviato e apparirà dopo l'approvazione.","ok");
         })
         .catch(function(err){
-          showStatus(err.message||"Invio non riuscito. Riprova.","error");
+          var msg=String(err&&err.message||"");
+          if(/pattern|Failed to fetch|NetworkError|Load failed/i.test(msg)){
+            msg="Invio non riuscito. Apri il link pubblico della pagina (non solo l’anteprima) e riprova.";
+          }
+          showStatus(msg||"Invio non riuscito. Riprova.","error");
         })
         .finally(function(){
           if(submitBtn){submitBtn.disabled=false;submitBtn.textContent="Invia messaggio";}
@@ -2052,20 +2059,20 @@ body.nav-open{overflow:hidden}
 .moment-content{padding:24px 20px 48px;display:grid;gap:24px;background:transparent;width:100%;max-width:100%;min-width:0;overflow-x:hidden}
 .moment-section-anchor{min-width:0;max-width:100%;overflow-x:hidden}
 
-.moment-counter, .moment-card, .moment-countdown, .moment-quote-wrap, .moment-signature, .moment-rsvp-form, .moment-guestbook-form, .moment-sealed, .moment-letter {
-  background: rgba(255,255,255,.82)!important;
+.moment-counter, .moment-card, .moment-countdown, .moment-quote-wrap, .moment-signature, .moment-rsvp-form, .moment-guestbook, .moment-sealed, .moment-letter {
+  background: rgba(255,255,255,.92)!important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,.45)!important;
-  box-shadow: 0 16px 36px -10px rgba(17,32,65,.05), inset 0 1px 0 rgba(255,255,255,.7)!important;
+  border: 1px solid ${c.lineStrong}!important;
+  box-shadow: 0 16px 36px -10px rgba(17,32,65,.08), inset 0 1px 0 rgba(255,255,255,.7)!important;
   border-radius: 24px!important;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.moment-card:hover, .moment-counter:hover, .moment-countdown:hover, .moment-quote-wrap:hover, .moment-rsvp-form:hover, .moment-guestbook-form:hover {
+.moment-card:hover, .moment-counter:hover, .moment-countdown:hover, .moment-quote-wrap:hover, .moment-rsvp-form:hover, .moment-guestbook:hover {
   transform: translateY(-2px);
   box-shadow: 0 20px 48px -8px ${c.go}14, inset 0 1px 0 rgba(255,255,255,.8)!important;
-  border-color: rgba(255,255,255,.65)!important;
+  border-color: ${c.go}55!important;
 }
 
 .moment-card p, .moment-journey-text, .moment-rsvp-intro, .moment-guestbook-intro, .moment-letter p {
@@ -2297,10 +2304,10 @@ body.nav-open{overflow:hidden}
   transform:translateY(0);
 }
 
+.moment-guestbook{padding:22px 18px 20px;display:grid;gap:4px}
 .moment-guestbook-intro{margin:0 0 16px;line-height:1.75;color:${cardInk};font-size:1.02rem;font-weight:500;opacity:.88}
-.moment-guestbook-form{padding:24px 20px}
-.moment-guestbook-form label{display:grid;gap:8px;font-family:${f.ui};font-size:.88rem;font-weight:700;color:${cardInk}}
-.moment-guestbook-form label{display:grid;gap:8px;font-family:${f.ui};font-size:.88rem;font-weight:700;color:${cardInk}}
+.moment-guestbook-form{padding:0;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.moment-guestbook-form label{display:grid;gap:8px;font-family:${f.ui};font-size:.88rem;font-weight:700;color:${cardInk};margin:0 0 12px}
 .moment-guestbook-status{margin:12px 0 0;padding:10px 12px;border-radius:12px;font-size:.86rem;line-height:1.45}
 .moment-guestbook-status.ok{background:#ECFDF3;border:1px solid #A7F3D0;color:#166534}
 .moment-guestbook-status.error{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B}
@@ -3889,7 +3896,7 @@ async function momentPinHash(slug, pin) {
 function cors(response) {
   const headers = new Headers(response.headers);
   headers.set("Access-Control-Allow-Origin", "*");
-  headers.set("Access-Control-Allow-Methods", "POST,OPTIONS");
+  headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   return new Response(response.body, { status: response.status, headers });
 }

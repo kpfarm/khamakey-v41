@@ -173,7 +173,6 @@ export const MOMENT_TEMPLATES = {
       { date:"12:30", place:"Sala festa", text:"Ricevimento con famiglia e amici." }
     ]},
     rsvp:{ enabled:true, title:"Conferma presenza", body:"Facci sapere se partecipi — rispondi su WhatsApp.", whatsapp_number:"", event_name:"", ask_guests:true, ask_notes:true },
-    guestbook:{ enabled:true, title:"Auguri degli amici", body:"Lascia un messaggio per chi festeggia." },
     gallery:{ enabled:true, title:"Foto del giorno", body:"", media:[], images:[] },
     dedication:{ enabled:true, title:"Un ringraziamento", body:"Grazie a chi ci ha accompagnato in questo passo di fede.", signature:"" },
     signature:{ enabled:true, title:"", body:"", sign_name:"", sign_subtitle:"Con gratitudine" }
@@ -232,7 +231,6 @@ export const MOMENT_TEMPLATES = {
     gallery:{ enabled:true, title:"Ricordi", body:"", media:[], images:[] },
     countdown:{ enabled:true, title:"Conto alla rovescia", body:"", event_label:"Al compleanno", target_date:"" },
     rsvp:{ enabled:true, title:"Conferma presenza", body:"Compila il modulo e inviaci la risposta su WhatsApp.", whatsapp_number:"", event_name:"", ask_guests:true, ask_notes:true },
-    guestbook:{ enabled:true, title:"Auguri degli amici", body:"Lascia un messaggio per chi festeggia." },
     music:{ enabled:true, title:"Playlist della festa", body:"", spotify_url:"" },
     signature:{ enabled:true, title:"", body:"", sign_name:"", sign_subtitle:"Buon compleanno!" }
   }, { pill:"Compleanno · Un anno in più di gioia", subtitle:"Buon compleanno!" }),
@@ -245,7 +243,6 @@ export const MOMENT_TEMPLATES = {
       { date:"20:00", place:"Ballo", text:"Musica e celebrazione fino a tardi." }
     ]},
     rsvp:{ enabled:true, title:"Conferma presenza", body:"Facci sapere se ci sarai — rispondi su WhatsApp.", whatsapp_number:"", event_name:"", ask_guests:true, ask_notes:true },
-    guestbook:{ enabled:true, title:"Libro degli ospiti", body:"Lasciateci un pensiero — apparirà dopo la nostra approvazione." },
     gallery:{ enabled:true, title:"Le nostre foto", body:"", media:[], images:[] },
     promises:{ enabled:true, title:"Le nostre promesse", body:"💍 · Esserci sempre\n🌅 · Una vita insieme\n♥ · Amarsi ogni giorno" },
     music:{ enabled:true, title:"La nostra canzone", body:"", spotify_url:"" },
@@ -259,7 +256,6 @@ export const MOMENT_TEMPLATES = {
       { date:"22:00", place:"Pista", text:"Musica e festa." }
     ]},
     rsvp:{ enabled:true, title:"Conferma presenza", body:"Dicci se vieni — rispondi su WhatsApp.", whatsapp_number:"", event_name:"", ask_guests:true, ask_notes:true },
-    guestbook:{ enabled:true, title:"Libro degli ospiti", body:"Scrivi un augurio o un ricordo della serata." },
     gallery:{ enabled:true, title:"Galleria", body:"", media:[], images:[] },
     music:{ enabled:true, title:"Playlist", body:"", spotify_url:"" },
     dedication:{ enabled:true, title:"Grazie", body:"Grazie per essere qui e festeggiare con noi!", signature:"" },

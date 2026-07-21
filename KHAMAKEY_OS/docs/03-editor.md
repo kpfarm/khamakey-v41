@@ -168,5 +168,5 @@ python3 ~/.codex/skills/khamakey-release-workflow/scripts/sync_public_css.py pag
 - [ ] Sincronizzazione ordine blocchi editor ↔ Supabase
 - [ ] UX catalogo (varianti, allergeni, disponibilità)
 - [x] Tabella risposte RSVP (backend v70 + pannello editor)
-- [x] Libro degli ospiti con moderazione (v108)
+- [x] Libro degli ospiti con moderazione (v108) — **escluso dal prodotto** da Moments v179 / Worker v167 (codice in repo, non in menu né pubblico)
 - [ ] Smoke test wizard 5 settori

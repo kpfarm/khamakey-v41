@@ -5,6 +5,16 @@ import { parseListItems, itemsFromSection, LIST_SECTION_MODES, normalizeListItem
 import { mergePlacesIntoTimeline, resolveJourneySteps, parseJourneySteps } from "./moment-journey.js";
 import { readRsvpFieldsFromForm } from "./moment-rsvp-fields.js?v=177";
 
+/**
+ * Sezioni escluse dal prodotto (non in menu editor, non in anteprima/pubblico).
+ * Codice/API restano nel repo per un eventuale riarmo futuro.
+ */
+export const EXCLUDED_SECTIONS = new Set(["guestbook"]);
+
+export function isSectionExcluded(key){
+  return EXCLUDED_SECTIONS.has(String(key || "").trim());
+}
+
 export const SECTION_ORDER_DEFAULT = [
   "intro",
   "dedication",
@@ -260,6 +270,9 @@ export function migrateSections(rawSections = {}){
       sections[key].body = "";
     }
   }
+  for(const key of EXCLUDED_SECTIONS){
+    if(sections[key]) sections[key] = { ...sections[key], enabled:false };
+  }
   return mergePlacesIntoTimeline(sections);
 }
 
@@ -279,7 +292,8 @@ export function sectionHasContent(key, section){
     case "rsvp":
       return Boolean(String(section.whatsapp_number || "").replace(/\D/g, ""));
     case "guestbook":
-      return Boolean(section?.enabled);
+      // Escluso dal prodotto — mai “pronta” per anteprima/pubblico
+      return false;
     case "promises":
     case "dreams":
     case "rituals":

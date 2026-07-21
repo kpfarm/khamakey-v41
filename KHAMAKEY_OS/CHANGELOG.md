@@ -25,6 +25,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
 ### Changed
+- **Moments v179 / Worker v167 — Libro ospiti escluso (2026-07-21, Cursor)** — Pages + Worker
+  - Sezione guestbook fuori da menu editor, template e «Altre sezioni».
+  - Pagina pubblica: sezione non renderizzata; API guestbook resta disabilitata.
+  - Codice/SQL restano in repo per eventuale riarmo futuro.
 - **Admin v177 — PDF etichette: testo “a cosa serve” (2026-07-21, Cursor)** — Pages
   - Ovale inserto: «Per attivare la pagina» + codice + «Inseriscilo nell'app Moments».
   - Barcode: solo barcode (niente codice attivazione nello stesso riquadro).

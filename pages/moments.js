@@ -102,14 +102,15 @@ import {
   parseImageLines,
   formatImageLines,
   sectionFieldHints,
-  sectionHasContent
-} from "./moment-sections.js?v=177";
+  sectionHasContent,
+  isSectionExcluded
+} from "./moment-sections.js?v=179";
 import {
   TYPE_LABELS,
   renderCategorySelect,
   templateForType,
   normalizeMomentType
-} from "./moment-categories.js";
+} from "./moment-categories.js?v=179";
 import {
   navSectionsForEditor,
   kitSectionKeys,
@@ -124,10 +125,9 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js?v=152";
+} from "./moment-editor-kit.js?v=179";
 import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
-import { renderGuestbookModerationShell, bindGuestbookModerationPanel } from "./moment-guestbook-kit.js";
 import { renderMomentDashboardShell, bindMomentDashboard } from "./moment-editor-dashboard.js";
 import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=177";
 
@@ -581,8 +581,10 @@ function mergedState(row){
     together_since:state.together_since || "",
     counter_label:state.counter_label || "",
     show_counter_hms:Boolean(state.show_counter_hms),
-    sectionOrder:normalizeSectionOrder(state.sectionOrder),
-    pinned_sections:Array.isArray(state.pinned_sections) ? state.pinned_sections.filter(Boolean) : [],
+    sectionOrder:normalizeSectionOrder(state.sectionOrder).filter(key => !isSectionExcluded(key)),
+    pinned_sections:Array.isArray(state.pinned_sections)
+      ? state.pinned_sections.filter(key => key && !isSectionExcluded(key))
+      : [],
     sections
   };
 }
@@ -2096,7 +2098,7 @@ function renderSectionPanels(state, shareMeta = {}){
   const panelKeys = new Set(kitSectionKeys(state.type));
   const enabled = Object.fromEntries(Object.entries(state.sections || {}).map(([k,v])=>[k, Boolean(v?.enabled)]));
   const navKeys = new Set(navSectionsForEditor(state.type, sectionOrder, state.pinned_sections || [], enabled));
-  return sectionOrder.filter(key=>key !== "places").map(key=>{
+  return sectionOrder.filter(key=>key !== "places" && !isSectionExcluded(key)).map(key=>{
     const panelId = `section-${key}`;
     const section = state.sections[key] || DEFAULT_SECTIONS[key] || {};
     const enabledOn = Boolean(section?.enabled);
@@ -2111,7 +2113,6 @@ function renderSectionPanels(state, shareMeta = {}){
           published:shareMeta.published !== false
         })
       : "";
-    const guestbookModeration = key === "guestbook" ? renderGuestbookModerationShell() : "";
     const panelTitle = String(section?.title || "").trim() || sectionLabelForType(state.type, key);
     return `<div class="editor-panel ${activeEditorPanel === panelId ? "active" : ""}" data-editor-panel="${esc(panelId)}" data-section-panel-key="${esc(key)}" ${hidden ? "hidden" : ""}>
       ${renderSectionHeader(panelTitle,sectionSubtitleForType(state.type, key))}
@@ -2120,7 +2121,6 @@ function renderSectionPanels(state, shareMeta = {}){
       <div class="section-editor-stack ${enabledOn ? "" : "is-muted"}" data-section-stack="${esc(key)}">
         ${sectionEditor(key,section,true)}
         ${rsvpShare}
-        ${guestbookModeration}
       </div>
     </div>`;
   }).join("");
@@ -2750,7 +2750,6 @@ function renderDetail(id){
     sharePageUrl
   });
   bindRsvpResponsesPanel({ supabase, eventId:row.id });
-  bindGuestbookModerationPanel({ supabase, eventId:row.id });
   bindMomentDashboard({
     supabase,
     eventId:row.id,
@@ -3419,9 +3418,7 @@ function sectionEditor(key,section,standalone=false){
     if(key === "rsvp"){
       return `<div class="editor-card"><p class="ecard-title">${icon} RSVP invitati</p><p class="field-hint">${esc(guide)}</p>${titleField}${rsvpFields}${bodyField}</div>`;
     }
-    if(key === "guestbook"){
-      return `<div class="editor-card"><p class="ecard-title"><span class="step-badge">1</span> ${icon} Libro degli ospiti</p><p class="rsvp-wa-warn">Pubblico temporaneamente in pausa (stabilità piattaforma). Puoi tenere la sezione pronta in editor; i visitatori non inviano messaggi finché non lo riattiviamo.</p><p class="field-hint">${esc(guide)}</p>${titleField}<label>Invito agli ospiti<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></div>`;
-    }
+    if(isSectionExcluded(key)) return "";
     return `<div class="editor-card"><p class="ecard-title">${icon} ${esc(guide.split(".")[0])}</p>${fields.replace(galleryField,"").replace(journeyField,"")}</div>`;
   }
   const fillGuide = `<div class="section-fill-guide"><p>${esc(guide)}</p></div>`;
@@ -3618,9 +3615,18 @@ function readFormState(formNode){
     show_counter_hms:form.get("show_counter_hms") === "on",
     anniversary_emails:form.get("anniversary_emails") === "on",
     theme:String(form.get("page_theme") || "classic"),
-    sectionOrder:[...sectionOrder],
-    pinned_sections:String(form.get("pinned_sections") || "").split(",").map(value=>value.trim()).filter(Boolean),
-    sections
+    sectionOrder:sectionOrder.filter(key => !isSectionExcluded(key)),
+    pinned_sections:String(form.get("pinned_sections") || "")
+      .split(",")
+      .map(value=>value.trim())
+      .filter(key => key && !isSectionExcluded(key)),
+    sections: (()=>{
+      const next = { ...sections };
+      for(const key of Object.keys(next)){
+        if(isSectionExcluded(key) && next[key]) next[key] = { ...next[key], enabled:false };
+      }
+      return next;
+    })()
   };
 }
 

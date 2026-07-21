@@ -10,8 +10,8 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v166-safe-guestbook-off";
-const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // oscurato: priorità stabilità magazzino/admin
+const WORKER_VERSION = "v167-guestbook-excluded";
+const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 
 export default {
   async fetch(request, env, ctx) {
@@ -1422,7 +1422,8 @@ function momentSectionHasContent(key, section) {
       // RSVP pubblico solo con WhatsApp organizzatore (obbligatorio).
       return Boolean(normalizeWhatsAppDigits(section.whatsapp_number));
     case "guestbook":
-      return true;
+      // Escluso dal prodotto — non renderizzare anche se enabled nello state
+      return false;
     case "promises":
     case "dreams":
     case "rituals":

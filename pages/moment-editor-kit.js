@@ -1,11 +1,11 @@
 /** Kit editor — sezioni consigliate, opzionali e etichette adattive per tipo pagina. */
 import { MOMENT_TYPE_GROUPS, normalizeMomentType } from "./moment-categories.js";
-import { SECTION_ORDER_DEFAULT, sectionFillGuide, SECTION_ICONS } from "./moment-sections.js";
+import { SECTION_ORDER_DEFAULT, sectionFillGuide, SECTION_ICONS, isSectionExcluded } from "./moment-sections.js";
 
 export { SECTION_ICONS };
 
-/** Tutte le sezioni disponibili nel kit (places deprecato → timeline). */
-export const ALL_KIT_SECTIONS = SECTION_ORDER_DEFAULT.filter(key => key !== "places");
+/** Tutte le sezioni disponibili nel kit (places deprecato → timeline; escluse = fuori prodotto). */
+export const ALL_KIT_SECTIONS = SECTION_ORDER_DEFAULT.filter(key => key !== "places" && !isSectionExcluded(key));
 
 const BASE_SECTION_LABELS = {
   intro:"Introduzione",
@@ -468,10 +468,12 @@ export function editorKitForType(type){
   const group = TYPE_TO_GROUP[key] || "other";
   const base = GROUP_KITS[group] || GROUP_KITS.other;
   const merged = mergeKit(base, TYPE_OVERRIDES[key] || {});
+  const sections = (merged.sections || []).filter(sectionKey => !isSectionExcluded(sectionKey));
   const vocab = buildKitVocab(key, group);
   return {
     ...merged,
-    optional: ALL_KIT_SECTIONS.filter(sectionKey => !merged.sections.includes(sectionKey)),
+    sections,
+    optional: ALL_KIT_SECTIONS.filter(sectionKey => !sections.includes(sectionKey)),
     labels: vocab.labels,
     subtitles: vocab.subtitles
   };

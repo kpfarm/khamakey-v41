@@ -1,56 +1,83 @@
-/** Modello media Moments — foto, video, audio con titolo e descrizione. */
+/** Modello media Moments — foto, video, audio, PDF con titolo e descrizione. */
 
-import { inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=144";
+import { inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=173";
+import {
+  DEFAULT_MOMENTS_LIMITS,
+  mediaLimitsFromPlan,
+  normalizePlanLimits
+} from "./moment-plans.js?v=173";
 
-export const MAX_GALLERY_ITEMS = 24;
+export const MAX_GALLERY_ITEMS = DEFAULT_MOMENTS_LIMITS.gallery_images;
 export const MAX_GALLERY_VIDEOS = 0;
 export const MAX_GALLERY_AUDIO = 0;
-export const MAX_MUSIC_AUDIO = 2;
-export const MAX_VIDEO_CLIPS = 1;
-export const MAX_LETTER_IMAGES = 2;
-export const MAX_LETTER_VIDEOS = 1;
-export const MAX_LETTER_AUDIO = 1;
-export const MAX_LETTER_ITEMS = MAX_LETTER_IMAGES + MAX_LETTER_VIDEOS + MAX_LETTER_AUDIO;
+export const MAX_MUSIC_AUDIO = DEFAULT_MOMENTS_LIMITS.music_audio;
+export const MAX_VIDEO_CLIPS = DEFAULT_MOMENTS_LIMITS.video_clips;
+export const MAX_LETTER_IMAGES = DEFAULT_MOMENTS_LIMITS.letter_images;
+export const MAX_LETTER_VIDEOS = DEFAULT_MOMENTS_LIMITS.letter_videos;
+export const MAX_LETTER_AUDIO = DEFAULT_MOMENTS_LIMITS.letter_audio;
+export const MAX_LETTER_PDFS = DEFAULT_MOMENTS_LIMITS.letter_pdfs;
+export const MAX_LETTER_ITEMS =
+  MAX_LETTER_IMAGES + MAX_LETTER_VIDEOS + MAX_LETTER_AUDIO + MAX_LETTER_PDFS;
 
-export const MEDIA_LIMITS_HINT =
-  `Fino a ${MAX_GALLERY_ITEMS} foto (8 MB) — titolo e descrizione compaiono sotto ogni foto e nell’ingrandimento.`;
+export const MEDIA_LIMITS_HINT = mediaLimitsFromPlan("gallery").hint;
+export const VIDEO_SECTION_HINT = mediaLimitsFromPlan("video").hint;
+export const LETTER_MEDIA_HINT = mediaLimitsFromPlan("letter_future").hint;
 
-export const VIDEO_SECTION_HINT =
-  `Un solo video (MP4/MOV, max 25 MB) con titolo e descrizione. Per audio usa la sezione Musica.`;
+let activePlanLimits = { ...DEFAULT_MOMENTS_LIMITS };
 
-export const LETTER_MEDIA_HINT =
-  `Fino a ${MAX_LETTER_IMAGES} foto, ${MAX_LETTER_VIDEOS} video e ${MAX_LETTER_AUDIO} audio (8 MB foto · 25 MB video · 12 MB audio) — si sbloccano con la lettera.`;
+export function setActivePlanLimits(limits){
+  activePlanLimits = normalizePlanLimits(limits || DEFAULT_MOMENTS_LIMITS);
+  return activePlanLimits;
+}
 
-export function mediaLimitsForKey(sectionKey = "gallery"){
-  if(sectionKey === "letter_future"){
-    return {
-      maxItems:MAX_LETTER_ITEMS,
-      maxImages:MAX_LETTER_IMAGES,
-      maxVideos:MAX_LETTER_VIDEOS,
-      maxAudio:MAX_LETTER_AUDIO,
-      hint:LETTER_MEDIA_HINT
-    };
-  }
-  return {
-    maxItems:MAX_GALLERY_ITEMS,
-    maxImages:MAX_GALLERY_ITEMS,
-    maxVideos:0,
-    maxAudio:0,
-    hint:MEDIA_LIMITS_HINT
-  };
+export function getActivePlanLimits(){
+  return activePlanLimits;
+}
+
+export function mediaLimitsForKey(sectionKey = "gallery", planLimits = activePlanLimits){
+  return mediaLimitsFromPlan(sectionKey, planLimits);
 }
 
 /** Converte media[] o allegato legacy (media_url) in lista normalizzata. */
 export function migrateLetterMediaSection(section = {}){
+  const limits = mediaLimitsForKey("letter_future");
   const list = normalizeMediaList(section);
-  if(list.length) return list.slice(0, MAX_LETTER_ITEMS);
+  if(list.length) return list.slice(0, limits.maxItems);
   const type = String(section.media_type || "").trim();
   const url = String(section.media_url || "").trim();
   const title = String(section.media_title || "").trim();
-  if(url && ["image","video","audio"].includes(type)){
+  if(url && ["image","video","audio","pdf"].includes(type)){
     return [normalizeMediaItem({ type, url, title })];
   }
   return [];
+}
+
+export function migrateVideoSectionMedia(section = {}){
+  const limits = mediaLimitsForKey("video");
+  const list = normalizeMediaList(section).filter(item=>item.type === "video");
+  if(list.length) return list.slice(0, limits.maxVideos);
+  const url = String(section.video_url || "").trim();
+  if(!url) return [];
+  return [normalizeMediaItem({
+    type:"video",
+    url,
+    title:section.video_title,
+    description:section.video_description
+  })].slice(0, limits.maxVideos);
+}
+
+export function migrateMusicSectionMedia(section = {}){
+  const limits = mediaLimitsForKey("music");
+  const list = normalizeMediaList(section).filter(item=>item.type === "audio");
+  if(list.length) return list.slice(0, limits.maxAudio);
+  const url = String(section.audio_url || "").trim();
+  if(!url) return [];
+  return [normalizeMediaItem({
+    type:"audio",
+    url,
+    title:section.audio_title,
+    description:section.audio_description
+  })].slice(0, limits.maxAudio);
 }
 
 export function mediaId(){
@@ -62,6 +89,7 @@ export function detectMediaType(fileOrUrl){
     const url = fileOrUrl.toLowerCase();
     if(/\.(mp4|webm|mov|m4v)(\?|$)/.test(url)) return "video";
     if(/\.(mp3|m4a|wav|ogg|aac)(\?|$)/.test(url)) return "audio";
+    if(/\.pdf(\?|$)/.test(url)) return "pdf";
     return "image";
   }
   if(fileOrUrl && typeof fileOrUrl === "object" && "name" in fileOrUrl){
@@ -69,6 +97,7 @@ export function detectMediaType(fileOrUrl){
     if(kind) return kind;
   }
   const type = String(fileOrUrl?.type || "");
+  if(type === "application/pdf") return "pdf";
   if(type.startsWith("video/")) return "video";
   if(type.startsWith("audio/")) return "audio";
   return "image";
@@ -76,7 +105,7 @@ export function detectMediaType(fileOrUrl){
 
 export function normalizeMediaItem(raw = {}){
   const url = String(raw.url || raw.src || "").trim();
-  const type = ["image","video","audio"].includes(raw.type) ? raw.type : detectMediaType(url);
+  const type = ["image","video","audio","pdf"].includes(raw.type) ? raw.type : detectMediaType(url);
   return {
     id:String(raw.id || mediaId()),
     type,
@@ -124,7 +153,6 @@ export function coverFocusStyle(state = {}){
   const x = clampNumber(state.cover_focus_x,0,100,50);
   const y = clampNumber(state.cover_focus_y,0,100,50);
   const zoom = clampNumber(state.cover_zoom,100,200,100);
-  // Zoom sul punto di fuoco (non sul centro del riquadro)
   return {
     x,y,zoom,
     css:`object-position:${x}% ${y}%;transform-origin:${x}% ${y}%;transform:scale(${zoom/100})`
@@ -139,12 +167,14 @@ export function clampNumber(value,min,max,fallback){
 
 export function mediaThumbHtml(item,{editable = false,index = 0,sectionKey = "gallery"} = {}){
   const safe = normalizeMediaItem(item);
-  const badge = safe.type === "video" ? "▶" : safe.type === "audio" ? "♫" : "";
+  const badge = safe.type === "video" ? "▶" : safe.type === "audio" ? "♫" : safe.type === "pdf" ? "PDF" : "";
   const preview = safe.type === "image"
     ? `<img src="${escAttr(safe.url)}" alt="" loading="lazy" decoding="async">`
     : safe.type === "video"
       ? `<video src="${escAttr(safe.url)}" muted playsinline preload="metadata"></video><span class="media-type-badge">${badge}</span>`
-      : `<div class="media-audio-thumb"><span class="media-type-badge">${badge || "♫"}</span><span class="media-audio-label">${escHtml(safe.title || "Audio")}</span></div>`;
+      : safe.type === "pdf"
+        ? `<div class="media-pdf-thumb"><span class="media-type-badge">${badge}</span><span class="media-audio-label">${escHtml(safe.title || "PDF")}</span></div>`
+        : `<div class="media-audio-thumb"><span class="media-type-badge">${badge || "♫"}</span><span class="media-audio-label">${escHtml(safe.title || "Audio")}</span></div>`;
   const meta = safe.title ? `<span class="media-thumb-title">${escHtml(safe.title)}</span>` : "";
   return `<div class="gallery-thumb media-thumb media-thumb-${safe.type}" data-media-index="${index}" data-media-section="${escAttr(sectionKey)}" role="button" tabindex="0" aria-label="Apri dettagli">
     ${preview}${meta}
@@ -155,13 +185,18 @@ export function mediaThumbHtml(item,{editable = false,index = 0,sectionKey = "ga
 /** Riga editor con titolo e descrizione visibili per ogni file. */
 export function mediaEditorRowHtml(item,{index = 0,sectionKey = "gallery"} = {}){
   const safe = normalizeMediaItem(item);
-  const typeLabel = safe.type === "video" ? "Video" : safe.type === "audio" ? "Audio" : "Foto";
+  const typeLabel = safe.type === "video" ? "Video" : safe.type === "audio" ? "Audio" : safe.type === "pdf" ? "PDF" : "Foto";
   const preview = safe.type === "image"
     ? `<img src="${escAttr(safe.url)}" alt="" loading="lazy" decoding="async">`
     : safe.type === "video"
       ? `<video src="${escAttr(safe.url)}" muted playsinline preload="metadata"></video>`
-      : `<div class="media-audio-row-icon" aria-hidden="true">♫</div>`;
-  const replaceLabel = safe.type === "image" ? "Cambia foto" : safe.type === "video" ? "Cambia video" : "Cambia audio";
+      : safe.type === "pdf"
+        ? `<div class="media-pdf-row-icon" aria-hidden="true">PDF</div>`
+        : `<div class="media-audio-row-icon" aria-hidden="true">♫</div>`;
+  const replaceLabel = safe.type === "image" ? "Cambia foto"
+    : safe.type === "video" ? "Cambia video"
+      : safe.type === "pdf" ? "Cambia PDF"
+        : "Cambia audio";
   return `<article class="media-edit-row media-edit-row-${safe.type}" data-media-id="${escAttr(safe.id)}" data-media-index="${index}" data-media-section="${escAttr(sectionKey)}">
     <div class="media-edit-preview" aria-label="${escAttr(typeLabel)}">${preview}</div>
     <div class="media-edit-fields">
@@ -179,14 +214,26 @@ export const GALLERY_IMAGE_GROUP = [
   { type:"image", label:"Foto", icon:"📷", addLabel:"Aggiungi foto", accept:IMAGE_ACCEPT }
 ];
 
+export const VIDEO_TYPE_GROUPS = [
+  { type:"video", label:"Video", icon:"▶", addLabel:"Aggiungi video", accept:"video/*" }
+];
+
+export const MUSIC_TYPE_GROUPS = [
+  { type:"audio", label:"Audio", icon:"♫", addLabel:"Aggiungi audio", accept:"audio/*" }
+];
+
 export const GALLERY_TYPE_GROUPS = [
   ...GALLERY_IMAGE_GROUP,
   { type:"video", label:"Video", icon:"▶", addLabel:"Aggiungi video", accept:"video/*" },
-  { type:"audio", label:"Audio", icon:"♫", addLabel:"Aggiungi audio", accept:"audio/*", addHint:"Messaggi vocali e registrazioni — si sbloccano con la lettera." }
+  { type:"audio", label:"Audio", icon:"♫", addLabel:"Aggiungi audio", accept:"audio/*", addHint:"Messaggi vocali e registrazioni — si sbloccano con la lettera." },
+  { type:"pdf", label:"PDF", icon:"PDF", addLabel:"Aggiungi PDF", accept:"application/pdf,.pdf", addHint:"Documenti e lettere in PDF — si aprono dopo lo sblocco." }
 ];
 
 export function galleryEditorGroups(key = "gallery"){
-  return key === "letter_future" ? GALLERY_TYPE_GROUPS : GALLERY_IMAGE_GROUP;
+  if(key === "letter_future") return GALLERY_TYPE_GROUPS;
+  if(key === "video") return VIDEO_TYPE_GROUPS;
+  if(key === "music") return MUSIC_TYPE_GROUPS;
+  return GALLERY_IMAGE_GROUP;
 }
 
 function escAttr(value){

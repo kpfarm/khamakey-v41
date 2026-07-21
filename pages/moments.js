@@ -16,7 +16,7 @@ import {
   warmUploadPipeline,
   warmUploadAuth,
   MAX_GALLERY_IMAGES
-} from "./media-upload.js?v=144";
+} from "./media-upload.js?v=173";
 import {
   readGalleryMedia,
   writeGalleryMedia,
@@ -35,7 +35,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=164";
+} from "./moments-media-ui.js?v=173";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -45,7 +45,21 @@ import {
   bindJourneyEditor,
   uploadJourneyStepPhoto
 } from "./moments-journey-ui.js?v=144";
-import { migrateLetterMediaSection } from "./moment-media.js?v=164";
+import {
+  migrateLetterMediaSection,
+  migrateVideoSectionMedia,
+  migrateMusicSectionMedia,
+  setActivePlanLimits
+} from "./moment-media.js?v=173";
+import {
+  emptyEntitlements,
+  fetchMomentEntitlements,
+  formatBytes,
+  normalizeEntitlements,
+  PLAN_LABELS,
+  storageBytesLimit,
+  storageUsagePercent
+} from "./moment-plans.js?v=173";
 import { LIST_SECTION_MODES, itemsFromSection } from "./moment-list-items.js";
 import {
   renderListItemsPanel,
@@ -203,6 +217,7 @@ const SECTION_PHOTO_FIELDS = {
 };
 const LIST_SECTION_KEYS = new Set(Object.keys(LIST_SECTION_MODES));
 let uploadBusy = false;
+let currentEntitlements = emptyEntitlements();
 
 function setStatus(node,message="",type=""){
   if(!node) return;
@@ -517,12 +532,31 @@ function mergedState(row){
     sections.gallery.media = galleryImages;
     sections.gallery.images = galleryImages.map(item=>item.url);
     if(!sections.video) sections.video = { ...DEFAULT_SECTIONS.video };
-    if(galleryVideos.length && !String(sections.video.video_url || "").trim()){
-      const first = galleryVideos[0];
-      sections.video.video_url = first.url;
-      sections.video.video_title = first.title || sections.video.video_title || "";
-      sections.video.video_description = first.description || sections.video.video_description || "";
+    const videoMedia = migrateVideoSectionMedia(sections.video);
+    if(!videoMedia.length && galleryVideos.length){
+      sections.video.media = galleryVideos;
+      sections.video.video_url = galleryVideos[0].url;
+      sections.video.video_title = galleryVideos[0].title || "";
+      sections.video.video_description = galleryVideos[0].description || "";
+    }else{
+      sections.video.media = videoMedia;
+      if(videoMedia[0]){
+        sections.video.video_url = videoMedia[0].url;
+        sections.video.video_title = videoMedia[0].title || sections.video.video_title || "";
+        sections.video.video_description = videoMedia[0].description || sections.video.video_description || "";
+      }
     }
+  }
+  if(sections.music){
+    sections.music.media = migrateMusicSectionMedia(sections.music);
+    if(sections.music.media[0]){
+      sections.music.audio_url = sections.music.media[0].url;
+      sections.music.audio_title = sections.music.media[0].title || sections.music.audio_title || "";
+      sections.music.audio_description = sections.music.media[0].description || sections.music.audio_description || "";
+    }
+  }
+  if(sections.letter_future){
+    sections.letter_future.media = migrateLetterMediaSection(sections.letter_future);
   }
   return {
     title:row.title || state.title || "",
@@ -1122,11 +1156,55 @@ function renderActivationFormHtml(formId = "editorActivationForm",statusId = "ed
   <p class="status" id="${statusId}"></p>`;
 }
 
+function renderPlanStorageCard(entitlements = currentEntitlements){
+  const ent = normalizeEntitlements(entitlements);
+  const pct = storageUsagePercent(ent);
+  const maxBytes = storageBytesLimit(ent.limits);
+  const planLabel = PLAN_LABELS[ent.plan_key] || ent.plan_name || "Free";
+  const upgradeHint = ent.plan_key === "moments_pro"
+    ? "Hai il piano massimo per questo Moment."
+    : "Upgrade Plus/Pro (pagamento in arrivo) sblocca più spazio e più video, audio e PDF.";
+  return `<div class="plan-storage-card" id="momentPlanStorageCard" data-plan-key="${esc(ent.plan_key)}">
+    <div class="plan-storage-head">
+      <div>
+        <p class="eyebrow">Piano Moments</p>
+        <strong>${esc(planLabel)}</strong>
+      </div>
+      <span class="plan-storage-usage">${esc(formatBytes(ent.bytes_used))} / ${esc(formatBytes(maxBytes))}</span>
+    </div>
+    <div class="plan-storage-bar" aria-hidden="true"><span style="width:${pct}%"></span></div>
+    <p class="field-hint plan-storage-hint">${esc(upgradeHint)}</p>
+    ${ent.plan_key === "moments_free" ? `<button type="button" class="ghost plan-upgrade-stub" disabled title="Collegamento Stripe in arrivo">Upgrade Plus — €4,90/mese</button>` : ""}
+    ${ent.plan_key === "moments_plus" ? `<button type="button" class="ghost plan-upgrade-stub" disabled title="Collegamento Stripe in arrivo">Upgrade Pro — €9,90/mese</button>` : ""}
+  </div>`;
+}
+
 function renderOverviewPanel(row, state, publicUrl){
   return `<div class="editor-panel ${activeEditorPanel === "overview" ? "active" : ""}" data-editor-panel="overview">
     ${renderSectionHeader(EDITOR_PANELS.overview.title,EDITOR_PANELS.overview.subtitle)}
+    ${renderPlanStorageCard(currentEntitlements)}
     ${renderMomentDashboardShell({ publicUrl, published:row.public_visible, slug:row.slug })}
   </div>`;
+}
+
+async function refreshMomentEntitlements(eventId){
+  if(!eventId) return currentEntitlements;
+  try{
+    currentEntitlements = await fetchMomentEntitlements(supabase, eventId);
+  }catch(error){
+    console.warn("Entitlements Moments non disponibili", error);
+    currentEntitlements = emptyEntitlements(eventId);
+  }
+  setActivePlanLimits(currentEntitlements.limits);
+  const card = document.getElementById("momentPlanStorageCard");
+  if(card) card.outerHTML = renderPlanStorageCard(currentEntitlements);
+  const form = document.getElementById("momentEditorForm");
+  if(form){
+    for(const key of ["gallery","video","music","letter_future"]){
+      if(form.querySelector(`#galleryOrganized_${key}`)) renderGalleryGrid(form, key);
+    }
+  }
+  return currentEntitlements;
 }
 
 function renderObjectsPanel(){
@@ -2498,6 +2576,8 @@ function renderDetail(id){
             ${renderSectionPanels(state,{ publicUrl, published:row.public_visible, pageTitle:state.title })}
             ${renderExtrasPanel(state)}
             ${renderGalleryFileInput("gallery")}
+            ${renderGalleryFileInput("video")}
+            ${renderGalleryFileInput("music")}
             ${renderGalleryFileInput("letter_future")}
             ${renderJourneyFileInput()}
             ${renderPrivacyPanel(row, state)}
@@ -2627,9 +2707,16 @@ function renderDetail(id){
   const galleryMedia = normalizeMediaList(state.sections.gallery);
   writeGalleryMedia(editorForm,"gallery",galleryMedia);
   renderGalleryGrid(editorForm,"gallery");
+  const videoMedia = migrateVideoSectionMedia(state.sections.video);
+  writeGalleryMedia(editorForm,"video",videoMedia);
+  renderGalleryGrid(editorForm,"video");
+  const musicMedia = migrateMusicSectionMedia(state.sections.music);
+  writeGalleryMedia(editorForm,"music",musicMedia);
+  renderGalleryGrid(editorForm,"music");
   const letterMedia = migrateLetterMediaSection(state.sections.letter_future);
   writeGalleryMedia(editorForm,"letter_future",letterMedia);
   renderGalleryGrid(editorForm,"letter_future");
+  refreshMomentEntitlements(row.id).catch(()=>{});
   for(const key of LIST_SECTION_KEYS){
     const items = itemsFromSection(state.sections[key], LIST_SECTION_MODES[key]);
     writeListItems(editorForm,key,items);
@@ -2761,8 +2848,12 @@ async function uploadGalleryImages(files,row,formNode,key){
     enableSection(formNode,key);
     markEditorDirty(formNode);
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
+    refreshMomentEntitlements(row.id).catch(()=>{});
     const count = items?.length || batchSize;
-    const label = key === "letter_future" ? "lettera al futuro" : "galleria";
+    const label = key === "letter_future" ? "lettera al futuro"
+      : key === "video" ? "sezione video"
+        : key === "music" ? "sezione musica"
+          : "galleria";
     promptSaveReminder(`${count} file caricati nella ${label}. Clicca Salva verde per vederli sulla tua pagina.`);
   }catch(error){
     const message = error.message || "Upload non riuscito.";
@@ -3087,8 +3178,12 @@ function openGalleryFilePicker(formNode,key,type = "",{ replaceId = "", multiple
   enableSection(formNode,key);
   const input = document.getElementById(`galleryFile_${key}`);
   if(!input) return;
-  const accepts = { image:IMAGE_ACCEPT, video:"video/*", audio:"audio/*" };
-  input.accept = accepts[type] || `${IMAGE_ACCEPT},video/*,audio/*`;
+  const accepts = { image:IMAGE_ACCEPT, video:"video/*", audio:"audio/*", pdf:"application/pdf,.pdf" };
+  input.accept = accepts[type] || (key === "letter_future"
+    ? `${IMAGE_ACCEPT},video/*,audio/*,application/pdf,.pdf`
+    : key === "video" ? "video/*"
+      : key === "music" ? "audio/*"
+        : IMAGE_ACCEPT);
   input.dataset.pendingType = type || "";
   input.dataset.pendingReplaceId = replaceId || "";
   if(typeof multiple === "boolean"){
@@ -3462,12 +3557,24 @@ function readFormState(formNode){
     ...sections.timeline,
     items:compactJourneySteps(readJourneySteps(formNode,"timeline"))
   };
+  const musicMedia = readGalleryMedia(formNode,"music");
+  const musicFirst = musicMedia[0];
   sections.music = {
     ...sections.music,
-    audio_url:String(form.get("section_music_audio_url") || sections.music.audio_url || "").trim(),
-    audio_title:String(form.get("section_music_audio_title") || sections.music.audio_title || "").trim(),
-    audio_description:String(form.get("section_music_audio_description") || sections.music.audio_description || "").trim(),
+    media:musicMedia,
+    audio_url:musicFirst?.url || "",
+    audio_title:musicFirst?.title || "",
+    audio_description:musicFirst?.description || "",
     image_url:String(form.get("section_music_image_url") || sections.music.image_url || "").trim()
+  };
+  const videoMedia = readGalleryMedia(formNode,"video");
+  const videoFirst = videoMedia[0];
+  sections.video = {
+    ...sections.video,
+    media:videoMedia,
+    video_url:videoFirst?.url || "",
+    video_title:videoFirst?.title || "",
+    video_description:videoFirst?.description || ""
   };
   for(const key of LIST_SECTION_KEYS){
     sections[key] = {

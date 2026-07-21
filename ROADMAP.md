@@ -301,3 +301,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-21 | Cursor | **Admin v170**: Supporto operativo — coda Da lavorare, KPI cliccabili, note staff separate, email/link |
 | 2026-07-21 | Cursor | **Admin v171**: Clienti Moments collegati a ticket Supporto e Editor |
 | 2026-07-21 | Cursor | **Admin v172 / Worker v158**: assegnazione ticket + risposta cliente via Resend |
+| 2026-07-21 | Cursor | **Moments/Admin v173 / Worker v159 / SQL v161**: piani Free/Plus/Pro (250MB·1GB·3GB), quota R2, video/lettera multi+PDF, Stripe stub |

@@ -9,6 +9,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Moments/Admin v173 / Worker v159 / SQL v161 — Piani Free/Plus/Pro (2026-07-21, Cursor)** — Pages + Worker + SQL
+  - `moment_events.plan_key`, `moment_media_usage`, seed `moments_free|plus|pro` con prezzi e `limits` jsonb.
+  - RPC `get_moment_entitlements`, `record_moment_media_bytes`, `apply_moment_plan`.
+  - Editor: barra storage, limiti dinamici; video/musica multi; lettera + PDF; CTA upgrade stub.
+  - Worker: PDF su R2, quota storage, video/lettera a scroll come galleria.
+  - Admin: edit `limits`, override piano su drawer cliente Moments.
 - **Moments v165 / Worker v155 — Sfumatura hero on/off (2026-07-20, Cursor)** — Pages + Worker
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 

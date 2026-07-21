@@ -1379,7 +1379,7 @@ async function loadMoments(){
   try{
     const { data,error } = await supabase
       .from("moment_events")
-      .select("id,title,slug,event_type,moment_type,status,event_date,nfc_code,pin_enabled,public_visible,owner_email,activated_at,created_at")
+      .select("id,title,slug,event_type,moment_type,status,event_date,nfc_code,pin_enabled,public_visible,owner_email,plan_key,activated_at,created_at")
       .order("activated_at",{ascending:false,nullsFirst:false})
       .order("created_at",{ascending:false})
       .limit(200);
@@ -3275,15 +3275,18 @@ async function loadPlans(){
   try{
     const { data,error } = await supabase
       .from("platform_plans")
-      .select("id,plan_key,name,description,price_monthly,price_yearly,setup_fee,features,active,public_visible,sort_order,stripe_product_id,stripe_price_monthly_id,stripe_price_yearly_id")
+      .select("id,plan_key,name,description,price_monthly,price_yearly,setup_fee,features,limits,active,public_visible,sort_order,stripe_product_id,stripe_price_monthly_id,stripe_price_yearly_id")
       .order("sort_order",{ascending:true})
       .order("name",{ascending:true});
     if(error) throw error;
     planRows = data || [];
-    const renderedPlans = planRows.length ? planRows.map(row=>`
+    const renderedPlans = planRows.length ? planRows.map(row=>{
+      const storage = row.limits?.storage_mb != null ? `${row.limits.storage_mb} MB` : "";
+      const product = row.limits?.product || "";
+      return `
       <tr>
         <td><strong>${esc(row.name)}</strong><div class="muted-cell">${esc(row.description || "")}</div></td>
-        <td>${esc(row.plan_key)}</td>
+        <td>${esc(row.plan_key)}${product ? `<div class="muted-cell">${esc(product)}${storage ? ` · ${esc(storage)}` : ""}</div>` : ""}</td>
         <td>${money(row.price_monthly)}</td>
         <td>${money(row.price_yearly)}</td>
         <td>${row.stripe_product_id ? "configurato" : "-"}<div class="muted-cell">${esc(row.stripe_price_monthly_id || row.stripe_price_yearly_id || "")}</div></td>
@@ -3291,7 +3294,8 @@ async function loadPlans(){
         <td><span class="status-pill ${row.active ? "active" : "disabled"}">${row.active ? "attivo" : "disattivo"}</span><div class="muted-cell">${row.public_visible ? "pubblico" : "privato"}</div></td>
         <td><button class="small-action" type="button" data-plan-edit="${esc(row.id)}">Modifica</button>${row.stripe_price_monthly_id ? `<button class="small-action" type="button" data-plan-stripe="${esc(row.id)}" data-cycle="monthly">Stripe mese</button>` : ""}${row.stripe_price_yearly_id ? `<button class="small-action" type="button" data-plan-stripe="${esc(row.id)}" data-cycle="yearly">Stripe anno</button>` : ""}</td>
       </tr>
-    `).join("") : `<tr><td colspan="8">Nessun piano configurato.</td></tr>`;
+    `;
+    }).join("") : `<tr><td colspan="8">Nessun piano configurato.</td></tr>`;
     plansTable.innerHTML = renderedPlans;
     billingPlansTable.innerHTML = planRows.length ? planRows.map(row=>`
       <tr>
@@ -4148,6 +4152,11 @@ function editPlan(id){
   planForm.elements.sort_order.value = row.sort_order || 0;
   planForm.elements.description.value = row.description || "";
   planForm.elements.features.value = (row.features || []).join(", ");
+  if(planForm.elements.limits){
+    planForm.elements.limits.value = row.limits && Object.keys(row.limits).length
+      ? JSON.stringify(row.limits, null, 2)
+      : "";
+  }
   focusForm(planForm,planFormStatus,`Stai modificando il piano ${row.name || row.plan_key}.`);
 }
 
@@ -4229,10 +4238,17 @@ function openMomentDrawer(eventId,view="summary"){
   document.getElementById("momentDrawerNfc").textContent = row.nfc_code || "-";
   document.getElementById("momentDrawerType").textContent = momentTemplateLabel(row.moment_type || row.event_type);
   document.getElementById("momentDrawerPublished").textContent = row.public_visible ? "Sì" : "No";
+  const planKey = String(row.plan_key || "moments_free").trim().toLowerCase();
+  const planLabels = { moments_free:"Free", moments_plus:"Plus", moments_pro:"Pro" };
+  const planNode = document.getElementById("momentDrawerPlan");
+  if(planNode) planNode.textContent = planLabels[planKey] || planKey;
+  const planSelect = document.getElementById("momentPlanSelect");
+  if(planSelect) planSelect.value = planLabels[planKey] ? planKey : "moments_free";
   document.getElementById("momentDrawerPin").textContent = row.pin_enabled ? "Attivo" : "Disattivo";
   document.getElementById("momentDrawerPublicUrl").textContent = publicUrl || "-";
   momentDrawer.dataset.publicUrl = publicUrl;
   momentDrawer.dataset.editorUrl = editorUrl;
+  momentDrawer.dataset.eventId = row.id || "";
   const openPublic = document.getElementById("momentOpenPublicUrl");
   const openEditor = document.getElementById("momentOpenEditorUrl");
   if(openPublic){
@@ -5287,6 +5303,19 @@ async function savePlan(event){
     .split(",")
     .map(item=>item.trim())
     .filter(Boolean);
+  let limits = {};
+  const limitsRaw = String(form.elements.limits?.value || "").trim();
+  if(limitsRaw){
+    try{
+      limits = JSON.parse(limitsRaw);
+      if(!limits || typeof limits !== "object" || Array.isArray(limits)){
+        throw new Error("I limiti devono essere un oggetto JSON.");
+      }
+    }catch(parseError){
+      setFormStatus(planFormStatus,parseError.message || "JSON limiti non valido.","error");
+      return;
+    }
+  }
   const payload = {
     plan_key:String(form.elements.plan_key.value || "").trim().toLowerCase(),
     name:String(form.elements.name.value || "").trim(),
@@ -5300,6 +5329,7 @@ async function savePlan(event){
     sort_order:Number(form.elements.sort_order.value || 0),
     public_visible:form.elements.public_visible.value === "true",
     features,
+    limits,
     active:form.elements.active.value === "true"
   };
   setFormStatus(planFormStatus,"Salvataggio piano...");
@@ -5935,6 +5965,35 @@ document.getElementById("momentCopyPublicUrl")?.addEventListener("click",async()
   const url = momentDrawer?.dataset.publicUrl || "";
   if(!url) return;
   try{ await navigator.clipboard.writeText(url); }catch(error){ console.warn("Copia link non riuscita",error); }
+});
+
+document.getElementById("momentPlanForm")?.addEventListener("submit",async event=>{
+  event.preventDefault();
+  const status = document.getElementById("momentPlanFormStatus");
+  const eventId = momentDrawer?.dataset.eventId || currentMoment?.id || "";
+  const planKey = String(event.currentTarget.elements.plan_key.value || "").trim().toLowerCase();
+  if(!eventId || !planKey){
+    setFormStatus(status,"Seleziona un piano valido.","error");
+    return;
+  }
+  setFormStatus(status,"Applicazione piano...");
+  const { data, error } = await supabase.rpc("apply_moment_plan", {
+    p_event_id: eventId,
+    p_plan_key: planKey
+  });
+  if(error){
+    console.error(error);
+    setFormStatus(status, error.message || "Piano non applicato.","error");
+    return;
+  }
+  const labels = { moments_free:"Free", moments_plus:"Plus", moments_pro:"Pro" };
+  const applied = String(data?.plan_key || planKey);
+  const row = momentRows.find(item=>item.id === eventId);
+  if(row) row.plan_key = applied;
+  if(currentMoment?.id === eventId) currentMoment.plan_key = applied;
+  const planNode = document.getElementById("momentDrawerPlan");
+  if(planNode) planNode.textContent = labels[applied] || applied;
+  setFormStatus(status,`Piano ${labels[applied] || applied} applicato. Limiti attivi al prossimo caricamento editor.`,"ok");
 });
 
 document.querySelectorAll("[data-code-drawer-close]").forEach(button=>{

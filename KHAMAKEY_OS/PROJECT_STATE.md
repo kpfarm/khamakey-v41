@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-20** (SSOT versioni allineato a codice live; audit SE basi — zero cambio runtime)
+> Ultimo aggiornamento: **2026-07-21** (piani Moments Free/Plus/Pro + quota storage + video/lettera multi + PDF)
 
 ### Fonte di verità versioni
 
@@ -88,17 +88,17 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 ---
 
-## Versioni attuali (allineate al codice 2026-07-20)
+## Versioni attuali (allineate al codice 2026-07-21)
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v172** | Supporto: assegnazione + risposta Resend; clienti↔ticket↔editor v171. |
-| **Moments editor** | **v166** | Copy: codice solo in inserto confezione (non sul chip). |
-| **Worker NFC** | **v158-support-reply** | Menu sezioni: testo scuro su foglio bianco (contrasto); attivazione sicura v156. |
+| **Admin / Officina Moments** | **v173** | Override piano Moments su drawer cliente; `platform_plans.limits` editabile. |
+| **Moments editor** | **v173** | Piani Free/Plus/Pro, barra storage, video/musica multi, PDF in lettera. |
+| **Worker NFC** | **v159-moments-plans** | Quota R2 per piano, PDF upload, video/lettera a scroll come galleria. |
 | **Business shell** | **app v167** | `APP_VERSION` in `app.js` — account Moments non finiscono nel flusso Business. Editor Business HTML può avere WIP locale non ancora allineato in tabella. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
-| **SQL Supabase** | **≥ v160 (prod)** | Opaque slug Moments v160; security v75–v83; RSVP/guestbook; support sources v158; category lock v157; drop overload `activate_moment_code` v159. Business activation/inventory v147/v148 in repo. |
-| **Prossima release piattaforma** | **v166+** (solo se serve cambio runtime) | Non bumpare per sole doc. Priorità ops: secrets Stripe/Resend webhook, Auth leaked-password, smoke Moments. |
+| **SQL Supabase** | **≥ v161 (prod)** | Piani Moments v161 (`plan_key`, usage, RPC); opaque slug v160; security v75–v83. |
+| **Prossima release piattaforma** | **collegare Stripe** sui `moments_plus` / `moments_pro` | Prezzi già in seed (€4,90/€39 Plus · €9,90/€79 Pro). |
 
 ---
 
@@ -108,7 +108,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 - [x] Progetto consolidato `pages/` + `worker/` + `sql/`
 - [x] Auth Supabase (PKCE), RLS admin e clienti
 - [x] URL centralizzati in `pages/config.js`
-- [x] Upload media R2 (foto, video, audio) via Worker
+- [x] Upload media R2 (foto, video, audio, PDF) via Worker
+- [x] Piani Moments Free/Plus/Pro per prodotto (storage + limiti contenuti; Stripe stub)
 - [x] Pagina pubblica Business `/p/` e Moments `/m/` + NFC `/k/`
 
 ### Business

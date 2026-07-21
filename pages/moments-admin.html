@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=172">
-  <link rel="stylesheet" href="moments-admin.css?v=172">
+  <link rel="stylesheet" href="admin.css?v=173">
+  <link rel="stylesheet" href="moments-admin.css?v=173">
 </head>
 <body>
   <main class="admin-shell locked" id="adminShell">
@@ -721,6 +721,7 @@
           <span>Codice NFC</span><strong id="momentDrawerNfc">-</strong>
           <span>Tipo</span><strong id="momentDrawerType">-</strong>
           <span>Pubblicata</span><strong id="momentDrawerPublished">-</strong>
+          <span>Piano</span><strong id="momentDrawerPlan">Free</strong>
           <span>PIN</span><strong id="momentDrawerPin">-</strong>
           <span>Link pubblico</span><strong id="momentDrawerPublicUrl">-</strong>
           <span>Ticket aperti</span><strong id="momentDrawerTickets">-</strong>
@@ -731,6 +732,18 @@
           <a class="small-action" id="momentOpenEditorUrl" href="#" target="_blank" rel="noopener">Apri editor</a>
           <button type="button" class="small-action" id="momentOpenSupportTickets" hidden>Vedi ticket</button>
         </div>
+        <form class="admin-form compact-form" id="momentPlanForm" style="margin-top:16px">
+          <p class="field-hint">Cambia piano (Free / Plus / Pro). I limiti editor e storage si aggiornano subito; Stripe arriva dopo.</p>
+          <label>Piano Moments
+            <select name="plan_key" id="momentPlanSelect">
+              <option value="moments_free">Free — 250 MB</option>
+              <option value="moments_plus">Plus — 1 GB · €4,90/mese</option>
+              <option value="moments_pro">Pro — 3 GB · €9,90/mese</option>
+            </select>
+          </label>
+          <button type="submit" class="small-action primary-outline">Applica piano</button>
+          <p class="form-status" id="momentPlanFormStatus"></p>
+        </form>
       </div>
       <div class="drawer-view" id="moment-drawer-public">
         <iframe id="momentDrawerPublicFrame" title="Pagina pubblica Moments" loading="lazy"></iframe>
@@ -878,5 +891,5 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=172"></script>
+  <script type="module" src="admin.js?v=173"></script>
 </body>

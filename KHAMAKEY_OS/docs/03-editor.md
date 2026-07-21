@@ -103,18 +103,28 @@ Definiti in `moment-themes.js` e `worker.js`:
 | `POST /api/media/delete` | Worker | Cancella file R2 (solo proprietario) |
 | `GET /cdn/{path}` | Worker | Serve file pubblici |
 
-Limiti server (Worker `MEDIA_LIMITS`): immagine 8 MB · video 25 MB · audio 12 MB.  
-Compressione WebP client-side per immagini (max 1920px, q0.82).
+Limiti server (Worker `MEDIA_LIMITS` / piano): immagine 8 MB · video 25 MB · audio 12 MB · **PDF 15 MB**.  
+Compressione WebP client-side per immagini (max 1920px, q0.82).  
+Moments: quota totale per prodotto in `platform_plans.limits.storage_mb` + contatore `moment_media_usage` (SQL v161).
 
-### Limiti quantità (base per futuri piani a pagamento)
+### Limiti quantità Moments (piani Free / Plus / Pro — SQL v161)
 
-| Area | Limite attuale |
+| | Free | Plus | Pro |
+|--|------|------|-----|
+| Storage / prodotto | 250 MB | 1 GB | 3 GB |
+| Foto galleria | 24 | 48 | 100 |
+| Video (scroll come galleria) | 1 | 3 | 8 |
+| Audio musica | 1 | 4 | 10 |
+| Lettera foto/video/audio/PDF | 2/1/1/1 | 4/2/2/3 | 8/4/4/8 |
+| Journey | 24 | 48 | 100 |
+
+Piano su `moment_events.plan_key`. Admin può applicare con RPC `apply_moment_plan`. Stripe price ID ancora da collegare.
+
+| Area Business (invariato) | Limite |
 |------|----------------|
 | Business — galleria | 10 foto |
 | Business — video presentazione | 1 (R2, max 25 MB / 2 min) oppure link YouTube |
-| Moments — galleria | 24 elementi, di cui max 6 video e 6 audio |
-| Moments — journey | 24 tappe con foto |
-| Rate limit upload | 30 file/ora per utente (Worker) |
+| Rate limit upload | 60 file/ora per utente (Worker) |
 
 ### Fix upload Business v124 (2026-07-15, Claude Code)
 

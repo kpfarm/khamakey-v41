@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v158-support-reply";
+const WORKER_VERSION = "v159-moments-plans";
 
 export default {
   async fetch(request, env, ctx) {
@@ -496,17 +496,28 @@ function tooManyRequests() {
 const MEDIA_LIMITS = {
   image: 8 * 1024 * 1024,
   video: 25 * 1024 * 1024,
-  audio: 12 * 1024 * 1024
+  audio: 12 * 1024 * 1024,
+  pdf: 15 * 1024 * 1024
+};
+
+const DEFAULT_MOMENTS_PLAN_LIMITS = {
+  storage_mb: 250,
+  max_image_mb: 8,
+  max_video_mb: 25,
+  max_audio_mb: 12,
+  max_pdf_mb: 15
 };
 
 const MEDIA_MIME = {
   image: new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]),
   video: new Set(["video/mp4", "video/webm", "video/quicktime", "video/3gpp", "video/x-m4v"]),
-  audio: new Set(["audio/mpeg", "audio/mp4", "audio/wav", "audio/webm", "audio/x-m4a", "audio/aac", "audio/ogg", "audio/x-caf"])
+  audio: new Set(["audio/mpeg", "audio/mp4", "audio/wav", "audio/webm", "audio/x-m4a", "audio/aac", "audio/ogg", "audio/x-caf"]),
+  pdf: new Set(["application/pdf"])
 };
 
 function mediaKindFromMime(mime) {
   const type = String(mime || "").toLowerCase();
+  if (type === "application/pdf") return "pdf";
   if (type.startsWith("video/")) return "video";
   if (type.startsWith("audio/")) return "audio";
   if (type.startsWith("image/")) return "image";
@@ -529,6 +540,7 @@ function mimeFromFilename(name) {
   if (/\.aac$/.test(file)) return "audio/aac";
   if (/\.m4a$/.test(file)) return "audio/x-m4a";
   if (/\.mp3$/.test(file)) return "audio/mpeg";
+  if (/\.pdf$/.test(file)) return "application/pdf";
   return "";
 }
 
@@ -552,9 +564,48 @@ function mediaExtFromMime(mime) {
     "audio/x-m4a": "m4a",
     "audio/wav": "wav",
     "audio/webm": "webm",
-    "audio/aac": "aac"
+    "audio/aac": "aac",
+    "application/pdf": "pdf"
   };
   return map[String(mime || "").toLowerCase()] || "bin";
+}
+
+async function rpcAsUser(env, jwt, name, body) {
+  const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/${name}`, {
+    method: "POST",
+    headers: {
+      apikey: env.SUPABASE_PUBLISHABLE_KEY,
+      Authorization: `Bearer ${jwt}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+  const text = await response.text();
+  if (!response.ok) {
+    let message = `Supabase RPC ${name}: ${response.status}`;
+    try {
+      const parsed = JSON.parse(text);
+      message = String(parsed.message || parsed.error || parsed.details || message);
+    } catch {
+      if (text) message = text.slice(0, 240);
+    }
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
+  }
+  return text ? JSON.parse(text) : null;
+}
+
+function momentsPlanFileLimitBytes(limits, kind) {
+  const src = limits && typeof limits === "object" ? limits : DEFAULT_MOMENTS_PLAN_LIMITS;
+  const mbKey = kind === "image" ? "max_image_mb"
+    : kind === "video" ? "max_video_mb"
+      : kind === "audio" ? "max_audio_mb"
+        : kind === "pdf" ? "max_pdf_mb"
+          : "";
+  const mb = Number(src[mbKey]);
+  if (Number.isFinite(mb) && mb > 0) return Math.floor(mb * 1024 * 1024);
+  return MEDIA_LIMITS[kind] || 0;
 }
 
 async function supabaseUser(env, jwt) {
@@ -637,21 +688,66 @@ async function handleMediaUpload(request, env) {
     if (!kind || !MEDIA_MIME[kind]?.has(mime)) {
       return cors(json({ error: "Formato file non supportato." }, 400));
     }
-    if (file.size > MEDIA_LIMITS[kind]) {
+
+    let planLimits = DEFAULT_MOMENTS_PLAN_LIMITS;
+    if (scope === "moments") {
+      try {
+        const entitlements = await rpcAsUser(env, jwt, "get_moment_entitlements", { p_event_id: scopeId });
+        planLimits = entitlements?.limits && typeof entitlements.limits === "object"
+          ? entitlements.limits
+          : DEFAULT_MOMENTS_PLAN_LIMITS;
+        const storageMb = Number(planLimits.storage_mb) || DEFAULT_MOMENTS_PLAN_LIMITS.storage_mb;
+        const bytesUsed = Number(entitlements?.bytes_used) || 0;
+        const maxBytes = Math.max(0, storageMb) * 1024 * 1024;
+        if (bytesUsed + file.size > maxBytes) {
+          const usedMb = (bytesUsed / (1024 * 1024)).toFixed(1);
+          return cors(json({
+            error: `Spazio esaurito per questo Moment (${usedMb} / ${storageMb} MB). Passa a Plus o Pro, oppure rimuovi file.`,
+            code: "storage_quota",
+            plan_key: entitlements?.plan_key || "moments_free",
+            bytes_used: bytesUsed,
+            storage_mb: storageMb
+          }, 413));
+        }
+      } catch (entError) {
+        console.error("handleMediaUpload entitlements", entError);
+        // Fallback ai limiti file globali se RPC non disponibile
+      }
+    }
+
+    const kindLimit = scope === "moments"
+      ? momentsPlanFileLimitBytes(planLimits, kind)
+      : MEDIA_LIMITS[kind];
+    if (file.size > kindLimit) {
       return cors(json({ error: `File troppo grande per ${kind}.` }, 413));
     }
 
-    const folder = kind === "image" ? "images" : kind === "video" ? "videos" : "audio";
+    const folder = kind === "image" ? "images"
+      : kind === "video" ? "videos"
+        : kind === "audio" ? "audio"
+          : "documents";
     const ext = mediaExtFromMime(mime);
     const key = `${scope}/${scopeId}/${folder}/${crypto.randomUUID()}.${ext}`;
     await env.MEDIA.put(key, file.stream(), {
       httpMetadata: { contentType: mime },
-      customMetadata: { scope, scopeId, kind, uploader: user.email }
+      customMetadata: { scope, scopeId, kind, uploader: user.email, bytes: String(file.size) }
     });
+
+    if (scope === "moments") {
+      try {
+        await rpcAsUser(env, jwt, "record_moment_media_bytes", {
+          p_event_id: scopeId,
+          p_delta_bytes: file.size,
+          p_delta_files: 1
+        });
+      } catch (usageError) {
+        console.error("handleMediaUpload usage", usageError);
+      }
+    }
 
     const origin = new URL(request.url).origin;
     const url = `${origin}/cdn/${key}`;
-    return cors(json({ ok: true, url, type: kind, key }));
+    return cors(json({ ok: true, url, type: kind, key, bytes: file.size }));
   } catch (error) {
     console.error("handleMediaUpload", error);
     return cors(json({ error: "Upload non riuscito. Riprova tra poco." }, 500));
@@ -686,8 +782,29 @@ async function handleMediaDelete(request, env) {
     return cors(json({ error: "Non puoi eliminare media da questa pagina." }, 403));
   }
 
+  let deletedBytes = 0;
+  try {
+    const head = await env.MEDIA.head(key);
+    deletedBytes = Number(head?.size) || Number(head?.customMetadata?.bytes) || 0;
+  } catch {
+    deletedBytes = 0;
+  }
+
   await env.MEDIA.delete(key);
-  return cors(json({ ok: true }));
+
+  if (scope === "moments" && scopeId && deletedBytes > 0) {
+    try {
+      await rpcAsUser(env, jwt, "record_moment_media_bytes", {
+        p_event_id: scopeId,
+        p_delta_bytes: -deletedBytes,
+        p_delta_files: -1
+      });
+    } catch (usageError) {
+      console.error("handleMediaDelete usage", usageError);
+    }
+  }
+
+  return cors(json({ ok: true, bytes_removed: deletedBytes }));
 }
 
 async function handleMomentPreview(request, env) {
@@ -1203,12 +1320,12 @@ function resolveMomentSections(state) {
     rsvp:{enabled:false,title:"",body:"",whatsapp_number:"",event_name:"",ask_guests:true,ask_notes:true,images:[]},
     guestbook:{enabled:false,title:"",body:"",images:[]},
     gallery:{enabled:false,title:"",body:"",images:[]},
-    video:{enabled:false,title:"",body:"",video_url:"",video_title:"",video_description:"",images:[]},
+    video:{enabled:false,title:"",body:"",video_url:"",video_title:"",video_description:"",media:[],images:[]},
     promises:{enabled:false,title:"",body:"",images:[]},
     places:{enabled:false,title:"",body:"",images:[]},
     dreams:{enabled:false,title:"",body:"",images:[]},
     countdown:{enabled:false,title:"",body:"",event_label:"",target_date:"",image_url:"",images:[]},
-    music:{enabled:false,title:"",body:"",spotify_url:"",youtube_url:"",audio_url:"",audio_title:"",audio_description:"",images:[]},
+    music:{enabled:false,title:"",body:"",spotify_url:"",youtube_url:"",audio_url:"",audio_title:"",audio_description:"",media:[],images:[]},
     letter_future:{enabled:false,title:"",body:"",recipient:"",unlock_date:"",media:[],media_type:"",media_url:"",media_title:"",images:[]},
     rituals:{enabled:false,title:"",body:"",images:[]},
     pet:{enabled:false,title:"",body:"",pet_name:"",pet_emoji:"🐾",pet_photo:"",images:[]},
@@ -1275,7 +1392,7 @@ function momentSectionHasContent(key, section) {
     case "gallery":
       return normalizeMomentMedia(section).some(item => item.type === "image");
     case "video":
-      return Boolean(String(section.video_url || "").trim());
+      return migrateVideoSectionMedia(section).length > 0;
     case "rsvp":
       // RSVP pubblico solo con WhatsApp organizzatore (obbligatorio).
       return Boolean(normalizeWhatsAppDigits(section.whatsapp_number));
@@ -1289,7 +1406,7 @@ function momentSectionHasContent(key, section) {
     case "countdown":
       return Boolean(section.target_date);
     case "music":
-      return Boolean(section.spotify_url || section.youtube_url || section.audio_url || section.image_url);
+      return Boolean(section.spotify_url || section.youtube_url || section.image_url || migrateMusicSectionMedia(section).length);
     case "letter_future":
       return Boolean(section.body || section.unlock_date || letterMediaItems(section).length);
     case "pet":
@@ -1408,18 +1525,19 @@ function letterMediaItems(section) {
   if (Array.isArray(section.media) && section.media.length) {
     return section.media
       .map(item => ({
-        type: ["image", "video", "audio"].includes(item?.type) ? item.type : "image",
+        type: ["image", "video", "audio", "pdf"].includes(item?.type) ? item.type : "image",
         url: String(item?.url || "").trim(),
-        title: String(item?.title || "").trim()
+        title: String(item?.title || "").trim(),
+        description: String(item?.description || "").trim()
       }))
       .filter(item => item.url && safeUrl(item.url) !== "#")
-      .slice(0, 4);
+      .slice(0, 24);
   }
   const type = String(section.media_type || "").trim();
   const url = String(section.media_url || "").trim();
   const title = String(section.media_title || "").trim();
-  if (url && safeUrl(url) !== "#" && ["image", "video", "audio"].includes(type)) {
-    return [{ type, url, title }];
+  if (url && safeUrl(url) !== "#" && ["image", "video", "audio", "pdf"].includes(type)) {
+    return [{ type, url, title, description: "" }];
   }
   return [];
 }
@@ -1427,16 +1545,51 @@ function letterMediaItems(section) {
 function renderLetterFutureMedia(section) {
   const items = letterMediaItems(section);
   if (!items.length) return "";
-  return items.map(item => {
-    const title = item.title ? `<p class="moment-letter-media-title">${escapeHtml(item.title)}</p>` : "";
+  const cards = items.map((item, idx) => {
+    const title = item.title ? `<span class="moment-gallery-caption">${escapeHtml(item.title)}</span>` : "";
+    const desc = item.description ? `<span class="moment-gallery-desc">${escapeHtml(item.description)}</span>` : "";
+    const meta = (title || desc) ? `<figcaption class="moment-gallery-meta">${title}${desc}</figcaption>` : "";
     if (item.type === "video") {
-      return `<div class="moment-letter-media">${title}<video src="${attr(item.url)}" controls playsinline></video></div>`;
+      return `<figure class="moment-gallery-figure">
+        <div class="moment-gallery-frame" data-media-open="${idx}">
+          <video src="${attr(item.url)}" muted playsinline preload="metadata" draggable="false"></video>
+          <button type="button" class="moment-gallery-zoom-hint" data-media-open="${idx}" aria-label="${attr(item.title || "Apri video")}">▶</button>
+        </div>
+        ${meta}
+      </figure>`;
     }
     if (item.type === "audio") {
-      return `<div class="moment-letter-media moment-audio">${title ? `<p class="moment-audio-title">${escapeHtml(item.title)}</p>` : ""}<audio src="${attr(item.url)}" controls></audio></div>`;
+      return `<figure class="moment-gallery-figure moment-letter-audio-card">
+        <div class="moment-letter-audio-wrap">
+          <span class="moment-letter-audio-icon" aria-hidden="true">♫</span>
+          <audio src="${attr(item.url)}" controls></audio>
+        </div>
+        ${meta}
+      </figure>`;
     }
-    return `<div class="moment-letter-media">${title}<img src="${attr(item.url)}" alt="${attr(item.title || "Allegato")}" loading="lazy"></div>`;
+    if (item.type === "pdf") {
+      const label = item.title || "Apri PDF";
+      return `<figure class="moment-gallery-figure moment-letter-pdf-card">
+        <a class="moment-letter-pdf-link" href="${attr(item.url)}" target="_blank" rel="noopener noreferrer">
+          <span class="moment-letter-pdf-icon" aria-hidden="true">PDF</span>
+          <span class="moment-letter-pdf-label">${escapeHtml(label)}</span>
+        </a>
+        ${meta}
+      </figure>`;
+    }
+    return `<figure class="moment-gallery-figure">
+      <div class="moment-gallery-frame" data-media-open="${idx}">
+        <img src="${attr(item.url)}" alt="${attr(item.title || "")}" loading="lazy" decoding="async" draggable="false">
+        <button type="button" class="moment-gallery-zoom-hint" data-media-open="${idx}" aria-label="${attr(item.title || "Apri foto")}">＋</button>
+      </div>
+      ${meta}
+    </figure>`;
   }).join("");
+  const payload = items.map(({ type, url, title, description }) => ({ type, url, title, description }));
+  const json = JSON.stringify(payload).replace(/</g, "\\u003c");
+  return `<p class="moment-gallery-hint">Scorri gli allegati · tocca per aprire</p>
+<div class="moment-gallery"><div class="moment-gallery-scroll"><div class="moment-gallery-track">${cards}</div></div></div>
+<script type="application/json" class="moment-gallery-data">${json}</script>`;
 }
 
 function renderTogetherCounter(state, colors) {
@@ -2003,6 +2156,14 @@ body.nav-open{overflow:hidden}
 .moment-gallery{margin-top:10px;width:100%;max-width:100%;min-width:0;overflow:hidden}
 .moment-gallery-scroll{display:block;width:100%;max-width:100%;min-width:0;margin:12px 0 0;padding:0 0 12px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:0}
 .moment-gallery-scroll::-webkit-scrollbar{display:none}
+.moment-letter-pdf-card,.moment-letter-audio-card{min-width:min(72vw,240px)}
+.moment-letter-pdf-link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:min(72vw,240px);aspect-ratio:4/3;border-radius:16px;background:${c.bl2};border:1px solid color-mix(in srgb,${c.go} 18%,transparent);text-decoration:none;color:${c.ink};scroll-snap-align:center;box-shadow:0 8px 22px rgba(0,0,0,.08)}
+.moment-letter-pdf-icon{display:inline-flex;align-items:center;justify-content:center;min-width:52px;height:36px;padding:0 10px;border-radius:10px;background:${c.ink};color:#fff;font-family:${f.ui};font-size:.72rem;font-weight:800;letter-spacing:.06em}
+.moment-letter-pdf-label{font-family:${f.ui};font-size:.85rem;font-weight:650;text-align:center;padding:0 12px;line-height:1.3}
+.moment-letter-audio-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:min(72vw,240px);aspect-ratio:4/3;border-radius:16px;background:${c.bl2};padding:14px;scroll-snap-align:center;box-shadow:0 8px 22px rgba(0,0,0,.08)}
+.moment-letter-audio-icon{font-size:1.4rem}
+.moment-letter-audio-wrap audio{width:100%}
+.moment-audio-list{display:grid;gap:12px;margin-top:10px}
 .moment-gallery-track{display:flex;flex-wrap:nowrap;gap:12px;width:max-content;max-width:none;align-items:flex-start}
 .moment-gallery-figure{margin:0;display:grid;gap:8px;flex:0 0 220px;width:220px;max-width:70vw;scroll-snap-align:start;outline:none;border:0;background:transparent;padding:0;text-align:left;touch-action:pan-x}
 .moment-gallery-frame{position:relative;overflow:hidden;border-radius:18px;width:100%;aspect-ratio:4/5;background:#111;box-shadow:0 10px 28px rgba(15,23,42,.12);touch-action:pan-x;cursor:pointer}
@@ -3391,13 +3552,14 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     return `<section class="moment-countdown rv" data-target="${attr(target.length > 10 ? target : target + "T12:00:00")}">${photo}<p class="moment-countdown-label">${escapeHtml(section.title || "Conto alla rovescia")}</p>${section.event_label ? `<p class="moment-countdown-event">${escapeHtml(section.event_label)}</p>` : ""}${section.body ? `<p class="moment-countdown-note">${escapeHtml(section.body)}</p>` : ""}<div class="moment-countdown-grid"><span class="moment-countdown-unit"><b data-cd="days">0</b><small>giorni</small></span><span class="moment-countdown-unit"><b data-cd="hours">0</b><small>ore</small></span><span class="moment-countdown-unit"><b data-cd="minutes">0</b><small>minuti</small></span></div></section>`;
   }
 
-  if (key === "music" && (section.spotify_url || section.youtube_url || section.audio_url || section.image_url)) {
+  if (key === "music" && (section.spotify_url || section.youtube_url || section.image_url || migrateMusicSectionMedia(section).length)) {
     const spotify = spotifyEmbedFromUrl(section.spotify_url);
     const youtube = youtubeEmbedFromUrl(section.youtube_url);
     const imageUrl = safeUrl(section.image_url || "") !== "#" ? safeUrl(section.image_url || "") : "";
     const photo = imageUrl ? `<img class="moment-music-photo" src="${attr(imageUrl)}" alt="" loading="lazy">` : "";
-    const audioBlock = section.audio_url
-      ? `<div class="moment-audio">${section.audio_title ? `<p class="moment-audio-title">${escapeHtml(section.audio_title)}</p>` : ""}${section.audio_description ? `<p class="moment-audio-desc">${escapeHtml(section.audio_description)}</p>` : ""}<audio src="${attr(section.audio_url)}" controls></audio></div>`
+    const audioItems = migrateMusicSectionMedia(section);
+    const audioBlock = audioItems.length
+      ? `<div class="moment-audio-list">${audioItems.map(item => `<div class="moment-audio">${item.title ? `<p class="moment-audio-title">${escapeHtml(item.title)}</p>` : ""}${item.description ? `<p class="moment-audio-desc">${escapeHtml(item.description)}</p>` : ""}<audio src="${attr(item.url)}" controls></audio></div>`).join("")}</div>`
       : "";
     return `<article class="${rv}">${head(section.title || "La nostra canzone")}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${photo}${spotify ? `<div class="moment-spotify"><iframe src="${attr(spotify)}" loading="lazy" allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture"></iframe></div>` : ""}${youtube ? `<div class="moment-youtube"><iframe src="${attr(youtube)}" loading="lazy" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen title="Video YouTube"></iframe></div>` : ""}${audioBlock}</article>`;
   }
@@ -3445,14 +3607,28 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   }
 
   if (key === "video") {
-    const videoUrl = safeUrl(section.video_url || "") !== "#" ? safeUrl(section.video_url || "") : "";
-    if (!videoUrl) {
-      return `<article class="${rv}">${head(section.title || "Video")}<p class="moment-empty-hint">Carica un video MP4 o MOV nell'editor.</p></article>`;
-    }
-    const title = section.video_title ? `<p class="moment-video-title">${escapeHtml(section.video_title)}</p>` : "";
-    const desc = section.video_description ? `<p class="moment-video-desc">${escapeHtml(section.video_description)}</p>` : "";
+    const media = migrateVideoSectionMedia(section);
+    const headBlock = head(section.title || "Video");
     const body = section.body ? `<p>${escapeHtml(section.body)}</p>` : "";
-    return `<article class="${rv}">${head(section.title || "Video")}${body}<div class="moment-video-wrap"><video src="${attr(videoUrl)}" controls playsinline preload="metadata"></video>${title}${desc}</div></article>`;
+    if (!media.length) {
+      return `<article class="${rv} moment-card-gallery">${headBlock}${body}<p class="moment-empty-hint">Carica uno o più video MP4/MOV nell'editor.</p></article>`;
+    }
+    const cards = media.map((item, idx) => {
+      const title = item.title ? `<span class="moment-gallery-caption">${escapeHtml(item.title)}</span>` : "";
+      const desc = item.description ? `<span class="moment-gallery-desc">${escapeHtml(item.description)}</span>` : "";
+      const meta = (title || desc) ? `<figcaption class="moment-gallery-meta">${title}${desc}</figcaption>` : "";
+      const label = item.title || "Apri video";
+      return `<figure class="moment-gallery-figure">
+        <div class="moment-gallery-frame" data-media-open="${idx}">
+          <video src="${attr(item.url)}" muted playsinline preload="metadata" draggable="false"></video>
+          <button type="button" class="moment-gallery-zoom-hint" data-media-open="${idx}" aria-label="${attr(label)}">▶</button>
+        </div>
+        ${meta}
+      </figure>`;
+    }).join("");
+    const payload = media.map(({ type, url, title, description }) => ({ type, url, title, description }));
+    const json = JSON.stringify(payload).replace(/</g, "\\u003c");
+    return `<article class="${rv} moment-card-gallery">${headBlock}${body}<p class="moment-gallery-hint">Scorri i video · tocca ▶ per aprire</p><div class="moment-gallery"><div class="moment-gallery-scroll"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
   }
 
   if (key === "quote" && !section.body) {
@@ -3460,7 +3636,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     return `<article class="${rv} moment-quote-wrap">${titleHead}<span class="moment-quote-mark">"</span><p class="moment-quote-text moment-empty-hint">Aggiungi la citazione nell'editor.</p></article>`;
   }
 
-  if (key === "music" && !section.spotify_url && !section.youtube_url && !section.audio_url && !section.image_url) {
+  if (key === "music" && !section.spotify_url && !section.youtube_url && !section.image_url && !migrateMusicSectionMedia(section).length) {
     return `<article class="${rv}">${head(section.title || "Musica")}<p class="moment-empty-hint">Aggiungi Spotify, YouTube, un audio o un'immagine.</p></article>`;
   }
 
@@ -3469,7 +3645,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   }
 
   if (key === "letter_future" && !section.body && !section.unlock_date && !letterMediaItems(section).length) {
-    return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<p class="moment-empty-hint">Scrivi la lettera, scegli la data di apertura e opzionalmente allega fino a 2 foto, 1 video e 1 audio.</p></article>`;
+    return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<p class="moment-empty-hint">Scrivi la lettera, scegli la data di apertura e allega foto, video, audio o PDF.</p></article>`;
   }
 
   if (key === "countdown" && !section.target_date) {
@@ -3500,7 +3676,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
 function normalizeMomentMedia(section) {
   if (Array.isArray(section.media) && section.media.length) {
     return section.media.map(item => ({
-      type: ["image", "video", "audio"].includes(item.type) ? item.type : "image",
+      type: ["image", "video", "audio", "pdf"].includes(item.type) ? item.type : "image",
       url: String(item.url || "").trim(),
       title: String(item.title || "").trim(),
       description: String(item.description || "").trim()
@@ -3508,6 +3684,32 @@ function normalizeMomentMedia(section) {
   }
   const images = Array.isArray(section.images) ? section.images.filter(Boolean) : [];
   return images.map(url => ({ type: "image", url: String(url), title: "", description: "" }));
+}
+
+function migrateVideoSectionMedia(section = {}) {
+  const list = normalizeMomentMedia(section).filter(item => item.type === "video");
+  if (list.length) return list;
+  const url = String(section.video_url || "").trim();
+  if (!url || safeUrl(url) === "#") return [];
+  return [{
+    type: "video",
+    url,
+    title: String(section.video_title || "").trim(),
+    description: String(section.video_description || "").trim()
+  }];
+}
+
+function migrateMusicSectionMedia(section = {}) {
+  const list = normalizeMomentMedia(section).filter(item => item.type === "audio");
+  if (list.length) return list;
+  const url = String(section.audio_url || "").trim();
+  if (!url || safeUrl(url) === "#") return [];
+  return [{
+    type: "audio",
+    url,
+    title: String(section.audio_title || "").trim(),
+    description: String(section.audio_description || "").trim()
+  }];
 }
 
 function renderMomentActivationPage(product, origin, env = {}) {

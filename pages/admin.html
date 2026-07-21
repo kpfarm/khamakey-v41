@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=172">
+  <link rel="stylesheet" href="admin.css?v=173">
   <script>
     // Dominio Moments: questo è l'admin Business — vai subito all'Officina Moments.
     (function () {
@@ -1573,6 +1573,9 @@
               <label class="wide-field">Funzionalità
                 <input name="features" type="text" placeholder="Editor completo, Analytics, Supporto">
               </label>
+              <label class="wide-field">Limiti JSON (Moments: storage_mb, gallery_images, video_clips…)
+                <textarea name="limits" rows="6" placeholder='{"product":"moments","storage_mb":250,"gallery_images":24}'></textarea>
+              </label>
               <button class="primary-action" type="submit">Salva piano</button>
               <button class="ghost-button" type="button" data-reset-form="planForm">Nuovo piano</button>
               <p class="form-status" id="planFormStatus"></p>
@@ -2098,6 +2101,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=172"></script>
+  <script type="module" src="admin.js?v=173"></script>
 </body>
 </html>

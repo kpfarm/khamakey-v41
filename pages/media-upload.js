@@ -5,6 +5,7 @@ export const MEDIA_BUCKET = "khamakey-media";
 export const MAX_IMAGE_MB = 8;
 export const MAX_VIDEO_MB = 25;
 export const MAX_AUDIO_MB = 12;
+export const MAX_PDF_MB = 15;
 export const MAX_GALLERY_IMAGES = 24;
 
 const UPLOAD_URL = `${WORKER_BASE_URL}/api/media/upload`;
@@ -35,7 +36,7 @@ export function getUploadClient(){
 
 /** URL serviti da Cloudflare R2 via Worker /cdn/ */
 export function isCloudflareMediaUrl(url){
-  return /\/cdn\/(moments|business)\/[0-9a-f-]+\/(images|videos|audio)\//i.test(String(url || ""));
+  return /\/cdn\/(moments|business)\/[0-9a-f-]+\/(images|videos|audio|documents)\//i.test(String(url || ""));
 }
 
 /** Legacy Supabase Storage (pagine già pubblicate) */
@@ -52,12 +53,14 @@ export const IMAGE_ACCEPT = "image/*,.heic,.heif,.heics,.hif";
 const IMAGE_EXT = /\.(jpe?g|png|webp|gif|heic|heif|heics|hif|avif|tiff?)$/i;
 const VIDEO_EXT = /\.(mp4|webm|mov|m4v)$/i;
 const AUDIO_EXT = /\.(mp3|m4a|wav|ogg|aac)$/i;
+const PDF_EXT = /\.pdf$/i;
 
 /** Riconosce il tipo anche quando Safari/iOS non imposta file.type (comune con video dalla galleria). */
 export function inferMediaKind(file){
   const type = String(file?.type || "").toLowerCase();
   const name = String(file?.name || "").toLowerCase();
   if(isHeicFile(file)) return "image";
+  if(type === "application/pdf" || PDF_EXT.test(name)) return "pdf";
   if(type.startsWith("video/") || VIDEO_EXT.test(name)) return "video";
   if(type.startsWith("audio/") || AUDIO_EXT.test(name)) return "audio";
   if(type.startsWith("image/") || IMAGE_EXT.test(name)) return "image";
@@ -80,9 +83,11 @@ export function mimeForUpload(file, kind = inferMediaKind(file)){
     if(name.endsWith(".m4a")) return "audio/x-m4a";
     return "audio/mpeg";
   }
+  if(kind === "pdf") return "application/pdf";
   if(name.endsWith(".png")) return "image/png";
   if(name.endsWith(".gif")) return "image/gif";
   if(name.endsWith(".webp")) return "image/webp";
+  if(name.endsWith(".pdf")) return "application/pdf";
   return "image/jpeg";
 }
 
@@ -224,6 +229,16 @@ export function validateAudioFile(file,maxMb = MAX_AUDIO_MB){
   }
   if(file.size > maxMb * 1024 * 1024){
     throw new Error(`Audio troppo grande: massimo ${maxMb} MB.`);
+  }
+  return true;
+}
+
+export function validatePdfFile(file,maxMb = MAX_PDF_MB){
+  if(!file || inferMediaKind(file) !== "pdf"){
+    throw new Error("Seleziona un file PDF valido.");
+  }
+  if(file.size > maxMb * 1024 * 1024){
+    throw new Error(`PDF troppo grande: massimo ${maxMb} MB.`);
   }
   return true;
 }
@@ -377,11 +392,17 @@ export async function uploadAudio(supabase,options){
   return uploadViaCloudflare(supabase,options);
 }
 
+export async function uploadPdf(supabase,options){
+  validatePdfFile(options.file);
+  return uploadViaCloudflare(supabase,options);
+}
+
 export async function uploadMediaFile(supabase,options){
   const file = options.file;
   const kind = inferMediaKind(file);
   if(kind === "video") return uploadVideo(supabase,options);
   if(kind === "audio") return uploadAudio(supabase,options);
+  if(kind === "pdf") return uploadPdf(supabase,options);
   if(kind === "image"){
     return uploadImage(supabase,{
       ...options,
@@ -389,7 +410,7 @@ export async function uploadMediaFile(supabase,options){
       quality:options.quality ?? GALLERY_IMAGE_QUALITY
     });
   }
-  throw new Error("Formato file non riconosciuto. Usa JPG, PNG, MP4 o MOV.");
+  throw new Error("Formato file non riconosciuto. Usa JPG, PNG, MP4, MOV o PDF.");
 }
 
 export async function uploadImages(supabase,options,files){

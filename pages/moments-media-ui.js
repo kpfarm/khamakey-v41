@@ -1,4 +1,4 @@
-import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=144";
+import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=173";
 import {
   normalizeMediaItem,
   normalizeMediaList,
@@ -8,12 +8,13 @@ import {
   mediaThumbHtml,
   mediaEditorRowHtml,
   galleryEditorGroups,
-  GALLERY_TYPE_GROUPS,
   coverFocusStyle,
   mediaId,
   mediaLimitsForKey,
-  VIDEO_SECTION_HINT
-} from "./moment-media.js?v=164";
+  migrateVideoSectionMedia,
+  migrateMusicSectionMedia,
+  migrateLetterMediaSection
+} from "./moment-media.js?v=173";
 
 let mediaEditContext = null;
 
@@ -40,7 +41,8 @@ export function renderGalleryGrid(formNode,key){
     const canAdd = media.length < limits.maxItems
       && (group.type !== "image" || countMediaByType(media,"image") < limits.maxImages)
       && (group.type !== "video" || countMediaByType(media,"video") < limits.maxVideos)
-      && (group.type !== "audio" || countMediaByType(media,"audio") < limits.maxAudio);
+      && (group.type !== "audio" || countMediaByType(media,"audio") < limits.maxAudio)
+      && (group.type !== "pdf" || countMediaByType(media,"pdf") < (limits.maxPdfs || 0));
     const rows = items.length
       ? items.map(({item,idx})=>mediaEditorRowHtml(item,{index:idx,sectionKey:key})).join("")
       : `<p class="gallery-type-empty">Nessuna ${group.label.toLowerCase()} ancora.</p>`;
@@ -71,20 +73,41 @@ function focusMediaRowTitle(formNode,key,mediaId){
   });
 }
 
+function sectionMediaLabel(key){
+  if(key === "letter_future") return "lettera al futuro";
+  if(key === "video") return "sezione video";
+  if(key === "music") return "sezione musica";
+  return "galleria";
+}
+
 function canAddFiles(current,batch,key = "gallery"){
   const limits = mediaLimitsForKey(key);
-  const label = key === "letter_future" ? "lettera al futuro" : "galleria";
+  const label = sectionMediaLabel(key);
   const next = [...current];
-  const filtered = key === "gallery"
-    ? batch.filter(file=>(inferMediaKind(file) || "image") === "image")
-    : batch;
+  let filtered = batch;
+  if(key === "gallery"){
+    filtered = batch.filter(file=>(inferMediaKind(file) || "image") === "image");
+  }else if(key === "video"){
+    filtered = batch.filter(file=>inferMediaKind(file) === "video");
+  }else if(key === "music"){
+    filtered = batch.filter(file=>inferMediaKind(file) === "audio");
+  }
   for(const file of filtered){
     const type = inferMediaKind(file) || "image";
     if(key === "gallery" && type !== "image"){
       throw new Error("La galleria accetta solo foto. Usa la sezione Video o Musica.");
     }
+    if(key === "video" && type !== "video"){
+      throw new Error("Questa sezione accetta solo video.");
+    }
+    if(key === "music" && type !== "audio"){
+      throw new Error("Questa sezione accetta solo audio.");
+    }
+    if(key === "letter_future" && !["image","video","audio","pdf"].includes(type)){
+      throw new Error("Formato non supportato nella lettera al futuro.");
+    }
     if(next.length >= limits.maxItems){
-      throw new Error(`Limite raggiunto: massimo ${limits.maxItems} allegati nella ${label}.`);
+      throw new Error(`Limite raggiunto: massimo ${limits.maxItems} allegati nella ${label}. Passa a Plus o Pro per sbloccare di più.`);
     }
     if(type === "image" && countMediaByType(next,"image") >= limits.maxImages){
       throw new Error(`Massimo ${limits.maxImages} foto nella ${label}.`);
@@ -94,6 +117,9 @@ function canAddFiles(current,batch,key = "gallery"){
     }
     if(type === "audio" && countMediaByType(next,"audio") >= limits.maxAudio){
       throw new Error(`Massimo ${limits.maxAudio} audio nella ${label}.`);
+    }
+    if(type === "pdf" && countMediaByType(next,"pdf") >= (limits.maxPdfs || 0)){
+      throw new Error(`Massimo ${limits.maxPdfs || 0} PDF nella ${label}.`);
     }
     next.push({type});
   }
@@ -163,7 +189,10 @@ export async function replaceGalleryMediaItem({supabase,row,formNode,key,mediaId
     throw new Error("La galleria accetta solo foto. Usa la sezione Video o Musica.");
   }
   if(existing.type && nextType !== existing.type){
-    const want = existing.type === "video" ? "video" : existing.type === "audio" ? "audio" : "foto";
+    const want = existing.type === "video" ? "video"
+      : existing.type === "audio" ? "audio"
+        : existing.type === "pdf" ? "PDF"
+          : "foto";
     throw new Error(`Seleziona un file dello stesso tipo (${want}) oppure rimuovi l'elemento e aggiungine uno nuovo.`);
   }
   onStatus?.("Sostituzione in corso...");
@@ -448,24 +477,40 @@ export function renderCoverFramer(state){
 
 /** Input file fuori dai pannelli nascosti — altrimenti il dialog non si apre in Chrome/Safari. */
 export function renderGalleryFileInput(key = "gallery"){
-  const accept = key === "letter_future" ? `${IMAGE_ACCEPT},video/*,audio/*` : IMAGE_ACCEPT;
+  const accept = key === "letter_future"
+    ? `${IMAGE_ACCEPT},video/*,audio/*,application/pdf,.pdf`
+    : key === "video"
+      ? "video/*"
+      : key === "music"
+        ? "audio/*"
+        : IMAGE_ACCEPT;
   return `<input type="file" id="galleryFile_${key}" accept="${accept}" multiple hidden tabindex="-1" aria-hidden="true">`;
 }
 
 export function renderGalleryUploadPanel(section,key){
-  const media = normalizeMediaList(section);
+  const seeded = key === "video"
+    ? migrateVideoSectionMedia(section)
+    : key === "music"
+      ? migrateMusicSectionMedia(section)
+      : key === "letter_future"
+        ? migrateLetterMediaSection(section)
+        : normalizeMediaList(section);
   const limits = mediaLimitsForKey(key);
   const isLetter = key === "letter_future";
+  const isVideo = key === "video";
+  const isMusic = key === "music";
   const intro = isLetter
-    ? `<p><strong>Allegati sigillati</strong></p><p class="field-hint">Foto, video o audio che si sbloccano <strong>insieme alla lettera</strong>. Tocca Aggiungi, poi <strong>Salva</strong>.</p>`
-    : `<p><strong>Galleria foto</strong></p><p class="field-hint">Solo immagini qui. Tocca <strong>Aggiungi foto</strong>, scrivi titolo e descrizione, poi <strong>Salva</strong>.</p>`;
-  const footer = isLetter
-    ? `${media.length ? `${media.length} allegati pronti. ` : ""}${limits.hint}`
-    : `${media.length ? `${media.length} foto pronte. ` : ""}${limits.hint} Video → sezione <strong>Video</strong> · Audio → sezione <strong>Musica</strong>.`;
+    ? `<p><strong>Allegati sigillati</strong></p><p class="field-hint">Foto, video, audio o PDF che si sbloccano <strong>insieme alla lettera</strong>. Tocca Aggiungi, poi <strong>Salva</strong>.</p>`
+    : isVideo
+      ? `<p><strong>Video</strong></p><p class="field-hint">Carica uno o più video — in pagina scorrono come la galleria. Titolo e descrizione sotto ciascuno, poi <strong>Salva</strong>.</p>`
+      : isMusic
+        ? `<p><strong>Audio</strong></p><p class="field-hint">Messaggi vocali o brani — complemento a Spotify/YouTube. Poi <strong>Salva</strong>.</p>`
+        : `<p><strong>Galleria foto</strong></p><p class="field-hint">Solo immagini qui. Tocca <strong>Aggiungi foto</strong>, scrivi titolo e descrizione, poi <strong>Salva</strong>.</p>`;
+  const footer = `${seeded.length ? `${seeded.length} file pronti. ` : ""}${limits.hint}`;
   return `<div class="gallery-upload-panel" data-gallery-key="${key}">
     <div class="gallery-steps">${intro}</div>
     <div class="gallery-organized" id="galleryOrganized_${key}"></div>
-    <textarea name="section_${key}_media" class="gallery-media-json" aria-hidden="true" tabindex="-1"></textarea>
+    <textarea name="section_${key}_media" class="gallery-media-json" aria-hidden="true" tabindex="-1">${esc(serializeMediaList(seeded))}</textarea>
     <p class="field-hint" id="galleryUploadStatus_${key}">${footer}</p>
   </div>`;
 }
@@ -485,33 +530,11 @@ export function renderSectionPhotoPanel(key, section, fieldName, { previewId, fi
 }
 
 export function renderVideoSectionPanel(section){
-  const videoUrl = String(section.video_url || "").trim();
-  const preview = videoUrl
-    ? `<div class="video-section-preview"><video src="${esc(videoUrl)}" controls playsinline preload="metadata"></video><button type="button" class="ghost video-section-remove" data-video-section-remove aria-label="Rimuovi video">Rimuovi</button></div>`
-    : `<button type="button" class="gallery-add video-section-add" data-video-section-upload><span>▶</span>Carica video MP4/MOV</button>`;
-  return `<div class="video-section-panel" id="videoSectionPanel">
-    <input type="hidden" name="section_video_video_url" value="${esc(videoUrl)}">
-    <label>Titolo del video<input name="section_video_video_title" value="${esc(section.video_title || "")}" placeholder="Es. Il giorno più bello" maxlength="120"></label>
-    <label>Descrizione<textarea name="section_video_video_description" rows="3" placeholder="Racconta questo video...">${esc(section.video_description || "")}</textarea></label>
-    <p class="field-hint">${VIDEO_SECTION_HINT}</p>
-    ${preview}
-    <input type="file" id="sectionVideoFile" accept="video/*" hidden>
-  </div>`;
+  return renderGalleryUploadPanel(section, "video");
 }
 
 export function renderMusicAudioPanel(section){
-  const audioUrl = String(section.audio_url || "").trim();
-  const preview = audioUrl
-    ? `<div class="music-audio-preview"><audio src="${esc(audioUrl)}" controls></audio><button type="button" class="ghost music-audio-remove" data-music-audio-remove aria-label="Rimuovi audio">Rimuovi</button></div>`
-    : `<button type="button" class="gallery-add music-audio-add" data-music-audio-add><span>+</span>Carica audio MP3/M4A</button>`;
-  return `<div class="music-audio-panel" id="musicAudioPanel">
-    <input type="hidden" name="section_music_audio_url" value="${esc(audioUrl)}">
-    <input type="hidden" name="section_music_audio_title" value="${esc(section.audio_title || "")}">
-    <input type="hidden" name="section_music_audio_description" value="${esc(section.audio_description || "")}">
-    <p class="field-hint">Alternativa o complemento a Spotify/YouTube — max 12 MB.</p>
-    ${preview}
-    <input type="file" id="musicAudioFile" accept="audio/*" hidden>
-  </div>`;
+  return renderGalleryUploadPanel(section, "music");
 }
 
 function esc(value){

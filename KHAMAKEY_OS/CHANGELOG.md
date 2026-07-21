@@ -24,6 +24,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 - **Moments v165 / Worker v155 — Sfumatura hero on/off (2026-07-20, Cursor)** — Pages + Worker
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
+### Fixed
+- **Worker v164 — Guestbook anteprima (2026-07-21, Cursor)** — Worker
+  - Fetch guestbook/RSVP verso `WORKER_PUBLIC_BASE` assoluto (l’iframe `srcdoc` rompeva URL relativi → errore Safari «pattern»).
+  - Card `.moment-guestbook` più definita (bordo/sfondo); form interno senza doppio riquadro.
 ### Changed
 - **Admin v175 / Worker v163 — Resend Moments domain (2026-07-21, Cursor)** — Pages + Worker
   - Default From `info@khamakeymoments.com`; avviso nuovo ticket anche a `khamakeymoments@gmail.com`.

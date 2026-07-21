@@ -305,3 +305,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-21 | Cursor | **Moments v174 / Worker v160**: switch opt-in scorrimento laterale tappe (default lista verticale invariata) |
 | 2026-07-21 | Cursor | **Moments v175 / Worker v161**: Privacy + Termini + consenso signup + footer/notice `/m/` (no cookie marketing) |
 | 2026-07-21 | Cursor | **Moments v176**: messaggio ticket assistenza solo user-facing (niente Officina admin) |
+| 2026-07-21 | Cursor | **Worker v164-guestbook**: fix invio guestbook in anteprima (API assoluta); card sezione più definita |

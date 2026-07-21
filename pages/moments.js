@@ -104,13 +104,13 @@ import {
   sectionFieldHints,
   sectionHasContent,
   isSectionExcluded
-} from "./moment-sections.js?v=179";
+} from "./moment-sections.js?v=180";
 import {
   TYPE_LABELS,
   renderCategorySelect,
   templateForType,
   normalizeMomentType
-} from "./moment-categories.js?v=179";
+} from "./moment-categories.js?v=180";
 import {
   navSectionsForEditor,
   kitSectionKeys,
@@ -125,7 +125,7 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js?v=179";
+} from "./moment-editor-kit.js?v=180";
 import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderMomentDashboardShell, bindMomentDashboard } from "./moment-editor-dashboard.js";

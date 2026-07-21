@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v160-journey-scroll";
+const WORKER_VERSION = "v161-legal";
 
 export default {
   async fetch(request, env, ctx) {
@@ -172,10 +172,10 @@ async function handleMomentPage(request, env, ctx, slug) {
 
   const pinRequired = Boolean(page.pin_required);
   if (pinRequired && !page.pin_valid) {
-    return html(renderMomentPinGate(page, url.origin, Boolean(pin)), 401, { "Cache-Control": "no-store" });
+    return html(renderMomentPinGate(page, url.origin, Boolean(pin), env), 401, { "Cache-Control": "no-store" });
   }
 
-  return html(renderMomentPage(page, url.origin), 200, {
+  return html(renderMomentPage(page, url.origin, env), 200, {
     "Cache-Control": pinRequired ? "private, no-store" : "public, max-age=30, s-maxage=60"
   });
 }
@@ -828,7 +828,7 @@ async function handleMomentPreview(request, env) {
     state: pageState
   };
   const origin = new URL(request.url).origin;
-  const html = renderMomentPage(page, origin);
+  const html = renderMomentPage(page, origin, env);
   return cors(new Response(html, {
     status: 200,
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }
@@ -996,15 +996,16 @@ document.addEventListener("click",event=>{
 </html>`;
 }
 
-function renderMomentPinGate(page, origin, failed = false) {
+function renderMomentPinGate(page, origin, failed = false, env = {}) {
+  const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
   return `<!doctype html>
 <html lang="it">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(page.title || "KhamaKey Moments")}</title>
-<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:Arial,sans-serif;background:#f5f7fa;color:#172036}.card{width:min(92vw,420px);background:white;border:1px solid #e2e8f0;border-radius:18px;padding:26px;box-shadow:0 18px 60px rgba(27,42,94,.12);text-align:center}h1{color:#1b2a5e;margin:0 0 8px}p{color:#64748b;line-height:1.5}input{width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:13px;margin:12px 0;text-align:center;font-size:1.2rem;letter-spacing:.16em}button{width:100%;border:0;border-radius:10px;background:#1b2a5e;color:white;padding:12px;font-weight:800}.error{color:#d92d20;font-weight:800}</style></head>
-<body><form class="card" method="GET"><h1>${escapeHtml(page.title || "Moment protetto")}</h1><p>Inserisci il PIN per aprire questa pagina KhamaKey Moments.</p>${failed ? `<p class="error">PIN non corretto.</p>` : ""}<input name="pin" inputmode="numeric" autocomplete="one-time-code" placeholder="PIN" required><button type="submit">Apri pagina</button></form></body></html>`;
+<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:Arial,sans-serif;background:#f5f7fa;color:#172036}.card{width:min(92vw,420px);background:white;border:1px solid #e2e8f0;border-radius:18px;padding:26px;box-shadow:0 18px 60px rgba(27,42,94,.12);text-align:center}h1{color:#1b2a5e;margin:0 0 8px}p{color:#64748b;line-height:1.5}input{width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:13px;margin:12px 0;text-align:center;font-size:1.2rem;letter-spacing:.16em}button{width:100%;border:0;border-radius:10px;background:#1b2a5e;color:white;padding:12px;font-weight:800}.error{color:#d92d20;font-weight:800}.legal{margin-top:16px;font-size:12px}.legal a{color:#1b2a5e;font-weight:700;text-decoration:none;margin:0 8px}.legal a:hover{text-decoration:underline}</style></head>
+<body><form class="card" method="GET"><h1>${escapeHtml(page.title || "Moment protetto")}</h1><p>Inserisci il PIN per aprire questa pagina KhamaKey Moments.</p>${failed ? `<p class="error">PIN non corretto.</p>` : ""}<input name="pin" inputmode="numeric" autocomplete="one-time-code" placeholder="PIN" required><button type="submit">Apri pagina</button><p class="legal"><a href="${attr(pagesBase)}/moments-privacy.html" target="_blank" rel="noopener">Privacy</a><a href="${attr(pagesBase)}/moments-terms.html" target="_blank" rel="noopener">Termini</a></p></form></body></html>`;
 }
 
-function renderMomentPage(page, origin) {
+function renderMomentPage(page, origin, env = {}) {
   const state = page.state || {};
   const title = String(state.title || page.title || "KhamaKey Moments").trim();
   const description = String(state.subtitle || page.description || state.description || "").trim();
@@ -1082,6 +1083,9 @@ function renderMomentPage(page, origin) {
   }
 
   const extraTypeClass = momentType === "valentine" ? " moment-type-love" : "";
+  const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
+  const privacyUrl = `${pagesBase}/moments-privacy.html`;
+  const termsUrl = `${pagesBase}/moments-terms.html`;
 
   return `<!doctype html>
 <html lang="it">
@@ -1105,8 +1109,21 @@ ${profileBlock}
 </div></section>
 ${dividerHtml}
 <section class="moment-content">${counterHtml}${sectionHtml}</section>
-<footer class="moment-footer">Creato con cura · KhamaKey Moments</footer>
+<footer class="moment-footer">
+  <span>Creato con cura · KhamaKey Moments</span>
+  <nav class="moment-footer-legal" aria-label="Informazioni legali">
+    <a href="${attr(privacyUrl)}" target="_blank" rel="noopener">Privacy</a>
+    <a href="${attr(termsUrl)}" target="_blank" rel="noopener">Termini</a>
+  </nav>
+</footer>
 </main>
+<aside class="moment-privacy-notice" id="momentPrivacyNotice" hidden>
+  <p>Questa pagina usa misure di sicurezza tecniche lato server. Non usiamo cookie di marketing. Dettagli nella Privacy Policy.</p>
+  <div class="moment-privacy-actions">
+    <a href="${attr(privacyUrl)}" target="_blank" rel="noopener">Privacy</a>
+    <button type="button" data-privacy-dismiss>Ho capito</button>
+  </div>
+</aside>
 <div class="moment-lightbox" id="momentLightbox" aria-hidden="true">
 <button type="button" class="moment-lightbox-nav moment-lightbox-prev" id="momentLightboxPrev" aria-label="Precedente">‹</button>
 <button type="button" class="moment-lightbox-nav moment-lightbox-next" id="momentLightboxNext" aria-label="Successivo">›</button>
@@ -1954,6 +1971,18 @@ document.getElementById("momentLightboxPrev")?.addEventListener("click",function
 document.getElementById("momentLightboxNext")?.addEventListener("click",function(e){e.stopPropagation();openMedia(currentIndex+1);});
 lb.addEventListener("click",function(e){if(e.target===lb)closeLightbox();});
 }
+(function(){
+  var key="kk_moments_privacy_notice_v1";
+  var box=document.getElementById("momentPrivacyNotice");
+  if(!box)return;
+  try{if(localStorage.getItem(key)==="1")return;}catch(e){}
+  box.hidden=false;
+  var btn=box.querySelector("[data-privacy-dismiss]");
+  if(btn)btn.addEventListener("click",function(){
+    try{localStorage.setItem(key,"1");}catch(e){}
+    box.remove();
+  });
+})();
 })();`;
 }
 
@@ -2332,7 +2361,14 @@ body.nav-open{overflow:hidden}
 .moment-media-list .moment-media-card{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:76px;padding:12px;background:${c.cardSoft};border:1px solid ${c.line};border-radius:14px;box-shadow:none;transition:border-color .2s,background .2s}
 .moment-media-list .moment-media-card:hover{background:${c.surface};border-color:${c.lineStrong}}
 .moment-media-card-audio{min-height:88px}
-.moment-footer{text-align:center;color:${c.ink}!important;opacity:.9;font-family:${f.ui};font-size:12px;font-weight:600;letter-spacing:.02em;padding:16px 20px max(28px,env(safe-area-inset-bottom));text-shadow:0 1px 2px rgba(0,0,0,.18)}
+.moment-footer{text-align:center;color:${c.ink}!important;opacity:.9;font-family:${f.ui};font-size:12px;font-weight:600;letter-spacing:.02em;padding:16px 20px max(28px,env(safe-area-inset-bottom));text-shadow:0 1px 2px rgba(0,0,0,.18);display:grid;gap:8px;justify-items:center}
+.moment-footer-legal{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.moment-footer-legal a{color:${c.ink}!important;opacity:.95;text-decoration:underline;text-underline-offset:2px;font-weight:700}
+.moment-privacy-notice{position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:45;max-width:520px;margin:0 auto;padding:14px 14px 12px;border-radius:16px;background:rgba(17,24,39,.94);color:#fff;box-shadow:0 16px 40px rgba(9,16,36,.28);font-family:${f.ui}}
+.moment-privacy-notice p{margin:0 0 10px;font-size:.74rem;line-height:1.45;color:rgba(255,255,255,.86);font-weight:600}
+.moment-privacy-actions{display:flex;gap:8px}
+.moment-privacy-actions a,.moment-privacy-actions button{flex:1;border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:9px 8px;font-family:${f.ui};font-size:.72rem;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;color:#fff;background:rgba(255,255,255,.08)}
+.moment-privacy-actions button{background:#fff;color:#111827;border-color:transparent}
 @media(prefers-reduced-motion:reduce){.hero-in,.rv{opacity:1;transform:none;transition:none}.rv.on .moment-journey-item,.rv.on .moment-promise,.rv.on .moment-ritual,.rv.on .moment-number,.rv.on .moment-dream{animation:none}.moment-sealed-icon,.moment-decor-item{animation:none}.moment-decor{display:none}}
 @media(min-width:720px){body{padding:24px;background:#eef2f7}.moment-page{width:min(100%,680px);margin:auto;border-radius:24px;box-shadow:0 24px 70px rgba(17,32,65,.08);background:${c.surface}}.moment-content{padding:20px 20px 36px}}
 .moment-cut-arco #moment-hero {
@@ -3793,6 +3829,9 @@ p{color:#6B6470;line-height:1.55;margin:0 0 12px}
 .steps{text-align:left;margin:16px 0 8px;padding:14px 14px 10px;border-radius:14px;background:#FFF9F5;border:1px solid #E8D4CE}
 .steps li{margin:0 0 8px;color:#18202F;font-size:14px;line-height:1.4}
 .steps strong{color:#071A3C}
+.legal{margin-top:16px;font-size:12px;color:#6B6470}
+.legal a{color:#071A3C;font-weight:700;text-decoration:none;margin:0 8px}
+.legal a:hover{text-decoration:underline}
 </style></head>
 <body><main class="card">
 <img class="logo" src="${attr(logoSrc)}" alt="KhamaKey Moments">
@@ -3808,6 +3847,7 @@ ${lineLabel ? `<span class="badge">${escapeHtml(lineLabel)}</span>` : ""}
 </ol>
 <a class="button" href="${attr(pagesBase)}/moments.html">Attiva in Area Moments</a>
 <p class="hint">Senza il codice della confezione non si può attivare la pagina — così il prodotto resta sicuro in negozio.</p>
+<p class="legal"><a href="${attr(pagesBase)}/moments-privacy.html" target="_blank" rel="noopener">Privacy</a><a href="${attr(pagesBase)}/moments-terms.html" target="_blank" rel="noopener">Termini</a></p>
 </main></body></html>`;
 }
 

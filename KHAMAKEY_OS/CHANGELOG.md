@@ -9,6 +9,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Moments v175 / Worker v161 — Privacy + Termini Moments (2026-07-21, Cursor)** — Pages + Worker
+  - Pagine `moments-privacy.html` / `moments-terms.html` + CSS legale.
+  - Link su auth, consenso signup, account hub; footer/notice su `/m/`, PIN gate e pagina attivazione.
+  - Notice pubblica: solo misure tecniche (visitor hash server-side), nessun cookie marketing; dismiss in `localStorage`.
 - **Moments v174 / Worker v160 — Scroll laterale tappe opt-in (2026-07-21, Cursor)** — Pages + Worker
   - Switch in sezione Tappe: default lista verticale invariata; se attivo, stesso scroll orizzontale della galleria (`scroll_layout`).
 - **Moments/Admin v173 / Worker v159 / SQL v161 — Piani Free/Plus/Pro (2026-07-21, Cursor)** — Pages + Worker + SQL

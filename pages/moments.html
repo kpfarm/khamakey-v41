@@ -7,7 +7,7 @@
   <link rel="icon" href="khamakey-favicon.png">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="moments.css?v=174">
+  <link rel="stylesheet" href="moments.css?v=175">
 </head>
 <body class="session-pending">
   <main class="moments-boot" id="momentsBoot" aria-live="polite">
@@ -117,6 +117,10 @@
               <input id="momentsSignupPin" type="text" inputmode="numeric" autocomplete="new-password" placeholder="Esempio 1234" minlength="4" required>
               <span class="field-hint">Scegli un PIN da 4 cifre o più. Lo userai per aprire la pagina collegata all’NFC.</span>
             </label>
+            <label class="consent-check">
+              <input id="momentsSignupLegal" type="checkbox" required>
+              <span>Accetto i <a href="./moments-terms.html" target="_blank" rel="noopener">Termini di servizio</a> e ho letto la <a href="./moments-privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+            </label>
             <div class="signup-actions">
               <button type="button" class="ghost" id="signupPrevStep">Indietro</button>
               <button type="submit" class="primary">Crea account e attiva</button>
@@ -125,6 +129,10 @@
         </form>
 
         <p id="momentsAuthStatus" class="status" aria-live="polite"></p>
+        <nav class="auth-legal" aria-label="Informazioni legali">
+          <a href="./moments-privacy.html">Privacy</a>
+          <a href="./moments-terms.html">Termini</a>
+        </nav>
       </div>
     </section>
   </main>
@@ -204,6 +212,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=174"></script>
+  <script type="module" src="moments.js?v=175"></script>
 </body>
 </html>

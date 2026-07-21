@@ -705,6 +705,10 @@ function renderAccountPanels(){
         <div style="margin-top:14px">
           <button type="button" class="ghost" id="accountHubLogout">Esci dall’account</button>
         </div>
+        <nav class="account-legal-links" aria-label="Informazioni legali">
+          <a href="./moments-privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
+          <a href="./moments-terms.html" target="_blank" rel="noopener">Termini di servizio</a>
+        </nav>
       </div>`;
     document.getElementById("accountHubLogout")?.addEventListener("click",()=>{
       document.getElementById("momentsLogout")?.click();
@@ -4002,8 +4006,10 @@ signupForm?.addEventListener("submit",async event=>{
   const code = normalizeCode(document.getElementById("momentsSignupCode").value);
   const title = document.getElementById("momentsSignupTitle").value.trim();
   const pin = document.getElementById("momentsSignupPin").value.trim();
+  const legalOk = Boolean(document.getElementById("momentsSignupLegal")?.checked);
   if(!isValidMomentCode(code)) return setStatus(statusNode,"Codice Moments non valido.","error");
   if(!title) return setStatus(statusNode,"Inserisci il nome della pagina.","error");
+  if(!legalOk) return setStatus(statusNode,"Per creare l’account accetta Termini e Privacy.","error");
   try{ validatePin(pin); }catch(error){ return setStatus(statusNode,error.message,"error"); }
   storePendingMomentActivation({ code, title, pin });
   setStatus(statusNode,"Creazione account Moments...");

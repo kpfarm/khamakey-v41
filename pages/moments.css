@@ -111,6 +111,15 @@ textarea{min-height:86px;resize:vertical}
 .signup-step.active{background:var(--rosa-cipria);color:var(--blu-notte);border-color:#E0B8B6}
 .signup-actions{display:flex;gap:8px;align-items:center}
 .signup-actions .primary{margin-left:auto}
+.consent-check{display:flex;align-items:flex-start;gap:10px;margin:12px 0 4px;font-size:.78rem;line-height:1.45;color:var(--muted);font-weight:600}
+.consent-check input{width:18px;height:18px;margin-top:2px;flex:0 0 auto}
+.consent-check a{color:var(--navy);font-weight:800}
+.auth-legal{display:flex;justify-content:center;gap:16px;margin:14px 0 0;padding-top:12px;border-top:1px solid var(--border);font-size:.78rem;font-weight:700}
+.auth-legal a{color:var(--navy);text-decoration:none}
+.auth-legal a:hover{text-decoration:underline}
+.account-legal-links{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:14px;font-size:.82rem;font-weight:700}
+.account-legal-links a{color:var(--navy);text-decoration:none}
+.account-legal-links a:hover{text-decoration:underline}
 .status{margin:10px 0 0;color:var(--muted);font-size:.86rem;min-height:1.2em}.status.error{color:var(--red)}.status.ok{color:var(--green-dark)}
 
 /* App */

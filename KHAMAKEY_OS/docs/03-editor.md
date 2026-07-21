@@ -78,6 +78,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 - Lettera / messaggio speciale
 - Contatore con etichetta personalizzabile (es. «Insieme da», «Ti sopporto da»)
 - Supporto operativo: menu account `Assistenza` e form ticket nella scheda Account, con `source='moments_editor'`.
+- Legale Moments (v175): `moments-privacy.html` / `moments-terms.html`; link in auth + account; checkbox consenso in signup. Su `/m/` footer + notice tecnica (no cookie marketing; `visitorId` solo server-side per PIN/rate-limit).
 
 ### Categorie evento
 21 categorie con template bilanciati (v89–v90):

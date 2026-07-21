@@ -93,8 +93,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v173** | Override piano Moments su drawer cliente; `platform_plans.limits` editabile. |
-| **Moments editor** | **v174** | Switch opt-in scroll laterale tappe; piani Free/Plus/Pro v173. |
-| **Worker NFC** | **v160-journey-scroll** | Tappe: layout verticale default + scroll orizzontale se `scroll_layout`. |
+| **Moments editor** | **v175** | Privacy/Termini + consenso signup; scroll tappe v174; piani Free/Plus/Pro v173. |
+| **Worker NFC** | **v161-legal** | Footer Privacy/Termini su `/m/`, notice sicurezza (no cookie marketing), link attivazione/PIN. |
 | **Business shell** | **app v167** | `APP_VERSION` in `app.js` — account Moments non finiscono nel flusso Business. Editor Business HTML può avere WIP locale non ancora allineato in tabella. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v161 (prod)** | Piani Moments v161 (`plan_key`, usage, RPC); opaque slug v160; security v75–v83. |

@@ -24,6 +24,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 - **Moments v165 / Worker v155 — Sfumatura hero on/off (2026-07-20, Cursor)** — Pages + Worker
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
+### Changed
+- **Admin v176 — PDF etichette Cricut (2026-07-21, Cursor)** — Pages
+  - Link NFC = URL completo `https://link.khamakeymoments.com/m/<slug>` (copia-incolla sul chip).
+  - Riquadro confezione: codice di attivazione + barcode (niente numero d’ordine nel rettangolo).
+  - Sezioni PDF: panoramica · ovali · confezione · URL NFC.
+
 ### Fixed
 - **SQL v166 + Worker v166 — Stabilità magazzino (2026-07-21, Cursor)** — SQL + Worker
   - Causa: v165 aveva revocato `USAGE` su schema `app_private` → `permission denied for function create_moment_product_batch`.

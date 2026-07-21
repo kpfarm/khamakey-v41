@@ -297,7 +297,7 @@
                   <li><strong>Confezione</strong><span>Kit regalo</span></li>
                   <li><strong>Altra linea</strong><span>Nuovo oggetto — scrivi il nome</span></li>
                 </ul>
-                <p class="guide-tip-inline">CSV/PDF: <strong>codice attivazione</strong> solo per l’inserto in confezione. Programma il chip con <strong>Link NFC /m/…</strong> (mai col codice). Dopo v160 riprogramma i pezzi già in magazzino.</p>
+                <p class="guide-tip-inline">CSV/PDF: <strong>codice attivazione</strong> nell’inserto (anche nel riquadro confezione del PDF). Programma il chip con l’<strong>URL NFC completo</strong> (mai col codice). Dopo v160 riprogramma i pezzi già in magazzino.</p>
               </aside>
             </div>
           </div>
@@ -530,7 +530,7 @@
                 <button type="button" class="small-action primary-outline" id="momentLabelsSelected">PDF etichette (selezione)</button>
               </div>
             </div>
-            <p class="field-hint export-hint"><strong>Stampa / NFC:</strong> CSV = codice attivazione (inserto) + Link NFC <code>/m/slug</code> per programmare il chip. <strong>PDF 4 sezioni</strong> · ovali codice · rettangoli barcode · link NFC · taglio Cricut (contorno nero). <strong>Non</strong> programmare il chip con il codice attivazione.</p>
+            <p class="field-hint export-hint"><strong>Stampa / NFC:</strong> CSV = codice attivazione (inserto) + <strong>URL completo</strong> Link NFC per programmare il chip. <strong>PDF 4 sezioni</strong> · ovali codice · rettangoli confezione (codice+barcode) · URL NFC · taglio Cricut. <strong>Non</strong> programmare il chip con il codice attivazione.</p>
             <div class="table-wrap inventory-table-wrap">
               <table class="inventory-table">
                 <thead><tr>
@@ -891,5 +891,5 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=175"></script>
+  <script type="module" src="admin.js?v=176"></script>
 </body>

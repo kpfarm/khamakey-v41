@@ -17,8 +17,8 @@
 ```text
 Officina NFC
   Modello (MOM-KEY-WED) → genera pezzo/i
-  → CSV + PDF 4 sezioni Cricut: panoramica · ovali codice · barcode · link /m/slug
-  → stampa/taglia etichette · programma chip con /m/slug · codice in inserto
+  → CSV + PDF 4 sezioni Cricut: panoramica · ovali codice · confezione (codice+barcode) · URL NFC completo
+  → stampa/taglia etichette · programma chip con URL completo · codice in inserto
   → scaffale
 
 Cliente
@@ -43,16 +43,16 @@ Prima il codice compariva sulla pagina pre-attivazione e spesso coincideva con `
 3. `/k/<codice>` non risolve pezzi `available` (solo dopo claim)
 4. CSV/PDF restano la fonte del codice per stampa inserto
 
-### PDF etichette Cricut (Admin v169)
+### PDF etichette Cricut (Admin v176)
 
 Export magazzino → un PDF A4 con **4 sezioni** (si ripaginano se il lotto è grande), stessa numerazione da 1:
 
-1. **Panoramica** — CATEGORIA / QUANTITÀ + `# · ovale codice · barcode · link` (foglio di controllo, non da tagliare)
+1. **Panoramica** — CATEGORIA / QUANTITÀ + `# · ovale codice · confezione (codice+barcode) · URL NFC completo` (foglio di controllo, non da tagliare)
 2. **Ovali codice** (48×18 mm) — inserto confezione, taglio Cricut sul contorno nero
-3. **Rettangoli barcode** (40×15 mm) — etichetta confezione / scan
-4. **Rettangoli link NFC** (55×16 mm) — programmazione chip `/m/slug`
+3. **Rettangoli confezione** (42×20 mm) — **codice attivazione** + barcode magazzino (niente numero d’ordine nel riquadro)
+4. **Rettangoli link NFC** (72×18 mm) — URL completo `https://link.khamakeymoments.com/m/<slug>` da copiare sul chip
 
-**Azione officina:** pezzi già in magazzino con chip vecchio `/k/CODICE` vanno **riprogrammati** con il nuovo Link NFC `/m/slug` dal magazzino.
+**Azione officina:** pezzi già in magazzino con chip vecchio `/k/CODICE` vanno **riprogrammati** con il nuovo Link NFC URL completo dal magazzino.
 
 SQL: `sql/khamakey-moments-opaque-slug-v160.sql` (applicato su Supabase).
 

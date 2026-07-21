@@ -56,7 +56,7 @@ export const MOMENTS_CONSOLE_GUIDES = {
     subtitle: "Genera pezzi fisici, PDF etichette Cricut 4 sezioni, export CSV.",
     steps: [
       "Quantità default 1 — anche un solo regalo o prova.",
-      "PDF lotto 4 sezioni Cricut: panoramica · ovali codice · rettangoli barcode · link NFC (stessa numerazione da 1).",
+      "PDF lotto 4 sezioni Cricut: panoramica · ovali codice · confezione (codice+barcode) · URL NFC completo (stessa numerazione da 1).",
       "Canale: Regalo, Vendita locale, Agente…",
       "Se la tabella sembra vuota: chip «Tutti» o «Mostra tutti» — i filtri a volte nascondono i pezzi."
     ],
@@ -65,7 +65,7 @@ export const MOMENTS_CONSOLE_GUIDES = {
       { pill: "claimed active", label: "Attivato dal cliente" },
       { pill: "paused archived", label: "Fuori rotazione" }
     ],
-    tip: "Link chip NFC = /m/slug · Codice attivazione solo in confezione · Pagina live = stesso /m/slug dopo attivazione."
+    tip: "Link chip NFC = URL completo https://link…/m/slug · Codice attivazione in confezione · Pagina live = stesso /m/slug dopo attivazione."
   },
   momentClients: {
     subtitle: "Account e oggetti attivati: editor admin, pagine /m/ e supporto cliente.",

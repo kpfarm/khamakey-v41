@@ -25,6 +25,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
 ### Changed
+- **Admin v175 / Worker v163 — Resend Moments domain (2026-07-21, Cursor)** — Pages + Worker
+  - Default From `info@khamakeymoments.com`; avviso nuovo ticket anche a `khamakeymoments@gmail.com`.
+  - Richiede secret live `RESEND_FROM_EMAIL` aggiornato (niente più `@khamakey.com`).
 - **Admin v174 / Worker v162 — Fix risposta ticket (2026-07-21, Cursor)** — Pages + Worker
   - Admin passa `to_email`; Worker non dipende da embed `profiles` (RLS); errori Resend restituiti allo staff.
 - **Moments v176 — Ticket assistenza (2026-07-21, Cursor)** — Pages only

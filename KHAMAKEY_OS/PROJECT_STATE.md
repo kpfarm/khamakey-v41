@@ -92,9 +92,9 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v174** | Reply ticket: passa `to_email`; errori Resend più chiari. |
+| **Admin / Officina Moments** | **v175** | Hint Resend mittente Moments; reply ticket v174. |
 | **Moments editor** | **v176** | Messaggio ticket assistenza user-facing; Privacy/Termini v175; piani Free/Plus/Pro. |
-| **Worker NFC** | **v162-support-reply** | Fix risposta ticket: destinatario affidabile + dettaglio errore Resend. |
+| **Worker NFC** | **v163-resend-moments** | Default From `info@khamakeymoments.com`; notify ticket anche a `khamakeymoments@gmail.com`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v161 (prod)** | Piani Moments v161 (`plan_key`, usage, RPC); opaque slug v160; security v75–v83. |

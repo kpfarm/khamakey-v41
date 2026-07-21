@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v162-support-reply";
+const WORKER_VERSION = "v163-resend-moments";
 
 export default {
   async fetch(request, env, ctx) {
@@ -225,7 +225,7 @@ async function handleBooking(request, env) {
   if (env.RESEND_API_KEY) {
     const emailResult = await sendBookingEmail(env, {
       to: recipient,
-      from: env.RESEND_FROM_EMAIL || "KhamaKey <noreply@khamakey.com>",
+      from: env.RESEND_FROM_EMAIL || "KhamaKey Moments <info@khamakeymoments.com>",
       replyTo: validEmail(values.email) ? values.email : undefined,
       businessName: String(fields.nome || "KhamaKey"),
       requestType: String(fields.bookingType || "Richiesta"),
@@ -429,9 +429,7 @@ async function handleMomentSupportNotify(request, env) {
     return cors(json({ ok: false, skipped: true, reason: "email_not_configured" }));
   }
 
-  const extra = String(env.SUPPORT_NOTIFY_EMAIL || "").trim().toLowerCase();
-  const recipients = [...ADMIN_EMAILS];
-  if (extra && !recipients.includes(extra)) recipients.push(extra);
+  const recipients = supportNotifyRecipients(env);
   if (!recipients.length) return cors(json({ ok: false, skipped: true, reason: "no_recipients" }));
 
   const adminBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
@@ -4054,6 +4052,22 @@ const ADMIN_EMAILS = new Set([
   "info.khamakey@gmail.com"
 ]);
 
+/** Inbox umana Moments (notify ticket) — non concede permessi admin. */
+const SUPPORT_INBOX_EMAILS = [
+  "khamakeymoments@gmail.com"
+];
+
+function supportNotifyRecipients(env) {
+  const recipients = new Set(
+    [...ADMIN_EMAILS, ...SUPPORT_INBOX_EMAILS]
+      .map(email => String(email || "").trim().toLowerCase())
+      .filter(Boolean)
+  );
+  const extra = String(env.SUPPORT_NOTIFY_EMAIL || "").trim().toLowerCase();
+  if (extra) recipients.add(extra);
+  return [...recipients];
+}
+
 async function verifyPlatformAdmin(env, jwt) {
   const user = await supabaseUser(env, jwt);
   if (!user?.email) return null;
@@ -5597,7 +5611,7 @@ async function runRateLimitCleanupJob(env) {
 
 async function sendResendEmail(env, { to, subject, html, text, tags = [], replyTo }) {
   const payload = {
-    from: env.RESEND_FROM_EMAIL || "KhamaKey <noreply@khamakey.com>",
+    from: env.RESEND_FROM_EMAIL || "KhamaKey Moments <info@khamakeymoments.com>",
     to: Array.isArray(to) ? to : [to],
     subject,
     html,

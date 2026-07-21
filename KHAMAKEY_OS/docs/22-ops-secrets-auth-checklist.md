@@ -9,7 +9,7 @@
 |--------------|------------|-----------------|
 | Media R2 | OK | Nessuno |
 | Shopify | `active` | Catalogo/ordini |
-| Resend API | `active` | Email ticket staff, prenotazioni, anniversari |
+| Resend API | `active` | Email ticket staff, prenotazioni, anniversari, **Auth SMTP** |
 | Stripe | `not_configured` | Solo pagamenti Business — **Moments non bloccato** |
 | PayPal | `not_configured` | Opzionale Business |
 | OpenAI | `not_configured` | Traduzioni Business i18n |
@@ -97,9 +97,10 @@ Poi Admin → Configurazioni → Piani: Price ID `price_...`.
 
 ## Checklist chiusura
 
+- [x] **Supabase Auth SMTP** (2026-07-21): Resend `smtp.resend.com:465`, mittente `noreply@khamakeymoments.com` — verificato reset password
 - [ ] Leaked password ON (o documentato blocco piano Free)
 - [ ] (Opz.) `RESEND_WEBHOOK_SECRET` impostato
 - [ ] (Quando serve Business) Stripe secrets + `/health` stripe active
 - [ ] Aggiornare riga in `PROJECT_STATE.md` → Problemi aperti
 
-*KhamaKey OS — ops checklist 2026-07-20*
+*KhamaKey OS — ops checklist 2026-07-21*

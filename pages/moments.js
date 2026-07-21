@@ -376,7 +376,8 @@ function lockedMomentType(row){
 
 function renderMomentTypeField(state){
   const type = normalizeMomentType(state.type);
-  const label = TYPE_LABELS[type] || type;
+  // Clienti: niente tipologia in UI (resta hidden per salvataggio/template).
+  // Admin: select per override operativo.
   if(adminMode){
     return `<label>Tipo di momento (admin)
         <select name="moment_type" id="momentTypeSelect">
@@ -384,12 +385,7 @@ function renderMomentTypeField(state){
         </select>
       </label>`;
   }
-  return `<div class="moment-type-locked">
-      <span class="field-label">Tipo di pagina</span>
-      <p class="moment-type-badge"><span class="type-pill">${esc(label)}</span></p>
-      <input type="hidden" name="moment_type" id="momentTypeInput" value="${esc(type)}">
-      <p class="field-hint">Definito dal prodotto NFC collegato — ogni codice attiva il modello giusto per l'occasione.</p>
-    </div>`;
+  return `<input type="hidden" name="moment_type" id="momentTypeInput" value="${esc(type)}">`;
 }
 
 function templateSeedKey(eventId){
@@ -1167,9 +1163,9 @@ function renderPlanStorageCard(entitlements = currentEntitlements){
   const pct = storageUsagePercent(ent);
   const maxBytes = storageBytesLimit(ent.limits);
   const planLabel = PLAN_LABELS[ent.plan_key] || ent.plan_name || "Free";
-  const upgradeHint = ent.plan_key === "moments_pro"
-    ? "Hai il piano massimo per questo Moment."
-    : "Upgrade Plus/Pro (pagamento in arrivo) sblocca più spazio e più video, audio e PDF.";
+  const planHint = ent.plan_key === "moments_free"
+    ? "Spazio incluso con il tuo oggetto NFC. I piani a pagamento arriveranno più avanti."
+    : "Spazio e limiti attivi per questo Moment.";
   return `<div class="plan-storage-card" id="momentPlanStorageCard" data-plan-key="${esc(ent.plan_key)}">
     <div class="plan-storage-head">
       <div>
@@ -1179,9 +1175,7 @@ function renderPlanStorageCard(entitlements = currentEntitlements){
       <span class="plan-storage-usage">${esc(formatBytes(ent.bytes_used))} / ${esc(formatBytes(maxBytes))}</span>
     </div>
     <div class="plan-storage-bar" aria-hidden="true"><span style="width:${pct}%"></span></div>
-    <p class="field-hint plan-storage-hint">${esc(upgradeHint)}</p>
-    ${ent.plan_key === "moments_free" ? `<button type="button" class="ghost plan-upgrade-stub" disabled title="Collegamento Stripe in arrivo">Upgrade Plus — €4,90/mese</button>` : ""}
-    ${ent.plan_key === "moments_plus" ? `<button type="button" class="ghost plan-upgrade-stub" disabled title="Collegamento Stripe in arrivo">Upgrade Pro — €9,90/mese</button>` : ""}
+    <p class="field-hint plan-storage-hint">${esc(planHint)}</p>
   </div>`;
 }
 
@@ -2185,7 +2179,7 @@ function renderOnboardingWizard(row){
     </div>
     <ol class="onboarding-steps">
       <li class="active"><strong>1. Copertina</strong><span>Titolo, tipo pagina e foto.</span></li>
-      <li><strong>2. Template</strong><span>Scegli il tipo e tocca «Prepara tutto per me».</span></li>
+      <li><strong>2. Template</strong><span>Tocca «Prepara tutto per me» per partire dal modello del tuo prodotto.</span></li>
       <li><strong>3. Contenuti</strong><span>Modifica testi e media. In «Altre sezioni» aggiungi solo ciò che ti serve.</span></li>
       <li><strong>4. Pubblica</strong><span>Salva e condividi il link NFC.</span></li>
     </ol>

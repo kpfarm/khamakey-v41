@@ -313,3 +313,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-21 | Cursor | **Moments v179 / Worker v167**: libro ospiti escluso da editor e pagina pubblica (API off) |
 | 2026-07-21 | Cursor | **Moments v180**: chrome editor unisex su palette ufficiale (rosa solo accent) |
 | 2026-07-22 | Cursor | **Moments v181**: fix boot bloccato — cache-bust import moment-sections/editor-kit |
+| 2026-07-22 | Cursor | **Moments v182**: nasconde tipologia in Copertina; riepilogo senza prezzo Plus non disponibile |

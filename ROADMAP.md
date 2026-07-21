@@ -311,3 +311,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-21 | Cursor | **Admin v176**: PDF Cricut — URL NFC completo, codice attivazione nel riquadro confezione, niente # sul barcode |
 | 2026-07-21 | Cursor | **Admin v177**: PDF — ovale con testo “per attivare” + codice; barcode solo barcode (non tutti i codici insieme) |
 | 2026-07-21 | Cursor | **Moments v179 / Worker v167**: libro ospiti escluso da editor e pagina pubblica (API off) |
+| 2026-07-21 | Cursor | **Moments v180**: chrome editor unisex su palette ufficiale (rosa solo accent) |

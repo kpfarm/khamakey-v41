@@ -55,7 +55,7 @@ Asset in [`../assets/brand/`](../assets/brand/):
 
 Gradienti: Rosa Ricordo → Blu Notte; Rosa Cipria → Rosa Luce.
 
-UI Moments (`moments.css`): `--navy` = Blu Notte, CTA (`--green`) = Rosa Luce, `--green-dark` = Rosa Ricordo, `--bg` = Avorio.
+UI Moments (`moments.css` v180): stessa palette ufficiale. **Chrome editor** bilanciato — base Avorio + Blu Notte soft; Rosa Luce/Ricordo solo CTA, focus e accenti (meno Rosa Cipria a pieno campo → lettura più unisex).
 
 ### Linee Guida Grafiche Moments (Adattivo — pagina pubblica)
 

@@ -25,6 +25,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
 ### Changed
+- **Moments v180 — Chrome editor unisex (2026-07-21, Cursor)** — Pages
+  - Stessa palette ufficiale Moments; base Blu Notte/Avorio; rosa solo CTA/focus/accenti.
 - **Moments v179 / Worker v167 — Libro ospiti escluso (2026-07-21, Cursor)** — Pages + Worker
   - Sezione guestbook fuori da menu editor, template e «Altre sezioni».
   - Pagina pubblica: sezione non renderizzata; API guestbook resta disabilitata.

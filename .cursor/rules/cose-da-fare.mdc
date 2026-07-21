@@ -11,7 +11,7 @@ Se l'utente scrive **cose da fare** (anche con varianti tipo «che cose da fare�
 
 1. **Supabase Auth** — *Leaked Password Protection*: su piano **FREE non disponibile** (serve Pro) → saltato / documentato
 2. ~~**Chip magazzino**~~ — fatto (2026-07-21): Link NFC `/m/slug` (admin già allineato)
-3. **Smoke test Moments** — *rimandato* (utente non può ora): attivazione → editor → `/m/` → ticket → PDF Cricut
+3. **Smoke test Moments** — in corso (2026-07-21): auto A✅; manca login utente B1–B10
 4. **Supporto** — *rimandato con smoke*: assegnazione + risposta Resend (Admin v172 / Worker v158)
 5. Prossimo backlog prodotto solo se ops sopra ok (es. report rivenditori, hub spedizioni)
 

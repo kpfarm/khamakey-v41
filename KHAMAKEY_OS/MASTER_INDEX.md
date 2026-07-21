@@ -69,6 +69,7 @@ KHAMAKEY_OS/
 | **Checklist operabilità Business + Admin** | [`docs/21-checklist-operabilita-business-admin.md`](docs/21-checklist-operabilita-business-admin.md) |
 | Officina NFC Moments | [`docs/21-moments-officina-nfc.md`](docs/21-moments-officina-nfc.md) |
 | Ops secrets / Auth checklist | [`docs/22-ops-secrets-auth-checklist.md`](docs/22-ops-secrets-auth-checklist.md) |
+| Smoke test Moments | [`docs/23-smoke-moments.md`](docs/23-smoke-moments.md) |
 
 ## Prompt operativi
 

@@ -103,7 +103,7 @@ import {
   formatImageLines,
   sectionFieldHints,
   sectionHasContent
-} from "./moment-sections.js?v=174";
+} from "./moment-sections.js?v=177";
 import {
   TYPE_LABELS,
   renderCategorySelect,
@@ -129,7 +129,7 @@ import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderGuestbookModerationShell, bindGuestbookModerationPanel } from "./moment-guestbook-kit.js";
 import { renderMomentDashboardShell, bindMomentDashboard } from "./moment-editor-dashboard.js";
-import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js";
+import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=177";
 
 const auth = document.getElementById("momentsAuth");
 const app = document.getElementById("momentsApp");
@@ -3550,7 +3550,7 @@ function readFormState(formNode){
   const form = new FormData(formNode);
   const sections = {};
   for(const key of Object.keys(DEFAULT_SECTIONS)){
-    sections[key] = readSectionFromForm(form,key);
+    sections[key] = readSectionFromForm(form, key, formNode);
   }
   sections.gallery = {
     ...sections.gallery,
@@ -3803,8 +3803,13 @@ async function saveMoment(event,row){
   // Senza WhatsApp: spegni RSVP in automatico (niente blocco, UX semplice)
   let rsvpAutoOff = false;
   if(state.sections?.rsvp){
-    const wa = normalizeWhatsAppDigits(state.sections.rsvp.whatsapp_number);
+    // Preferisci il valore live del campo (iOS / pannelli nascosti)
+    const liveWa = String(formNode.querySelector('[name="section_rsvp_whatsapp_number"]')?.value || "").trim();
+    const wa = normalizeWhatsAppDigits(liveWa || state.sections.rsvp.whatsapp_number);
     state.sections.rsvp.whatsapp_number = wa;
+    if(formNode.querySelector('[name="section_rsvp_whatsapp_number"]') && wa){
+      formNode.querySelector('[name="section_rsvp_whatsapp_number"]').value = wa;
+    }
     if(state.sections.rsvp.enabled && (!wa || wa.length < 10)){
       state.sections.rsvp.enabled = false;
       rsvpAutoOff = true;

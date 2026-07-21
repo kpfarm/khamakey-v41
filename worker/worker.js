@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v164-guestbook";
+const WORKER_VERSION = "v165-guestbook-ingest";
 
 export default {
   async fetch(request, env, ctx) {
@@ -271,7 +271,7 @@ async function handleMomentRsvp(request, env) {
   const rows = await rpc(env, "get_public_moment", { p_slug: slug, p_pin_hash: pinHash, p_visitor_key: rsvpVisitor });
   const page = rows?.[0];
   if (!page || !page.pin_valid) {
-    return cors(json({ error: "Pagina non valida" }, 404));
+    return cors(json({ error: "Pagina protetta: riapri il link e inserisci di nuovo il PIN, poi riprova." }, 401));
   }
 
   const ingestKey = env.WEBHOOK_INGEST_KEY || env.ANALYTICS_INGEST_KEY;
@@ -330,7 +330,9 @@ async function handleMomentGuestbookSubmit(request, env) {
   const guestbookVisitor = await visitorId(request, env.VISITOR_SALT || "khamakey");
   const rows = await rpc(env, "get_public_moment", { p_slug: slug, p_pin_hash: pinHash, p_visitor_key: guestbookVisitor });
   const page = rows?.[0];
-  if (!page || !page.pin_valid) return cors(json({ error: "Pagina non valida" }, 404));
+  if (!page || !page.pin_valid) {
+    return cors(json({ error: "Pagina protetta: riapri il link e inserisci di nuovo il PIN, poi riprova." }, 401));
+  }
 
   const ingestKey = env.WEBHOOK_INGEST_KEY || env.ANALYTICS_INGEST_KEY;
   if (!ingestKey) return cors(json({ error: "Servizio non configurato" }, 503));
@@ -402,6 +404,7 @@ function guestbookErrorMessage(error) {
   if (msg.includes("non pubblicata")) return "Pagina non pubblicata. Pubblica la pagina prima di raccogliere messaggi.";
   if (msg.includes("ingest") || msg.includes("chiave ingest")) return "Servizio temporaneamente non disponibile. Riprova più tardi.";
   if (msg.includes("obbligatori")) return "Nome e messaggio sono obbligatori.";
+  if (msg.includes("troppo lungo")) return "Messaggio troppo lungo (max 1200 caratteri).";
   return "Invio messaggio non riuscito. Riprova tra poco.";
 }
 
@@ -1690,7 +1693,13 @@ function momentPageScript(state, ordered = [], hasCounter = false, slug = "", ap
 var momentPageSlug="${momentSlug}";
 var momentApiBase="${momentApiBase}";
 function momentApi(path){return momentApiBase+path;}
+var momentPinStoreKey="km_pin_"+momentPageSlug;
 var momentPin=(new URLSearchParams(location.search).get("pin")||"").trim();
+if(momentPin){
+  try{sessionStorage.setItem(momentPinStoreKey,momentPin);}catch(e){}
+}else{
+  try{momentPin=String(sessionStorage.getItem(momentPinStoreKey)||"").trim();}catch(e){}
+}
 if(momentPin&&history.replaceState){
   try{history.replaceState(null,"",location.pathname+location.hash);}catch(e){}
 }
@@ -2060,19 +2069,19 @@ body.nav-open{overflow:hidden}
 .moment-section-anchor{min-width:0;max-width:100%;overflow-x:hidden}
 
 .moment-counter, .moment-card, .moment-countdown, .moment-quote-wrap, .moment-signature, .moment-rsvp-form, .moment-guestbook, .moment-sealed, .moment-letter {
-  background: rgba(255,255,255,.92)!important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid ${c.lineStrong}!important;
-  box-shadow: 0 16px 36px -10px rgba(17,32,65,.08), inset 0 1px 0 rgba(255,255,255,.7)!important;
+  background: #FFFFFF!important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1.5px solid ${c.lineStrong}!important;
+  box-shadow: 0 18px 40px -12px rgba(17,32,65,.14), 0 1px 0 rgba(255,255,255,.9) inset!important;
   border-radius: 24px!important;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .moment-card:hover, .moment-counter:hover, .moment-countdown:hover, .moment-quote-wrap:hover, .moment-rsvp-form:hover, .moment-guestbook:hover {
   transform: translateY(-2px);
-  box-shadow: 0 20px 48px -8px ${c.go}14, inset 0 1px 0 rgba(255,255,255,.8)!important;
-  border-color: ${c.go}55!important;
+  box-shadow: 0 22px 48px -10px ${c.go}22, 0 1px 0 rgba(255,255,255,.95) inset!important;
+  border-color: ${c.go}66!important;
 }
 
 .moment-card p, .moment-journey-text, .moment-rsvp-intro, .moment-guestbook-intro, .moment-letter p {
@@ -2304,7 +2313,8 @@ body.nav-open{overflow:hidden}
   transform:translateY(0);
 }
 
-.moment-guestbook{padding:22px 18px 20px;display:grid;gap:4px}
+.moment-guestbook{padding:22px 18px 20px;display:grid;gap:4px;background:#FFFFFF!important}
+.moment-rsvp-form{background:#FFFFFF!important}
 .moment-guestbook-intro{margin:0 0 16px;line-height:1.75;color:${cardInk};font-size:1.02rem;font-weight:500;opacity:.88}
 .moment-guestbook-form{padding:0;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 .moment-guestbook-form label{display:grid;gap:8px;font-family:${f.ui};font-size:.88rem;font-weight:700;color:${cardInk};margin:0 0 12px}

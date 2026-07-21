@@ -35,6 +35,7 @@ Eseguire **in ordine** i file non ancora applicati. Vedi [`../../sql/README.md`]
 | v69 | `khamakey-business-i18n-v69.sql` | Traduzioni pagine Business |
 | v70 | `khamakey-moments-rsvp-v70.sql` | RSVP Moments strutturato |
 | v71 | `khamakey-moments-guestbook-v71.sql` | Guestbook Moments |
+| **v165** | `khamakey-webhook-ingest-store-v165.sql` | Store chiave ingest + guestbook/RSVP aggiornati |
 | v72-v73 | anniversari + letter unlock | Automazioni Moments |
 | v74 | `khamakey-business-analytics-v74.sql` | Analytics Business |
 | v75-v83 | hardening sicurezza | PIN, rate limit, CSP/RLS, linter Supabase |

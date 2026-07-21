@@ -62,17 +62,27 @@ export function renderRsvpFieldsEditor(section = {}){
   </div>`;
 }
 
-export function readRsvpFieldsFromForm(form){
-  const fieldKeys = Object.keys(RSVP_OPTIONAL_FIELDS).filter(key=>form.get(`section_rsvp_field_${key}`) === "on");
-  const count = Number(form.get("section_rsvp_custom_count") || 0);
+export function readRsvpFieldsFromForm(form, formNode = null){
+  const checked = name=>{
+    const el = formNode?.elements?.[name] || formNode?.querySelector?.(`[name="${name}"]`);
+    if(el && el.type === "checkbox") return Boolean(el.checked);
+    return form.get(name) === "on";
+  };
+  const text = name=>{
+    const el = formNode?.elements?.[name] || formNode?.querySelector?.(`[name="${name}"]`);
+    if(el && typeof el.value === "string") return String(el.value || "").trim();
+    return String(form.get(name) || "").trim();
+  };
+  const fieldKeys = Object.keys(RSVP_OPTIONAL_FIELDS).filter(key=>checked(`section_rsvp_field_${key}`));
+  const count = Number(text("section_rsvp_custom_count") || form.get("section_rsvp_custom_count") || 0);
   const customFields = [];
   for(let index = 0; index < count; index += 1){
-    const label = String(form.get(`section_rsvp_custom_label_${index}`) || "").trim();
+    const label = text(`section_rsvp_custom_label_${index}`);
     if(!label) continue;
     customFields.push({
       id:`custom_${index + 1}`,
       label,
-      placeholder:String(form.get(`section_rsvp_custom_placeholder_${index}`) || "").trim(),
+      placeholder:text(`section_rsvp_custom_placeholder_${index}`),
       type:"text",
       enabled:true
     });

@@ -24,7 +24,7 @@ const RSVP_INVITE_EMOJI = {
   default:"📲"
 };
 
-import { rsvpGuestPreviewLines, readRsvpFieldsFromForm } from "./moment-rsvp-fields.js";
+import { rsvpGuestPreviewLines, readRsvpFieldsFromForm } from "./moment-rsvp-fields.js?v=177";
 import { renderRsvpResponsesShell } from "./moment-rsvp-responses.js";
 
 function esc(value){

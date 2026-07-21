@@ -3,7 +3,7 @@
 import { normalizeMediaList, parseMediaList, migrateLetterMediaSection } from "./moment-media.js";
 import { parseListItems, itemsFromSection, LIST_SECTION_MODES, normalizeListItems } from "./moment-list-items.js";
 import { mergePlacesIntoTimeline, resolveJourneySteps, parseJourneySteps } from "./moment-journey.js";
-import { readRsvpFieldsFromForm } from "./moment-rsvp-fields.js";
+import { readRsvpFieldsFromForm } from "./moment-rsvp-fields.js?v=177";
 
 export const SECTION_ORDER_DEFAULT = [
   "intro",
@@ -309,26 +309,45 @@ export function sectionIsVisible(key, section){
 
 export { parseLineItems } from "./moment-list-items.js";
 
-export function readSectionFromForm(form, key){
+/** Legge un campo dal DOM live (più affidabile di FormData su pannelli display:none / iOS). */
+function liveFieldValue(form, formNode, name){
+  const el = formNode?.elements?.[name] || formNode?.querySelector?.(`[name="${name}"]`);
+  if(el && typeof el.value === "string" && el.type !== "checkbox" && el.type !== "radio" && el.type !== "file"){
+    return String(el.value || "").trim();
+  }
+  if(el?.type === "checkbox") return el.checked ? "on" : "";
+  const raw = form.get(name);
+  return raw == null ? "" : String(raw).trim();
+}
+
+function liveCheckboxOn(form, formNode, name){
+  const el = formNode?.elements?.[name] || formNode?.querySelector?.(`[name="${name}"]`);
+  if(el && el.type === "checkbox") return Boolean(el.checked);
+  return form.get(name) === "on";
+}
+
+export function readSectionFromForm(form, key, formNode = null){
+  const val = name => liveFieldValue(form, formNode, name);
   const base = {
-    enabled:form.get(`section_${key}_enabled`) === "on",
-    title:String(form.get(`section_${key}_title`) || "").trim(),
-    body:String(form.get(`section_${key}_body`) || "").trim(),
+    enabled:liveCheckboxOn(form, formNode, `section_${key}_enabled`),
+    title:val(`section_${key}_title`),
+    body:val(`section_${key}_body`),
     images:key === "gallery" ? parseImageLines(form.get(`section_${key}_images`)) : []
   };
   if(key === "dedication"){
-    base.recipient = String(form.get(`section_${key}_recipient`) || "").trim();
-    base.signature = String(form.get(`section_${key}_signature`) || "").trim();
+    base.recipient = val(`section_${key}_recipient`);
+    base.signature = val(`section_${key}_signature`);
   }
   if(key === "countdown"){
-    base.event_label = String(form.get(`section_${key}_event_label`) || "").trim();
-    base.target_date = String(form.get(`section_${key}_target_date`) || "").trim();
-    base.image_url = String(form.get(`section_${key}_image_url`) || "").trim();
+    base.event_label = val(`section_${key}_event_label`);
+    base.target_date = val(`section_${key}_target_date`);
+    base.image_url = val(`section_${key}_image_url`);
   }
   if(key === "rsvp"){
-    base.whatsapp_number = String(form.get(`section_${key}_whatsapp_number`) || "").trim();
-    base.event_name = String(form.get(`section_${key}_event_name`) || "").trim();
-    Object.assign(base, readRsvpFieldsFromForm(form));
+    // Dopo Object.assign: WhatsApp/evento non devono essere sovrascritti dai soli field_keys
+    Object.assign(base, readRsvpFieldsFromForm(form, formNode));
+    base.whatsapp_number = val(`section_${key}_whatsapp_number`);
+    base.event_name = val(`section_${key}_event_name`);
   }
   if(key === "music"){
     base.spotify_url = String(form.get(`section_${key}_spotify_url`) || "").trim();

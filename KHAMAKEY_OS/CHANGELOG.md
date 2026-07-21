@@ -25,6 +25,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
 ### Fixed
+- **Moments v177 / Worker v165 / SQL v165 — Guestbook + WhatsApp RSVP (2026-07-21, Cursor)** — Pages + Worker + SQL
+  - Guestbook: store `app_private.khamakey_secrets` per chiave ingest (GUC `ALTER DATABASE` non disponibile via MCP); allineata a Worker `WEBHOOK_INGEST_KEY`.
+  - WhatsApp RSVP: lettura dal DOM live al salvataggio (non solo FormData).
+  - Contrasto card guestbook/RSVP più netto; PIN pubblico in `sessionStorage`.
 - **Worker v164 — Guestbook anteprima (2026-07-21, Cursor)** — Worker
   - Fetch guestbook/RSVP verso `WORKER_PUBLIC_BASE` assoluto (l’iframe `srcdoc` rompeva URL relativi → errore Safari «pattern»).
   - Card `.moment-guestbook` più definita (bordo/sfondo); form interno senza doppio riquadro.

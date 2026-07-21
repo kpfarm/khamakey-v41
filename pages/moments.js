@@ -56,10 +56,11 @@ import {
   fetchMomentEntitlements,
   formatBytes,
   normalizeEntitlements,
+  planLimitsSummaryLines,
   PLAN_LABELS,
   storageBytesLimit,
   storageUsagePercent
-} from "./moment-plans.js?v=173";
+} from "./moment-plans.js?v=183";
 import { LIST_SECTION_MODES, itemsFromSection } from "./moment-list-items.js";
 import {
   renderListItemsPanel,
@@ -714,13 +715,16 @@ function renderAccountPanels(){
     return;
   }
   if(activeAccountTab === "plan"){
+    const ent = normalizeEntitlements(currentEntitlements);
+    const planLabel = PLAN_LABELS[ent.plan_key] || ent.plan_name || "Free";
     accountPanels.innerHTML = `
       <div class="account-panel-card">
         <h3>Piano</h3>
-        <p>Qui compariranno i piani a pagamento quando saranno disponibili.</p>
+        <p>Limiti del tuo piano attuale. I piani a pagamento arriveranno più avanti — senza sorprese di prezzo qui.</p>
         <div class="account-plan-card">
-          <strong>Moments Free</strong>
-          <p>Incluso con il tuo oggetto NFC: editor pagina, pubblicazione e assistenza base.</p>
+          <strong>Moments ${esc(planLabel)}</strong>
+          <p>Incluso con il tuo oggetto NFC: editor, pubblicazione e assistenza base.</p>
+          ${renderPlanLimitsList(ent.limits)}
         </div>
       </div>`;
     return;
@@ -1158,14 +1162,19 @@ function renderActivationFormHtml(formId = "editorActivationForm",statusId = "ed
   <p class="status" id="${statusId}"></p>`;
 }
 
+function renderPlanLimitsList(limits){
+  const lines = planLimitsSummaryLines(limits);
+  return `<ul class="plan-limits-list">${lines.map(line=>`<li>${esc(line)}</li>`).join("")}</ul>`;
+}
+
 function renderPlanStorageCard(entitlements = currentEntitlements){
   const ent = normalizeEntitlements(entitlements);
   const pct = storageUsagePercent(ent);
   const maxBytes = storageBytesLimit(ent.limits);
   const planLabel = PLAN_LABELS[ent.plan_key] || ent.plan_name || "Free";
   const planHint = ent.plan_key === "moments_free"
-    ? "Spazio incluso con il tuo oggetto NFC. I piani a pagamento arriveranno più avanti."
-    : "Spazio e limiti attivi per questo Moment.";
+    ? "Limiti del piano Free incluso con il tuo oggetto NFC. I piani a pagamento arriveranno più avanti."
+    : "Limiti attivi per questo Moment.";
   return `<div class="plan-storage-card" id="momentPlanStorageCard" data-plan-key="${esc(ent.plan_key)}">
     <div class="plan-storage-head">
       <div>
@@ -1176,6 +1185,7 @@ function renderPlanStorageCard(entitlements = currentEntitlements){
     </div>
     <div class="plan-storage-bar" aria-hidden="true"><span style="width:${pct}%"></span></div>
     <p class="field-hint plan-storage-hint">${esc(planHint)}</p>
+    ${renderPlanLimitsList(ent.limits)}
   </div>`;
 }
 

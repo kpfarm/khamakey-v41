@@ -807,6 +807,9 @@ body.media-modal-open{overflow:hidden}
 .plan-storage-bar{height:8px;border-radius:999px;background:rgba(7,26,60,.08);overflow:hidden;margin-bottom:8px}
 .plan-storage-bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#AA626C,#071A3C);transition:width .35s ease}
 .plan-storage-hint{margin:0 0 10px}
+.plan-limits-list{margin:0;padding:0 0 0 1.1em;display:grid;gap:4px;font-size:.78rem;line-height:1.4;color:var(--antracite);font-weight:600}
+.plan-limits-list li{padding:0}
+.account-plan-card .plan-limits-list{margin-top:10px}
 .plan-upgrade-stub{width:100%;opacity:.85;cursor:not-allowed}
 .media-pdf-thumb,.media-pdf-row-icon{
   display:flex;align-items:center;justify-content:center;gap:8px;

@@ -105,6 +105,19 @@ export function storageUsagePercent(entitlements){
   return Math.min(100, Math.round((ent.bytes_used / max) * 100));
 }
 
+/** Righe leggibili per UI cliente (riepilogo / account) — senza prezzi upgrade. */
+export function planLimitsSummaryLines(planLimits = DEFAULT_MOMENTS_LIMITS){
+  const limits = normalizePlanLimits(planLimits);
+  return [
+    `Spazio totale ${limits.storage_mb} MB`,
+    `Fino a ${limits.gallery_images} foto in galleria`,
+    `Fino a ${limits.video_clips} video`,
+    `Fino a ${limits.music_audio} brano audio`,
+    `Lettera al futuro: ${limits.letter_images} foto · ${limits.letter_videos} video · ${limits.letter_audio} audio · ${limits.letter_pdfs} PDF`,
+    `File max: foto ${limits.max_image_mb} MB · video ${limits.max_video_mb} MB`
+  ];
+}
+
 export function canFitBytes(entitlements, nextBytes){
   const ent = normalizeEntitlements(entitlements);
   const max = storageBytesLimit(ent.limits);

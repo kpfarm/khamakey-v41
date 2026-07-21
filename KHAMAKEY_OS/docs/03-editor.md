@@ -118,6 +118,8 @@ Moments: quota totale per prodotto in `platform_plans.limits.storage_mb` + conta
 | Lettera foto/video/audio/PDF | 2/1/1/1 | 4/2/2/3 | 8/4/4/8 |
 | Journey | 24 | 48 | 100 |
 
+Layout tappe: **lista verticale di default** (invariata). Opzione editor `scroll_layout` → scroll laterale come galleria (utile con molte tappe).
+
 Piano su `moment_events.plan_key`. Admin può applicare con RPC `apply_moment_plan`. Stripe price ID ancora da collegare.
 
 | Area Business (invariato) | Limite |

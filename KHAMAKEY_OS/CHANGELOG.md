@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Moments v174 / Worker v160 — Scroll laterale tappe opt-in (2026-07-21, Cursor)** — Pages + Worker
+  - Switch in sezione Tappe: default lista verticale invariata; se attivo, stesso scroll orizzontale della galleria (`scroll_layout`).
 - **Moments/Admin v173 / Worker v159 / SQL v161 — Piani Free/Plus/Pro (2026-07-21, Cursor)** — Pages + Worker + SQL
   - `moment_events.plan_key`, `moment_media_usage`, seed `moments_free|plus|pro` con prezzi e `limits` jsonb.
   - RPC `get_moment_entitlements`, `record_moment_media_bytes`, `apply_moment_plan`.

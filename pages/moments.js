@@ -44,7 +44,7 @@ import {
   renderJourneyFileInput,
   bindJourneyEditor,
   uploadJourneyStepPhoto
-} from "./moments-journey-ui.js?v=144";
+} from "./moments-journey-ui.js?v=174";
 import {
   migrateLetterMediaSection,
   migrateVideoSectionMedia,
@@ -103,7 +103,7 @@ import {
   formatImageLines,
   sectionFieldHints,
   sectionHasContent
-} from "./moment-sections.js?v=158";
+} from "./moment-sections.js?v=174";
 import {
   TYPE_LABELS,
   renderCategorySelect,

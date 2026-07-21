@@ -78,8 +78,20 @@ export function renderJourneySteps(formNode,key = "timeline"){
 
 export function renderJourneyPanel(section,placesSection = null){
   const steps = resolveJourneySteps(section,placesSection);
+  const scrollOn = Boolean(section?.scroll_layout);
   return `<div class="journey-panel" data-journey-key="timeline">
     <p class="journey-lead">Ogni tappa è una card: nome, data, racconto e foto. Trascina ☰ per riordinare.</p>
+    <div class="section-switch ${scrollOn ? "is-on" : ""}" data-journey-scroll-switch role="switch" aria-checked="${scrollOn ? "true" : "false"}" tabindex="0">
+      <span class="section-switch-label">
+        <span class="section-switch-icon" aria-hidden="true">↔</span>
+        <span class="section-switch-copy">
+          <strong>${scrollOn ? "Scorrimento laterale attivo" : "Lista verticale (default)"}</strong>
+          <small>${scrollOn ? "In pagina le tappe scorrono come la galleria — pagina più corta" : "Con tante tappe puoi attivare lo scroll laterale come la galleria"}</small>
+        </span>
+      </span>
+      <span class="section-switch-track" aria-hidden="true"><i></i></span>
+    </div>
+    <input type="checkbox" name="section_timeline_scroll_layout" value="on" ${scrollOn ? "checked" : ""} hidden id="journeyScrollLayoutInput">
     <div class="journey-steps-head">
       <span class="journey-steps-count"><strong id="journeyStepCount_timeline">${steps.length}</strong> / ${MAX_JOURNEY_STEPS} tappe</span>
       <button type="button" class="primary journey-add-btn" data-journey-add="timeline">+ Aggiungi tappa</button>
@@ -128,12 +140,42 @@ function bindJourneyStepDnD(formNode){
   listNode.addEventListener("drop",event=>event.preventDefault());
 }
 
+function syncJourneyScrollSwitch(formNode){
+  const input = formNode.querySelector("#journeyScrollLayoutInput, [name=\"section_timeline_scroll_layout\"]");
+  const switchEl = formNode.querySelector("[data-journey-scroll-switch]");
+  if(!input || !switchEl) return;
+  const on = Boolean(input.checked);
+  switchEl.classList.toggle("is-on", on);
+  switchEl.setAttribute("aria-checked", on ? "true" : "false");
+  const strong = switchEl.querySelector(".section-switch-copy strong");
+  const small = switchEl.querySelector(".section-switch-copy small");
+  if(strong) strong.textContent = on ? "Scorrimento laterale attivo" : "Lista verticale (default)";
+  if(small){
+    small.textContent = on
+      ? "In pagina le tappe scorrono come la galleria — pagina più corta"
+      : "Con tante tappe puoi attivare lo scroll laterale come la galleria";
+  }
+}
+
 export function bindJourneyEditor(formNode,actions = {}){
   if(formNode.dataset.journeyBound === "1") return;
   formNode.dataset.journeyBound = "1";
   bindJourneyStepDnD(formNode);
   let previewTimer = null;
+  const toggleScroll = ()=>{
+    const input = formNode.querySelector("#journeyScrollLayoutInput, [name=\"section_timeline_scroll_layout\"]");
+    if(!input) return;
+    input.checked = !input.checked;
+    syncJourneyScrollSwitch(formNode);
+    formNode.dispatchEvent(new Event("input",{bubbles:true}));
+  };
   formNode.addEventListener("click",event=>{
+    const scrollSwitch = event.target.closest("[data-journey-scroll-switch]");
+    if(scrollSwitch && formNode.contains(scrollSwitch)){
+      event.preventDefault();
+      toggleScroll();
+      return;
+    }
     const addBtn = event.target.closest("[data-journey-add]");
     if(addBtn && formNode.contains(addBtn)){
       event.preventDefault();
@@ -157,6 +199,13 @@ export function bindJourneyEditor(formNode,actions = {}){
       event.preventDefault();
       actions.onRemoveStep?.(formNode, removeBtn.dataset.journeyRemove);
     }
+  });
+  formNode.addEventListener("keydown",event=>{
+    const scrollSwitch = event.target.closest("[data-journey-scroll-switch]");
+    if(!scrollSwitch || !formNode.contains(scrollSwitch)) return;
+    if(event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    toggleScroll();
   });
   formNode.addEventListener("input",event=>{
     const row = event.target.closest(".journey-step-card");

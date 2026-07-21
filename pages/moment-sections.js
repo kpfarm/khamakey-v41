@@ -28,7 +28,7 @@ export const SECTION_ORDER_DEFAULT = [
 export const DEFAULT_SECTIONS = {
   intro:{ enabled:true, title:"La nostra storia", body:"", images:[] },
   dedication:{ enabled:false, title:"Una dedica per te", body:"", recipient:"", signature:"", images:[] },
-  timeline:{ enabled:false, title:"Tappe & luoghi", body:"", items:[], images:[] },
+  timeline:{ enabled:false, title:"Tappe & luoghi", body:"", items:[], scroll_layout:false, images:[] },
   rsvp:{ enabled:false, title:"Conferma presenza", body:"Compila il modulo e invia la risposta su WhatsApp.", whatsapp_number:"", event_name:"", ask_guests:true, ask_notes:true, field_keys:["guests","notes"], custom_fields:[], images:[] },
   guestbook:{ enabled:false, title:"Libro degli ospiti", body:"Lascia un pensiero — apparirà dopo l'approvazione dell'organizzatore.", images:[] },
   gallery:{ enabled:false, title:"Galleria foto", body:"", images:[], media:[] },
@@ -373,6 +373,7 @@ export function readSectionFromForm(form, key){
   }
   if(key === "timeline"){
     base.items = parseJourneySteps(form.get(`section_${key}_items`));
+    base.scroll_layout = form.get(`section_${key}_scroll_layout`) === "on";
   }
   return base;
 }

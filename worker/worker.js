@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v159-moments-plans";
+const WORKER_VERSION = "v160-journey-scroll";
 
 export default {
   async fetch(request, env, ctx) {
@@ -1316,7 +1316,7 @@ function resolveMomentSections(state) {
   const defaults = {
     intro:{enabled:true,title:"",body:"",images:[]},
     dedication:{enabled:false,title:"",body:"",recipient:"",signature:"",images:[]},
-    timeline:{enabled:false,title:"",body:"",items:[],images:[]},
+    timeline:{enabled:false,title:"",body:"",items:[],scroll_layout:false,images:[]},
     rsvp:{enabled:false,title:"",body:"",whatsapp_number:"",event_name:"",ask_guests:true,ask_notes:true,images:[]},
     guestbook:{enabled:false,title:"",body:"",images:[]},
     gallery:{enabled:false,title:"",body:"",images:[]},
@@ -2104,6 +2104,12 @@ body.nav-open{overflow:hidden}
 .moment-journey-place{display:block;font-size:1.08rem;color:${cardInk};font-weight:800;line-height:1.25;font-family:${f.ui}}
 .moment-journey-map{display:inline-flex;align-items:center;gap:4px;font-family:${f.ui};font-size:.78rem;font-weight:700;color:${c.go};text-decoration:underline;text-underline-offset:3px;margin-top:4px;opacity:.88}
 @media(min-width:560px){.moment-journey-item{grid-template-columns:120px minmax(0,1fr);align-items:start}.moment-journey-photo{width:120px;height:120px;max-height:none}}
+.moment-journey--scroll{display:block;overflow:hidden;max-width:100%;min-width:0;margin-top:4px}
+.moment-journey--scroll .moment-gallery{margin-top:0}
+.moment-journey--scroll .moment-journey-item{width:min(78vw,280px);flex:0 0 auto;scroll-snap-align:center;margin:0;grid-template-columns:1fr;align-content:start}
+.moment-journey--scroll .moment-journey-item::before{display:none}
+.moment-journey--scroll .moment-journey-photo{width:100%;height:150px;max-height:none}
+@media(min-width:560px){.moment-journey--scroll .moment-journey-item{grid-template-columns:1fr}.moment-journey--scroll .moment-journey-photo{width:100%;height:150px}}
 .moment-meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
 .moment-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid ${c.line};border-radius:999px;padding:10px 18px;font-family:${f.ui};font-size:.78rem;color:${cardInk};background:#FFFFFF;text-decoration:none;font-weight:700;min-height:44px;transition:background .2s,border-color .2s}
 .moment-chip:hover{background:${c.cardSoft};border-color:${c.lineStrong}}
@@ -2784,6 +2790,28 @@ main.moment-type-travel {
 .moment-type-travel .moment-journey-item::after,
 .moment-type-travel .moment-journey-item::before {
   display: none !important;
+}
+
+/* Journey scroll opt-in: non ereditare il layout verticale “postcard” travel */
+.moment-type-travel .moment-journey--scroll .moment-journey-item {
+  width: min(78vw, 280px) !important;
+  margin-bottom: 0 !important;
+  margin-left: 0 !important;
+  padding: 16px !important;
+  border-radius: 18px !important;
+  display: grid !important;
+  gap: 12px !important;
+  flex: 0 0 auto !important;
+  transform: none !important;
+}
+.moment-type-travel .moment-journey--scroll .moment-journey-photo {
+  width: 100% !important;
+  height: 150px !important;
+  max-height: 150px !important;
+  border-radius: 14px !important;
+}
+.moment-type-travel .moment-journey--scroll .moment-journey-place {
+  font-size: 1.08rem !important;
 }
 
 /* Postcard Timbro e Icone */
@@ -3503,6 +3531,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   if (key === "timeline") {
     const steps = resolveJourneyStepsWorker(section);
     const headBlock = head(section.title || "Tappe & luoghi");
+    const scrollLayout = Boolean(section.scroll_layout);
     if (!steps.length) {
       return `<article class="${rv}">${headBlock}<p class="moment-empty-hint">Aggiungi tappe con data, luogo, descrizione e foto nell'editor.</p></article>`;
     }
@@ -3518,7 +3547,11 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
         : "";
       return `<div class="moment-journey-item">${photo}<div class="moment-journey-copy">${date}${place}${text}${mapLink}</div></div>`;
     }).join("");
-    return `<article class="${rv}">${head(section.title || "Tappe & luoghi")}<div class="moment-journey">${items}</div></article>`;
+    // Default invariato: lista verticale. Opt-in: stesso scroll orizzontale della galleria.
+    if (scrollLayout) {
+      return `<article class="${rv} moment-card-gallery">${headBlock}<p class="moment-gallery-hint">Scorri le tappe</p><div class="moment-journey moment-journey--scroll"><div class="moment-gallery"><div class="moment-gallery-scroll"><div class="moment-gallery-track">${items}</div></div></div></div></article>`;
+    }
+    return `<article class="${rv}">${headBlock}<div class="moment-journey">${items}</div></article>`;
   }
 
   if (key === "promises") {

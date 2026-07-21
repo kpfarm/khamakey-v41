@@ -302,3 +302,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-21 | Cursor | **Admin v171**: Clienti Moments collegati a ticket Supporto e Editor |
 | 2026-07-21 | Cursor | **Admin v172 / Worker v158**: assegnazione ticket + risposta cliente via Resend |
 | 2026-07-21 | Cursor | **Moments/Admin v173 / Worker v159 / SQL v161**: piani Free/Plus/Pro (250MB·1GB·3GB), quota R2, video/lettera multi+PDF, Stripe stub |
+| 2026-07-21 | Cursor | **Moments v174 / Worker v160**: switch opt-in scorrimento laterale tappe (default lista verticale invariata) |

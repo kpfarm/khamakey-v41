@@ -25,6 +25,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Toggle Design «Sfumatura sotto la foto»: on = fade nel colore sfondo pagina (`bl`); off = taglio netto. Default on (pagine esistenti invariate).
 
 ### Changed
+- **Admin v174 / Worker v162 — Fix risposta ticket (2026-07-21, Cursor)** — Pages + Worker
+  - Admin passa `to_email`; Worker non dipende da embed `profiles` (RLS); errori Resend restituiti allo staff.
 - **Moments v176 — Ticket assistenza (2026-07-21, Cursor)** — Pages only
   - Messaggio post-invio: solo conferma utente («Ti risponderemo via email»), niente riferimenti a Officina/Admin.
 - **Admin v172 / Worker v158 — Assegnazione ticket + risposta Resend (2026-07-21, Cursor)** — Pages + Worker

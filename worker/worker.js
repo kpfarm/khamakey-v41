@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v161-legal";
+const WORKER_VERSION = "v162-support-reply";
 
 export default {
   async fetch(request, env, ctx) {
@@ -4133,6 +4133,7 @@ async function handleSupportReply(request, env) {
   const ticketId = String(body.ticket_id || "").trim();
   const message = String(body.message || "").trim().slice(0, 6000);
   const subjectOverride = String(body.subject || "").trim().slice(0, 180);
+  const bodyToEmail = String(body.to_email || "").trim().toLowerCase();
   if (!ticketId || !message) {
     return cors(json({ error: "ticket_id e message obbligatori" }, 400));
   }
@@ -4145,20 +4146,22 @@ async function handleSupportReply(request, env) {
     apikey: env.SUPABASE_PUBLISHABLE_KEY,
     Authorization: `Bearer ${jwt}`
   };
+  // Evita embed profiles: RLS profili = solo self. Email da to_email staff o da description.
   const ticketRes = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/platform_support_tickets?id=eq.${encodeURIComponent(ticketId)}&select=id,subject,description,source,profiles(email)`,
+    `${env.SUPABASE_URL}/rest/v1/platform_support_tickets?id=eq.${encodeURIComponent(ticketId)}&select=id,subject,description,source,profile_id`,
     { headers }
   );
-  if (!ticketRes.ok) return cors(json({ error: "Ticket non leggibile." }, 502));
+  if (!ticketRes.ok) {
+    const detail = await ticketRes.text().catch(() => "");
+    console.error("support-reply ticket fetch", ticketRes.status, detail.slice(0, 300));
+    return cors(json({ error: "Ticket non leggibile." }, 502));
+  }
   const tickets = await ticketRes.json().catch(() => []);
   const ticket = Array.isArray(tickets) ? tickets[0] : null;
   if (!ticket) return cors(json({ error: "Ticket non trovato." }, 404));
 
-  let toEmail = String(ticket.profiles?.email || "").trim().toLowerCase();
-  if (!toEmail) {
-    toEmail = String(ticket.description || "").match(/Cliente:\s*([^\s\n]+@[^\s\n]+)/i)?.[1] || "";
-    toEmail = String(toEmail).trim().toLowerCase();
-  }
+  const fromDescription = String(ticket.description || "").match(/Cliente:\s*([^\s\n]+@[^\s\n]+)/i)?.[1] || "";
+  let toEmail = bodyToEmail || String(fromDescription).trim().toLowerCase();
   if (!toEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toEmail)) {
     return cors(json({ error: "Email cliente non disponibile su questo ticket." }, 400));
   }
@@ -4188,10 +4191,7 @@ async function handleSupportReply(request, env) {
       subject: mailSubject,
       html,
       text,
-      tags: [
-        { name: "type", value: "support_reply" },
-        { name: "ticket_id", value: String(ticketId).slice(0, 64) }
-      ]
+      replyTo: staff.email || undefined
     });
     return cors(json({
       ok: true,
@@ -4202,7 +4202,10 @@ async function handleSupportReply(request, env) {
     }));
   } catch (error) {
     console.error("support-reply", error);
-    return cors(json({ error: "Invio email non riuscito." }, 500));
+    const detail = String(error?.message || "").replace(/^Resend:\s*/i, "").slice(0, 280);
+    return cors(json({
+      error: detail ? `Invio email non riuscito: ${detail}` : "Invio email non riuscito."
+    }, 500));
   }
 }
 
@@ -5592,7 +5595,20 @@ async function runRateLimitCleanupJob(env) {
   return rpc(env, "cleanup_rate_limit_tables", { p_ingest_key: ingestKey });
 }
 
-async function sendResendEmail(env, { to, subject, html, text, tags = [] }) {
+async function sendResendEmail(env, { to, subject, html, text, tags = [], replyTo }) {
+  const payload = {
+    from: env.RESEND_FROM_EMAIL || "KhamaKey <noreply@khamakey.com>",
+    to: Array.isArray(to) ? to : [to],
+    subject,
+    html,
+    text
+  };
+  if (replyTo && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(replyTo))) {
+    payload.reply_to = String(replyTo).trim().toLowerCase();
+  }
+  if (Array.isArray(tags) && tags.length) {
+    payload.tags = tags;
+  }
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -5600,16 +5616,12 @@ async function sendResendEmail(env, { to, subject, html, text, tags = [] }) {
       "Content-Type": "application/json",
       "Idempotency-Key": crypto.randomUUID()
     },
-    body: JSON.stringify({
-      from: env.RESEND_FROM_EMAIL || "KhamaKey <noreply@khamakey.com>",
-      to: Array.isArray(to) ? to : [to],
-      subject,
-      html,
-      text,
-      tags
-    })
+    body: JSON.stringify(payload)
   });
   const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(`Resend: ${response.status} ${JSON.stringify(result)}`);
+  if (!response.ok) {
+    const resendMsg = result?.message || result?.error || JSON.stringify(result);
+    throw new Error(`Resend: ${response.status} ${resendMsg}`);
+  }
   return result;
 }

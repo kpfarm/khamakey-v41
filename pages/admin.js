@@ -5574,7 +5574,8 @@ async function sendSupportCustomerReply(){
       body:JSON.stringify({
         ticket_id:ticketId,
         message,
-        subject:`Re: ${row.subject || "Assistenza KhamaKey"}`
+        subject:`Re: ${row.subject || "Assistenza KhamaKey"}`,
+        to_email:email
       })
     });
     const result = await response.json().catch(()=>({}));

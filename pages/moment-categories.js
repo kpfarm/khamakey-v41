@@ -1,6 +1,6 @@
 /** Categorie Moments — tipi pagina, etichette e template precompilati. */
 
-import { DEFAULT_SECTIONS } from "./moment-sections.js";
+import { DEFAULT_SECTIONS } from "./moment-sections.js?v=180";
 
 export const MOMENT_TYPE_GROUPS = [
   {

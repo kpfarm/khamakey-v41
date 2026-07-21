@@ -606,7 +606,7 @@ body.media-modal-open{overflow:hidden}
     --topbar-h:52px;
     --bottomnav-h:calc(96px + env(safe-area-inset-bottom,0px));
   }
-  /* Shell mobile: niente scroll “nel vuoto rosa” — scorre solo il pannello */
+  /* Shell mobile: niente scroll nel vuoto — scorre solo il pannello */
   html:has(.moments-app:not([hidden])),
   body:has(.moments-app:not([hidden])){
     height:100%;

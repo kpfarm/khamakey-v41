@@ -93,7 +93,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v177** | PDF: ovale con testo “a cosa serve” + codice; barcode solo barcode; URL NFC completo. |
-| **Moments editor** | **v180** | Chrome UI unisex su palette ufficiale (Blu Notte base, rosa solo accent); guestbook escluso. |
+| **Moments editor** | **v181** | Fix boot (cache-bust import sezioni); chrome UI unisex v180; guestbook escluso. |
 | **Worker NFC** | **v167-guestbook-excluded** | Guestbook escluso (API off + sezione non renderizzata). |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |

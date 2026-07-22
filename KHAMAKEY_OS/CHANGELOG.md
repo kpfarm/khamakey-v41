@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Docs — i18n Moments regole Step 2 (2026-07-23, Cursor)** — Docs only
+  - ADR-007 + `docs/27-moments-i18n-rules.md`: default IT, preferenza `khamakey.moments.uiLocale`, solo click esplicito, no i18n Business. Zero runtime.
 - **Docs — i18n Moments inventario Step 1 (2026-07-23, Cursor)** — Docs only
   - `docs/26-moments-i18n-inventory.md`: mappa file, auth/shell/sezioni/errori, stime ~420–520 chrome; template e legale differiti. Zero runtime.
 - **Admin v178 / SQL v167 — Reset pezzo reso Amazon (2026-07-22, Cursor)** — Pages + SQL

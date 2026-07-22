@@ -1,7 +1,8 @@
 # 26 — Moments i18n: inventario stringhe (Step 1)
 
 > **Data:** 2026-07-23 · **Stato:** inventario completato · **Nessun cambio runtime**  
-> Scope: chrome editor Moments IT→EN. Contenuti cliente e Admin = fuori.
+> Scope: chrome editor Moments IT→EN. Contenuti cliente e Admin = fuori.  
+> **Step 2 (regole):** [`27-moments-i18n-rules.md`](27-moments-i18n-rules.md) · ADR [`007-moments-editor-i18n.md`](../decisions/007-moments-editor-i18n.md)
 
 ## Decisioni scope (da Step 0)
 

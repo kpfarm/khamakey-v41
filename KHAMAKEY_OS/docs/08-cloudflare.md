@@ -8,6 +8,8 @@
 | **Worker** | `khamakey-nfc` | `worker/` |
 | **R2** | `khamakey-media` | — (via Worker) |
 
+**SSOT versioni live (2026-07-22):** Moments editor **v186** · Worker **`WORKER_VERSION` = v182-hero-description** · dettagli in [`PROJECT_STATE.md`](../PROJECT_STATE.md). Se docs e codice divergono, **vince il codice**.
+
 ---
 
 ## Cloudflare Pages

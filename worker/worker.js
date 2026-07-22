@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v177-horoscope-distill";
+const WORKER_VERSION = "v180-horoscope-clean";
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
 const HOROSCOPE_CACHE_HOST = "https://horoscope-cache.khamakey.internal";
@@ -1457,11 +1457,16 @@ function polishHoroscopeSentence(sentence) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+function isAiOpeningSentence(sentence) {
+  const t = String(sentence || "").toLowerCase();
+  return /giornata odierna|si presenta (come|con)|nati sotto il segno|per sfruttare al meglio|energie (della|del) (giornata|giorno)|caratterizzat[oa] da|questi aspetti|opportunità planet|influenze planet|grazie alle numerose|modello di linguaggio|22 luglio \d{4}|\d{1,2}\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+\d{4}/.test(t);
+}
+
 function isPlanetHeavySentence(sentence) {
   const t = String(sentence || "").toLowerCase();
   const planets = (t.match(/\b(sole|luna|mercurio|venere|marte|giove|saturno|urano|nettuno|plutone)\b/g) || []).length;
   const jargon = /congiunzione|opposizione|trigono|sextile|quadrato|aspetti?|transiti?|ephemer|casa\s+\d+|cielo di oggi|influenze planet|planetarie|astrolog/.test(t);
-  return planets >= 2 || (planets >= 1 && jargon) || jargon;
+  return planets >= 2 || (planets >= 1 && jargon) || jargon || isAiOpeningSentence(t);
 }
 
 function scoreHoroscopeSentence(sentence) {
@@ -1581,8 +1586,11 @@ function toNewspaperHoroscopeFallback(raw, signKey, date = "") {
 function isNewspaperHoroscopeClean(text) {
   const t = String(text || "").toLowerCase();
   if (!t) return false;
-  if (/planetar|influenze planet|aspetto|transito|congiunzione|trigono|astrolog/.test(t)) return false;
+  if (isAiOpeningSentence(t)) return false;
+  if (/planetar|influenze planet|aspetti?|transiti?|congiunzione|trigono|astrolog/.test(t)) return false;
   if (/\b(the|and|with|your|can expect|thanks to|libra|aries|taurus)\b/.test(t)) return false;
+  // Troppo lungo = quasi sempre blocco AI grezzo
+  if (t.length > 320) return false;
   return true;
 }
 
@@ -1596,8 +1604,8 @@ function shapeHoroscopeForMoments(raw, signKey, date = "") {
 }
 
 function horoscopeCacheUrl(sign, language, date) {
-  // v5 — niente fallback al testo AI grezzo; cache nuova dopo il filtro
-  return `${HOROSCOPE_CACHE_HOST}/daily-paper/v5/${encodeURIComponent(sign)}/${encodeURIComponent(language)}/${date}`;
+  // v7 — filtro aperture AI + lunghezza max
+  return `${HOROSCOPE_CACHE_HOST}/daily-paper/v7/${encodeURIComponent(sign)}/${encodeURIComponent(language)}/${date}`;
 }
 
 async function cacheHoroscopePayload(cacheUrl, payload) {
@@ -1658,7 +1666,7 @@ async function fetchAstroWayDailyOnce(env, sign, language, date) {
     language: extracted.language || language,
     unavailable: !text,
     reason: text ? "" : "empty_text",
-    format: "giornale-v5"
+    format: "giornale-v7"
   };
 }
 
@@ -1677,9 +1685,9 @@ async function fetchAstroWayDaily(env, sign, language = "it") {
         const payload = await cached.json();
         if (payload?.text) {
           // Se la cache è già in formato giornale, usala; altrimenti riscrivi
-          if (payload.format === "giornale-v5" && isNewspaperHoroscopeClean(payload.text)) return payload;
+          if (payload.format === "giornale-v7" && isNewspaperHoroscopeClean(payload.text)) return payload;
           const paper = shapeHoroscopeForMoments(payload.text, cleanSign, date);
-          return { ...payload, text: paper, format: "giornale-v5", unavailable: !paper };
+          return { ...payload, text: paper, format: "giornale-v7", unavailable: !paper };
         }
       }
     } catch (error) {
@@ -1753,12 +1761,14 @@ async function handleHoroscopeProbe(request, env, url) {
   const body = {
     ok: Boolean(reading?.text),
     configured: true,
+    worker_version: WORKER_VERSION,
     sign,
     date: reading?.date || horoscopeDateRome(),
     language: reading?.language || "",
     reason: reading?.reason || (reading?.text ? "" : "unavailable"),
     text_len: reading?.text ? reading.text.length : 0,
     text_preview: reading?.text ? String(reading.text).slice(0, 160) : "",
+    text: reading?.text || "",
     format: reading?.format || ""
   };
   return cors(new Response(JSON.stringify(body), {

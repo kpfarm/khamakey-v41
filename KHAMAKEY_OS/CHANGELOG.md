@@ -9,6 +9,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Worker v181 — Oroscopo snack coerente (2026-07-22, Cursor)** — Worker
+  - Solo frasi intere e leggibili; niente strip mid-sentence che produceva pezzi tipo «Il che…».
+  - Cache `daily-paper/v8` / `giornale-v8`.
+- **Worker v180 — Oroscopo snack pulito (2026-07-22, Cursor)** — Worker
+  - Distill AstroWay in 2–3 frasi da giornale; rifiuta aperture AI (“giornata odierna”, aspetti/transiti, date lunghe).
+  - Cache `daily-paper/v7` / formato `giornale-v7`; probe espone `worker_version`.
 - **Worker v172 — Oroscopo stile giornale (2026-07-22, Cursor)** — Worker
   - Daily AstroWay riscritto in 2–3 frasi familiari da quotidiano (amore/lavoro/energia), senza gergo planetario.
 - **Worker v171 — Oroscopo breve (2026-07-22, Cursor)** — Worker

@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-22** (Oroscopo multi-persona AstroWay — Moments v184 / Worker v168)
+> Ultimo aggiornamento: **2026-07-22** (Oroscopo snack giornale — Worker v181 / Moments v185)
 
 ### Fonte di verità versioni
 
@@ -96,7 +96,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v177** | PDF: ovale con testo “a cosa serve” + codice; barcode solo barcode; URL NFC completo. |
 | **Moments editor** | **v185** | Fix Aggiungi persona oroscopo (slot senza segno); daily AstroWay. |
-| **Worker NFC** | **v172-horoscope-giornale** | Oroscopo stile quotidiano (2–3 frasi); temi da AstroWay. |
+| **Worker NFC** | **v181-horoscope-clean** | Oroscopo snack 2–3 frasi intere (AstroWay o fallback giornale). |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v166 (prod)** | v166 ripristina USAGE `app_private` (fix magazzino); v165 ingest store. |

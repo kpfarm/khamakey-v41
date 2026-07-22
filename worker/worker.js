@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v180-horoscope-clean";
+const WORKER_VERSION = "v181-horoscope-clean";
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
 const HOROSCOPE_CACHE_HOST = "https://horoscope-cache.khamakey.internal";
@@ -1447,9 +1447,7 @@ function polishHoroscopeSentence(sentence) {
   s = s
     .replace(/^#{1,6}\s+/, "")
     .replace(/^[-*•]\s+/, "")
-    .replace(/\boggi,?\s+\d{1,2}\s+\w+\s+\d{4},?\s*/gi, "Oggi ")
-    .replace(/\b(il|la|lo)\s+(sole|luna|mercurio|venere|marte|giove|saturno|urano|nettuno|plutone)\b[^.!?…]{0,80}/gi, "")
-    .replace(/\b(congiunzione|opposizione|trigono|sextile|quadrato|aspetto|transito|casa\s+\d+)\b[^.!?…]{0,40}/gi, "")
+    .replace(/^(oggi|la giornata odierna),?\s+\d{1,2}\s+\w+\s+\d{4},?\s*/i, "Oggi ")
     .replace(/\s+/g, " ")
     .trim();
   if (!s) return "";
@@ -1457,16 +1455,29 @@ function polishHoroscopeSentence(sentence) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+function isCoherentHoroscopeSentence(sentence) {
+  const s = String(sentence || "").trim();
+  if (s.length < 32 || s.length > 170) return false;
+  // Frammenti tipici dopo strip AI / gergo
+  if (/^(il|la|lo|l'|un|una|e|ma|per|con|che|tto|ndo)\b/i.test(s)) return false;
+  if (/\bil che\b|\bl'\s+\w|\s{2,}|,\s*,/.test(s.toLowerCase())) return false;
+  if (!/^[A-ZÀÈÉÌÒÙ]/.test(s)) return false;
+  // Deve sembrare una frase completa italiana, non un pezzo di paragrafo
+  const words = s.split(/\s+/).length;
+  if (words < 6 || words > 32) return false;
+  return true;
+}
+
 function isAiOpeningSentence(sentence) {
   const t = String(sentence || "").toLowerCase();
-  return /giornata odierna|si presenta (come|con)|nati sotto il segno|per sfruttare al meglio|energie (della|del) (giornata|giorno)|caratterizzat[oa] da|questi aspetti|opportunità planet|influenze planet|grazie alle numerose|modello di linguaggio|22 luglio \d{4}|\d{1,2}\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+\d{4}/.test(t);
+  return /giornata odierna|si presenta (come|con)|nati sotto il segno|per sfruttare al meglio|energie (della|del) (giornata|giorno)|caratterizzat[oa] da|questi aspetti|opportunità planet|influenze planet|grazie alle numerose|modello di linguaggio|connettervi|comprenderli a un liv|\d{1,2}\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+\d{4}/.test(t);
 }
 
 function isPlanetHeavySentence(sentence) {
   const t = String(sentence || "").toLowerCase();
   const planets = (t.match(/\b(sole|luna|mercurio|venere|marte|giove|saturno|urano|nettuno|plutone)\b/g) || []).length;
-  const jargon = /congiunzione|opposizione|trigono|sextile|quadrato|aspetti?|transiti?|ephemer|casa\s+\d+|cielo di oggi|influenze planet|planetarie|astrolog/.test(t);
-  return planets >= 2 || (planets >= 1 && jargon) || jargon || isAiOpeningSentence(t);
+  const jargon = /congiunzione|opposizione|trigono|sextile|quadrato|aspetti?|transiti?|ephemer|casa\s+\d+|cielo di oggi|influenze planet|planetarie|astrolog|influenzando/.test(t);
+  return planets >= 1 || jargon || isAiOpeningSentence(t);
 }
 
 function scoreHoroscopeSentence(sentence) {
@@ -1506,6 +1517,7 @@ function distillNewspaperHoroscope(raw, signKey, date = "") {
     .map(polishHoroscopeSentence)
     .filter(Boolean)
     .filter(s => !isPlanetHeavySentence(s))
+    .filter(isCoherentHoroscopeSentence)
     .map(s => ({ s, score: scoreHoroscopeSentence(s) }))
     .filter(item => item.score > 0)
     .sort((a, b) => b.score - a.score);
@@ -1587,10 +1599,11 @@ function isNewspaperHoroscopeClean(text) {
   const t = String(text || "").toLowerCase();
   if (!t) return false;
   if (isAiOpeningSentence(t)) return false;
-  if (/planetar|influenze planet|aspetti?|transiti?|congiunzione|trigono|astrolog/.test(t)) return false;
+  if (/planetar|influenze planet|aspetti?|transiti?|congiunzione|trigono|astrolog|influenzando/.test(t)) return false;
   if (/\b(the|and|with|your|can expect|thanks to|libra|aries|taurus)\b/.test(t)) return false;
+  if (/\bil che\b|\bl'\s+[a-z]|^tto\b|,\s*,/.test(t)) return false;
   // Troppo lungo = quasi sempre blocco AI grezzo
-  if (t.length > 320) return false;
+  if (t.length > 280) return false;
   return true;
 }
 
@@ -1604,8 +1617,8 @@ function shapeHoroscopeForMoments(raw, signKey, date = "") {
 }
 
 function horoscopeCacheUrl(sign, language, date) {
-  // v7 — filtro aperture AI + lunghezza max
-  return `${HOROSCOPE_CACHE_HOST}/daily-paper/v7/${encodeURIComponent(sign)}/${encodeURIComponent(language)}/${date}`;
+  // v8 — solo frasi coerenti (niente strip mid-sentence)
+  return `${HOROSCOPE_CACHE_HOST}/daily-paper/v8/${encodeURIComponent(sign)}/${encodeURIComponent(language)}/${date}`;
 }
 
 async function cacheHoroscopePayload(cacheUrl, payload) {
@@ -1666,7 +1679,7 @@ async function fetchAstroWayDailyOnce(env, sign, language, date) {
     language: extracted.language || language,
     unavailable: !text,
     reason: text ? "" : "empty_text",
-    format: "giornale-v7"
+    format: "giornale-v8"
   };
 }
 
@@ -1685,9 +1698,9 @@ async function fetchAstroWayDaily(env, sign, language = "it") {
         const payload = await cached.json();
         if (payload?.text) {
           // Se la cache è già in formato giornale, usala; altrimenti riscrivi
-          if (payload.format === "giornale-v7" && isNewspaperHoroscopeClean(payload.text)) return payload;
+          if (payload.format === "giornale-v8" && isNewspaperHoroscopeClean(payload.text)) return payload;
           const paper = shapeHoroscopeForMoments(payload.text, cleanSign, date);
-          return { ...payload, text: paper, format: "giornale-v7", unavailable: !paper };
+          return { ...payload, text: paper, format: "giornale-v8", unavailable: !paper };
         }
       }
     } catch (error) {

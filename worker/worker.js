@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v169-horoscope-fix";
+const WORKER_VERSION = "v170-video-horoscope-ui";
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
 const HOROSCOPE_CACHE_HOST = "https://horoscope-cache.khamakey.internal";
@@ -1834,10 +1834,7 @@ function renderLetterFutureMedia(section) {
     const meta = (title || desc) ? `<figcaption class="moment-gallery-meta">${title}${desc}</figcaption>` : "";
     if (item.type === "video") {
       return `<figure class="moment-gallery-figure">
-        <div class="moment-gallery-frame" data-media-open="${idx}">
-          <video src="${attr(item.url)}" muted playsinline preload="metadata" draggable="false"></video>
-          <button type="button" class="moment-gallery-zoom-hint" data-media-open="${idx}" aria-label="${attr(item.title || "Apri video")}">▶</button>
-        </div>
+        ${renderGalleryVideoFrame(item.url, idx, item.title || "Apri video")}
         ${meta}
       </figure>`;
     }
@@ -2232,6 +2229,16 @@ document.querySelectorAll(".moment-gallery-scroll").forEach(function(scroller){
     e.preventDefault();
     openMedia(Number(node.getAttribute("data-media-open")));
   });
+  scroller.querySelectorAll("video").forEach(function(video){
+    var nudge=function(){
+      try{
+        if(video.readyState>=1 && video.currentTime<0.05) video.currentTime=0.12;
+      }catch(err){}
+    };
+    video.addEventListener("loadedmetadata",nudge);
+    video.addEventListener("loadeddata",nudge);
+    if(video.readyState>=1) nudge();
+  });
 });
 document.addEventListener("keydown",function(e){
   var node=e.target.closest("[data-media-open]");
@@ -2423,7 +2430,7 @@ body.nav-open{overflow:hidden}
 .moment-chip:hover{background:${c.cardSoft};border-color:${c.lineStrong}}
 .moment-chip-action{background:${c.go};color:#FFFFFF;border-color:${c.go};box-shadow:0 4px 12px ${c.go}33}
 .moment-chip-action:hover{background:${c.g2};border-color:${c.g2}}
-.moment-gallery-scroll video,.moment-gallery-scroll .moment-media-card{width:min(72vw,240px);aspect-ratio:4/3;height:auto;object-fit:cover;border-radius:16px;scroll-snap-align:center;box-shadow:0 8px 22px rgba(0,0,0,.08);border:0;padding:0;background:${c.bl2};cursor:pointer}
+.moment-gallery-scroll .moment-media-card{width:min(72vw,240px);aspect-ratio:4/3;height:auto;object-fit:cover;border-radius:16px;scroll-snap-align:center;box-shadow:0 8px 22px rgba(0,0,0,.08);border:0;padding:0;background:${c.bl2};cursor:pointer}
 .moment-media-card{display:grid;place-items:center;color:${c.go};font-family:${f.ui};font-size:.78rem;font-weight:700;min-height:88px;border-radius:20px;border:1px solid ${c.line};transition:border-color .2s,background .2s}
 .moment-media-card:hover{background:${c.cardSoft};border-color:${c.lineStrong}}
 .moment-media-card small{display:block;margin-top:8px;opacity:.75;padding:0 10px;text-align:center}
@@ -2480,10 +2487,12 @@ body.nav-open{overflow:hidden}
 .moment-audio-list{display:grid;gap:12px;margin-top:10px}
 .moment-gallery-track{display:flex;flex-wrap:nowrap;gap:12px;width:max-content;max-width:none;align-items:flex-start}
 .moment-gallery-figure{margin:0;display:grid;gap:8px;flex:0 0 220px;width:220px;max-width:70vw;scroll-snap-align:start;outline:none;border:0;background:transparent;padding:0;text-align:left;touch-action:pan-x}
-.moment-gallery-frame{position:relative;overflow:hidden;border-radius:18px;width:100%;aspect-ratio:4/5;background:#111;box-shadow:0 10px 28px rgba(15,23,42,.12);touch-action:pan-x;cursor:pointer}
+.moment-gallery-frame{position:relative;overflow:hidden;border-radius:18px;width:100%;aspect-ratio:4/5;background:#0f172a;box-shadow:0 10px 28px rgba(15,23,42,.12);touch-action:pan-x;cursor:pointer}
 .moment-gallery-frame[data-media-open]:focus-visible{box-shadow:0 0 0 3px ${c.go}66}
-.moment-gallery-frame img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
-.moment-gallery-zoom-hint{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border:0;border-radius:999px;background:rgba(255,255,255,.96);color:#111;display:grid;place-items:center;font-size:1.2rem;font-weight:800;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.22);cursor:pointer;touch-action:manipulation;z-index:2;padding:0}
+.moment-gallery-frame img,.moment-gallery-frame video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none;background:#0f172a;border:0;border-radius:0;box-shadow:none;aspect-ratio:auto;max-width:none}
+.moment-gallery-frame video{object-position:center center}
+.moment-gallery-video-badge{position:absolute;left:10px;top:10px;z-index:2;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(15,23,42,.72);color:#fff;font-family:${f.ui};font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;pointer-events:none;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.moment-gallery-zoom-hint{position:absolute;right:10px;bottom:10px;width:44px;height:44px;border:0;border-radius:999px;background:rgba(255,255,255,.96);color:#111;display:grid;place-items:center;font-size:1.15rem;font-weight:800;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.22);cursor:pointer;touch-action:manipulation;z-index:2;padding:0}
 .moment-gallery-zoom-hint:focus-visible{outline:2px solid ${c.go};outline-offset:2px}
 .moment-gallery-meta{display:grid;gap:3px;padding:0 2px;min-width:0;pointer-events:none}
 .moment-gallery-caption{font-family:${f.ui};font-size:.88rem;font-weight:600;color:#111111;line-height:1.3;max-width:100%}
@@ -2597,10 +2606,10 @@ body.nav-open{overflow:hidden}
 .moment-horoscope-list{display:grid;gap:14px}
 .moment-horoscope-card{padding:16px 14px;border-radius:16px;background:${c.cardSoft};border:1px solid ${c.line}}
 .moment-horoscope-person{margin:0 0 10px;font-family:${f.ui};font-size:.92rem;font-weight:800;color:${cardInk}}
-.moment-horoscope-text{margin:0 0 10px;display:grid;gap:8px;font-family:${f.display};font-size:clamp(1.02rem,4vw,1.22rem);line-height:1.55;color:${cardInk}}
-.moment-horoscope-text p{margin:0}
-.moment-horoscope-heading{margin:4px 0 0!important;font-family:${f.ui}!important;font-size:.88rem!important;letter-spacing:.02em}
-.moment-horoscope-text ul{margin:0;padding-left:1.15rem;display:grid;gap:4px}
+.moment-horoscope-text{margin:0 0 10px;display:grid;gap:8px;font-family:${f.ui};font-size:clamp(.98rem,3.8vw,1.08rem);font-weight:500;line-height:1.65;color:${cardInk};font-style:normal}
+.moment-horoscope-text p{margin:0;font-family:inherit;font-style:normal;font-weight:500}
+.moment-horoscope-heading{margin:8px 0 0!important;font-family:${f.ui}!important;font-size:.82rem!important;letter-spacing:.04em;text-transform:uppercase;color:${c.muted}}
+.moment-horoscope-text ul{margin:0;padding-left:1.15rem;display:grid;gap:4px;font-family:inherit}
 .moment-horoscope-empty{margin:0 0 10px;color:${c.muted};font-size:.95rem;line-height:1.5}
 .moment-horoscope-disclaimer{margin:0;font-size:.72rem;line-height:1.4;color:${c.muted}}
 .moment-card-head .moment-card-icon{font-size:1.15rem;line-height:1;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:${c.cardSoft};border:1px solid ${c.line};flex-shrink:0;color:${c.go}}
@@ -4005,10 +4014,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
       const meta = (title || desc) ? `<figcaption class="moment-gallery-meta">${title}${desc}</figcaption>` : "";
       const label = item.title || "Apri video";
       return `<figure class="moment-gallery-figure">
-        <div class="moment-gallery-frame" data-media-open="${idx}">
-          <video src="${attr(item.url)}" muted playsinline preload="metadata" draggable="false"></video>
-          <button type="button" class="moment-gallery-zoom-hint" data-media-open="${idx}" aria-label="${attr(label)}">▶</button>
-        </div>
+        ${renderGalleryVideoFrame(item.url, idx, label)}
         ${meta}
       </figure>`;
     }).join("");
@@ -4057,6 +4063,23 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   }
   const body = section.body ? `<p>${escapeHtml(section.body)}</p>` : "";
   return `<article class="${rv}">${head(section.title)}${body}${gallery}</article>`;
+}
+
+function videoPreviewSrc(url) {
+  const clean = String(url || "").trim();
+  if (!clean || safeUrl(clean) === "#") return "";
+  const base = clean.split("#")[0];
+  // Safari/iOS: #t= forza il primo fotogramma come anteprima
+  return `${base}#t=0.15`;
+}
+
+function renderGalleryVideoFrame(url, openIndex, label = "Apri video") {
+  const src = videoPreviewSrc(url);
+  return `<div class="moment-gallery-frame" data-media-open="${openIndex}">
+          <video src="${attr(src)}" muted playsinline preload="metadata" draggable="false"></video>
+          <span class="moment-gallery-video-badge" aria-hidden="true">▶ Video</span>
+          <button type="button" class="moment-gallery-zoom-hint" data-media-open="${openIndex}" aria-label="${attr(label)}">▶</button>
+        </div>`;
 }
 
 function normalizeMomentMedia(section) {

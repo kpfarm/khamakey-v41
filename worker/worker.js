@@ -10,11 +10,12 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v170-video-horoscope-ui";
+const WORKER_VERSION = "v171-horoscope-short";
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
 const HOROSCOPE_CACHE_HOST = "https://horoscope-cache.khamakey.internal";
 const HOROSCOPE_LANG_FALLBACKS = ["it", "en"];
+const HOROSCOPE_SHORT_MAX_CHARS = 420;
 const ZODIAC_SIGN_SET = new Set([
   "aries", "taurus", "gemini", "cancer", "leo", "virgo",
   "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"
@@ -1394,6 +1395,41 @@ function extractAstroWayHoroscopeText(body) {
   };
 }
 
+/** Riduce l’oroscopo AI (lungo, a sezioni) a un paragrafo stile “giornale”. */
+function shortenHoroscopeText(raw, maxChars = HOROSCOPE_SHORT_MAX_CHARS) {
+  let text = String(raw || "");
+  if (!text) return "";
+  text = text
+    .replace(/^#{1,6}\s+.+$/gm, " ")
+    .replace(/^[-*•]\s+/gm, "")
+    .replace(/\r/g, "")
+    .replace(/\n+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text) return "";
+  if (text.length <= maxChars) return text;
+
+  const slice = text.slice(0, maxChars + 1);
+  const sentenceEnds = [...slice.matchAll(/[.!?…]["»”']?(?=\s|$)/g)];
+  if (sentenceEnds.length >= 2) {
+    const pick = sentenceEnds[Math.min(sentenceEnds.length - 1, 3)];
+    return slice.slice(0, pick.index + pick[0].length).trim();
+  }
+  if (sentenceEnds.length === 1) {
+    const pick = sentenceEnds[0];
+    const cut = slice.slice(0, pick.index + pick[0].length).trim();
+    if (cut.length >= 120) return cut;
+  }
+  const space = slice.lastIndexOf(" ", maxChars);
+  const soft = (space > 100 ? slice.slice(0, space) : slice.slice(0, maxChars)).trim();
+  return /[.!?…]$/.test(soft) ? soft : `${soft}…`;
+}
+
+function horoscopeCacheUrl(sign, language, date) {
+  // v1 short — evita di riusare cache dei testi lunghi a sezioni
+  return `${HOROSCOPE_CACHE_HOST}/daily-short/v1/${encodeURIComponent(sign)}/${encodeURIComponent(language)}/${date}`;
+}
+
 async function cacheHoroscopePayload(cacheUrl, payload) {
   if (!payload?.text) return;
   try {
@@ -1442,15 +1478,17 @@ async function fetchAstroWayDailyOnce(env, sign, language, date) {
     };
   }
   const extracted = extractAstroWayHoroscopeText(body);
+  const text = shortenHoroscopeText(extracted.text);
   return {
-    text: extracted.text,
-    disclaimer: extracted.disclaimer,
+    text,
+    disclaimer: extracted.disclaimer || "Solo a scopo di intrattenimento.",
     model: extracted.model,
     sign,
     date,
     language: extracted.language || language,
-    unavailable: !extracted.text,
-    reason: extracted.text ? "" : "empty_text"
+    unavailable: !text,
+    reason: text ? "" : "empty_text",
+    format: "short"
   };
 }
 
@@ -1462,12 +1500,16 @@ async function fetchAstroWayDaily(env, sign, language = "it") {
   const languages = [...new Set([preferred, ...HOROSCOPE_LANG_FALLBACKS])];
 
   for (const lang of languages) {
-    const cacheUrl = `${HOROSCOPE_CACHE_HOST}/daily/${encodeURIComponent(cleanSign)}/${encodeURIComponent(lang)}/${date}`;
+    const cacheUrl = horoscopeCacheUrl(cleanSign, lang, date);
     try {
       const cached = await caches.default.match(new Request(cacheUrl, { method: "GET" }));
       if (cached) {
         const payload = await cached.json();
-        if (payload?.text) return payload;
+        if (payload?.text) {
+          // Compat: se in cache c’è ancora un testo lungo, rimpiccioliscilo
+          const short = shortenHoroscopeText(payload.text);
+          return { ...payload, text: short, format: "short", unavailable: !short };
+        }
       }
     } catch (error) {
       console.error("horoscope cache match", error);
@@ -1491,7 +1533,7 @@ async function fetchAstroWayDaily(env, sign, language = "it") {
     try {
       last = await fetchAstroWayDailyOnce(env, cleanSign, lang, date);
       if (last?.text) {
-        const cacheUrl = `${HOROSCOPE_CACHE_HOST}/daily/${encodeURIComponent(cleanSign)}/${encodeURIComponent(lang)}/${date}`;
+        const cacheUrl = horoscopeCacheUrl(cleanSign, lang, date);
         await cacheHoroscopePayload(cacheUrl, last);
         return last;
       }
@@ -1519,38 +1561,11 @@ async function fetchAstroWayDaily(env, sign, language = "it") {
   };
 }
 
-/** Markdown leggero AstroWay → HTML sicuro (titoli ## e elenchi - ). */
+/** Un paragrafo leggibile (niente sezioni markdown lunghe). */
 function formatHoroscopeHtml(raw) {
-  const lines = String(raw || "").split(/\r?\n/);
-  const parts = [];
-  let list = [];
-  const flushList = () => {
-    if (!list.length) return;
-    parts.push(`<ul>${list.map(item => `<li>${item}</li>`).join("")}</ul>`);
-    list = [];
-  };
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) {
-      flushList();
-      continue;
-    }
-    const heading = trimmed.match(/^#{1,3}\s+(.+)$/);
-    if (heading) {
-      flushList();
-      parts.push(`<p class="moment-horoscope-heading"><strong>${escapeHtml(heading[1])}</strong></p>`);
-      continue;
-    }
-    const bullet = trimmed.match(/^[-*•]\s+(.+)$/);
-    if (bullet) {
-      list.push(escapeHtml(bullet[1]));
-      continue;
-    }
-    flushList();
-    parts.push(`<p>${escapeHtml(trimmed)}</p>`);
-  }
-  flushList();
-  return parts.join("") || `<p>${escapeHtml(String(raw || ""))}</p>`;
+  const text = shortenHoroscopeText(raw);
+  if (!text) return "";
+  return `<p>${escapeHtml(text)}</p>`;
 }
 
 async function handleHoroscopeProbe(request, env, url) {
@@ -2606,10 +2621,8 @@ body.nav-open{overflow:hidden}
 .moment-horoscope-list{display:grid;gap:14px}
 .moment-horoscope-card{padding:16px 14px;border-radius:16px;background:${c.cardSoft};border:1px solid ${c.line}}
 .moment-horoscope-person{margin:0 0 10px;font-family:${f.ui};font-size:.92rem;font-weight:800;color:${cardInk}}
-.moment-horoscope-text{margin:0 0 10px;display:grid;gap:8px;font-family:${f.ui};font-size:clamp(.98rem,3.8vw,1.08rem);font-weight:500;line-height:1.65;color:${cardInk};font-style:normal}
+.moment-horoscope-text{margin:0 0 10px;font-family:${f.ui};font-size:clamp(1rem,3.8vw,1.12rem);font-weight:500;line-height:1.65;color:${cardInk};font-style:normal}
 .moment-horoscope-text p{margin:0;font-family:inherit;font-style:normal;font-weight:500}
-.moment-horoscope-heading{margin:8px 0 0!important;font-family:${f.ui}!important;font-size:.82rem!important;letter-spacing:.04em;text-transform:uppercase;color:${c.muted}}
-.moment-horoscope-text ul{margin:0;padding-left:1.15rem;display:grid;gap:4px;font-family:inherit}
 .moment-horoscope-empty{margin:0 0 10px;color:${c.muted};font-size:.95rem;line-height:1.5}
 .moment-horoscope-disclaimer{margin:0;font-size:.72rem;line-height:1.4;color:${c.muted}}
 .moment-card-head .moment-card-icon{font-size:1.15rem;line-height:1;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:${c.cardSoft};border:1px solid ${c.line};flex-shrink:0;color:${c.go}}

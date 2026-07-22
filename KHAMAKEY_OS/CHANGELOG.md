@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Worker v171 — Oroscopo breve (2026-07-22, Cursor)** — Worker
+  - Testo AstroWay compresso a un paragrafo (~420 caratteri), senza sezioni markdown lunghe.
 - **Worker v170 — Oroscopo leggibile + anteprima video (2026-07-22, Cursor)** — Worker
   - Testo oroscopo su font UI (DM Sans), non più display/corsivo.
   - Video in galleria: fill del frame, `#t=` per poster Safari, badge Video.

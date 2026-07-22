@@ -318,3 +318,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-22 | Cursor | **Moments v184 / Worker v168**: Oroscopo daily AstroWay — max 5 persone/segni in editor; cache Worker |
 | 2026-07-22 | Cursor | **Moments v185 / Worker v169**: fix Aggiungi persona oroscopo + probe AstroWay + parse risposta più robusto |
 | 2026-07-22 | Cursor | **Worker v170**: oroscopo font UI leggibile; video anteprima fill frame + #t= poster Safari |
+| 2026-07-22 | Cursor | **Worker v171**: oroscopo daily ridotto a un paragrafo breve (stile giornale) |

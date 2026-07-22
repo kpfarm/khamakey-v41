@@ -56,6 +56,25 @@ Export magazzino → un PDF A4 con **4 sezioni** (si ripaginano se il lotto è g
 
 SQL: `sql/khamakey-moments-opaque-slug-v160.sql` (applicato su Supabase).
 
+## Reset pezzo (reso Amazon / rifabbricazione) — Admin v178 + SQL v167
+
+Per un pezzo **già attivato** (`claimed`) che torna in magazzino:
+
+1. Officina → Magazzino → **Modifica** sul codice
+2. Sezione rossa **Reso Amazon / rifabbricazione**
+3. Motivo opzionale → digita `RESET` → conferma dialog
+4. Esito:
+   - pagina cliente e contenuti: **eliminati**
+   - account scollegato
+   - **nuovo codice attivazione** (ristampa solo l’inserto)
+   - **stesso** `/m/<slug>` sul chip → **non riprogrammare l’NFC**
+   - barcode confezione invariato
+5. Log in tabella `moment_unit_reset_log` (solo staff)
+
+SQL: `sql/khamakey-moments-unit-reset-v167.sql` (RPC `admin_reset_moment_unit_for_resale`, permesso `moments.write`).
+
+**Non** resettare pezzi `available` / in uso da clienti attivi senza reso confermato.
+
 ## Entry point
 
 - URL produzione: `https://app.khamakeymoments.com/moments-admin`

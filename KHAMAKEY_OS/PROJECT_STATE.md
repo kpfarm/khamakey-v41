@@ -94,12 +94,12 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v177** | PDF: ovale con testo “a cosa serve” + codice; barcode solo barcode; URL NFC completo. |
+| **Admin / Officina Moments** | **v178** | Reset pezzo reso/refurb (SQL v167): nuovo codice attivazione, stesso slug NFC. |
 | **Moments editor** | **v186** | Descrizione breve in hero (campo `page_description`); oroscopo AstroWay. |
 | **Worker NFC** | **v182-hero-description** | Hero: frase sotto titolo + descrizione breve; oroscopo snack giornale. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
-| **SQL Supabase** | **≥ v166 (prod)** | v166 ripristina USAGE `app_private` (fix magazzino); v165 ingest store. |
+| **SQL Supabase** | **≥ v167 (prod)** | v167 reset pezzo reso; v166 USAGE `app_private`; v165 ingest store. |
 | **Prossima release piattaforma** | **collegare Stripe** sui `moments_plus` / `moments_pro` | Prezzi già in seed (€4,90/€39 Plus · €9,90/€79 Pro). |
 
 ---

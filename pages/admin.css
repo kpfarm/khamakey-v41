@@ -214,6 +214,13 @@ tr:last-child td{border-bottom:0}
 .permission-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .primary-action{border:0;background:var(--navy);color:white;border-radius:10px;padding:11px 14px;font-weight:900}
 .primary-action:disabled{opacity:.55;cursor:not-allowed}
+.danger-action{border:0;background:#B91C1C;color:white;border-radius:10px;padding:11px 14px;font-weight:900;cursor:pointer}
+.danger-action:hover{background:#991B1B}
+.danger-action:disabled{opacity:.55;cursor:not-allowed}
+.code-reset-panel{margin-top:14px;padding:12px;border:1px solid #FECACA;border-radius:12px;background:#FEF2F2;display:grid;gap:10px}
+.code-reset-panel[hidden]{display:none !important}
+.code-reset-title{margin:0;font-weight:900;color:#991B1B;font-size:.9rem}
+.code-reset-panel .muted-cell{margin:0;line-height:1.45}
 .denied{color:var(--red)}
 .admin-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0 18px;padding:14px;border:1px solid var(--border);border-radius:14px;background:#F8FAFC}
 .admin-form label{display:grid;gap:6px;font-size:.74rem;font-weight:900;color:var(--navy)}

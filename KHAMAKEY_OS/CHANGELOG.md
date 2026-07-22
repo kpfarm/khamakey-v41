@@ -8,6 +8,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **Admin v178 / SQL v167 — Reset pezzo reso Amazon (2026-07-22, Cursor)** — Pages + SQL
+  - Officina: su codice `claimed`, azione «Reset pezzo per rivendita» (digita `RESET` + confirm).
+  - RPC `admin_reset_moment_unit_for_resale`: cancella evento/pagina, scollega account, nuovo codice attivazione; **stesso `public_slug`** (chip NFC invariato).
+  - Log `moment_unit_reset_log` (solo staff). Nessun cambio Worker / editor pubblico.
+
 ### Fixed
 - **Moments v186 / Worker v182 — Descrizione breve in hero (2026-07-22, Cursor)** — Pages + Worker
   - Hero pubblico: frase sotto titolo + descrizione breve (prima la frase nascondeva la descrizione).

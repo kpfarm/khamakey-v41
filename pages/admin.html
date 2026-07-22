@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=173">
+  <link rel="stylesheet" href="admin.css?v=178">
   <script>
     // Dominio Moments: questo è l'admin Business — vai subito all'Officina Moments.
     (function () {
@@ -2016,6 +2016,17 @@
           </label>
           <button class="primary-action" type="submit">Salva modifiche</button>
           <button class="small-action" type="button" id="codeEditUnlinkOrder">Scollega ordine</button>
+          <div class="code-reset-panel" id="codeResetPanel" hidden>
+            <p class="code-reset-title">Reso Amazon / rifabbricazione</p>
+            <p class="muted-cell">Cancella la pagina del cliente, scollega l’account e genera un <strong>nuovo codice attivazione</strong>. Il link NFC sul chip (<code>/m/…</code>) resta uguale: non riprogrammare il chip. Ristampa solo l’inserto confezione.</p>
+            <label>Motivo (opzionale)
+              <input type="text" id="codeResetReason" maxlength="200" placeholder="es. reso Amazon ORD-123">
+            </label>
+            <label>Digita <strong>RESET</strong> per confermare
+              <input type="text" id="codeResetConfirm" autocomplete="off" placeholder="RESET">
+            </label>
+            <button class="danger-action" type="button" id="codeResetResaleBtn">Reset pezzo per rivendita</button>
+          </div>
           <p class="form-status" id="codeEditFormStatus"></p>
         </form>
       </div>
@@ -2101,6 +2112,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=177"></script>
+  <script type="module" src="admin.js?v=178"></script>
 </body>
 </html>

@@ -4336,6 +4336,15 @@ function openCodeDrawer(code,kind="moment"){
       : momentActivationUrl(row);
   }
   setFormStatus(codeEditFormStatus,"");
+  const resetPanel = document.getElementById("codeResetPanel");
+  const resetReason = document.getElementById("codeResetReason");
+  const resetConfirm = document.getElementById("codeResetConfirm");
+  if(resetReason) resetReason.value = "";
+  if(resetConfirm) resetConfirm.value = "";
+  if(resetPanel){
+    const showReset = kind === "moment" && row.status === "claimed";
+    resetPanel.hidden = !showReset;
+  }
   codeDrawer.classList.add("open");
   codeDrawer.setAttribute("aria-hidden","false");
 }
@@ -4405,6 +4414,64 @@ async function unlinkCodeOrder(){
   setFormStatus(codeEditFormStatus,"Ordine scollegato.","ok");
   await loadMomentProducts();
   openCodeDrawer(currentCodeRow.code);
+}
+
+async function resetMomentUnitForResale(){
+  if(!currentCodeRow || currentCodeKind !== "moment") return;
+  if(!hasPermission("moments.write")){
+    setFormStatus(codeEditFormStatus,"Non hai il permesso moments.write.","error");
+    return;
+  }
+  if(currentCodeRow.status !== "claimed"){
+    setFormStatus(codeEditFormStatus,"Il reset vale solo per pezzi già attivati.","error");
+    return;
+  }
+  const confirmInput = document.getElementById("codeResetConfirm");
+  const reasonInput = document.getElementById("codeResetReason");
+  const confirmText = String(confirmInput?.value || "").trim().toUpperCase();
+  if(confirmText !== "RESET"){
+    setFormStatus(codeEditFormStatus,"Digita RESET nel campo di conferma.","error");
+    confirmInput?.focus();
+    return;
+  }
+  const slug = currentCodeRow.public_slug || "";
+  const owner = currentCodeRow.claimed_by_email || "nessun email";
+  const ok = window.confirm(
+    `Confermi il reset di questo pezzo?\n\n` +
+    `• Pagina e contenuti del cliente: eliminati\n` +
+    `• Account scollegato: ${owner}\n` +
+    `• Nuovo codice attivazione (ristampa inserto)\n` +
+    `• Link NFC invariato: /m/${slug}\n\n` +
+    `Operazione irreversibile.`
+  );
+  if(!ok) return;
+
+  const btn = document.getElementById("codeResetResaleBtn");
+  if(btn) btn.disabled = true;
+  setFormStatus(codeEditFormStatus,"Reset in corso…");
+  const { data, error } = await supabase.rpc("admin_reset_moment_unit_for_resale",{
+    p_code: currentCodeRow.code,
+    p_confirm: "RESET",
+    p_reason: String(reasonInput?.value || "").trim() || null
+  });
+  if(btn) btn.disabled = false;
+  if(error){
+    console.error(error);
+    setFormStatus(codeEditFormStatus, error.message || "Reset non riuscito.","error");
+    return;
+  }
+  const row = Array.isArray(data) ? data[0] : data;
+  const newCode = row?.new_code || "";
+  await Promise.all([loadMomentProducts(), loadMomentInventoryStats(), loadMomentAgentInventoryStats()]);
+  setFormStatus(
+    codeEditFormStatus,
+    newCode
+      ? `Pezzo resettato. Nuovo codice: ${formatMomentCodeDisplay(newCode)}. Chip NFC invariato.`
+      : "Pezzo resettato.",
+    "ok"
+  );
+  if(newCode) openCodeDrawer(newCode);
+  else closeCodeDrawer();
 }
 
 function setOrderDrawerView(view="summary"){
@@ -6008,6 +6075,7 @@ document.querySelectorAll("[data-order-drawer-view]").forEach(button=>{
 });
 if(codeEditForm) codeEditForm.addEventListener("submit",saveCodeEdit);
 document.getElementById("codeEditUnlinkOrder")?.addEventListener("click",unlinkCodeOrder);
+document.getElementById("codeResetResaleBtn")?.addEventListener("click",resetMomentUnitForResale);
 if(orderEditForm) orderEditForm.addEventListener("submit",saveOrderEdit);
 if(orderAssignForm) orderAssignForm.addEventListener("submit",assignOrderCodes);
 

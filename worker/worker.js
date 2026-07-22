@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v181-horoscope-clean";
+const WORKER_VERSION = "v182-hero-description";
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
 const HOROSCOPE_CACHE_HOST = "https://horoscope-cache.khamakey.internal";
@@ -1032,7 +1032,10 @@ function renderMomentPinGate(page, origin, failed = false, env = {}) {
 async function renderMomentPage(page, origin, env = {}) {
   const state = page.state || {};
   const title = String(state.title || page.title || "KhamaKey Moments").trim();
-  const description = String(state.subtitle || page.description || state.description || "").trim();
+  const subtitle = String(state.subtitle || "").trim();
+  const description = String(state.description || page.description || "").trim();
+  const heroLead = subtitle || description;
+  const heroExtra = description && description !== subtitle ? description : "";
   const pill = String(state.pill || "").trim();
   const coverUrl = safeUrl(state.cover_url || "") !== "#" ? safeUrl(state.cover_url || "") : "";
   const profileUrl = safeUrl(state.profile_photo || "") !== "#" ? safeUrl(state.profile_photo || "") : "";
@@ -1118,10 +1121,10 @@ async function renderMomentPage(page, origin, env = {}) {
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="${attr(colors.bl)}">
 <title>${escapeHtml(title)} · KhamaKey Moments</title>
-<meta name="description" content="${escapeHtml(description || "Un ricordo da custodire nel tempo.")}">
+<meta name="description" content="${escapeHtml(heroLead || "Un ricordo da custodire nel tempo.")}">
 ${ogImage ? `<meta property="og:image" content="${attr(ogImage)}">` : ""}
 <meta property="og:title" content="${escapeHtml(title)}">
-<meta property="og:description" content="${escapeHtml(description || "Un ricordo da custodire nel tempo.")}">
+<meta property="og:description" content="${escapeHtml(heroLead || "Un ricordo da custodire nel tempo.")}">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?${fonts.google}&display=swap" rel="stylesheet">
 <style>${momentPageCss(colors, fonts)}</style></head>
@@ -1131,7 +1134,7 @@ ${decorHtml}
 <section class="moment-hero" id="moment-hero">${heroCover}<div class="moment-hero-overlay"></div><div class="moment-hero-content hero-in">
 ${pill ? `<span class="moment-pill">${escapeHtml(pill)}</span>` : `<small>KhamaKey Moments</small>`}
 ${profileBlock}
-<h1>${escapeHtml(title)}</h1>${description ? `<p>${escapeHtml(description)}</p>` : ""}
+<h1>${escapeHtml(title)}</h1>${heroLead ? `<p class="moment-hero-subtitle">${escapeHtml(heroLead)}</p>` : ""}${heroExtra ? `<p class="moment-hero-desc">${escapeHtml(heroExtra)}</p>` : ""}
 </div></section>
 ${dividerHtml}
 <section class="moment-content">${counterHtml}${sectionHtml}</section>
@@ -2552,6 +2555,7 @@ body.nav-open{overflow:hidden}
 .moment-profile:hover{transform:scale(1.05)}
 .moment-hero h1{font-family:${f.display};font-size:clamp(2.4rem,9vw,4.2rem);font-weight:800;line-height:1.12;margin:8px 0;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.45),0 8px 32px rgba(0,0,0,0.35)}
 .moment-hero p{font-family:${f.body};font-size:clamp(1.05rem,4vw,1.2rem);font-style:italic;line-height:1.75;margin:0 auto;max-width:480px;color:rgba(255,255,255,.98);text-shadow:0 1px 6px rgba(0,0,0,0.4),0 4px 16px rgba(0,0,0,0.28)}
+.moment-hero p.moment-hero-desc{margin-top:10px;font-size:clamp(.95rem,3.6vw,1.05rem);font-style:normal;opacity:.95}
 @keyframes scrollPulse{0%,100%{opacity:.5;transform:scaleY(1)}50%{opacity:.15;transform:scaleY(.55)}}
 @keyframes momentItemIn{from{opacity:0;transform:translateY(16px) scale(0.98)}to{opacity:1;transform:none}}
 .moment-content{padding:24px 20px 48px;display:grid;gap:24px;background:transparent;width:100%;max-width:100%;min-width:0;overflow-x:hidden}

@@ -23,16 +23,18 @@ Usa un account di prova o il tuo. Preferisci un prodotto **già attivato** se no
 
 | # | Check | Passo | Esito |
 |---|-------|-------|-------|
-| B1 | Login | `app.khamakeymoments.com/moments.html` → Accedi | ⬜ |
-| B2 | Editor apre | Topbar, sezioni, anteprima | ⬜ |
-| B3 | Salva | Modifica testo minore → Salva → ok | ⬜ |
-| B4 | Pubblica | Sezione Pubblica → pagina live | ⬜ |
-| B5 | Link `/m/slug` | Apri link pubblico da editor | ⬜ |
-| B6 | PIN | Se PIN attivo: gate PIN → PIN corretto apre pagina | ⬜ |
-| B7 | Footer legale | Su `/m/`: Privacy + Termini; notice «Ho capito» dismissibile | ⬜ |
-| B8 | RSVP | Sezione attiva + WhatsApp → invio da `/m/` → ok in editor | ⬜ |
-| B9 | Guestbook | Messaggio da `/m/` → appare dopo approvazione (o conferma API ok) | ⬜ |
-| B10 | Ticket | Account → Assistenza → invia ticket → email staff / ticket in Admin | ⬜ |
+| B1 | Login | `app.khamakeymoments.com/moments.html` → Accedi | ✅ 2026-07-22 (browser Cursor) |
+| B2 | Editor apre | Topbar, sezioni, anteprima | ✅ `il nostro viaggio` / MOMENTC9D6EDCB35 |
+| B3 | Salva | Modifica testo minore → Salva → ok | ✅ toast «Pagina salvata» |
+| B4 | Pubblica | Sezione Pubblica → pagina live | ✅ già pubblicata |
+| B5 | Link `/m/slug` | Apri link pubblico da editor | ✅ `/m/momentc9d6edcb35` ok (titolo, video, oroscopo, Privacy) |
+| B6 | PIN | Se PIN attivo: gate PIN → PIN corretto apre pagina | ⬜ N/A — «Nessun PIN» su questa pagina |
+| B7 | Footer legale | Su `/m/`: Privacy + Termini; notice «Ho capito» dismissibile | ✅ |
+| B8 | RSVP | Sezione attiva + WhatsApp → invio da `/m/` → ok in editor | ⬜ non eseguito |
+| B9 | Guestbook | Messaggio da `/m/` → appare dopo approvazione (o conferma API ok) | ⬜ escluso dal prodotto |
+| B10 | Ticket | Account → Assistenza → invia ticket → email staff / ticket in Admin | ⬜ non eseguito |
+
+Nota 2026-07-22: il campo «Descrizione breve» di prova non è ricomparso dopo reload editor (da verificare mapping salvataggio). Core flusso ok.
 
 ## C — Officina (opzionale nello stesso giro)
 

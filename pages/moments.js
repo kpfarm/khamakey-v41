@@ -105,7 +105,7 @@ import {
   sectionFieldHints,
   sectionHasContent,
   isSectionExcluded
-} from "./moment-sections.js?v=185";
+} from "./moment-sections.js?v=186";
 import {
   TYPE_LABELS,
   renderCategorySelect,
@@ -126,7 +126,7 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js?v=185";
+} from "./moment-editor-kit.js?v=186";
 import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderMomentDashboardShell, bindMomentDashboard } from "./moment-editor-dashboard.js";
@@ -135,7 +135,7 @@ import {
   renderHoroscopePeoplePanel,
   bindHoroscopePeopleEditor,
   refreshHoroscopePeopleEditor
-} from "./moment-horoscope.js?v=185";
+} from "./moment-horoscope.js?v=186";
 
 const auth = document.getElementById("momentsAuth");
 const app = document.getElementById("momentsApp");
@@ -2021,7 +2021,7 @@ function renderCoverPanel(state){
         <summary>Altri testi sulla copertina (facoltativo)</summary>
         <label>Etichetta sopra il titolo<input name="pill" value="${esc(state.pill)}" placeholder="Es. Amore · Un mondo tutto nostro"></label>
         <label>Frase sotto il titolo<input name="subtitle" value="${esc(state.subtitle)}" placeholder="Es. Per sempre insieme"></label>
-        <label>Descrizione breve<textarea name="description" placeholder="Breve frase per chi apre la pagina — non incollare link o indirizzi tecnici">${esc(state.description)}</textarea></label>
+        <label>Descrizione breve<textarea name="page_description" placeholder="Breve frase per chi apre la pagina — non incollare link o indirizzi tecnici">${esc(state.description)}</textarea></label>
       </details>
       <p class="field-hint">I colori si scelgono in <strong>Design → Colori</strong> — un tap e la pagina cambia look.</p>
     </div>
@@ -3615,7 +3615,8 @@ function readFormState(formNode){
     title:String(form.get("title") || "").trim(),
     type:normalizeMomentType(form.get("moment_type")),
     subtitle:String(form.get("subtitle") || "").trim(),
-    description:String(form.get("description") || "").trim(),
+    // name distinto da eventuali altri "description" (es. ticket assistenza)
+    description:String(form.get("page_description") || form.get("description") || "").trim(),
     pill:String(form.get("pill") || "").trim(),
     cover_url:String(form.get("cover_url") || "").trim(),
     cover_focus_x:Number(form.get("cover_focus_x") || 50),
@@ -3771,7 +3772,7 @@ async function renderPreview(state,options = {}){
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
         title:state.title,
-        description:state.subtitle || state.description,
+        description:state.description || state.subtitle,
         slug:rows.find(item=>item.id === activeId)?.slug || "",
         page_state:state
       })

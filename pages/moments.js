@@ -1,10 +1,46 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
 import { normalizeMomentCode, formatMomentCodeDisplay, isValidMomentCode } from "./moment-codes.js";
-import { applyDocumentLang, getUiLocale } from "./moments-i18n.js?v=187";
+import {
+  applyChromeI18n,
+  applyDocumentLang,
+  getUiLocale,
+  onUiLocaleChange,
+  setUiLocale,
+  t
+} from "./moments-i18n.js?v=188";
 
-/* Step 3 i18n: apply <html lang> from saved preference (default it). Toggle UI = step 4. */
+/* Step 3–4 i18n: <html lang> + language switcher (full chrome strings = steps 5–7). */
 applyDocumentLang(getUiLocale());
+
+function syncLangSwitchers(locale = getUiLocale()){
+  document.querySelectorAll("[data-lang-switch]").forEach(root=>{
+    root.setAttribute("aria-label", t("lang.switch"));
+    root.querySelectorAll("[data-set-locale]").forEach(btn=>{
+      const code = btn.getAttribute("data-set-locale");
+      const active = code === locale;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  });
+  applyChromeI18n(document);
+}
+
+function bindLangSwitchers(){
+  document.querySelectorAll("[data-set-locale]").forEach(btn=>{
+    if(btn.dataset.langBound === "1") return;
+    btn.dataset.langBound = "1";
+    btn.addEventListener("click",()=>{
+      const code = btn.getAttribute("data-set-locale");
+      if(!code || code === getUiLocale()) return;
+      setUiLocale(code);
+    });
+  });
+  onUiLocaleChange(syncLangSwitchers);
+  syncLangSwitchers();
+}
+
+bindLangSwitchers();
 import {
   uploadImage,
   uploadVideo,

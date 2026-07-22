@@ -1,7 +1,7 @@
 # ADR-007: Moments editor i18n (IT / EN)
 
 **Data:** 2026-07-23  
-**Stato:** Accettata · infra Step 3 in `pages/moments-i18n.js` (Moments v187); toggle UI = Step 4  
+**Stato:** Accettata · infra + toggle Step 4 (Moments v188); traduzione chrome = Step 5–7  
 **Inventario:** [`docs/26-moments-i18n-inventory.md`](../docs/26-moments-i18n-inventory.md)
 
 ## Contesto

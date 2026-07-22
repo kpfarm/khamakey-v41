@@ -7,7 +7,7 @@
   <link rel="icon" href="khamakey-favicon.png">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="moments.css?v=187">
+  <link rel="stylesheet" href="moments.css?v=188">
 </head>
 <body class="session-pending">
   <main class="moments-boot" id="momentsBoot" aria-live="polite">
@@ -32,6 +32,13 @@
 
     <section class="auth-panel">
       <div class="auth-card">
+        <div class="lang-switch" data-lang-switch>
+          <span class="lang-switch-label" data-i18n="lang.switch">Lingua</span>
+          <div class="lang-switch-btns" role="group">
+            <button type="button" data-set-locale="it" aria-pressed="true">IT</button>
+            <button type="button" data-set-locale="en" aria-pressed="false">EN</button>
+          </div>
+        </div>
         <div class="auth-tabs" id="authTabs" role="tablist">
           <button class="active" type="button" data-auth-tab="login">Accedi</button>
           <button type="button" data-auth-tab="signup">Crea account</button>
@@ -143,6 +150,12 @@
         <img src="khamakey-moments-wordmark.png" alt="KhamaKey Moments" class="topbar-logo">
       </div>
       <div class="topbar-right">
+        <div class="lang-switch lang-switch-compact" data-lang-switch>
+          <div class="lang-switch-btns" role="group">
+            <button type="button" data-set-locale="it" aria-pressed="true">IT</button>
+            <button type="button" data-set-locale="en" aria-pressed="false">EN</button>
+          </div>
+        </div>
         <div class="user-menu-wrap">
           <button type="button" class="user-menu-btn" id="momentsUserMenuBtn" aria-label="Menu account">
             <span class="user-avatar" id="momentsUserAvatar">K</span>
@@ -151,6 +164,15 @@
             <div class="user-menu-head">
               <p class="user-menu-name" id="momentsUserName">Account</p>
               <p class="user-menu-email" id="momentsUserEmail"></p>
+            </div>
+            <div class="user-menu-section">
+              <p class="user-menu-label" data-i18n="lang.switch">Lingua</p>
+              <div class="lang-switch lang-switch-menu" data-lang-switch>
+                <div class="lang-switch-btns" role="group">
+                  <button type="button" data-set-locale="it" aria-pressed="true">IT</button>
+                  <button type="button" data-set-locale="en" aria-pressed="false">EN</button>
+                </div>
+              </div>
             </div>
             <div class="user-menu-section">
               <p class="user-menu-label">Prodotti attivi</p>
@@ -212,6 +234,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=187"></script>
+  <script type="module" src="moments.js?v=188"></script>
 </body>
 </html>

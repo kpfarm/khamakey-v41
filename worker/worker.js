@@ -10,12 +10,12 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v174-video-center";
+const WORKER_VERSION = "v175-horoscope-distill";
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
 const HOROSCOPE_CACHE_HOST = "https://horoscope-cache.khamakey.internal";
 const HOROSCOPE_LANG_FALLBACKS = ["it", "en"];
-const HOROSCOPE_SHORT_MAX_CHARS = 360;
+const HOROSCOPE_SHORT_MAX_CHARS = 380;
 const ZODIAC_SIGN_SET = new Set([
   "aries", "taurus", "gemini", "cancer", "leo", "virgo",
   "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"
@@ -1434,122 +1434,158 @@ function pickHoroscopeLine(lines, seed, salt = 0) {
   return lines[Math.abs(seed + salt) % lines.length];
 }
 
+function splitHoroscopeSentences(text) {
+  return String(text || "")
+    .split(/(?<=[.!?…])\s+/)
+    .map(part => part.trim())
+    .filter(Boolean);
+}
+
+function polishHoroscopeSentence(sentence) {
+  let s = String(sentence || "").trim();
+  if (!s) return "";
+  s = s
+    .replace(/^#{1,6}\s+/, "")
+    .replace(/^[-*•]\s+/, "")
+    .replace(/\boggi,?\s+\d{1,2}\s+\w+\s+\d{4},?\s*/gi, "Oggi ")
+    .replace(/\b(il|la|lo)\s+(sole|luna|mercurio|venere|marte|giove|saturno|urano|nettuno|plutone)\b[^.!?…]{0,80}/gi, "")
+    .replace(/\b(congiunzione|opposizione|trigono|sextile|quadrato|aspetto|transito|casa\s+\d+)\b[^.!?…]{0,40}/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!s) return "";
+  if (!/[.!?…]$/.test(s)) s += ".";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function isPlanetHeavySentence(sentence) {
+  const t = String(sentence || "").toLowerCase();
+  const planets = (t.match(/\b(sole|luna|mercurio|venere|marte|giove|saturno|urano|nettuno|plutone)\b/g) || []).length;
+  const jargon = /congiunzione|opposizione|trigono|sextile|quadrato|aspetto|transito|ephemer|casa\s+\d+|cielo di oggi/.test(t);
+  return planets >= 2 || (planets >= 1 && jargon);
+}
+
+function scoreHoroscopeSentence(sentence) {
+  const t = String(sentence || "").toLowerCase();
+  const len = t.length;
+  if (len < 28 || len > 190) return -50;
+  if (isPlanetHeavySentence(t)) return -40;
+  let score = 10;
+  if (/amor|cuore|affett|coppia|partner|tener|relazion/.test(t)) score += 8;
+  if (/lavor|progett|decision|studio|carriera|denaro/.test(t)) score += 6;
+  if (/oggi|giornata|sera|mattina|momento|energia|seren|opportun|ascolt|cura/.test(t)) score += 5;
+  if (/favorevol|dolce|legger|calma|equilibrio|slancio/.test(t)) score += 3;
+  if (/##|http|disclaimer|modello/.test(t)) score -= 20;
+  // Preferisce frasi “umane”, non troppo corte/generiche
+  if (len >= 55 && len <= 150) score += 4;
+  return score;
+}
+
+function sentencesLookAlike(a, b) {
+  const na = String(a || "").toLowerCase().replace(/[^a-zàèéìòù0-9\s]/g, "").slice(0, 48);
+  const nb = String(b || "").toLowerCase().replace(/[^a-zàèéìòù0-9\s]/g, "").slice(0, 48);
+  if (!na || !nb) return false;
+  return na === nb || na.includes(nb.slice(0, 24)) || nb.includes(na.slice(0, 24));
+}
+
 /**
- * Riscrive il daily AstroWay in stile oroscopo da giornale italiano:
- * 2–3 frasi corte, tono familiare, niente gergo planetario.
+ * Distilla il daily AstroWay in 2–3 frasi da giornale, partendo dal testo vero del giorno.
+ * I template restano solo fallback se il distillato è troppo povero.
  */
-function toNewspaperHoroscope(raw, signKey, date = "") {
+function distillNewspaperHoroscope(raw, signKey, date = "") {
+  const sign = ZODIAC_SIGN_LABELS[signKey] || "il tuo segno";
+  const flat = shortenHoroscopeText(raw, 1200);
+  if (!flat) return "";
+
+  const candidates = splitHoroscopeSentences(flat)
+    .map(polishHoroscopeSentence)
+    .filter(Boolean)
+    .filter(s => !isPlanetHeavySentence(s))
+    .map(s => ({ s, score: scoreHoroscopeSentence(s) }))
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  const picked = [];
+  for (const item of candidates) {
+    if (picked.length >= 2) break;
+    if (picked.some(prev => sentencesLookAlike(prev, item.s))) continue;
+    picked.push(item.s);
+  }
+  if (!picked.length) return "";
+
+  const seed = horoscopeSeed(signKey, date || horoscopeDateRome());
+  const srcLower = flat.toLowerCase();
+  const caution = /cautel|attenti|pazien|evita|rischio|stress|tensione|nervos/.test(srcLower);
+  const luck = /opportun|fortuna|favorevol|positiv|successo|seren|armon/.test(srcLower);
+  const energy = /energi|vital|slancio|motiv|entusiasmo|creativ/.test(srcLower);
+
+  const lead = caution && !luck
+    ? pickHoroscopeLine([
+        `Giornata da vivere con calma per ${sign}.`,
+        `Ritmo lento e utile per ${sign}.`
+      ], seed, 1)
+    : luck || energy
+      ? pickHoroscopeLine([
+          `Giornata favorevole per ${sign}.`,
+          `Bella energia oggi per ${sign}.`
+        ], seed, 2)
+      : pickHoroscopeLine([
+          `Giornata a due facce per ${sign}.`,
+          `Serve equilibrio per ${sign}.`
+        ], seed, 3);
+
+  const firstMentionsSign = new RegExp(sign, "i").test(picked[0]) || /giornata|oggi/i.test(picked[0]);
+  const parts = firstMentionsSign ? picked.slice(0, 2) : [lead, ...picked.slice(0, 2)];
+  return shortenHoroscopeText(parts.filter(Boolean).slice(0, 3).join(" "), HOROSCOPE_SHORT_MAX_CHARS);
+}
+
+/**
+ * Fallback template se AstroWay non dà frasi utilizzabili.
+ */
+function toNewspaperHoroscopeFallback(raw, signKey, date = "") {
   const sign = ZODIAC_SIGN_LABELS[signKey] || "il tuo segno";
   const src = shortenHoroscopeText(raw, 900).toLowerCase();
-  if (!src) return "";
+  if (!src) return `Giornata da vivere con equilibrio per ${sign}. Ascolta i tuoi ritmi e scegli le cose semplici.`;
 
   const love = /amor|cuore|coppia|sentiment|affett|relazion|partner|passione|tener/.test(src);
   const work = /lavor|carriera|progett|decision|impegno|profession|studio|denaro|econom|affar/.test(src);
   const energy = /energi|vital|slancio|motiv|entusiasmo|creativ|iniziativ/.test(src);
   const caution = /cautel|attenti|pazien|evita|rischio|stress|tensione|nervos|lentezz|misura/.test(src);
-  const social = /amic|famigli|incontr|social|comunic|chiacchier/.test(src);
   const luck = /opportun|fortuna|favorevol|positiv|successo|seren|benefic|armon/.test(src);
   const seed = horoscopeSeed(signKey, date || horoscopeDateRome());
 
-  const openingsGood = [
-    `Giornata favorevole per ${sign}.`,
-    `Bella energia oggi per ${sign}.`,
-    `Vento in poppa per ${sign}.`
-  ];
-  const openingsMixed = [
-    `Giornata a due facce per ${sign}.`,
-    `Serve equilibrio per ${sign}.`,
-    `Oggi ${sign} gioca d’astuzia.`
-  ];
-  const openingsCalm = [
-    `Giornata da vivere con calma per ${sign}.`,
-    `Ritmo lento e utile per ${sign}.`,
-    `Meglio non forzare, ${sign}.`
-  ];
-
   const parts = [];
-  if (caution && !luck) parts.push(pickHoroscopeLine(openingsCalm, seed, 1));
-  else if (luck || energy) parts.push(pickHoroscopeLine(openingsGood, seed, 2));
-  else parts.push(pickHoroscopeLine(openingsMixed, seed, 3));
+  if (caution && !luck) parts.push(`Giornata da vivere con calma per ${sign}.`);
+  else if (luck || energy) parts.push(`Giornata favorevole per ${sign}.`);
+  else parts.push(`Serve equilibrio per ${sign}.`);
 
   if (love) {
-    parts.push(pickHoroscopeLine(
-      caution
-        ? [
-            "In amore ascolta più di quanto parli: un gesto sincero basta.",
-            "Negli affetti niente drammi: dolcezza e pazienza vincono.",
-            "Cuore aperto, ma senza correre: la tenerezza arriva da sola."
-          ]
-        : [
-            "Negli affetti l’aria è dolce: c’è spazio per tenerezza e piccole sorprese.",
-            "In amore le cose scorrono bene: un messaggio o un abbraccio fanno miracoli.",
-            "Il cuore è leggero: è il momento giusto per dirlo, senza paura."
-          ],
-      seed,
-      11
-    ));
-  }
-
-  if (work) {
-    parts.push(pickHoroscopeLine(
-      caution
-        ? [
-            "Al lavoro procedi passo dopo passo: le decisioni affrettate possono attendere.",
-            "In ufficio meglio metodo che fretta: oggi conta la precisione.",
-            "Sul lavoro evita le corse: una scelta chiara vale più di dieci tentativi."
-          ]
-        : [
-            "Sul lavoro le idee circolano bene: è il momento di proporre e concludere.",
-            "In ambito professionale c’è slancio: osa una mossa concreta.",
-            "Lavoro e progetti rispondono: porta a casa un piccolo risultato."
-          ],
-      seed,
-      21
-    ));
-  }
-
-  if (!love && !work) {
-    if (social) {
-      parts.push(pickHoroscopeLine([
-        "Con amici e famiglia i rapporti si sciolgono: una chiacchierata fa bene al cuore.",
-        "Attorno a te c’è voglia di stare insieme: accetta un invito senza pensarci troppo.",
-        "Le relazioni contano: oggi un sorriso apre più porte di un discorso lungo."
-      ], seed, 31));
-    } else {
-      parts.push(pickHoroscopeLine(
-        energy
-          ? [
-              "C’è slancio per iniziare qualcosa di nuovo: segui l’istinto, senza esagerare.",
-              "La giornata invita al movimento: anche un piccolo cambiamento rinfresca tutto.",
-              "Hai energia da spendere: usala per te, con leggerezza."
-            ]
-          : [
-              "Ascolta i tuoi ritmi: oggi contano la cura di sé e la serenità.",
-              "Prenditi il tempo che serve: anche una pausa è un successo.",
-              "La giornata chiede semplicità: meno pensieri, più cose belle."
-            ],
-        seed,
-        41
-      ));
-    }
-  } else if (parts.length < 3 && (energy || luck)) {
+    parts.push(caution
+      ? "In amore ascolta più di quanto parli: un gesto sincero basta."
+      : "Negli affetti l’aria è dolce: c’è spazio per tenerezza e piccole sorprese.");
+  } else if (work) {
+    parts.push(caution
+      ? "Al lavoro procedi passo dopo passo: le decisioni affrettate possono attendere."
+      : "Sul lavoro le idee circolano bene: è il momento di proporre e concludere.");
+  } else {
     parts.push(pickHoroscopeLine([
-      "L’energia c’è: usala con leggerezza.",
-      "Di sera stacca e goditi il momento.",
-      "Un piccolo rituale ti rimette in sesto."
-    ], seed, 51));
+      "Ascolta i tuoi ritmi: oggi contano la cura di sé e la serenità.",
+      "C’è slancio per iniziare qualcosa di nuovo: segui l’istinto, senza esagerare.",
+      "La giornata chiede semplicità: meno pensieri, più cose belle."
+    ], seed, 7));
   }
 
   return parts.filter(Boolean).slice(0, 3).join(" ");
 }
 
 function shapeHoroscopeForMoments(raw, signKey, date = "") {
-  return toNewspaperHoroscope(raw, signKey, date) || shortenHoroscopeText(raw);
+  return distillNewspaperHoroscope(raw, signKey, date)
+    || toNewspaperHoroscopeFallback(raw, signKey, date)
+    || shortenHoroscopeText(raw);
 }
 
 function horoscopeCacheUrl(sign, language, date) {
-  // v2 giornale — tono da quotidiano, non testo AI a sezioni
-  return `${HOROSCOPE_CACHE_HOST}/daily-paper/v2/${encodeURIComponent(sign)}/${encodeURIComponent(language)}/${date}`;
+  // v3 distill — frasi dal testo AstroWay del giorno, non solo template
+  return `${HOROSCOPE_CACHE_HOST}/daily-paper/v3/${encodeURIComponent(sign)}/${encodeURIComponent(language)}/${date}`;
 }
 
 async function cacheHoroscopePayload(cacheUrl, payload) {
@@ -1610,7 +1646,7 @@ async function fetchAstroWayDailyOnce(env, sign, language, date) {
     language: extracted.language || language,
     unavailable: !text,
     reason: text ? "" : "empty_text",
-    format: "giornale"
+    format: "giornale-v3"
   };
 }
 
@@ -1629,9 +1665,9 @@ async function fetchAstroWayDaily(env, sign, language = "it") {
         const payload = await cached.json();
         if (payload?.text) {
           // Se la cache è già in formato giornale, usala; altrimenti riscrivi
-          if (payload.format === "giornale") return payload;
+          if (payload.format === "giornale-v3") return payload;
           const paper = shapeHoroscopeForMoments(payload.text, cleanSign, date);
-          return { ...payload, text: paper, format: "giornale", unavailable: !paper };
+          return { ...payload, text: paper, format: "giornale-v3", unavailable: !paper };
         }
       }
     } catch (error) {

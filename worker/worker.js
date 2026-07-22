@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v173-video-center";
+const WORKER_VERSION = "v174-video-center";
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
 const HOROSCOPE_CACHE_HOST = "https://horoscope-cache.khamakey.internal";

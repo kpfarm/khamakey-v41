@@ -9,50 +9,8 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=190";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=190";
-
-registerMessages("it", AUTH_MESSAGES_IT);
-registerMessages("en", AUTH_MESSAGES_EN);
-applyDocumentLang(getUiLocale());
-
-function syncLangSwitchers(locale = getUiLocale()){
-  document.querySelectorAll("[data-lang-switch]").forEach(root=>{
-    root.setAttribute("aria-label", t("lang.switch"));
-    root.querySelectorAll("[data-set-locale]").forEach(btn=>{
-      const code = btn.getAttribute("data-set-locale");
-      const active = code === locale;
-      btn.classList.toggle("active", active);
-      btn.setAttribute("aria-pressed", active ? "true" : "false");
-    });
-  });
-  applyChromeI18n(document);
-  if(typeof refreshAccountMenu === "function"){
-    try{ refreshAccountMenu(); }catch(_e){ /* boot order */ }
-  }
-  if(typeof appView !== "undefined" && appView === "account" && typeof renderAccountPanels === "function"){
-    try{ renderAccountPanels(); }catch(_e){ /* boot order */ }
-  }
-  if(document.getElementById("emptyActivationForm") && typeof renderEmptyState === "function"){
-    try{ renderEmptyState(); }catch(_e){ /* boot order */ }
-  }
-}
-
-function bindLangSwitchers(){
-  document.querySelectorAll("[data-set-locale]").forEach(btn=>{
-    if(btn.dataset.langBound === "1") return;
-    btn.dataset.langBound = "1";
-    btn.addEventListener("click",()=>{
-      const code = btn.getAttribute("data-set-locale");
-      if(!code || code === getUiLocale()) return;
-      setUiLocale(code);
-    });
-  });
-  onUiLocaleChange(syncLangSwitchers);
-  syncLangSwitchers();
-}
-
-bindLangSwitchers();
+} from "./moments-i18n.js?v=191";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=191";
 import {
   uploadImage,
   uploadVideo,
@@ -4160,6 +4118,47 @@ document.getElementById("momentsLogout")?.addEventListener("click",async()=>{
 window.addEventListener("beforeunload",event=>{
   if(editorDirty) event.preventDefault();
 });
+
+/* i18n: register + bind AFTER lets/consts init (TDZ-safe). Never block boot. */
+registerMessages("it", AUTH_MESSAGES_IT);
+registerMessages("en", AUTH_MESSAGES_EN);
+applyDocumentLang(getUiLocale());
+
+function syncLangSwitchers(locale = getUiLocale()){
+  document.querySelectorAll("[data-lang-switch]").forEach(root=>{
+    root.setAttribute("aria-label", t("lang.switch"));
+    root.querySelectorAll("[data-set-locale]").forEach(btn=>{
+      const code = btn.getAttribute("data-set-locale");
+      const active = code === locale;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  });
+  applyChromeI18n(document);
+  try{
+    if(currentUser) refreshAccountMenu();
+    if(appView === "account") renderAccountPanels();
+    if(document.getElementById("emptyActivationForm")) renderEmptyState();
+  }catch(error){
+    console.warn("i18n refresh", error);
+  }
+}
+
+function bindLangSwitchers(){
+  document.querySelectorAll("[data-set-locale]").forEach(btn=>{
+    if(btn.dataset.langBound === "1") return;
+    btn.dataset.langBound = "1";
+    btn.addEventListener("click",()=>{
+      const code = btn.getAttribute("data-set-locale");
+      if(!code || code === getUiLocale()) return;
+      setUiLocale(code);
+    });
+  });
+  onUiLocaleChange(syncLangSwitchers);
+  syncLangSwitchers();
+}
+
+bindLangSwitchers();
 
 try{
   const { data,error } = await supabase.auth.getSession();

@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Docs — i18n Moments inventario Step 1 (2026-07-23, Cursor)** — Docs only
+  - `docs/26-moments-i18n-inventory.md`: mappa file, auth/shell/sezioni/errori, stime ~420–520 chrome; template e legale differiti. Zero runtime.
 - **Admin v178 / SQL v167 — Reset pezzo reso Amazon (2026-07-22, Cursor)** — Pages + SQL
   - Officina: su codice `claimed`, azione «Reset pezzo per rivendita» (digita `RESET` + confirm).
   - RPC `admin_reset_moment_unit_for_resale`: cancella evento/pagina, scollega account, nuovo codice attivazione; **stesso `public_slug`** (chip NFC invariato).

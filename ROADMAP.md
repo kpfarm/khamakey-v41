@@ -323,3 +323,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-22 | Cursor | **Worker v181**: oroscopo snack — solo frasi intere coerenti (niente pezzi spezzati); altrimenti fallback giornale |
 | 2026-07-22 | Cursor | **Moments v186 / Worker v182**: descrizione breve visibile in hero + campo `page_description`; SSOT docs allineato |
 | 2026-07-22 | Cursor | **Admin v178 / SQL v167**: reset pezzo reso/refurb — nuovo codice attivazione, stesso slug NFC; log staff; zero cambio pubblico |
+| 2026-07-23 | Cursor | **i18n Moments Step 1**: inventario stringhe chrome editor (~420–520) in `docs/26-moments-i18n-inventory.md` — zero runtime |

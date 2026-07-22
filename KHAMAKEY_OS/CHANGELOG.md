@@ -8,6 +8,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **Moments v191 — Boot bloccato da i18n (2026-07-23, Cursor)** — Pages
+  - `syncLangSwitchers` leggeva `appView` in TDZ → ReferenceError → schermo “Apertura in corso…” infinito.
+  - Init lingua spostata dopo le variabili; login di nuovo funzionante.
+
 ### Added
 - **Moments v190 — i18n auth/account Step 5 (2026-07-23, Cursor)** — Pages
   - Dizionario `moments-i18n-auth.js` + `data-i18n` su login/signup/account/attivazione.

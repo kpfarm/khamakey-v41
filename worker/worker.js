@@ -2624,6 +2624,9 @@ body.nav-open{overflow:hidden}
 .moment-letter-audio-wrap audio{width:100%}
 .moment-audio-list{display:grid;gap:12px;margin-top:10px}
 .moment-gallery-track{display:flex;flex-wrap:nowrap;gap:12px;width:max-content;max-width:none;align-items:flex-start}
+.moment-gallery-scroll.is-single{display:flex;justify-content:center;overflow-x:hidden;scroll-snap-type:none}
+.moment-gallery-scroll.is-single .moment-gallery-track{width:auto;max-width:100%;margin:0 auto;justify-content:center}
+.moment-gallery-scroll.is-single .moment-gallery-figure{flex:0 0 auto;width:min(86vw,300px);max-width:100%;scroll-snap-align:none}
 .moment-gallery-figure{margin:0;display:grid;gap:8px;flex:0 0 220px;width:220px;max-width:70vw;scroll-snap-align:start;outline:none;border:0;background:transparent;padding:0;text-align:left;touch-action:pan-x}
 .moment-gallery-frame{position:relative;overflow:hidden;border-radius:18px;width:100%;aspect-ratio:4/5;background:#0f172a;box-shadow:0 10px 28px rgba(15,23,42,.12);touch-action:pan-x;cursor:pointer}
 .moment-gallery-frame[data-media-open]:focus-visible{box-shadow:0 0 0 3px ${c.go}66}
@@ -4144,6 +4147,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     if (!media.length) {
       return `<article class="${rv} moment-card-gallery">${headBlock}${body}<p class="moment-empty-hint">Carica uno o più video MP4/MOV nell'editor.</p></article>`;
     }
+    const single = media.length === 1;
     const cards = media.map((item, idx) => {
       const title = item.title ? `<span class="moment-gallery-caption">${escapeHtml(item.title)}</span>` : "";
       const desc = item.description ? `<span class="moment-gallery-desc">${escapeHtml(item.description)}</span>` : "";
@@ -4156,7 +4160,9 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     }).join("");
     const payload = media.map(({ type, url, title, description }) => ({ type, url, title, description }));
     const json = JSON.stringify(payload).replace(/</g, "\\u003c");
-    return `<article class="${rv} moment-card-gallery">${headBlock}${body}<p class="moment-gallery-hint">Scorri i video · tocca ▶ per aprire</p><div class="moment-gallery"><div class="moment-gallery-scroll"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
+    const hint = single ? "Tocca ▶ per aprire" : "Scorri i video · tocca ▶ per aprire";
+    const scrollClass = single ? "moment-gallery-scroll is-single" : "moment-gallery-scroll";
+    return `<article class="${rv} moment-card-gallery">${headBlock}${body}<p class="moment-gallery-hint">${hint}</p><div class="moment-gallery"><div class="${scrollClass}"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
   }
 
   if (key === "quote" && !section.body) {

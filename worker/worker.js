@@ -1460,7 +1460,7 @@ function polishHoroscopeSentence(sentence) {
 function isPlanetHeavySentence(sentence) {
   const t = String(sentence || "").toLowerCase();
   const planets = (t.match(/\b(sole|luna|mercurio|venere|marte|giove|saturno|urano|nettuno|plutone)\b/g) || []).length;
-  const jargon = /congiunzione|opposizione|trigono|sextile|quadrato|aspetto|transito|ephemer|casa\s+\d+|cielo di oggi|influenze planet|planetarie|astrolog/.test(t);
+  const jargon = /congiunzione|opposizione|trigono|sextile|quadrato|aspetti?|transiti?|ephemer|casa\s+\d+|cielo di oggi|influenze planet|planetarie|astrolog/.test(t);
   return planets >= 2 || (planets >= 1 && jargon) || jargon;
 }
 
@@ -1750,7 +1750,7 @@ async function handleHoroscopeProbe(request, env, url) {
     return cors(json({ ok: false, configured: false, reason: "missing_key", sign }));
   }
   const reading = await fetchAstroWayDaily(env, sign, "it");
-  return cors(json({
+  const body = {
     ok: Boolean(reading?.text),
     configured: true,
     sign,
@@ -1758,7 +1758,15 @@ async function handleHoroscopeProbe(request, env, url) {
     language: reading?.language || "",
     reason: reading?.reason || (reading?.text ? "" : "unavailable"),
     text_len: reading?.text ? reading.text.length : 0,
-    text_preview: reading?.text ? String(reading.text).slice(0, 160) : ""
+    text_preview: reading?.text ? String(reading.text).slice(0, 160) : "",
+    format: reading?.format || ""
+  };
+  return cors(new Response(JSON.stringify(body), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store"
+    }
   }));
 }
 

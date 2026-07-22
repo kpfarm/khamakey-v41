@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v175-horoscope-distill";
+const WORKER_VERSION = "v177-horoscope-distill";
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
 const HOROSCOPE_CACHE_HOST = "https://horoscope-cache.khamakey.internal";
@@ -1578,15 +1578,26 @@ function toNewspaperHoroscopeFallback(raw, signKey, date = "") {
   return parts.filter(Boolean).slice(0, 3).join(" ");
 }
 
+function isNewspaperHoroscopeClean(text) {
+  const t = String(text || "").toLowerCase();
+  if (!t) return false;
+  if (/planetar|influenze planet|aspetto|transito|congiunzione|trigono|astrolog/.test(t)) return false;
+  if (/\b(the|and|with|your|can expect|thanks to|libra|aries|taurus)\b/.test(t)) return false;
+  return true;
+}
+
 function shapeHoroscopeForMoments(raw, signKey, date = "") {
-  return distillNewspaperHoroscope(raw, signKey, date)
-    || toNewspaperHoroscopeFallback(raw, signKey, date)
-    || shortenHoroscopeText(raw);
+  const distilled = distillNewspaperHoroscope(raw, signKey, date);
+  if (distilled && isNewspaperHoroscopeClean(distilled)) return distilled;
+  const fallback = toNewspaperHoroscopeFallback(raw, signKey, date);
+  if (fallback && isNewspaperHoroscopeClean(fallback)) return fallback;
+  const sign = ZODIAC_SIGN_LABELS[signKey] || "il tuo segno";
+  return `Giornata da vivere con equilibrio per ${sign}. Ascolta i tuoi ritmi e scegli le cose semplici.`;
 }
 
 function horoscopeCacheUrl(sign, language, date) {
-  // v3 distill — frasi dal testo AstroWay del giorno, non solo template
-  return `${HOROSCOPE_CACHE_HOST}/daily-paper/v3/${encodeURIComponent(sign)}/${encodeURIComponent(language)}/${date}`;
+  // v5 — niente fallback al testo AI grezzo; cache nuova dopo il filtro
+  return `${HOROSCOPE_CACHE_HOST}/daily-paper/v5/${encodeURIComponent(sign)}/${encodeURIComponent(language)}/${date}`;
 }
 
 async function cacheHoroscopePayload(cacheUrl, payload) {
@@ -1647,7 +1658,7 @@ async function fetchAstroWayDailyOnce(env, sign, language, date) {
     language: extracted.language || language,
     unavailable: !text,
     reason: text ? "" : "empty_text",
-    format: "giornale-v3"
+    format: "giornale-v5"
   };
 }
 
@@ -1666,9 +1677,9 @@ async function fetchAstroWayDaily(env, sign, language = "it") {
         const payload = await cached.json();
         if (payload?.text) {
           // Se la cache è già in formato giornale, usala; altrimenti riscrivi
-          if (payload.format === "giornale-v3") return payload;
+          if (payload.format === "giornale-v5" && isNewspaperHoroscopeClean(payload.text)) return payload;
           const paper = shapeHoroscopeForMoments(payload.text, cleanSign, date);
-          return { ...payload, text: paper, format: "giornale-v3", unavailable: !paper };
+          return { ...payload, text: paper, format: "giornale-v5", unavailable: !paper };
         }
       }
     } catch (error) {

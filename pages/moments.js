@@ -8,7 +8,7 @@ import {
   onUiLocaleChange,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=188";
+} from "./moments-i18n.js?v=189";
 
 /* Step 3–4 i18n: <html lang> + language switcher (full chrome strings = steps 5–7). */
 applyDocumentLang(getUiLocale());

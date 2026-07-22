@@ -232,9 +232,9 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Shopify Moments** | Operativo — libero | webhook ordini, catalogo vendita, sync bozze |
 | **Editor Business — contratto pubblico** | Condiviso | `publicStateFromEditor`, renderer `/p/` nel Worker |
 | **Admin / Officina Moments** | **Libero** (live **v177**) | `admin.html`, `moments-admin.html`, `admin.js`, `admin.css`, `admin-guide.js`, `admin-moment-labels.js` — coordinarsi se stesso pannello |
-| **Moments editor** | **Libero** (live **v185**) | `moments.html`, `moments.js`, `moments.css`, pagine legali Moments |
+| **Moments editor** | **Libero** (live **v186**) | `moments.html`, `moments.js`, `moments.css`, pagine legali Moments |
 | **Security hardening (audit 2026-07-11)** | Completato e deployato (vedi `PROJECT_STATE.md`) | Regole assolute CSP/RLS/dati restano vincolanti |
-| **`worker/worker.js`** | **Libero** (live **v172-horoscope-giornale**) | Chi tocca `worker.js` prende lock esplicito e non parallelizza |
+| **`worker/worker.js`** | **Libero** (live **v182-hero-description**) | Chi tocca `worker.js` prende lock esplicito e non parallelizza |
 | **Editor Business — upload media** | Completato v124 — libero | PDF catalogo / docs base64→R2 ancora pendenti (`docs/03-editor.md`) |
 | **Business WIP locale (working tree)** | **Non toccare** senza owner | `editor.html`, `editor-*.js`, SQL v147/v148 untracked, demo landing — commit separati |
 
@@ -319,7 +319,7 @@ Percorsi skill: `pages/` (non `khamakey-test-app`), `worker/` (non `khamakey-clo
 ## Convenzioni versione
 
 - Un solo contatore release piattaforma: `?v=NN` su HTML/JS (bump solo se cambia runtime)
-- **SSOT live** (2026-07-21): Admin/Officina **v173** · Moments **v175** · Worker **v161-legal** · Business shell `APP_VERSION` **167** · SQL **≥ v161**
+- **SSOT live** (2026-07-22): Admin/Officina **v177** · Moments **v186** · Worker **v182-hero-description** · Business shell `APP_VERSION` **168** · SQL **≥ v166**
 - Worker: `WORKER_VERSION` in `worker/worker.js`
 - Tabella ufficiale: `KHAMAKEY_OS/PROJECT_STATE.md` → se diverge, vince il codice
 - Dettaglio workflow: `.cursor/rules/git-commit-workflow.mdc`

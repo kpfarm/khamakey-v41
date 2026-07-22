@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-22** (Oroscopo snack giornale — Worker v181 / Moments v185)
+> Ultimo aggiornamento: **2026-07-22** (Descrizione breve in hero — Moments v186 / Worker v182)
 
 ### Fonte di verità versioni
 
@@ -95,8 +95,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v177** | PDF: ovale con testo “a cosa serve” + codice; barcode solo barcode; URL NFC completo. |
-| **Moments editor** | **v185** | Fix Aggiungi persona oroscopo (slot senza segno); daily AstroWay. |
-| **Worker NFC** | **v181-horoscope-clean** | Oroscopo snack 2–3 frasi intere (AstroWay o fallback giornale). |
+| **Moments editor** | **v186** | Descrizione breve in hero (campo `page_description`); oroscopo AstroWay. |
+| **Worker NFC** | **v182-hero-description** | Hero: frase sotto titolo + descrizione breve; oroscopo snack giornale. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v166 (prod)** | v166 ripristina USAGE `app_private` (fix magazzino); v165 ingest store. |
@@ -184,17 +184,18 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 ## Priorità correnti (Moments-first)
 
 1. **Non rompere Moments** — zero refactor runtime senza smoke
-2. **Ops secrets / Auth** — Stripe, Resend webhook, leaked-password
-3. **Igiene multi-agente** — lock aggiornati, commit solo file del task
-4. Business Sprint S1–S2 / Stripe — solo quando Moments è quiet
+2. **Basi per ~10k pezzi** — checklist ops [`docs/24-pronti-per-10k-moments.md`](docs/24-pronti-per-10k-moments.md) (smoke, monitoraggio, supporto, media/NFC)
+3. **Ops secrets / Auth** — Stripe, Resend webhook, leaked-password
+4. **Igiene multi-agente** — lock aggiornati, commit solo file del task
+5. Business — in stand-by / progetto separato; non mescolare con Moments
 
 ---
 
 ## Prossimo obiettivo
 
-> Tenere Moments stabile. Prossimi miglioramenti **solo ops/docs** o fix mirati: secrets Worker, Auth dashboard, smoke PIN/RSVP/guestbook/ticket. Nessun cambio a `renderMomentPage` / RPC Moments senza test su slug reale.
-
-Audit SE 2026-07-20: basi solide; canvas `foundations-se-audit.canvas.tsx` (Cursor).
+> Tenere Moments stabile. Basi 10k: [`docs/24-pronti-per-10k-moments.md`](docs/24-pronti-per-10k-moments.md). Smoke: [`docs/23-smoke-moments.md`](docs/23-smoke-moments.md).  
+> Live 2026-07-22: Moments **v186** · Worker **v182-hero-description**.  
+> Nessun cambio a `renderMomentPage` / RPC Moments senza smoke su slug reale.
 
 ---
 

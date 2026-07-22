@@ -70,6 +70,7 @@ KHAMAKEY_OS/
 | Officina NFC Moments | [`docs/21-moments-officina-nfc.md`](docs/21-moments-officina-nfc.md) |
 | Ops secrets / Auth checklist | [`docs/22-ops-secrets-auth-checklist.md`](docs/22-ops-secrets-auth-checklist.md) |
 | Smoke test Moments | [`docs/23-smoke-moments.md`](docs/23-smoke-moments.md) |
+| **Basi solide per ~10k Moments** | [`docs/24-pronti-per-10k-moments.md`](docs/24-pronti-per-10k-moments.md) |
 
 ## Prompt operativi
 

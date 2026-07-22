@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Moments v186 / Worker v182 — Descrizione breve in hero (2026-07-22, Cursor)** — Pages + Worker
+  - Hero pubblico: frase sotto titolo + descrizione breve (prima la frase nascondeva la descrizione).
+  - Editor: campo form `page_description` per salvataggio più sicuro.
 - **Worker v181 — Oroscopo snack coerente (2026-07-22, Cursor)** — Worker
   - Solo frasi intere e leggibili; niente strip mid-sentence che produceva pezzi tipo «Il che…».
   - Cache `daily-paper/v8` / `giornale-v8`.

@@ -34,7 +34,7 @@ Usa un account di prova o il tuo. Preferisci un prodotto **già attivato** se no
 | B9 | Guestbook | Messaggio da `/m/` → appare dopo approvazione (o conferma API ok) | ⬜ escluso dal prodotto |
 | B10 | Ticket | Account → Assistenza → invia ticket → email staff / ticket in Admin | ⬜ non eseguito |
 
-Nota 2026-07-22: il campo «Descrizione breve» di prova non è ricomparso dopo reload editor (da verificare mapping salvataggio). Core flusso ok.
+Nota 2026-07-22: in hero pubblico `subtitle` aveva priorità su `description` → la «Descrizione breve» non si vedeva se c’era la «Frase sotto il titolo». Fix Worker **v182** + Moments **v186** (`page_description`).
 
 ## C — Officina (opzionale nello stesso giro)
 

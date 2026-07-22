@@ -321,3 +321,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-22 | Cursor | **Worker v171**: oroscopo daily ridotto a un paragrafo breve (stile giornale) |
 | 2026-07-22 | Cursor | **Worker v172**: oroscopo tono quotidiano italiano (2–3 frasi familiari, temi da AstroWay) |
 | 2026-07-22 | Cursor | **Worker v181**: oroscopo snack — solo frasi intere coerenti (niente pezzi spezzati); altrimenti fallback giornale |
+| 2026-07-22 | Cursor | **Moments v186 / Worker v182**: descrizione breve visibile in hero + campo `page_description`; SSOT docs allineato |

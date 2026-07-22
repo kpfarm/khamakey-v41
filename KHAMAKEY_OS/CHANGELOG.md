@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Moments v190 — i18n auth/account Step 5 (2026-07-23, Cursor)** — Pages
+  - Dizionario `moments-i18n-auth.js` + `data-i18n` su login/signup/account/attivazione.
+  - Messaggi runtime (errori, ticket, PIN banner) via `t()`; shell editor ancora IT.
 - **Moments v188 — i18n toggle Step 4 (2026-07-23, Cursor)** — Pages
   - Selettore IT/EN in login, topbar e menu account; salva `khamakey.moments.uiLocale`.
   - Stringhe chrome ancora IT (traduzione massiva = step 5–7); label Lingua/Language già i18n.

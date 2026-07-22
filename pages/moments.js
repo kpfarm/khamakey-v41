@@ -6,11 +6,14 @@ import {
   applyDocumentLang,
   getUiLocale,
   onUiLocaleChange,
+  registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=189";
+} from "./moments-i18n.js?v=190";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=190";
 
-/* Step 3–4 i18n: <html lang> + language switcher (full chrome strings = steps 5–7). */
+registerMessages("it", AUTH_MESSAGES_IT);
+registerMessages("en", AUTH_MESSAGES_EN);
 applyDocumentLang(getUiLocale());
 
 function syncLangSwitchers(locale = getUiLocale()){
@@ -24,6 +27,15 @@ function syncLangSwitchers(locale = getUiLocale()){
     });
   });
   applyChromeI18n(document);
+  if(typeof refreshAccountMenu === "function"){
+    try{ refreshAccountMenu(); }catch(_e){ /* boot order */ }
+  }
+  if(typeof appView !== "undefined" && appView === "account" && typeof renderAccountPanels === "function"){
+    try{ renderAccountPanels(); }catch(_e){ /* boot order */ }
+  }
+  if(document.getElementById("emptyActivationForm") && typeof renderEmptyState === "function"){
+    try{ renderEmptyState(); }catch(_e){ /* boot order */ }
+  }
 }
 
 function bindLangSwitchers(){
@@ -96,6 +108,7 @@ import {
   fetchMomentEntitlements,
   formatBytes,
   normalizeEntitlements,
+  normalizePlanLimits,
   planLimitsSummaryLines,
   PLAN_LABELS,
   storageBytesLimit,
@@ -299,7 +312,7 @@ function normalizeCode(value){
 
 function validatePin(pin){
   const clean = String(pin || "").trim();
-  if(clean.length < 4) throw new Error("Il PIN deve avere almeno 4 caratteri.");
+  if(clean.length < 4) throw new Error(t("auth.msg.pin_min"));
   return clean;
 }
 
@@ -326,17 +339,18 @@ function showPinSuccessBanner(eventId,pin,title){
   const banner = document.createElement("div");
   banner.id = "pinSuccessBanner";
   banner.className = "pin-success-banner";
+  const pageTitle = title || t("pin.banner.title_fallback");
   banner.innerHTML = `
     <div>
-      <p class="eyebrow">PIN impostato</p>
-      <h3>Salva il PIN di «${esc(title || "la tua pagina")}»</h3>
-      <p>Serve per aprire la pagina collegata al tag NFC. Non possiamo mostrarlo di nuovo su altri dispositivi.</p>
+      <p class="eyebrow">${esc(t("pin.banner.eyebrow"))}</p>
+      <h3>${esc(t("pin.banner.title", { title: pageTitle }))}</h3>
+      <p>${esc(t("pin.banner.body"))}</p>
       <div class="pin-reveal-row">
         <code id="pinRevealValue">${esc(pin)}</code>
-        <button type="button" class="ghost" id="copyPinBtn">Copia PIN</button>
+        <button type="button" class="ghost" id="copyPinBtn">${esc(t("pin.banner.copy"))}</button>
       </div>
     </div>
-    <button type="button" class="pin-success-close" id="dismissPinBanner" aria-label="Chiudi">×</button>`;
+    <button type="button" class="pin-success-close" id="dismissPinBanner" aria-label="${esc(t("common.close"))}">×</button>`;
   detail.prepend(banner);
   document.getElementById("copyPinBtn")?.addEventListener("click",()=>copyText(pin,document.getElementById("copyPinBtn")));
   document.getElementById("dismissPinBanner")?.addEventListener("click",()=>banner.remove());
@@ -350,7 +364,7 @@ function bindPasswordToggles(root=document){
       const visible = input.type === "password";
       input.type = visible ? "text" : "password";
       button.classList.toggle("visible",visible);
-      button.setAttribute("aria-label", visible ? "Nascondi password" : "Mostra password");
+      button.setAttribute("aria-label", visible ? t("auth.password.hide") : t("auth.password.show"));
     });
   });
 }
@@ -371,22 +385,22 @@ async function refreshActivationCodeTypeHint(code, hintEl){
     return;
   }
   hintEl.hidden = false;
-  hintEl.textContent = "Verifica codice…";
+  hintEl.textContent = t("auth.msg.code_peek");
   hintEl.className = "field-hint activation-code-type";
   try{
     const { data,error } = await supabase.rpc("peek_moment_activation_code",{ p_code:clean });
     if(error) throw error;
     const row = Array.isArray(data) ? data[0] : data;
     if(!row?.product_type){
-      hintEl.textContent = "Codice non trovato in magazzino KhamaKey.";
+      hintEl.textContent = t("auth.msg.code_stock_miss");
       hintEl.className = "field-hint activation-code-type warn";
       return;
     }
     const typeLabel = TYPE_LABELS[normalizeMomentType(row.product_type)] || row.product_type;
     const productLabel = String(row.product_label || "").trim();
     hintEl.textContent = productLabel
-      ? `Modello pagina: ${typeLabel} · ${productLabel}`
-      : `Modello pagina: ${typeLabel}`;
+      ? t("auth.msg.model_page_product", { type: typeLabel, product: productLabel })
+      : t("auth.msg.model_page", { type: typeLabel });
     hintEl.className = "field-hint activation-code-type ok";
   }catch(error){
     console.warn("peek_moment_activation_code", error);
@@ -672,8 +686,8 @@ function accountDisplayName(user = currentUser){
   const metaName = String(user?.user_metadata?.full_name || "").trim();
   if(metaName) return metaName;
   const email = String(user?.email || "").trim();
-  if(!email) return "Account Moments";
-  return email.split("@")[0] || "Account Moments";
+  if(!email) return t("account.title");
+  return email.split("@")[0] || t("account.title");
 }
 
 function showEditorView(){
@@ -733,25 +747,26 @@ function renderAccountPanels(){
   if(!accountPanels) return;
   const name = accountDisplayName(currentUser);
   const email = String(currentUser?.email || "").trim();
+  const dateLocale = getUiLocale() === "en" ? "en-GB" : "it-IT";
   const createdAt = currentUser?.created_at
-    ? new Date(currentUser.created_at).toLocaleDateString("it-IT")
+    ? new Date(currentUser.created_at).toLocaleDateString(dateLocale)
     : "—";
   if(activeAccountTab === "profile"){
     accountPanels.innerHTML = `
       <div class="account-panel-card">
-        <h3>Profilo</h3>
-        <p>Dati del tuo account Moments. Da qui gestisci anche l’uscita.</p>
+        <h3>${esc(t("account.profile.title"))}</h3>
+        <p>${esc(t("account.profile.lead"))}</p>
         <div class="account-profile-grid">
-          <div class="account-profile-row"><span>Nome</span><strong>${esc(name)}</strong></div>
-          <div class="account-profile-row"><span>Email</span><strong>${esc(email || "—")}</strong></div>
-          <div class="account-profile-row"><span>Account creato</span><strong>${esc(createdAt)}</strong></div>
+          <div class="account-profile-row"><span>${esc(t("account.profile.name"))}</span><strong>${esc(name)}</strong></div>
+          <div class="account-profile-row"><span>${esc(t("account.profile.email"))}</span><strong>${esc(email || "—")}</strong></div>
+          <div class="account-profile-row"><span>${esc(t("account.profile.created"))}</span><strong>${esc(createdAt)}</strong></div>
         </div>
         <div style="margin-top:14px">
-          <button type="button" class="ghost" id="accountHubLogout">Esci dall’account</button>
+          <button type="button" class="ghost" id="accountHubLogout">${esc(t("account.profile.logout"))}</button>
         </div>
-        <nav class="account-legal-links" aria-label="Informazioni legali">
-          <a href="./moments-privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
-          <a href="./moments-terms.html" target="_blank" rel="noopener">Termini di servizio</a>
+        <nav class="account-legal-links" aria-label="${esc(t("auth.legal.nav"))}">
+          <a href="./moments-privacy.html" target="_blank" rel="noopener">${esc(t("account.profile.privacy"))}</a>
+          <a href="./moments-terms.html" target="_blank" rel="noopener">${esc(t("account.profile.terms"))}</a>
         </nav>
       </div>`;
     document.getElementById("accountHubLogout")?.addEventListener("click",()=>{
@@ -764,11 +779,11 @@ function renderAccountPanels(){
     const planLabel = PLAN_LABELS[ent.plan_key] || ent.plan_name || "Free";
     accountPanels.innerHTML = `
       <div class="account-panel-card">
-        <h3>Piano</h3>
-        <p>Limiti del tuo piano attuale. I piani a pagamento arriveranno più avanti — senza sorprese di prezzo qui.</p>
+        <h3>${esc(t("account.plan.title"))}</h3>
+        <p>${esc(t("account.plan.lead"))}</p>
         <div class="account-plan-card">
           <strong>Moments ${esc(planLabel)}</strong>
-          <p>Incluso con il tuo oggetto NFC: editor, pubblicazione e assistenza base.</p>
+          <p>${esc(t("account.plan.included"))}</p>
           ${renderPlanLimitsList(ent.limits)}
         </div>
       </div>`;
@@ -777,20 +792,20 @@ function renderAccountPanels(){
   if(activeAccountTab === "support"){
     accountPanels.innerHTML = `
       <div class="account-panel-card">
-        <h3>Assistenza</h3>
-        <p>Apri un ticket al team KhamaKey se qualcosa non funziona sulla pagina o sull’account.</p>
+        <h3>${esc(t("account.support.title"))}</h3>
+        <p>${esc(t("account.support.lead"))}</p>
         <form class="support-inline-form" id="momentSupportForm">
-          <label>Oggetto<input name="subject" type="text" placeholder="Es. Non riesco a pubblicare" required></label>
-          <label>Priorità
+          <label><span>${esc(t("account.support.subject"))}</span><input name="subject" type="text" placeholder="${esc(t("account.support.subject.ph"))}" required></label>
+          <label><span>${esc(t("account.support.priority"))}</span>
             <select name="priority">
-              <option value="normal">Normale</option>
-              <option value="high">Alta</option>
-              <option value="urgent">Urgente</option>
-              <option value="low">Bassa</option>
+              <option value="normal">${esc(t("account.support.priority.normal"))}</option>
+              <option value="high">${esc(t("account.support.priority.high"))}</option>
+              <option value="urgent">${esc(t("account.support.priority.urgent"))}</option>
+              <option value="low">${esc(t("account.support.priority.low"))}</option>
             </select>
           </label>
-          <label>Dettagli<textarea name="description" rows="4" placeholder="Scrivi cosa succede e cosa stavi facendo." required></textarea></label>
-          <button type="submit" class="primary">Invia ticket</button>
+          <label><span>${esc(t("account.support.details"))}</span><textarea name="description" rows="4" placeholder="${esc(t("account.support.details.ph"))}" required></textarea></label>
+          <button type="submit" class="primary">${esc(t("account.support.submit"))}</button>
           <p class="status" id="momentSupportStatus" aria-live="polite"></p>
         </form>
       </div>`;
@@ -801,17 +816,17 @@ function renderAccountPanels(){
   }
   accountPanels.innerHTML = `
     <div class="account-panel-card">
-      <h3>Prodotti attivi</h3>
-      <p>Oggetti NFC collegati al tuo account. Tocca una pagina per aprirla nell’editor.</p>
+      <h3>${esc(t("account.products.title"))}</h3>
+      <p>${esc(t("account.products.lead"))}</p>
       <div class="side-head">
-        <strong>Pagine collegate</strong>
+        <strong>${esc(t("account.products.linked"))}</strong>
         <span class="objects-count">${rows.length}</span>
       </div>
       <div class="objects-switcher" id="objectsSwitcher">${renderObjectsListHtml()}</div>
     </div>
     <div class="account-panel-card">
-      <h3>${rows.length ? "Attiva un altro oggetto" : "Attiva il primo oggetto"}</h3>
-      <p>Serve un codice Moments dalla confezione NFC — non un codice Business.</p>
+      <h3>${esc(rows.length ? t("account.activate.another") : t("account.activate.first"))}</h3>
+      <p>${esc(t("account.activate.lead"))}</p>
       ${renderActivationFormHtml("accountActivationForm","accountActivationStatus")}
     </div>`;
   bindObjectSwitcher(accountPanels);
@@ -822,18 +837,18 @@ function refreshAccountMenu(){
   const email = String(currentUser?.email || "").trim();
   const name = accountDisplayName(currentUser);
   if(userName) userName.textContent = name;
-  if(userEmail) userEmail.textContent = email || "Email non disponibile";
+  if(userEmail) userEmail.textContent = email || t("menu.email_missing");
   if(userAvatar){
     const seed = name || email || "K";
     userAvatar.textContent = seed.charAt(0).toUpperCase();
   }
   if(!userMenuProducts) return;
   if(!rows.length){
-    userMenuProducts.innerHTML = `<p class="user-menu-empty">Nessun prodotto attivo. Aprilo da Gestisci account.</p>`;
+    userMenuProducts.innerHTML = `<p class="user-menu-empty">${esc(t("menu.empty_products"))}</p>`;
     return;
   }
   userMenuProducts.innerHTML = rows.map(row=>{
-    let title = row?.title || row?.slug || "Pagina Moments";
+    let title = row?.title || row?.slug || t("menu.page_fallback");
     let typeLabel = "";
     try{
       const state = mergedState(row);
@@ -842,7 +857,7 @@ function refreshAccountMenu(){
     }catch(_error){
       typeLabel = TYPE_LABELS[normalizeMomentType(row?.moment_type || row?.event_type || "free")] || "";
     }
-    const status = row.public_visible ? "pubblicata" : "bozza";
+    const status = row.public_visible ? t("menu.status.published") : t("menu.status.draft");
     const code = row.nfc_code ? formatMomentCodeDisplay(row.nfc_code) : "NFC";
     return `<button type="button" class="user-menu-product ${row.id === activeId ? "active" : ""}" data-menu-object-id="${esc(row.id)}">
       ${esc(title)}
@@ -930,7 +945,7 @@ function bindGlobalAppChrome(){
   if(planBlock && planBlock.dataset.bound !== "1"){
     planBlock.dataset.bound = "1";
     planBlock.style.cursor = "pointer";
-    planBlock.title = "Apri piano account";
+    planBlock.title = t("menu.plan_title");
     planBlock.addEventListener("click",()=>{
       userMenu?.classList.remove("open");
       showAccountHub("plan");
@@ -1159,7 +1174,7 @@ async function tryPendingActivation(user){
       console.error(error);
       showAccountHub("products");
       const status = document.getElementById("accountActivationStatus");
-      if(status) setStatus(status, error.message || "Attivazione Moments non riuscita. Riprova dal modulo sotto.","error");
+      if(status) setStatus(status, error.message || t("auth.msg.activate_fail"),"error");
       const codeInput = document.querySelector("#accountActivationForm [name='code']");
       if(codeInput) codeInput.value = formatMomentCodeDisplay(pendingCode);
       return;
@@ -1173,12 +1188,12 @@ async function tryPendingActivation(user){
     const codeInput = document.querySelector("#accountActivationForm [name='code']");
     if(codeInput) codeInput.value = formatMomentCodeDisplay(pendingCode);
     const status = document.getElementById("accountActivationStatus");
-    if(status) setStatus(status, `Hai il codice ${formatMomentCodeDisplay(pendingCode)} da collegare. Inserisci nome pagina e PIN.`);
+    if(status) setStatus(status, t("auth.msg.pending_code", { code: formatMomentCodeDisplay(pendingCode) }));
   }
 }
 
 function renderObjectsListHtml(){
-  if(!rows.length) return `<p class="empty-inline">Nessun oggetto collegato. Attiva il primo codice nel modulo sotto.</p>`;
+  if(!rows.length) return `<p class="empty-inline">${esc(t("account.products.empty"))}</p>`;
   return rows.map(row=>{
     let state;
     try{
@@ -1190,7 +1205,7 @@ function renderObjectsListHtml(){
     const type = TYPE_LABELS[state.type] || state.type;
     return `<button class="object-pick ${row.id === activeId ? "active" : ""}" type="button" data-object-id="${esc(row.id)}">
       ${esc(state.title || row.slug)}
-      <span>${esc(row.nfc_code || "NFC")} · ${row.public_visible ? "pubblicata" : "bozza"}</span>
+      <span>${esc(row.nfc_code || "NFC")} · ${row.public_visible ? t("menu.status.published") : t("menu.status.draft")}</span>
       <span class="type-pill">${esc(type)}</span>
     </button>`;
   }).join("");
@@ -1198,17 +1213,34 @@ function renderObjectsListHtml(){
 
 function renderActivationFormHtml(formId = "editorActivationForm",statusId = "editorActivationStatus",prefillCode = ""){
   return `<form id="${formId}" class="activation-inline-form">
-    <label>Codice NFC<input name="code" autocomplete="off" placeholder="Es. M7K2-9XPL-H3WN" value="${esc(formatMomentCodeDisplay(prefillCode))}" required></label>
+    <label><span>${esc(t("activate.code"))}</span><input name="code" autocomplete="off" placeholder="${esc(t("activate.code.ph"))}" value="${esc(formatMomentCodeDisplay(prefillCode))}" required></label>
     <p class="field-hint activation-code-type" id="editorActivationTypeHint" data-activation-type-hint hidden></p>
-    <label>Nome pagina<input name="title" placeholder="Esempio Il nostro viaggio" required></label>
-    <label>PIN pagina<input name="access_pin" inputmode="numeric" autocomplete="new-password" placeholder="Esempio 1234" minlength="4" required></label>
-    <button type="submit" class="primary">Attiva oggetto</button>
+    <label><span>${esc(t("activate.page"))}</span><input name="title" placeholder="${esc(t("activate.page.ph"))}" required></label>
+    <label><span>${esc(t("activate.pin"))}</span><input name="access_pin" inputmode="numeric" autocomplete="new-password" placeholder="${esc(t("activate.pin.ph"))}" minlength="4" required></label>
+    <button type="submit" class="primary">${esc(t("activate.submit"))}</button>
   </form>
   <p class="status" id="${statusId}"></p>`;
 }
 
+function planLimitsSummaryLinesI18n(planLimits){
+  const limits = normalizePlanLimits(planLimits);
+  return [
+    t("plan.limit.storage", { n: limits.storage_mb }),
+    t("plan.limit.gallery", { n: limits.gallery_images }),
+    t("plan.limit.video", { n: limits.video_clips }),
+    t("plan.limit.audio", { n: limits.music_audio }),
+    t("plan.limit.letter", {
+      images: limits.letter_images,
+      videos: limits.letter_videos,
+      audio: limits.letter_audio,
+      pdfs: limits.letter_pdfs
+    }),
+    t("plan.limit.files", { img: limits.max_image_mb, vid: limits.max_video_mb })
+  ];
+}
+
 function renderPlanLimitsList(limits){
-  const lines = planLimitsSummaryLines(limits);
+  const lines = planLimitsSummaryLinesI18n(limits);
   return `<ul class="plan-limits-list">${lines.map(line=>`<li>${esc(line)}</li>`).join("")}</ul>`;
 }
 
@@ -1270,13 +1302,13 @@ function renderObjectsPanel(){
 async function submitMomentSupportTicket(event,row){
   event.preventDefault();
   const status = document.getElementById("momentSupportStatus");
-  if(!currentUser) return setStatus(status,"Accedi per aprire un ticket.","error");
+  if(!currentUser) return setStatus(status,t("account.support.login"),"error");
   const form = event.currentTarget;
   const subject = String(form.elements.subject.value || "").trim();
   const description = String(form.elements.description.value || "").trim();
   const priority = form.elements.priority.value || "normal";
-  if(!subject || !description) return setStatus(status,"Compila oggetto e dettagli.","error");
-  setStatus(status,"Invio ticket...");
+  if(!subject || !description) return setStatus(status,t("account.support.fill"),"error");
+  setStatus(status,t("account.support.sending"));
   const detail = [
     `Cliente: ${currentUser.email || ""}`,
     description,
@@ -1293,7 +1325,7 @@ async function submitMomentSupportTicket(event,row){
   });
   if(error){
     console.error(error);
-    setStatus(status,error.message || "Ticket non inviato.","error");
+    setStatus(status,error.message || t("account.support.fail"),"error");
     return;
   }
   try{
@@ -1313,7 +1345,7 @@ async function submitMomentSupportTicket(event,row){
     console.warn("Avviso email supporto non inviato", notifyError);
   }
   form.reset();
-  setStatus(status,"Ticket inviato. Ti risponderemo al più presto via email.","ok");
+  setStatus(status,t("account.support.ok"),"ok");
 }
 
 function renderEmptyState(message = "",prefillCode = ""){
@@ -1321,8 +1353,8 @@ function renderEmptyState(message = "",prefillCode = ""){
   detail.innerHTML = `
     <div class="empty-state">
       <p class="eyebrow">KhamaKey Moments</p>
-      <h2>Attiva il tuo primo oggetto Moments</h2>
-      <p>${esc(message || "Inserisci il codice Moments sulla confezione NFC per creare la pagina. Non è un account Business.")}</p>
+      <h2>${esc(t("activate.empty.title"))}</h2>
+      <p>${esc(message || t("activate.empty.lead"))}</p>
     </div>
     <div class="editor-card" style="margin-top:16px;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:14px">
       ${renderActivationFormHtml("emptyActivationForm","emptyActivationStatus",prefillCode)}
@@ -1431,23 +1463,23 @@ function bindActivationForm(form,statusEl){
     const code = normalizeCode(data.get("code"));
     const title = String(data.get("title") || "").trim();
     const pin = String(data.get("access_pin") || "").trim();
-    if(!/^[A-Z0-9]{8,32}$/.test(code)) return setStatus(statusEl,"Codice non valido.","error");
-    if(!title) return setStatus(statusEl,"Inserisci il nome della pagina.","error");
+    if(!/^[A-Z0-9]{8,32}$/.test(code)) return setStatus(statusEl,t("auth.msg.code_bad"),"error");
+    if(!title) return setStatus(statusEl,t("auth.msg.page_title_required"),"error");
     try{ validatePin(pin); }catch(error){ return setStatus(statusEl,error.message,"error"); }
-    setStatus(statusEl,"Collegamento in corso...");
+    setStatus(statusEl,t("auth.msg.linking"));
     try{
       const item = await activateCode({code,title,pin});
       clearPendingMomentActivation();
       activeId = item.event_id || activeId;
       rememberPin(activeId,pin);
       form.reset();
-      setStatus(statusEl,"Oggetto Moments collegato al tuo account.","ok");
+      setStatus(statusEl,t("auth.msg.linked_ok"),"ok");
       activeEditorPanel = "cover";
       await loadObjects();
       if(activeId) showPinSuccessBanner(activeId,pin,title);
     }catch(error){
       console.error(error);
-      setStatus(statusEl,error.message || "Collegamento non riuscito.","error");
+      setStatus(statusEl,error.message || t("auth.msg.link_fail"),"error");
     }
   });
 }
@@ -4009,64 +4041,64 @@ document.getElementById("momentsForgotBack")?.addEventListener("click",()=>showA
 forgotForm?.addEventListener("submit",async event=>{
   event.preventDefault();
   const email = document.getElementById("momentsForgotEmail").value.trim().toLowerCase();
-  if(!email) return setStatus(statusNode,"Inserisci l’email.","error");
-  setStatus(statusNode,"Invio link di recupero...");
+  if(!email) return setStatus(statusNode,t("auth.msg.email_required"),"error");
+  setStatus(statusNode,t("auth.msg.forgot_sending"));
   const { error } = await supabase.auth.resetPasswordForEmail(email,{redirectTo:authRedirectTo("/moments.html")});
-  setStatus(statusNode,error ? (error.message || "Recupero non riuscito.") : "Controlla la email: ti abbiamo inviato il link per la nuova password.", error ? "error" : "ok");
+  setStatus(statusNode,error ? (error.message || t("auth.msg.forgot_fail")) : t("auth.msg.forgot_sent"), error ? "error" : "ok");
 });
 
 recoveryForm?.addEventListener("submit",async event=>{
   event.preventDefault();
-  setStatus(statusNode,"Aggiornamento password...");
+  setStatus(statusNode,t("auth.msg.password_updating"));
   const { error } = await supabase.auth.updateUser({password:document.getElementById("momentsRecoveryPassword").value});
-  if(error) return setStatus(statusNode,error.message || "Aggiornamento non riuscito.","error");
+  if(error) return setStatus(statusNode,error.message || t("auth.msg.password_update_fail"),"error");
   recoveryMode = false;
   showAuthTab("login");
-  setStatus(statusNode,"Password aggiornata. Ora puoi accedere.","ok");
+  setStatus(statusNode,t("auth.msg.password_updated"),"ok");
 });
 
 loginForm?.addEventListener("submit",async event=>{
   event.preventDefault();
-  setStatus(statusNode,"Accesso in corso...");
+  setStatus(statusNode,t("auth.msg.login_busy"));
   try{
     const { data,error } = await supabase.auth.signInWithPassword({
       email:document.getElementById("momentsEmail").value.trim().toLowerCase(),
       password:document.getElementById("momentsPassword").value
     });
-    if(error) return setStatus(statusNode,error.message || "Accesso non riuscito.","error");
+    if(error) return setStatus(statusNode,error.message || t("auth.msg.login_fail"),"error");
     const user = data.session?.user || data.user;
-    if(!user) return setStatus(statusNode,"Sessione non disponibile. Riprova.","error");
+    if(!user) return setStatus(statusNode,t("auth.msg.session_missing"),"error");
     await showApp(user);
     setStatus(statusNode,"");
   }catch(error){
     console.error(error);
-    setStatus(statusNode,error.message || "Errore imprevisto durante l'accesso.","error");
+    setStatus(statusNode,error.message || t("auth.msg.login_unexpected"),"error");
   }
 });
 
 document.getElementById("signupNextStep")?.addEventListener("click",async()=>{
   const code = normalizeCode(document.getElementById("momentsSignupCode").value);
-  if(!isValidMomentCode(code)) return setStatus(statusNode,"Inserisci un codice Moments valido (es. M7K2-9XPL-H3WN).","error");
-  setStatus(statusNode,"Verifica codice Moments…");
+  if(!isValidMomentCode(code)) return setStatus(statusNode,t("auth.msg.code_invalid_example"),"error");
+  setStatus(statusNode,t("auth.msg.code_checking"));
   try{
     const { data,error } = await supabase.rpc("peek_moment_activation_code",{ p_code:code });
     if(error) throw error;
     const row = Array.isArray(data) ? data[0] : data;
     if(!row?.product_type){
-      return setStatus(statusNode,"Codice non trovato nel magazzino Moments. Controlla di averlo digitato bene.","error");
+      return setStatus(statusNode,t("auth.msg.code_not_found"),"error");
     }
     if(String(row.status || "") === "claimed"){
-      return setStatus(statusNode,"Questo codice è già stato attivato. Accedi con l’account collegato.","error");
+      return setStatus(statusNode,t("auth.msg.code_claimed"),"error");
     }
     if(row.status && String(row.status) !== "available"){
-      return setStatus(statusNode,"Questo codice non è attivabile al momento.","error");
+      return setStatus(statusNode,t("auth.msg.code_unavailable"),"error");
     }
     setStatus(statusNode,"");
     setSignupStep(2);
     await refreshActivationCodeTypeHint(code, document.getElementById("momentsSignupTypeHint"));
   }catch(error){
     console.error(error);
-    setStatus(statusNode,error.message || "Verifica codice non riuscita. Riprova.","error");
+    setStatus(statusNode,error.message || t("auth.msg.code_check_fail"),"error");
   }
 });
 
@@ -4079,12 +4111,12 @@ signupForm?.addEventListener("submit",async event=>{
   const title = document.getElementById("momentsSignupTitle").value.trim();
   const pin = document.getElementById("momentsSignupPin").value.trim();
   const legalOk = Boolean(document.getElementById("momentsSignupLegal")?.checked);
-  if(!isValidMomentCode(code)) return setStatus(statusNode,"Codice Moments non valido.","error");
-  if(!title) return setStatus(statusNode,"Inserisci il nome della pagina.","error");
-  if(!legalOk) return setStatus(statusNode,"Per creare l’account accetta Termini e Privacy.","error");
+  if(!isValidMomentCode(code)) return setStatus(statusNode,t("auth.msg.code_invalid"),"error");
+  if(!title) return setStatus(statusNode,t("auth.msg.page_title_required"),"error");
+  if(!legalOk) return setStatus(statusNode,t("auth.msg.legal_required"),"error");
   try{ validatePin(pin); }catch(error){ return setStatus(statusNode,error.message,"error"); }
   storePendingMomentActivation({ code, title, pin });
-  setStatus(statusNode,"Creazione account Moments...");
+  setStatus(statusNode,t("auth.msg.signup_busy"));
   const { data,error } = await supabase.auth.signUp({
     email,
     password:document.getElementById("momentsSignupPassword").value,
@@ -4098,22 +4130,22 @@ signupForm?.addEventListener("submit",async event=>{
       }
     }
   });
-  if(error) return setStatus(statusNode,error.message || "Registrazione non riuscita.","error");
+  if(error) return setStatus(statusNode,error.message || t("auth.msg.signup_fail"),"error");
   if(data.session?.user){
     try{
       const item = await activateCode({code,title,pin});
       clearPendingMomentActivation();
       activeId = item.event_id || "";
       rememberPin(activeId,pin);
-      setStatus(statusNode,"Account creato e oggetto Moments collegato.","ok");
+      setStatus(statusNode,t("auth.msg.signup_ok_linked"),"ok");
     }catch(activationError){
       console.error(activationError);
-      setStatus(statusNode,activationError.message || "Account creato, ma codice non collegato. Completa l’attivazione Moments nell’app.","error");
+      setStatus(statusNode,activationError.message || t("auth.msg.signup_ok_unlink"),"error");
     }
     await showApp(data.session.user);
     if(activeId) showPinSuccessBanner(activeId,pin,title);
   }else{
-    setStatus(statusNode,"Account creato. Conferma l’email dal link (tornerai su Moments), poi accedi: il codice verrà collegato automaticamente se hai completato nome pagina e PIN.","ok");
+    setStatus(statusNode,t("auth.msg.signup_confirm_email"),"ok");
   }
 });
 
@@ -4122,7 +4154,7 @@ document.getElementById("momentsLogout")?.addEventListener("click",async()=>{
   activeId = "";
   rows = [];
   showAuthTab("login");
-  showAuth("Sessione chiusa.");
+  showAuth(t("auth.msg.session_closed"));
 });
 
 window.addEventListener("beforeunload",event=>{
@@ -4145,7 +4177,7 @@ try{
   console.error(error);
   showAuth();
   showAuthTab("login");
-  setStatus(statusNode,"Impossibile verificare la sessione. Accedi di nuovo.","error");
+  setStatus(statusNode,t("auth.msg.session_check_fail"),"error");
 }
 
 supabase.auth.onAuthStateChange(async(event,session)=>{

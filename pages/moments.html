@@ -7,26 +7,26 @@
   <link rel="icon" href="khamakey-favicon.png">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="moments.css?v=189">
+  <link rel="stylesheet" href="moments.css?v=190">
 </head>
 <body class="session-pending">
   <main class="moments-boot" id="momentsBoot" aria-live="polite">
     <div class="boot-card">
       <img src="khamakey-moments-wordmark-on-light.png" alt="KhamaKey Moments" class="brand-logo">
-      <h2>Apertura in corso…</h2>
-      <p>Attendere qualche istante.</p>
+      <h2 data-i18n="boot.opening">Apertura in corso…</h2>
+      <p data-i18n="boot.wait">Attendere qualche istante.</p>
     </div>
   </main>
 
   <main class="moments-auth" id="momentsAuth" hidden>
     <section class="auth-brand">
       <img src="khamakey-moments-wordmark.png" alt="KhamaKey Moments" class="brand-logo">
-      <h1>Il tuo spazio privato collegato all’NFC.</h1>
-      <p>Ogni oggetto KhamaKey Moments ha già il suo link pubblico. Il <strong>codice di attivazione</strong> è nell’inserto della confezione — non sul chip NFC.</p>
+      <h1 data-i18n="auth.brand.title">Il tuo spazio privato collegato all’NFC.</h1>
+      <p data-i18n-html="auth.brand.body">Ogni oggetto KhamaKey Moments ha già il suo link pubblico. Il <strong>codice di attivazione</strong> è nell’inserto della confezione — non sul chip NFC.</p>
       <div class="auth-steps">
-        <div class="auth-step"><span>1</span><div><strong>Inserisci il codice</strong><p>Lo trovi sul biglietto dentro la confezione del prodotto.</p></div></div>
-        <div class="auth-step"><span>2</span><div><strong>Crea l’account</strong><p>Collega il codice al tuo profilo Moments.</p></div></div>
-        <div class="auth-step"><span>3</span><div><strong>Personalizza la pagina</strong><p>Sezioni, testi, PIN e pubblicazione.</p></div></div>
+        <div class="auth-step"><span>1</span><div><strong data-i18n="auth.step1.title">Inserisci il codice</strong><p data-i18n="auth.step1.body">Lo trovi sul biglietto dentro la confezione del prodotto.</p></div></div>
+        <div class="auth-step"><span>2</span><div><strong data-i18n="auth.step2.title">Crea l’account</strong><p data-i18n="auth.step2.body">Collega il codice al tuo profilo Moments.</p></div></div>
+        <div class="auth-step"><span>3</span><div><strong data-i18n="auth.step3.title">Personalizza la pagina</strong><p data-i18n="auth.step3.body">Sezioni, testi, PIN e pubblicazione.</p></div></div>
       </div>
     </section>
 
@@ -40,105 +40,105 @@
           </div>
         </div>
         <div class="auth-tabs" id="authTabs" role="tablist">
-          <button class="active" type="button" data-auth-tab="login">Accedi</button>
-          <button type="button" data-auth-tab="signup">Crea account</button>
+          <button class="active" type="button" data-auth-tab="login" data-i18n="auth.tab.login">Accedi</button>
+          <button type="button" data-auth-tab="signup" data-i18n="auth.tab.signup">Crea account</button>
         </div>
 
         <form id="momentsLoginForm" class="auth-form">
           <div class="form-intro">
-            <h2>Accesso Moments</h2>
-            <p>Entra per gestire le pagine collegate ai tuoi oggetti NFC.</p>
+            <h2 data-i18n="auth.login.title">Accesso Moments</h2>
+            <p data-i18n="auth.login.lead">Entra per gestire le pagine collegate ai tuoi oggetti NFC.</p>
           </div>
-          <label>Email<input id="momentsEmail" type="email" autocomplete="email" required></label>
-          <label>Password
+          <label><span data-i18n="auth.email">Email</span><input id="momentsEmail" type="email" autocomplete="email" required></label>
+          <label><span data-i18n="auth.password">Password</span>
             <span class="password-field">
               <input id="momentsPassword" type="password" autocomplete="current-password" minlength="8" required>
-              <button class="password-toggle" type="button" data-password-target="momentsPassword" aria-label="Mostra password">
+              <button class="password-toggle" type="button" data-password-target="momentsPassword" data-i18n-aria="auth.password.show" aria-label="Mostra password">
                 <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
                 <svg class="eye-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 5.2A11 11 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-2.1 2.9M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.2-1"/></svg>
               </button>
             </span>
           </label>
-          <button type="submit" class="primary">Accedi</button>
-          <button type="button" class="text-button" id="momentsForgot">Password dimenticata?</button>
+          <button type="submit" class="primary" data-i18n="auth.login.submit">Accedi</button>
+          <button type="button" class="text-button" id="momentsForgot" data-i18n="auth.forgot.link">Password dimenticata?</button>
         </form>
 
         <form id="momentsForgotForm" class="auth-form" hidden>
           <div class="form-intro">
-            <h2>Recupera password</h2>
-            <p>Ti invieremo un link per scegliere una nuova password.</p>
+            <h2 data-i18n="auth.forgot.title">Recupera password</h2>
+            <p data-i18n="auth.forgot.lead">Ti invieremo un link per scegliere una nuova password.</p>
           </div>
-          <label>Email<input id="momentsForgotEmail" type="email" autocomplete="email" required></label>
-          <button type="submit" class="primary">Invia link di recupero</button>
-          <button type="button" class="text-button" id="momentsForgotBack">Torna all’accesso</button>
+          <label><span data-i18n="auth.email">Email</span><input id="momentsForgotEmail" type="email" autocomplete="email" required></label>
+          <button type="submit" class="primary" data-i18n="auth.forgot.submit">Invia link di recupero</button>
+          <button type="button" class="text-button" id="momentsForgotBack" data-i18n="auth.forgot.back">Torna all’accesso</button>
         </form>
 
         <form id="momentsRecoveryForm" class="auth-form" hidden>
           <div class="form-intro">
-            <h2>Nuova password</h2>
-            <p>Scegli una password di almeno 8 caratteri.</p>
+            <h2 data-i18n="auth.recovery.title">Nuova password</h2>
+            <p data-i18n="auth.recovery.lead">Scegli una password di almeno 8 caratteri.</p>
           </div>
-          <label>Nuova password
+          <label><span data-i18n="auth.recovery.password">Nuova password</span>
             <span class="password-field">
               <input id="momentsRecoveryPassword" type="password" autocomplete="new-password" minlength="8" required>
-              <button class="password-toggle" type="button" data-password-target="momentsRecoveryPassword" aria-label="Mostra password">
+              <button class="password-toggle" type="button" data-password-target="momentsRecoveryPassword" data-i18n-aria="auth.password.show" aria-label="Mostra password">
                 <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
                 <svg class="eye-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 5.2A11 11 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-2.1 2.9M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.2-1"/></svg>
               </button>
             </span>
           </label>
-          <button type="submit" class="primary">Aggiorna password</button>
+          <button type="submit" class="primary" data-i18n="auth.recovery.submit">Aggiorna password</button>
         </form>
 
         <form id="momentsSignupForm" class="auth-form" hidden>
           <div class="form-intro">
-            <h2>Nuovo account Moments</h2>
-            <p>Serve il <strong>codice Moments</strong> sulla confezione NFC (non è un account Business). Poi inserisci email e password.</p>
+            <h2 data-i18n="auth.signup.title">Nuovo account Moments</h2>
+            <p data-i18n-html="auth.signup.lead">Serve il <strong>codice Moments</strong> sulla confezione NFC (non è un account Business). Poi inserisci email e password.</p>
           </div>
           <div class="signup-steps" id="signupSteps">
-            <span class="signup-step active" data-step="1">1. Codice</span>
-            <span class="signup-step" data-step="2">2. Account</span>
+            <span class="signup-step active" data-step="1" data-i18n="auth.signup.step1">1. Codice</span>
+            <span class="signup-step" data-step="2" data-i18n="auth.signup.step2">2. Account</span>
           </div>
           <div class="signup-panel" data-signup-panel="1">
-            <label>Codice Moments (inserto confezione)
-              <input id="momentsSignupCode" type="text" autocomplete="off" placeholder="Es. M7K2-9XPL-H3WN" required>
-              <span class="field-hint">Sul biglietto dentro la confezione — non è sul chip NFC. Senza codice non si apre lo step account.</span>
+            <label><span data-i18n="auth.signup.code">Codice Moments (inserto confezione)</span>
+              <input id="momentsSignupCode" type="text" autocomplete="off" data-i18n-placeholder="auth.signup.code.ph" placeholder="Es. M7K2-9XPL-H3WN" required>
+              <span class="field-hint" data-i18n="auth.signup.code.hint">Sul biglietto dentro la confezione — non è sul chip NFC. Senza codice non si apre lo step account.</span>
             </label>
-            <button type="button" class="primary" id="signupNextStep">Continua</button>
+            <button type="button" class="primary" id="signupNextStep" data-i18n="auth.signup.continue">Continua</button>
           </div>
           <div class="signup-panel" data-signup-panel="2" hidden>
-            <label>Nome e cognome<input id="momentsSignupName" type="text" autocomplete="name" required></label>
-            <label>Email<input id="momentsSignupEmail" type="email" autocomplete="email" required></label>
-            <label>Password account
+            <label><span data-i18n="auth.signup.name">Nome e cognome</span><input id="momentsSignupName" type="text" autocomplete="name" required></label>
+            <label><span data-i18n="auth.email">Email</span><input id="momentsSignupEmail" type="email" autocomplete="email" required></label>
+            <label><span data-i18n="auth.signup.password">Password account</span>
               <span class="password-field">
                 <input id="momentsSignupPassword" type="password" autocomplete="new-password" minlength="8" required>
-                <button class="password-toggle" type="button" data-password-target="momentsSignupPassword" aria-label="Mostra password">
+                <button class="password-toggle" type="button" data-password-target="momentsSignupPassword" data-i18n-aria="auth.password.show" aria-label="Mostra password">
                   <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
                   <svg class="eye-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 5.2A11 11 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-2.1 2.9M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.2-1"/></svg>
                 </button>
               </span>
             </label>
-            <label>Nome pagina<input id="momentsSignupTitle" type="text" placeholder="Esempio Il nostro ricordo" required></label>
+            <label><span data-i18n="auth.signup.page">Nome pagina</span><input id="momentsSignupTitle" type="text" data-i18n-placeholder="auth.signup.page.ph" placeholder="Esempio Il nostro ricordo" required></label>
             <p class="field-hint activation-code-type" id="momentsSignupTypeHint" hidden></p>
-            <label>PIN pagina (per aprire il link)
-              <input id="momentsSignupPin" type="text" inputmode="numeric" autocomplete="new-password" placeholder="Esempio 1234" minlength="4" required>
-              <span class="field-hint">Scegli un PIN da 4 cifre o più. Lo userai per aprire la pagina collegata all’NFC.</span>
+            <label><span data-i18n="auth.signup.pin">PIN pagina (per aprire il link)</span>
+              <input id="momentsSignupPin" type="text" inputmode="numeric" autocomplete="new-password" data-i18n-placeholder="auth.signup.pin.ph" placeholder="Esempio 1234" minlength="4" required>
+              <span class="field-hint" data-i18n="auth.signup.pin.hint">Scegli un PIN da 4 cifre o più. Lo userai per aprire la pagina collegata all’NFC.</span>
             </label>
             <label class="consent-check">
               <input id="momentsSignupLegal" type="checkbox" required>
-              <span>Accetto i <a href="./moments-terms.html" target="_blank" rel="noopener">Termini di servizio</a> e ho letto la <a href="./moments-privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+              <span data-i18n-html="auth.signup.consent">Accetto i <a href="./moments-terms.html" target="_blank" rel="noopener">Termini di servizio</a> e ho letto la <a href="./moments-privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span>
             </label>
             <div class="signup-actions">
-              <button type="button" class="ghost" id="signupPrevStep">Indietro</button>
-              <button type="submit" class="primary">Crea account e attiva</button>
+              <button type="button" class="ghost" id="signupPrevStep" data-i18n="auth.signup.back">Indietro</button>
+              <button type="submit" class="primary" data-i18n="auth.signup.submit">Crea account e attiva</button>
             </div>
           </div>
         </form>
 
         <p id="momentsAuthStatus" class="status" aria-live="polite"></p>
-        <nav class="auth-legal" aria-label="Informazioni legali">
-          <a href="./moments-privacy.html">Privacy</a>
-          <a href="./moments-terms.html">Termini</a>
+        <nav class="auth-legal" data-i18n-aria="auth.legal.nav" aria-label="Informazioni legali">
+          <a href="./moments-privacy.html" data-i18n="auth.legal.privacy">Privacy</a>
+          <a href="./moments-terms.html" data-i18n="auth.legal.terms">Termini</a>
         </nav>
       </div>
     </section>
@@ -157,7 +157,7 @@
           </div>
         </div>
         <div class="user-menu-wrap">
-          <button type="button" class="user-menu-btn" id="momentsUserMenuBtn" aria-label="Menu account">
+          <button type="button" class="user-menu-btn" id="momentsUserMenuBtn" data-i18n-aria="menu.account_aria" aria-label="Menu account">
             <span class="user-avatar" id="momentsUserAvatar">K</span>
           </button>
           <div class="user-menu" id="momentsUserMenu">
@@ -175,19 +175,19 @@
               </div>
             </div>
             <div class="user-menu-section">
-              <p class="user-menu-label">Prodotti attivi</p>
+              <p class="user-menu-label" data-i18n="menu.products">Prodotti attivi</p>
               <div class="user-menu-products" id="momentsMenuProducts"></div>
             </div>
             <div class="user-menu-section">
-              <p class="user-menu-label">Piano</p>
+              <p class="user-menu-label" data-i18n="menu.plan">Piano</p>
               <div class="user-menu-plan" id="momentsMenuPlan">
-                <strong>Moments Free</strong>
-                <span>250 MB · vedi limiti in Riepilogo</span>
+                <strong data-i18n="plan.menu_name">Moments Free</strong>
+                <span data-i18n="menu.plan.teaser">250 MB · vedi limiti in Riepilogo</span>
               </div>
             </div>
-            <button type="button" class="user-menu-item" id="momentsMenuAccount">Gestisci account</button>
-            <button type="button" class="user-menu-item" id="momentsMenuSupport">Assistenza</button>
-            <button type="button" class="user-menu-item danger" id="momentsLogout">Esci</button>
+            <button type="button" class="user-menu-item" id="momentsMenuAccount" data-i18n="menu.manage">Gestisci account</button>
+            <button type="button" class="user-menu-item" id="momentsMenuSupport" data-i18n="menu.support">Assistenza</button>
+            <button type="button" class="user-menu-item danger" id="momentsLogout" data-i18n="menu.logout">Esci</button>
           </div>
         </div>
       </div>
@@ -195,8 +195,8 @@
 
     <section class="main-panel" id="momentDetail">
       <div class="empty-state">
-        <h2>Caricamento...</h2>
-        <p>Attendere qualche istante.</p>
+        <h2 data-i18n="common.loading">Caricamento...</h2>
+        <p data-i18n="boot.wait">Attendere qualche istante.</p>
       </div>
     </section>
 
@@ -204,17 +204,17 @@
       <div class="account-hub-inner">
         <div class="account-hub-head">
           <div>
-            <p class="eyebrow">Il tuo account</p>
-            <h2>Account Moments</h2>
-            <p class="account-hub-lead">Profilo, prodotti NFC, piano e assistenza — separati dall’editor della pagina.</p>
+            <p class="eyebrow" data-i18n="account.eyebrow">Il tuo account</p>
+            <h2 data-i18n="account.title">Account Moments</h2>
+            <p class="account-hub-lead" data-i18n="account.lead">Profilo, prodotti NFC, piano e assistenza — separati dall’editor della pagina.</p>
           </div>
-          <button type="button" class="ghost" id="momentsAccountBackToEditor">Torna all’editor</button>
+          <button type="button" class="ghost" id="momentsAccountBackToEditor" data-i18n="account.back">Torna all’editor</button>
         </div>
-        <nav class="account-hub-tabs" id="momentsAccountTabs" aria-label="Sezioni account">
-          <button type="button" class="account-tab active" data-account-tab="profile">Profilo</button>
-          <button type="button" class="account-tab" data-account-tab="products">Prodotti</button>
-          <button type="button" class="account-tab" data-account-tab="plan">Piano</button>
-          <button type="button" class="account-tab" data-account-tab="support">Assistenza</button>
+        <nav class="account-hub-tabs" id="momentsAccountTabs" data-i18n-aria="account.tabs_aria" aria-label="Sezioni account">
+          <button type="button" class="account-tab active" data-account-tab="profile" data-i18n="account.tab.profile">Profilo</button>
+          <button type="button" class="account-tab" data-account-tab="products" data-i18n="account.tab.products">Prodotti</button>
+          <button type="button" class="account-tab" data-account-tab="plan" data-i18n="account.tab.plan">Piano</button>
+          <button type="button" class="account-tab" data-account-tab="support" data-i18n="account.tab.support">Assistenza</button>
         </nav>
         <div class="account-hub-panels" id="momentsAccountPanels"></div>
       </div>
@@ -234,6 +234,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=189"></script>
+  <script type="module" src="moments.js?v=190"></script>
 </body>
 </html>

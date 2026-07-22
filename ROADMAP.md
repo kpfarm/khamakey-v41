@@ -327,3 +327,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-23 | Cursor | **i18n Moments Step 2**: regole ADR-007 — default IT, `localStorage` uiLocale, no auto-detect; zero runtime |
 | 2026-07-23 | Cursor | **i18n Moments Step 3 / v187**: `moments-i18n.js` + `applyDocumentLang` al boot; dizionario seed; UI invariata |
 | 2026-07-23 | Cursor | **i18n Moments Step 4 / v188**: toggle IT\|EN in auth + topbar + menu; preferenza persistita; chrome ancora IT |
+| 2026-07-23 | Cursor | **i18n Moments Step 5 / v190**: auth + account + attivazione EN (`moments-i18n-auth.js`); deploy Pages |

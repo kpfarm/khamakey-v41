@@ -1460,23 +1460,24 @@ function polishHoroscopeSentence(sentence) {
 function isPlanetHeavySentence(sentence) {
   const t = String(sentence || "").toLowerCase();
   const planets = (t.match(/\b(sole|luna|mercurio|venere|marte|giove|saturno|urano|nettuno|plutone)\b/g) || []).length;
-  const jargon = /congiunzione|opposizione|trigono|sextile|quadrato|aspetto|transito|ephemer|casa\s+\d+|cielo di oggi/.test(t);
-  return planets >= 2 || (planets >= 1 && jargon);
+  const jargon = /congiunzione|opposizione|trigono|sextile|quadrato|aspetto|transito|ephemer|casa\s+\d+|cielo di oggi|influenze planet|planetarie|astrolog/.test(t);
+  return planets >= 2 || (planets >= 1 && jargon) || jargon;
 }
 
 function scoreHoroscopeSentence(sentence) {
   const t = String(sentence || "").toLowerCase();
   const len = t.length;
-  if (len < 28 || len > 190) return -50;
+  if (len < 28 || len > 170) return -50;
   if (isPlanetHeavySentence(t)) return -40;
+  // Evita inglese / mix strani tipici dell’AI
+  if (/\b(the|and|with|your|libra|aries|taurus|can expect|thanks to)\b/.test(t)) return -30;
   let score = 10;
   if (/amor|cuore|affett|coppia|partner|tener|relazion/.test(t)) score += 8;
   if (/lavor|progett|decision|studio|carriera|denaro/.test(t)) score += 6;
-  if (/oggi|giornata|sera|mattina|momento|energia|seren|opportun|ascolt|cura/.test(t)) score += 5;
+  if (/oggi|giornata|sera|mattina|momento|energia|seren|opportun|ascolt|cura|parl|sent|scelt/.test(t)) score += 5;
   if (/favorevol|dolce|legger|calma|equilibrio|slancio/.test(t)) score += 3;
-  if (/##|http|disclaimer|modello/.test(t)) score -= 20;
-  // Preferisce frasi “umane”, non troppo corte/generiche
-  if (len >= 55 && len <= 150) score += 4;
+  if (/##|http|disclaimer|modello|grazie alle numerose/.test(t)) score -= 20;
+  if (len >= 45 && len <= 140) score += 4;
   return score;
 }
 

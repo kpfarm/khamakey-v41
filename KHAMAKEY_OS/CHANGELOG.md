@@ -9,6 +9,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Worker v172 — Oroscopo stile giornale (2026-07-22, Cursor)** — Worker
+  - Daily AstroWay riscritto in 2–3 frasi familiari da quotidiano (amore/lavoro/energia), senza gergo planetario.
 - **Worker v171 — Oroscopo breve (2026-07-22, Cursor)** — Worker
   - Testo AstroWay compresso a un paragrafo (~420 caratteri), senza sezioni markdown lunghe.
 - **Worker v170 — Oroscopo leggibile + anteprima video (2026-07-22, Cursor)** — Worker

@@ -1,8 +1,9 @@
 # 27 — Moments i18n: regole (Step 2)
 
-> **Data:** 2026-07-23 · **Stato:** regole accettate · **Nessun cambio runtime**  
+> **Data:** 2026-07-23 · **Stato:** regole accettate · **Step 3 infra live (Moments v187)**  
 > Decisione formale: [`decisions/007-moments-editor-i18n.md`](../decisions/007-moments-editor-i18n.md)  
-> Inventario: [`26-moments-i18n-inventory.md`](26-moments-i18n-inventory.md)
+> Inventario: [`26-moments-i18n-inventory.md`](26-moments-i18n-inventory.md)  
+> Modulo: `pages/moments-i18n.js` (`t`, `getUiLocale` / `setUiLocale`, `applyChromeI18n`)
 
 ## In una frase
 
@@ -45,6 +46,12 @@ Clicca IT
 - Titolo, storia, foto: **lingua del cliente** (quello che ha scritto).
 - Frasi fisse (PIN, privacy, bottoni RSVP di sistema): Step 9 — indipendenti dal toggle editor.
 
+## Step 3 (fatto)
+
+- File `pages/moments-i18n.js` + import in `moments.js` (solo `applyDocumentLang` al boot).
+- Dizionario seed minimo (`boot.*`, `common.*`, `lang.*`) — UI ancora tutta in italiano in HTML/JS.
+- Nessun toggle lingua (Step 4). Nessuna sostituzione massiva di stringhe (Step 5–7).
+
 ## Prossimo passo
 
-**Step 3** — infrastruttura: `moments-i18n.js` + struttura dizionario (ancora senza tradurre tutta la UI).
+**Step 4** — selettore IT/EN visibile (auth + editor) che chiama `setUiLocale`.

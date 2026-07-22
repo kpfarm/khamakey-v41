@@ -1,6 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
 import { normalizeMomentCode, formatMomentCodeDisplay, isValidMomentCode } from "./moment-codes.js";
+import { applyDocumentLang, getUiLocale } from "./moments-i18n.js?v=187";
+
+/* Step 3 i18n: apply <html lang> from saved preference (default it). Toggle UI = step 4. */
+applyDocumentLang(getUiLocale());
 import {
   uploadImage,
   uploadVideo,

@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Moments v187 — i18n infra Step 3 (2026-07-23, Cursor)** — Pages
+  - Nuovo `moments-i18n.js`: `t` / `getUiLocale` / `setUiLocale` / `applyChromeI18n`; seed IT+EN minimo.
+  - Boot applica solo `<html lang>` da `localStorage` (default it). Nessun toggle; stringhe UI ancora IT.
 - **Docs — i18n Moments regole Step 2 (2026-07-23, Cursor)** — Docs only
   - ADR-007 + `docs/27-moments-i18n-rules.md`: default IT, preferenza `khamakey.moments.uiLocale`, solo click esplicito, no i18n Business. Zero runtime.
 - **Docs — i18n Moments inventario Step 1 (2026-07-23, Cursor)** — Docs only

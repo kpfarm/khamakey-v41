@@ -105,7 +105,7 @@ import {
   sectionFieldHints,
   sectionHasContent,
   isSectionExcluded
-} from "./moment-sections.js?v=184";
+} from "./moment-sections.js?v=185";
 import {
   TYPE_LABELS,
   renderCategorySelect,
@@ -126,7 +126,7 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js?v=184";
+} from "./moment-editor-kit.js?v=185";
 import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderMomentDashboardShell, bindMomentDashboard } from "./moment-editor-dashboard.js";
@@ -135,7 +135,7 @@ import {
   renderHoroscopePeoplePanel,
   bindHoroscopePeopleEditor,
   refreshHoroscopePeopleEditor
-} from "./moment-horoscope.js?v=184";
+} from "./moment-horoscope.js?v=185";
 
 const auth = document.getElementById("momentsAuth");
 const app = document.getElementById("momentsApp");

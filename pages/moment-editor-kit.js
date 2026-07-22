@@ -1,6 +1,6 @@
 /** Kit editor — sezioni consigliate, opzionali e etichette adattive per tipo pagina. */
 import { MOMENT_TYPE_GROUPS, normalizeMomentType } from "./moment-categories.js?v=180";
-import { SECTION_ORDER_DEFAULT, sectionFillGuide, SECTION_ICONS, isSectionExcluded } from "./moment-sections.js?v=184";
+import { SECTION_ORDER_DEFAULT, sectionFillGuide, SECTION_ICONS, isSectionExcluded } from "./moment-sections.js?v=185";
 
 export { SECTION_ICONS };
 

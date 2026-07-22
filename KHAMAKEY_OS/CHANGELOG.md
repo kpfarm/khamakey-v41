@@ -8,6 +8,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **Moments v185 / Worker v169 — Oroscopo: Aggiungi persona + fetch (2026-07-22, Cursor)** — Pages + Worker
+  - Editor: le nuove persone senza segno non vengono più scartate (tasto «Aggiungi» ripristinato).
+  - Worker: parse risposta AstroWay più robusto, fallback lingua `it`→`en`, probe `GET /api/moment/horoscope-probe`.
+
 ### Added
 - **Moments v184 / Worker v168 — Oroscopo multi-persona (2026-07-22, Cursor)** — Pages + Worker
   - Sezione opzionale `horoscope`: fino a 5 persone (nome facoltativo + segno) fissate in editor.

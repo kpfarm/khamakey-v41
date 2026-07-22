@@ -43,25 +43,30 @@ export function normalizeHoroscopePerson(raw = {}){
   };
 }
 
-/** Migra `sign` legacy → `people[]`. Max 5 voci con segno valido (o slot vuoti in editor). */
-export function normalizeHoroscopePeople(section = {}){
+/** Slot editor: tiene anche righe senza segno (per «Aggiungi persona»). */
+export function horoscopePeopleSlots(section = {}){
   const fromPeople = Array.isArray(section.people)
+    ? section.people.map(normalizeHoroscopePerson).slice(0, MAX_HOROSCOPE_PEOPLE)
+    : [];
+  if(fromPeople.length) return fromPeople;
+  const legacy = normalizeZodiacSign(section.sign);
+  if(legacy) return [normalizeHoroscopePerson({ name: "", sign: legacy })];
+  return [normalizeHoroscopePerson()];
+}
+
+/** Persistenza / pagina pubblica: solo persone con segno valido. */
+export function normalizeHoroscopePeople(section = {}){
+  const slots = Array.isArray(section.people)
     ? section.people.map(normalizeHoroscopePerson)
     : [];
-  const withSign = fromPeople.filter(person => person.sign);
-  if(withSign.length){
-    return withSign.slice(0, MAX_HOROSCOPE_PEOPLE);
-  }
+  const withSign = slots.filter(person => person.sign);
+  if(withSign.length) return withSign.slice(0, MAX_HOROSCOPE_PEOPLE);
   const legacy = normalizeZodiacSign(section.sign);
-  if(legacy){
-    return [normalizeHoroscopePerson({ name: "", sign: legacy })];
-  }
-  return fromPeople.slice(0, MAX_HOROSCOPE_PEOPLE);
+  return legacy ? [normalizeHoroscopePerson({ name: "", sign: legacy })] : [];
 }
 
 export function horoscopePeopleForEditor(section = {}){
-  const people = normalizeHoroscopePeople(section);
-  return people.length ? people : [normalizeHoroscopePerson()];
+  return horoscopePeopleSlots(section);
 }
 
 export function serializeHoroscopePeople(people){
@@ -72,6 +77,19 @@ export function serializeHoroscopePeople(people){
   );
 }
 
+/** Parse per UI editor — non scarta le righe senza segno. */
+export function parseHoroscopePeopleSlots(raw){
+  if(Array.isArray(raw)) return raw.map(normalizeHoroscopePerson).slice(0, MAX_HOROSCOPE_PEOPLE);
+  try{
+    const parsed = JSON.parse(String(raw || "[]"));
+    if(!Array.isArray(parsed)) return [];
+    return parsed.map(normalizeHoroscopePerson).slice(0, MAX_HOROSCOPE_PEOPLE);
+  }catch{
+    return [];
+  }
+}
+
+/** Parse per salvataggio — solo segni validi. */
 export function parseHoroscopePeople(raw){
   if(Array.isArray(raw)) return normalizeHoroscopePeople({ people: raw });
   try{
@@ -126,7 +144,7 @@ export function renderHoroscopePeoplePanel(section = {}){
 
 function readPeopleHidden(formNode){
   const input = formNode?.querySelector?.('[name="section_horoscope_people"]');
-  return parseHoroscopePeople(input?.value || "[]");
+  return parseHoroscopePeopleSlots(input?.value || "[]");
 }
 
 function writePeopleHidden(formNode, people){
@@ -154,12 +172,14 @@ export function bindHoroscopePeopleEditor(formNode){
     const addBtn = event.target.closest("[data-horoscope-add]");
     if(addBtn && formNode.contains(addBtn)){
       event.preventDefault();
+      event.stopPropagation();
       const people = readPeopleHidden(formNode);
       if(people.length >= MAX_HOROSCOPE_PEOPLE){
         alert(`Massimo ${MAX_HOROSCOPE_PEOPLE} persone (bundle).`);
         return;
       }
-      writePeopleHidden(formNode, [...people, normalizeHoroscopePerson()]);
+      const next = [...people, normalizeHoroscopePerson()];
+      writePeopleHidden(formNode, next);
       renderPeopleList(formNode);
       formNode.dispatchEvent(new Event("input", { bubbles: true }));
       return;
@@ -167,6 +187,7 @@ export function bindHoroscopePeopleEditor(formNode){
     const removeBtn = event.target.closest("[data-horoscope-remove]");
     if(removeBtn && formNode.contains(removeBtn)){
       event.preventDefault();
+      event.stopPropagation();
       const id = removeBtn.dataset.horoscopeRemove;
       let people = readPeopleHidden(formNode).filter(person => person.id !== id);
       if(!people.length) people = [normalizeHoroscopePerson()];

@@ -95,8 +95,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v177** | PDF: ovale con testo “a cosa serve” + codice; barcode solo barcode; URL NFC completo. |
-| **Moments editor** | **v184** | Sezione Oroscopo: fino a 5 persone (nome + segno); daily AstroWay. |
-| **Worker NFC** | **v168-horoscope** | Fetch/cache oroscopo giornaliero; guestbook resta escluso. |
+| **Moments editor** | **v185** | Fix Aggiungi persona oroscopo (slot senza segno); daily AstroWay. |
+| **Worker NFC** | **v169-horoscope-fix** | Probe `/api/moment/horoscope-probe`; fallback lingua it→en; guestbook escluso. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v166 (prod)** | v166 ripristina USAGE `app_private` (fix magazzino); v165 ingest store. |

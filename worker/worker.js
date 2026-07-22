@@ -10,10 +10,11 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v168-horoscope";
+const WORKER_VERSION = "v169-horoscope-fix";
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
 const HOROSCOPE_CACHE_HOST = "https://horoscope-cache.khamakey.internal";
+const HOROSCOPE_LANG_FALLBACKS = ["it", "en"];
 const ZODIAC_SIGN_SET = new Set([
   "aries", "taurus", "gemini", "cancer", "leo", "virgo",
   "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"
@@ -110,6 +111,9 @@ export default {
       }
       if (url.pathname === "/health") {
         return json(buildIntegrationsHealth(env));
+      }
+      if (url.pathname === "/api/moment/horoscope-probe" && request.method === "GET") {
+        return handleHoroscopeProbe(request, env, url);
       }
       if (url.pathname === "/api/cron/moment-anniversaries" && request.method === "POST") {
         return handleMomentAnniversariesCron(request, env);
@@ -1375,25 +1379,102 @@ function horoscopeDateRome() {
   }).format(new Date());
 }
 
+function extractAstroWayHoroscopeText(body) {
+  if (!body || typeof body !== "object") return { text: "", disclaimer: "", language: "", model: "" };
+  const data = body.data && typeof body.data === "object" ? body.data : body;
+  const text = String(
+    data.horoscope || data.text || data.content || data.reading
+    || body.horoscope || body.text || ""
+  ).trim();
+  return {
+    text,
+    disclaimer: String(data.disclaimer || body.disclaimer || "").trim(),
+    language: String(data.language || body.language || "").trim(),
+    model: String(data.model || body.model || "").trim()
+  };
+}
+
+async function cacheHoroscopePayload(cacheUrl, payload) {
+  if (!payload?.text) return;
+  try {
+    const ttl = 60 * 60 * 26;
+    const cacheReq = new Request(cacheUrl, { method: "GET" });
+    const toCache = new Response(JSON.stringify(payload), {
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": `public, max-age=${ttl}`
+      }
+    });
+    await caches.default.put(cacheReq, toCache);
+  } catch (error) {
+    console.error("horoscope cache put", error);
+  }
+}
+
+async function fetchAstroWayDailyOnce(env, sign, language, date) {
+  const apiKey = String(env.ASTROWAY_API_KEY || "").trim();
+  if (!apiKey) {
+    return { text: "", disclaimer: "", unavailable: true, reason: "missing_key", sign, date, language };
+  }
+  const response = await fetch(ASTROWAY_DAILY_URL, {
+    method: "POST",
+    headers: {
+      "X-Api-Key": apiKey,
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({ sign, date, language })
+  });
+  const raw = await response.text().catch(() => "");
+  let body = null;
+  try { body = raw ? JSON.parse(raw) : null; } catch { body = null; }
+  if (!response.ok) {
+    const errCode = body?.error?.code || body?.code || "";
+    console.error("astroway daily", response.status, errCode, raw.slice(0, 280));
+    return {
+      text: "",
+      disclaimer: "",
+      unavailable: true,
+      reason: errCode ? `http_${response.status}_${errCode}` : `http_${response.status}`,
+      sign,
+      date,
+      language
+    };
+  }
+  const extracted = extractAstroWayHoroscopeText(body);
+  return {
+    text: extracted.text,
+    disclaimer: extracted.disclaimer,
+    model: extracted.model,
+    sign,
+    date,
+    language: extracted.language || language,
+    unavailable: !extracted.text,
+    reason: extracted.text ? "" : "empty_text"
+  };
+}
+
 async function fetchAstroWayDaily(env, sign, language = "it") {
   const cleanSign = normalizeZodiacSignWorker(sign);
   if (!cleanSign) return null;
   const date = horoscopeDateRome();
-  const lang = String(language || "it").trim().toLowerCase() || "it";
-  const cacheUrl = `${HOROSCOPE_CACHE_HOST}/daily/${encodeURIComponent(cleanSign)}/${encodeURIComponent(lang)}/${date}`;
-  try {
-    const cache = caches.default;
-    const cached = await cache.match(new Request(cacheUrl, { method: "GET" }));
-    if (cached) {
-      const payload = await cached.json();
-      if (payload?.text) return payload;
+  const preferred = String(language || "it").trim().toLowerCase() || "it";
+  const languages = [...new Set([preferred, ...HOROSCOPE_LANG_FALLBACKS])];
+
+  for (const lang of languages) {
+    const cacheUrl = `${HOROSCOPE_CACHE_HOST}/daily/${encodeURIComponent(cleanSign)}/${encodeURIComponent(lang)}/${date}`;
+    try {
+      const cached = await caches.default.match(new Request(cacheUrl, { method: "GET" }));
+      if (cached) {
+        const payload = await cached.json();
+        if (payload?.text) return payload;
+      }
+    } catch (error) {
+      console.error("horoscope cache match", error);
     }
-  } catch (error) {
-    console.error("horoscope cache match", error);
   }
 
-  const apiKey = String(env.ASTROWAY_API_KEY || "").trim();
-  if (!apiKey) {
+  if (!String(env.ASTROWAY_API_KEY || "").trim()) {
     return {
       text: "",
       disclaimer: "",
@@ -1401,73 +1482,98 @@ async function fetchAstroWayDaily(env, sign, language = "it") {
       reason: "missing_key",
       sign: cleanSign,
       date,
-      language: lang
+      language: preferred
     };
   }
 
-  try {
-    const response = await fetch(ASTROWAY_DAILY_URL, {
-      method: "POST",
-      headers: {
-        "X-Api-Key": apiKey,
-        "Content-Type": "application/json",
-        Accept: "application/json"
-      },
-      body: JSON.stringify({ sign: cleanSign, date, language: lang })
-    });
-    if (!response.ok) {
-      console.error("astroway daily", response.status, await response.text().catch(() => ""));
-      return {
+  let last = null;
+  for (const lang of languages) {
+    try {
+      last = await fetchAstroWayDailyOnce(env, cleanSign, lang, date);
+      if (last?.text) {
+        const cacheUrl = `${HOROSCOPE_CACHE_HOST}/daily/${encodeURIComponent(cleanSign)}/${encodeURIComponent(lang)}/${date}`;
+        await cacheHoroscopePayload(cacheUrl, last);
+        return last;
+      }
+    } catch (error) {
+      console.error("astroway daily fetch", error);
+      last = {
         text: "",
         disclaimer: "",
         unavailable: true,
-        reason: `http_${response.status}`,
+        reason: "fetch_error",
         sign: cleanSign,
         date,
         language: lang
       };
     }
-    const body = await response.json();
-    const data = body?.data && typeof body.data === "object" ? body.data : body;
-    const text = String(data?.horoscope || data?.text || "").trim();
-    const disclaimer = String(data?.disclaimer || "").trim();
-    const payload = {
-      text,
-      disclaimer,
-      model: String(data?.model || "").trim(),
-      sign: cleanSign,
-      date,
-      language: String(data?.language || lang).trim() || lang,
-      unavailable: !text
-    };
-    if (text) {
-      try {
-        const ttl = 60 * 60 * 26; // ~26h — copre il giorno + buffer
-        const cacheReq = new Request(cacheUrl, { method: "GET" });
-        const toCache = new Response(JSON.stringify(payload), {
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": `public, max-age=${ttl}`
-          }
-        });
-        await caches.default.put(cacheReq, toCache);
-      } catch (error) {
-        console.error("horoscope cache put", error);
-      }
-    }
-    return payload;
-  } catch (error) {
-    console.error("astroway daily fetch", error);
-    return {
-      text: "",
-      disclaimer: "",
-      unavailable: true,
-      reason: "fetch_error",
-      sign: cleanSign,
-      date,
-      language: lang
-    };
   }
+  return last || {
+    text: "",
+    disclaimer: "",
+    unavailable: true,
+    reason: "unavailable",
+    sign: cleanSign,
+    date,
+    language: preferred
+  };
+}
+
+/** Markdown leggero AstroWay → HTML sicuro (titoli ## e elenchi - ). */
+function formatHoroscopeHtml(raw) {
+  const lines = String(raw || "").split(/\r?\n/);
+  const parts = [];
+  let list = [];
+  const flushList = () => {
+    if (!list.length) return;
+    parts.push(`<ul>${list.map(item => `<li>${item}</li>`).join("")}</ul>`);
+    list = [];
+  };
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushList();
+      continue;
+    }
+    const heading = trimmed.match(/^#{1,3}\s+(.+)$/);
+    if (heading) {
+      flushList();
+      parts.push(`<p class="moment-horoscope-heading"><strong>${escapeHtml(heading[1])}</strong></p>`);
+      continue;
+    }
+    const bullet = trimmed.match(/^[-*•]\s+(.+)$/);
+    if (bullet) {
+      list.push(escapeHtml(bullet[1]));
+      continue;
+    }
+    flushList();
+    parts.push(`<p>${escapeHtml(trimmed)}</p>`);
+  }
+  flushList();
+  return parts.join("") || `<p>${escapeHtml(String(raw || ""))}</p>`;
+}
+
+async function handleHoroscopeProbe(request, env, url) {
+  const ip = request.headers.get("cf-connecting-ip") || "anon";
+  if (!await checkRateLimit(env, `horoscope-probe:${ip}`, 10, 15)) {
+    return tooManyRequests();
+  }
+  const sign = normalizeZodiacSignWorker(url.searchParams.get("sign") || "leo") || "leo";
+  const configured = Boolean(String(env.ASTROWAY_API_KEY || "").trim());
+  if (!configured) {
+    return cors(json({ ok: false, configured: false, reason: "missing_key", sign }));
+  }
+  const reading = await fetchAstroWayDaily(env, sign, "it");
+  return cors(json({
+    ok: Boolean(reading?.text),
+    configured: true,
+    sign,
+    date: reading?.date || horoscopeDateRome(),
+    language: reading?.language || "",
+    reason: reading?.reason || (reading?.text ? "" : "unavailable"),
+    text_len: reading?.text ? reading.text.length : 0,
+    text_preview: reading?.text ? String(reading.text).slice(0, 160) : ""
+  }));
 }
 
 async function loadHoroscopeReadingsForSections(sections, env) {
@@ -2491,7 +2597,10 @@ body.nav-open{overflow:hidden}
 .moment-horoscope-list{display:grid;gap:14px}
 .moment-horoscope-card{padding:16px 14px;border-radius:16px;background:${c.cardSoft};border:1px solid ${c.line}}
 .moment-horoscope-person{margin:0 0 10px;font-family:${f.ui};font-size:.92rem;font-weight:800;color:${cardInk}}
-.moment-horoscope-text{margin:0 0 10px;font-family:${f.display};font-size:clamp(1.05rem,4.2vw,1.28rem);line-height:1.55;color:${cardInk}}
+.moment-horoscope-text{margin:0 0 10px;display:grid;gap:8px;font-family:${f.display};font-size:clamp(1.02rem,4vw,1.22rem);line-height:1.55;color:${cardInk}}
+.moment-horoscope-text p{margin:0}
+.moment-horoscope-heading{margin:4px 0 0!important;font-family:${f.ui}!important;font-size:.88rem!important;letter-spacing:.02em}
+.moment-horoscope-text ul{margin:0;padding-left:1.15rem;display:grid;gap:4px}
 .moment-horoscope-empty{margin:0 0 10px;color:${c.muted};font-size:.95rem;line-height:1.5}
 .moment-horoscope-disclaimer{margin:0;font-size:.72rem;line-height:1.4;color:${c.muted}}
 .moment-card-head .moment-card-icon{font-size:1.15rem;line-height:1;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:${c.cardSoft};border:1px solid ${c.line};flex-shrink:0;color:${c.go}}
@@ -3762,7 +3871,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
         ? `${escapeHtml(person.name)} · ${escapeHtml(signLabel)}`
         : escapeHtml(signLabel);
       const body = reading.text
-        ? `<p class="moment-horoscope-text">${escapeHtml(reading.text)}</p>`
+        ? `<div class="moment-horoscope-text">${formatHoroscopeHtml(reading.text)}</div>`
         : `<p class="moment-horoscope-empty">L’oroscopo di oggi non è ancora disponibile. Riprova tra poco.</p>`;
       const disclaimer = reading.disclaimer
         ? `<p class="moment-horoscope-disclaimer">${escapeHtml(reading.disclaimer)}</p>`
@@ -5200,6 +5309,7 @@ function resendConfigured(env) {
 }
 
 function buildIntegrationsHealth(env) {
+  const astrowayConfigured = Boolean(String(env.ASTROWAY_API_KEY || "").trim());
   return {
     ok: true,
     service: "khamakey-nfc",
@@ -5211,7 +5321,8 @@ function buildIntegrationsHealth(env) {
       shopify: { configured: shopifyConfigured(env), status: shopifyConfigured(env) ? "active" : "not_configured" },
       resend: { configured: resendConfigured(env), status: resendConfigured(env) ? "active" : "not_configured" },
       stripe: { configured: stripeConfigured(env), webhook: stripeWebhookConfigured(env), status: stripeConfigured(env) ? "active" : "not_configured" },
-      paypal: { configured: paypalConfigured(env), status: paypalConfigured(env) ? "active" : "not_configured" }
+      paypal: { configured: paypalConfigured(env), status: paypalConfigured(env) ? "active" : "not_configured" },
+      astroway: { configured: astrowayConfigured, status: astrowayConfigured ? "active" : "not_configured" }
     }
   };
 }

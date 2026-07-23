@@ -13,6 +13,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - `syncLangSwitchers` leggeva `appView` in TDZ → ReferenceError → schermo “Apertura in corso…” infinito.
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
+### Fixed
+- **Moments v193 — Salva tagliato + pausa i18n (2026-07-23, Cursor)** — Pages
+  - CSS: `Salva` / `Salvato` / Annulla non si comprimono più (`flex-shrink:0`, `nowrap`, min-width).
+  - Espansione EN (6b/sezioni) in pausa; resta toggle + auth/shell già fatti; default IT.
+
 ### Added
 - **Moments v192 — i18n shell Step 6a (2026-07-23, Cursor)** — Pages
   - `moments-i18n-shell.js`: Salva / Annulla / Anteprima / Modifica / status topbar / Copia link / Condividi / Apri pagina / pill Pubblicata|Bozza|PIN.

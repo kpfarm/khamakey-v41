@@ -214,12 +214,12 @@ textarea{min-height:86px;resize:vertical}
   box-shadow:0 20px 50px -10px rgba(27,42,94,.06);
 }
 .editor-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--soft);flex-wrap:wrap}
-.editor-save-status{font-size:.78rem;font-weight:900;color:var(--green-dark)}
+.editor-save-status{font-size:.78rem;font-weight:900;color:var(--green-dark);flex-shrink:0;white-space:nowrap}
 .editor-save-status.dirty{color:var(--amber)}
 .editor-topbar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto}
-.editor-open-link{text-decoration:none;display:inline-flex;align-items:center;border:0;background:transparent;font:inherit;cursor:pointer}
-.editor-save-btn{min-width:88px}
-.editor-undo-btn{font-size:.78rem;padding:8px 10px;white-space:nowrap}
+.editor-open-link{text-decoration:none;display:inline-flex;align-items:center;border:0;background:transparent;font:inherit;cursor:pointer;flex-shrink:0;white-space:nowrap}
+.editor-save-btn{min-width:6.5rem;padding-left:18px;padding-right:18px;flex-shrink:0;white-space:nowrap}
+.editor-undo-btn{font-size:.78rem;padding:8px 10px;white-space:nowrap;flex-shrink:0}
 .editor-undo-btn[hidden]{display:none!important}
 .quick-publish.published{background:var(--green);color:#fff;border-color:var(--green)}
 .quick-publish:not(.published){background:#fff;color:var(--navy)}
@@ -586,14 +586,14 @@ body.media-modal-open{overflow:hidden}
 /* Save bar + preview FAB + bottom nav (stile Business) */
 .save-bar{position:fixed;bottom:0;left:0;right:0;background:var(--navy);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:300;transform:translateY(100%);transition:transform .3s;box-shadow:0 -4px 20px rgba(27,42,94,.25)}
 .save-bar-actions{display:flex;align-items:center;gap:8px}
-.btn-undo{border:1px solid rgba(255,255,255,.28);background:transparent;color:#fff;border-radius:10px;padding:9px 12px;font-size:.78rem;font-weight:800;cursor:pointer}
+.btn-undo{border:1px solid rgba(255,255,255,.28);background:transparent;color:#fff;border-radius:10px;padding:9px 12px;font-size:.78rem;font-weight:800;cursor:pointer;flex-shrink:0;white-space:nowrap}
 .btn-undo:hover{background:rgba(255,255,255,.1)}
 .btn-undo[hidden]{display:none!important}
 .save-bar.visible{transform:translateY(0)}
 .save-msg{color:rgba(255,255,255,.7);font-size:.78rem;line-height:1.3}
 .save-msg strong{color:#9AE06A;font-weight:800}
-.btn-save{border:0;background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;font-weight:800;font-size:.82rem;padding:10px 20px;border-radius:10px;cursor:pointer;white-space:nowrap}
-.preview-fab{display:none;position:fixed;right:12px;bottom:calc(var(--bottomnav-h) + 12px);z-index:280;border:0;background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;border-radius:999px;padding:11px 15px;font-weight:800;font-size:.8rem;box-shadow:0 8px 24px rgba(76,175,39,.35);cursor:pointer}
+.btn-save{border:0;background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;font-weight:800;font-size:.82rem;padding:10px 22px;border-radius:10px;cursor:pointer;white-space:nowrap;flex-shrink:0;min-width:5.5rem}
+.preview-fab{display:none;position:fixed;right:12px;bottom:calc(var(--bottomnav-h) + 12px);z-index:280;border:0;background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;border-radius:999px;padding:11px 16px;font-weight:800;font-size:.8rem;box-shadow:0 8px 24px rgba(76,175,39,.35);cursor:pointer;white-space:nowrap;max-width:none}
 .save-bar.visible ~ .preview-fab{bottom:calc(var(--bottomnav-h) + 68px)}
 .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:2px solid var(--border);z-index:400;box-shadow:0 -8px 24px rgba(27,42,94,.08);flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
 .sub-nav{display:flex;gap:4px;padding:6px 8px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;min-height:0;max-height:0;opacity:0;transition:max-height .25s,opacity .2s,padding .2s}

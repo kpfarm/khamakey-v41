@@ -9,9 +9,9 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=192";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=192";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=192";
+} from "./moments-i18n.js?v=193";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=193";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=193";
 import {
   uploadImage,
   uploadVideo,

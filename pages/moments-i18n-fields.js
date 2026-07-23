@@ -300,5 +300,13 @@ export const FIELD_PHRASE_EN = {
 
   // 11e6a — Section photo buttons only (no upload/delete logic)
   "Carica immagine": "Upload image",
-  "Video del ricordo": "Memory video"
+  "Video del ricordo": "Memory video",
+
+  // 11e6b — Gallery/video/audio panel intro chrome only
+  "Allegati sigillati": "Sealed attachments",
+  "Foto, video, audio o PDF che si sbloccano insieme alla lettera. Tocca Aggiungi, poi Salva.": "Photos, video, audio or PDF that unlock with the letter. Tap Add, then Save.",
+  "Carica uno o più video — in pagina scorrono come la galleria. Titolo e descrizione sotto ciascuno, poi Salva.": "Upload one or more videos — on the page they scroll like the gallery. Title and description under each, then Save.",
+  "Audio": "Audio",
+  "Messaggi vocali o brani — complemento a Spotify/YouTube. Poi Salva.": "Voice notes or tracks — alongside Spotify/YouTube. Then Save.",
+  "Solo immagini qui. Tocca Aggiungi foto, scrivi titolo e descrizione, poi Salva.": "Images only here. Tap Add photos, write title and description, then Save."
 };

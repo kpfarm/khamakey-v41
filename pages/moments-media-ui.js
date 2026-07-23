@@ -15,8 +15,8 @@ import {
   migrateMusicSectionMedia,
   migrateLetterMediaSection
 } from "./moment-media.js?v=173";
-import { getUiLocale } from "./moments-i18n.js?v=209";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=209";
+import { getUiLocale } from "./moments-i18n.js?v=210";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=210";
 
 let mediaEditContext = null;
 
@@ -508,12 +508,12 @@ export function renderGalleryUploadPanel(section,key){
   const isVideo = key === "video";
   const isMusic = key === "music";
   const intro = isLetter
-    ? `<p><strong>Allegati sigillati</strong></p><p class="field-hint">Foto, video, audio o PDF che si sbloccano <strong>insieme alla lettera</strong>. Tocca Aggiungi, poi <strong>Salva</strong>.</p>`
+    ? `<p><strong data-lf="Allegati sigillati">${esc(lf("Allegati sigillati"))}</strong></p><p class="field-hint" data-lf="Foto, video, audio o PDF che si sbloccano insieme alla lettera. Tocca Aggiungi, poi Salva.">${esc(lf("Foto, video, audio o PDF che si sbloccano insieme alla lettera. Tocca Aggiungi, poi Salva."))}</p>`
     : isVideo
-      ? `<p><strong>Video</strong></p><p class="field-hint">Carica uno o più video — in pagina scorrono come la galleria. Titolo e descrizione sotto ciascuno, poi <strong>Salva</strong>.</p>`
+      ? `<p><strong data-lf="Video">${esc(lf("Video"))}</strong></p><p class="field-hint" data-lf="Carica uno o più video — in pagina scorrono come la galleria. Titolo e descrizione sotto ciascuno, poi Salva.">${esc(lf("Carica uno o più video — in pagina scorrono come la galleria. Titolo e descrizione sotto ciascuno, poi Salva."))}</p>`
       : isMusic
-        ? `<p><strong>Audio</strong></p><p class="field-hint">Messaggi vocali o brani — complemento a Spotify/YouTube. Poi <strong>Salva</strong>.</p>`
-        : `<p><strong>Galleria foto</strong></p><p class="field-hint">Solo immagini qui. Tocca <strong>Aggiungi foto</strong>, scrivi titolo e descrizione, poi <strong>Salva</strong>.</p>`;
+        ? `<p><strong data-lf="Audio">${esc(lf("Audio"))}</strong></p><p class="field-hint" data-lf="Messaggi vocali o brani — complemento a Spotify/YouTube. Poi Salva.">${esc(lf("Messaggi vocali o brani — complemento a Spotify/YouTube. Poi Salva."))}</p>`
+        : `<p><strong data-lf="Galleria foto">${esc(lf("Galleria foto"))}</strong></p><p class="field-hint" data-lf="Solo immagini qui. Tocca Aggiungi foto, scrivi titolo e descrizione, poi Salva.">${esc(lf("Solo immagini qui. Tocca Aggiungi foto, scrivi titolo e descrizione, poi Salva."))}</p>`;
   const footer = `${seeded.length ? `${seeded.length} file pronti. ` : ""}${limits.hint}`;
   return `<div class="gallery-upload-panel" data-gallery-key="${key}">
     <div class="gallery-steps">${intro}</div>

@@ -43,7 +43,7 @@ Steps 1–9 = auth, shell, nav, etichette/sottotitoli sezioni, toast, chrome `/m
   - [x] **11e5** (v208) — Journey UI
   - [ ] **11e6** Gallery / video / media — **a pezzi** (vedi sotto)
     - [x] **11e6a** (v209) — Foto sezione: Carica foto / Rimuovi (no logica upload)
-    - [ ] 11e6b Intro pannello galleria/video/audio (solo testi)
+    - [x] **11e6b** (v210) — Intro pannello galleria/video/audio (solo testi)
     - [ ] 11e6c Griglia media (etichette gruppi / empty / add)
     - [ ] 11e6d Modal titolo/descrizione media
     - [ ] 11e6e Messaggi errore/status upload (dopo smoke 6a–6d)

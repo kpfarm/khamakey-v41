@@ -38,7 +38,7 @@ Steps 1–9 = auth, shell, nav, etichette/sottotitoli sezioni, toast, chrome `/m
 - [ ] **11e** Kit sezioni avanzati — **a pezzi** (vedi sotto)
   - [x] **11e1** (v204) — dedica / lettera futuro / citazione / firma / pet
   - [x] **11e2** (v205) — countdown + musica chrome
-  - [ ] 11e3 RSVP WhatsApp chrome
+  - [x] **11e3** (v206) — RSVP WhatsApp chrome
   - [ ] 11e4 List UI
   - [ ] 11e5 Journey UI
   - [ ] 11e6 Gallery / video / media UI

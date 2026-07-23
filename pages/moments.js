@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=205";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=205";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=205";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=205";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=205";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=205";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=205";
+} from "./moments-i18n.js?v=206";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=206";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=206";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=206";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=206";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=206";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=206";
 import {
   uploadImage,
   uploadVideo,
@@ -3665,10 +3665,10 @@ function sectionEditor(key,section,standalone=false){
     ${renderGalleryUploadPanel(safe, "letter_future")}` : "";
   const rsvpFields = key === "rsvp" ? `
     <div class="editor-card smart-card" data-rsvp-wa-card>
-      <p class="ecard-title"><span class="step-badge">1</span> WhatsApp organizzatore <span class="field-required">obbligatorio</span></p>
-      <p class="rsvp-wa-warn" id="rsvpWaWarn" ${normalizeWhatsAppDigits(safe.whatsapp_number) ? "hidden" : ""}>Senza WhatsApp, al Salva la sezione RSVP si <strong>disattiva da sola</strong> e esce dal menu. Inserisci il numero per tenerla attiva.</p>
-      <label>Numero WhatsApp<input name="section_${esc(key)}_whatsapp_number" id="rsvpWhatsappInput" value="${esc(safe.whatsapp_number || "")}" placeholder="393331234567" inputmode="tel" autocomplete="tel"></label>
-      <p class="field-hint">Prefisso internazionale senza + (es. 39333… per Italia). Gli invitati compilano il modulo e ti inviano il messaggio su WhatsApp.</p>
+      <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("WhatsApp organizzatore")} <span class="field-required" data-lf="obbligatorio">${esc(localizeFieldPhrase("obbligatorio"))}</span></p>
+      <p class="rsvp-wa-warn" id="rsvpWaWarn" data-lf="Senza WhatsApp, al Salva la sezione RSVP si disattiva da sola e esce dal menu. Inserisci il numero per tenerla attiva." ${normalizeWhatsAppDigits(safe.whatsapp_number) ? "hidden" : ""}>${esc(localizeFieldPhrase("Senza WhatsApp, al Salva la sezione RSVP si disattiva da sola e esce dal menu. Inserisci il numero per tenerla attiva."))}</p>
+      <label>${lfSpan("Numero WhatsApp")}<input name="section_${esc(key)}_whatsapp_number" id="rsvpWhatsappInput" value="${esc(safe.whatsapp_number || "")}" placeholder="393331234567" inputmode="tel" autocomplete="tel"></label>
+      <p class="field-hint" data-lf="Prefisso internazionale senza + (es. 39333… per Italia). Gli invitati compilano il modulo e ti inviano il messaggio su WhatsApp.">${esc(localizeFieldPhrase("Prefisso internazionale senza + (es. 39333… per Italia). Gli invitati compilano il modulo e ti inviano il messaggio su WhatsApp."))}</p>
     </div>
     ${renderRsvpFieldsEditor(safe)}` : "";
   const petFields = key === "pet" ? `

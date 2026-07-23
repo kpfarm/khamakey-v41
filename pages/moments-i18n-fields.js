@@ -228,5 +228,12 @@ export const FIELD_PHRASE_EN = {
   "Link pubblico — non file caricati.": "Public link — not uploaded files.",
   "Link pubblico del video.": "Public link to the video.",
   "Immagine": "Image",
-  "Facoltativa — copertina del brano, locandina o foto simbolica.": "Optional — track cover, poster or symbolic photo."
+  "Facoltativa — copertina del brano, locandina o foto simbolica.": "Optional — track cover, poster or symbolic photo.",
+
+  // 11e3 — RSVP WhatsApp chrome only (not invite seed / rsvp-fields kit)
+  "WhatsApp organizzatore": "Organiser WhatsApp",
+  "obbligatorio": "required",
+  "Senza WhatsApp, al Salva la sezione RSVP si disattiva da sola e esce dal menu. Inserisci il numero per tenerla attiva.": "Without WhatsApp, on Save the RSVP section turns itself off and leaves the menu. Enter the number to keep it on.",
+  "Numero WhatsApp": "WhatsApp number",
+  "Prefisso internazionale senza + (es. 39333… per Italia). Gli invitati compilano il modulo e ti inviano il messaggio su WhatsApp.": "International prefix without + (e.g. 39333… for Italy). Guests fill in the form and send you the message on WhatsApp."
 };

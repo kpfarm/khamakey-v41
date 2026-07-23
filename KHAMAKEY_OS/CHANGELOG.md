@@ -20,6 +20,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
 ### Added
+- **Moments v206 — i18n fields Step 11e3 (2026-07-23, Cursor)** — Pages
+  - Solo chrome WhatsApp RSVP (titolo, warn, numero, hint). Non tocca invite seed / `moment-rsvp-fields`.
 - **Moments v205 — i18n fields Step 11e2 (2026-07-23, Cursor)** — Pages
   - Countdown + Musica: titoli step, label, hint EN; bottoni upload ancora IT → 11e6.
 - **Moments v204 — i18n fields Step 11e1 (2026-07-23, Cursor)** — Pages

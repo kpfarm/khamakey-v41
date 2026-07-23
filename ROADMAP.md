@@ -359,3 +359,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-23 | Cursor | **Piano i18n completion** `docs/30`: slice A/B/C sicurezza-first, zero logica |
 | 2026-07-23 | Cursor | **Piano i18n §2.5**: riduzione rischi (micro-slice A1a/b, freeze Worker, diff guard, pausa) |
 | 2026-07-23 | Cursor | **Regola assoluta catena NFC→editor→/m//k/** in CODEX-COLLAB + docs/30 §0 |
+| 2026-07-23 | Cursor | **Regola assoluta upload media (cuore)** CODEX-COLLAB §5 + docs/30 N5 |

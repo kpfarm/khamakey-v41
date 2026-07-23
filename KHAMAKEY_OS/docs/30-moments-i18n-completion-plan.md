@@ -10,15 +10,16 @@
 
 ## 0. Catena sacro-santa (mai rompere)
 
-Tutta la webapp Moments esiste per questa catena. **Nessuna slice i18n può indebolirla.**
+Tutta la webapp Moments esiste per questa catena. **Nessuna slice i18n può indebolirla.**  
+In parallelo: **gli upload media sono il cuore pulsante** — senza foto/video/audio/allegati affidabili la pagina NFC è vuota. Stesso livello di protezione della catena NFC (vedi anche `CODEX-COLLAB.md` regole 4 e 5).
 
 ```text
 Oggetto fisico + chip NFC
   → codice attivazione / slug
   → account cliente
-  → editor pagine (Salva, media, sezioni, RSVP, PIN)
+  → editor pagine (Salva, UPLOAD media, sezioni, RSVP, PIN)
   → pagina pubblica /m/<slug>  (+ /k/<codice> NFC)
-  → ospite apre, legge, conferma RSVP su WhatsApp
+  → ospite apre, legge i media, conferma RSVP su WhatsApp
 ```
 
 | Anello | Cosa proteggere | i18n può toccare? |
@@ -26,9 +27,9 @@ Oggetto fisico + chip NFC
 | Attivazione pezzo / magazzino | RPC, codici, reset reso | **No** |
 | Auth + sessione | Login, recovery | Solo label `data-i18n` già coperte |
 | Editor Salva / bozza / pubblica | `saveMoment`, visibility, PIN | **No** logica |
-| Media R2 | upload/replace/delete | **Solo** stringhe status (già fatto); **no** handler |
+| **Upload media (cuore)** | `POST /api/media/upload`, R2, replace/delete/DnD, MIME iOS, limiti, progress, cleanup | **Solo** stringhe status/label (già fatto 11e6*); **mai** handler/endpoint/bucket |
 | RSVP | numero WA, `wa.me`, submit API | **Solo** label chrome; **no** numeri/URL/API |
-| Pagina pubblica `/m/` `/k/` | Worker render, PIN gate, rate limit | Fase C: **solo** dizionario; freeze finché A+B ok |
+| Pagina pubblica `/m/` `/k/` | Worker render, PIN gate, rate limit, CDN media | Fase C: **solo** dizionario; freeze finché A+B ok |
 | NFC redirect `/k/` | slug binding | **No** |
 
 Se un cambiamento i18n mette a rischio anche un solo anello → **non fare**. Lasciare IT.
@@ -41,8 +42,9 @@ Smoke minimo **sempre** (anche slice “solo label”), oltre G1–G5:
 | N2 | Salva | Salva senza errore; reload mantiene dati |
 | N3 | Link pubblico | Apri `/m/` (o anteprima) della pagina |
 | N4 | Se slice RSVP | Numero WA ancora salvato; sezione non sparisce |
+| **N5** | **Upload** (sempre se si tocca pannello media; consigliato almeno 1× a fine blocco A/B) | Carica 1 foto reale → appare in editor → Salva → visibile su `/m/` (o anteprima). Preferibile anche da telefono/Safari |
 
-Fallisce N1–N4 → **revert immediato** + redeploy versione precedente. Non “cerchiamo di sistemare”.
+Fallisce N1–N5 → **revert immediato** + redeploy versione precedente. Non “cerchiamo di sistemare”.
 
 ---
 

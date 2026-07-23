@@ -37,6 +37,10 @@ Se una CSP, una RLS, un rate limit o una verifica firma ti impedisce di completa
 
 Il prodotto Moments è: **chip NFC in oggetto → attivazione → editor pagina → `/m/` e `/k/` → ospite**. Nessuna modifica (i18n, UI, refactor) può spezzare attivazione, Salva, media, PIN, binding slug/NFC, renderer pubblico Worker o RSVP WhatsApp. In dubbio: non toccare la logica; solo chrome testuale. Dettaglio operativo i18n: `KHAMAKEY_OS/docs/30-moments-i18n-completion-plan.md` §0.
 
+### 5. Mai rompere gli upload media (cuore del prodotto)
+
+Foto, video, audio, allegati e copertine sono il contenuto vivo delle pagine NFC. **Tutti** i percorsi di upload devono restare intatti: Moments e Business, editor e Worker (`POST /api/media/upload` → R2), replace, delete, DnD, compressione, limiti piano, MIME Safari/iOS. Vietato cambiare handler, endpoint, bucket, form-data, progress o cleanup “di passaggio” per i18n/UI/refactor. Consentito solo testo UI (label, status, errori) senza toccare la logica. Smoke obbligatorio dopo ogni slice che tocca un pannello media: carica un file reale, ricarica l’editor, verifica che resti in pagina pubblica. Fallisce → revert immediato.
+
 ---
 
 ## Ingresso di un nuovo agente nel progetto (onboarding)

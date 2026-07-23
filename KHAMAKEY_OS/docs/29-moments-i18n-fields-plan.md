@@ -31,7 +31,7 @@ Steps 1–9 = auth, shell, nav, etichette/sottotitoli sezioni, toast, chrome `/m
 
 - [x] Piano documentato
 - [x] **11a** Copertina (v199)
-- [ ] 11b Pubblica
+- [x] **11b** Pubblica (v200)
 - [ ] 11c Colori / Contatore / Ordine
 - [ ] 11d Campi sezioni comuni
 - [ ] 11e Kit sezioni avanzati

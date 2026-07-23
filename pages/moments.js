@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=199";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=199";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=199";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=199";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=199";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=199";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=199";
+} from "./moments-i18n.js?v=200";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=200";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=200";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=200";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=200";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=200";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=200";
 import {
   uploadImage,
   uploadVideo,
@@ -226,6 +226,11 @@ function syncFieldChromeI18n(root = document){
     const src = el.getAttribute("data-lf-placeholder");
     if(src == null) return;
     el.setAttribute("placeholder", localizeFieldPhrase(src));
+  });
+  root.querySelectorAll("[data-lf-option]").forEach(el=>{
+    const src = el.getAttribute("data-lf-option");
+    if(src == null) return;
+    el.textContent = localizeFieldPhrase(src);
   });
 }
 
@@ -2299,47 +2304,47 @@ function renderPrivacyPanel(row, state = {}){
   const savedPin = getRememberedPin(row.id);
   const pinHintBlock = savedPin ? `
     <div class="pin-reminder-card">
-      <p class="pin-reminder-label">PIN su questo telefono</p>
+      <p class="pin-reminder-label">${lfSpan("PIN su questo telefono")}</p>
       <div class="pin-reveal-row">
         <code id="savedPinValue">${esc(savedPin)}</code>
-        <button type="button" class="ghost" id="copySavedPinBtn">Copia</button>
-        <button type="button" class="ghost" id="forgetSavedPinBtn">Rimuovi</button>
+        <button type="button" class="ghost" id="copySavedPinBtn">${lfSpan("Copia")}</button>
+        <button type="button" class="ghost" id="forgetSavedPinBtn">${lfSpan("Rimuovi")}</button>
       </div>
     </div>` : `
     <div class="pin-reminder-card pin-reminder-empty">
-      <p class="field-hint">Il PIN non si può recuperare dal server. Se l'hai dimenticato, scrivine uno nuovo sotto e tocca <strong>Salva</strong>.</p>
+      <p class="field-hint">${lfSpan("Il PIN non si può recuperare dal server. Se l'hai dimenticato, scrivine uno nuovo sotto e tocca Salva.")}</p>
     </div>`;
   return `<div class="editor-panel ${activeEditorPanel === "privacy" ? "active" : ""}" data-editor-panel="privacy">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.privacy),editorPanelSubtitle(EDITOR_PANELS.privacy))}
     <div class="editor-card smart-card">
-      <p class="ecard-title">🌍 Chi può vedere la pagina?</p>
-      <label>Stato pagina
+      <p class="ecard-title">🌍 ${lfSpan("Chi può vedere la pagina?")}</p>
+      <label>${lfSpan("Stato pagina")}
         <select name="public_visible" id="publicVisibleSelect">
-          <option value="true" ${row.public_visible ? "selected" : ""}>✅ Pubblicata — chi ha il link la vede</option>
-          <option value="false" ${!row.public_visible ? "selected" : ""}>🔒 Bozza — solo tu la modifichi</option>
+          <option value="true" data-lf-option="✅ Pubblicata — chi ha il link la vede" ${row.public_visible ? "selected" : ""}>${esc(localizeFieldPhrase("✅ Pubblicata — chi ha il link la vede"))}</option>
+          <option value="false" data-lf-option="🔒 Bozza — solo tu la modifichi" ${!row.public_visible ? "selected" : ""}>${esc(localizeFieldPhrase("🔒 Bozza — solo tu la modifichi"))}</option>
         </select>
       </label>
-      <p class="field-hint">Dopo aver scelto, tocca il pulsante verde <strong>Salva</strong> in basso.</p>
+      <p class="field-hint">${lfSpan("Dopo aver scelto, tocca il pulsante verde Salva in basso.")}</p>
     </div>
     <div class="editor-card smart-card">
-      <p class="ecard-title">🔐 PIN di apertura</p>
+      <p class="ecard-title">🔐 ${lfSpan("PIN di apertura")}</p>
       ${pinHintBlock}
-      <label>Protezione
+      <label>${lfSpan("Protezione")}
         <select name="pin_enabled">
-          <option value="true" ${row.pin_enabled ? "selected" : ""}>PIN attivo</option>
-          <option value="false" ${!row.pin_enabled ? "selected" : ""}>Nessun PIN</option>
+          <option value="true" data-lf-option="PIN attivo" ${row.pin_enabled ? "selected" : ""}>${esc(localizeFieldPhrase("PIN attivo"))}</option>
+          <option value="false" data-lf-option="Nessun PIN" ${!row.pin_enabled ? "selected" : ""}>${esc(localizeFieldPhrase("Nessun PIN"))}</option>
         </select>
       </label>
-      <label>Nuovo PIN<input name="access_pin" inputmode="numeric" autocomplete="new-password" placeholder="Es. 1234 — lascia vuoto per non cambiare"></label>
-      <p class="field-hint">Chi avvicina il tag NFC dovrà inserire questo PIN per aprire la pagina.</p>
+      <label>${lfSpan("Nuovo PIN")}<input name="access_pin" inputmode="numeric" autocomplete="new-password" placeholder="${esc(localizeFieldPhrase("Es. 1234 — lascia vuoto per non cambiare"))}" data-lf-placeholder="Es. 1234 — lascia vuoto per non cambiare"></label>
+      <p class="field-hint">${lfSpan("Chi avvicina il tag NFC dovrà inserire questo PIN per aprire la pagina.")}</p>
     </div>
     <div class="editor-card smart-card">
-      <p class="ecard-title">💫 Ricordi nel tempo</p>
+      <p class="ecard-title">💫 ${lfSpan("Ricordi nel tempo")}</p>
       <label class="smart-toggle">
         <input type="checkbox" name="anniversary_emails" ${anniversaryEmails ? "checked" : ""}>
-        <span><strong>Email anniversario</strong><small>Ogni anno, alla data dell'evento o del contatore «insieme da», ti inviamo un promemoria con il link alla pagina.</small></span>
+        <span><strong>${lfSpan("Email anniversario")}</strong><small>${lfSpan("Ogni anno, alla data dell'evento o del contatore «insieme da», ti inviamo un promemoria con il link alla pagina.")}</small></span>
       </label>
-      <p class="field-hint">Usa la data evento, «insieme da» o la data del countdown se attivi.</p>
+      <p class="field-hint">${lfSpan("Usa la data evento, «insieme da» o la data del countdown se attivi.")}</p>
     </div>
   </div>`;
 }

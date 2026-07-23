@@ -339,3 +339,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-23 | Cursor | **i18n Moments Step 8**: smoke IT/EN auth + assets (`docs/28-moments-i18n-smoke.md`) |
 | 2026-07-23 | Cursor | **i18n Moments Step 9 / Worker v183**: chrome `/m/` IT/EN (`?lang=` + Accept-Language); contenuti cliente no |
 | 2026-07-23 | Cursor | **i18n Moments Step 11a / v199**: solo campi pannello Copertina EN; piano `docs/29`; 11b+ dopo |
+| 2026-07-23 | Cursor | **i18n Moments Step 11b / v200**: solo campi pannello Pubblica EN |

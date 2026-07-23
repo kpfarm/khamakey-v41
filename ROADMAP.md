@@ -352,3 +352,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-23 | Cursor | **i18n Moments Step 11e6b / v210**: solo intro testi galleria/video/audio EN |
 | 2026-07-23 | Cursor | **i18n Moments Step 11e6c / v211**: solo etichette griglia media EN |
 | 2026-07-23 | Cursor | **i18n Moments Step 11e6d / v212**: Titolo/Descrizione media + Cambia/Rimuovi EN |
+| 2026-07-23 | Cursor | **i18n Moments Step 11e6e / v213**: solo messaggi errore/status upload EN |

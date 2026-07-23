@@ -11,12 +11,13 @@ import {
   coverFocusStyle,
   mediaId,
   mediaLimitsForKey,
+  getActivePlanLimits,
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
   migrateLetterMediaSection
-} from "./moment-media.js?v=212";
-import { getUiLocale } from "./moments-i18n.js?v=212";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=212";
+} from "./moment-media.js?v=213";
+import { getUiLocale } from "./moments-i18n.js?v=213";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=213";
 
 let mediaEditContext = null;
 
@@ -24,6 +25,50 @@ function lf(text){
   const raw = String(text || "");
   if(!raw || getUiLocale() === "it") return raw;
   return FIELD_PHRASE_EN[raw] || raw;
+}
+
+function lfFill(it, vars = {}){
+  let out = lf(it);
+  for(const [k, v] of Object.entries(vars)){
+    out = out.split(`{${k}}`).join(String(v));
+  }
+  return out;
+}
+
+function localizedLimitsHint(key){
+  const plan = getActivePlanLimits();
+  const limits = mediaLimitsForKey(key);
+  if(key === "letter_future"){
+    return lfFill(
+      "Fino a {a} foto, {b} video, {c} audio e {d} PDF (max {e}/{f}/{g}/{h} MB) — si sbloccano con la lettera.",
+      {
+        a: limits.maxImages,
+        b: limits.maxVideos,
+        c: limits.maxAudio,
+        d: limits.maxPdfs || 0,
+        e: plan.max_image_mb,
+        f: plan.max_video_mb,
+        g: plan.max_audio_mb,
+        h: plan.max_pdf_mb
+      }
+    );
+  }
+  if(key === "video"){
+    return lfFill(
+      "Fino a {n} video (MP4/MOV, max {mb} MB ciascuno) con titolo e descrizione — scorrimento in pagina come la galleria.",
+      { n: limits.maxVideos, mb: plan.max_video_mb }
+    );
+  }
+  if(key === "music"){
+    return lfFill(
+      "Fino a {n} audio (max {mb} MB) — alternativa o complemento a Spotify/YouTube.",
+      { n: limits.maxAudio, mb: plan.max_audio_mb }
+    );
+  }
+  return lfFill(
+    "Fino a {n} foto (max {mb} MB) — titolo e descrizione sotto ogni foto e nell’ingrandimento.",
+    { n: limits.maxImages, mb: plan.max_image_mb }
+  );
 }
 
 export function readGalleryMedia(formNode,key){
@@ -92,7 +137,7 @@ function sectionMediaLabel(key){
 
 function canAddFiles(current,batch,key = "gallery"){
   const limits = mediaLimitsForKey(key);
-  const label = sectionMediaLabel(key);
+  const label = lf(sectionMediaLabel(key));
   const next = [...current];
   let filtered = batch;
   if(key === "gallery"){
@@ -105,31 +150,31 @@ function canAddFiles(current,batch,key = "gallery"){
   for(const file of filtered){
     const type = inferMediaKind(file) || "image";
     if(key === "gallery" && type !== "image"){
-      throw new Error("La galleria accetta solo foto. Usa la sezione Video o Musica.");
+      throw new Error(lf("La galleria accetta solo foto. Usa la sezione Video o Musica."));
     }
     if(key === "video" && type !== "video"){
-      throw new Error("Questa sezione accetta solo video.");
+      throw new Error(lf("Questa sezione accetta solo video."));
     }
     if(key === "music" && type !== "audio"){
-      throw new Error("Questa sezione accetta solo audio.");
+      throw new Error(lf("Questa sezione accetta solo audio."));
     }
     if(key === "letter_future" && !["image","video","audio","pdf"].includes(type)){
-      throw new Error("Formato non supportato nella lettera al futuro.");
+      throw new Error(lf("Formato non supportato nella lettera al futuro."));
     }
     if(next.length >= limits.maxItems){
-      throw new Error(`Limite raggiunto: massimo ${limits.maxItems} allegati nella ${label}. Passa a Plus o Pro per sbloccare di più.`);
+      throw new Error(lfFill("Limite raggiunto: massimo {n} allegati nella {label}. Passa a Plus o Pro per sbloccare di più.", { n: limits.maxItems, label }));
     }
     if(type === "image" && countMediaByType(next,"image") >= limits.maxImages){
-      throw new Error(`Massimo ${limits.maxImages} foto nella ${label}.`);
+      throw new Error(lfFill("Massimo {n} foto nella {label}.", { n: limits.maxImages, label }));
     }
     if(type === "video" && countMediaByType(next,"video") >= limits.maxVideos){
-      throw new Error(`Massimo ${limits.maxVideos} video nella ${label}.`);
+      throw new Error(lfFill("Massimo {n} video nella {label}.", { n: limits.maxVideos, label }));
     }
     if(type === "audio" && countMediaByType(next,"audio") >= limits.maxAudio){
-      throw new Error(`Massimo ${limits.maxAudio} audio nella ${label}.`);
+      throw new Error(lfFill("Massimo {n} audio nella {label}.", { n: limits.maxAudio, label }));
     }
     if(type === "pdf" && countMediaByType(next,"pdf") >= (limits.maxPdfs || 0)){
-      throw new Error(`Massimo ${limits.maxPdfs || 0} PDF nella ${label}.`);
+      throw new Error(lfFill("Massimo {n} PDF nella {label}.", { n: limits.maxPdfs || 0, label }));
     }
     next.push({type});
   }
@@ -137,12 +182,12 @@ function canAddFiles(current,batch,key = "gallery"){
 }
 
 export async function uploadGalleryMedia({supabase,row,formNode,key,files,onStatus,onBusy}){
-  if(!row?.id) throw new Error("Pagina non selezionata. Ricarica l'editor e riprova.");
+  if(!row?.id) throw new Error(lf("Pagina non selezionata. Ricarica l'editor e riprova."));
   const limits = mediaLimitsForKey(key);
   const current = readGalleryMedia(formNode,key);
   const batch = canAddFiles(current,[...files].slice(0,limits.maxItems - current.length),key);
-  if(!batch.length) throw new Error("Nessun file selezionato.");
-  onStatus?.(`Preparazione ${batch.length} file...`);
+  if(!batch.length) throw new Error(lf("Nessun file selezionato."));
+  onStatus?.(lfFill("Preparazione {n} file...", { n: batch.length }));
   onBusy?.(true);
   const uploadedItems = [];
   const errors = [];
@@ -150,13 +195,13 @@ export async function uploadGalleryMedia({supabase,row,formNode,key,files,onStat
     const results = await uploadMediaBatch(supabase,{scope:"moments",scopeId:row.id},batch,{
       onProgress:({phase,done,total,success,file,error})=>{
         if(phase === "prepare"){
-          onStatus?.(`Ottimizzazione ${total} file...`);
+          onStatus?.(lfFill("Ottimizzazione {n} file...", { n: total }));
           return;
         }
         if(!success){
-          errors.push(`${file?.name || "file"}: ${error?.message || "errore"}`);
+          errors.push(`${file?.name || lf("file")}: ${error?.message || lf("errore")}`);
         }
-        onStatus?.(`Caricati ${done}/${total}...`);
+        onStatus?.(lfFill("Caricati {done}/{total}...", { done, total }));
       }
     });
     for(const result of results){
@@ -170,13 +215,13 @@ export async function uploadGalleryMedia({supabase,row,formNode,key,files,onStat
       }));
     }
     if(!uploadedItems.length){
-      throw new Error(errors[0] || "Upload non riuscito.");
+      throw new Error(errors[0] || lf("Upload non riuscito."));
     }
     writeGalleryMedia(formNode,key,[...current,...uploadedItems]);
     renderGalleryGrid(formNode,key);
     const okMsg = errors.length
-      ? `${uploadedItems.length} file caricati, ${errors.length} errori — aggiungi titolo e descrizione, poi Salva.`
-      : `${uploadedItems.length} file caricati — aggiungi titolo e descrizione, poi clicca Salva.`;
+      ? lfFill("{n} file caricati, {e} errori — aggiungi titolo e descrizione, poi Salva.", { n: uploadedItems.length, e: errors.length })
+      : lfFill("{n} file caricati — aggiungi titolo e descrizione, poi clicca Salva.", { n: uploadedItems.length });
     onStatus?.(okMsg, errors.length ? "error" : "ok");
     formNode.dispatchEvent(new Event("input",{bubbles:true}));
     if(uploadedItems[0]?.id) focusMediaRowTitle(formNode,key,uploadedItems[0].id);
@@ -188,42 +233,42 @@ export async function uploadGalleryMedia({supabase,row,formNode,key,files,onStat
 
 /** Sostituisce il file di una riga galleria mantenendo titolo e descrizione. */
 export async function replaceGalleryMediaItem({supabase,row,formNode,key,mediaId,file,onStatus,onBusy}){
-  if(!row?.id) throw new Error("Pagina non selezionata. Ricarica l'editor e riprova.");
-  if(!file) throw new Error("Nessun file selezionato.");
+  if(!row?.id) throw new Error(lf("Pagina non selezionata. Ricarica l'editor e riprova."));
+  if(!file) throw new Error(lf("Nessun file selezionato."));
   const current = readGalleryMedia(formNode,key);
   const index = current.findIndex(item=>item.id === mediaId);
-  if(index < 0) throw new Error("Elemento non trovato nella galleria.");
+  if(index < 0) throw new Error(lf("Elemento non trovato nella galleria."));
   const existing = current[index];
   const nextType = inferMediaKind(file) || "image";
   if(key === "gallery" && nextType !== "image"){
-    throw new Error("La galleria accetta solo foto. Usa la sezione Video o Musica.");
+    throw new Error(lf("La galleria accetta solo foto. Usa la sezione Video o Musica."));
   }
   if(existing.type && nextType !== existing.type){
-    const want = existing.type === "video" ? "video"
+    const wantIt = existing.type === "video" ? "video"
       : existing.type === "audio" ? "audio"
         : existing.type === "pdf" ? "PDF"
           : "foto";
-    throw new Error(`Seleziona un file dello stesso tipo (${want}) oppure rimuovi l'elemento e aggiungine uno nuovo.`);
+    throw new Error(lfFill("Seleziona un file dello stesso tipo ({want}) oppure rimuovi l'elemento e aggiungine uno nuovo.", { want: lf(wantIt) }));
   }
-  onStatus?.("Sostituzione in corso...");
+  onStatus?.(lf("Sostituzione in corso..."));
   onBusy?.(true);
   try{
     let uploadError = null;
     const results = await uploadMediaBatch(supabase,{scope:"moments",scopeId:row.id},[file],{
       onProgress:({phase,done,total,success,file:progressFile,error})=>{
         if(phase === "prepare"){
-          onStatus?.("Ottimizzazione file...");
+          onStatus?.(lf("Ottimizzazione file..."));
           return;
         }
         if(!success){
-          uploadError = error || new Error(`${progressFile?.name || "file"}: upload non riuscito`);
+          uploadError = error || new Error(lfFill("{name}: upload non riuscito", { name: progressFile?.name || lf("file") }));
           return;
         }
-        onStatus?.(`Caricato ${done}/${total}...`);
+        onStatus?.(lfFill("Caricato {done}/{total}...", { done, total }));
       }
     });
     const result = results.find(item=>item.ok);
-    if(!result?.url) throw uploadError || new Error("Upload non riuscito.");
+    if(!result?.url) throw uploadError || new Error(lf("Upload non riuscito."));
     const oldUrl = existing.url;
     current[index] = normalizeMediaItem({
       ...existing,
@@ -232,7 +277,7 @@ export async function replaceGalleryMediaItem({supabase,row,formNode,key,mediaId
     });
     writeGalleryMedia(formNode,key,current);
     renderGalleryGrid(formNode,key);
-    onStatus?.("File sostituito — clicca Salva per aggiornare la pagina.","ok");
+    onStatus?.(lf("File sostituito — clicca Salva per aggiornare la pagina."),"ok");
     formNode.dispatchEvent(new Event("input",{bubbles:true}));
     return { item:current[index], oldUrl };
   }finally{
@@ -525,7 +570,6 @@ export function renderGalleryUploadPanel(section,key){
       : key === "letter_future"
         ? migrateLetterMediaSection(section)
         : normalizeMediaList(section);
-  const limits = mediaLimitsForKey(key);
   const isLetter = key === "letter_future";
   const isVideo = key === "video";
   const isMusic = key === "music";
@@ -536,12 +580,13 @@ export function renderGalleryUploadPanel(section,key){
       : isMusic
         ? `<p><strong data-lf="Audio">${esc(lf("Audio"))}</strong></p><p class="field-hint" data-lf="Messaggi vocali o brani — complemento a Spotify/YouTube. Poi Salva.">${esc(lf("Messaggi vocali o brani — complemento a Spotify/YouTube. Poi Salva."))}</p>`
         : `<p><strong data-lf="Galleria foto">${esc(lf("Galleria foto"))}</strong></p><p class="field-hint" data-lf="Solo immagini qui. Tocca Aggiungi foto, scrivi titolo e descrizione, poi Salva.">${esc(lf("Solo immagini qui. Tocca Aggiungi foto, scrivi titolo e descrizione, poi Salva."))}</p>`;
-  const footer = `${seeded.length ? `${seeded.length} file pronti. ` : ""}${limits.hint}`;
+  const ready = seeded.length ? lfFill("{n} file pronti. ", { n: seeded.length }) : "";
+  const footer = `${ready}${localizedLimitsHint(key)}`;
   return `<div class="gallery-upload-panel" data-gallery-key="${key}">
     <div class="gallery-steps">${intro}</div>
     <div class="gallery-organized" id="galleryOrganized_${key}"></div>
     <textarea name="section_${key}_media" class="gallery-media-json" aria-hidden="true" tabindex="-1">${esc(serializeMediaList(seeded))}</textarea>
-    <p class="field-hint" id="galleryUploadStatus_${key}">${footer}</p>
+    <p class="field-hint" id="galleryUploadStatus_${key}">${esc(footer)}</p>
   </div>`;
 }
 

@@ -20,6 +20,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
 ### Added
+- **Moments v213 — i18n fields Step 11e6e (2026-07-23, Cursor)** — Pages
+  - Solo messaggi errore/status upload (limiti, progress, footer hint) EN; handler upload/replace invariati.
 - **Moments v212 — i18n fields Step 11e6d (2026-07-23, Cursor)** — Pages
   - Modal + campi Titolo/Descrizione/Cambia/Rimuovi sulle card media; handler upload invariati.
 - **Moments v211 — i18n fields Step 11e6c (2026-07-23, Cursor)** — Pages

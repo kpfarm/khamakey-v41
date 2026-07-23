@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=212";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=212";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=212";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=212";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=212";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=212";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=212";
+} from "./moments-i18n.js?v=213";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=213";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=213";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=213";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=213";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=213";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=213";
 import {
   uploadImage,
   uploadVideo,
@@ -51,7 +51,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=212";
+} from "./moments-media-ui.js?v=213";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -60,13 +60,13 @@ import {
   renderJourneyFileInput,
   bindJourneyEditor,
   uploadJourneyStepPhoto
-} from "./moments-journey-ui.js?v=212";
+} from "./moments-journey-ui.js?v=213";
 import {
   migrateLetterMediaSection,
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
   setActivePlanLimits
-} from "./moment-media.js?v=212";
+} from "./moment-media.js?v=213";
 import {
   emptyEntitlements,
   fetchMomentEntitlements,
@@ -85,7 +85,7 @@ import {
   writeListItems,
   readListItems,
   bindListItemsEditor
-} from "./moments-list-ui.js?v=212";
+} from "./moments-list-ui.js?v=213";
 import { journeyStepId, MAX_JOURNEY_STEPS, normalizeJourneyStep, resolveJourneySteps, compactJourneySteps } from "./moment-journey.js";
 import {
   COLOR_PALETTES,
@@ -211,6 +211,14 @@ function localizeFieldPhrase(text){
   const raw = String(text || "");
   if(!raw || getUiLocale() === "it") return raw;
   return FIELD_PHRASE_EN[raw] || raw;
+}
+
+function lfFill(it, vars = {}){
+  let out = localizeFieldPhrase(it);
+  for(const [k, v] of Object.entries(vars)){
+    out = out.split(`{${k}}`).join(String(v));
+  }
+  return out;
 }
 
 function lfSpan(itText){
@@ -3095,7 +3103,7 @@ function setCoverUrl(formNode, url){
 
 async function uploadCoverImage(file,row,formNode){
   const status = document.getElementById("coverUploadStatus");
-  setUploadStatus(status,"Caricamento in corso...");
+  setUploadStatus(status,localizeFieldPhrase("Caricamento in corso..."));
   uploadBusy = true;
   try{
     const url = await uploadImage(supabase,{scope:"moments",scopeId:row.id,file});
@@ -3114,7 +3122,7 @@ async function uploadCoverImage(file,row,formNode){
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
     setUploadStatus(status,t("save.reminder_cover"),"ok");
   }catch(error){
-    setUploadStatus(status,error.message || "Upload non riuscito.","error");
+    setUploadStatus(status,error.message || localizeFieldPhrase("Upload non riuscito."),"error");
   }finally{
     uploadBusy = false;
   }
@@ -3159,7 +3167,7 @@ async function uploadGalleryImages(files,row,formNode,key){
           : t("save.label_gallery");
     promptSaveReminder(t("save.reminder_upload", { count, label }));
   }catch(error){
-    const message = error.message || "Upload non riuscito.";
+    const message = error.message || localizeFieldPhrase("Upload non riuscito.");
     setUploadStatus(status,message,"error");
     alert(message);
   }
@@ -3181,7 +3189,7 @@ async function uploadSectionVideo(file,row,formNode){
       deleteStorageObject(supabase,oldUrl).catch(()=>{});
     }
   }catch(error){
-    alert(error.message || "Upload video non riuscito.");
+    alert(error.message || localizeFieldPhrase("Upload video non riuscito."));
   }finally{
     uploadBusy = false;
   }
@@ -3229,7 +3237,7 @@ async function uploadMusicAudio(file,row,formNode){
       deleteStorageObject(supabase,oldUrl).catch(()=>{});
     }
   }catch(error){
-    alert(error.message || "Upload audio non riuscito.");
+    alert(error.message || localizeFieldPhrase("Upload audio non riuscito."));
   }finally{
     uploadBusy = false;
   }
@@ -3253,7 +3261,7 @@ async function uploadSectionPhoto(key,file,row,formNode){
       deleteStorageObject(supabase,oldUrl).catch(()=>{});
     }
   }catch(error){
-    alert(error.message || "Upload foto non riuscito.");
+    alert(error.message || localizeFieldPhrase("Upload foto non riuscito."));
   }finally{
     uploadBusy = false;
   }
@@ -3346,18 +3354,18 @@ async function handleGalleryFileInputChange(input,row,formNode){
     : files;
   if(!filtered.length){
     const status = document.getElementById(`galleryUploadStatus_${key}`);
-    const label = pendingType === "video" ? "video" : pendingType === "audio" ? "audio" : "foto";
-    const formats = pendingType === "video"
+    const label = localizeFieldPhrase(pendingType === "video" ? "video" : pendingType === "audio" ? "audio" : "foto");
+    const formats = localizeFieldPhrase(pendingType === "video"
       ? "MP4, WebM o MOV"
       : pendingType === "audio"
         ? "MP3, M4A o WAV"
-        : "JPG, PNG, WebP o HEIC";
-    setUploadStatus(status,`Formato non riconosciuto. Seleziona un ${label} valido (${formats}).`,"error");
+        : "JPG, PNG, WebP o HEIC");
+    setUploadStatus(status,lfFill("Formato non riconosciuto. Seleziona un {label} valido ({formats}).", { label, formats }),"error");
     return;
   }
   const liveRow = rows.find(item=>item.id === activeId) || row;
   if(!liveRow?.id){
-    alert("Pagina non selezionata. Ricarica l'editor e riprova.");
+    alert(localizeFieldPhrase("Pagina non selezionata. Ricarica l'editor e riprova."));
     return;
   }
   if(replaceId){
@@ -3389,7 +3397,7 @@ async function replaceGalleryImage(file,row,formNode,key,mediaId){
     }
     promptSaveReminder(t("save.reminder_photo"));
   }catch(error){
-    const message = error.message || "Sostituzione non riuscita.";
+    const message = error.message || localizeFieldPhrase("Sostituzione non riuscita.");
     setUploadStatus(status,message,"error");
     alert(message);
   }
@@ -3515,7 +3523,7 @@ function bindMediaUploadDelegation(){
     const row = rows.find(item=>item.id === activeId);
     if(!formNode || !row){
       if(event.target.closest("[data-gallery-add],[data-gallery-remove],[data-gallery-replace]")){
-        alert("Editor non pronto. Ricarica la pagina e riprova.");
+        alert(localizeFieldPhrase("Editor non pronto. Ricarica la pagina e riprova."));
       }
       return;
     }

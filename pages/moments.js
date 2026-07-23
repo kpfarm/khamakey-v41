@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=201";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=201";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=201";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=201";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=201";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=201";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=201";
+} from "./moments-i18n.js?v=202";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=202";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=202";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=202";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=202";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=202";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=202";
 import {
   uploadImage,
   uploadVideo,
@@ -119,6 +119,7 @@ import {
   parseImageLines,
   formatImageLines,
   sectionFieldHints,
+  sectionFillGuide,
   sectionHasContent,
   isSectionExcluded
 } from "./moment-sections.js?v=186";
@@ -231,6 +232,16 @@ function syncFieldChromeI18n(root = document){
     const src = el.getAttribute("data-lf-option");
     if(src == null) return;
     el.textContent = localizeFieldPhrase(src);
+  });
+  root.querySelectorAll("[data-lf-section-guide]").forEach(el=>{
+    const key = el.getAttribute("data-lf-section-guide");
+    if(!key) return;
+    el.textContent = localizedSectionFillGuide(currentMomentType, key);
+  });
+  root.querySelectorAll("[data-lf-section-guide-title]").forEach(el=>{
+    const key = el.getAttribute("data-lf-section-guide-title");
+    if(!key) return;
+    el.textContent = localizedSectionFillGuide(currentMomentType, key).split(".")[0];
   });
 }
 
@@ -1658,15 +1669,29 @@ function renderSectionToggleButton(key,enabled){
   return "";
 }
 
+function localizedSectionFillGuide(type, key){
+  const base = sectionFillGuide(key);
+  const raw = sectionFillGuideForType(type, key);
+  if(raw === base) return localizeFieldPhrase(base);
+  const sep = " — ";
+  if(raw.startsWith(base + sep)){
+    const ctx = raw.slice(base.length + sep.length);
+    return `${localizeFieldPhrase(base)}${sep}${localizeSectionSubtitle(ctx)}`;
+  }
+  return localizeFieldPhrase(raw);
+}
+
 function renderSectionPanelToggle(key,enabled){
   const icon = SECTION_ICONS[key] || "•";
+  const titleIt = enabled ? "Visibile in pagina" : "Non visibile";
+  const hintIt = enabled ? "I visitatori la vedono" : "Tocca per mostrarla";
   return `<div class="section-switch ${enabled ? "is-on" : ""}" data-section-toggle="${esc(key)}" role="switch" aria-checked="${enabled ? "true" : "false"}" tabindex="0">
     ${renderSectionEnabledInput(key,enabled)}
     <span class="section-switch-label">
       <span class="section-switch-icon">${icon}</span>
       <span class="section-switch-copy">
-        <strong>${enabled ? "Visibile in pagina" : "Non visibile"}</strong>
-        <small>${enabled ? "I visitatori la vedono" : "Tocca per mostrarla"}</small>
+        <strong data-lf="${esc(titleIt)}">${esc(localizeFieldPhrase(titleIt))}</strong>
+        <small data-lf="${esc(hintIt)}">${esc(localizeFieldPhrase(hintIt))}</small>
       </span>
     </span>
     <span class="section-switch-track" aria-hidden="true"><i></i></span>
@@ -1682,8 +1707,16 @@ function syncSectionToggleButtons(formNode,key){
     node.setAttribute("aria-checked",enabled ? "true" : "false");
     const strong = node.querySelector(".section-switch-copy strong");
     const small = node.querySelector(".section-switch-copy small");
-    if(strong) strong.textContent = enabled ? "Visibile in pagina" : "Non visibile";
-    if(small) small.textContent = enabled ? "I visitatori la vedono" : "Tocca per mostrarla";
+    if(strong){
+      const it = enabled ? "Visibile in pagina" : "Non visibile";
+      strong.setAttribute("data-lf", it);
+      strong.textContent = localizeFieldPhrase(it);
+    }
+    if(small){
+      const it = enabled ? "I visitatori la vedono" : "Tocca per mostrarla";
+      small.setAttribute("data-lf", it);
+      small.textContent = localizeFieldPhrase(it);
+    }
   });
   const stack = formNode.querySelector(`[data-section-stack="${key}"]`);
   if(stack) stack.classList.toggle("is-muted",!enabled);
@@ -2256,13 +2289,14 @@ function renderExtrasPanel(state){
         <strong>${esc(localizedSectionLabel(state.type, key))}</strong>
         <small>${esc(localizedSectionSubtitle(state.type, key))}</small>
       </span>
-      <span class="extras-card-action">${isPrimary ? "Riattiva →" : "Aggiungi →"}</span>
+      <span class="extras-card-action">${lfSpan(isPrimary ? "Riattiva →" : "Aggiungi →")}</span>
     </button>`;
   }).join("");
+  const extrasIntro = "Le sezioni consigliate compaiono nel menu quando sono attive. Qui trovi tutte le altre (e quelle che hai spento): tocca per aggiungerle. Per toglierle di nuovo dal menu, apri la sezione e spegni Visibile in pagina.";
   return `<div class="editor-panel ${activeEditorPanel === "extras" ? "active" : ""}" data-editor-panel="extras">
     ${renderSectionHeader(t("sec.extras_title") || t("nav.extras"), t("sec.extras_sub"))}
     <div class="editor-card smart-card">
-      <p class="field-hint">Le sezioni consigliate compaiono nel menu quando sono attive. Qui trovi <strong>tutte le altre</strong> (e quelle che hai spento): tocca per aggiungerle. Per toglierle di nuovo dal menu, apri la sezione e spegni <strong>Visibile in pagina</strong>.</p>
+      <p class="field-hint" data-lf="${esc(extrasIntro)}">${esc(localizeFieldPhrase(extrasIntro))}</p>
       <div class="extras-grid">${cards}</div>
     </div>
   </div>`;
@@ -2296,7 +2330,7 @@ function renderSectionPanels(state, shareMeta = {}){
     const panelTitle = String(section?.title || "").trim() || localizedSectionLabel(state.type, key);
     return `<div class="editor-panel ${activeEditorPanel === panelId ? "active" : ""}" data-editor-panel="${esc(panelId)}" data-section-panel-key="${esc(key)}" ${hidden ? "hidden" : ""}>
       ${renderSectionHeader(panelTitle, localizedSectionSubtitle(state.type, key))}
-      ${mutedNav ? `<p class="field-hint extras-hint">Sezione extra — attivala con l'interruttore sotto o da <strong>Altre sezioni</strong>.</p>` : ""}
+      ${mutedNav ? `<p class="field-hint extras-hint">${lfSpan("Sezione extra — attivala con l'interruttore sotto o da Altre sezioni.")}</p>` : ""}
       ${renderSectionPanelToggle(key,enabledOn)}
       <div class="section-editor-stack ${enabledOn ? "" : "is-muted"}" data-section-stack="${esc(key)}">
         ${sectionEditor(key,section,true)}
@@ -3564,7 +3598,8 @@ function renderGalleryUpload(section,key){
 
 function renderSectionTitleField(key, section){
   const placeholder = DEFAULT_SECTIONS[key]?.title || SECTION_LABELS[key] || "";
-  return `<label>Titolo sezione<input name="section_${esc(key)}_title" value="${esc(section.title || "")}" placeholder="Es. ${esc(placeholder)}"><span class="field-hint">Compare nel menu della pagina e come titolo della sezione.</span></label>`;
+  const hint = "Compare nel menu della pagina e come titolo della sezione.";
+  return `<label>${lfSpan("Titolo sezione")}<input name="section_${esc(key)}_title" value="${esc(section.title || "")}" placeholder="Es. ${esc(placeholder)}"><span class="field-hint" data-lf="${esc(hint)}">${esc(localizeFieldPhrase(hint))}</span></label>`;
 }
 
 function sectionOrderDisplayLabel(formNode, momentType, key){
@@ -3577,11 +3612,11 @@ function sectionEditor(key,section,standalone=false){
   const safe = section || DEFAULT_SECTIONS[key] || {};
   const hints = sectionFieldHints();
   const icon = SECTION_ICONS[key] || "•";
-  const guide = sectionFillGuideForType(currentMomentType, key);
+  const guide = localizedSectionFillGuide(currentMomentType, key);
   const galleryField = key === "gallery" ? renderGalleryUpload(safe,key) : "";
   const journeyField = key === "timeline" ? renderJourneyPanel(safe) : "";
   const listHint = hints[key] && key !== "timeline"
-    ? `<p class="section-hint">${esc(hints[key])}</p>` : "";
+    ? `<p class="section-hint" data-lf="${esc(hints[key])}">${esc(localizeFieldPhrase(hints[key]))}</p>` : "";
   const dedicationFields = key === "dedication" ? `
     <label>Destinatario<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="Es. Marco, amici, futuro noi"></label>
     <label>Firma<input name="section_${esc(key)}_signature" value="${esc(safe.signature || "")}" placeholder="Es. Con amore, i tuoi nomi"></label>` : "";
@@ -3640,11 +3675,14 @@ function sectionEditor(key,section,standalone=false){
       <p class="ecard-title"><span class="step-badge">1</span> Persone e segni</p>
       ${renderHoroscopePeoplePanel(safe)}
     </div>` : "";
-  const bodyLabel = key === "quote" ? "Citazione" : key === "dedication" || key === "letter_future" ? "Testo della lettera" : key === "pet" ? "Racconto" : "Contenuto";
+  const bodyLabelIt = key === "quote" ? "Citazione" : key === "dedication" || key === "letter_future" ? "Testo della lettera" : key === "pet" ? "Racconto" : "Contenuto";
+  const bodyLabel = lfSpan(bodyLabelIt);
+  const writeHere = localizeFieldPhrase("Scrivi qui...");
   const bodyField = key === "timeline" || key === "gallery" || key === "video" || key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" || LIST_SECTION_KEYS.has(key)
-    ? (key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" ? `<details class="design-advanced editor-card"><summary>Testo extra (facoltativo)</summary><label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></details>` : "")
-    : `<label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label>`;
+    ? (key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" ? `<details class="design-advanced editor-card"><summary>${lfSpan("Testo extra (facoltativo)")}</summary><label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="${esc(writeHere)}" data-lf-placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></details>` : "")
+    : `<label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="${esc(writeHere)}" data-lf-placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label>`;
   const titleField = renderSectionTitleField(key, safe);
+  const guideHint = `<p class="field-hint" data-lf-section-guide="${esc(key)}">${esc(guide)}</p>`;
   const fields = `
     ${titleField}
     ${bodyField}
@@ -3664,27 +3702,27 @@ function sectionEditor(key,section,standalone=false){
     ${galleryField}`;
   if(standalone){
     if(key === "gallery"){
-      return `<div class="editor-card"><p class="ecard-title">${icon} Galleria foto</p><p class="field-hint">${esc(guide)}</p>${titleField}${galleryField}</div>`;
+      return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Galleria foto")}</p>${guideHint}${titleField}${galleryField}</div>`;
     }
     if(key === "video"){
-      return `<div class="editor-card"><p class="ecard-title">${icon} Video</p><p class="field-hint">${esc(guide)}</p>${titleField}${videoFields}</div>`;
+      return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Video")}</p>${guideHint}${titleField}${videoFields}</div>`;
     }
     if(key === "timeline"){
-      return `<div class="editor-card"><p class="ecard-title">${icon} Tappe del percorso</p><p class="field-hint">${esc(guide)}</p>${titleField}${journeyField}</div>`;
+      return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Tappe del percorso")}</p>${guideHint}${titleField}${journeyField}</div>`;
     }
     if(key === "countdown"){
-      return `<div class="editor-card"><p class="ecard-title">${icon} Conto alla rovescia</p><p class="field-hint">${esc(guide)}</p>${titleField}</div>${countdownFields}${bodyField}`;
+      return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Conto alla rovescia")}</p>${guideHint}${titleField}</div>${countdownFields}${bodyField}`;
     }
     if(key === "rsvp"){
-      return `<div class="editor-card"><p class="ecard-title">${icon} RSVP invitati</p><p class="field-hint">${esc(guide)}</p>${titleField}${rsvpFields}${bodyField}</div>`;
+      return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("RSVP invitati")}</p>${guideHint}${titleField}${rsvpFields}${bodyField}</div>`;
     }
     if(key === "horoscope"){
-      return `<div class="editor-card"><p class="ecard-title">${icon} Oroscopo</p><p class="field-hint">${esc(guide)}</p>${titleField}${horoscopeFields}${bodyField}</div>`;
+      return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Oroscopo")}</p>${guideHint}${titleField}${horoscopeFields}${bodyField}</div>`;
     }
     if(isSectionExcluded(key)) return "";
-    return `<div class="editor-card"><p class="ecard-title">${icon} ${esc(guide.split(".")[0])}</p>${fields.replace(galleryField,"").replace(journeyField,"")}</div>`;
+    return `<div class="editor-card"><p class="ecard-title">${icon} <span data-lf-section-guide-title="${esc(key)}">${esc(guide.split(".")[0])}</span></p>${fields.replace(galleryField,"").replace(journeyField,"")}</div>`;
   }
-  const fillGuide = `<div class="section-fill-guide"><p>${esc(guide)}</p></div>`;
+  const fillGuide = `<div class="section-fill-guide"><p data-lf-section-guide="${esc(key)}">${esc(guide)}</p></div>`;
   return `<details class="section-box section-box-${esc(key)}" data-section-key="${esc(key)}" ${safe.enabled ? "open" : ""}>
     <summary><span class="section-icon">${esc(icon)}</span><label><input type="checkbox" name="section_${esc(key)}_enabled" ${safe.enabled ? "checked" : ""} onclick="event.stopPropagation()"> <span>${esc(SECTION_LABELS[key])}</span></label></summary>
     <div class="section-body">${fillGuide}${fields}</div>

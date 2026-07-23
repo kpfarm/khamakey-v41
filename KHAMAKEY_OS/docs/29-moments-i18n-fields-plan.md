@@ -33,5 +33,5 @@ Steps 1–9 = auth, shell, nav, etichette/sottotitoli sezioni, toast, chrome `/m
 - [x] **11a** Copertina (v199)
 - [x] **11b** Pubblica (v200)
 - [x] **11c** Colori / Contatore / Ordine (v201) — nomi look/hint taxonomy ancora IT
-- [ ] 11d Campi sezioni comuni
+- [x] **11d** Campi comuni sezioni (v202) — toggle Visibile, Titolo sezione, guide fill, body chrome; kit dedicati → 11e
 - [ ] 11e Kit sezioni avanzati

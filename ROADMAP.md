@@ -341,3 +341,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-23 | Cursor | **i18n Moments Step 11a / v199**: solo campi pannello Copertina EN; piano `docs/29`; 11b+ dopo |
 | 2026-07-23 | Cursor | **i18n Moments Step 11b / v200**: solo campi pannello Pubblica EN |
 | 2026-07-23 | Cursor | **i18n Moments Step 11c / v201**: Colori + Contatore + Ordine EN; look taxonomy ancora IT |
+| 2026-07-23 | Cursor | **i18n Moments Step 11d / v202**: chrome comune sezioni EN (toggle, titolo, guide); kit → 11e |

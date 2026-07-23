@@ -357,3 +357,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-23 | Cursor | **Moments v215**: fix toggle lingua EN→IT (refresh kit/fields + status galleria) |
 | 2026-07-23 | Cursor | **Moments v216**: lingua UI sync su account Auth (cross-device al login) |
 | 2026-07-23 | Cursor | **Piano i18n completion** `docs/30`: slice A/B/C sicurezza-first, zero logica |
+| 2026-07-23 | Cursor | **Piano i18n §2.5**: riduzione rischi (micro-slice A1a/b, freeze Worker, diff guard, pausa) |

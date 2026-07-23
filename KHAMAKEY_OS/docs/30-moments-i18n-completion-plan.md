@@ -1,9 +1,10 @@
 # 30 — Moments i18n: piano di completamento (sicurezza-first)
 
-> **Data:** 2026-07-23 · **Stato:** piano approvabile · **Nessun codice in questo file**  
+> **Data:** 2026-07-23 · **Stato:** piano approvabile · **riduzione rischi attiva** · **Nessun codice in questo file**  
 > Obiettivo: chiudere il chrome IT|EN Moments **senza alterare il funzionamento** della webapp.  
 > Baseline live: editor **v216** · Worker **v184** · audit canvas `moments-i18n-audit-2026-07-23`.  
-> Estende: [`29-moments-i18n-fields-plan.md`](29-moments-i18n-fields-plan.md) · regole [`27`](27-moments-i18n-rules.md) · ADR [`007`](../decisions/007-moments-editor-i18n.md).
+> Estende: [`29-moments-i18n-fields-plan.md`](29-moments-i18n-fields-plan.md) · regole [`27`](27-moments-i18n-rules.md) · ADR [`007`](../decisions/007-moments-editor-i18n.md).  
+> **Priorità:** ridurre rischio > velocità. Meglio lasciare IT che rischiare un handler.
 
 ---
 
@@ -72,33 +73,118 @@ Se G3 o G4 falliscono → **revert della slice**, non “aggiustare in fretta”
 
 ---
 
-## 3. Principio di esecuzione
+## 2.5 Riduzione rischi (obbligatoria)
 
-```text
-Una slice = un commit = un bump ?v= = un deploy Pages
-            (+ Worker solo se file worker.js toccato)
-Smoke G1–G5 → poi slice successiva
-Mai due kit nello stesso commit
-In dubbio → lascia IT e annota nel piano
+Misure extra oltre §2. Se in conflitto con la velocità, **vincono queste**.
+
+### R1 — Allowlist file per slice
+
+Nella slice è permesso modificare **solo**:
+
+| Tipo | File ammessi |
+|------|----------------|
+| Codice UI della slice | 1 file kit max (es. solo `moment-rsvp-fields.js`) |
+| Dizionario | solo `moments-i18n-fields.js` (o solo Worker i18n in fase C) |
+| Cache bust | `moments.html` + import `?v=` nei file che già importano quel modulo |
+| Docs | `docs/30`, `PROJECT_STATE`, `CHANGELOG`, `ROADMAP`, `CODEX-COLLAB` |
+
+**Tutto il resto = fuori diff.** Se serve un secondo file JS di logica → fermarsi.
+
+### R2 — Freeze Worker fino a fine Fase A+B
+
+- **Nessun** deploy Worker nelle fasi A e B.  
+- Fase C solo dopo smoke A+B e lock esplicito.  
+- Così un errore stringhe editor non può toccare `/m/` pubblici.
+
+### R3 — Diff guard (prima del commit)
+
+Eseguire e allegare mentalmente:
+
+```bash
+git diff --stat
+git diff -U0 -- pages/moment-rsvp-fields.js   # esempio: solo ± stringhe / data-lf
 ```
 
-Ordine: **rischio prodotto × frequenza uso** (Amazon UK), non “file più corto”.
+Bloccare il commit se compare una di queste in un file “logica”:
+
+- `function ` nuova o firma cambiata  
+- `addEventListener` / `fetch(` / `rpc(` / `wa.me` / `upload`  
+- `normalizeWhatsApp` / `readRsvp` / `writeGallery` / `saveMoment`  
+- cambi a condizioni `if (` che non siano solo testo UI  
+
+Eccezione unica: 1 chiamata `refreshXLocale(form)` in `syncLangSwitchers` (come già per RSVP share), senza toccare bind.
+
+### R4 — Slice ancora più piccole (RSVP)
+
+| ID | Scope ristretto | Note rischio |
+|----|-----------------|--------------|
+| **A1a** | Solo label/hint dei 4 toggle standard (`guests/notes/phone/email`) | Zero custom rows |
+| **A1b** | Solo UI “voce personalizzata” (label/placeholder/Rimuovi/Aggiungi) | Dopo smoke A1a |
+| **A2a** | Solo titoli/bottoni/warn del share panel (`data-lf`) | Non toccare `syncLangSwitchers` |
+| **A2b** | Solo refresh toggle share (1 hook) | Slice separata, dopo A2a stabile |
+
+Mai A1a+A1b nello stesso commit.
+
+### R5 — Pausa e conferma umana
+
+Dopo **ogni** deploy Pages:
+
+1. Smoke G1–G4 sul pezzo toccato  
+2. **Stop** — non partire la slice successiva nella stessa sessione senza ok utente  
+3. Se dubbio su G4 → lasciare live la versione precedente (`git revert` + redeploy)
+
+### R6 — IT sempre first
+
+Ordine smoke fisso: **G1 (IT) → G4 funzione → G2 EN → G3 EN→IT → G5 boot**.  
+Se G1 o G4 falliscono, **non** testare EN: revert subito.
+
+### R7 — Niente “mentre ci sono”
+
+Vietato nella stessa slice: refactor CSS, rinomina variabili, “sistemo anche quello”, toccare oroscopo durante RSVP, aggiornare seed.
+
+### R8 — Skip aggressivo
+
+| Area | Decisione riduzione rischio |
+|------|----------------------------|
+| Guestbook toasts Worker (C2) | **Saltare** finché guestbook pubblico resta off |
+| Seed / legale (D4) | **Fuori piano** |
+| TYPE_LABELS (D1) | Solo dopo A+B stabili; altrimenti lasciare IT |
+
+### R9 — Un solo agente / un lock
+
+- Lock Moments per tutta la Fase A.  
+- Nessun parallelismo su `moments.js` / `moment-rsvp-*.js`.  
+- Worker lock solo in Fase C.
 
 ---
 
-## 4. Roadmap slice (mirata)
+## 3. Principio di esecuzione
+
+```text
+Una micro-slice = un commit = un bump ?v= = un deploy Pages
+Smoke G1→G4→G2→G3→G5 → ok utente → slice successiva
+Worker congelato fino a fine A+B
+Allowlist file + diff guard
+In dubbio → lascia IT e annota
+```
+
+Ordine: **sicurezza > completezza EN > velocità**.
+
+---
+
+## 4. Roadmap slice (mirata, rischio ridotto)
 
 ### Fase A — Chiudere chrome RSVP editor (P0)
 
 | ID | Scope | File | Vietato | Smoke funzione (G4) | Rischio |
 |----|--------|------|---------|---------------------|---------|
-| **A1** | Solo etichette/hint/toggle campi RSVP opzionali + custom rows | `moment-rsvp-fields.js` + `FIELD_PHRASE_EN` | `readRsvpFieldsFromForm`, normalize, salvataggio field_keys | Attiva/disattiva “Ospiti”, aggiungi voce custom, Salva, ricarica: campi invariati | Medio |
-| **A2** | Solo chrome pannello share (titoli, bottoni, warn bozza, riepilogo) | `moment-rsvp-kit.js` | `rsvpInviteMessage` body (già EN), `wa.me`, copy/share handlers | Copia link / Copia messaggio / Condividi ancora funzionano; testo invito IT\|EN ok | Medio |
-| **A2b** | Refresh share chrome al toggle | `moment-rsvp-kit.js` + 1 riga in `syncLangSwitchers` | Non rifare bind listener; solo `textContent` / re-render HTML statico del pannello | EN→IT: labels share tornano IT | Medio |
+| **A1a** | Solo 4 toggle standard RSVP (label/hint) | `moment-rsvp-fields.js` + `FIELD_PHRASE_EN` | custom rows, read/normalize/save | Toggle Ospiti/Note on-off, Salva, reload | **Basso** |
+| **A1b** | Solo custom fields UI chrome | stesso file | read/normalize/save | Aggiungi/rimuovi voce, Salva | Basso-medio |
+| **A2a** | Solo chrome statico share (`data-lf` su titoli/bottoni/warn) | `moment-rsvp-kit.js` | handlers copy/share, invite body logic | Copia link / Copia messaggio | Basso-medio |
+| **A2b** | Solo hook refresh share in `syncLangSwitchers` | `moments.js` (1 riga) + eventuale helper kit | re-bind listener, logica share | EN→IT labels share | Medio (isolato) |
 
-**Stop dopo A2b:** smoke RSVP completo IT e EN (WhatsApp numero, Salva, anteprima messaggio).
-
-Versioni previste: **v217** (A1) → **v218** (A2+A2b) — o A2/A2b insieme se lo scope resta solo stringhe.
+**Stop dopo A2b:** smoke RSVP completo IT e EN (WhatsApp, Salva, messaggio).  
+Versioni: **v217** A1a → **v218** A1b → **v219** A2a → **v220** A2b (una ciascuno).
 
 ---
 
@@ -165,15 +251,14 @@ Dopo:
 | Slice | Stato | Versione |
 |-------|--------|----------|
 | Baseline (1–11e6e, WA, fix toggle, account locale) | Fatto | v216 / W v184 |
-| **A1** RSVP fields chrome | Pending | — |
-| **A2** RSVP share chrome + refresh | Pending | — |
-| **B1** Oroscopo people | Pending | — |
-| **B2** Dashboard | Pending | — |
-| **B3** Wizard onboarding | Pending | — |
-| **B4** Card piano | Pending | — |
-| **C1** Worker Apri PDF/foto | Pending | — |
-| **C2** Guestbook toasts | Skip se guestbook off | — |
-| **D*** | Dopo A–C | — |
+| **A1a** RSVP 4 toggle label/hint | Pending | v217 |
+| **A1b** RSVP custom fields chrome | Pending | v218 |
+| **A2a** RSVP share chrome statico | Pending | v219 |
+| **A2b** RSVP share refresh toggle | Pending | v220 |
+| **B1–B4** | Pending dopo ok A | — |
+| **C1** Worker (dopo freeze A+B) | Pending | — |
+| **C2** Guestbook toasts | **Skip** (prodotto off) | — |
+| **D*** | Opzionale / fuori | — |
 
 ---
 

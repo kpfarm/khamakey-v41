@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=202";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=202";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=202";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=202";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=202";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=202";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=202";
+} from "./moments-i18n.js?v=203";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=203";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=203";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=203";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=203";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=203";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=203";
 import {
   uploadImage,
   uploadVideo,
@@ -242,6 +242,11 @@ function syncFieldChromeI18n(root = document){
     const key = el.getAttribute("data-lf-section-guide-title");
     if(!key) return;
     el.textContent = localizedSectionFillGuide(currentMomentType, key).split(".")[0];
+  });
+  root.querySelectorAll("[data-lf-title-name]").forEach(el=>{
+    const nameIt = el.getAttribute("data-lf-title-name") || "";
+    const hintIt = el.getAttribute("data-lf-title-hint") || "";
+    el.setAttribute("title", `${localizeFieldPhrase(nameIt)} — ${localizeFieldPhrase(hintIt)}`);
   });
 }
 
@@ -2035,11 +2040,13 @@ function renderLookPicker(currentLook, momentType = "free"){
     if(!look) return "";
     const colors = resolvePalette(look.palette, look.variant);
     const isSuggested = id === suggested;
+    const label = localizeFieldPhrase(look.label);
+    const hint = localizeFieldPhrase(look.hint);
     return `<button type="button" class="look-card ${currentLook === id ? "active" : ""} ${isSuggested ? "look-suggested" : ""}" data-look="${esc(id)}" aria-pressed="${currentLook === id ? "true" : "false"}">
       <span class="look-card-preview" style="--lk-go:${esc(colors.go)};--lk-g2:${esc(colors.g2)};--lk-hero:${esc(colors.hero)};--lk-ro:${esc(colors.ro)};--lk-bl:${esc(colors.bl)};--lk-card:${esc(colors.card || colors.bl2)};--lk-in:${esc(colors.in)}"></span>
       <span class="look-card-emoji" aria-hidden="true">${look.emoji}</span>
-      <strong>${esc(look.label)}${isSuggested ? ` · <span data-lf="consigliato">${esc(localizeFieldPhrase("consigliato"))}</span>` : ""}</strong>
-      <small>${esc(look.hint)}</small>
+      <strong><span data-lf="${esc(look.label)}">${esc(label)}</span>${isSuggested ? ` · <span data-lf="consigliato">${esc(localizeFieldPhrase("consigliato"))}</span>` : ""}</strong>
+      <small data-lf="${esc(look.hint)}">${esc(hint)}</small>
     </button>`;
   }).join("")}</div>
   <input type="hidden" name="page_look" id="pageLookInput" value="${esc(currentLook)}">`;
@@ -2047,11 +2054,14 @@ function renderLookPicker(currentLook, momentType = "free"){
 
 function renderPalettePicker(current){
   const active = canonicalizePalette(current);
-  const bgHint = localizeFieldPhrase("sfondo pagina");
+  const bgHintIt = "sfondo pagina";
+  const bgHint = localizeFieldPhrase(bgHintIt);
   return `<div class="palette-row">${PALETTE_PICKER_ORDER.map(key=>{
     const c = COLOR_PALETTES[key];
-    const title = `${PALETTE_LABELS[key] || key} — ${bgHint}`;
-    return `<button type="button" class="palette-btn ${active === key ? "active" : ""}" data-palette="${esc(key)}" title="${esc(title)}"><span style="background:${c.bl}"></span></button>`;
+    const nameIt = PALETTE_LABELS[key] || key;
+    const name = localizeFieldPhrase(nameIt);
+    const title = `${name} — ${bgHint}`;
+    return `<button type="button" class="palette-btn ${active === key ? "active" : ""}" data-palette="${esc(key)}" title="${esc(title)}" data-lf-title-name="${esc(nameIt)}" data-lf-title-hint="${esc(bgHintIt)}"><span style="background:${c.bl}"></span></button>`;
   }).join("")}</div><input type="hidden" name="color_palette" id="colorPaletteInput" value="${esc(active)}">`;
 }
 
@@ -2120,7 +2130,7 @@ function renderDesignSuggestBanner(momentType, currentLook){
   const look = PAGE_LOOKS[suggested];
   if(!look) return "";
   const typeLabel = TYPE_LABELS[momentType] || localizeFieldPhrase("questa pagina");
-  return `<p class="design-suggest">💡 ${lfSpan("Per")} <strong>${esc(typeLabel)}</strong> ${lfSpan("prova")} ${look.emoji} <button type="button" class="design-suggest-btn" data-suggest-look="${esc(suggested)}">${esc(look.label)}</button></p>`;
+  return `<p class="design-suggest">💡 ${lfSpan("Per")} <strong>${esc(typeLabel)}</strong> ${lfSpan("prova")} ${look.emoji} <button type="button" class="design-suggest-btn" data-suggest-look="${esc(suggested)}" data-lf="${esc(look.label)}">${esc(localizeFieldPhrase(look.label))}</button></p>`;
 }
 
 function renderDesignPanel(state){

@@ -8,6 +8,44 @@
 
 ---
 
+## 0. Catena sacro-santa (mai rompere)
+
+Tutta la webapp Moments esiste per questa catena. **Nessuna slice i18n può indebolirla.**
+
+```text
+Oggetto fisico + chip NFC
+  → codice attivazione / slug
+  → account cliente
+  → editor pagine (Salva, media, sezioni, RSVP, PIN)
+  → pagina pubblica /m/<slug>  (+ /k/<codice> NFC)
+  → ospite apre, legge, conferma RSVP su WhatsApp
+```
+
+| Anello | Cosa proteggere | i18n può toccare? |
+|--------|-----------------|-------------------|
+| Attivazione pezzo / magazzino | RPC, codici, reset reso | **No** |
+| Auth + sessione | Login, recovery | Solo label `data-i18n` già coperte |
+| Editor Salva / bozza / pubblica | `saveMoment`, visibility, PIN | **No** logica |
+| Media R2 | upload/replace/delete | **Solo** stringhe status (già fatto); **no** handler |
+| RSVP | numero WA, `wa.me`, submit API | **Solo** label chrome; **no** numeri/URL/API |
+| Pagina pubblica `/m/` `/k/` | Worker render, PIN gate, rate limit | Fase C: **solo** dizionario; freeze finché A+B ok |
+| NFC redirect `/k/` | slug binding | **No** |
+
+Se un cambiamento i18n mette a rischio anche un solo anello → **non fare**. Lasciare IT.
+
+Smoke minimo **sempre** (anche slice “solo label”), oltre G1–G5:
+
+| # | Catena | Check rapido |
+|---|--------|----------------|
+| N1 | Editor apre pezzo già attivato | Lista oggetti + apri pagina |
+| N2 | Salva | Salva senza errore; reload mantiene dati |
+| N3 | Link pubblico | Apri `/m/` (o anteprima) della pagina |
+| N4 | Se slice RSVP | Numero WA ancora salvato; sezione non sparisce |
+
+Fallisce N1–N4 → **revert immediato** + redeploy versione precedente. Non “cerchiamo di sistemare”.
+
+---
+
 ## 1. Obiettivo (definizione chiusa)
 
 **Done =** con toggle EN, un utente inglese vede **solo chrome UI in inglese** su:
@@ -90,11 +128,13 @@ Nella slice è permesso modificare **solo**:
 
 **Tutto il resto = fuori diff.** Se serve un secondo file JS di logica → fermarsi.
 
-### R2 — Freeze Worker fino a fine Fase A+B
+### R2 — Freeze Worker fino a fine Fase A+B (protezione `/m/` `/k/`)
 
 - **Nessun** deploy Worker nelle fasi A e B.  
-- Fase C solo dopo smoke A+B e lock esplicito.  
-- Così un errore stringhe editor non può toccare `/m/` pubblici.
+- Fase C solo dopo smoke A+B **e** ok utente esplicito **e** lock `worker.js`.  
+- Fase C = **solo** chiavi in `MOMENTS_PUBLIC_I18N` + `mt()` su stringhe già presenti; zero cambi al renderer strutturale, PIN, RSVP submit, rate limit.  
+- Dopo ogni deploy Worker: smoke N3 su una pagina Moments reale (`/m/?lang=it` e `?lang=en`) + tap NFC o `/k/` se disponibile.  
+- Motivo: un Worker rotto spezza la catena oggetto→pagina per tutti i clienti.
 
 ### R3 — Diff guard (prima del commit)
 
@@ -277,15 +317,16 @@ Dopo:
 ## 8. Messaggio per la prossima chat agente
 
 ```text
-Leggi KHAMAKEY_OS/00-START-HERE.md e docs/30-moments-i18n-completion-plan.md.
-Esegui SOLO la slice A1 (moment-rsvp-fields.js chrome).
-Vincoli: solo stringhe + data-lf + FIELD_PHRASE_EN; non toccare read/save/normalize RSVP.
-Gate G1–G6 obbligatori. Una release Pages. Poi stop.
+Leggi KHAMAKEY_OS/00-START-HERE.md e docs/30-moments-i18n-completion-plan.md (§2.5 riduzione rischi).
+Esegui SOLO la micro-slice A1a (4 toggle RSVP label/hint).
+Allowlist: moment-rsvp-fields.js + moments-i18n-fields.js + cache bust + docs.
+Vietato: custom rows, read/save/normalize, worker.js.
+Diff guard + smoke G1→G4→G2→G3→G5. Deploy Pages. POI STOP — aspetta ok utente.
 ```
 
 ---
 
 ## 9. Decisione richiesta all’utente
 
-Confermare di partire da **A1** (RSVP fields chrome) con le regole sopra.  
-Non iniziare B/C finché A non ha passato G1–G6.
+Confermare di partire da **A1a** (solo 4 toggle) con freeze Worker e pausa tra slice.  
+Non iniziare A1b/B/C senza ok esplicito dopo smoke A1a.

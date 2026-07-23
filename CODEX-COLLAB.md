@@ -33,6 +33,10 @@ Un cambiamento è accettabile solo se **risolve un problema reale o aggiunge un 
 
 Se una CSP, una RLS, un rate limit o una verifica firma ti impedisce di completare un task: fermati, scrivi nel commit (o segnala all'utente) qual è il blocco esatto e quale origine/permesso minimo ti servirebbe. Non allargare la policy "per provare" e non commitare la versione allargata senza spiegazione — è successo il 2026-07-11 (CSP allargata a `https:` wildcard su `worker.js`/`pages/_headers` senza commit, poi corretta) ed è esattamente il comportamento da evitare.
 
+### 4. Mai rompere la catena NFC → pagina editabile → pubblica
+
+Il prodotto Moments è: **chip NFC in oggetto → attivazione → editor pagina → `/m/` e `/k/` → ospite**. Nessuna modifica (i18n, UI, refactor) può spezzare attivazione, Salva, media, PIN, binding slug/NFC, renderer pubblico Worker o RSVP WhatsApp. In dubbio: non toccare la logica; solo chrome testuale. Dettaglio operativo i18n: `KHAMAKEY_OS/docs/30-moments-i18n-completion-plan.md` §0.
+
 ---
 
 ## Ingresso di un nuovo agente nel progetto (onboarding)

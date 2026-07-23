@@ -41,7 +41,12 @@ Steps 1–9 = auth, shell, nav, etichette/sottotitoli sezioni, toast, chrome `/m
   - [x] **11e3** (v206) — RSVP WhatsApp chrome
   - [x] **11e4** (v207) — List UI
   - [x] **11e5** (v208) — Journey UI
-  - [ ] 11e6 Gallery / video / media UI
+  - [ ] **11e6** Gallery / video / media — **a pezzi** (vedi sotto)
+    - [x] **11e6a** (v209) — Foto sezione: Carica foto / Rimuovi (no logica upload)
+    - [ ] 11e6b Intro pannello galleria/video/audio (solo testi)
+    - [ ] 11e6c Griglia media (etichette gruppi / empty / add)
+    - [ ] 11e6d Modal titolo/descrizione media
+    - [ ] 11e6e Messaggi errore/status upload (dopo smoke 6a–6d)
 
 ## 11e — sotto-slice (una release ciascuna)
 
@@ -52,7 +57,13 @@ Steps 1–9 = auth, shell, nav, etichette/sottotitoli sezioni, toast, chrome `/m
 | **11e3** | RSVP WhatsApp chrome (warn + numero) — **non** invite copy seed | Medio |
 | **11e4** | List UI (`moments-list-ui.js`) | Medio |
 | **11e5** | Journey UI (`moments-journey-ui.js`) | Medio |
-| **11e6** | Gallery / video / media UI | Medio |
+| **11e6a** | Solo bottoni foto sezione (`Carica foto` / `Rimuovi`) in `moments.js` + `renderSectionPhotoPanel` | Basso |
+| **11e6b** | Solo intro HTML galleria/video/musica (`renderGalleryUploadPanel`) | Basso |
+| **11e6c** | Solo etichette griglia (`renderGalleryGrid`) | Medio |
+| **11e6d** | Solo modal dettagli media | Basso |
+| **11e6e** | Solo stringhe Error/status upload — **dopo** smoke 6a–d | Medio |
 | Dopo | `moment-rsvp-fields.js`, oroscopo people panel, share kit | Separato |
 
 Regola: una sotto-slice = un bump `?v=` + deploy. Se qualcosa è dubbio → lasciare IT.
+
+**11e6 — vincolo:** non cambiare handler upload/delete/DnD; solo testo UI. Se serve toccare logica → fermarsi e chiedere.

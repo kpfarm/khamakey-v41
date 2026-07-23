@@ -8,8 +8,8 @@ import {
   parseListItems,
   serializeListItems
 } from "./moment-list-items.js";
-import { getUiLocale } from "./moments-i18n.js?v=208";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=208";
+import { getUiLocale } from "./moments-i18n.js?v=209";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=209";
 
 const LIST_LABELS = {
   promises:{

@@ -296,5 +296,9 @@ export const FIELD_PHRASE_EN = {
   "In pagina le tappe scorrono come la galleria — pagina più corta": "On the page, stops scroll like the gallery — shorter page",
   "Con tante tappe puoi attivare lo scroll laterale come la galleria": "With many stops you can turn on sideways scroll like the gallery",
   "Tappa non trovata.": "Stop not found.",
-  "Upload foto tappa non riuscito.": "Stop photo upload failed."
+  "Upload foto tappa non riuscito.": "Stop photo upload failed.",
+
+  // 11e6a — Section photo buttons only (no upload/delete logic)
+  "Carica immagine": "Upload image",
+  "Video del ricordo": "Memory video"
 };

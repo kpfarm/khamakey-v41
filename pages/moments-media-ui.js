@@ -15,8 +15,16 @@ import {
   migrateMusicSectionMedia,
   migrateLetterMediaSection
 } from "./moment-media.js?v=173";
+import { getUiLocale } from "./moments-i18n.js?v=209";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=209";
 
 let mediaEditContext = null;
+
+function lf(text){
+  const raw = String(text || "");
+  if(!raw || getUiLocale() === "it") return raw;
+  return FIELD_PHRASE_EN[raw] || raw;
+}
 
 export function readGalleryMedia(formNode,key){
   const field = formNode.querySelector(`textarea[name="section_${key}_media"], input[name="section_${key}_media"]`);
@@ -519,9 +527,10 @@ export function renderSectionPhotoPanel(key, section, fieldName, { previewId, fi
   const resolvedPreviewId = previewId || `${key}PhotoPreview`;
   const resolvedFileId = fileId || `${key}PhotoFile`;
   const url = String(section[fieldName] || "").trim();
+  const labelIt = label || "Carica foto";
   const preview = url
-    ? `<img src="${esc(url)}" alt=""><button type="button" class="ghost" data-section-photo-remove="${esc(key)}">Rimuovi</button>`
-    : `<button type="button" class="primary section-photo-btn" data-section-photo-upload="${esc(key)}">📷 ${esc(label)}</button>`;
+    ? `<img src="${esc(url)}" alt=""><button type="button" class="ghost" data-section-photo-remove="${esc(key)}" data-lf="Rimuovi">${esc(lf("Rimuovi"))}</button>`
+    : `<button type="button" class="primary section-photo-btn" data-section-photo-upload="${esc(key)}">📷 <span data-lf="${esc(labelIt)}">${esc(lf(labelIt))}</span></button>`;
   return `<div class="section-photo-panel" data-section-photo-key="${esc(key)}">
     <input type="hidden" name="section_${esc(key)}_${esc(fieldName)}" value="${esc(url)}">
     <div class="section-photo-preview" id="${esc(resolvedPreviewId)}">${preview}</div>

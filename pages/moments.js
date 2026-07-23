@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=208";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=208";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=208";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=208";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=208";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=208";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=208";
+} from "./moments-i18n.js?v=209";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=209";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=209";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=209";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=209";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=209";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=209";
 import {
   uploadImage,
   uploadVideo,
@@ -50,7 +50,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=173";
+} from "./moments-media-ui.js?v=209";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -59,7 +59,7 @@ import {
   renderJourneyFileInput,
   bindJourneyEditor,
   uploadJourneyStepPhoto
-} from "./moments-journey-ui.js?v=208";
+} from "./moments-journey-ui.js?v=209";
 import {
   migrateLetterMediaSection,
   migrateVideoSectionMedia,
@@ -84,7 +84,7 @@ import {
   writeListItems,
   readListItems,
   bindListItemsEditor
-} from "./moments-list-ui.js?v=208";
+} from "./moments-list-ui.js?v=209";
 import { journeyStepId, MAX_JOURNEY_STEPS, normalizeJourneyStep, resolveJourneySteps, compactJourneySteps } from "./moment-journey.js";
 import {
   COLOR_PALETTES,
@@ -3260,11 +3260,12 @@ async function uploadSectionPhoto(key,file,row,formNode){
 
 function sectionPhotoPreviewHtml(key,url){
   const config = SECTION_PHOTO_FIELDS[key];
-  const label = config?.label || "Carica foto";
+  const labelIt = config?.label || "Carica foto";
+  const label = localizeFieldPhrase(labelIt);
   if(url){
-    return `<img src="${esc(url)}" alt=""><button type="button" class="ghost" data-section-photo-remove="${esc(key)}">Rimuovi</button>`;
+    return `<img src="${esc(url)}" alt=""><button type="button" class="ghost" data-section-photo-remove="${esc(key)}" data-lf="Rimuovi">${esc(localizeFieldPhrase("Rimuovi"))}</button>`;
   }
-  return `<button type="button" class="primary section-photo-btn" data-section-photo-upload="${esc(key)}">📷 ${esc(label)}</button>`;
+  return `<button type="button" class="primary section-photo-btn" data-section-photo-upload="${esc(key)}">📷 <span data-lf="${esc(labelIt)}">${esc(label)}</span></button>`;
 }
 
 function refreshSectionPhotoPreview(key,url){
@@ -3665,7 +3666,7 @@ function sectionEditor(key,section,standalone=false){
     </div>` : "";
   const videoFields = key === "video" ? `
     <div class="editor-card">
-      <p class="ecard-title"><span class="step-badge">1</span> Video del ricordo</p>
+      <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Video del ricordo")}</p>
       ${renderVideoSectionPanel(safe)}
     </div>` : "";
   const listItemsPanel = LIST_SECTION_KEYS.has(key) ? renderListItemsPanel(key, safe) : "";

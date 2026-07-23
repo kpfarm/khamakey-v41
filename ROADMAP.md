@@ -348,3 +348,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-23 | Cursor | **i18n Moments Step 11e3 / v206**: RSVP WhatsApp chrome EN |
 | 2026-07-23 | Cursor | **i18n Moments Step 11e4 / v207**: List UI EN (promesse/sogni/rituali/numeri) |
 | 2026-07-23 | Cursor | **i18n Moments Step 11e5 / v208**: Journey UI EN (tappe + scroll) |
+| 2026-07-23 | Cursor | **i18n Moments Step 11e6a / v209**: solo bottoni foto sezione EN; upload logic no-touch |

@@ -20,6 +20,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
 ### Added
+- **Moments v211 — i18n fields Step 11e6c (2026-07-23, Cursor)** — Pages
+  - Solo chrome griglia: Foto/Video/Audio/PDF, Aggiungi…, empty, hint. Row actions e upload invariati.
 - **Moments v210 — i18n fields Step 11e6b (2026-07-23, Cursor)** — Pages
   - Solo intro HTML pannelli Galleria / Video / Audio / Allegati sigillati; nessun tocco a upload.
 - **Moments v209 — i18n fields Step 11e6a (2026-07-23, Cursor)** — Pages

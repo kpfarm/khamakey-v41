@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=210";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=210";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=210";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=210";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=210";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=210";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=210";
+} from "./moments-i18n.js?v=211";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=211";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=211";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=211";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=211";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=211";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=211";
 import {
   uploadImage,
   uploadVideo,
@@ -50,7 +50,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=210";
+} from "./moments-media-ui.js?v=211";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -59,7 +59,7 @@ import {
   renderJourneyFileInput,
   bindJourneyEditor,
   uploadJourneyStepPhoto
-} from "./moments-journey-ui.js?v=210";
+} from "./moments-journey-ui.js?v=211";
 import {
   migrateLetterMediaSection,
   migrateVideoSectionMedia,
@@ -84,7 +84,7 @@ import {
   writeListItems,
   readListItems,
   bindListItemsEditor
-} from "./moments-list-ui.js?v=210";
+} from "./moments-list-ui.js?v=211";
 import { journeyStepId, MAX_JOURNEY_STEPS, normalizeJourneyStep, resolveJourneySteps, compactJourneySteps } from "./moment-journey.js";
 import {
   COLOR_PALETTES,
@@ -4426,6 +4426,9 @@ function syncLangSwitchers(locale = getUiLocale()){
     if(editorForm){
       for(const key of LIST_SECTION_KEYS) renderListItems(editorForm, key);
       renderJourneySteps(editorForm, "timeline");
+      for(const key of ["gallery","video","music","letter_future"]){
+        if(editorForm.querySelector(`#galleryOrganized_${key}`)) renderGalleryGrid(editorForm, key);
+      }
     }
     if(currentUser) refreshAccountMenu();
     if(appView === "account") renderAccountPanels();

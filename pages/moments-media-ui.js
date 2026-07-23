@@ -15,8 +15,8 @@ import {
   migrateMusicSectionMedia,
   migrateLetterMediaSection
 } from "./moment-media.js?v=173";
-import { getUiLocale } from "./moments-i18n.js?v=210";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=210";
+import { getUiLocale } from "./moments-i18n.js?v=211";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=211";
 
 let mediaEditContext = null;
 
@@ -44,6 +44,7 @@ export function renderGalleryGrid(formNode,key){
   const limits = mediaLimitsForKey(key);
   const media = readGalleryMedia(formNode,key);
   const groups = galleryEditorGroups(key);
+  const galleryHintIt = "In pagina: foto grandi, titolo e descrizione sotto ciascuna; tap per ingrandire.";
   root.innerHTML = groups.map(group=>{
     const items = media.map((item,idx)=>({item,idx})).filter(({item})=>item.type === group.type);
     const canAdd = media.length < limits.maxItems
@@ -51,20 +52,21 @@ export function renderGalleryGrid(formNode,key){
       && (group.type !== "video" || countMediaByType(media,"video") < limits.maxVideos)
       && (group.type !== "audio" || countMediaByType(media,"audio") < limits.maxAudio)
       && (group.type !== "pdf" || countMediaByType(media,"pdf") < (limits.maxPdfs || 0));
+    const emptyIt = `Nessuna ${String(group.label || "").toLowerCase()} ancora.`;
     const rows = items.length
       ? items.map(({item,idx})=>mediaEditorRowHtml(item,{index:idx,sectionKey:key})).join("")
-      : `<p class="gallery-type-empty">Nessuna ${group.label.toLowerCase()} ancora.</p>`;
+      : `<p class="gallery-type-empty" data-lf="${esc(emptyIt)}">${esc(lf(emptyIt))}</p>`;
     const addBtn = canAdd
-      ? `<button type="button" class="ghost gallery-type-add" data-gallery-add="${key}" data-gallery-type="${group.type}"><span>${group.icon}</span>${group.addLabel}</button>`
+      ? `<button type="button" class="ghost gallery-type-add" data-gallery-add="${key}" data-gallery-type="${group.type}"><span>${group.icon}</span><span data-lf="${esc(group.addLabel)}">${esc(lf(group.addLabel))}</span></button>`
       : "";
     const hint = group.addHint
-      ? `<p class="field-hint gallery-type-hint">${group.addHint}</p>`
+      ? `<p class="field-hint gallery-type-hint" data-lf="${esc(group.addHint)}">${esc(lf(group.addHint))}</p>`
       : key === "gallery" && group.type === "image"
-        ? `<p class="field-hint gallery-type-hint">In pagina: foto grandi, titolo e descrizione sotto ciascuna; tap per ingrandire.</p>`
+        ? `<p class="field-hint gallery-type-hint" data-lf="${esc(galleryHintIt)}">${esc(lf(galleryHintIt))}</p>`
         : "";
     return `<section class="gallery-type-block" data-gallery-type="${group.type}">
       <div class="gallery-type-head">
-        <h4 class="gallery-type-title">${group.label} <span class="gallery-type-count">${items.length}</span></h4>
+        <h4 class="gallery-type-title"><span data-lf="${esc(group.label)}">${esc(lf(group.label))}</span> <span class="gallery-type-count">${items.length}</span></h4>
         ${addBtn}
       </div>
       ${hint}

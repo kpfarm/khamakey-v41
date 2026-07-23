@@ -308,5 +308,19 @@ export const FIELD_PHRASE_EN = {
   "Carica uno o più video — in pagina scorrono come la galleria. Titolo e descrizione sotto ciascuno, poi Salva.": "Upload one or more videos — on the page they scroll like the gallery. Title and description under each, then Save.",
   "Audio": "Audio",
   "Messaggi vocali o brani — complemento a Spotify/YouTube. Poi Salva.": "Voice notes or tracks — alongside Spotify/YouTube. Then Save.",
-  "Solo immagini qui. Tocca Aggiungi foto, scrivi titolo e descrizione, poi Salva.": "Images only here. Tap Add photos, write title and description, then Save."
+  "Solo immagini qui. Tocca Aggiungi foto, scrivi titolo e descrizione, poi Salva.": "Images only here. Tap Add photos, write title and description, then Save.",
+
+  // 11e6c — Gallery grid group chrome only (not row actions / upload)
+  "Foto": "Photo",
+  "Aggiungi foto": "Add photos",
+  "Aggiungi video": "Add video",
+  "Aggiungi audio": "Add audio",
+  "Aggiungi PDF": "Add PDF",
+  "Nessuna foto ancora.": "No photos yet.",
+  "Nessuna video ancora.": "No videos yet.",
+  "Nessuna audio ancora.": "No audio yet.",
+  "Nessuna pdf ancora.": "No PDFs yet.",
+  "In pagina: foto grandi, titolo e descrizione sotto ciascuna; tap per ingrandire.": "On the page: large photos, title and description under each; tap to enlarge.",
+  "Messaggi vocali e registrazioni — si sbloccano con la lettera.": "Voice notes and recordings — unlock with the letter.",
+  "Documenti e lettere in PDF — si aprono dopo lo sblocco.": "PDF documents and letters — open after unlock."
 };

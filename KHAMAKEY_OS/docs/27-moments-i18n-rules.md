@@ -1,6 +1,6 @@
 # 27 — Moments i18n: regole (Step 2)
 
-> **Data:** 2026-07-23 · **Stato:** regole ok · **v195: blocco auto-translate Safari**  
+> **Data:** 2026-07-23 · **Stato:** regole ok · **Step 7a nav menu (v196)** · translate=no  
 > Decisione formale: [`decisions/007-moments-editor-i18n.md`](../decisions/007-moments-editor-i18n.md)  
 > Inventario: [`26-moments-i18n-inventory.md`](26-moments-i18n-inventory.md)  
 > Moduli: `moments-i18n.js` · `moments-i18n-auth.js` · `moments-i18n-shell.js`

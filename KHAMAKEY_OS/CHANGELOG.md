@@ -20,6 +20,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
 ### Added
+- **Moments v196 — i18n nav Step 7a (2026-07-23, Cursor)** — Pages
+  - `moments-i18n-nav.js`: Copertina/Colori/Contenuti/Pubblica, gruppi Design/Pagina, Riepilogo, Altre sezioni.
+  - Taxonomy sezioni (In memoria, …) e campi pannello ancora IT (7b).
 - **Moments v194 — i18n save Step 6b (2026-07-23, Cursor)** — Pages
   - `moments-i18n-save.js`: Pagina salvata / Salvataggio… / errori / reminder «clicca Salva».
   - Nessun tocco a sezioni editor, attivazione, Worker `/m/`.

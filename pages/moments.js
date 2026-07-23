@@ -9,10 +9,11 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=195";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=195";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=195";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=195";
+} from "./moments-i18n.js?v=196";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=196";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=196";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=196";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=196";
 import {
   uploadImage,
   uploadVideo,
@@ -173,14 +174,20 @@ let activeAccountTab = "products";
 let appView = "editor"; // editor | account
 
 const EDITOR_PANELS = {
-  overview:{title:"Riepilogo",subtitle:"Stato pagina, link e statistiche RSVP / libro ospiti"},
+  overview:{titleKey:"nav.overview",subtitle:"Stato pagina, link e statistiche RSVP / libro ospiti"},
   objects:{title:"Le tue pagine",subtitle:"Scegli quale pagina modificare"},
-  cover:{title:"Copertina",subtitle:"Titolo, foto e messaggio — la prima cosa che si vede"},
-  styling:{title:"Colori",subtitle:"Scegli lo stile — colori classici, molto contrasto"},
-  counter:{title:"Contatore",subtitle:"Quanto tempo è passato da un giorno speciale? Scegli la data; ore/min/sec sono opzionali."},
-  order:{title:"Ordine",subtitle:"Trascina per cambiare l'ordine delle sezioni"},
-  privacy:{title:"Pubblica",subtitle:"Rendi visibile la pagina e proteggila con PIN"}
+  cover:{titleKey:"nav.cover",subtitle:"Titolo, foto e messaggio — la prima cosa che si vede"},
+  styling:{titleKey:"nav.colors",subtitle:"Scegli lo stile — colori classici, molto contrasto"},
+  counter:{titleKey:"nav.counter",subtitle:"Quanto tempo è passato da un giorno speciale? Scegli la data; ore/min/sec sono opzionali."},
+  order:{titleKey:"nav.order",subtitle:"Trascina per cambiare l'ordine delle sezioni"},
+  privacy:{titleKey:"nav.publish",subtitle:"Rendi visibile la pagina e proteggila con PIN"}
 };
+
+function editorPanelTitle(panel){
+  if(!panel) return "";
+  if(panel.titleKey) return t(panel.titleKey);
+  return panel.title || "";
+}
 
 let activeEditorPanel = "cover";
 let mobilePreviewMode = false;
@@ -913,11 +920,27 @@ function bindGlobalAppChrome(){
   }
 }
 
+function localizeFixedNavItems(items){
+  const keyById = {
+    cover: "nav.cover",
+    styling: "nav.colors",
+    order: "nav.order",
+    overview: "nav.overview",
+    privacy: "nav.publish",
+    extras: "nav.extras"
+  };
+  return (items || []).map(item=>{
+    const key = keyById[item.id];
+    if(!key) return item;
+    return { ...item, label: t(key) };
+  });
+}
+
 function navItemsForGroup(groupId, formNode){
-  if(groupId === "design") return designNavItems();
-  if(groupId === "page" || groupId === "account") return pageNavItems();
+  if(groupId === "design") return localizeFixedNavItems(designNavItems());
+  if(groupId === "page" || groupId === "account") return localizeFixedNavItems(pageNavItems());
   const enabled = enabledMapFromForm(formNode);
-  return contentNavItems(sectionOrder, currentMomentType, pinnedExtraSections, enabled);
+  return localizeFixedNavItems(contentNavItems(sectionOrder, currentMomentType, pinnedExtraSections, enabled));
 }
 
 function enabledMapFromForm(formNode){
@@ -1039,9 +1062,14 @@ function ensureMobileNav(){
       button.type = "button";
       button.className = `grp-btn ${group.id === activeNavGroup ? "active" : ""}`;
       button.dataset.navGroup = group.id;
-      button.innerHTML = `<span class="grp-icon">${group.icon}</span>${group.label}`;
+      button.innerHTML = `<span class="grp-icon">${group.icon}</span>${esc(t(`nav.group.${group.id}`))}`;
       button.addEventListener("click",()=>setNavGroup(group.id));
       grpNav.appendChild(button);
+    });
+  }else{
+    NAV_GROUPS.forEach(group=>{
+      const button = grpNav.querySelector(`[data-nav-group="${group.id}"]`);
+      if(button) button.innerHTML = `<span class="grp-icon">${group.icon}</span>${esc(t(`nav.group.${group.id}`))}`;
     });
   }
   renderSubNav(activeNavGroup);
@@ -1227,7 +1255,7 @@ function renderPlanStorageCard(entitlements = currentEntitlements){
 
 function renderOverviewPanel(row, state, publicUrl){
   return `<div class="editor-panel ${activeEditorPanel === "overview" ? "active" : ""}" data-editor-panel="overview">
-    ${renderSectionHeader(EDITOR_PANELS.overview.title,EDITOR_PANELS.overview.subtitle)}
+    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.overview),EDITOR_PANELS.overview.subtitle)}
     ${renderPlanStorageCard(currentEntitlements)}
     ${renderMomentDashboardShell({ publicUrl, published:row.public_visible, slug:row.slug })}
   </div>`;
@@ -1744,32 +1772,32 @@ function renderEditorSidebar(activePanel, momentType = currentMomentType, pinned
     </button>` : "";
   const extrasBtn = showExtras ? `
     <button type="button" class="editor-nav-item ${activePanel === "extras" ? "active" : ""}" data-editor-panel="extras">
-      <span class="editor-nav-icon">➕</span>Altre sezioni
+      <span class="editor-nav-icon">➕</span>${esc(t("nav.extras"))}
     </button>` : "";
   const contentItems = `${counterBtn}
     ${navKeys.map(key=>`
     <button type="button" class="editor-nav-item ${activePanel === `section-${key}` ? "active" : ""}" data-editor-panel="section-${esc(key)}" data-section-nav-key="${esc(key)}">
       <span class="editor-nav-icon">${esc(SECTION_ICONS[key] || "•")}</span>${esc(sectionLabelForType(momentType, key))}
     </button>`).join("")}${extrasBtn}`;
-  return `<nav class="editor-sidebar" aria-label="Sezioni editor">
-    <div class="editor-sidebar-group">Pagina</div>
+  return `<nav class="editor-sidebar" aria-label="${esc(t("nav.aria.sidebar"))}">
+    <div class="editor-sidebar-group">${esc(t("nav.sidebar.page"))}</div>
     <button type="button" class="editor-nav-item ${activePanel === "overview" ? "active" : ""}" data-editor-panel="overview">
-      <span class="editor-nav-icon">📊</span>Riepilogo
+      <span class="editor-nav-icon">📊</span>${esc(t("nav.overview"))}
     </button>
     <button type="button" class="editor-nav-item ${activePanel === "privacy" ? "active" : ""}" data-editor-panel="privacy">
-      <span class="editor-nav-icon">🔒</span>Pubblica
+      <span class="editor-nav-icon">🔒</span>${esc(t("nav.publish"))}
     </button>
-    <div class="editor-sidebar-group">Design</div>
+    <div class="editor-sidebar-group">${esc(t("nav.sidebar.design"))}</div>
     <button type="button" class="editor-nav-item ${activePanel === "cover" ? "active" : ""}" data-editor-panel="cover">
-      <span class="editor-nav-icon">✦</span>Copertina
+      <span class="editor-nav-icon">✦</span>${esc(t("nav.cover"))}
     </button>
     <button type="button" class="editor-nav-item ${activePanel === "styling" ? "active" : ""}" data-editor-panel="styling">
-      <span class="editor-nav-icon">◑</span>Colori
+      <span class="editor-nav-icon">◑</span>${esc(t("nav.colors"))}
     </button>
     <button type="button" class="editor-nav-item ${activePanel === "order" ? "active" : ""}" data-editor-panel="order">
-      <span class="editor-nav-icon">☰</span>Ordine sezioni
+      <span class="editor-nav-icon">☰</span>${esc(t("nav.order_long"))}
     </button>
-    <div class="editor-sidebar-group">Contenuti</div>
+    <div class="editor-sidebar-group">${esc(t("nav.sidebar.content"))}</div>
     ${contentItems}
   </nav>`;
 }
@@ -1967,7 +1995,7 @@ function renderDesignPanel(state){
     heroStyle: state.heroStyle || "classico"
   });
   return `<div class="editor-panel ${activeEditorPanel === "styling" ? "active" : ""}" data-editor-panel="styling">
-    ${renderSectionHeader(EDITOR_PANELS.styling.title,EDITOR_PANELS.styling.subtitle)}
+    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.styling),EDITOR_PANELS.styling.subtitle)}
     <div class="editor-card">
       <p class="ecard-title">Scegli lo stile</p>
       <p class="design-intro">Stili per <strong>${esc(TYPE_LABELS[state.type] || "questa categoria")}</strong>. Il colore scelto è lo <strong>sfondo</strong> della pagina; i riquadri restano bianchi con testo nero.</p>
@@ -2028,7 +2056,7 @@ function renderDesignPanel(state){
 
 function renderCoverPanel(state){
   return `<div class="editor-panel ${activeEditorPanel === "cover" ? "active" : ""}" data-editor-panel="cover">
-    ${renderSectionHeader(EDITOR_PANELS.cover.title,EDITOR_PANELS.cover.subtitle)}
+    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.cover),EDITOR_PANELS.cover.subtitle)}
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">1</span> Di cosa parla?</p>
       <label>Titolo della pagina<input name="title" value="${esc(state.title)}" required placeholder="Es. Il nostro anniversario"></label>
@@ -2093,7 +2121,7 @@ function renderCounterPanel(state){
 
 function renderOrderPanel(state){
   return `<div class="editor-panel ${activeEditorPanel === "order" ? "active" : ""}" data-editor-panel="order">
-    ${renderSectionHeader(EDITOR_PANELS.order.title,EDITOR_PANELS.order.subtitle)}
+    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.order),EDITOR_PANELS.order.subtitle)}
     <div class="editor-card">
       <p class="field-hint order-intro">Tieni premuto ☰ e trascina — le sezioni attive si riordinano subito nell'anteprima.</p>
       ${renderSectionOrderList(state)}
@@ -2182,7 +2210,7 @@ function renderPrivacyPanel(row, state = {}){
       <p class="field-hint">Il PIN non si può recuperare dal server. Se l'hai dimenticato, scrivine uno nuovo sotto e tocca <strong>Salva</strong>.</p>
     </div>`;
   return `<div class="editor-panel ${activeEditorPanel === "privacy" ? "active" : ""}" data-editor-panel="privacy">
-    ${renderSectionHeader(EDITOR_PANELS.privacy.title,EDITOR_PANELS.privacy.subtitle)}
+    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.privacy),EDITOR_PANELS.privacy.subtitle)}
     <div class="editor-card smart-card">
       <p class="ecard-title">🌍 Chi può vedere la pagina?</p>
       <label>Stato pagina
@@ -2252,12 +2280,12 @@ function syncEditorProgress(){
 function renderEditorProgress(){
   const current = editorProgressStep();
   const steps = [
-    { n:1, label:"Copertina", panel:"cover", group:"design" },
-    { n:2, label:"Colori", panel:"styling", group:"design" },
-    { n:3, label:"Contenuti", panel:"content", group:"content" },
-    { n:4, label:"Pubblica", panel:"privacy", group:"page" }
+    { n:1, label:t("nav.cover"), panel:"cover", group:"design" },
+    { n:2, label:t("nav.colors"), panel:"styling", group:"design" },
+    { n:3, label:t("nav.content"), panel:"content", group:"content" },
+    { n:4, label:t("nav.publish"), panel:"privacy", group:"page" }
   ];
-  return `<nav class="editor-progress" aria-label="Passi rapidi">${steps.map(step=>`<button type="button" class="editor-progress-step ${current === step.n ? "active" : ""} ${current > step.n ? "done" : ""}" data-progress-step="${step.n}" data-progress-panel="${esc(step.panel)}" data-progress-group="${esc(step.group)}"><span class="editor-progress-num">${step.n}</span><span class="editor-progress-label">${esc(step.label)}</span></button>`).join("")}</nav>`;
+  return `<nav class="editor-progress" aria-label="${esc(t("nav.aria.progress"))}">${steps.map(step=>`<button type="button" class="editor-progress-step ${current === step.n ? "active" : ""} ${current > step.n ? "done" : ""}" data-progress-step="${step.n}" data-progress-panel="${esc(step.panel)}" data-progress-group="${esc(step.group)}"><span class="editor-progress-num">${step.n}</span><span class="editor-progress-label">${esc(step.label)}</span></button>`).join("")}</nav>`;
 }
 
 function bindEditorProgress(root){
@@ -2346,6 +2374,38 @@ function updateSaveStatus(saved){
     button.hidden = saved;
     button.disabled = saved;
   });
+}
+
+function refreshNavChrome(){
+  ensureMobileNav();
+  const progressMap = {
+    1: "nav.cover",
+    2: "nav.colors",
+    3: "nav.content",
+    4: "nav.publish"
+  };
+  document.querySelectorAll(".editor-progress-step").forEach(node=>{
+    const n = Number(node.dataset.progressStep);
+    const label = node.querySelector(".editor-progress-label");
+    if(label && progressMap[n]) label.textContent = t(progressMap[n]);
+    const nav = node.closest(".editor-progress");
+    if(nav) nav.setAttribute("aria-label", t("nav.aria.progress"));
+  });
+  const help = document.querySelector(".editor-topbar-help");
+  if(help){
+    help.setAttribute("data-i18n-html", "nav.help_html");
+    help.innerHTML = t("nav.help_html");
+  }
+  const sidebar = document.querySelector("#momentEditorShell .editor-sidebar");
+  if(!sidebar || !activeId) return;
+  const row = rows.find(item => item.id === activeId);
+  if(!row) return;
+  const state = mergedState(row);
+  const enabled = Object.fromEntries(Object.entries(state.sections || {}).map(([k,v])=>[k, Boolean(v?.enabled)]));
+  const next = renderEditorSidebar(activeEditorPanel, state.type, state.pinned_sections || pinnedExtraSections, enabled);
+  sidebar.outerHTML = next;
+  const shell = document.getElementById("momentEditorShell");
+  if(shell) bindEditorNavigation(shell);
 }
 
 function refreshShellChrome(){
@@ -2633,7 +2693,7 @@ function renderDetail(id){
       </div>
       <p class="editor-action-hint" id="editorActionHint" hidden></p>
       ${renderEditorProgress()}
-      <p class="editor-topbar-help">4 passi · tocca la barra sopra per saltare · <strong>Salva</strong> quando hai finito</p>
+      <p class="editor-topbar-help" data-i18n-html="nav.help_html">${t("nav.help_html")}</p>
       <div class="editor-layout">
         ${renderEditorSidebar(activeEditorPanel, state.type, state.pinned_sections || [], Object.fromEntries(Object.entries(state.sections || {}).map(([k,v])=>[k, Boolean(v?.enabled)])))}
         <div class="editor-main">
@@ -4156,6 +4216,8 @@ registerMessages("it", SHELL_MESSAGES_IT);
 registerMessages("en", SHELL_MESSAGES_EN);
 registerMessages("it", SAVE_MESSAGES_IT);
 registerMessages("en", SAVE_MESSAGES_EN);
+registerMessages("it", NAV_MESSAGES_IT);
+registerMessages("en", NAV_MESSAGES_EN);
 applyDocumentLang(getUiLocale());
 
 function syncLangSwitchers(locale = getUiLocale()){
@@ -4171,6 +4233,7 @@ function syncLangSwitchers(locale = getUiLocale()){
   applyChromeI18n(document);
   try{
     refreshShellChrome();
+    refreshNavChrome();
     if(currentUser) refreshAccountMenu();
     if(appView === "account") renderAccountPanels();
     if(document.getElementById("emptyActivationForm")) renderEmptyState();

@@ -6,6 +6,14 @@ import {
   mediaLimitsFromPlan,
   normalizePlanLimits
 } from "./moment-plans.js?v=173";
+import { getUiLocale } from "./moments-i18n.js?v=212";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=212";
+
+function lf(text){
+  const raw = String(text || "");
+  if(!raw || getUiLocale() === "it") return raw;
+  return FIELD_PHRASE_EN[raw] || raw;
+}
 
 export const MAX_GALLERY_ITEMS = DEFAULT_MOMENTS_LIMITS.gallery_images;
 export const MAX_GALLERY_VIDEOS = 0;
@@ -185,7 +193,8 @@ export function mediaThumbHtml(item,{editable = false,index = 0,sectionKey = "ga
 /** Riga editor con titolo e descrizione visibili per ogni file. */
 export function mediaEditorRowHtml(item,{index = 0,sectionKey = "gallery"} = {}){
   const safe = normalizeMediaItem(item);
-  const typeLabel = safe.type === "video" ? "Video" : safe.type === "audio" ? "Audio" : safe.type === "pdf" ? "PDF" : "Foto";
+  const typeLabelIt = safe.type === "video" ? "Video" : safe.type === "audio" ? "Audio" : safe.type === "pdf" ? "PDF" : "Foto";
+  const typeLabel = lf(typeLabelIt);
   const preview = safe.type === "image"
     ? `<img src="${escAttr(safe.url)}" alt="" loading="lazy" decoding="async">`
     : safe.type === "video"
@@ -193,18 +202,20 @@ export function mediaEditorRowHtml(item,{index = 0,sectionKey = "gallery"} = {})
       : safe.type === "pdf"
         ? `<div class="media-pdf-row-icon" aria-hidden="true">PDF</div>`
         : `<div class="media-audio-row-icon" aria-hidden="true">♫</div>`;
-  const replaceLabel = safe.type === "image" ? "Cambia foto"
+  const replaceLabelIt = safe.type === "image" ? "Cambia foto"
     : safe.type === "video" ? "Cambia video"
       : safe.type === "pdf" ? "Cambia PDF"
         : "Cambia audio";
+  const titlePh = "Es. Il nostro primo giorno";
+  const descPh = "Racconta questo ricordo...";
   return `<article class="media-edit-row media-edit-row-${safe.type}" data-media-id="${escAttr(safe.id)}" data-media-index="${index}" data-media-section="${escAttr(sectionKey)}">
     <div class="media-edit-preview" aria-label="${escAttr(typeLabel)}">${preview}</div>
     <div class="media-edit-fields">
-      <label class="media-edit-label">Titolo<input class="media-row-title" type="text" value="${escAttr(safe.title)}" placeholder="Es. Il nostro primo giorno" maxlength="120"></label>
-      <label class="media-edit-label">Descrizione<textarea class="media-row-desc" rows="2" placeholder="Racconta questo ricordo...">${escHtml(safe.description)}</textarea></label>
+      <label class="media-edit-label"><span data-lf="Titolo">${escHtml(lf("Titolo"))}</span><input class="media-row-title" type="text" value="${escAttr(safe.title)}" placeholder="${escAttr(lf(titlePh))}" data-lf-placeholder="${escAttr(titlePh)}" maxlength="120"></label>
+      <label class="media-edit-label"><span data-lf="Descrizione">${escHtml(lf("Descrizione"))}</span><textarea class="media-row-desc" rows="2" placeholder="${escAttr(lf(descPh))}" data-lf-placeholder="${escAttr(descPh)}">${escHtml(safe.description)}</textarea></label>
       <div class="media-edit-actions">
-        <button type="button" class="media-edit-replace" data-gallery-replace="${index}" data-media-id="${escAttr(safe.id)}" data-media-section="${escAttr(sectionKey)}" data-media-type="${escAttr(safe.type)}">${escHtml(replaceLabel)}</button>
-        <button type="button" class="media-edit-remove" data-gallery-remove="${index}" data-media-id="${escAttr(safe.id)}" data-media-section="${escAttr(sectionKey)}">Rimuovi</button>
+        <button type="button" class="media-edit-replace" data-gallery-replace="${index}" data-media-id="${escAttr(safe.id)}" data-media-section="${escAttr(sectionKey)}" data-media-type="${escAttr(safe.type)}" data-lf="${escAttr(replaceLabelIt)}">${escHtml(lf(replaceLabelIt))}</button>
+        <button type="button" class="media-edit-remove" data-gallery-remove="${index}" data-media-id="${escAttr(safe.id)}" data-media-section="${escAttr(sectionKey)}" data-lf="Rimuovi">${escHtml(lf("Rimuovi"))}</button>
       </div>
     </div>
   </article>`;

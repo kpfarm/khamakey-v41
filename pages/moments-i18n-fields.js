@@ -322,5 +322,17 @@ export const FIELD_PHRASE_EN = {
   "Nessuna pdf ancora.": "No PDFs yet.",
   "In pagina: foto grandi, titolo e descrizione sotto ciascuna; tap per ingrandire.": "On the page: large photos, title and description under each; tap to enlarge.",
   "Messaggi vocali e registrazioni — si sbloccano con la lettera.": "Voice notes and recordings — unlock with the letter.",
-  "Documenti e lettere in PDF — si aprono dopo lo sblocco.": "PDF documents and letters — open after unlock."
+  "Documenti e lettere in PDF — si aprono dopo lo sblocco.": "PDF documents and letters — open after unlock.",
+
+  // 11e6d — Media title/description modal + inline row chrome (no upload handlers)
+  "Titolo": "Title",
+  "Descrizione": "Description",
+  "Es. Il nostro primo giorno": "e.g. Our first day",
+  "Racconta questo ricordo...": "Tell this memory...",
+  "Salva dettagli": "Save details",
+  "Chiudi": "Close",
+  "Cambia foto": "Change photo",
+  "Cambia video": "Change video",
+  "Cambia audio": "Change audio",
+  "Cambia PDF": "Change PDF"
 };

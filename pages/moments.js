@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=211";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=211";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=211";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=211";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=211";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=211";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=211";
+} from "./moments-i18n.js?v=212";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=212";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=212";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=212";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=212";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=212";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=212";
 import {
   uploadImage,
   uploadVideo,
@@ -47,10 +47,11 @@ import {
   syncCoverFramer,
   bindGalleryMediaInteractions,
   ensureMediaModals,
+  syncMediaModalChrome,
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=211";
+} from "./moments-media-ui.js?v=212";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -59,13 +60,13 @@ import {
   renderJourneyFileInput,
   bindJourneyEditor,
   uploadJourneyStepPhoto
-} from "./moments-journey-ui.js?v=211";
+} from "./moments-journey-ui.js?v=212";
 import {
   migrateLetterMediaSection,
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
   setActivePlanLimits
-} from "./moment-media.js?v=173";
+} from "./moment-media.js?v=212";
 import {
   emptyEntitlements,
   fetchMomentEntitlements,
@@ -84,7 +85,7 @@ import {
   writeListItems,
   readListItems,
   bindListItemsEditor
-} from "./moments-list-ui.js?v=211";
+} from "./moments-list-ui.js?v=212";
 import { journeyStepId, MAX_JOURNEY_STEPS, normalizeJourneyStep, resolveJourneySteps, compactJourneySteps } from "./moment-journey.js";
 import {
   COLOR_PALETTES,
@@ -4429,6 +4430,7 @@ function syncLangSwitchers(locale = getUiLocale()){
       for(const key of ["gallery","video","music","letter_future"]){
         if(editorForm.querySelector(`#galleryOrganized_${key}`)) renderGalleryGrid(editorForm, key);
       }
+      syncMediaModalChrome();
     }
     if(currentUser) refreshAccountMenu();
     if(appView === "account") renderAccountPanels();

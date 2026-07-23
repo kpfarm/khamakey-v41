@@ -45,7 +45,7 @@ Steps 1–9 = auth, shell, nav, etichette/sottotitoli sezioni, toast, chrome `/m
     - [x] **11e6a** (v209) — Foto sezione: Carica foto / Rimuovi (no logica upload)
     - [x] **11e6b** (v210) — Intro pannello galleria/video/audio (solo testi)
     - [x] **11e6c** (v211) — Griglia media (etichette gruppi / empty / add)
-    - [ ] 11e6d Modal titolo/descrizione media
+    - [x] **11e6d** (v212) — Modal + campi Titolo/Descrizione riga (no upload logic)
     - [ ] 11e6e Messaggi errore/status upload (dopo smoke 6a–6d)
 
 ## 11e — sotto-slice (una release ciascuna)

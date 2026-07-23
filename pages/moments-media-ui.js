@@ -14,9 +14,9 @@ import {
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
   migrateLetterMediaSection
-} from "./moment-media.js?v=173";
-import { getUiLocale } from "./moments-i18n.js?v=211";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=211";
+} from "./moment-media.js?v=212";
+import { getUiLocale } from "./moments-i18n.js?v=212";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=212";
 
 let mediaEditContext = null;
 
@@ -246,19 +246,39 @@ export function ensureMediaModals(root=document.body){
   modal.id = "momentMediaModal";
   modal.className = "media-modal";
   modal.hidden = true;
+  const titlePh = "Es. Il nostro primo giorno";
+  const descPh = "Racconta questo ricordo...";
   modal.innerHTML = `<div class="media-modal-backdrop" data-close-media-modal></div>
     <div class="media-modal-card" role="dialog" aria-modal="true" aria-labelledby="mediaModalTitle">
-      <button type="button" class="media-modal-close" data-close-media-modal aria-label="Chiudi">×</button>
+      <button type="button" class="media-modal-close" data-close-media-modal aria-label="${esc(lf("Chiudi"))}" data-lf-aria="Chiudi">×</button>
       <div class="media-modal-preview" id="mediaModalPreview"></div>
-      <label>Titolo<input id="mediaModalTitleInput" placeholder="Es. Il nostro primo giorno"></label>
-      <label>Descrizione<textarea id="mediaModalDescInput" placeholder="Racconta questo ricordo..."></textarea></label>
-      <button type="button" class="primary" id="mediaModalSaveBtn">Salva dettagli</button>
+      <label><span data-lf="Titolo">${esc(lf("Titolo"))}</span><input id="mediaModalTitleInput" placeholder="${esc(lf(titlePh))}" data-lf-placeholder="${esc(titlePh)}"></label>
+      <label><span data-lf="Descrizione">${esc(lf("Descrizione"))}</span><textarea id="mediaModalDescInput" placeholder="${esc(lf(descPh))}" data-lf-placeholder="${esc(descPh)}"></textarea></label>
+      <button type="button" class="primary" id="mediaModalSaveBtn" data-lf="Salva dettagli">${esc(lf("Salva dettagli"))}</button>
     </div>`;
   root.appendChild(modal);
   modal.querySelectorAll("[data-close-media-modal]").forEach(node=>{
     node.addEventListener("click",closeMediaModal);
   });
   document.getElementById("mediaModalSaveBtn")?.addEventListener("click",saveMediaModal);
+}
+
+/** Refresh modal chrome after locale toggle (IDs/handlers unchanged). */
+export function syncMediaModalChrome(){
+  const modal = document.getElementById("momentMediaModal");
+  if(!modal) return;
+  modal.querySelectorAll("[data-lf]").forEach(el=>{
+    const src = el.getAttribute("data-lf");
+    if(src != null) el.textContent = lf(src);
+  });
+  modal.querySelectorAll("[data-lf-placeholder]").forEach(el=>{
+    const src = el.getAttribute("data-lf-placeholder");
+    if(src != null) el.setAttribute("placeholder", lf(src));
+  });
+  modal.querySelectorAll("[data-lf-aria]").forEach(el=>{
+    const src = el.getAttribute("data-lf-aria");
+    if(src != null) el.setAttribute("aria-label", lf(src));
+  });
 }
 
 export function openMediaModal(formNode,key,index){

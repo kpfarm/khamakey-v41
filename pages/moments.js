@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=214";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=214";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=214";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=214";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=214";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=214";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=214";
+} from "./moments-i18n.js?v=215";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=215";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=215";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=215";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=215";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=215";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=215";
 import {
   uploadImage,
   uploadVideo,
@@ -48,10 +48,11 @@ import {
   bindGalleryMediaInteractions,
   ensureMediaModals,
   syncMediaModalChrome,
+  syncGalleryUploadStatusChrome,
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=214";
+} from "./moments-media-ui.js?v=215";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -60,13 +61,13 @@ import {
   renderJourneyFileInput,
   bindJourneyEditor,
   uploadJourneyStepPhoto
-} from "./moments-journey-ui.js?v=214";
+} from "./moments-journey-ui.js?v=215";
 import {
   migrateLetterMediaSection,
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
   setActivePlanLimits
-} from "./moment-media.js?v=214";
+} from "./moment-media.js?v=215";
 import {
   emptyEntitlements,
   fetchMomentEntitlements,
@@ -85,7 +86,7 @@ import {
   writeListItems,
   readListItems,
   bindListItemsEditor
-} from "./moments-list-ui.js?v=214";
+} from "./moments-list-ui.js?v=215";
 import { journeyStepId, MAX_JOURNEY_STEPS, normalizeJourneyStep, resolveJourneySteps, compactJourneySteps } from "./moment-journey.js";
 import {
   COLOR_PALETTES,
@@ -145,10 +146,10 @@ import {
   sectionFillGuideForType,
   primarySectionsForType
 } from "./moment-editor-kit.js?v=186";
-import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=214";
+import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=215";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderMomentDashboardShell, bindMomentDashboard } from "./moment-editor-dashboard.js";
-import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=214";
+import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=215";
 import {
   renderHoroscopePeoplePanel,
   bindHoroscopePeopleEditor,
@@ -2571,20 +2572,27 @@ function refreshNavChrome(){
     help.setAttribute("data-i18n-html", "nav.help_html");
     help.innerHTML = t("nav.help_html");
   }
-  const sidebar = document.querySelector("#momentEditorShell .editor-sidebar");
-  if(!sidebar || !activeId) return;
-  const row = rows.find(item => item.id === activeId);
-  if(!row) return;
-  const state = mergedState(row);
-  const enabled = Object.fromEntries(Object.entries(state.sections || {}).map(([k,v])=>[k, Boolean(v?.enabled)]));
-  const next = renderEditorSidebar(activeEditorPanel, state.type, state.pinned_sections || pinnedExtraSections, enabled);
-  sidebar.outerHTML = next;
-  const shell = document.getElementById("momentEditorShell");
-  if(shell) bindEditorNavigation(shell);
   const form = document.getElementById("momentEditorForm");
-  if(form){
-    syncEditorKitUi(form);
-    refreshSectionOrderList(form);
+  const sidebar = document.querySelector("#momentEditorShell .editor-sidebar");
+  if(sidebar && activeId){
+    const row = rows.find(item => item.id === activeId);
+    if(row){
+      try{
+        const state = mergedState(row);
+        const enabled = Object.fromEntries(Object.entries(state.sections || {}).map(([k,v])=>[k, Boolean(v?.enabled)]));
+        const next = renderEditorSidebar(activeEditorPanel, state.type, state.pinned_sections || pinnedExtraSections, enabled);
+        sidebar.outerHTML = next;
+        const shell = document.getElementById("momentEditorShell");
+        if(shell) bindEditorNavigation(shell);
+      }catch(error){
+        console.warn("i18n sidebar refresh", error);
+      }
+    }
+  }
+  const liveForm = document.getElementById("momentEditorForm") || form;
+  if(liveForm){
+    syncEditorKitUi(liveForm);
+    refreshSectionOrderList(liveForm);
   }
 }
 
@@ -3094,6 +3102,9 @@ function setUploadStatus(node,message="",type=""){
   if(!node) return;
   node.textContent = message;
   node.className = `field-hint ${type}`.trim();
+  if(node.id && String(node.id).startsWith("galleryUploadStatus_")){
+    node.dataset.galleryStatusDefault = type || !message ? "1" : "0";
+  }
 }
 
 function setCoverUrl(formNode, url){
@@ -4427,26 +4438,30 @@ function syncLangSwitchers(locale = getUiLocale()){
     });
   });
   applyChromeI18n(document);
-  try{
-    refreshShellChrome();
-    refreshNavChrome();
-    syncFieldChromeI18n(document.getElementById("momentEditorForm") || document);
-    const editorForm = document.getElementById("momentEditorForm");
-    if(editorForm){
-      for(const key of LIST_SECTION_KEYS) renderListItems(editorForm, key);
-      renderJourneySteps(editorForm, "timeline");
+  const editorForm = document.getElementById("momentEditorForm");
+  const run = (label, fn)=>{
+    try{ fn(); }catch(error){ console.warn(`i18n refresh:${label}`, error); }
+  };
+  run("shell", ()=>refreshShellChrome());
+  run("nav", ()=>refreshNavChrome());
+  // Always re-apply field chrome + kit titles after nav (even if sidebar rebuild failed).
+  run("kit", ()=>{ if(editorForm) syncEditorKitUi(editorForm); });
+  run("fields", ()=>syncFieldChromeI18n(editorForm || document));
+  if(editorForm){
+    run("lists", ()=>{ for(const key of LIST_SECTION_KEYS) renderListItems(editorForm, key); });
+    run("journey", ()=>renderJourneySteps(editorForm, "timeline"));
+    run("gallery", ()=>{
       for(const key of ["gallery","video","music","letter_future"]){
         if(editorForm.querySelector(`#galleryOrganized_${key}`)) renderGalleryGrid(editorForm, key);
       }
-      syncMediaModalChrome();
-      refreshRsvpShareLocale(editorForm);
-    }
-    if(currentUser) refreshAccountMenu();
-    if(appView === "account") renderAccountPanels();
-    if(document.getElementById("emptyActivationForm")) renderEmptyState();
-  }catch(error){
-    console.warn("i18n refresh", error);
+      syncGalleryUploadStatusChrome(editorForm);
+    });
+    run("mediaModal", ()=>syncMediaModalChrome());
+    run("rsvpShare", ()=>refreshRsvpShareLocale(editorForm));
   }
+  run("accountMenu", ()=>{ if(currentUser) refreshAccountMenu(); });
+  run("accountPanels", ()=>{ if(appView === "account") renderAccountPanels(); });
+  run("empty", ()=>{ if(document.getElementById("emptyActivationForm")) renderEmptyState(); });
 }
 
 function bindLangSwitchers(){

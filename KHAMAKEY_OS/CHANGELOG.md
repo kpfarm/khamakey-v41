@@ -19,6 +19,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - `syncLangSwitchers` leggeva `appView` in TDZ → ReferenceError → schermo “Apertura in corso…” infinito.
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
+### Fixed
+- **Moments v215 — toggle lingua resta in EN (2026-07-23, Cursor)** — Pages
+  - Refresh IT/EN a step isolati: titoli sezioni/kit ripristinati anche se rebuild sidebar fallisce.
+  - Status hint galleria/video/audio ripristinato al cambio lingua.
+
 ### Added
 - **Moments v214 + Worker v184 — RSVP WhatsApp i18n (2026-07-23, Cursor)** — Pages + Worker
   - Messaggio conferma WA e invito “Condividi” IT|EN (locale visitatore / toggle editor).

@@ -15,9 +15,9 @@ import {
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
   migrateLetterMediaSection
-} from "./moment-media.js?v=214";
-import { getUiLocale } from "./moments-i18n.js?v=214";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=214";
+} from "./moment-media.js?v=215";
+import { getUiLocale } from "./moments-i18n.js?v=215";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=215";
 
 let mediaEditContext = null;
 
@@ -586,8 +586,23 @@ export function renderGalleryUploadPanel(section,key){
     <div class="gallery-steps">${intro}</div>
     <div class="gallery-organized" id="galleryOrganized_${key}"></div>
     <textarea name="section_${key}_media" class="gallery-media-json" aria-hidden="true" tabindex="-1">${esc(serializeMediaList(seeded))}</textarea>
-    <p class="field-hint" id="galleryUploadStatus_${key}">${esc(footer)}</p>
+    <p class="field-hint" id="galleryUploadStatus_${key}" data-gallery-status-default="1">${esc(footer)}</p>
   </div>`;
+}
+
+/** Refresh default gallery/video/music/letter status hints after locale toggle (not live upload errors). */
+export function syncGalleryUploadStatusChrome(formNode){
+  if(!formNode) return;
+  for(const key of ["gallery", "video", "music", "letter_future"]){
+    const el = document.getElementById(`galleryUploadStatus_${key}`);
+    if(!el || !formNode.querySelector(`[data-gallery-key="${key}"]`)) continue;
+    if(el.dataset.galleryStatusDefault !== "1" && el.classList.contains("error")) continue;
+    const count = readGalleryMedia(formNode, key).length;
+    const ready = count ? lfFill("{n} file pronti. ", { n: count }) : "";
+    el.textContent = `${ready}${localizedLimitsHint(key)}`;
+    el.className = "field-hint";
+    el.dataset.galleryStatusDefault = "1";
+  }
 }
 
 export function renderSectionPhotoPanel(key, section, fieldName, { previewId, fileId, label = "Carica foto" } = {}){

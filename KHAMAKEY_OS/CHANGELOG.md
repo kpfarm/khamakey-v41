@@ -20,6 +20,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
 ### Added
+- **Worker v183 — Moments `/m/` i18n Step 9 (2026-07-23, Cursor)** — Worker
+  - Chrome pubblica IT/EN: PIN, footer, privacy notice, lightbox, contatore, RSVP/guestbook form, hint gallery/video.
+  - Locale: `?lang=en|it` oppure `Accept-Language` visitatore; default IT. Non usa `uiLocale` editor.
+  - `Vary: Accept-Language` sulle risposte `/m/`.
+- **Docs — i18n Moments Step 8 smoke (2026-07-23, Cursor)** — Docs
+  - `docs/28-moments-i18n-smoke.md`: A+B verificati live; C da slice 6–7.
 - **Moments v198 — i18n sections Step 7c (2026-07-23, Cursor)** — Pages
   - `SECTION_SUBTITLE_EN`: sottotitoli header pannello (`.section-sub`) + extras; refresh al toggle lingua.
   - Campi form / hint ancora IT; Worker `/m/` invariato.

@@ -1,9 +1,9 @@
 # 27 — Moments i18n: regole (Step 2)
 
-> **Data:** 2026-07-23 · **Stato:** regole ok · **Step 7c sottotitoli (v198)** · translate=no  
+> **Data:** 2026-07-23 · **Stato:** regole ok · **Step 9 Worker `/m/` (v183)** · editor v198 · translate=no  
 > Decisione formale: [`decisions/007-moments-editor-i18n.md`](../decisions/007-moments-editor-i18n.md)  
-> Inventario: [`26-moments-i18n-inventory.md`](26-moments-i18n-inventory.md)  
-> Moduli: `moments-i18n.js` · `moments-i18n-auth.js` · `moments-i18n-shell.js` · `moments-i18n-sections.js`
+> Inventario: [`26-moments-i18n-inventory.md`](26-moments-i18n-inventory.md) · Smoke: [`28-moments-i18n-smoke.md`](28-moments-i18n-smoke.md)  
+> Moduli: `moments-i18n.js` · `moments-i18n-auth.js` · `moments-i18n-shell.js` · `moments-i18n-sections.js` · Worker `MOMENTS_PUBLIC_I18N`
 
 ## In una frase
 
@@ -55,4 +55,4 @@ Clicca IT
 
 ## Prossimo passo
 
-**Step 8** — smoke QA IT/EN (boot, Salva, toggle, sezioni). Poi Step 9 Worker `/m/` chrome.
+**Step 10** — chiudere release (docs già aggiornati). Opzionale dopo: campi form editor EN, template seed EN, Privacy/Terms EN.

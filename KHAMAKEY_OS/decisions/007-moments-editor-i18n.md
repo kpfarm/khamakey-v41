@@ -1,8 +1,9 @@
 # ADR-007: Moments editor i18n (IT / EN)
 
 **Data:** 2026-07-23  
-**Stato:** Accettata · Step 5 auth + Step 6a shell (Moments v192); sezioni/toasts = 6b–7; Worker = 9  
-**Inventario:** [`docs/26-moments-i18n-inventory.md`](../docs/26-moments-i18n-inventory.md)
+**Stato:** Accettata · Steps 1–9 fatti (editor v198 + Worker v183 Moments `/m/` chrome)  
+**Inventario:** [`docs/26-moments-i18n-inventory.md`](../docs/26-moments-i18n-inventory.md)  
+**Smoke:** [`docs/28-moments-i18n-smoke.md`](../docs/28-moments-i18n-smoke.md)
 
 ## Contesto
 
@@ -52,13 +53,15 @@ Esiste già i18n **Business** basato su snapshot + `Accept-Language` nel Worker.
 - L’anteprima mostra i **contenuti** come salvati (lingua del cliente).
 - Le uniche stringhe EN nell’anteprima, se presenti, sono chrome Worker (fase 9) — non i campi titolo/storia.
 
-### Pagina pubblica `/m/` (fase 9 — regole distinte)
+### Pagina pubblica `/m/` (fase 9 — implementata Worker v183)
 
 - **Contenuti cliente:** invariati (quello che ha scritto).
-- **Chrome fissa Worker** (PIN, notice, label RSVP fisse):
+- **Chrome fissa Worker** (PIN, notice, RSVP/guestbook form, contatore, lightbox):
   - default `it`
-  - può usare `Accept-Language` del **visitatore** *oppure* `?lang=en` per forzare — decisione implementativa in Step 9
-  - **non** dipende da `khamakey.moments.uiLocale` del proprietario (quel flag è solo editor sul suo browser)
+  - `?lang=en` o `?lang=it` forza la lingua
+  - altrimenti `Accept-Language` del **visitatore** (solo `it`/`en`)
+  - **non** dipende da `khamakey.moments.uiLocale` del proprietario
+- Header `Vary: Accept-Language` sulle risposte `/m/`
 - Non attivare il sistema snapshot Business (`state.i18n`) su Moments.
 
 ### Implementazione (vincoli tecnici, da Step 3+)

@@ -73,6 +73,7 @@ KHAMAKEY_OS/
 | **Basi solide per ~10k Moments** | [`docs/24-pronti-per-10k-moments.md`](docs/24-pronti-per-10k-moments.md) |
 | Monitoraggio Moments | [`docs/25-monitoraggio-moments.md`](docs/25-monitoraggio-moments.md) |
 | **i18n Moments IT/EN — inventario** | [`docs/26-moments-i18n-inventory.md`](docs/26-moments-i18n-inventory.md) |
+| **i18n Moments IT/EN — smoke Step 8** | [`docs/28-moments-i18n-smoke.md`](docs/28-moments-i18n-smoke.md) |
 | **i18n Moments IT/EN — regole** | [`docs/27-moments-i18n-rules.md`](docs/27-moments-i18n-rules.md) · ADR [`decisions/007-moments-editor-i18n.md`](decisions/007-moments-editor-i18n.md) |
 
 ## Prompt operativi

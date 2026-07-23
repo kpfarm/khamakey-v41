@@ -95,8 +95,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v178** | Reset pezzo reso/refurb (SQL v167): nuovo codice attivazione, stesso slug NFC. |
-| **Moments editor** | **v198** | i18n Step 7c: sottotitoli pannelli/sezioni EN; campi form ancora IT. |
-| **Worker NFC** | **v182-hero-description** | Hero: frase sotto titolo + descrizione breve; oroscopo snack giornale. |
+| **Worker NFC** | **v183-moments-i18n** | Chrome `/m/` IT/EN (`?lang=` o Accept-Language); contenuti cliente invariati. |
+| **Moments editor** | **v198** | i18n Step 7c + Step 8 smoke; campi form ancora IT. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v167 (prod)** | v167 reset pezzo reso; v166 USAGE `app_private`; v165 ingest store. |

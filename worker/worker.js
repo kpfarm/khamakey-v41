@@ -10,7 +10,154 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v182-hero-description";
+const WORKER_VERSION = "v183-moments-i18n";
+
+/** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
+const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
+const MOMENTS_PUBLIC_I18N = {
+  it: {
+    "pin.fallback_title": "Moment protetto",
+    "pin.prompt": "Inserisci il PIN per aprire questa pagina KhamaKey Moments.",
+    "pin.wrong": "PIN non corretto.",
+    "pin.submit": "Apri pagina",
+    "empty.title": "Pagina in preparazione",
+    "empty.body": "Il proprietario sta ancora scegliendo i contenuti da mostrare.",
+    "meta.default_desc": "Un ricordo da custodire nel tempo.",
+    "footer.made": "Creato con cura · KhamaKey Moments",
+    "footer.legal_aria": "Informazioni legali",
+    "privacy.notice": "Questa pagina usa misure di sicurezza tecniche lato server. Non usiamo cookie di marketing. Dettagli nella Privacy Policy.",
+    "privacy.got_it": "Ho capito",
+    "legal.privacy": "Privacy",
+    "legal.terms": "Termini",
+    "lightbox.prev": "Precedente",
+    "lightbox.next": "Successivo",
+    "lightbox.close": "Chiudi",
+    "nav.aria": "Sezioni pagina",
+    "nav.home": "Home",
+    "nav.counter": "Contatore",
+    "nav.menu": "Menu sezioni",
+    "nav.sections": "Sezioni",
+    "nav.close": "Chiudi",
+    "counter.years": "anni",
+    "counter.months": "mesi",
+    "counter.days": "giorni",
+    "counter.hours": "ore",
+    "counter.minutes": "minuti",
+    "counter.seconds": "secondi",
+    "counter.default_label": "Insieme da",
+    "gallery.hint": "Scorri gli allegati · tocca per aprire",
+    "gallery.photos_hint": "Scorri le foto · tocca ＋ per ingrandire",
+    "gallery.journey_hint": "Scorri le tappe",
+    "video.open": "Apri video",
+    "video.tap_one": "Tocca ▶ per aprire",
+    "video.tap_many": "Scorri i video · tocca ▶ per aprire",
+    "rsvp.default_title": "Conferma presenza",
+    "rsvp.name": "Nome e cognome",
+    "rsvp.name_ph": "Es. Marco Rossi",
+    "rsvp.coming": "Vieni?",
+    "rsvp.yes": "Sì, ci sarò",
+    "rsvp.no": "No, non posso",
+    "rsvp.maybe": "Forse",
+    "rsvp.submit_wa": "Invia su WhatsApp",
+    "rsvp.submit": "Invia conferma",
+    "rsvp.sending_btn": "Invio…",
+    "rsvp.need_fields": "Compila nome e presenza.",
+    "rsvp.sending": "Invio in corso…",
+    "rsvp.saved_wa": "Conferma salvata. Apro WhatsApp…",
+    "rsvp.thanks": "Grazie! La tua conferma è stata inviata.",
+    "rsvp.fail": "Invio non riuscito. Riprova.",
+    "rsvp.no_wa": "Inserisci il numero WhatsApp dell'organizzatore nell'editor e salva: senza WhatsApp la sezione non appare agli invitati.",
+    "guestbook.default_title": "Libro degli ospiti",
+    "guestbook.name": "Il tuo nome",
+    "guestbook.name_ph": "Es. Laura Bianchi",
+    "guestbook.message": "Il tuo messaggio",
+    "guestbook.message_ph": "Scrivi un pensiero, un augurio o un ricordo…",
+    "guestbook.submit": "Invia messaggio",
+    "guestbook.paused": "Il libro degli ospiti è temporaneamente in pausa. Tornerà disponibile a breve.",
+    "guestbook.empty": "Sii il primo a lasciare un pensiero.",
+    "guestbook.need_publish": "Il guestbook funziona sulla pagina pubblicata. Pubblica la pagina e apri il link condiviso."
+  },
+  en: {
+    "pin.fallback_title": "Protected Moment",
+    "pin.prompt": "Enter the PIN to open this KhamaKey Moments page.",
+    "pin.wrong": "Incorrect PIN.",
+    "pin.submit": "Open page",
+    "empty.title": "Page in progress",
+    "empty.body": "The owner is still choosing what to show.",
+    "meta.default_desc": "A memory to keep through time.",
+    "footer.made": "Made with care · KhamaKey Moments",
+    "footer.legal_aria": "Legal",
+    "privacy.notice": "This page uses technical server-side security measures. We don’t use marketing cookies. Details in the Privacy Policy.",
+    "privacy.got_it": "Got it",
+    "legal.privacy": "Privacy",
+    "legal.terms": "Terms",
+    "lightbox.prev": "Previous",
+    "lightbox.next": "Next",
+    "lightbox.close": "Close",
+    "nav.aria": "Page sections",
+    "nav.home": "Home",
+    "nav.counter": "Counter",
+    "nav.menu": "Sections menu",
+    "nav.sections": "Sections",
+    "nav.close": "Close",
+    "counter.years": "years",
+    "counter.months": "months",
+    "counter.days": "days",
+    "counter.hours": "hours",
+    "counter.minutes": "minutes",
+    "counter.seconds": "seconds",
+    "counter.default_label": "Together since",
+    "gallery.hint": "Swipe attachments · tap to open",
+    "gallery.photos_hint": "Swipe photos · tap ＋ to enlarge",
+    "gallery.journey_hint": "Swipe the stops",
+    "video.open": "Open video",
+    "video.tap_one": "Tap ▶ to open",
+    "video.tap_many": "Swipe videos · tap ▶ to open",
+    "rsvp.default_title": "Confirm attendance",
+    "rsvp.name": "Full name",
+    "rsvp.name_ph": "e.g. Alex Smith",
+    "rsvp.coming": "Coming?",
+    "rsvp.yes": "Yes, I’ll be there",
+    "rsvp.no": "No, I can’t",
+    "rsvp.maybe": "Maybe",
+    "rsvp.submit_wa": "Send on WhatsApp",
+    "rsvp.submit": "Send confirmation",
+    "rsvp.sending_btn": "Sending…",
+    "rsvp.need_fields": "Please fill in name and attendance.",
+    "rsvp.sending": "Sending…",
+    "rsvp.saved_wa": "Saved. Opening WhatsApp…",
+    "rsvp.thanks": "Thank you! Your confirmation was sent.",
+    "rsvp.fail": "Couldn’t send. Please try again.",
+    "rsvp.no_wa": "Add the organiser’s WhatsApp number in the editor and save — without it guests won’t see this section.",
+    "guestbook.default_title": "Guestbook",
+    "guestbook.name": "Your name",
+    "guestbook.name_ph": "e.g. Sam Lee",
+    "guestbook.message": "Your message",
+    "guestbook.message_ph": "Write a thought, wish or memory…",
+    "guestbook.submit": "Send message",
+    "guestbook.paused": "The guestbook is temporarily paused. It will be back soon.",
+    "guestbook.empty": "Be the first to leave a note.",
+    "guestbook.need_publish": "The guestbook works on the published page. Publish and open the shared link."
+  }
+};
+
+function resolveMomentsPublicLocale(request) {
+  try {
+    const url = new URL(request.url);
+    const forced = String(url.searchParams.get("lang") || "").toLowerCase().slice(0, 2);
+    if (MOMENTS_PUBLIC_LOCALES.includes(forced)) return forced;
+  } catch { /* ignore */ }
+  const preferred = parseAcceptLanguage(request.headers.get("Accept-Language"));
+  for (const code of preferred) {
+    if (MOMENTS_PUBLIC_LOCALES.includes(code)) return code;
+  }
+  return "it";
+}
+
+function mt(locale, key) {
+  const pack = MOMENTS_PUBLIC_I18N[locale] || MOMENTS_PUBLIC_I18N.it;
+  return pack[key] || MOMENTS_PUBLIC_I18N.it[key] || key;
+}
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
 const HOROSCOPE_CACHE_HOST = "https://horoscope-cache.khamakey.internal";
@@ -193,13 +340,18 @@ async function handleMomentPage(request, env, ctx, slug) {
     return html(notFound("Moment non pubblicato"), 404);
   }
 
+  const locale = resolveMomentsPublicLocale(request);
   const pinRequired = Boolean(page.pin_required);
   if (pinRequired && !page.pin_valid) {
-    return html(renderMomentPinGate(page, url.origin, Boolean(pin), env), 401, { "Cache-Control": "no-store" });
+    return html(renderMomentPinGate(page, url.origin, Boolean(pin), env, locale), 401, {
+      "Cache-Control": "no-store",
+      "Vary": "Accept-Language"
+    });
   }
 
-  return html(await renderMomentPage(page, url.origin, env), 200, {
-    "Cache-Control": pinRequired ? "private, no-store" : "public, max-age=30, s-maxage=60"
+  return html(await renderMomentPage(page, url.origin, env, locale), 200, {
+    "Cache-Control": pinRequired ? "private, no-store" : "public, max-age=30, s-maxage=60",
+    "Vary": "Accept-Language"
   });
 }
 
@@ -1020,16 +1172,16 @@ document.addEventListener("click",event=>{
 </html>`;
 }
 
-function renderMomentPinGate(page, origin, failed = false, env = {}) {
+function renderMomentPinGate(page, origin, failed = false, env = {}, locale = "it") {
   const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
   return `<!doctype html>
-<html lang="it">
+<html lang="${attr(locale)}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(page.title || "KhamaKey Moments")}</title>
 <style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:Arial,sans-serif;background:#f5f7fa;color:#172036}.card{width:min(92vw,420px);background:white;border:1px solid #e2e8f0;border-radius:18px;padding:26px;box-shadow:0 18px 60px rgba(27,42,94,.12);text-align:center}h1{color:#1b2a5e;margin:0 0 8px}p{color:#64748b;line-height:1.5}input{width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:13px;margin:12px 0;text-align:center;font-size:1.2rem;letter-spacing:.16em}button{width:100%;border:0;border-radius:10px;background:#1b2a5e;color:white;padding:12px;font-weight:800}.error{color:#d92d20;font-weight:800}.legal{margin-top:16px;font-size:12px}.legal a{color:#1b2a5e;font-weight:700;text-decoration:none;margin:0 8px}.legal a:hover{text-decoration:underline}</style></head>
-<body><form class="card" method="GET"><h1>${escapeHtml(page.title || "Moment protetto")}</h1><p>Inserisci il PIN per aprire questa pagina KhamaKey Moments.</p>${failed ? `<p class="error">PIN non corretto.</p>` : ""}<input name="pin" inputmode="numeric" autocomplete="one-time-code" placeholder="PIN" required><button type="submit">Apri pagina</button><p class="legal"><a href="${attr(pagesBase)}/moments-privacy.html" target="_blank" rel="noopener">Privacy</a><a href="${attr(pagesBase)}/moments-terms.html" target="_blank" rel="noopener">Termini</a></p></form></body></html>`;
+<body><form class="card" method="GET"><h1>${escapeHtml(page.title || mt(locale, "pin.fallback_title"))}</h1><p>${escapeHtml(mt(locale, "pin.prompt"))}</p>${failed ? `<p class="error">${escapeHtml(mt(locale, "pin.wrong"))}</p>` : ""}<input name="pin" inputmode="numeric" autocomplete="one-time-code" placeholder="PIN" required><button type="submit">${escapeHtml(mt(locale, "pin.submit"))}</button><p class="legal"><a href="${attr(pagesBase)}/moments-privacy.html" target="_blank" rel="noopener">${escapeHtml(mt(locale, "legal.privacy"))}</a><a href="${attr(pagesBase)}/moments-terms.html" target="_blank" rel="noopener">${escapeHtml(mt(locale, "legal.terms"))}</a></p></form></body></html>`;
 }
 
-async function renderMomentPage(page, origin, env = {}) {
+async function renderMomentPage(page, origin, env = {}, locale = "it") {
   const state = page.state || {};
   const title = String(state.title || page.title || "KhamaKey Moments").trim();
   const subtitle = String(state.subtitle || "").trim();
@@ -1053,14 +1205,14 @@ async function renderMomentPage(page, origin, env = {}) {
     .map(key => ({ key, section: sections[key] }))
     .filter(({ key, section }) => momentSectionVisible(key, section));
   const hasCounter = Boolean(state.show_together_counter && state.together_since);
-  const counterHtml = renderTogetherCounter(state, colors);
+  const counterHtml = renderTogetherCounter(state, colors, locale);
   const momentType = String(state.type || page.moment_type || "free").trim().toLowerCase();
   const horoscopeReadings = await loadHoroscopeReadingsForSections(sections, env);
-  const live = { horoscopeReadings };
+  const live = { horoscopeReadings, locale };
   const sectionHtml = ordered.length
     ? ordered.map(({ key, section }) => `<div class="moment-section-anchor" id="moment-section-${escapeHtml(key)}">${renderMomentSection(key, section, colors, momentType, fonts, page.slug || "", live)}</div>`).join("")
-    : `<div class="moment-card moment-card-empty rv"><strong>Pagina in preparazione</strong><p>Il proprietario sta ancora scegliendo i contenuti da mostrare.</p></div>`;
-  const navHtml = renderMomentNav(title, ordered, hasCounter);
+    : `<div class="moment-card moment-card-empty rv"><strong>${escapeHtml(mt(locale, "empty.title"))}</strong><p>${escapeHtml(mt(locale, "empty.body"))}</p></div>`;
+  const navHtml = renderMomentNav(title, ordered, hasCounter, locale);
   const decorHtml = renderMomentDecor(state);
   const coverFocusX = clampNumber(state.cover_focus_x, 0, 100, 50);
   const coverFocusY = clampNumber(state.cover_focus_y, 0, 100, 50);
@@ -1117,14 +1269,14 @@ async function renderMomentPage(page, origin, env = {}) {
   const termsUrl = `${pagesBase}/moments-terms.html`;
 
   return `<!doctype html>
-<html lang="it">
+<html lang="${attr(locale)}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="${attr(colors.bl)}">
 <title>${escapeHtml(title)} · KhamaKey Moments</title>
-<meta name="description" content="${escapeHtml(heroLead || "Un ricordo da custodire nel tempo.")}">
+<meta name="description" content="${escapeHtml(heroLead || mt(locale, "meta.default_desc"))}">
 ${ogImage ? `<meta property="og:image" content="${attr(ogImage)}">` : ""}
 <meta property="og:title" content="${escapeHtml(title)}">
-<meta property="og:description" content="${escapeHtml(heroLead || "Un ricordo da custodire nel tempo.")}">
+<meta property="og:description" content="${escapeHtml(heroLead || mt(locale, "meta.default_desc"))}">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?${fonts.google}&display=swap" rel="stylesheet">
 <style>${momentPageCss(colors, fonts)}</style></head>
@@ -1139,26 +1291,26 @@ ${profileBlock}
 ${dividerHtml}
 <section class="moment-content">${counterHtml}${sectionHtml}</section>
 <footer class="moment-footer">
-  <span>Creato con cura · KhamaKey Moments</span>
-  <nav class="moment-footer-legal" aria-label="Informazioni legali">
-    <a href="${attr(privacyUrl)}" target="_blank" rel="noopener">Privacy</a>
-    <a href="${attr(termsUrl)}" target="_blank" rel="noopener">Termini</a>
+  <span>${escapeHtml(mt(locale, "footer.made"))}</span>
+  <nav class="moment-footer-legal" aria-label="${attr(mt(locale, "footer.legal_aria"))}">
+    <a href="${attr(privacyUrl)}" target="_blank" rel="noopener">${escapeHtml(mt(locale, "legal.privacy"))}</a>
+    <a href="${attr(termsUrl)}" target="_blank" rel="noopener">${escapeHtml(mt(locale, "legal.terms"))}</a>
   </nav>
 </footer>
 </main>
 <aside class="moment-privacy-notice" id="momentPrivacyNotice" hidden>
-  <p>Questa pagina usa misure di sicurezza tecniche lato server. Non usiamo cookie di marketing. Dettagli nella Privacy Policy.</p>
+  <p>${escapeHtml(mt(locale, "privacy.notice"))}</p>
   <div class="moment-privacy-actions">
-    <a href="${attr(privacyUrl)}" target="_blank" rel="noopener">Privacy</a>
-    <button type="button" data-privacy-dismiss>Ho capito</button>
+    <a href="${attr(privacyUrl)}" target="_blank" rel="noopener">${escapeHtml(mt(locale, "legal.privacy"))}</a>
+    <button type="button" data-privacy-dismiss>${escapeHtml(mt(locale, "privacy.got_it"))}</button>
   </div>
 </aside>
 <div class="moment-lightbox" id="momentLightbox" aria-hidden="true">
-<button type="button" class="moment-lightbox-nav moment-lightbox-prev" id="momentLightboxPrev" aria-label="Precedente">‹</button>
-<button type="button" class="moment-lightbox-nav moment-lightbox-next" id="momentLightboxNext" aria-label="Successivo">›</button>
-<button type="button" class="moment-lightbox-close" id="momentLightboxClose" aria-label="Chiudi">×</button>
+<button type="button" class="moment-lightbox-nav moment-lightbox-prev" id="momentLightboxPrev" aria-label="${attr(mt(locale, "lightbox.prev"))}">‹</button>
+<button type="button" class="moment-lightbox-nav moment-lightbox-next" id="momentLightboxNext" aria-label="${attr(mt(locale, "lightbox.next"))}">›</button>
+<button type="button" class="moment-lightbox-close" id="momentLightboxClose" aria-label="${attr(mt(locale, "lightbox.close"))}">×</button>
 <div class="moment-lightbox-card"><div id="momentLightboxMedia"></div><p class="moment-lightbox-counter" id="momentLightboxCounter"></p><h3 class="moment-lightbox-title" id="momentLightboxTitle"></h3><p class="moment-lightbox-desc" id="momentLightboxDesc"></p></div></div>
-<script>${momentPageScript(state, ordered, hasCounter, page.slug || "", String(env.WORKER_PUBLIC_BASE || "https://link.khamakeymoments.com").replace(/\/$/, ""))}</script>
+<script>${momentPageScript(state, ordered, hasCounter, page.slug || "", String(env.WORKER_PUBLIC_BASE || "https://link.khamakeymoments.com").replace(/\/$/, ""), locale)}</script>
 </body></html>`;
 }
 
@@ -1198,9 +1350,9 @@ function shortenMomentNavLabel(text, max = 20){
   return clean.length <= max ? clean : `${clean.slice(0, max - 1)}…`;
 }
 
-function buildMomentNavItems(ordered, hasCounter){
-  const items = [{ id:"moment-hero", label:"Home" }];
-  if(hasCounter) items.push({ id:"moment-section-counter", label:"Contatore" });
+function buildMomentNavItems(ordered, hasCounter, locale = "it"){
+  const items = [{ id:"moment-hero", label: mt(locale, "nav.home") }];
+  if(hasCounter) items.push({ id:"moment-section-counter", label: mt(locale, "nav.counter") });
   ordered.forEach(({ key, section })=>{
     const fallback = MOMENT_NAV_LABELS[key] || key;
     const label = shortenMomentNavLabel(section.title) || fallback;
@@ -1209,19 +1361,19 @@ function buildMomentNavItems(ordered, hasCounter){
   return items;
 }
 
-function renderMomentNav(title, ordered, hasCounter){
+function renderMomentNav(title, ordered, hasCounter, locale = "it"){
   if(!ordered.length && !hasCounter) return "";
-  const items = buildMomentNavItems(ordered, hasCounter);
+  const items = buildMomentNavItems(ordered, hasCounter, locale);
   if(items.length < 2) return "";
   const links = items.map(item => `<li><a href="#${attr(item.id)}" data-sec="${attr(item.id)}">${escapeHtml(item.label)}</a></li>`).join("");
   const drawerLinks = items.map(item => `<li><a href="#${attr(item.id)}" data-sec="${attr(item.id)}" data-drawer-link>${escapeHtml(item.label)}</a></li>`).join("");
   return `<div class="moment-nav-backdrop" id="momentNavBackdrop" aria-hidden="true"></div>
-<nav class="moment-nav on-hero" id="momentNav" aria-label="Sezioni pagina">
+<nav class="moment-nav on-hero" id="momentNav" aria-label="${attr(mt(locale, "nav.aria"))}">
 <ul class="moment-nav-links">${links}</ul>
-<button type="button" class="moment-nav-burger" id="momentNavBurger" aria-label="Menu sezioni" aria-expanded="false"><span></span><span></span><span></span></button>
+<button type="button" class="moment-nav-burger" id="momentNavBurger" aria-label="${attr(mt(locale, "nav.menu"))}" aria-expanded="false"><span></span><span></span><span></span></button>
 </nav>
 <div class="moment-nav-sheet" id="momentNavDrawer" aria-hidden="true">
-<div class="moment-nav-sheet-head"><span>Sezioni</span><button type="button" class="moment-nav-sheet-close" id="momentNavClose" aria-label="Chiudi">×</button></div>
+<div class="moment-nav-sheet-head"><span>${escapeHtml(mt(locale, "nav.sections"))}</span><button type="button" class="moment-nav-sheet-close" id="momentNavClose" aria-label="${attr(mt(locale, "nav.close"))}">×</button></div>
 <ul>${drawerLinks}</ul>
 </div>`;
 }
@@ -2045,7 +2197,7 @@ function letterMediaItems(section) {
   return [];
 }
 
-function renderLetterFutureMedia(section) {
+function renderLetterFutureMedia(section, locale = "it") {
   const items = letterMediaItems(section);
   if (!items.length) return "";
   const cards = items.map((item, idx) => {
@@ -2054,7 +2206,7 @@ function renderLetterFutureMedia(section) {
     const meta = (title || desc) ? `<figcaption class="moment-gallery-meta">${title}${desc}</figcaption>` : "";
     if (item.type === "video") {
       return `<figure class="moment-gallery-figure">
-        ${renderGalleryVideoFrame(item.url, idx, item.title || "Apri video")}
+        ${renderGalleryVideoFrame(item.url, idx, item.title || mt(locale, "video.open"))}
         ${meta}
       </figure>`;
     }
@@ -2087,34 +2239,47 @@ function renderLetterFutureMedia(section) {
   }).join("");
   const payload = items.map(({ type, url, title, description }) => ({ type, url, title, description }));
   const json = JSON.stringify(payload).replace(/</g, "\\u003c");
-  return `<p class="moment-gallery-hint">Scorri gli allegati · tocca per aprire</p>
+  return `<p class="moment-gallery-hint">${escapeHtml(mt(locale, "gallery.hint"))}</p>
 <div class="moment-gallery"><div class="moment-gallery-scroll"><div class="moment-gallery-track">${cards}</div></div></div>
 <script type="application/json" class="moment-gallery-data">${json}</script>`;
 }
 
-function renderTogetherCounter(state, colors) {
+function renderTogetherCounter(state, colors, locale = "it") {
   if(!state.show_together_counter || !state.together_since) return "";
   const date = String(state.together_since).slice(0, 10);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return "";
   const live = Boolean(state.show_counter_hms);
-  const label = String(state.counter_label || "").trim() || "Insieme da";
+  const label = String(state.counter_label || "").trim() || mt(locale, "counter.default_label");
   const grid = live
-    ? `<span class="moment-counter-unit"><b data-unit="days">0</b><small>giorni</small></span>
-<span class="moment-counter-unit"><b data-unit="hours">0</b><small>ore</small></span>
-<span class="moment-counter-unit"><b data-unit="minutes">0</b><small>minuti</small></span>
-<span class="moment-counter-unit"><b data-unit="seconds">0</b><small>secondi</small></span>`
-    : `<span class="moment-counter-unit"><b data-unit="years">0</b><small>anni</small></span>
-<span class="moment-counter-unit"><b data-unit="months">0</b><small>mesi</small></span>
-<span class="moment-counter-unit"><b data-unit="days">0</b><small>giorni</small></span>`;
+    ? `<span class="moment-counter-unit"><b data-unit="days">0</b><small>${escapeHtml(mt(locale, "counter.days"))}</small></span>
+<span class="moment-counter-unit"><b data-unit="hours">0</b><small>${escapeHtml(mt(locale, "counter.hours"))}</small></span>
+<span class="moment-counter-unit"><b data-unit="minutes">0</b><small>${escapeHtml(mt(locale, "counter.minutes"))}</small></span>
+<span class="moment-counter-unit"><b data-unit="seconds">0</b><small>${escapeHtml(mt(locale, "counter.seconds"))}</small></span>`
+    : `<span class="moment-counter-unit"><b data-unit="years">0</b><small>${escapeHtml(mt(locale, "counter.years"))}</small></span>
+<span class="moment-counter-unit"><b data-unit="months">0</b><small>${escapeHtml(mt(locale, "counter.months"))}</small></span>
+<span class="moment-counter-unit"><b data-unit="days">0</b><small>${escapeHtml(mt(locale, "counter.days"))}</small></span>`;
   return `<section class="moment-counter rv" id="moment-section-counter" data-since="${attr(date)}" data-hms="${live ? "1" : "0"}">
 <div class="moment-counter-label">${escapeHtml(label)}</div>
 <div class="moment-counter-grid">${grid}</div></section>`;
 }
 
-function momentPageScript(state, ordered = [], hasCounter = false, slug = "", apiBase = "") {
+function momentPageScript(state, ordered = [], hasCounter = false, slug = "", apiBase = "", locale = "it") {
   const momentSlug = String(slug || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   const momentApiBase = String(apiBase || "https://link.khamakeymoments.com").replace(/\/$/, "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-  const navItems = buildMomentNavItems(ordered, hasCounter);
+  const navItems = buildMomentNavItems(ordered, hasCounter, locale);
+  const i18nJson = JSON.stringify({
+    rsvpNeed: mt(locale, "rsvp.need_fields"),
+    rsvpSending: mt(locale, "rsvp.sending"),
+    rsvpSendingBtn: mt(locale, "rsvp.sending_btn"),
+    rsvpSavedWa: mt(locale, "rsvp.saved_wa"),
+    rsvpThanks: mt(locale, "rsvp.thanks"),
+    rsvpFail: mt(locale, "rsvp.fail"),
+    rsvpSubmitWa: mt(locale, "rsvp.submit_wa"),
+    rsvpSubmit: mt(locale, "rsvp.submit"),
+    gbEmpty: mt(locale, "guestbook.empty"),
+    gbNeedPublish: mt(locale, "guestbook.need_publish"),
+    dateLocale: locale === "en" ? "en-GB" : "it-IT"
+  }).replace(/</g, "\\u003c");
   const navIds = navItems.map(item => item.id);
   const navScript = navIds.length >= 2 ? `
 (function(){
@@ -2174,6 +2339,7 @@ function momentPageScript(state, ordered = [], hasCounter = false, slug = "", ap
   return `(function(){
 var momentPageSlug="${momentSlug}";
 var momentApiBase="${momentApiBase}";
+var momentI18n=${i18nJson};
 function momentApi(path){return momentApiBase+path;}
 var momentPinStoreKey="km_pin_"+momentPageSlug;
 var momentPin=(new URLSearchParams(location.search).get("pin")||"").trim();
@@ -2298,28 +2464,28 @@ document.querySelectorAll("[data-rsvp-form]").forEach(function(form){
       }
     };
     if(!payload.values.name||!payload.values.attending){
-      if(status){status.hidden=false;status.textContent="Compila nome e presenza.";status.className="moment-rsvp-status error";}
+      if(status){status.hidden=false;status.textContent=momentI18n.rsvpNeed;status.className="moment-rsvp-status error";}
       return;
     }
-    if(submitBtn){submitBtn.disabled=true;submitBtn.textContent="Invio…";}
-    if(status){status.hidden=false;status.textContent="Invio in corso…";status.className="moment-rsvp-status";}
+    if(submitBtn){submitBtn.disabled=true;submitBtn.textContent=momentI18n.rsvpSendingBtn;}
+    if(status){status.hidden=false;status.textContent=momentI18n.rsvpSending;status.className="moment-rsvp-status";}
     fetch(momentApi("/api/moment/rsvp"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
       .then(function(res){return res.json().then(function(data){return {ok:res.ok,data:data};});})
       .then(function(result){
-        if(!result.ok)throw new Error((result.data&&result.data.error)||"Invio non riuscito");
+        if(!result.ok)throw new Error((result.data&&result.data.error)||momentI18n.rsvpFail);
         if(wa){
-          if(status){status.hidden=false;status.textContent="Conferma salvata. Apro WhatsApp…";status.className="moment-rsvp-status ok";}
+          if(status){status.hidden=false;status.textContent=momentI18n.rsvpSavedWa;status.className="moment-rsvp-status ok";}
           window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(lines.join("\\n")),"_blank","noopener");
         }else{
-          if(status){status.hidden=false;status.textContent="Grazie! La tua conferma è stata inviata.";status.className="moment-rsvp-status ok";}
+          if(status){status.hidden=false;status.textContent=momentI18n.rsvpThanks;status.className="moment-rsvp-status ok";}
           form.reset();
         }
       })
       .catch(function(err){
-        if(status){status.hidden=false;status.textContent=err.message||"Invio non riuscito. Riprova.";status.className="moment-rsvp-status error";}
+        if(status){status.hidden=false;status.textContent=err.message||momentI18n.rsvpFail;status.className="moment-rsvp-status error";}
       })
       .finally(function(){
-        if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=wa?"Invia su WhatsApp":"Invia conferma";}
+        if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=wa?momentI18n.rsvpSubmitWa:momentI18n.rsvpSubmit;}
       });
   });
 });
@@ -2338,9 +2504,9 @@ document.querySelectorAll(".moment-guestbook").forEach(function(section){
   }
   if(!list)return;
   function escText(value){return String(value||"").replace(/[&<>"']/g,function(ch){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch];});}
-  function formatDate(value){try{return new Intl.DateTimeFormat("it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(value));}catch(e){return "";}}
+  function formatDate(value){try{return new Intl.DateTimeFormat(momentI18n.dateLocale||"it-IT",{day:"2-digit",month:"short",year:"numeric"}).format(new Date(value));}catch(e){return "";}}
   function paintMessages(messages){
-    if(!messages||!messages.length){list.innerHTML='<p class="moment-guestbook-empty">Sii il primo a lasciare un pensiero.</p>';return;}
+    if(!messages||!messages.length){list.innerHTML='<p class="moment-guestbook-empty">'+escText(momentI18n.gbEmpty)+'</p>';return;}
     list.innerHTML=messages.map(function(item){
       return '<article class="moment-guestbook-card"><p class="moment-guestbook-quote">“'+escText(item.message)+'”</p><p class="moment-guestbook-author">— '+escText(item.guest_name)+(item.created_at?' · '+escText(formatDate(item.created_at)):"")+'</p></article>';
     }).join("");
@@ -2356,7 +2522,7 @@ document.querySelectorAll(".moment-guestbook").forEach(function(section){
     form.addEventListener("submit",function(e){
       e.preventDefault();
       if(!slug){
-        showStatus("Il guestbook funziona sulla pagina pubblicata. Pubblica la pagina e apri il link condiviso.","error");
+        showStatus(momentI18n.gbNeedPublish,"error");
         return;
       }
       var fd=new FormData(form);
@@ -4014,6 +4180,7 @@ function rsvpWhatsAppIntro(momentType, eventName) {
 }
 
 function renderMomentSection(key, section, colors, momentType = "free", fonts = null, slug = "", live = {}) {
+  const locale = live?.locale || "it";
   const images = Array.isArray(section.images) ? section.images.filter(url => safeUrl(url) !== "#").slice(0, 24) : [];
   let icon = MOMENT_SECTION_ICONS[key] || "•";
   if (momentType === "travel") {
@@ -4074,21 +4241,24 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     const wa = normalizeWhatsAppDigits(section.whatsapp_number);
     const eventName = String(section.event_name || section.title || "Evento").trim();
     if (!wa) {
-      return `<article class="${rv}">${head(section.title || "Conferma presenza")}<p class="moment-empty-hint">Inserisci il numero WhatsApp dell'organizzatore nell'editor e salva: senza WhatsApp la sezione non appare agli invitati.</p></article>`;
+      return `<article class="${rv}">${head(section.title || mt(locale, "rsvp.default_title"))}<p class="moment-empty-hint">${escapeHtml(mt(locale, "rsvp.no_wa"))}</p></article>`;
     }
     const { html: optionalFields, customFields } = renderRsvpOptionalFields(section);
     const eventBadge = renderRsvpEventBadge(eventName, fonts);
     const rsvpIntro = rsvpWhatsAppIntro(momentType, eventName);
     const customAttr = attr(JSON.stringify(customFields.map(field => ({ id: field.id, label: field.label }))));
-    return `<article class="${rv} moment-rsvp" data-rsvp-wa="${attr(wa)}" data-rsvp-event="${attr(eventName)}" data-rsvp-intro="${attr(rsvpIntro)}" data-rsvp-custom="${customAttr}">${head(section.title || "Conferma presenza")}${eventBadge}${section.body ? `<p class="moment-rsvp-intro">${escapeHtml(section.body)}</p>` : ""}<p class="moment-rsvp-status" data-rsvp-status hidden role="status" aria-live="polite"></p><form class="moment-rsvp-form" data-rsvp-form><label>Nome e cognome<input type="text" name="rsvp_name" required placeholder="Es. Marco Rossi" autocomplete="name"></label><fieldset class="moment-rsvp-attending"><legend>Vieni?</legend><label><input type="radio" name="rsvp_attending" value="Sì, ci sarò" checked> Sì, ci sarò</label><label><input type="radio" name="rsvp_attending" value="No, non posso"> No, non posso</label><label><input type="radio" name="rsvp_attending" value="Forse"> Forse</label></fieldset>${optionalFields}<button type="submit" class="moment-rsvp-submit">Invia su WhatsApp</button></form></article>`;
+    const yes = mt(locale, "rsvp.yes");
+    const no = mt(locale, "rsvp.no");
+    const maybe = mt(locale, "rsvp.maybe");
+    return `<article class="${rv} moment-rsvp" data-rsvp-wa="${attr(wa)}" data-rsvp-event="${attr(eventName)}" data-rsvp-intro="${attr(rsvpIntro)}" data-rsvp-custom="${customAttr}">${head(section.title || mt(locale, "rsvp.default_title"))}${eventBadge}${section.body ? `<p class="moment-rsvp-intro">${escapeHtml(section.body)}</p>` : ""}<p class="moment-rsvp-status" data-rsvp-status hidden role="status" aria-live="polite"></p><form class="moment-rsvp-form" data-rsvp-form><label>${escapeHtml(mt(locale, "rsvp.name"))}<input type="text" name="rsvp_name" required placeholder="${attr(mt(locale, "rsvp.name_ph"))}" autocomplete="name"></label><fieldset class="moment-rsvp-attending"><legend>${escapeHtml(mt(locale, "rsvp.coming"))}</legend><label><input type="radio" name="rsvp_attending" value="${attr(yes)}" checked> ${escapeHtml(yes)}</label><label><input type="radio" name="rsvp_attending" value="${attr(no)}"> ${escapeHtml(no)}</label><label><input type="radio" name="rsvp_attending" value="${attr(maybe)}"> ${escapeHtml(maybe)}</label></fieldset>${optionalFields}<button type="submit" class="moment-rsvp-submit">${escapeHtml(mt(locale, "rsvp.submit_wa"))}</button></form></article>`;
   }
 
   if (key === "guestbook") {
     const pageSlug = String(slug || "").trim();
     if (!MOMENT_GUESTBOOK_PUBLIC_ENABLED) {
-      return `<article class="${rv} moment-guestbook is-disabled" data-guestbook-slug="${attr(pageSlug)}">${head(section.title || "Libro degli ospiti")}<p class="moment-guestbook-intro">Il libro degli ospiti è temporaneamente in pausa. Tornerà disponibile a breve.</p></article>`;
+      return `<article class="${rv} moment-guestbook is-disabled" data-guestbook-slug="${attr(pageSlug)}">${head(section.title || mt(locale, "guestbook.default_title"))}<p class="moment-guestbook-intro">${escapeHtml(mt(locale, "guestbook.paused"))}</p></article>`;
     }
-    return `<article class="${rv} moment-guestbook" data-guestbook-slug="${attr(pageSlug)}">${head(section.title || "Libro degli ospiti")}${section.body ? `<p class="moment-guestbook-intro">${escapeHtml(section.body)}</p>` : ""}<p class="moment-guestbook-status" data-guestbook-status hidden role="status" aria-live="polite"></p><form class="moment-guestbook-form" data-guestbook-form><label>Il tuo nome<input type="text" name="guestbook_name" required placeholder="Es. Laura Bianchi" autocomplete="name"></label><label>Il tuo messaggio<textarea name="guestbook_message" rows="4" required placeholder="Scrivi un pensiero, un augurio o un ricordo…"></textarea></label><button type="submit" class="moment-guestbook-submit">Invia messaggio</button></form><div class="moment-guestbook-list" data-guestbook-list aria-live="polite"></div></article>`;
+    return `<article class="${rv} moment-guestbook" data-guestbook-slug="${attr(pageSlug)}">${head(section.title || mt(locale, "guestbook.default_title"))}${section.body ? `<p class="moment-guestbook-intro">${escapeHtml(section.body)}</p>` : ""}<p class="moment-guestbook-status" data-guestbook-status hidden role="status" aria-live="polite"></p><form class="moment-guestbook-form" data-guestbook-form><label>${escapeHtml(mt(locale, "guestbook.name"))}<input type="text" name="guestbook_name" required placeholder="${attr(mt(locale, "guestbook.name_ph"))}" autocomplete="name"></label><label>${escapeHtml(mt(locale, "guestbook.message"))}<textarea name="guestbook_message" rows="4" required placeholder="${attr(mt(locale, "guestbook.message_ph"))}"></textarea></label><button type="submit" class="moment-guestbook-submit">${escapeHtml(mt(locale, "guestbook.submit"))}</button></form><div class="moment-guestbook-list" data-guestbook-list aria-live="polite"></div></article>`;
   }
 
   if (key === "horoscope") {
@@ -4133,7 +4303,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     }).join("");
     // Default invariato: lista verticale. Opt-in: stesso scroll orizzontale della galleria.
     if (scrollLayout) {
-      return `<article class="${rv} moment-card-gallery">${headBlock}<p class="moment-gallery-hint">Scorri le tappe</p><div class="moment-journey moment-journey--scroll"><div class="moment-gallery"><div class="moment-gallery-scroll"><div class="moment-gallery-track">${items}</div></div></div></div></article>`;
+      return `<article class="${rv} moment-card-gallery">${headBlock}<p class="moment-gallery-hint">${escapeHtml(mt(locale, "gallery.journey_hint"))}</p><div class="moment-journey moment-journey--scroll"><div class="moment-gallery"><div class="moment-gallery-scroll"><div class="moment-gallery-track">${items}</div></div></div></div></article>`;
     }
     return `<article class="${rv}">${headBlock}<div class="moment-journey">${items}</div></article>`;
   }
@@ -4188,7 +4358,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
       return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<div class="moment-sealed"><div class="moment-sealed-icon" aria-hidden="true">🔒</div><p>Questa lettera è sigillata${when ? ` fino al <strong>${escapeHtml(when)}</strong>` : ""}.</p><p class="moment-sealed-date">Torna in quella data per rileggerla.</p></div></article>`;
     }
     const recipient = section.recipient ? `<p class="moment-letter-to">Caro/a ${escapeHtml(section.recipient)},</p>` : "";
-    const media = renderLetterFutureMedia(section);
+    const media = renderLetterFutureMedia(section, locale);
     return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<div class="moment-letter">${recipient}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${media}<span class="moment-letter-heart" aria-hidden="true">♥</span></div></article>`;
   }
 
@@ -4220,7 +4390,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     }).join("");
     const payload = media.map(({ type, url, title, description }) => ({ type, url, title, description }));
     const json = JSON.stringify(payload).replace(/</g, "\\u003c");
-    return `<article class="${rv} moment-card-gallery">${headBlock}<p class="moment-gallery-hint">Scorri le foto · tocca ＋ per ingrandire</p><div class="moment-gallery"><div class="moment-gallery-scroll"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
+    return `<article class="${rv} moment-card-gallery">${headBlock}<p class="moment-gallery-hint">${escapeHtml(mt(locale, "gallery.photos_hint"))}</p><div class="moment-gallery"><div class="moment-gallery-scroll"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
   }
 
   if (key === "video") {
@@ -4235,7 +4405,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
       const title = item.title ? `<span class="moment-gallery-caption">${escapeHtml(item.title)}</span>` : "";
       const desc = item.description ? `<span class="moment-gallery-desc">${escapeHtml(item.description)}</span>` : "";
       const meta = (title || desc) ? `<figcaption class="moment-gallery-meta">${title}${desc}</figcaption>` : "";
-      const label = item.title || "Apri video";
+      const label = item.title || mt(locale, "video.open");
       return `<figure class="moment-gallery-figure">
         ${renderGalleryVideoFrame(item.url, idx, label)}
         ${meta}
@@ -4243,9 +4413,9 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     }).join("");
     const payload = media.map(({ type, url, title, description }) => ({ type, url, title, description }));
     const json = JSON.stringify(payload).replace(/</g, "\\u003c");
-    const hint = single ? "Tocca ▶ per aprire" : "Scorri i video · tocca ▶ per aprire";
+    const hint = single ? mt(locale, "video.tap_one") : mt(locale, "video.tap_many");
     const scrollClass = single ? "moment-gallery-scroll is-single" : "moment-gallery-scroll";
-    return `<article class="${rv} moment-card-gallery">${headBlock}${body}<p class="moment-gallery-hint">${hint}</p><div class="moment-gallery"><div class="${scrollClass}"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
+    return `<article class="${rv} moment-card-gallery">${headBlock}${body}<p class="moment-gallery-hint">${escapeHtml(hint)}</p><div class="moment-gallery"><div class="${scrollClass}"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
   }
 
   if (key === "quote" && !section.body) {

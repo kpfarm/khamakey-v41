@@ -356,3 +356,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-23 | Cursor | **RSVP WA i18n / Moments v214 + Worker v184**: messaggio WhatsApp + invito EN; numeri no-touch |
 | 2026-07-23 | Cursor | **Moments v215**: fix toggle lingua EN→IT (refresh kit/fields + status galleria) |
 | 2026-07-23 | Cursor | **Moments v216**: lingua UI sync su account Auth (cross-device al login) |
+| 2026-07-23 | Cursor | **Piano i18n completion** `docs/30`: slice A/B/C sicurezza-first, zero logica |

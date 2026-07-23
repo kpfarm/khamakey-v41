@@ -293,7 +293,7 @@ Dopo:
 | Slice | Stato | Versione |
 |-------|--------|----------|
 | Baseline (1–11e6e, WA, fix toggle, account locale) | Fatto | v216 / W v184 |
-| **A1a** RSVP 4 toggle label/hint | Pending | v217 |
+| **A1a** RSVP 4 toggle label/hint | Fatto | v217 |
 | **A1b** RSVP custom fields chrome | Pending | v218 |
 | **A2a** RSVP share chrome statico | Pending | v219 |
 | **A2b** RSVP share refresh toggle | Pending | v220 |

@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v217 — i18n A1a RSVP toggles (2026-07-23, Cursor)** — Pages
+  - Solo label + hint dei 4 toggle standard (ospiti/note/telefono/email) via `data-lf` + `FIELD_PHRASE_EN`.
+  - Nessun tocco a custom rows, `readRsvp`/`normalize`/`bind`, Worker, upload.
+
 ### Fixed
 - **Moments v195 — Safari auto-translate (2026-07-23, Cursor)** — Pages
   - Non era il dizionario IT: Safari traduceva la pagina (`IT`→`esso`, `Pubblica`→`Pubblicità`, `Anteprima`→`Aprile`).

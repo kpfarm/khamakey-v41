@@ -1,4 +1,5 @@
-import { getUiLocale } from "./moments-i18n.js?v=216";
+import { getUiLocale } from "./moments-i18n.js?v=217";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=217";
 
 export const RSVP_OPTIONAL_FIELDS = {
   guests:{ label:"Quanti siete?", type:"number", waLabel:"👥 Ospiti", waLabelEn:"👥 Guests", placeholder:"1", hint:"Numero di persone" },
@@ -6,6 +7,12 @@ export const RSVP_OPTIONAL_FIELDS = {
   phone:{ label:"Telefono", type:"tel", waLabel:"📞 Tel.", waLabelEn:"📞 Phone", placeholder:"Es. 333 1234567", hint:"Per contatti rapidi" },
   email:{ label:"Email", type:"email", waLabel:"✉️ Email", waLabelEn:"✉️ Email", placeholder:"Es. marco@email.it", hint:"Conferma via email" }
 };
+
+function lf(text){
+  const raw = String(text || "");
+  if(!raw || getUiLocale() === "it") return raw;
+  return FIELD_PHRASE_EN[raw] || raw;
+}
 
 function waLabelFor(spec){
   return getUiLocale() === "en" ? (spec.waLabelEn || spec.waLabel) : spec.waLabel;
@@ -45,7 +52,7 @@ export function renderRsvpFieldsEditor(section = {}){
     const checked = safe.field_keys.includes(key);
     return `<label class="smart-toggle rsvp-field-toggle">
       <input type="checkbox" name="section_rsvp_field_${esc(key)}" data-rsvp-field-key="${esc(key)}" ${checked ? "checked" : ""}>
-      <span><strong>${esc(spec.label)}</strong><small>${esc(spec.hint)}</small></span>
+      <span><strong data-lf="${esc(spec.label)}">${esc(lf(spec.label))}</strong><small data-lf="${esc(spec.hint)}">${esc(lf(spec.hint))}</small></span>
     </label>`;
   }).join("");
   const customRows = safe.custom_fields.map((field,index)=>`

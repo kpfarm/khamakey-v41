@@ -383,5 +383,15 @@ export const FIELD_PHRASE_EN = {
   "Upload video non riuscito.": "Video upload failed.",
   "Upload audio non riuscito.": "Audio upload failed.",
   "Upload foto non riuscito.": "Photo upload failed.",
-  "Sostituzione non riuscita.": "Replace failed."
+  "Sostituzione non riuscita.": "Replace failed.",
+
+  // A1a — RSVP standard field toggles (label + hint only; no custom rows / handlers)
+  "Quanti siete?": "How many of you?",
+  "Numero di persone": "Number of people",
+  "Note (allergie, bambini…)": "Notes (allergies, children…)",
+  "Allergie, bambini, esigenze": "Allergies, children, needs",
+  "Telefono": "Phone",
+  "Per contatti rapidi": "For quick contact",
+  "Email": "Email",
+  "Conferma via email": "Email confirmation"
 };

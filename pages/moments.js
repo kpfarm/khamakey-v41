@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=200";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=200";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=200";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=200";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=200";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=200";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=200";
+} from "./moments-i18n.js?v=201";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=201";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=201";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=201";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=201";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=201";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=201";
 import {
   uploadImage,
   uploadVideo,
@@ -1694,7 +1694,7 @@ function refreshSectionOrderList(formNode){
   if(!listNode) return;
   const keys = enabledSectionKeysFromForm(formNode);
   if(!keys.length){
-    listNode.innerHTML = `<p class="section-order-empty">Nessuna sezione attiva. Attiva almeno una sezione dal menu <strong>Contenuti</strong>.</p>`;
+    listNode.innerHTML = `<p class="section-order-empty">${lfSpan("Nessuna sezione attiva. Attiva almeno una sezione dal menu Contenuti.")}</p>`;
     return;
   }
   listNode.innerHTML = keys.map((key,idx)=>renderSectionOrderItem(key,idx, currentTypeFromForm(formNode), formNode)).join("");
@@ -2005,7 +2005,7 @@ function renderLookPicker(currentLook, momentType = "free"){
     return `<button type="button" class="look-card ${currentLook === id ? "active" : ""} ${isSuggested ? "look-suggested" : ""}" data-look="${esc(id)}" aria-pressed="${currentLook === id ? "true" : "false"}">
       <span class="look-card-preview" style="--lk-go:${esc(colors.go)};--lk-g2:${esc(colors.g2)};--lk-hero:${esc(colors.hero)};--lk-ro:${esc(colors.ro)};--lk-bl:${esc(colors.bl)};--lk-card:${esc(colors.card || colors.bl2)};--lk-in:${esc(colors.in)}"></span>
       <span class="look-card-emoji" aria-hidden="true">${look.emoji}</span>
-      <strong>${esc(look.label)}${isSuggested ? " · consigliato" : ""}</strong>
+      <strong>${esc(look.label)}${isSuggested ? ` · <span data-lf="consigliato">${esc(localizeFieldPhrase("consigliato"))}</span>` : ""}</strong>
       <small>${esc(look.hint)}</small>
     </button>`;
   }).join("")}</div>
@@ -2014,9 +2014,11 @@ function renderLookPicker(currentLook, momentType = "free"){
 
 function renderPalettePicker(current){
   const active = canonicalizePalette(current);
+  const bgHint = localizeFieldPhrase("sfondo pagina");
   return `<div class="palette-row">${PALETTE_PICKER_ORDER.map(key=>{
     const c = COLOR_PALETTES[key];
-    return `<button type="button" class="palette-btn ${active === key ? "active" : ""}" data-palette="${esc(key)}" title="${esc(PALETTE_LABELS[key] || key)} — sfondo pagina"><span style="background:${c.bl}"></span></button>`;
+    const title = `${PALETTE_LABELS[key] || key} — ${bgHint}`;
+    return `<button type="button" class="palette-btn ${active === key ? "active" : ""}" data-palette="${esc(key)}" title="${esc(title)}"><span style="background:${c.bl}"></span></button>`;
   }).join("")}</div><input type="hidden" name="color_palette" id="colorPaletteInput" value="${esc(active)}">`;
 }
 
@@ -2084,8 +2086,8 @@ function renderDesignSuggestBanner(momentType, currentLook){
   if(!suggested || suggested === currentLook) return "";
   const look = PAGE_LOOKS[suggested];
   if(!look) return "";
-  const typeLabel = TYPE_LABELS[momentType] || "questa pagina";
-  return `<p class="design-suggest">💡 Per <strong>${esc(typeLabel)}</strong> prova ${look.emoji} <button type="button" class="design-suggest-btn" data-suggest-look="${esc(suggested)}">${esc(look.label)}</button></p>`;
+  const typeLabel = TYPE_LABELS[momentType] || localizeFieldPhrase("questa pagina");
+  return `<p class="design-suggest">💡 ${lfSpan("Per")} <strong>${esc(typeLabel)}</strong> ${lfSpan("prova")} ${look.emoji} <button type="button" class="design-suggest-btn" data-suggest-look="${esc(suggested)}">${esc(look.label)}</button></p>`;
 }
 
 function renderDesignPanel(state){
@@ -2099,44 +2101,45 @@ function renderDesignPanel(state){
     fontPair,
     heroStyle: state.heroStyle || "classico"
   });
+  const typeLabel = TYPE_LABELS[state.type] || localizeFieldPhrase("questa categoria");
   return `<div class="editor-panel ${activeEditorPanel === "styling" ? "active" : ""}" data-editor-panel="styling">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.styling),editorPanelSubtitle(EDITOR_PANELS.styling))}
     <div class="editor-card">
-      <p class="ecard-title">Scegli lo stile</p>
-      <p class="design-intro">Stili per <strong>${esc(TYPE_LABELS[state.type] || "questa categoria")}</strong>. Il colore scelto è lo <strong>sfondo</strong> della pagina; i riquadri restano bianchi con testo nero.</p>
+      <p class="ecard-title">${lfSpan("Scegli lo stile")}</p>
+      <p class="design-intro">${lfSpan("Stili per")} <strong>${esc(typeLabel)}</strong>. ${lfSpan("Il colore scelto è lo sfondo della pagina; i riquadri restano bianchi con testo nero.")}</p>
       ${renderDesignSuggestBanner(state.type, currentLook)}
       <div class="look-picker-host">${renderLookPicker(currentLook, state.type)}</div>
     </div>
     <div class="editor-card">
-      <p class="ecard-title">Ecco come sarà</p>
+      <p class="ecard-title">${lfSpan("Ecco come sarà")}</p>
       <div class="design-swatch" style="--sw-bl:${esc(colors.bl)};--sw-go:${esc(colors.go)};--sw-g2:${esc(colors.g2)};--sw-ro:${esc(colors.ro)};--sw-in:${esc(colors.in)};--sw-hero:${esc(colors.hero)}">
-        <div class="design-swatch-hero"><span>Il titolo della tua pagina</span></div>
-        <div class="design-swatch-body"><span>Sfondo</span><span>Accenti</span></div>
+        <div class="design-swatch-hero"><span>${lfSpan("Il titolo della tua pagina")}</span></div>
+        <div class="design-swatch-body"><span>${lfSpan("Sfondo")}</span><span>${lfSpan("Accenti")}</span></div>
       </div>
     </div>
     <details class="design-advanced editor-card">
-      <summary>Vuoi cambiare qualcosa in più? (facoltativo)</summary>
-      <label>Colore di sfondo
+      <summary>${lfSpan("Vuoi cambiare qualcosa in più? (facoltativo)")}</summary>
+      <label>${lfSpan("Colore di sfondo")}
         ${renderPalettePicker(palette)}
       </label>
-      <p class="field-hint">Ogni cerchio è uno sfondo diverso (incluso il rosso). Nero e antracite = pagina scura.</p>
-      <label>Atmosfera
+      <p class="field-hint">${lfSpan("Ogni cerchio è uno sfondo diverso (incluso il rosso). Nero e antracite = pagina scura.")}</p>
+      <label>${lfSpan("Atmosfera")}
         <select name="theme_variant">
           ${Object.entries(VARIANT_LABELS).map(([value,label])=>option(value,label,variant)).join("")}
         </select>
       </label>
-      <p class="field-hint">Chiaro · Caldo (sfondo più intenso) · Scuro (pagina di sera)</p>
-      <label>Stile scritte
+      <p class="field-hint">${lfSpan("Chiaro · Caldo (sfondo più intenso) · Scuro (pagina di sera)")}</p>
+      <label>${lfSpan("Stile scritte")}
         <select name="font_pair">
           ${Object.entries(FONT_PAIRS).map(([value,meta])=>option(value,meta.label,fontPair)).join("")}
         </select>
       </label>
-      <label>Copertina in alto
+      <label>${lfSpan("Copertina in alto")}
         <select name="hero_style">
           ${Object.entries(HERO_STYLES).map(([value,label])=>option(value,label,state.heroStyle || "classico")).join("")}
         </select>
       </label>
-      <label>Raccordo fondo copertina
+      <label>${lfSpan("Raccordo fondo copertina")}
         <select name="hero_cut">
           ${[
             ["dritto", "Dritto classico"],
@@ -2146,7 +2149,7 @@ function renderDesignPanel(state){
           ].map(([value,label])=>option(value,label,state.heroCut || "dritto")).join("")}
         </select>
       </label>
-      <label>Sfumatura sotto la foto
+      <label>${lfSpan("Sfumatura sotto la foto")}
         <select name="hero_fade">
           ${[
             ["on", "Attiva (colore pagina)"],
@@ -2154,7 +2157,7 @@ function renderDesignPanel(state){
           ].map(([value,label])=>option(value,label,state.heroFade === false ? "off" : "on")).join("")}
         </select>
       </label>
-      <p class="field-hint">La sfumatura fonde la foto con lo sfondo della pagina. Puoi spegnerla per un distacco netto.</p>
+      <p class="field-hint">${lfSpan("La sfumatura fonde la foto con lo sfondo della pagina. Puoi spegnerla per un distacco netto.")}</p>
     </details>
   </div>`;
 }
@@ -2195,14 +2198,18 @@ function renderCoverPanel(state){
 function renderCounterPanel(state){
   if(!showCounterForType(state.type)) return "";
   const counterTitle = localizedCounterLabel(state.type);
+  const onLabel = "Contatore attivo";
+  const offLabel = "Contatore spento";
+  const onHint = "Compare sotto la copertina";
+  const offHint = "Tocca per mostrarlo";
   return `<div class="editor-panel ${activeEditorPanel === "counter" ? "active" : ""}" data-editor-panel="counter">
     ${renderSectionHeader(counterTitle,editorPanelSubtitle(EDITOR_PANELS.counter))}
     <div class="section-switch ${state.show_together_counter ? "is-on" : ""}" data-counter-switch="main" role="switch" aria-checked="${state.show_together_counter ? "true" : "false"}" tabindex="0">
       <span class="section-switch-label">
         <span class="section-switch-icon">⏱</span>
         <span class="section-switch-copy">
-          <strong>${state.show_together_counter ? "Contatore attivo" : "Contatore spento"}</strong>
-          <small>${state.show_together_counter ? "Compare sotto la copertina" : "Tocca per mostrarlo"}</small>
+          <strong data-lf="${state.show_together_counter ? onLabel : offLabel}">${esc(localizeFieldPhrase(state.show_together_counter ? onLabel : offLabel))}</strong>
+          <small data-lf="${state.show_together_counter ? onHint : offHint}">${esc(localizeFieldPhrase(state.show_together_counter ? onHint : offHint))}</small>
         </span>
       </span>
       <span class="section-switch-track" aria-hidden="true"><i></i></span>
@@ -2210,15 +2217,15 @@ function renderCounterPanel(state){
     <input type="checkbox" name="show_together_counter" ${state.show_together_counter ? "checked" : ""} hidden id="showTogetherCounterInput">
     <div class="section-editor-stack ${state.show_together_counter ? "" : "is-muted"}">
       <div class="editor-card smart-card">
-        <p class="ecard-title"><span class="step-badge">1</span> Da quale giorno?</p>
-        <label>Testo sopra il contatore<input name="counter_label" value="${esc(state.counter_label || "")}" placeholder="Es. Insieme da, Ti sopporto da"></label>
-        <label>Data speciale<input type="date" name="together_since" value="${esc(state.together_since || "")}"></label>
-        <p class="field-hint">Solo il giorno (es. primo appuntamento). Non serve ora: il conteggio parte dalla mezzanotte di quella data.</p>
+        <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Da quale giorno?")}</p>
+        <label>${lfSpan("Testo sopra il contatore")}<input name="counter_label" value="${esc(state.counter_label || "")}" placeholder="${esc(localizeFieldPhrase("Es. Insieme da, Ti sopporto da"))}" data-lf-placeholder="Es. Insieme da, Ti sopporto da"></label>
+        <label>${lfSpan("Data speciale")}<input type="date" name="together_since" value="${esc(state.together_since || "")}"></label>
+        <p class="field-hint">${lfSpan("Solo il giorno (es. primo appuntamento). Non serve ora: il conteggio parte dalla mezzanotte di quella data.")}</p>
       </div>
       <div class="editor-card smart-card">
-        <p class="ecard-title"><span class="step-badge">2</span> Come mostrarlo?</p>
-        <label class="smart-toggle"><input type="checkbox" name="show_counter_hms" ${state.show_counter_hms ? "checked" : ""}> Mostra anche ore, minuti e secondi (timer che scorre)</label>
-        <p class="field-hint"><strong>Spento</strong> (consigliato): anni · mesi · giorni, aggiornato in modo calmo.<br><strong>Acceso</strong>: giorni · ore · min · sec che cambiano ogni secondo — utile se vuoi l’effetto “orologio vivo”. Parte sempre dalla mezzanotte del giorno scelto sopra.</p>
+        <p class="ecard-title"><span class="step-badge">2</span> ${lfSpan("Come mostrarlo?")}</p>
+        <label class="smart-toggle"><input type="checkbox" name="show_counter_hms" ${state.show_counter_hms ? "checked" : ""}> ${lfSpan("Mostra anche ore, minuti e secondi (timer che scorre)")}</label>
+        <p class="field-hint">${lfSpan("Spento (consigliato): anni · mesi · giorni, aggiornato in modo calmo.")}<br>${lfSpan("Acceso: giorni · ore · min · sec che cambiano ogni secondo — utile se vuoi l’effetto “orologio vivo”. Parte sempre dalla mezzanotte del giorno scelto sopra.")}</p>
       </div>
     </div>
   </div>`;
@@ -2228,7 +2235,7 @@ function renderOrderPanel(state){
   return `<div class="editor-panel ${activeEditorPanel === "order" ? "active" : ""}" data-editor-panel="order">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.order),editorPanelSubtitle(EDITOR_PANELS.order))}
     <div class="editor-card">
-      <p class="field-hint order-intro">Tieni premuto ☰ e trascina — le sezioni attive si riordinano subito nell'anteprima.</p>
+      <p class="field-hint order-intro">${lfSpan("Tieni premuto ☰ e trascina — le sezioni attive si riordinano subito nell'anteprima.")}</p>
       ${renderSectionOrderList(state)}
     </div>
   </div>`;
@@ -2561,12 +2568,12 @@ function revertEditorChanges(){
 function renderSectionOrderItem(key,idx,momentType = currentMomentType,formNode = null){
   const label = formNode ? sectionOrderDisplayLabel(formNode, momentType, key) : localizedSectionLabel(momentType, key);
   return `<div class="section-order-item" data-section-key="${esc(key)}">
-    <button type="button" class="section-drag section-drag-handle" aria-label="Trascina per riordinare">☰</button>
+    <button type="button" class="section-drag section-drag-handle" aria-label="${esc(localizeFieldPhrase("Trascina per riordinare"))}">☰</button>
     <span class="section-order-icon">${esc(SECTION_ICONS[key] || "•")}</span>
     <span class="section-order-label">${esc(label)}</span>
     <div class="section-order-actions">
-      <button type="button" class="section-move-btn" data-section-move-up="${esc(key)}" aria-label="Sposta su">↑</button>
-      <button type="button" class="section-move-btn" data-section-move-down="${esc(key)}" aria-label="Sposta giù">↓</button>
+      <button type="button" class="section-move-btn" data-section-move-up="${esc(key)}" aria-label="${esc(localizeFieldPhrase("Sposta su"))}">↑</button>
+      <button type="button" class="section-move-btn" data-section-move-down="${esc(key)}" aria-label="${esc(localizeFieldPhrase("Sposta giù"))}">↓</button>
     </div>
     <span class="section-order-num">#${idx+1}</span>
   </div>`;
@@ -2576,9 +2583,9 @@ function renderSectionOrderList(state){
   const keys = state ? enabledSectionKeysFromState(state) : navSectionsForEditor(currentMomentType, sectionOrder, pinnedExtraSections);
   const items = keys.length
     ? keys.map((key,idx)=>renderSectionOrderItem(key,idx, state?.type || currentMomentType)).join("")
-    : `<p class="section-order-empty">Nessuna sezione attiva. Attiva almeno una sezione dal menu <strong>Contenuti</strong>.</p>`;
+    : `<p class="section-order-empty">${lfSpan("Nessuna sezione attiva. Attiva almeno una sezione dal menu Contenuti.")}</p>`;
   return `<div class="section-order-panel">
-    <p class="section-order-hint">Trascina con ☰ oppure usa ↑ ↓ per cambiare l'ordine delle sezioni attive.</p>
+    <p class="section-order-hint">${lfSpan("Trascina con ☰ oppure usa ↑ ↓ per cambiare l'ordine delle sezioni attive.")}</p>
     <div class="section-order-list" id="sectionOrderList">${items}</div>
   </div>`;
 }
@@ -3240,8 +3247,16 @@ function bindCounterSwitch(formNode){
     switchEl.setAttribute("aria-checked",input.checked ? "true" : "false");
     const strong = switchEl.querySelector(".section-switch-copy strong");
     const small = switchEl.querySelector(".section-switch-copy small");
-    if(strong) strong.textContent = input.checked ? "Contatore attivo" : "Contatore spento";
-    if(small) small.textContent = input.checked ? "Compare sotto la copertina" : "Tocca per mostrarlo";
+    if(strong){
+      const it = input.checked ? "Contatore attivo" : "Contatore spento";
+      strong.setAttribute("data-lf", it);
+      strong.textContent = localizeFieldPhrase(it);
+    }
+    if(small){
+      const it = input.checked ? "Compare sotto la copertina" : "Tocca per mostrarlo";
+      small.setAttribute("data-lf", it);
+      small.textContent = localizeFieldPhrase(it);
+    }
     if(stack) stack.classList.toggle("is-muted",!input.checked);
   };
   switchEl.addEventListener("click",()=>{
@@ -3539,7 +3554,8 @@ function bindMediaUploadDelegation(){
 }
 
 function option(value,label,current){
-  return `<option value="${esc(value)}" ${value === current ? "selected" : ""}>${esc(label)}</option>`;
+  const it = String(label || "");
+  return `<option value="${esc(value)}" data-lf-option="${esc(it)}" ${value === current ? "selected" : ""}>${esc(localizeFieldPhrase(it))}</option>`;
 }
 
 function renderGalleryUpload(section,key){

@@ -20,6 +20,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
 ### Added
+- **Moments v201 — i18n fields Step 11c (2026-07-23, Cursor)** — Pages
+  - Colori / Contatore / Ordine: label, select, hint EN; nomi look taxonomy ancora IT.
 - **Moments v200 — i18n fields Step 11b (2026-07-23, Cursor)** — Pages
   - Solo pannello Pubblica: stato, PIN, email anniversario EN.
 - **Moments v199 — i18n fields Step 11a (2026-07-23, Cursor)** — Pages

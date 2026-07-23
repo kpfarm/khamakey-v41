@@ -1,0 +1,51 @@
+/** Editor shell chrome only — Step 6a (topbar / save / preview). No activation, no /m/. */
+
+export const SHELL_MESSAGES_IT = {
+  "shell.save_bar": "Hai <strong>modifiche non salvate</strong>",
+  "shell.save": "Salva",
+  "shell.undo": "↩ Annulla",
+  "shell.undo_title": "Annulla le modifiche non salvate",
+  "shell.preview": "Anteprima",
+  "shell.edit": "Modifica",
+  "shell.saved": "Salvato",
+  "shell.unsaved": "Modifiche non salvate",
+  "shell.save_fail": "Salva non riuscito",
+  "shell.editor_page": "Editor pagina",
+  "shell.copy_link": "Copia link",
+  "shell.share": "Condividi",
+  "shell.open_page": "Apri pagina",
+  "shell.open_title": "Apre la pagina pubblica",
+  "shell.published": "Pubblicata",
+  "shell.draft": "Bozza privata",
+  "shell.pin_on": "PIN attivo",
+  "shell.pin_off": "PIN disattivo",
+  "shell.live_preview": "Anteprima live",
+  "shell.preview_iframe": "Anteprima della tua pagina",
+  "shell.confirm_switch": "Hai modifiche non salvate. Vuoi cambiare oggetto senza salvare?",
+  "shell.confirm_undo": "Annullare le modifiche non salvate e tornare all'ultima versione salvata?"
+};
+
+export const SHELL_MESSAGES_EN = {
+  "shell.save_bar": "You have <strong>unsaved changes</strong>",
+  "shell.save": "Save",
+  "shell.undo": "↩ Undo",
+  "shell.undo_title": "Undo unsaved changes",
+  "shell.preview": "Preview",
+  "shell.edit": "Edit",
+  "shell.saved": "Saved",
+  "shell.unsaved": "Unsaved changes",
+  "shell.save_fail": "Save failed",
+  "shell.editor_page": "Page editor",
+  "shell.copy_link": "Copy link",
+  "shell.share": "Share",
+  "shell.open_page": "Open page",
+  "shell.open_title": "Opens the public page",
+  "shell.published": "Published",
+  "shell.draft": "Private draft",
+  "shell.pin_on": "PIN on",
+  "shell.pin_off": "PIN off",
+  "shell.live_preview": "Live preview",
+  "shell.preview_iframe": "Preview of your page",
+  "shell.confirm_switch": "You have unsaved changes. Switch page without saving?",
+  "shell.confirm_undo": "Discard unsaved changes and restore the last saved version?"
+};

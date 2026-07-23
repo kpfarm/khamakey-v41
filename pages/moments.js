@@ -9,8 +9,9 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=191";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=191";
+} from "./moments-i18n.js?v=192";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=192";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=192";
 import {
   uploadImage,
   uploadVideo,
@@ -248,7 +249,7 @@ function showEditorSaveFeedback(message, type = "error"){
   setStatus(editorStatus, message, type);
   const saveStatus = document.getElementById("editorSaveStatus");
   if(saveStatus){
-    saveStatus.textContent = type === "ok" ? "Salvato" : (type === "error" ? "Salva non riuscito" : message);
+    saveStatus.textContent = type === "ok" ? t("shell.saved") : (type === "error" ? t("shell.save_fail") : message);
     saveStatus.classList.toggle("dirty", type !== "ok");
   }
   const barMsg = document.querySelector("#momentsSaveBar .save-msg");
@@ -827,7 +828,7 @@ function refreshAccountMenu(){
       userMenu?.classList.remove("open");
       const nextId = button.dataset.menuObjectId;
       if(!nextId) return;
-      if(editorDirty && activeId && nextId !== activeId && !confirm("Hai modifiche non salvate. Vuoi cambiare oggetto senza salvare?")) return;
+      if(editorDirty && activeId && nextId !== activeId && !confirm(t("shell.confirm_switch"))) return;
       try{
         await ensureEventPageState(nextId);
         showEditorView();
@@ -876,7 +877,7 @@ function bindGlobalAppChrome(){
       if(!shell) return;
       mobilePreviewMode = !mobilePreviewMode;
       shell.classList.toggle("show-preview",mobilePreviewMode);
-      fab.textContent = mobilePreviewMode ? "Modifica" : "Anteprima";
+      setPreviewFabLabel();
       if(mobilePreviewMode){
         const form = document.getElementById("momentEditorForm");
         if(form) schedulePreviewUpdate(form,{immediate:true,force:true});
@@ -1071,8 +1072,7 @@ function renderSubNav(groupId, formNode){
       if(shell && mobilePreviewMode){
         mobilePreviewMode = false;
         shell.classList.remove("show-preview");
-        const fab = document.getElementById("momentsPreviewFab");
-        if(fab) fab.textContent = "Anteprima";
+        setPreviewFabLabel();
       }
       window.scrollTo({top:0,behavior:"smooth"});
     });
@@ -1398,7 +1398,7 @@ function bindObjectSwitcher(root){
       const nextId = button.dataset.objectId;
       if(!nextId) return;
       if(nextId === activeId && appView === "editor") return;
-      if(editorDirty && activeId && nextId !== activeId && !confirm("Hai modifiche non salvate. Vuoi cambiare oggetto senza salvare?")) return;
+      if(editorDirty && activeId && nextId !== activeId && !confirm(t("shell.confirm_switch"))) return;
       activeEditorPanel = "cover";
       try{
         await ensureEventPageState(nextId);
@@ -2299,8 +2299,7 @@ function bindEditorNavigation(root){
       if(mobilePreviewMode){
         mobilePreviewMode = false;
         root.classList.remove("show-preview");
-        const fab = document.getElementById("momentsPreviewFab");
-        if(fab) fab.textContent = "Anteprima";
+        setPreviewFabLabel();
       }
     });
   });
@@ -2322,22 +2321,50 @@ function bindMobilePreviewToggle(root){
   });
 }
 
+function setPreviewFabLabel(){
+  const fab = document.getElementById("momentsPreviewFab");
+  if(!fab) return;
+  fab.textContent = mobilePreviewMode ? t("shell.edit") : t("shell.preview");
+  fab.setAttribute("data-i18n", mobilePreviewMode ? "shell.edit" : "shell.preview");
+}
+
 function updateSaveStatus(saved){
   const node = document.getElementById("editorSaveStatus");
   if(node){
-    node.textContent = saved ? "Salvato" : "Modifiche non salvate";
+    node.textContent = saved ? t("shell.saved") : t("shell.unsaved");
     node.classList.toggle("dirty",!saved);
   }
-  document.getElementById("momentsSaveBar")?.classList.toggle("visible",!saved);
+  const saveBar = document.getElementById("momentsSaveBar");
+  saveBar?.classList.toggle("visible",!saved);
+  const barMsg = saveBar?.querySelector(".save-msg");
+  if(barMsg && !saved){
+    barMsg.setAttribute("data-i18n-html", "shell.save_bar");
+    barMsg.innerHTML = t("shell.save_bar");
+  }
   document.querySelectorAll(".editor-undo-btn").forEach(button=>{
     button.hidden = saved;
     button.disabled = saved;
   });
 }
 
+function refreshShellChrome(){
+  setPreviewFabLabel();
+  if(document.getElementById("editorSaveStatus")){
+    updateSaveStatus(!editorDirty);
+  }
+  const row = rows.find(item => item.id === activeId);
+  if(!row || !detail) return;
+  detail.querySelectorAll(".status-pill.live, .status-pill.draft").forEach(pill=>{
+    pill.textContent = row.public_visible ? t("shell.published") : t("shell.draft");
+  });
+  detail.querySelectorAll(".status-pill.pin").forEach(pill=>{
+    pill.textContent = row.pin_enabled ? t("shell.pin_on") : t("shell.pin_off");
+  });
+}
+
 function revertEditorChanges(){
   if(!editorDirty || !savedEditorSnapshot || !activeId) return;
-  if(!window.confirm("Annullare le modifiche non salvate e tornare all'ultima versione salvata?")) return;
+  if(!window.confirm(t("shell.confirm_undo"))) return;
   const row = rows.find(item=>item.id === activeId);
   if(!row) return;
   let savedState;
@@ -2575,32 +2602,32 @@ function renderDetail(id){
     ${adminMode ? `<p class="admin-mode-banner" id="adminModeBanner">Modalità admin — stai modificando l'oggetto di ${esc(row.owner_email || "cliente")}.</p>` : ""}
     <div class="detail-head">
       <div>
-        <p class="eyebrow">Editor pagina</p>
+        <p class="eyebrow" data-i18n="shell.editor_page">${esc(t("shell.editor_page"))}</p>
         <h2>${esc(state.title || row.slug)}</h2>
         <p class="detail-meta">${esc(row.nfc_code || "")} · ${esc(TYPE_LABELS[state.type] || state.type)}</p>
         <div class="status-row">
-          <span class="status-pill ${row.public_visible ? "live" : "draft"}">${row.public_visible ? "Pubblicata" : "Bozza privata"}</span>
-          <span class="status-pill pin">${row.pin_enabled ? "PIN attivo" : "PIN disattivo"}</span>
+          <span class="status-pill ${row.public_visible ? "live" : "draft"}">${esc(row.public_visible ? t("shell.published") : t("shell.draft"))}</span>
+          <span class="status-pill pin">${esc(row.pin_enabled ? t("shell.pin_on") : t("shell.pin_off"))}</span>
         </div>
       </div>
       <div class="link-row">
-        <button type="button" class="copy-button" id="editorCopyLinkBtn">Copia link</button>
-        <button type="button" class="copy-button" id="editorSharePageBtn">Condividi</button>
+        <button type="button" class="copy-button" id="editorCopyLinkBtn" data-i18n="shell.copy_link">${esc(t("shell.copy_link"))}</button>
+        <button type="button" class="copy-button" id="editorSharePageBtn" data-i18n="shell.share">${esc(t("shell.share"))}</button>
       </div>
     </div>
     ${showWizard ? renderOnboardingWizard(row) : ""}
     <div class="editor-shell" id="momentEditorShell">
       <div class="editor-topbar">
-        <span class="editor-save-status" id="editorSaveStatus">Salvato</span>
+        <span class="editor-save-status" id="editorSaveStatus">${esc(t("shell.saved"))}</span>
         <div class="editor-topbar-actions">
           <div class="mobile-view-toggle">
-            <button type="button" class="mobile-view-btn active" data-mobile-view="edit">Modifica</button>
-            <button type="button" class="mobile-view-btn" data-mobile-view="preview">Anteprima</button>
+            <button type="button" class="mobile-view-btn active" data-mobile-view="edit" data-i18n="shell.edit">${esc(t("shell.edit"))}</button>
+            <button type="button" class="mobile-view-btn" data-mobile-view="preview" data-i18n="shell.preview">${esc(t("shell.preview"))}</button>
           </div>
           <button type="button" class="ghost quick-publish published" id="quickPublishBtn" title="Rende la pagina visibile a chi ha il link">Pubblica pagina</button>
-          <button type="button" class="ghost editor-open-link" id="editorOpenPageBtn" title="Apre la pagina pubblica">Apri pagina</button>
-          <button type="button" class="ghost editor-undo-btn" id="editorUndoBtn" hidden title="Annulla le modifiche non salvate">↩ Annulla</button>
-          <button type="submit" form="momentEditorForm" class="primary editor-save-btn">Salva</button>
+          <button type="button" class="ghost editor-open-link" id="editorOpenPageBtn" data-i18n="shell.open_page" data-i18n-title="shell.open_title" title="${esc(t("shell.open_title"))}">${esc(t("shell.open_page"))}</button>
+          <button type="button" class="ghost editor-undo-btn" id="editorUndoBtn" hidden data-i18n="shell.undo" data-i18n-title="shell.undo_title" title="${esc(t("shell.undo_title"))}">${esc(t("shell.undo"))}</button>
+          <button type="submit" form="momentEditorForm" class="primary editor-save-btn" data-i18n="shell.save">${esc(t("shell.save"))}</button>
         </div>
       </div>
       <p class="editor-action-hint" id="editorActionHint" hidden></p>
@@ -2629,12 +2656,12 @@ function renderDetail(id){
         </div>
         <aside class="preview-card" id="momentPreview">
           <div class="preview-label">
-            <span>Anteprima live</span>
+            <span data-i18n="shell.live_preview">${esc(t("shell.live_preview"))}</span>
             <span class="preview-live-status"></span>
           </div>
           <div class="preview-live-wrap">
             <div class="preview-live-stage" id="previewLiveStage">
-              <iframe class="preview-live-iframe" title="Anteprima della tua pagina"></iframe>
+              <iframe class="preview-live-iframe" title="${esc(t("shell.preview_iframe"))}" data-i18n-title="shell.preview_iframe"></iframe>
             </div>
           </div>
         </aside>
@@ -2648,8 +2675,7 @@ function renderDetail(id){
   const editorForm = document.getElementById("momentEditorForm");
   const editorShell = document.getElementById("momentEditorShell");
   mobilePreviewMode = false;
-  const previewFab = document.getElementById("momentsPreviewFab");
-  if(previewFab) previewFab.textContent = "Anteprima";
+  setPreviewFabLabel();
   editorShell?.classList.remove("show-preview");
   savedEditorSnapshot = JSON.stringify(readFormState(editorForm));
   lastPreviewHash = "";
@@ -3746,12 +3772,12 @@ function ensurePreviewShell(preview){
   let stage = preview.querySelector("#previewLiveStage");
   if(!stage){
     preview.innerHTML = `<div class="preview-label">
-      <span>Anteprima live</span>
+      <span data-i18n="shell.live_preview">${esc(t("shell.live_preview"))}</span>
       <span class="preview-live-status"></span>
     </div>
     <div class="preview-live-wrap">
       <div class="preview-live-stage" id="previewLiveStage">
-        <iframe class="preview-live-iframe" title="Anteprima della tua pagina"></iframe>
+        <iframe class="preview-live-iframe" title="${esc(t("shell.preview_iframe"))}" data-i18n-title="shell.preview_iframe"></iframe>
       </div>
     </div>`;
     stage = preview.querySelector("#previewLiveStage");
@@ -3956,10 +3982,10 @@ async function saveMoment(event,row){
     detail.querySelectorAll(".status-pill.live, .status-pill.draft").forEach(pill=>{
       const isLive = publicVisible;
       pill.className = `status-pill ${isLive ? "live" : "draft"}`;
-      pill.textContent = isLive ? "Pubblicata" : "Bozza privata";
+      pill.textContent = isLive ? t("shell.published") : t("shell.draft");
     });
     detail.querySelectorAll(".status-pill.pin").forEach(pill=>{
-      pill.textContent = pinEnabled ? "PIN attivo" : "PIN disattivo";
+      pill.textContent = pinEnabled ? t("shell.pin_on") : t("shell.pin_off");
     });
     const formAfter = document.getElementById("momentEditorForm");
     if(formAfter) schedulePreviewUpdate(formAfter,{immediate:true,force:true});
@@ -4122,6 +4148,8 @@ window.addEventListener("beforeunload",event=>{
 /* i18n: register + bind AFTER lets/consts init (TDZ-safe). Never block boot. */
 registerMessages("it", AUTH_MESSAGES_IT);
 registerMessages("en", AUTH_MESSAGES_EN);
+registerMessages("it", SHELL_MESSAGES_IT);
+registerMessages("en", SHELL_MESSAGES_EN);
 applyDocumentLang(getUiLocale());
 
 function syncLangSwitchers(locale = getUiLocale()){
@@ -4136,6 +4164,7 @@ function syncLangSwitchers(locale = getUiLocale()){
   });
   applyChromeI18n(document);
   try{
+    refreshShellChrome();
     if(currentUser) refreshAccountMenu();
     if(appView === "account") renderAccountPanels();
     if(document.getElementById("emptyActivationForm")) renderEmptyState();

@@ -1,9 +1,9 @@
 # 27 — Moments i18n: regole (Step 2)
 
-> **Data:** 2026-07-23 · **Stato:** regole accettate · **Step 5 auth/account EN (Moments v190)**  
+> **Data:** 2026-07-23 · **Stato:** regole accettate · **Step 6a shell EN (Moments v192)**  
 > Decisione formale: [`decisions/007-moments-editor-i18n.md`](../decisions/007-moments-editor-i18n.md)  
 > Inventario: [`26-moments-i18n-inventory.md`](26-moments-i18n-inventory.md)  
-> Modulo: `pages/moments-i18n.js` (`t`, `getUiLocale` / `setUiLocale`, `applyChromeI18n`)
+> Moduli: `moments-i18n.js` · `moments-i18n-auth.js` · `moments-i18n-shell.js`
 
 ## In una frase
 

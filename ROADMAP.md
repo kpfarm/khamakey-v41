@@ -328,3 +328,5 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-23 | Cursor | **i18n Moments Step 3 / v187**: `moments-i18n.js` + `applyDocumentLang` al boot; dizionario seed; UI invariata |
 | 2026-07-23 | Cursor | **i18n Moments Step 4 / v188**: toggle IT\|EN in auth + topbar + menu; preferenza persistita; chrome ancora IT |
 | 2026-07-23 | Cursor | **i18n Moments Step 5 / v190**: auth + account + attivazione EN (`moments-i18n-auth.js`); deploy Pages |
+| 2026-07-23 | Cursor | **i18n Moments bootfix / v191**: TDZ `appView` in `syncLangSwitchers` → boot bloccato; init lingua dopo le variabili |
+| 2026-07-23 | Cursor | **i18n Moments Step 6a / v192**: shell Salva/Annulla/Anteprima + topbar status EN (`moments-i18n-shell.js`); no Worker/attivazione |

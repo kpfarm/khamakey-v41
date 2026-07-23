@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=206";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=206";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=206";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=206";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=206";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=206";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=206";
+} from "./moments-i18n.js?v=207";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=207";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=207";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=207";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=207";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=207";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=207";
 import {
   uploadImage,
   uploadVideo,
@@ -84,7 +84,7 @@ import {
   writeListItems,
   readListItems,
   bindListItemsEditor
-} from "./moments-list-ui.js";
+} from "./moments-list-ui.js?v=207";
 import { journeyStepId, MAX_JOURNEY_STEPS, normalizeJourneyStep, resolveJourneySteps, compactJourneySteps } from "./moment-journey.js";
 import {
   COLOR_PALETTES,
@@ -247,6 +247,11 @@ function syncFieldChromeI18n(root = document){
     const nameIt = el.getAttribute("data-lf-title-name") || "";
     const hintIt = el.getAttribute("data-lf-title-hint") || "";
     el.setAttribute("title", `${localizeFieldPhrase(nameIt)} — ${localizeFieldPhrase(hintIt)}`);
+  });
+  root.querySelectorAll("[data-lf-list-badge]").forEach(el=>{
+    const singular = el.getAttribute("data-lf-list-badge") || "";
+    const num = el.getAttribute("data-lf-list-num") || "";
+    el.textContent = `${localizeFieldPhrase(singular)} ${num}`.trim();
   });
 }
 
@@ -4411,6 +4416,10 @@ function syncLangSwitchers(locale = getUiLocale()){
     refreshShellChrome();
     refreshNavChrome();
     syncFieldChromeI18n(document.getElementById("momentEditorForm") || document);
+    const editorForm = document.getElementById("momentEditorForm");
+    if(editorForm){
+      for(const key of LIST_SECTION_KEYS) renderListItems(editorForm, key);
+    }
     if(currentUser) refreshAccountMenu();
     if(appView === "account") renderAccountPanels();
     if(document.getElementById("emptyActivationForm")) renderEmptyState();

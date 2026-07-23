@@ -80,7 +80,11 @@ export function onUiLocaleChange(fn) {
 export function applyDocumentLang(locale = getUiLocale()) {
   const code = normalizeUiLocale(locale);
   if (typeof document !== "undefined" && document.documentElement) {
-    document.documentElement.lang = code;
+    const root = document.documentElement;
+    root.lang = code;
+    /* Own IT/EN toggle — block Safari/Chrome auto-translate (IT→esso, Pubblica→Pubblicità). */
+    root.setAttribute("translate", "no");
+    root.classList.add("notranslate");
   }
   return code;
 }

@@ -9,6 +9,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Moments v195 — Safari auto-translate (2026-07-23, Cursor)** — Pages
+  - Non era il dizionario IT: Safari traduceva la pagina (`IT`→`esso`, `Pubblica`→`Pubblicità`, `Anteprima`→`Aprile`).
+  - `html translate="no"` + `notranslate` + meta Google; lingua resta solo dal toggle KhamaKey.
 - **Moments v193 — Salva tagliato + pausa i18n (2026-07-23, Cursor)** — Pages
   - CSS: `Salva` / `Salvato` / Annulla non si comprimono più (`flex-shrink:0`, `nowrap`, min-width).
   - Espansione EN (6b/sezioni) in pausa; resta toggle + auth/shell già fatti; default IT.

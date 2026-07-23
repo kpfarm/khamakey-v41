@@ -1,6 +1,6 @@
 # 27 — Moments i18n: regole (Step 2)
 
-> **Data:** 2026-07-23 · **Stato:** regole ok · **Step 6b save feedback (v194)**  
+> **Data:** 2026-07-23 · **Stato:** regole ok · **v195: blocco auto-translate Safari**  
 > Decisione formale: [`decisions/007-moments-editor-i18n.md`](../decisions/007-moments-editor-i18n.md)  
 > Inventario: [`26-moments-i18n-inventory.md`](26-moments-i18n-inventory.md)  
 > Moduli: `moments-i18n.js` · `moments-i18n-auth.js` · `moments-i18n-shell.js`
@@ -17,6 +17,7 @@ Default italiano; inglese solo se l’utente clicca EN; si salva nel browser; i 
 | 2 | Senza preferenza salvata → **sempre IT** |
 | 3 | Preferenza in `localStorage` → chiave `khamakey.moments.uiLocale` (`it` \| `en`) |
 | 4 | Solo scelta **esplicita** (toggle IT/EN) — niente auto-detect aggressivo |
+| 4b | **Bloccare traduzione Safari/Chrome** (`translate="no"` / `notranslate`) — altrimenti `IT`→`esso`, `Pubblica`→`Pubblicità`, `Anteprima`→`Aprile` |
 | 5 | Niente sync cloud della lingua UI in v1 |
 | 6 | Chiave EN mancante → fallback testo IT |
 | 7 | Si traduce il **chrome** editor; non i contenuti scritti dal cliente |

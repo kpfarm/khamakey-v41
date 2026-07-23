@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=204";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=204";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=204";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=204";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=204";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=204";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=204";
+} from "./moments-i18n.js?v=205";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=205";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=205";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=205";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=205";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=205";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=205";
 import {
   uploadImage,
   uploadVideo,
@@ -3632,26 +3632,26 @@ function sectionEditor(key,section,standalone=false){
     <label>${lfSpan("Firma")}<input name="section_${esc(key)}_signature" value="${esc(safe.signature || "")}" placeholder="${esc(localizeFieldPhrase("Es. Con amore, i tuoi nomi"))}" data-lf-placeholder="Es. Con amore, i tuoi nomi"></label>` : "";
   const countdownFields = key === "countdown" ? `
     <div class="editor-card">
-      <p class="ecard-title"><span class="step-badge">1</span> Quando?</p>
-      <label>Cosa aspettate?<input name="section_${esc(key)}_event_label" value="${esc(safe.event_label || "")}" placeholder="Es. Al nostro matrimonio"></label>
-      <label>Data e ora<input type="datetime-local" name="section_${esc(key)}_target_date" value="${esc(safe.target_date || "")}"></label>
+      <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Quando?")}</p>
+      <label>${lfSpan("Cosa aspettate?")}<input name="section_${esc(key)}_event_label" value="${esc(safe.event_label || "")}" placeholder="${esc(localizeFieldPhrase("Es. Al nostro matrimonio"))}" data-lf-placeholder="Es. Al nostro matrimonio"></label>
+      <label>${lfSpan("Data e ora")}<input type="datetime-local" name="section_${esc(key)}_target_date" value="${esc(safe.target_date || "")}"></label>
     </div>
     <div class="editor-card">
-      <p class="ecard-title"><span class="step-badge">2</span> Foto</p>
+      <p class="ecard-title"><span class="step-badge">2</span> ${lfSpan("Foto")}</p>
       ${renderSectionPhotoPanel(key, safe, "image_url", SECTION_PHOTO_FIELDS.countdown)}
-      <p class="field-hint">Facoltativa — appare sopra il timer nella pagina.</p>
+      <p class="field-hint" data-lf="Facoltativa — appare sopra il timer nella pagina.">${esc(localizeFieldPhrase("Facoltativa — appare sopra il timer nella pagina."))}</p>
     </div>` : "";
   const musicFields = key === "music" ? `
     <div class="editor-card">
-      <p class="ecard-title"><span class="step-badge">1</span> Collegamenti</p>
-      <label>Link Spotify<input name="section_${esc(key)}_spotify_url" value="${esc(safe.spotify_url || "")}" placeholder="https://open.spotify.com/track/..."><span class="field-hint">Link pubblico — non file caricati.</span></label>
-      <label>Link YouTube<input name="section_${esc(key)}_youtube_url" value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..."><span class="field-hint">Link pubblico del video.</span></label>
+      <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Collegamenti")}</p>
+      <label>${lfSpan("Link Spotify")}<input name="section_${esc(key)}_spotify_url" value="${esc(safe.spotify_url || "")}" placeholder="https://open.spotify.com/track/..."><span class="field-hint" data-lf="Link pubblico — non file caricati.">${esc(localizeFieldPhrase("Link pubblico — non file caricati."))}</span></label>
+      <label>${lfSpan("Link YouTube")}<input name="section_${esc(key)}_youtube_url" value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..."><span class="field-hint" data-lf="Link pubblico del video.">${esc(localizeFieldPhrase("Link pubblico del video."))}</span></label>
       ${renderMusicAudioPanel(safe)}
     </div>
     <div class="editor-card">
-      <p class="ecard-title"><span class="step-badge">2</span> Immagine</p>
+      <p class="ecard-title"><span class="step-badge">2</span> ${lfSpan("Immagine")}</p>
       ${renderSectionPhotoPanel(key, safe, "image_url", SECTION_PHOTO_FIELDS.music)}
-      <p class="field-hint">Facoltativa — copertina del brano, locandina o foto simbolica.</p>
+      <p class="field-hint" data-lf="Facoltativa — copertina del brano, locandina o foto simbolica.">${esc(localizeFieldPhrase("Facoltativa — copertina del brano, locandina o foto simbolica."))}</p>
     </div>` : "";
   const videoFields = key === "video" ? `
     <div class="editor-card">

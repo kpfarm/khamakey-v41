@@ -213,5 +213,20 @@ export const FIELD_PHRASE_EN = {
   "Es. Marco & Giulia": "e.g. Marco & Giulia",
   "Es. Per sempre": "e.g. Forever",
   "Nome": "Name",
-  "Es. Luna": "e.g. Luna"
+  "Es. Luna": "e.g. Luna",
+
+  // 11e2 — Countdown + Music chrome (sectionEditor only; upload UI → 11e6)
+  "Quando?": "When?",
+  "Cosa aspettate?": "What are you waiting for?",
+  "Es. Al nostro matrimonio": "e.g. Our wedding",
+  "Data e ora": "Date and time",
+  "Foto": "Photo",
+  "Facoltativa — appare sopra il timer nella pagina.": "Optional — shows above the timer on the page.",
+  "Collegamenti": "Links",
+  "Link Spotify": "Spotify link",
+  "Link YouTube": "YouTube link",
+  "Link pubblico — non file caricati.": "Public link — not uploaded files.",
+  "Link pubblico del video.": "Public link to the video.",
+  "Immagine": "Image",
+  "Facoltativa — copertina del brano, locandina o foto simbolica.": "Optional — track cover, poster or symbolic photo."
 };

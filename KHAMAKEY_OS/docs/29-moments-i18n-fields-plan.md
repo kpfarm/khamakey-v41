@@ -37,7 +37,7 @@ Steps 1–9 = auth, shell, nav, etichette/sottotitoli sezioni, toast, chrome `/m
 - [x] **Look taxonomy** (v203) — label/hint `PAGE_LOOKS` + nomi palette EN
 - [ ] **11e** Kit sezioni avanzati — **a pezzi** (vedi sotto)
   - [x] **11e1** (v204) — dedica / lettera futuro / citazione / firma / pet
-  - [ ] 11e2 Countdown + Musica
+  - [x] **11e2** (v205) — countdown + musica chrome
   - [ ] 11e3 RSVP WhatsApp chrome
   - [ ] 11e4 List UI
   - [ ] 11e5 Journey UI

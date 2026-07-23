@@ -335,3 +335,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-23 | Cursor | **Moments v195**: `translate=no` anti Safari — non era IT rotto (`IT`→esso, `Pubblica`→Pubblicità) |
 | 2026-07-23 | Cursor | **i18n Moments Step 7a / v196**: menu/progress/gruppi EN (`moments-i18n-nav.js`); etichette sezioni taxonomy ancora IT |
 | 2026-07-23 | Cursor | **i18n Moments Step 7b / v197**: taxonomy sezioni EN (`moments-i18n-sections.js` phrase map); sottotitoli/campi ancora IT |
+| 2026-07-23 | Cursor | **i18n Moments Step 7c / v198**: sottotitoli pannelli/sezioni EN (`SECTION_SUBTITLE_EN`); campi form ancora IT |

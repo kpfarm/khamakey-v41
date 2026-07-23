@@ -9,12 +9,12 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=197";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=197";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=197";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=197";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=197";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN } from "./moments-i18n-sections.js?v=197";
+} from "./moments-i18n.js?v=198";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=198";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=198";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=198";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=198";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=198";
 import {
   uploadImage,
   uploadVideo,
@@ -197,6 +197,12 @@ function localizeSectionPhrase(text){
   return SECTION_PHRASE_EN[raw] || raw;
 }
 
+function localizeSectionSubtitle(text){
+  const raw = String(text || "");
+  if(!raw || getUiLocale() === "it") return raw;
+  return SECTION_SUBTITLE_EN[raw] || raw;
+}
+
 function localizedSectionLabel(type, key){
   return localizeSectionPhrase(sectionLabelForType(type, key));
 }
@@ -207,6 +213,15 @@ function localizedSectionNavLabel(type, key){
 
 function localizedCounterLabel(type){
   return localizeSectionPhrase(counterLabelForType(type));
+}
+
+function localizedSectionSubtitle(type, key){
+  return localizeSectionSubtitle(sectionSubtitleForType(type, key));
+}
+
+function editorPanelSubtitle(panel){
+  if(!panel) return "";
+  return localizeSectionSubtitle(panel.subtitle || "");
 }
 
 let activeEditorPanel = "cover";
@@ -1061,9 +1076,39 @@ function syncEditorKitUi(formNode){
       const sub = panel.querySelector(".section-sub");
       const custom = String(formNode?.querySelector(`[name="section_${key}_title"]`)?.value || "").trim();
       if(title) title.textContent = custom || localizedSectionLabel(type, key);
-      if(sub) sub.textContent = sectionSubtitleForType(type, key);
+      if(sub) sub.textContent = localizedSectionSubtitle(type, key);
     }
   });
+
+  const fixedPanelMap = {
+    overview: EDITOR_PANELS.overview,
+    styling: EDITOR_PANELS.styling,
+    cover: EDITOR_PANELS.cover,
+    order: EDITOR_PANELS.order,
+    privacy: EDITOR_PANELS.privacy
+  };
+  for(const [panelId, panelDef] of Object.entries(fixedPanelMap)){
+    const panel = document.querySelector(`#momentEditorForm [data-editor-panel="${panelId}"]`);
+    if(!panel) continue;
+    const title = panel.querySelector(".section-title");
+    const sub = panel.querySelector(".section-sub");
+    if(title) title.textContent = editorPanelTitle(panelDef);
+    if(sub) sub.textContent = editorPanelSubtitle(panelDef);
+  }
+  const counterPanel = document.querySelector(`#momentEditorForm [data-editor-panel="counter"]`);
+  if(counterPanel){
+    const title = counterPanel.querySelector(".section-title");
+    const sub = counterPanel.querySelector(".section-sub");
+    if(title) title.textContent = localizedCounterLabel(type);
+    if(sub) sub.textContent = editorPanelSubtitle(EDITOR_PANELS.counter);
+  }
+  const extrasPanel = document.querySelector(`#momentEditorForm [data-editor-panel="extras"]`);
+  if(extrasPanel){
+    const title = extrasPanel.querySelector(".section-title");
+    const sub = extrasPanel.querySelector(".section-sub");
+    if(title) title.textContent = t("sec.extras_title") || t("nav.extras");
+    if(sub) sub.textContent = t("sec.extras_sub");
+  }
 
   if(!showCounter && activeEditorPanel === "counter"){
     setEditorPanel(`section-${[...navKeys][0] || "intro"}`);
@@ -1284,7 +1329,7 @@ function renderPlanStorageCard(entitlements = currentEntitlements){
 
 function renderOverviewPanel(row, state, publicUrl){
   return `<div class="editor-panel ${activeEditorPanel === "overview" ? "active" : ""}" data-editor-panel="overview">
-    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.overview),EDITOR_PANELS.overview.subtitle)}
+    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.overview),editorPanelSubtitle(EDITOR_PANELS.overview))}
     ${renderPlanStorageCard(currentEntitlements)}
     ${renderMomentDashboardShell({ publicUrl, published:row.public_visible, slug:row.slug })}
   </div>`;
@@ -2024,7 +2069,7 @@ function renderDesignPanel(state){
     heroStyle: state.heroStyle || "classico"
   });
   return `<div class="editor-panel ${activeEditorPanel === "styling" ? "active" : ""}" data-editor-panel="styling">
-    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.styling),EDITOR_PANELS.styling.subtitle)}
+    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.styling),editorPanelSubtitle(EDITOR_PANELS.styling))}
     <div class="editor-card">
       <p class="ecard-title">Scegli lo stile</p>
       <p class="design-intro">Stili per <strong>${esc(TYPE_LABELS[state.type] || "questa categoria")}</strong>. Il colore scelto è lo <strong>sfondo</strong> della pagina; i riquadri restano bianchi con testo nero.</p>
@@ -2085,7 +2130,7 @@ function renderDesignPanel(state){
 
 function renderCoverPanel(state){
   return `<div class="editor-panel ${activeEditorPanel === "cover" ? "active" : ""}" data-editor-panel="cover">
-    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.cover),EDITOR_PANELS.cover.subtitle)}
+    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.cover),editorPanelSubtitle(EDITOR_PANELS.cover))}
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">1</span> Di cosa parla?</p>
       <label>Titolo della pagina<input name="title" value="${esc(state.title)}" required placeholder="Es. Il nostro anniversario"></label>
@@ -2120,7 +2165,7 @@ function renderCounterPanel(state){
   if(!showCounterForType(state.type)) return "";
   const counterTitle = localizedCounterLabel(state.type);
   return `<div class="editor-panel ${activeEditorPanel === "counter" ? "active" : ""}" data-editor-panel="counter">
-    ${renderSectionHeader(counterTitle,EDITOR_PANELS.counter.subtitle)}
+    ${renderSectionHeader(counterTitle,editorPanelSubtitle(EDITOR_PANELS.counter))}
     <div class="section-switch ${state.show_together_counter ? "is-on" : ""}" data-counter-switch="main" role="switch" aria-checked="${state.show_together_counter ? "true" : "false"}" tabindex="0">
       <span class="section-switch-label">
         <span class="section-switch-icon">⏱</span>
@@ -2150,7 +2195,7 @@ function renderCounterPanel(state){
 
 function renderOrderPanel(state){
   return `<div class="editor-panel ${activeEditorPanel === "order" ? "active" : ""}" data-editor-panel="order">
-    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.order),EDITOR_PANELS.order.subtitle)}
+    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.order),editorPanelSubtitle(EDITOR_PANELS.order))}
     <div class="editor-card">
       <p class="field-hint order-intro">Tieni premuto ☰ e trascina — le sezioni attive si riordinano subito nell'anteprima.</p>
       ${renderSectionOrderList(state)}
@@ -2171,13 +2216,13 @@ function renderExtrasPanel(state){
       <span class="extras-card-icon">${esc(SECTION_ICONS[key] || "•")}</span>
       <span class="extras-card-copy">
         <strong>${esc(localizedSectionLabel(state.type, key))}</strong>
-        <small>${esc(sectionSubtitleForType(state.type, key))}</small>
+        <small>${esc(localizedSectionSubtitle(state.type, key))}</small>
       </span>
       <span class="extras-card-action">${isPrimary ? "Riattiva →" : "Aggiungi →"}</span>
     </button>`;
   }).join("");
   return `<div class="editor-panel ${activeEditorPanel === "extras" ? "active" : ""}" data-editor-panel="extras">
-    ${renderSectionHeader(t("sec.extras_title") || t("nav.extras"),"Tutte le sezioni extra per questo template — attiva solo quelle che ti servono.")}
+    ${renderSectionHeader(t("sec.extras_title") || t("nav.extras"), t("sec.extras_sub"))}
     <div class="editor-card smart-card">
       <p class="field-hint">Le sezioni consigliate compaiono nel menu quando sono attive. Qui trovi <strong>tutte le altre</strong> (e quelle che hai spento): tocca per aggiungerle. Per toglierle di nuovo dal menu, apri la sezione e spegni <strong>Visibile in pagina</strong>.</p>
       <div class="extras-grid">${cards}</div>
@@ -2212,7 +2257,7 @@ function renderSectionPanels(state, shareMeta = {}){
       : "";
     const panelTitle = String(section?.title || "").trim() || localizedSectionLabel(state.type, key);
     return `<div class="editor-panel ${activeEditorPanel === panelId ? "active" : ""}" data-editor-panel="${esc(panelId)}" data-section-panel-key="${esc(key)}" ${hidden ? "hidden" : ""}>
-      ${renderSectionHeader(panelTitle,sectionSubtitleForType(state.type, key))}
+      ${renderSectionHeader(panelTitle, localizedSectionSubtitle(state.type, key))}
       ${mutedNav ? `<p class="field-hint extras-hint">Sezione extra — attivala con l'interruttore sotto o da <strong>Altre sezioni</strong>.</p>` : ""}
       ${renderSectionPanelToggle(key,enabledOn)}
       <div class="section-editor-stack ${enabledOn ? "" : "is-muted"}" data-section-stack="${esc(key)}">
@@ -2239,7 +2284,7 @@ function renderPrivacyPanel(row, state = {}){
       <p class="field-hint">Il PIN non si può recuperare dal server. Se l'hai dimenticato, scrivine uno nuovo sotto e tocca <strong>Salva</strong>.</p>
     </div>`;
   return `<div class="editor-panel ${activeEditorPanel === "privacy" ? "active" : ""}" data-editor-panel="privacy">
-    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.privacy),EDITOR_PANELS.privacy.subtitle)}
+    ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.privacy),editorPanelSubtitle(EDITOR_PANELS.privacy))}
     <div class="editor-card smart-card">
       <p class="ecard-title">🌍 Chi può vedere la pagina?</p>
       <label>Stato pagina

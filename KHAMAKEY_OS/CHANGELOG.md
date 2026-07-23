@@ -20,6 +20,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
 ### Added
+- **Moments v198 — i18n sections Step 7c (2026-07-23, Cursor)** — Pages
+  - `SECTION_SUBTITLE_EN`: sottotitoli header pannello (`.section-sub`) + extras; refresh al toggle lingua.
+  - Campi form / hint ancora IT; Worker `/m/` invariato.
 - **Moments v197 — i18n sections Step 7b (2026-07-23, Cursor)** — Pages
   - `moments-i18n-sections.js`: mappa frasi IT→EN per etichette nav/sidebar/ordine (Memoria, Ricordo, …).
   - Sottotitoli e campi dentro i pannelli ancora IT.

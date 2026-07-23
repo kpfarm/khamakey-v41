@@ -1,9 +1,9 @@
 # 27 — Moments i18n: regole (Step 2)
 
-> **Data:** 2026-07-23 · **Stato:** regole ok · **Step 7b taxonomy sezioni (v197)** · translate=no  
+> **Data:** 2026-07-23 · **Stato:** regole ok · **Step 7c sottotitoli (v198)** · translate=no  
 > Decisione formale: [`decisions/007-moments-editor-i18n.md`](../decisions/007-moments-editor-i18n.md)  
 > Inventario: [`26-moments-i18n-inventory.md`](26-moments-i18n-inventory.md)  
-> Moduli: `moments-i18n.js` · `moments-i18n-auth.js` · `moments-i18n-shell.js`
+> Moduli: `moments-i18n.js` · `moments-i18n-auth.js` · `moments-i18n-shell.js` · `moments-i18n-sections.js`
 
 ## In una frase
 
@@ -55,4 +55,4 @@ Clicca IT
 
 ## Prossimo passo
 
-**Step 6** — shell editor + publish + toast/errori salvataggio.
+**Step 8** — smoke QA IT/EN (boot, Salva, toggle, sezioni). Poi Step 9 Worker `/m/` chrome.

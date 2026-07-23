@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=203";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=203";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=203";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=203";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=203";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=203";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=203";
+} from "./moments-i18n.js?v=204";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=204";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=204";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=204";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=204";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=204";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=204";
 import {
   uploadImage,
   uploadVideo,
@@ -3628,8 +3628,8 @@ function sectionEditor(key,section,standalone=false){
   const listHint = hints[key] && key !== "timeline"
     ? `<p class="section-hint" data-lf="${esc(hints[key])}">${esc(localizeFieldPhrase(hints[key]))}</p>` : "";
   const dedicationFields = key === "dedication" ? `
-    <label>Destinatario<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="Es. Marco, amici, futuro noi"></label>
-    <label>Firma<input name="section_${esc(key)}_signature" value="${esc(safe.signature || "")}" placeholder="Es. Con amore, i tuoi nomi"></label>` : "";
+    <label>${lfSpan("Destinatario")}<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="${esc(localizeFieldPhrase("Es. Marco, amici, futuro noi"))}" data-lf-placeholder="Es. Marco, amici, futuro noi"></label>
+    <label>${lfSpan("Firma")}<input name="section_${esc(key)}_signature" value="${esc(safe.signature || "")}" placeholder="${esc(localizeFieldPhrase("Es. Con amore, i tuoi nomi"))}" data-lf-placeholder="Es. Con amore, i tuoi nomi"></label>` : "";
   const countdownFields = key === "countdown" ? `
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">1</span> Quando?</p>
@@ -3660,8 +3660,8 @@ function sectionEditor(key,section,standalone=false){
     </div>` : "";
   const listItemsPanel = LIST_SECTION_KEYS.has(key) ? renderListItemsPanel(key, safe) : "";
   const letterFutureFields = key === "letter_future" ? `
-    <label>Destinatario<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="Es. noi tra 10 anni"></label>
-    <label>Data di apertura<input type="datetime-local" name="section_${esc(key)}_unlock_date" value="${esc(safe.unlock_date || "")}"></label>
+    <label>${lfSpan("Destinatario")}<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="${esc(localizeFieldPhrase("Es. noi tra 10 anni"))}" data-lf-placeholder="Es. noi tra 10 anni"></label>
+    <label>${lfSpan("Data di apertura")}<input type="datetime-local" name="section_${esc(key)}_unlock_date" value="${esc(safe.unlock_date || "")}"></label>
     ${renderGalleryUploadPanel(safe, "letter_future")}` : "";
   const rsvpFields = key === "rsvp" ? `
     <div class="editor-card smart-card" data-rsvp-wa-card>
@@ -3672,14 +3672,14 @@ function sectionEditor(key,section,standalone=false){
     </div>
     ${renderRsvpFieldsEditor(safe)}` : "";
   const petFields = key === "pet" ? `
-    <label>Nome<input name="section_${esc(key)}_pet_name" value="${esc(safe.pet_name || "")}" placeholder="Es. Luna"></label>
-    <label>Emoji<input name="section_${esc(key)}_pet_emoji" value="${esc(safe.pet_emoji || "🐾")}" maxlength="4" placeholder="🐾"></label>
+    <label>${lfSpan("Nome")}<input name="section_${esc(key)}_pet_name" value="${esc(safe.pet_name || "")}" placeholder="${esc(localizeFieldPhrase("Es. Luna"))}" data-lf-placeholder="Es. Luna"></label>
+    <label>${lfSpan("Emoji")}<input name="section_${esc(key)}_pet_emoji" value="${esc(safe.pet_emoji || "🐾")}" maxlength="4" placeholder="🐾"></label>
     ${renderSectionPhotoPanel(key, safe, "pet_photo", SECTION_PHOTO_FIELDS.pet)}` : "";
   const quoteFields = key === "quote" ? `
-    <label>Autore<input name="section_${esc(key)}_author" value="${esc(safe.author || "")}" placeholder="Es. William Shakespeare"></label>` : "";
+    <label>${lfSpan("Autore")}<input name="section_${esc(key)}_author" value="${esc(safe.author || "")}" placeholder="${esc(localizeFieldPhrase("Es. William Shakespeare"))}" data-lf-placeholder="Es. William Shakespeare"></label>` : "";
   const signatureFields = key === "signature" ? `
-    <label>Nome firma<input name="section_${esc(key)}_sign_name" value="${esc(safe.sign_name || "")}" placeholder="Es. Marco & Giulia"></label>
-    <label>Sottotitolo<input name="section_${esc(key)}_sign_subtitle" value="${esc(safe.sign_subtitle || "")}" placeholder="Es. Per sempre"></label>` : "";
+    <label>${lfSpan("Nome firma")}<input name="section_${esc(key)}_sign_name" value="${esc(safe.sign_name || "")}" placeholder="${esc(localizeFieldPhrase("Es. Marco & Giulia"))}" data-lf-placeholder="Es. Marco & Giulia"></label>
+    <label>${lfSpan("Sottotitolo")}<input name="section_${esc(key)}_sign_subtitle" value="${esc(safe.sign_subtitle || "")}" placeholder="${esc(localizeFieldPhrase("Es. Per sempre"))}" data-lf-placeholder="Es. Per sempre"></label>` : "";
   const horoscopeFields = key === "horoscope" ? `
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">1</span> Persone e segni</p>

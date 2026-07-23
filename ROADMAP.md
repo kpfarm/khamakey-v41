@@ -343,3 +343,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-23 | Cursor | **i18n Moments Step 11c / v201**: Colori + Contatore + Ordine EN; look taxonomy ancora IT |
 | 2026-07-23 | Cursor | **i18n Moments Step 11d / v202**: chrome comune sezioni EN (toggle, titolo, guide); kit → 11e |
 | 2026-07-23 | Cursor | **i18n Moments look taxonomy / v203**: label+hint look + palette EN; next 11e |
+| 2026-07-23 | Cursor | **i18n Moments Step 11e1 / v204**: campi semplici sezioni EN; 11e a pezzi |

@@ -197,5 +197,21 @@ export const FIELD_PHRASE_EN = {
   "Azzurro": "Sky blue",
   "Nero": "Black",
   "Antracite": "Anthracite",
-  "Crema": "Cream"
+  "Crema": "Cream",
+
+  // 11e1 — Simple section text fields (dedication, letter_future, quote, signature, pet)
+  "Destinatario": "Recipient",
+  "Firma": "Signature",
+  "Es. Marco, amici, futuro noi": "e.g. Marco, friends, future us",
+  "Es. Con amore, i tuoi nomi": "e.g. With love, your names",
+  "Es. noi tra 10 anni": "e.g. us in 10 years",
+  "Data di apertura": "Unlock date",
+  "Autore": "Author",
+  "Es. William Shakespeare": "e.g. William Shakespeare",
+  "Nome firma": "Signature name",
+  "Sottotitolo": "Subtitle",
+  "Es. Marco & Giulia": "e.g. Marco & Giulia",
+  "Es. Per sempre": "e.g. Forever",
+  "Nome": "Name",
+  "Es. Luna": "e.g. Luna"
 };

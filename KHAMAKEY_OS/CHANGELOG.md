@@ -20,6 +20,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
 ### Added
+- **Moments v204 — i18n fields Step 11e1 (2026-07-23, Cursor)** — Pages
+  - Solo campi semplici: Destinatario/Firma (dedica), lettera futuro, Autore, Nome firma, pet.
+  - Piano sotto-slice 11e2–11e6 in `docs/29`.
 - **Moments v203 — i18n look taxonomy (2026-07-23, Cursor)** — Pages
   - Nomi/hint look (`PAGE_LOOKS`) + tooltip palette EN; KhamaKey/Pop invariati.
 - **Moments v202 — i18n fields Step 11d (2026-07-23, Cursor)** — Pages

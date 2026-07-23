@@ -20,6 +20,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
 ### Added
+- **Moments v214 + Worker v184 — RSVP WhatsApp i18n (2026-07-23, Cursor)** — Pages + Worker
+  - Messaggio conferma WA e invito “Condividi” IT|EN (locale visitatore / toggle editor).
+  - Etichette form RSVP opzionali pubbliche localizzate; `normalizeWhatsAppDigits` e flusso `wa.me` invariati.
 - **Moments v213 — i18n fields Step 11e6e (2026-07-23, Cursor)** — Pages
   - Solo messaggi errore/status upload (limiti, progress, footer hint) EN; handler upload/replace invariati.
 - **Moments v212 — i18n fields Step 11e6d (2026-07-23, Cursor)** — Pages

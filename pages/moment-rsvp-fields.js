@@ -1,9 +1,15 @@
+import { getUiLocale } from "./moments-i18n.js?v=214";
+
 export const RSVP_OPTIONAL_FIELDS = {
-  guests:{ label:"Quanti siete?", type:"number", waLabel:"👥 Ospiti", placeholder:"1", hint:"Numero di persone" },
-  notes:{ label:"Note (allergie, bambini…)", type:"textarea", waLabel:"📝 Note", placeholder:"Facoltativo", hint:"Allergie, bambini, esigenze" },
-  phone:{ label:"Telefono", type:"tel", waLabel:"📞 Tel.", placeholder:"Es. 333 1234567", hint:"Per contatti rapidi" },
-  email:{ label:"Email", type:"email", waLabel:"✉️ Email", placeholder:"Es. marco@email.it", hint:"Conferma via email" }
+  guests:{ label:"Quanti siete?", type:"number", waLabel:"👥 Ospiti", waLabelEn:"👥 Guests", placeholder:"1", hint:"Numero di persone" },
+  notes:{ label:"Note (allergie, bambini…)", type:"textarea", waLabel:"📝 Note", waLabelEn:"📝 Notes", placeholder:"Facoltativo", hint:"Allergie, bambini, esigenze" },
+  phone:{ label:"Telefono", type:"tel", waLabel:"📞 Tel.", waLabelEn:"📞 Phone", placeholder:"Es. 333 1234567", hint:"Per contatti rapidi" },
+  email:{ label:"Email", type:"email", waLabel:"✉️ Email", waLabelEn:"✉️ Email", placeholder:"Es. marco@email.it", hint:"Conferma via email" }
 };
+
+function waLabelFor(spec){
+  return getUiLocale() === "en" ? (spec.waLabelEn || spec.waLabel) : spec.waLabel;
+}
 
 export function normalizeRsvpSection(section = {}){
   const next = { ...section };
@@ -144,14 +150,18 @@ function reindexRsvpCustomRows(list, countInput){
 
 export function rsvpGuestPreviewLines(section = {}){
   const safe = normalizeRsvpSection(section);
-  const eventName = String(safe.event_name || "Evento").trim();
-  const lines = ["Ciao! 👋", `RSVP · ${eventName}`, "", "👤 Nome: Marco Rossi", "✓ Presenza: Sì, ci sarò"];
+  const en = getUiLocale() === "en";
+  const eventName = String(safe.event_name || (en ? "Event" : "Evento")).trim();
+  const lines = en
+    ? ["Hi! 👋", `RSVP · ${eventName}`, "", "👤 Name: Alex Smith", "✓ Attendance: Yes, I’ll be there"]
+    : ["Ciao! 👋", `RSVP · ${eventName}`, "", "👤 Nome: Marco Rossi", "✓ Presenza: Sì, ci sarò"];
   safe.field_keys.forEach(key=>{
     const spec = RSVP_OPTIONAL_FIELDS[key];
     if(!spec) return;
-    if(key === "guests") lines.push(`${spec.waLabel}: 2`);
-    else if(key === "notes") lines.push(`${spec.waLabel}: —`);
-    else lines.push(`${spec.waLabel}: …`);
+    const label = waLabelFor(spec);
+    if(key === "guests") lines.push(`${label}: 2`);
+    else if(key === "notes") lines.push(`${label}: —`);
+    else lines.push(`${label}: …`);
   });
   safe.custom_fields.forEach(field=>{
     if(field.enabled === false) return;

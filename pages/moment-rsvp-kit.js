@@ -11,6 +11,19 @@ const RSVP_INVITE_COPY = {
   default:"Apri la pagina e conferma la tua presenza."
 };
 
+const RSVP_INVITE_COPY_EN = {
+  wedding:"We’re so happy to share our big day with you!",
+  birthday:"We can’t wait to celebrate with you!",
+  baptism:"Please confirm your attendance at the baptism.",
+  communion:"Please confirm your attendance at the communion.",
+  graduation:"Please confirm your attendance at the graduation.",
+  party:"Let us know if you’ll be at the party!",
+  anniversary:"Please confirm your attendance at our anniversary.",
+  memorial:"Join us in remembering.",
+  travel:"Let us know if you’re joining the trip!",
+  default:"Open the page and confirm your attendance."
+};
+
 const RSVP_INVITE_EMOJI = {
   wedding:"💍",
   birthday:"🎂",
@@ -24,11 +37,23 @@ const RSVP_INVITE_EMOJI = {
   default:"📲"
 };
 
-import { rsvpGuestPreviewLines, readRsvpFieldsFromForm } from "./moment-rsvp-fields.js?v=177";
+import { rsvpGuestPreviewLines, readRsvpFieldsFromForm } from "./moment-rsvp-fields.js?v=214";
 import { renderRsvpResponsesShell } from "./moment-rsvp-responses.js";
+import { getUiLocale } from "./moments-i18n.js?v=214";
+
+let lastShareCtx = null;
 
 function esc(value){
   return String(value ?? "").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+}
+
+function inviteLocale(){
+  return getUiLocale() === "en" ? "en" : "it";
+}
+
+function inviteHook(type){
+  const map = inviteLocale() === "en" ? RSVP_INVITE_COPY_EN : RSVP_INVITE_COPY;
+  return map[type] || map.default;
 }
 
 export function rsvpSectionUrl(publicUrl){
@@ -40,16 +65,20 @@ export function rsvpSectionUrl(publicUrl){
 export function rsvpInviteMessage({ momentType = "free", eventName = "", pageTitle = "", inviteUrl = "" } = {}){
   const type = String(momentType || "free").trim().toLowerCase();
   const emoji = RSVP_INVITE_EMOJI[type] || RSVP_INVITE_EMOJI.default;
-  const hook = RSVP_INVITE_COPY[type] || RSVP_INVITE_COPY.default;
-  const label = String(eventName || pageTitle || "Il nostro evento").trim();
+  const hook = inviteHook(type);
+  const en = inviteLocale() === "en";
+  const label = String(eventName || pageTitle || (en ? "Our event" : "Il nostro evento")).trim();
   const link = String(inviteUrl || "").trim();
+  const footer = en
+    ? "Fill in the RSVP form at the bottom of the page and send on WhatsApp."
+    : "Compila il modulo RSVP in fondo alla pagina e invia su WhatsApp.";
   const lines = [
     `${emoji} ${label}`,
     "",
     hook,
     link ? `👉 ${link}` : "",
     "",
-    "Compila il modulo RSVP in fondo alla pagina e invia su WhatsApp."
+    footer
   ];
   return lines.filter(Boolean).join("\n");
 }
@@ -116,9 +145,15 @@ export function syncRsvpSharePanel(formNode, { publicUrl, momentType, pageTitle,
   }
 }
 
+export function refreshRsvpShareLocale(formNode){
+  if(!formNode || !lastShareCtx) return;
+  syncRsvpSharePanel(formNode, lastShareCtx);
+}
+
 export function bindRsvpSharePanel(formNode, { publicUrl, momentType, pageTitle, published = true, copyText, sharePageUrl } = {}){
   const panel = document.getElementById("rsvpSharePanel");
   if(!panel || !formNode) return;
+  lastShareCtx = { publicUrl, momentType, pageTitle, published };
   const sync = ()=>syncRsvpSharePanel(formNode,{ publicUrl, momentType, pageTitle, published });
   ["section_rsvp_event_name"].forEach(name=>{
     formNode.querySelector(`[name="${name}"]`)?.addEventListener("input",sync);
@@ -161,11 +196,26 @@ function eventNameFromForm(formNode, pageTitle){
   return String(formNode.querySelector('[name="section_rsvp_event_name"]')?.value || pageTitle || "Evento").trim();
 }
 
-/** Messaggio RSVP lato pagina pubblica (Worker) — stesso tono per tipo evento. */
+/** Messaggio RSVP lato pagina pubblica — allineato al Worker (IT|EN). */
 export function rsvpPublicWhatsAppIntro(momentType, eventName){
   const type = String(momentType || "free").trim().toLowerCase();
-  const label = String(eventName || "Evento").trim();
+  const en = inviteLocale() === "en";
+  const label = String(eventName || (en ? "Event" : "Evento")).trim();
   const emoji = RSVP_INVITE_EMOJI[type] || "👋";
+  if(en){
+    const hooks = {
+      wedding:`Hi! ${emoji} Wedding RSVP · ${label}`,
+      birthday:`Hi! ${emoji} Birthday RSVP · ${label}`,
+      baptism:`Hi! ${emoji} Baptism RSVP · ${label}`,
+      communion:`Hi! ${emoji} Communion RSVP · ${label}`,
+      graduation:`Hi! ${emoji} Graduation RSVP · ${label}`,
+      party:`Hi! ${emoji} Party RSVP · ${label}`,
+      anniversary:`Hi! ${emoji} Anniversary RSVP · ${label}`,
+      memorial:`Hi! ${emoji} Attendance · ${label}`,
+      travel:`Hi! ${emoji} Travel RSVP · ${label}`
+    };
+    return hooks[type] || `Hi! ${emoji} RSVP · ${label}`;
+  }
   const hooks = {
     wedding:`Ciao! ${emoji} RSVP matrimonio · ${label}`,
     birthday:`Ciao! ${emoji} RSVP compleanno · ${label}`,

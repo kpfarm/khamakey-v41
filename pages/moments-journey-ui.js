@@ -8,8 +8,8 @@ import {
   resolveJourneySteps,
   serializeJourneySteps
 } from "./moment-journey.js";
-import { getUiLocale } from "./moments-i18n.js?v=213";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=213";
+import { getUiLocale } from "./moments-i18n.js?v=214";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=214";
 
 export function readJourneySteps(formNode,key = "timeline"){
   const field = formNode.querySelector(`input[name="section_${key}_items"]`);

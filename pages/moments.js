@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=213";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=213";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=213";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=213";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=213";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=213";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=213";
+} from "./moments-i18n.js?v=214";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=214";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=214";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=214";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=214";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=214";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=214";
 import {
   uploadImage,
   uploadVideo,
@@ -51,7 +51,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=213";
+} from "./moments-media-ui.js?v=214";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -60,13 +60,13 @@ import {
   renderJourneyFileInput,
   bindJourneyEditor,
   uploadJourneyStepPhoto
-} from "./moments-journey-ui.js?v=213";
+} from "./moments-journey-ui.js?v=214";
 import {
   migrateLetterMediaSection,
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
   setActivePlanLimits
-} from "./moment-media.js?v=213";
+} from "./moment-media.js?v=214";
 import {
   emptyEntitlements,
   fetchMomentEntitlements,
@@ -85,7 +85,7 @@ import {
   writeListItems,
   readListItems,
   bindListItemsEditor
-} from "./moments-list-ui.js?v=213";
+} from "./moments-list-ui.js?v=214";
 import { journeyStepId, MAX_JOURNEY_STEPS, normalizeJourneyStep, resolveJourneySteps, compactJourneySteps } from "./moment-journey.js";
 import {
   COLOR_PALETTES,
@@ -145,10 +145,10 @@ import {
   sectionFillGuideForType,
   primarySectionsForType
 } from "./moment-editor-kit.js?v=186";
-import { renderRsvpSharePanel, bindRsvpSharePanel } from "./moment-rsvp-kit.js";
+import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=214";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderMomentDashboardShell, bindMomentDashboard } from "./moment-editor-dashboard.js";
-import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=177";
+import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=214";
 import {
   renderHoroscopePeoplePanel,
   bindHoroscopePeopleEditor,
@@ -4439,6 +4439,7 @@ function syncLangSwitchers(locale = getUiLocale()){
         if(editorForm.querySelector(`#galleryOrganized_${key}`)) renderGalleryGrid(editorForm, key);
       }
       syncMediaModalChrome();
+      refreshRsvpShareLocale(editorForm);
     }
     if(currentUser) refreshAccountMenu();
     if(appView === "account") renderAccountPanels();

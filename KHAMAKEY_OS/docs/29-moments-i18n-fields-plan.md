@@ -62,7 +62,8 @@ Steps 1–9 = auth, shell, nav, etichette/sottotitoli sezioni, toast, chrome `/m
 | **11e6c** | Solo etichette griglia (`renderGalleryGrid`) | Medio |
 | **11e6d** | Solo modal dettagli media | Basso |
 | **11e6e** | Solo stringhe Error/status upload — **dopo** smoke 6a–d | Medio |
-| Dopo | `moment-rsvp-fields.js`, oroscopo people panel, share kit | Separato |
+| Dopo | `moment-rsvp-fields.js` chrome editor, oroscopo people panel, share kit UI | Separato |
+| **RSVP WA** | **v214 + Worker v184** — messaggio WhatsApp + invito EN (fatto) | Basso |
 
 Regola: una sotto-slice = un bump `?v=` + deploy. Se qualcosa è dubbio → lasciare IT.
 

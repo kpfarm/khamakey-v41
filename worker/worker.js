@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v183-moments-i18n";
+const WORKER_VERSION = "v184-rsvp-wa-i18n";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -67,6 +67,32 @@ const MOMENTS_PUBLIC_I18N = {
     "rsvp.thanks": "Grazie! La tua conferma è stata inviata.",
     "rsvp.fail": "Invio non riuscito. Riprova.",
     "rsvp.no_wa": "Inserisci il numero WhatsApp dell'organizzatore nell'editor e salva: senza WhatsApp la sezione non appare agli invitati.",
+    "rsvp.wa_name": "👤 Nome",
+    "rsvp.wa_attending": "✓ Presenza",
+    "rsvp.wa_guests": "👥 Ospiti",
+    "rsvp.wa_notes": "📝 Note",
+    "rsvp.wa_phone": "📞 Tel.",
+    "rsvp.wa_email": "✉️ Email",
+    "rsvp.wa_event_fallback": "Evento",
+    "rsvp.field_guests": "Quanti siete?",
+    "rsvp.field_notes": "Note (allergie, bambini…)",
+    "rsvp.field_phone": "Telefono",
+    "rsvp.field_email": "Email",
+    "rsvp.field_guests_ph": "1",
+    "rsvp.field_notes_ph": "Facoltativo",
+    "rsvp.field_phone_ph": "Es. 333 1234567",
+    "rsvp.field_email_ph": "Es. marco@email.it",
+    "rsvp.optional_ph": "Facoltativo",
+    "rsvp.wa_intro_wedding": "Ciao! {emoji} RSVP matrimonio · {label}",
+    "rsvp.wa_intro_birthday": "Ciao! {emoji} RSVP compleanno · {label}",
+    "rsvp.wa_intro_baptism": "Ciao! {emoji} RSVP battesimo · {label}",
+    "rsvp.wa_intro_communion": "Ciao! {emoji} RSVP comunione · {label}",
+    "rsvp.wa_intro_graduation": "Ciao! {emoji} RSVP laurea · {label}",
+    "rsvp.wa_intro_party": "Ciao! {emoji} RSVP festa · {label}",
+    "rsvp.wa_intro_anniversary": "Ciao! {emoji} RSVP anniversario · {label}",
+    "rsvp.wa_intro_memorial": "Ciao! {emoji} Partecipazione · {label}",
+    "rsvp.wa_intro_travel": "Ciao! {emoji} RSVP viaggio · {label}",
+    "rsvp.wa_intro_default": "Ciao! {emoji} RSVP · {label}",
     "guestbook.default_title": "Libro degli ospiti",
     "guestbook.name": "Il tuo nome",
     "guestbook.name_ph": "Es. Laura Bianchi",
@@ -129,6 +155,32 @@ const MOMENTS_PUBLIC_I18N = {
     "rsvp.thanks": "Thank you! Your confirmation was sent.",
     "rsvp.fail": "Couldn’t send. Please try again.",
     "rsvp.no_wa": "Add the organiser’s WhatsApp number in the editor and save — without it guests won’t see this section.",
+    "rsvp.wa_name": "👤 Name",
+    "rsvp.wa_attending": "✓ Attendance",
+    "rsvp.wa_guests": "👥 Guests",
+    "rsvp.wa_notes": "📝 Notes",
+    "rsvp.wa_phone": "📞 Phone",
+    "rsvp.wa_email": "✉️ Email",
+    "rsvp.wa_event_fallback": "Event",
+    "rsvp.field_guests": "How many of you?",
+    "rsvp.field_notes": "Notes (allergies, children…)",
+    "rsvp.field_phone": "Phone",
+    "rsvp.field_email": "Email",
+    "rsvp.field_guests_ph": "1",
+    "rsvp.field_notes_ph": "Optional",
+    "rsvp.field_phone_ph": "e.g. +44 7911 123456",
+    "rsvp.field_email_ph": "e.g. alex@email.com",
+    "rsvp.optional_ph": "Optional",
+    "rsvp.wa_intro_wedding": "Hi! {emoji} Wedding RSVP · {label}",
+    "rsvp.wa_intro_birthday": "Hi! {emoji} Birthday RSVP · {label}",
+    "rsvp.wa_intro_baptism": "Hi! {emoji} Baptism RSVP · {label}",
+    "rsvp.wa_intro_communion": "Hi! {emoji} Communion RSVP · {label}",
+    "rsvp.wa_intro_graduation": "Hi! {emoji} Graduation RSVP · {label}",
+    "rsvp.wa_intro_party": "Hi! {emoji} Party RSVP · {label}",
+    "rsvp.wa_intro_anniversary": "Hi! {emoji} Anniversary RSVP · {label}",
+    "rsvp.wa_intro_memorial": "Hi! {emoji} Attendance · {label}",
+    "rsvp.wa_intro_travel": "Hi! {emoji} Travel RSVP · {label}",
+    "rsvp.wa_intro_default": "Hi! {emoji} RSVP · {label}",
     "guestbook.default_title": "Guestbook",
     "guestbook.name": "Your name",
     "guestbook.name_ph": "e.g. Sam Lee",
@@ -157,6 +209,14 @@ function resolveMomentsPublicLocale(request) {
 function mt(locale, key) {
   const pack = MOMENTS_PUBLIC_I18N[locale] || MOMENTS_PUBLIC_I18N.it;
   return pack[key] || MOMENTS_PUBLIC_I18N.it[key] || key;
+}
+
+function mtFill(locale, key, vars = {}) {
+  let out = mt(locale, key);
+  for (const [k, v] of Object.entries(vars)) {
+    out = out.split(`{${k}}`).join(String(v));
+  }
+  return out;
 }
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
@@ -2276,6 +2336,12 @@ function momentPageScript(state, ordered = [], hasCounter = false, slug = "", ap
     rsvpFail: mt(locale, "rsvp.fail"),
     rsvpSubmitWa: mt(locale, "rsvp.submit_wa"),
     rsvpSubmit: mt(locale, "rsvp.submit"),
+    rsvpWaName: mt(locale, "rsvp.wa_name"),
+    rsvpWaAttending: mt(locale, "rsvp.wa_attending"),
+    rsvpWaGuests: mt(locale, "rsvp.wa_guests"),
+    rsvpWaNotes: mt(locale, "rsvp.wa_notes"),
+    rsvpWaPhone: mt(locale, "rsvp.wa_phone"),
+    rsvpWaEmail: mt(locale, "rsvp.wa_email"),
     gbEmpty: mt(locale, "guestbook.empty"),
     gbNeedPublish: mt(locale, "guestbook.need_publish"),
     dateLocale: locale === "en" ? "en-GB" : "it-IT"
@@ -2435,11 +2501,11 @@ document.querySelectorAll("[data-rsvp-form]").forEach(function(form){
     var fd=new FormData(form);
     var eventName=card.getAttribute("data-rsvp-event")||document.title.replace(/ · KhamaKey Moments$/,"");
     var intro=card.getAttribute("data-rsvp-intro")||("RSVP · "+eventName);
-    var lines=[intro,"","👤 Nome: "+(fd.get("rsvp_name")||""),"✓ Presenza: "+(fd.get("rsvp_attending")||"")];
-    if(fd.get("rsvp_guests"))lines.push("👥 Ospiti: "+fd.get("rsvp_guests"));
-    if(fd.get("rsvp_notes"))lines.push("📝 Note: "+fd.get("rsvp_notes"));
-    if(fd.get("rsvp_phone"))lines.push("📞 Tel.: "+fd.get("rsvp_phone"));
-    if(fd.get("rsvp_email"))lines.push("✉️ Email: "+fd.get("rsvp_email"));
+    var lines=[intro,"",(momentI18n.rsvpWaName||"👤 Nome")+": "+(fd.get("rsvp_name")||""),(momentI18n.rsvpWaAttending||"✓ Presenza")+": "+(fd.get("rsvp_attending")||"")];
+    if(fd.get("rsvp_guests"))lines.push((momentI18n.rsvpWaGuests||"👥 Ospiti")+": "+fd.get("rsvp_guests"));
+    if(fd.get("rsvp_notes"))lines.push((momentI18n.rsvpWaNotes||"📝 Note")+": "+fd.get("rsvp_notes"));
+    if(fd.get("rsvp_phone"))lines.push((momentI18n.rsvpWaPhone||"📞 Tel.")+": "+fd.get("rsvp_phone"));
+    if(fd.get("rsvp_email"))lines.push((momentI18n.rsvpWaEmail||"✉️ Email")+": "+fd.get("rsvp_email"));
     var customPayload={};
     try{
       var custom=JSON.parse(card.getAttribute("data-rsvp-custom")||"[]");
@@ -4116,14 +4182,15 @@ function normalizeRsvpSectionWorker(section = {}) {
   return next;
 }
 
-function renderRsvpOptionalFields(section) {
+function renderRsvpOptionalFields(section, locale = "it") {
   const safe = normalizeRsvpSectionWorker(section);
   const optional = {
-    guests: { label: "Quanti siete?", type: "number", placeholder: "1" },
-    notes: { label: "Note (allergie, bambini…)", type: "textarea", placeholder: "Facoltativo" },
-    phone: { label: "Telefono", type: "tel", placeholder: "Es. 333 1234567" },
-    email: { label: "Email", type: "email", placeholder: "Es. marco@email.it" }
+    guests: { label: mt(locale, "rsvp.field_guests"), type: "number", placeholder: mt(locale, "rsvp.field_guests_ph") },
+    notes: { label: mt(locale, "rsvp.field_notes"), type: "textarea", placeholder: mt(locale, "rsvp.field_notes_ph") },
+    phone: { label: mt(locale, "rsvp.field_phone"), type: "tel", placeholder: mt(locale, "rsvp.field_phone_ph") },
+    email: { label: mt(locale, "rsvp.field_email"), type: "email", placeholder: mt(locale, "rsvp.field_email_ph") }
   };
+  const optionalPh = mt(locale, "rsvp.optional_ph");
   let html = "";
   safe.field_keys.forEach(key => {
     const spec = optional[key];
@@ -4142,10 +4209,10 @@ function renderRsvpOptionalFields(section) {
   });
   safe.custom_fields.forEach(field => {
     if (field.type === "textarea") {
-      html += `<label>${escapeHtml(field.label)}<textarea name="rsvp_custom_${attr(field.id)}" rows="2" placeholder="${attr(field.placeholder || "Facoltativo")}"></textarea></label>`;
+      html += `<label>${escapeHtml(field.label)}<textarea name="rsvp_custom_${attr(field.id)}" rows="2" placeholder="${attr(field.placeholder || optionalPh)}"></textarea></label>`;
       return;
     }
-    html += `<label>${escapeHtml(field.label)}<input type="text" name="rsvp_custom_${attr(field.id)}" placeholder="${attr(field.placeholder || "Facoltativo")}"></label>`;
+    html += `<label>${escapeHtml(field.label)}<input type="text" name="rsvp_custom_${attr(field.id)}" placeholder="${attr(field.placeholder || optionalPh)}"></label>`;
   });
   return { html, customFields: safe.custom_fields };
 }
@@ -4157,26 +4224,27 @@ function renderRsvpEventBadge(eventName, fonts) {
   return `<div class="moment-rsvp-event"><p class="moment-rsvp-event-eyebrow">RSVP</p><p class="moment-rsvp-event-title">${escapeHtml(label)}</p></div>`;
 }
 
-function rsvpWhatsAppIntro(momentType, eventName) {
+function rsvpWhatsAppIntro(momentType, eventName, locale = "it") {
   const type = String(momentType || "free").trim().toLowerCase();
-  const label = String(eventName || "Evento").trim();
+  const label = String(eventName || mt(locale, "rsvp.wa_event_fallback")).trim();
   const emojiMap = {
     wedding: "💍", birthday: "🎂", baptism: "🕊️", communion: "✨", graduation: "🎓",
     party: "🎉", anniversary: "💑", memorial: "🕯️", travel: "✈️"
   };
   const emoji = emojiMap[type] || "👋";
-  const hooks = {
-    wedding: `Ciao! ${emoji} RSVP matrimonio · ${label}`,
-    birthday: `Ciao! ${emoji} RSVP compleanno · ${label}`,
-    baptism: `Ciao! ${emoji} RSVP battesimo · ${label}`,
-    communion: `Ciao! ${emoji} RSVP comunione · ${label}`,
-    graduation: `Ciao! ${emoji} RSVP laurea · ${label}`,
-    party: `Ciao! ${emoji} RSVP festa · ${label}`,
-    anniversary: `Ciao! ${emoji} RSVP anniversario · ${label}`,
-    memorial: `Ciao! ${emoji} Partecipazione · ${label}`,
-    travel: `Ciao! ${emoji} RSVP viaggio · ${label}`
+  const keyByType = {
+    wedding: "rsvp.wa_intro_wedding",
+    birthday: "rsvp.wa_intro_birthday",
+    baptism: "rsvp.wa_intro_baptism",
+    communion: "rsvp.wa_intro_communion",
+    graduation: "rsvp.wa_intro_graduation",
+    party: "rsvp.wa_intro_party",
+    anniversary: "rsvp.wa_intro_anniversary",
+    memorial: "rsvp.wa_intro_memorial",
+    travel: "rsvp.wa_intro_travel"
   };
-  return hooks[type] || `Ciao! ${emoji} RSVP · ${label}`;
+  const key = keyByType[type] || "rsvp.wa_intro_default";
+  return mtFill(locale, key, { emoji, label });
 }
 
 function renderMomentSection(key, section, colors, momentType = "free", fonts = null, slug = "", live = {}) {
@@ -4239,13 +4307,13 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
 
   if (key === "rsvp") {
     const wa = normalizeWhatsAppDigits(section.whatsapp_number);
-    const eventName = String(section.event_name || section.title || "Evento").trim();
+    const eventName = String(section.event_name || section.title || mt(locale, "rsvp.wa_event_fallback")).trim();
     if (!wa) {
       return `<article class="${rv}">${head(section.title || mt(locale, "rsvp.default_title"))}<p class="moment-empty-hint">${escapeHtml(mt(locale, "rsvp.no_wa"))}</p></article>`;
     }
-    const { html: optionalFields, customFields } = renderRsvpOptionalFields(section);
+    const { html: optionalFields, customFields } = renderRsvpOptionalFields(section, locale);
     const eventBadge = renderRsvpEventBadge(eventName, fonts);
-    const rsvpIntro = rsvpWhatsAppIntro(momentType, eventName);
+    const rsvpIntro = rsvpWhatsAppIntro(momentType, eventName, locale);
     const customAttr = attr(JSON.stringify(customFields.map(field => ({ id: field.id, label: field.label }))));
     const yes = mt(locale, "rsvp.yes");
     const no = mt(locale, "rsvp.no");

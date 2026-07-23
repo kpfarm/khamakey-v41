@@ -9,12 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=198";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=198";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=198";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=198";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=198";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=198";
+} from "./moments-i18n.js?v=199";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=199";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=199";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=199";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=199";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=199";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=199";
 import {
   uploadImage,
   uploadVideo,
@@ -201,6 +202,31 @@ function localizeSectionSubtitle(text){
   const raw = String(text || "");
   if(!raw || getUiLocale() === "it") return raw;
   return SECTION_SUBTITLE_EN[raw] || raw;
+}
+
+/** Step 11+: form field chrome (labels/hints/buttons). IT source → EN map. */
+function localizeFieldPhrase(text){
+  const raw = String(text || "");
+  if(!raw || getUiLocale() === "it") return raw;
+  return FIELD_PHRASE_EN[raw] || raw;
+}
+
+function lfSpan(itText){
+  const it = String(itText || "");
+  return `<span data-lf="${esc(it)}">${esc(localizeFieldPhrase(it))}</span>`;
+}
+
+function syncFieldChromeI18n(root = document){
+  root.querySelectorAll("[data-lf]").forEach(el=>{
+    const src = el.getAttribute("data-lf");
+    if(src == null) return;
+    el.textContent = localizeFieldPhrase(src);
+  });
+  root.querySelectorAll("[data-lf-placeholder]").forEach(el=>{
+    const src = el.getAttribute("data-lf-placeholder");
+    if(src == null) return;
+    el.setAttribute("placeholder", localizeFieldPhrase(src));
+  });
 }
 
 function localizedSectionLabel(type, key){
@@ -2132,31 +2158,31 @@ function renderCoverPanel(state){
   return `<div class="editor-panel ${activeEditorPanel === "cover" ? "active" : ""}" data-editor-panel="cover">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.cover),editorPanelSubtitle(EDITOR_PANELS.cover))}
     <div class="editor-card">
-      <p class="ecard-title"><span class="step-badge">1</span> Di cosa parla?</p>
-      <label>Titolo della pagina<input name="title" value="${esc(state.title)}" required placeholder="Es. Il nostro anniversario"></label>
+      <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Di cosa parla?")}</p>
+      <label>${lfSpan("Titolo della pagina")}<input name="title" value="${esc(state.title)}" required placeholder="${esc(localizeFieldPhrase("Es. Il nostro anniversario"))}" data-lf-placeholder="Es. Il nostro anniversario"></label>
       ${renderMomentTypeField(state)}
-      <p class="category-change-warning">⚠️ <strong>Attenzione:</strong> «Prepara tutto per me» sostituisce testi, sezioni e colori — operazione <strong>irreversibile</strong> dopo il salvataggio.</p>
-      <button type="button" class="primary smart-action-btn" id="applyMomentTemplate">✨ Prepara tutto per me</button>
-      <p class="field-hint">Ripristina il modello della tua categoria con testi e sezioni suggeriti. I contenuti attuali verranno sostituiti.</p>
+      <p class="category-change-warning">⚠️ <strong>${lfSpan("Attenzione:")}</strong> ${lfSpan("«Prepara tutto per me» sostituisce testi, sezioni e colori — operazione irreversibile dopo il salvataggio.")}</p>
+      <button type="button" class="primary smart-action-btn" id="applyMomentTemplate">✨ ${lfSpan("Prepara tutto per me")}</button>
+      <p class="field-hint">${lfSpan("Ripristina il modello della tua categoria con testi e sezioni suggeriti. I contenuti attuali verranno sostituiti.")}</p>
     </div>
     <div class="editor-card">
-      <p class="ecard-title"><span class="step-badge">2</span> La foto di copertina</p>
+      <p class="ecard-title"><span class="step-badge">2</span> ${lfSpan("La foto di copertina")}</p>
       <div class="cover-preview-wrap">
         <input type="hidden" name="cover_url" id="coverUrlInput" value="${esc(state.cover_url)}">
         <div class="cover-upload-actions">
           <input type="file" id="coverFileInput" accept="${IMAGE_ACCEPT}" hidden>
-          <button type="button" class="primary upload-trigger" data-upload-target="cover">📷 Carica foto copertina</button>
+          <button type="button" class="primary upload-trigger" data-upload-target="cover">📷 ${lfSpan("Carica foto copertina")}</button>
         </div>
         <p class="field-hint" id="coverUploadStatus"></p>
         <div id="coverFramerSlot">${renderCoverFramer(state)}</div>
       </div>
         <details class="design-advanced cover-extra">
-        <summary>Altri testi sulla copertina (facoltativo)</summary>
-        <label>Etichetta sopra il titolo<input name="pill" value="${esc(state.pill)}" placeholder="Es. Amore · Un mondo tutto nostro"></label>
-        <label>Frase sotto il titolo<input name="subtitle" value="${esc(state.subtitle)}" placeholder="Es. Per sempre insieme"></label>
-        <label>Descrizione breve<textarea name="page_description" placeholder="Breve frase per chi apre la pagina — non incollare link o indirizzi tecnici">${esc(state.description)}</textarea></label>
+        <summary>${lfSpan("Altri testi sulla copertina (facoltativo)")}</summary>
+        <label>${lfSpan("Etichetta sopra il titolo")}<input name="pill" value="${esc(state.pill)}" placeholder="${esc(localizeFieldPhrase("Es. Amore · Un mondo tutto nostro"))}" data-lf-placeholder="Es. Amore · Un mondo tutto nostro"></label>
+        <label>${lfSpan("Frase sotto il titolo")}<input name="subtitle" value="${esc(state.subtitle)}" placeholder="${esc(localizeFieldPhrase("Es. Per sempre insieme"))}" data-lf-placeholder="Es. Per sempre insieme"></label>
+        <label>${lfSpan("Descrizione breve")}<textarea name="page_description" placeholder="${esc(localizeFieldPhrase("Breve frase per chi apre la pagina — non incollare link o indirizzi tecnici"))}" data-lf-placeholder="Breve frase per chi apre la pagina — non incollare link o indirizzi tecnici">${esc(state.description)}</textarea></label>
       </details>
-      <p class="field-hint">I colori si scelgono in <strong>Design → Colori</strong> — un tap e la pagina cambia look.</p>
+      <p class="field-hint">${lfSpan("I colori si scelgono in Design → Colori — un tap e la pagina cambia look.")}</p>
     </div>
   </div>`;
 }
@@ -4315,6 +4341,7 @@ function syncLangSwitchers(locale = getUiLocale()){
   try{
     refreshShellChrome();
     refreshNavChrome();
+    syncFieldChromeI18n(document.getElementById("momentEditorForm") || document);
     if(currentUser) refreshAccountMenu();
     if(appView === "account") renderAccountPanels();
     if(document.getElementById("emptyActivationForm")) renderEmptyState();

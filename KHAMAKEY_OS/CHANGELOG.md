@@ -20,6 +20,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
 ### Added
+- **Moments v199 — i18n fields Step 11a (2026-07-23, Cursor)** — Pages
+  - Solo pannello Copertina: titoli/hint/bottoni/placeholder EN (`moments-i18n-fields.js` + `data-lf`).
+  - Piano slice: `docs/29-moments-i18n-fields-plan.md` (11b Pubblica, 11c Colori…).
 - **Worker v183 — Moments `/m/` i18n Step 9 (2026-07-23, Cursor)** — Worker
   - Chrome pubblica IT/EN: PIN, footer, privacy notice, lightbox, contatore, RSVP/guestbook form, hint gallery/video.
   - Locale: `?lang=en|it` oppure `Accept-Language` visitatore; default IT. Non usa `uiLocale` editor.

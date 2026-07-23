@@ -9,9 +9,10 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=193";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=193";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=193";
+} from "./moments-i18n.js?v=194";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=194";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=194";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=194";
 import {
   uploadImage,
   uploadVideo,
@@ -254,7 +255,7 @@ function showEditorSaveFeedback(message, type = "error"){
   }
   const barMsg = document.querySelector("#momentsSaveBar .save-msg");
   if(barMsg && type === "error" && message){
-    barMsg.innerHTML = `<strong>Attenzione:</strong> ${esc(message)}`;
+    barMsg.innerHTML = `<strong>${esc(t("save.attention"))}</strong> ${esc(message)}`;
   }
   if(type === "error"){
     editorStatus?.scrollIntoView({ behavior:"smooth", block:"nearest" });
@@ -1713,7 +1714,7 @@ function applyTemplateToForm(formNode,type){
   const suggestedLook = suggestLookForMomentType(normalizeMomentType(type));
   if(suggestedLook && PAGE_LOOKS[suggestedLook]) applyPageLook(formNode, suggestedLook, { preview:false });
   schedulePreviewUpdate(formNode,{immediate:true,force:true});
-  promptSaveReminder("Template applicato. Clicca Salva verde in alto a destra per pubblicare le modifiche.");
+  promptSaveReminder(t("save.reminder_template"));
 }
 
 function onboardingKey(eventId){
@@ -2553,15 +2554,15 @@ function bindQuickPublish(root,row){
     if(form) markEditorDirty(form);
     if(hint){
       hint.textContent = select.value === "true"
-        ? "Visibilità impostata su Pubblicata — clicca Salva verde per applicare."
-        : "Visibilità impostata su Bozza privata — clicca Salva verde per applicare.";
+        ? t("save.visibility_live")
+        : t("save.visibility_draft");
       hint.hidden = false;
     }
   });
   select.addEventListener("change",sync);
 }
 
-function promptSaveReminder(message = "Modifiche pronte — clicca Salva in alto a destra per aggiornare la tua pagina."){
+function promptSaveReminder(message = t("save.reminder_default")){
   const hint = document.getElementById("editorActionHint");
   if(hint){
     hint.textContent = message;
@@ -2844,7 +2845,7 @@ function renderDetail(id){
     savedEditorSnapshot = JSON.stringify(readFormState(editorForm));
     editorDirty = true;
     updateSaveStatus(false);
-    promptSaveReminder(`Modello «${TYPE_LABELS[currentMomentType] || currentMomentType}» preparato dal tuo prodotto NFC. Salva per pubblicare.`);
+    promptSaveReminder(t("save.reminder_model", { type: TYPE_LABELS[currentMomentType] || currentMomentType }));
   }
   setEditorChromeVisible(true);
 }
@@ -2879,7 +2880,7 @@ async function uploadCoverImage(file,row,formNode){
     bindCoverFramer(formNode);
     markEditorDirty(formNode);
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
-    setUploadStatus(status,"Copertina caricata. Ricorda di toccare Salva.","ok");
+    setUploadStatus(status,t("save.reminder_cover"),"ok");
   }catch(error){
     setUploadStatus(status,error.message || "Upload non riuscito.","error");
   }finally{
@@ -2920,11 +2921,11 @@ async function uploadGalleryImages(files,row,formNode,key){
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
     refreshMomentEntitlements(row.id).catch(()=>{});
     const count = items?.length || batchSize;
-    const label = key === "letter_future" ? "lettera al futuro"
-      : key === "video" ? "sezione video"
-        : key === "music" ? "sezione musica"
-          : "galleria";
-    promptSaveReminder(`${count} file caricati nella ${label}. Clicca Salva verde per vederli sulla tua pagina.`);
+    const label = key === "letter_future" ? t("save.label_letter")
+      : key === "video" ? t("save.label_video")
+        : key === "music" ? t("save.label_music")
+          : t("save.label_gallery");
+    promptSaveReminder(t("save.reminder_upload", { count, label }));
   }catch(error){
     const message = error.message || "Upload non riuscito.";
     setUploadStatus(status,message,"error");
@@ -3145,7 +3146,7 @@ async function replaceGalleryImage(file,row,formNode,key,mediaId){
     if(result?.oldUrl && isCloudflareMediaUrl(result.oldUrl) && result.oldUrl !== result.item?.url){
       deleteStorageObject(supabase,result.oldUrl).catch(()=>{});
     }
-    promptSaveReminder("Foto sostituita. Clicca Salva verde per aggiornare la pagina.");
+    promptSaveReminder(t("save.reminder_photo"));
   }catch(error){
     const message = error.message || "Sostituzione non riuscita.";
     setUploadStatus(status,message,"error");
@@ -3863,7 +3864,7 @@ async function saveMoment(event,row){
   try{
     state = sanitizeStateForSave(readFormState(formNode));
   }catch(error){
-    showEditorSaveFeedback(error.message || "Controlla i campi e riprova.","error");
+    showEditorSaveFeedback(error.message || t("save.check_fields"),"error");
     return;
   }
   if(!adminMode){
@@ -3872,15 +3873,15 @@ async function saveMoment(event,row){
   const pin = String(new FormData(formNode).get("access_pin") || "").trim();
   const publicVisible = new FormData(formNode).get("public_visible") === "true";
   const pinEnabled = new FormData(formNode).get("pin_enabled") === "true";
-  if(!state.title) return showEditorSaveFeedback("Inserisci il titolo della pagina.","error");
+  if(!state.title) return showEditorSaveFeedback(t("save.need_title"),"error");
   if(state.sections?.letter_future?.enabled){
     const letter = state.sections.letter_future;
     const hasLetter = Boolean(String(letter.body || "").trim() || letter.unlock_date || migrateLetterMediaSection(letter).length);
     if(!hasLetter){
-      return showEditorSaveFeedback("Lettera al futuro: scrivi il testo, la data di apertura o un allegato.","error");
+      return showEditorSaveFeedback(t("save.letter_empty"),"error");
     }
     if(letter.media?.some(item=>String(item?.url || "").startsWith("blob:"))){
-      return showEditorSaveFeedback("Lettera al futuro: attendi il caricamento degli allegati o ricaricali prima di salvare.","error");
+      return showEditorSaveFeedback(t("save.letter_blob"),"error");
     }
   }
   // Senza WhatsApp: spegni RSVP in automatico (niente blocco, UX semplice)
@@ -3910,7 +3911,7 @@ async function saveMoment(event,row){
       syncEditorKitUi(formNode);
     }
   }
-  showEditorSaveFeedback(rsvpAutoOff ? "RSVP spento (manca WhatsApp) — salvataggio…" : "Salvataggio...","");
+  showEditorSaveFeedback(rsvpAutoOff ? t("save.saving_rsvp_off") : t("save.saving"),"");
   try{
     let pinHash = null;
     if(pin){
@@ -3918,7 +3919,7 @@ async function saveMoment(event,row){
         pinHash = await momentPinHash(row.slug,validatePin(pin));
         rememberPin(row.id,pin);
       }catch(pinError){
-        return showEditorSaveFeedback(pinError.message || "PIN non valido (minimo 4 caratteri), oppure lascia il campo vuoto.","error");
+        return showEditorSaveFeedback(pinError.message || t("save.pin_invalid"),"error");
       }
     }
     const { error } = adminMode
@@ -3944,7 +3945,7 @@ async function saveMoment(event,row){
         });
     if(error){
       console.error(error);
-      showEditorSaveFeedback(error.message || "Salvataggio non riuscito.","error");
+      showEditorSaveFeedback(error.message || t("save.fail"),"error");
       return;
     }
     savedEditorSnapshot = JSON.stringify(state);
@@ -3954,12 +3955,15 @@ async function saveMoment(event,row){
     editorDirty = false;
     updateSaveStatus(true);
     const barMsg = document.querySelector("#momentsSaveBar .save-msg");
-    if(barMsg) barMsg.innerHTML = "Hai <strong>modifiche non salvate</strong>";
+    if(barMsg){
+      barMsg.setAttribute("data-i18n-html", "shell.save_bar");
+      barMsg.innerHTML = t("shell.save_bar");
+    }
     localStorage.setItem(onboardingKey(row.id),"done");
     showEditorSaveFeedback(
       rsvpAutoOff
-        ? "Pagina salvata. RSVP disattivato: inserisci il WhatsApp e riattivalo se ti serve."
-        : "Pagina salvata.",
+        ? t("save.ok_rsvp_off")
+        : t("save.ok"),
       "ok"
     );
     const hint = document.getElementById("editorActionHint");
@@ -4001,8 +4005,8 @@ async function saveMoment(event,row){
   }catch(error){
     console.error(error);
     const msg = String(error?.message || "").includes("Load failed")
-      ? "Connessione interrotta durante il salvataggio. Controlla la rete e riprova."
-      : (error?.message || "Salvataggio non riuscito.");
+      ? t("save.fail_network")
+      : (error?.message || t("save.fail"));
     showEditorSaveFeedback(msg,"error");
   }
 }
@@ -4150,6 +4154,8 @@ registerMessages("it", AUTH_MESSAGES_IT);
 registerMessages("en", AUTH_MESSAGES_EN);
 registerMessages("it", SHELL_MESSAGES_IT);
 registerMessages("en", SHELL_MESSAGES_EN);
+registerMessages("it", SAVE_MESSAGES_IT);
+registerMessages("en", SAVE_MESSAGES_EN);
 applyDocumentLang(getUiLocale());
 
 function syncLangSwitchers(locale = getUiLocale()){

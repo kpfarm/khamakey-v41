@@ -17,6 +17,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
 ### Added
+- **Moments v194 — i18n save Step 6b (2026-07-23, Cursor)** — Pages
+  - `moments-i18n-save.js`: Pagina salvata / Salvataggio… / errori / reminder «clicca Salva».
+  - Nessun tocco a sezioni editor, attivazione, Worker `/m/`.
 - **Moments v192 — i18n shell Step 6a (2026-07-23, Cursor)** — Pages
   - `moments-i18n-shell.js`: Salva / Annulla / Anteprima / Modifica / status topbar / Copia link / Condividi / Apri pagina / pill Pubblicata|Bozza|PIN.
   - Nessun tocco a attivazione codici, Worker `/m/`, sezioni editor, toast salvataggio (6b).

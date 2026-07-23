@@ -331,3 +331,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-23 | Cursor | **i18n Moments bootfix / v191**: TDZ `appView` in `syncLangSwitchers` → boot bloccato; init lingua dopo le variabili |
 | 2026-07-23 | Cursor | **i18n Moments Step 6a / v192**: shell Salva/Annulla/Anteprima + topbar status EN (`moments-i18n-shell.js`); no Worker/attivazione |
 | 2026-07-23 | Cursor | **Moments v193**: fix CSS Salva/status non tagliati; **pausa espansione i18n EN** (no 6b/7) finché IT non è stabile al 100% |
+| 2026-07-23 | Cursor | **i18n Moments Step 6b / v194**: toast/errori/reminder Salva EN (`moments-i18n-save.js`); slice minimo; no sezioni/Worker |

@@ -1,6 +1,6 @@
 # 27 — Moments i18n: regole (Step 2)
 
-> **Data:** 2026-07-23 · **Stato:** regole ok · **Step 6a fatto (v192) · espansione EN in pausa (v193)**  
+> **Data:** 2026-07-23 · **Stato:** regole ok · **Step 6b save feedback (v194)**  
 > Decisione formale: [`decisions/007-moments-editor-i18n.md`](../decisions/007-moments-editor-i18n.md)  
 > Inventario: [`26-moments-i18n-inventory.md`](26-moments-i18n-inventory.md)  
 > Moduli: `moments-i18n.js` · `moments-i18n-auth.js` · `moments-i18n-shell.js`

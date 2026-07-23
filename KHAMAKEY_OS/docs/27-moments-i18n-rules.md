@@ -16,6 +16,7 @@ Default italiano; inglese solo se l’utente clicca EN; si salva nel browser; i 
 | 1 | Lingue v1: solo `it` e `en` |
 | 2 | Senza preferenza salvata → **sempre IT** |
 | 3 | Preferenza in `localStorage` → chiave `khamakey.moments.uiLocale` (`it` \| `en`) |
+| 3b | Se loggato: sync anche su Auth `user_metadata.ui_locale` (segue l’account su altri device) |
 | 4 | Solo scelta **esplicita** (toggle IT/EN) — niente auto-detect aggressivo |
 | 4b | **Bloccare traduzione Safari/Chrome** (`translate="no"` / `notranslate`) — altrimenti `IT`→`esso`, `Pubblica`→`Pubblicità`, `Anteprima`→`Aprile` |
 | 5 | Niente sync cloud della lingua UI in v1 |

@@ -6,6 +6,8 @@
  */
 
 export const UI_LOCALE_STORAGE_KEY = "khamakey.moments.uiLocale";
+/** Supabase Auth user_metadata key — sync cross-device when logged in. */
+export const UI_LOCALE_USER_META_KEY = "ui_locale";
 export const UI_LOCALES = Object.freeze(["it", "en"]);
 
 /** Italian is source of truth. EN may omit keys → fallback IT. */
@@ -43,6 +45,15 @@ export function normalizeUiLocale(value) {
   return UI_LOCALES.includes(code) ? code : "it";
 }
 
+/** True if the user explicitly saved a choice in this browser. */
+export function hasStoredUiLocale() {
+  try {
+    return localStorage.getItem(UI_LOCALE_STORAGE_KEY) != null;
+  } catch {
+    return false;
+  }
+}
+
 /** Read preference. Missing/invalid → always "it" (no Accept-Language). */
 export function getUiLocale() {
   try {
@@ -50,6 +61,13 @@ export function getUiLocale() {
   } catch {
     return "it";
   }
+}
+
+/** Locale from Auth user_metadata, or null if never saved on the account. */
+export function readUiLocaleFromUser(user) {
+  const raw = user?.user_metadata?.[UI_LOCALE_USER_META_KEY];
+  if (raw == null || String(raw).trim() === "") return null;
+  return normalizeUiLocale(raw);
 }
 
 /**

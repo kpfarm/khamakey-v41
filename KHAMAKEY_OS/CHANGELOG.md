@@ -19,6 +19,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - `syncLangSwitchers` leggeva `appView` in TDZ → ReferenceError → schermo “Apertura in corso…” infinito.
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
+### Added
+- **Moments v216 — lingua account cross-device (2026-07-23, Cursor)** — Pages
+  - Toggle IT/EN salvato anche in `user_metadata.ui_locale`; al login vince la lingua account.
+
 ### Fixed
 - **Moments v215 — toggle lingua resta in EN (2026-07-23, Cursor)** — Pages
   - Refresh IT/EN a step isolati: titoli sezioni/kit ripristinati anche se rebuild sidebar fallisce.

@@ -5,17 +5,20 @@ import {
   applyChromeI18n,
   applyDocumentLang,
   getUiLocale,
+  hasStoredUiLocale,
   onUiLocaleChange,
+  readUiLocaleFromUser,
   registerMessages,
   setUiLocale,
-  t
-} from "./moments-i18n.js?v=215";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=215";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=215";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=215";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=215";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=215";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=215";
+  t,
+  UI_LOCALE_USER_META_KEY
+} from "./moments-i18n.js?v=216";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=216";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=216";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=216";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=216";
 import {
   uploadImage,
   uploadVideo,
@@ -52,7 +55,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=215";
+} from "./moments-media-ui.js?v=216";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -61,13 +64,13 @@ import {
   renderJourneyFileInput,
   bindJourneyEditor,
   uploadJourneyStepPhoto
-} from "./moments-journey-ui.js?v=215";
+} from "./moments-journey-ui.js?v=216";
 import {
   migrateLetterMediaSection,
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
   setActivePlanLimits
-} from "./moment-media.js?v=215";
+} from "./moment-media.js?v=216";
 import {
   emptyEntitlements,
   fetchMomentEntitlements,
@@ -86,7 +89,7 @@ import {
   writeListItems,
   readListItems,
   bindListItemsEditor
-} from "./moments-list-ui.js?v=215";
+} from "./moments-list-ui.js?v=216";
 import { journeyStepId, MAX_JOURNEY_STEPS, normalizeJourneyStep, resolveJourneySteps, compactJourneySteps } from "./moment-journey.js";
 import {
   COLOR_PALETTES,
@@ -146,10 +149,10 @@ import {
   sectionFillGuideForType,
   primarySectionsForType
 } from "./moment-editor-kit.js?v=186";
-import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=215";
+import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=216";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderMomentDashboardShell, bindMomentDashboard } from "./moment-editor-dashboard.js";
-import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=215";
+import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=216";
 import {
   renderHoroscopePeoplePanel,
   bindHoroscopePeopleEditor,
@@ -950,10 +953,36 @@ function refreshAccountMenu(){
   });
 }
 
+async function persistUiLocaleToAccount(locale){
+  if(!supabase || !currentUser) return;
+  const next = String(locale || "").trim().toLowerCase().slice(0, 2);
+  if(next !== "it" && next !== "en") return;
+  if(String(currentUser.user_metadata?.[UI_LOCALE_USER_META_KEY] || "") === next) return;
+  try{
+    const { data, error } = await supabase.auth.updateUser({ data: { [UI_LOCALE_USER_META_KEY]: next } });
+    if(error) throw error;
+    if(data?.user) currentUser = data.user;
+  }catch(error){
+    console.warn("ui_locale account sync", error);
+  }
+}
+
+/** Account locale wins cross-device; otherwise push local explicit choice to account. */
+async function syncUiLocaleWithAccount(user){
+  if(!user) return;
+  const fromAccount = readUiLocaleFromUser(user);
+  if(fromAccount){
+    if(fromAccount !== getUiLocale()) setUiLocale(fromAccount);
+    return;
+  }
+  if(hasStoredUiLocale()) await persistUiLocaleToAccount(getUiLocale());
+}
+
 async function showApp(user){
   if(!user) return;
   finishSessionBoot();
   currentUser = user;
+  await syncUiLocaleWithAccount(user);
   auth.hidden = true;
   app.hidden = false;
   refreshAccountMenu();
@@ -4472,6 +4501,7 @@ function bindLangSwitchers(){
       const code = btn.getAttribute("data-set-locale");
       if(!code || code === getUiLocale()) return;
       setUiLocale(code);
+      persistUiLocaleToAccount(code);
     });
   });
   onUiLocaleChange(syncLangSwitchers);

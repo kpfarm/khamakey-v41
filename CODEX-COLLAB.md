@@ -232,7 +232,7 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Shopify Moments** | Operativo — libero | webhook ordini, catalogo vendita, sync bozze |
 | **Editor Business — contratto pubblico** | Condiviso | `publicStateFromEditor`, renderer `/p/` nel Worker |
 | **Admin / Officina Moments** | **Libero** (live **v178**) | `admin.html`, `moments-admin.html`, `admin.js`, `admin.css`, `admin-guide.js`, `admin-moment-labels.js` — coordinarsi se stesso pannello |
-| **Moments editor** | **Libero** (live **v215**) | `moments.html`, `moments.js`, `moments-i18n*.js`, `moments.css` |
+| **Moments editor** | **Libero** (live **v216**) | `moments.html`, `moments.js`, `moments-i18n*.js`, `moments.css` |
 | **Security hardening (audit 2026-07-11)** | Completato e deployato (vedi `PROJECT_STATE.md`) | Regole assolute CSP/RLS/dati restano vincolanti |
 | **`worker/worker.js`** | **Libero** (live **v184-rsvp-wa-i18n**) | Chi tocca `worker.js` prende lock esplicito e non parallelizza |
 | **Editor Business — upload media** | Completato v124 — libero | PDF catalogo / docs base64→R2 ancora pendenti (`docs/03-editor.md`) |

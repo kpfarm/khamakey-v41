@@ -9,11 +9,12 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=196";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=196";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=196";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=196";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=196";
+} from "./moments-i18n.js?v=197";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=197";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=197";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=197";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=197";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN } from "./moments-i18n-sections.js?v=197";
 import {
   uploadImage,
   uploadVideo,
@@ -187,6 +188,25 @@ function editorPanelTitle(panel){
   if(!panel) return "";
   if(panel.titleKey) return t(panel.titleKey);
   return panel.title || "";
+}
+
+/** Step 7b: translate taxonomy labels only (nav / sidebar / order). Keep custom user titles. */
+function localizeSectionPhrase(text){
+  const raw = String(text || "");
+  if(!raw || getUiLocale() === "it") return raw;
+  return SECTION_PHRASE_EN[raw] || raw;
+}
+
+function localizedSectionLabel(type, key){
+  return localizeSectionPhrase(sectionLabelForType(type, key));
+}
+
+function localizedSectionNavLabel(type, key){
+  return localizeSectionPhrase(sectionNavLabelForType(type, key));
+}
+
+function localizedCounterLabel(type){
+  return localizeSectionPhrase(counterLabelForType(type));
 }
 
 let activeEditorPanel = "cover";
@@ -940,7 +960,16 @@ function navItemsForGroup(groupId, formNode){
   if(groupId === "design") return localizeFixedNavItems(designNavItems());
   if(groupId === "page" || groupId === "account") return localizeFixedNavItems(pageNavItems());
   const enabled = enabledMapFromForm(formNode);
-  return localizeFixedNavItems(contentNavItems(sectionOrder, currentMomentType, pinnedExtraSections, enabled));
+  const type = currentMomentType;
+  return contentNavItems(sectionOrder, type, pinnedExtraSections, enabled).map(item=>{
+    if(item.id === "extras") return { ...item, label: t("nav.extras") };
+    if(item.id === "counter") return { ...item, label: localizedCounterLabel(type) };
+    if(String(item.id || "").startsWith("section-")){
+      const key = item.id.slice(8);
+      return { ...item, label: localizedSectionNavLabel(type, key) };
+    }
+    return item;
+  });
 }
 
 function enabledMapFromForm(formNode){
@@ -984,7 +1013,7 @@ function currentTypeFromForm(formNode){
 function sectionEditorNavLabel(formNode, type, key){
   const custom = String(formNode?.querySelector(`[name="section_${key}_title"]`)?.value || "").trim();
   if(custom) return custom.length > 22 ? `${custom.slice(0, 20)}…` : custom;
-  return sectionNavLabelForType(type, key);
+  return localizedSectionNavLabel(type, key);
 }
 
 function syncEditorKitUi(formNode){
@@ -1000,7 +1029,7 @@ function syncEditorKitUi(formNode){
     if(panelId === "counter"){
       button.hidden = !showCounter;
       if(showCounter){
-        button.innerHTML = `<span class="editor-nav-icon">⏱</span>${esc(counterLabelForType(type))}`;
+        button.innerHTML = `<span class="editor-nav-icon">⏱</span>${esc(localizedCounterLabel(type))}`;
       }
       return;
     }
@@ -1031,7 +1060,7 @@ function syncEditorKitUi(formNode){
       const title = panel.querySelector(".section-title");
       const sub = panel.querySelector(".section-sub");
       const custom = String(formNode?.querySelector(`[name="section_${key}_title"]`)?.value || "").trim();
-      if(title) title.textContent = custom || sectionLabelForType(type, key);
+      if(title) title.textContent = custom || localizedSectionLabel(type, key);
       if(sub) sub.textContent = sectionSubtitleForType(type, key);
     }
   });
@@ -1768,7 +1797,7 @@ function renderEditorSidebar(activePanel, momentType = currentMomentType, pinned
   const showExtras = hiddenOptionalSections(momentType, pinned, enabled).length > 0;
   const counterBtn = showCounterForType(momentType) ? `
     <button type="button" class="editor-nav-item ${activePanel === "counter" ? "active" : ""}" data-editor-panel="counter">
-      <span class="editor-nav-icon">⏱</span>${esc(counterLabelForType(momentType))}
+      <span class="editor-nav-icon">⏱</span>${esc(localizedCounterLabel(momentType))}
     </button>` : "";
   const extrasBtn = showExtras ? `
     <button type="button" class="editor-nav-item ${activePanel === "extras" ? "active" : ""}" data-editor-panel="extras">
@@ -1777,7 +1806,7 @@ function renderEditorSidebar(activePanel, momentType = currentMomentType, pinned
   const contentItems = `${counterBtn}
     ${navKeys.map(key=>`
     <button type="button" class="editor-nav-item ${activePanel === `section-${key}` ? "active" : ""}" data-editor-panel="section-${esc(key)}" data-section-nav-key="${esc(key)}">
-      <span class="editor-nav-icon">${esc(SECTION_ICONS[key] || "•")}</span>${esc(sectionLabelForType(momentType, key))}
+      <span class="editor-nav-icon">${esc(SECTION_ICONS[key] || "•")}</span>${esc(localizedSectionLabel(momentType, key))}
     </button>`).join("")}${extrasBtn}`;
   return `<nav class="editor-sidebar" aria-label="${esc(t("nav.aria.sidebar"))}">
     <div class="editor-sidebar-group">${esc(t("nav.sidebar.page"))}</div>
@@ -2089,7 +2118,7 @@ function renderCoverPanel(state){
 
 function renderCounterPanel(state){
   if(!showCounterForType(state.type)) return "";
-  const counterTitle = counterLabelForType(state.type);
+  const counterTitle = localizedCounterLabel(state.type);
   return `<div class="editor-panel ${activeEditorPanel === "counter" ? "active" : ""}" data-editor-panel="counter">
     ${renderSectionHeader(counterTitle,EDITOR_PANELS.counter.subtitle)}
     <div class="section-switch ${state.show_together_counter ? "is-on" : ""}" data-counter-switch="main" role="switch" aria-checked="${state.show_together_counter ? "true" : "false"}" tabindex="0">
@@ -2141,14 +2170,14 @@ function renderExtrasPanel(state){
     <button type="button" class="extras-card" data-pin-section="${esc(key)}">
       <span class="extras-card-icon">${esc(SECTION_ICONS[key] || "•")}</span>
       <span class="extras-card-copy">
-        <strong>${esc(sectionLabelForType(state.type, key))}</strong>
+        <strong>${esc(localizedSectionLabel(state.type, key))}</strong>
         <small>${esc(sectionSubtitleForType(state.type, key))}</small>
       </span>
       <span class="extras-card-action">${isPrimary ? "Riattiva →" : "Aggiungi →"}</span>
     </button>`;
   }).join("");
   return `<div class="editor-panel ${activeEditorPanel === "extras" ? "active" : ""}" data-editor-panel="extras">
-    ${renderSectionHeader("Altre sezioni","Tutte le sezioni extra per questo template — attiva solo quelle che ti servono.")}
+    ${renderSectionHeader(t("sec.extras_title") || t("nav.extras"),"Tutte le sezioni extra per questo template — attiva solo quelle che ti servono.")}
     <div class="editor-card smart-card">
       <p class="field-hint">Le sezioni consigliate compaiono nel menu quando sono attive. Qui trovi <strong>tutte le altre</strong> (e quelle che hai spento): tocca per aggiungerle. Per toglierle di nuovo dal menu, apri la sezione e spegni <strong>Visibile in pagina</strong>.</p>
       <div class="extras-grid">${cards}</div>
@@ -2181,7 +2210,7 @@ function renderSectionPanels(state, shareMeta = {}){
           published:shareMeta.published !== false
         })
       : "";
-    const panelTitle = String(section?.title || "").trim() || sectionLabelForType(state.type, key);
+    const panelTitle = String(section?.title || "").trim() || localizedSectionLabel(state.type, key);
     return `<div class="editor-panel ${activeEditorPanel === panelId ? "active" : ""}" data-editor-panel="${esc(panelId)}" data-section-panel-key="${esc(key)}" ${hidden ? "hidden" : ""}>
       ${renderSectionHeader(panelTitle,sectionSubtitleForType(state.type, key))}
       ${mutedNav ? `<p class="field-hint extras-hint">Sezione extra — attivala con l'interruttore sotto o da <strong>Altre sezioni</strong>.</p>` : ""}
@@ -2406,6 +2435,11 @@ function refreshNavChrome(){
   sidebar.outerHTML = next;
   const shell = document.getElementById("momentEditorShell");
   if(shell) bindEditorNavigation(shell);
+  const form = document.getElementById("momentEditorForm");
+  if(form){
+    syncEditorKitUi(form);
+    refreshSectionOrderList(form);
+  }
 }
 
 function refreshShellChrome(){
@@ -2449,7 +2483,7 @@ function revertEditorChanges(){
 }
 
 function renderSectionOrderItem(key,idx,momentType = currentMomentType,formNode = null){
-  const label = formNode ? sectionOrderDisplayLabel(formNode, momentType, key) : sectionLabelForType(momentType, key);
+  const label = formNode ? sectionOrderDisplayLabel(formNode, momentType, key) : localizedSectionLabel(momentType, key);
   return `<div class="section-order-item" data-section-key="${esc(key)}">
     <button type="button" class="section-drag section-drag-handle" aria-label="Trascina per riordinare">☰</button>
     <span class="section-order-icon">${esc(SECTION_ICONS[key] || "•")}</span>
@@ -3444,7 +3478,7 @@ function renderSectionTitleField(key, section){
 function sectionOrderDisplayLabel(formNode, momentType, key){
   const custom = String(formNode?.querySelector(`[name="section_${key}_title"]`)?.value || "").trim();
   if(custom) return custom;
-  return sectionLabelForType(momentType, key);
+  return localizedSectionLabel(momentType, key);
 }
 
 function sectionEditor(key,section,standalone=false){
@@ -4218,6 +4252,8 @@ registerMessages("it", SAVE_MESSAGES_IT);
 registerMessages("en", SAVE_MESSAGES_EN);
 registerMessages("it", NAV_MESSAGES_IT);
 registerMessages("en", NAV_MESSAGES_EN);
+registerMessages("it", SECTION_MESSAGES_IT);
+registerMessages("en", SECTION_MESSAGES_EN);
 applyDocumentLang(getUiLocale());
 
 function syncLangSwitchers(locale = getUiLocale()){

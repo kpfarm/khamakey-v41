@@ -20,6 +20,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
 ### Added
+- **Moments v197 — i18n sections Step 7b (2026-07-23, Cursor)** — Pages
+  - `moments-i18n-sections.js`: mappa frasi IT→EN per etichette nav/sidebar/ordine (Memoria, Ricordo, …).
+  - Sottotitoli e campi dentro i pannelli ancora IT.
 - **Moments v196 — i18n nav Step 7a (2026-07-23, Cursor)** — Pages
   - `moments-i18n-nav.js`: Copertina/Colori/Contenuti/Pubblica, gruppi Design/Pagina, Riepilogo, Altre sezioni.
   - Taxonomy sezioni (In memoria, …) e campi pannello ancora IT (7b).

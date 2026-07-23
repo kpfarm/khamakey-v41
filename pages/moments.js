@@ -9,13 +9,13 @@ import {
   registerMessages,
   setUiLocale,
   t
-} from "./moments-i18n.js?v=207";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=207";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=207";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=207";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=207";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=207";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=207";
+} from "./moments-i18n.js?v=208";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=208";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=208";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=208";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=208";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=208";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=208";
 import {
   uploadImage,
   uploadVideo,
@@ -59,7 +59,7 @@ import {
   renderJourneyFileInput,
   bindJourneyEditor,
   uploadJourneyStepPhoto
-} from "./moments-journey-ui.js?v=174";
+} from "./moments-journey-ui.js?v=208";
 import {
   migrateLetterMediaSection,
   migrateVideoSectionMedia,
@@ -84,7 +84,7 @@ import {
   writeListItems,
   readListItems,
   bindListItemsEditor
-} from "./moments-list-ui.js?v=207";
+} from "./moments-list-ui.js?v=208";
 import { journeyStepId, MAX_JOURNEY_STEPS, normalizeJourneyStep, resolveJourneySteps, compactJourneySteps } from "./moment-journey.js";
 import {
   COLOR_PALETTES,
@@ -252,6 +252,11 @@ function syncFieldChromeI18n(root = document){
     const singular = el.getAttribute("data-lf-list-badge") || "";
     const num = el.getAttribute("data-lf-list-num") || "";
     el.textContent = `${localizeFieldPhrase(singular)} ${num}`.trim();
+  });
+  root.querySelectorAll("[data-lf-journey-badge]").forEach(el=>{
+    const label = el.getAttribute("data-lf-journey-badge") || "";
+    const num = el.getAttribute("data-lf-journey-num") || "";
+    el.textContent = `${localizeFieldPhrase(label)} ${num}`.trim();
   });
 }
 
@@ -3474,7 +3479,7 @@ async function uploadJourneyStepImage(file,row,formNode,stepId){
       deleteStorageObject(supabase,oldUrl).catch(()=>{});
     }
   }catch(error){
-    alert(error.message || "Upload foto tappa non riuscito.");
+    alert(error.message || localizeFieldPhrase("Upload foto tappa non riuscito."));
   }
 }
 
@@ -4419,6 +4424,7 @@ function syncLangSwitchers(locale = getUiLocale()){
     const editorForm = document.getElementById("momentEditorForm");
     if(editorForm){
       for(const key of LIST_SECTION_KEYS) renderListItems(editorForm, key);
+      renderJourneySteps(editorForm, "timeline");
     }
     if(currentUser) refreshAccountMenu();
     if(appView === "account") renderAccountPanels();

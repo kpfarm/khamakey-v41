@@ -20,6 +20,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
   - Init lingua spostata dopo le variabili; login di nuovo funzionante.
 
 ### Added
+- **Moments v208 — i18n fields Step 11e5 (2026-07-23, Cursor)** — Pages
+  - Journey UI: tappe, scroll switch, empty state, campi card EN; refresh al toggle lingua.
 - **Moments v207 — i18n fields Step 11e4 (2026-07-23, Cursor)** — Pages
   - List UI (promesse/sogni/rituali/numeri): label, add, empty, card fields EN; refresh al toggle lingua.
 - **Moments v206 — i18n fields Step 11e3 (2026-07-23, Cursor)** — Pages

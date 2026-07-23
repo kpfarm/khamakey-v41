@@ -40,7 +40,7 @@ Steps 1–9 = auth, shell, nav, etichette/sottotitoli sezioni, toast, chrome `/m
   - [x] **11e2** (v205) — countdown + musica chrome
   - [x] **11e3** (v206) — RSVP WhatsApp chrome
   - [x] **11e4** (v207) — List UI
-  - [ ] 11e5 Journey UI
+  - [x] **11e5** (v208) — Journey UI
   - [ ] 11e6 Gallery / video / media UI
 
 ## 11e — sotto-slice (una release ciascuna)

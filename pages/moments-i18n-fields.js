@@ -270,5 +270,31 @@ export const FIELD_PHRASE_EN = {
   "Es. Caffè insieme ogni mattina": "e.g. Coffee together every morning",
   "Es. 365": "e.g. 365",
   "Es. giorni insieme": "e.g. days together",
-  "Massimo 24 voci.": "Maximum 24 items."
+  "Massimo 24 voci.": "Maximum 24 items.",
+
+  // 11e5 — Journey UI (timeline stops)
+  "Tappa": "Stop",
+  "tappe": "stops",
+  "+ Aggiungi tappa": "+ Add stop",
+  "Tocca per aggiungere foto": "Tap to add a photo",
+  "Trascina": "Drag",
+  "Carica foto": "Upload photo",
+  "Rimuovi foto": "Remove photo",
+  "Nome tappa": "Stop name",
+  "Quando": "When",
+  "Cosa racconti": "What happened",
+  "Es. Parigi · Chiesa di San Marco": "e.g. Paris · St Mark’s Church",
+  "Es. 15 giugno · ore 18:30": "e.g. 15 June · 6:30 pm",
+  "Racconta cosa è successo, cosa provi, un ricordo...": "Tell what happened, how you feel, a memory...",
+  "Link mappa (facoltativo)": "Map link (optional)",
+  "Google Maps": "Google Maps",
+  "Nessuna tappa ancora": "No stops yet",
+  "Aggiungi le tappe del viaggio o del programma — una card per ogni momento importante.": "Add stops for the trip or schedule — one card for each important moment.",
+  "Ogni tappa è una card: nome, data, racconto e foto. Trascina ☰ per riordinare.": "Each stop is a card: name, date, story and photo. Drag ☰ to reorder.",
+  "Scorrimento laterale attivo": "Horizontal scroll on",
+  "Lista verticale (default)": "Vertical list (default)",
+  "In pagina le tappe scorrono come la galleria — pagina più corta": "On the page, stops scroll like the gallery — shorter page",
+  "Con tante tappe puoi attivare lo scroll laterale come la galleria": "With many stops you can turn on sideways scroll like the gallery",
+  "Tappa non trovata.": "Stop not found.",
+  "Upload foto tappa non riuscito.": "Stop photo upload failed."
 };

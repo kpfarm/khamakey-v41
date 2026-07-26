@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v186-storage-usage-sync";
+const WORKER_VERSION = "v187-media-i18n";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -117,7 +117,11 @@ const MOMENTS_PUBLIC_I18N = {
     "horoscope.sign.sagittarius": "Sagittario",
     "horoscope.sign.capricorn": "Capricorno",
     "horoscope.sign.aquarius": "Acquario",
-    "horoscope.sign.pisces": "Pesci"
+    "horoscope.sign.pisces": "Pesci",
+    "gallery.open_pdf": "Apri PDF",
+    "gallery.open_photo": "Apri foto",
+    "gallery.open_photo_full": "Apri foto a schermo intero",
+    "journey.open_map": "Apri mappa ↗"
   },
   en: {
     "pin.fallback_title": "Protected Moment",
@@ -221,7 +225,11 @@ const MOMENTS_PUBLIC_I18N = {
     "horoscope.sign.sagittarius": "Sagittarius",
     "horoscope.sign.capricorn": "Capricorn",
     "horoscope.sign.aquarius": "Aquarius",
-    "horoscope.sign.pisces": "Pisces"
+    "horoscope.sign.pisces": "Pisces",
+    "gallery.open_pdf": "Open PDF",
+    "gallery.open_photo": "Open photo",
+    "gallery.open_photo_full": "Open full-screen photo",
+    "journey.open_map": "Open map ↗"
   }
 };
 
@@ -2418,7 +2426,7 @@ function renderLetterFutureMedia(section, locale = "it") {
       </figure>`;
     }
     if (item.type === "pdf") {
-      const label = item.title || "Apri PDF";
+      const label = item.title || mt(locale, "gallery.open_pdf");
       return `<figure class="moment-gallery-figure moment-letter-pdf-card">
         <a class="moment-letter-pdf-link" href="${attr(item.url)}" target="_blank" rel="noopener noreferrer">
           <span class="moment-letter-pdf-icon" aria-hidden="true">PDF</span>
@@ -2430,7 +2438,7 @@ function renderLetterFutureMedia(section, locale = "it") {
     return `<figure class="moment-gallery-figure">
       <div class="moment-gallery-frame" data-media-open="${idx}">
         <img src="${attr(item.url)}" alt="${attr(item.title || "")}" loading="lazy" decoding="async" draggable="false">
-        <button type="button" class="moment-gallery-zoom-hint" data-media-open="${idx}" aria-label="${attr(item.title || "Apri foto")}">＋</button>
+        <button type="button" class="moment-gallery-zoom-hint" data-media-open="${idx}" aria-label="${attr(item.title || mt(locale, "gallery.open_photo"))}">＋</button>
       </div>
       ${meta}
     </figure>`;
@@ -4503,7 +4511,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
       const place = step.place ? `<strong class="moment-journey-place">${escapeHtml(step.place)}</strong>` : "";
       const text = step.text ? `<p class="moment-journey-text">${escapeHtml(step.text)}</p>` : "";
       const mapLink = step.maps_url && safeUrl(step.maps_url) !== "#"
-        ? `<a class="moment-journey-map" href="${attr(step.maps_url)}" target="_blank" rel="noopener">Apri mappa ↗</a>`
+        ? `<a class="moment-journey-map" href="${attr(step.maps_url)}" target="_blank" rel="noopener">${escapeHtml(mt(locale, "journey.open_map"))}</a>`
         : "";
       return `<div class="moment-journey-item">${photo}<div class="moment-journey-copy">${date}${place}${text}${mapLink}</div></div>`;
     }).join("");
@@ -4585,7 +4593,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
       const title = item.title ? `<span class="moment-gallery-caption">${escapeHtml(item.title)}</span>` : "";
       const desc = item.description ? `<span class="moment-gallery-desc">${escapeHtml(item.description)}</span>` : "";
       const meta = (title || desc) ? `<figcaption class="moment-gallery-meta">${title}${desc}</figcaption>` : "";
-      const label = item.title || "Apri foto a schermo intero";
+      const label = item.title || mt(locale, "gallery.open_photo_full");
       return `<figure class="moment-gallery-figure">
         <div class="moment-gallery-frame" data-media-open="${idx}">
           <img src="${attr(item.url)}" alt="${attr(item.title || "")}" loading="lazy" decoding="async" draggable="false">

@@ -1,5 +1,5 @@
-import { getUiLocale } from "./moments-i18n.js?v=220";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=220";
+import { getUiLocale } from "./moments-i18n.js?v=221";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=221";
 
 export const RSVP_OPTIONAL_FIELDS = {
   guests:{ label:"Quanti siete?", type:"number", waLabel:"👥 Ospiti", waLabelEn:"👥 Guests", placeholder:"1", hint:"Numero di persone" },

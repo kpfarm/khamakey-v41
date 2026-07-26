@@ -18,7 +18,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=216";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=220";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=221";
 import {
   uploadImage,
   uploadVideo,
@@ -150,10 +150,10 @@ import {
   sectionFillGuideForType,
   primarySectionsForType
 } from "./moment-editor-kit.js?v=186";
-import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=220";
-import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
+import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=221";
+import { bindRsvpResponsesPanel, refreshRsvpResponsesLocale } from "./moment-rsvp-responses.js?v=221";
 import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=219";
-import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=220";
+import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=221";
 import {
   renderHoroscopePeoplePanel,
   bindHoroscopePeopleEditor,
@@ -241,6 +241,11 @@ function syncFieldChromeI18n(root = document){
     const src = el.getAttribute("data-lf-placeholder");
     if(src == null) return;
     el.setAttribute("placeholder", localizeFieldPhrase(src));
+  });
+  root.querySelectorAll("[data-lf-aria]").forEach(el=>{
+    const src = el.getAttribute("data-lf-aria");
+    if(src == null) return;
+    el.setAttribute("aria-label", localizeFieldPhrase(src));
   });
   root.querySelectorAll("[data-lf-option]").forEach(el=>{
     const src = el.getAttribute("data-lf-option");
@@ -2458,19 +2463,27 @@ function renderPrivacyPanel(row, state = {}){
 }
 
 function renderOnboardingWizard(row){
-  return `<div class="onboarding-wizard" id="onboardingWizard">
+  const eyebrow = "5 minuti";
+  const title = "La tua pagina in 4 passi";
+  const closeAria = "Chiudi guida";
+  const start = "Inizia → Copertina";
+  const steps = [
+    { strong:"1. Copertina", span:"Titolo, tipo pagina e foto." },
+    { strong:"2. Template", span:"Tocca «Prepara tutto per me» per partire dal modello del tuo prodotto." },
+    { strong:"3. Contenuti", span:"Modifica testi e media. In «Altre sezioni» aggiungi solo ciò che ti serve." },
+    { strong:"4. Pubblica", span:"Salva e condividi il link NFC." }
+  ];
+  const stepsHtml = steps.map((step, index)=>`
+      <li class="${index === 0 ? "active" : ""}"><strong data-lf="${esc(step.strong)}">${esc(localizeFieldPhrase(step.strong))}</strong><span data-lf="${esc(step.span)}">${esc(localizeFieldPhrase(step.span))}</span></li>`).join("");
+  return `<div class="onboarding-wizard" id="onboardingWizard" data-onboarding-wizard>
     <div class="onboarding-head">
-      <p class="eyebrow">5 minuti</p>
-      <h3>La tua pagina in 4 passi</h3>
-      <button type="button" class="onboarding-close" id="dismissOnboarding" aria-label="Chiudi guida">×</button>
+      <p class="eyebrow" data-lf="${esc(eyebrow)}">${esc(localizeFieldPhrase(eyebrow))}</p>
+      <h3 data-lf="${esc(title)}">${esc(localizeFieldPhrase(title))}</h3>
+      <button type="button" class="onboarding-close" id="dismissOnboarding" aria-label="${esc(localizeFieldPhrase(closeAria))}" data-lf-aria="${esc(closeAria)}">×</button>
     </div>
-    <ol class="onboarding-steps">
-      <li class="active"><strong>1. Copertina</strong><span>Titolo, tipo pagina e foto.</span></li>
-      <li><strong>2. Template</strong><span>Tocca «Prepara tutto per me» per partire dal modello del tuo prodotto.</span></li>
-      <li><strong>3. Contenuti</strong><span>Modifica testi e media. In «Altre sezioni» aggiungi solo ciò che ti serve.</span></li>
-      <li><strong>4. Pubblica</strong><span>Salva e condividi il link NFC.</span></li>
+    <ol class="onboarding-steps">${stepsHtml}
     </ol>
-    <button type="button" class="primary" id="onboardingStart">Inizia → Copertina</button>
+    <button type="button" class="primary" id="onboardingStart" data-lf="${esc(start)}">${esc(localizeFieldPhrase(start))}</button>
   </div>`;
 }
 
@@ -4504,6 +4517,7 @@ function syncLangSwitchers(locale = getUiLocale()){
     });
     run("mediaModal", ()=>syncMediaModalChrome());
     run("rsvpShare", ()=>refreshRsvpShareLocale(editorForm));
+    run("rsvpResponses", ()=>refreshRsvpResponsesLocale());
     run("horoscope", ()=>refreshHoroscopePeopleEditor(editorForm));
     run("dashboard", ()=>refreshMomentDashboardLocale());
     run("planCard", ()=>{

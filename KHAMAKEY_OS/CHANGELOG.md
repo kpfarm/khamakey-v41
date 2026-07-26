@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v221 + Worker v187 — chiusura piano i18n A–C (2026-07-26, Cursor)** — Pages + Worker
+  - B3 wizard onboarding EN; pannello risposte RSVP EN; C1 `Apri PDF/foto/mappa` via `mt()`.
+  - NFC/upload/Salva/RSVP submit invariati.
 - **Moments v220 — RSVP i18n A1b+A2 (2026-07-26, Cursor)** — Pages
   - Custom fields, «Cosa chiedere», share panel (Copia/Condividi/riepilogo) IT|EN via `data-lf`.
   - `refreshRsvpShareLocale` aggiorna chrome + anteprima; read/save/normalize/WA invariati.

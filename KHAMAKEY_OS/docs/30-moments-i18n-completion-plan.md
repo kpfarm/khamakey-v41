@@ -299,8 +299,9 @@ Dopo:
 | **A2b** RSVP share refresh toggle | Fatto (in `refreshRsvpShareLocale`) | v220 |
 | **B1** Oroscopo editor + public locale | Fatto | v218 / W v185 |
 | **B2+B4** Dashboard + card piano Overview | Fatto (+ storage reale W v186) | v219 / W v186 |
-| **B3** Wizard | Pending | — |
-| **C1** Worker media residuali | Pending | — |
+| **B3** Wizard | Fatto | v221 |
+| RSVP responses panel | Fatto | v221 |
+| **C1** Worker media residuali | Fatto | W v187 |
 | **C2** Guestbook toasts | **Skip** (prodotto off) | — |
 | **D*** | Opzionale / fuori | — |
 
@@ -308,13 +309,13 @@ Dopo:
 
 ## 7. Criterio di successo finale (Fase A+B+C)
 
-- [ ] Toggle EN: RSVP fields + share + oroscopo + dashboard + wizard in EN  
-- [ ] Toggle IT: tutto torna IT (nessuno sticky)  
-- [ ] RSVP: numero, Salva, WA message, share/copy invariati funzionalmente  
-- [ ] Media upload/replace/delete invariati  
-- [ ] `/m/?lang=en` e default IT ok  
-- [ ] Login su secondo device ripristina `ui_locale` (già v216)  
-- [ ] Nessun cambio SQL / attivazione / Business  
+- [x] Toggle EN: RSVP fields + share + oroscopo + dashboard + wizard in EN  
+- [x] Toggle IT: tutto torna IT (nessuno sticky) — da smoke utente  
+- [x] RSVP: numero, Salva, WA message, share/copy invariati funzionalmente  
+- [x] Media upload/replace/delete invariati  
+- [x] `/m/?lang=en` e default IT ok (C1 residuali chiusi)  
+- [x] Login su secondo device ripristina `ui_locale` (già v216)  
+- [x] Nessun cambio SQL / attivazione / Business (v168 solo contatore storage)  
 
 ---
 

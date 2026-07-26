@@ -37,10 +37,10 @@ const RSVP_INVITE_EMOJI = {
   default:"📲"
 };
 
-import { rsvpGuestPreviewLines, readRsvpFieldsFromForm } from "./moment-rsvp-fields.js?v=220";
-import { renderRsvpResponsesShell } from "./moment-rsvp-responses.js";
-import { getUiLocale } from "./moments-i18n.js?v=220";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=220";
+import { rsvpGuestPreviewLines, readRsvpFieldsFromForm } from "./moment-rsvp-fields.js?v=221";
+import { renderRsvpResponsesShell } from "./moment-rsvp-responses.js?v=221";
+import { getUiLocale } from "./moments-i18n.js?v=221";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=221";
 
 let lastShareCtx = null;
 

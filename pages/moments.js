@@ -18,7 +18,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=216";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=217";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=218";
 import {
   uploadImage,
   uploadVideo,
@@ -157,7 +157,7 @@ import {
   renderHoroscopePeoplePanel,
   bindHoroscopePeopleEditor,
   refreshHoroscopePeopleEditor
-} from "./moment-horoscope.js?v=186";
+} from "./moment-horoscope.js?v=218";
 
 const auth = document.getElementById("momentsAuth");
 const app = document.getElementById("momentsApp");
@@ -3742,7 +3742,7 @@ function sectionEditor(key,section,standalone=false){
     <label>${lfSpan("Sottotitolo")}<input name="section_${esc(key)}_sign_subtitle" value="${esc(safe.sign_subtitle || "")}" placeholder="${esc(localizeFieldPhrase("Es. Per sempre"))}" data-lf-placeholder="Es. Per sempre"></label>` : "";
   const horoscopeFields = key === "horoscope" ? `
     <div class="editor-card">
-      <p class="ecard-title"><span class="step-badge">1</span> Persone e segni</p>
+      <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Persone e segni")}</p>
       ${renderHoroscopePeoplePanel(safe)}
     </div>` : "";
   const bodyLabelIt = key === "quote" ? "Citazione" : key === "dedication" || key === "letter_future" ? "Testo della lettera" : key === "pet" ? "Racconto" : "Contenuto";
@@ -4487,6 +4487,7 @@ function syncLangSwitchers(locale = getUiLocale()){
     });
     run("mediaModal", ()=>syncMediaModalChrome());
     run("rsvpShare", ()=>refreshRsvpShareLocale(editorForm));
+    run("horoscope", ()=>refreshHoroscopePeopleEditor(editorForm));
   }
   run("accountMenu", ()=>{ if(currentUser) refreshAccountMenu(); });
   run("accountPanels", ()=>{ if(appView === "account") renderAccountPanels(); });

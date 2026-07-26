@@ -95,8 +95,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v178** | Reset pezzo reso/refurb (SQL v167): nuovo codice attivazione, stesso slug NFC. |
-| **Worker NFC** | **v184-rsvp-wa-i18n** | Chrome `/m/` IT/EN + messaggio WhatsApp RSVP localizzato; numeri/invio invariati. |
-| **Moments editor** | **v217** | A1a: label/hint 4 toggle RSVP standard EN (`data-lf`); custom rows / handlers invariati. |
+| **Worker NFC** | **v185-horoscope-i18n** | Oroscopo `/m/` IT\|EN (letture + chrome); RSVP WA i18n da v184 invariato. |
+| **Moments editor** | **v218** | B1 oroscopo editor EN; A1a RSVP toggles v217. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v167 (prod)** | v167 reset pezzo reso; v166 USAGE `app_private`; v165 ingest store. |

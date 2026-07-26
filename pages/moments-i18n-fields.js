@@ -393,5 +393,31 @@ export const FIELD_PHRASE_EN = {
   "Telefono": "Phone",
   "Per contatti rapidi": "For quick contact",
   "Email": "Email",
-  "Conferma via email": "Email confirmation"
+  "Conferma via email": "Email confirmation",
+
+  // B1 — Horoscope editor chrome (no Astroway / people[] save logic)
+  "Persone e segni": "People and signs",
+  "Fino a 5 persone (bundle). Ogni segno mostra l’oroscopo del giorno, aggiornato automaticamente.": "Up to 5 people (bundle). Each sign shows today’s horoscope, updated automatically.",
+  "persone": "people",
+  "+ Aggiungi persona": "+ Add person",
+  "Rimuovi persona": "Remove person",
+  "Nome (facoltativo)": "Name (optional)",
+  "Es. Marco": "e.g. Alex",
+  "Segno zodiacale": "Zodiac sign",
+  "Scegli il segno": "Choose a sign",
+  "Nessuna persona": "No people yet",
+  "Aggiungi almeno un segno per mostrare l’oroscopo.": "Add at least one sign to show the horoscope.",
+  "Massimo {n} persone (bundle).": "Maximum {n} people (bundle).",
+  "Ariete": "Aries",
+  "Toro": "Taurus",
+  "Gemelli": "Gemini",
+  "Cancro": "Cancer",
+  "Leone": "Leo",
+  "Vergine": "Virgo",
+  "Bilancia": "Libra",
+  "Scorpione": "Scorpio",
+  "Sagittario": "Sagittarius",
+  "Capricorno": "Capricorn",
+  "Acquario": "Aquarius",
+  "Pesci": "Pisces"
 };

@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v218 + Worker v185 — oroscopo IT|EN (2026-07-26, Cursor)** — Pages + Worker
+  - Editor B1: segni, label, Aggiungi/Rimuovi, empty → `data-lf` + refresh al toggle lingua.
+  - Worker: `loadHoroscopeReadings` usa locale (prima hardcode `"it"`); chrome `/m/` via `mt()`; EN senza distill “giornale” IT.
+  - Invariati: people[] save, PIN, RSVP, upload, attivazione NFC.
 - **Moments v217 — i18n A1a RSVP toggles (2026-07-23, Cursor)** — Pages
   - Solo label + hint dei 4 toggle standard (ospiti/note/telefono/email) via `data-lf` + `FIELD_PHRASE_EN`.
   - Nessun tocco a custom rows, `readRsvp`/`normalize`/`bind`, Worker, upload.

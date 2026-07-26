@@ -1,5 +1,8 @@
 /** Oroscopo Moments — fino a 5 persone (nome opzionale + segno), testo daily via AstroWay (Worker). */
 
+import { getUiLocale } from "./moments-i18n.js?v=218";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=218";
+
 export const MAX_HOROSCOPE_PEOPLE = 5;
 
 export const ZODIAC_SIGNS = Object.freeze([
@@ -19,6 +22,20 @@ export const ZODIAC_SIGNS = Object.freeze([
 
 const SIGN_SET = new Set(ZODIAC_SIGNS.map(item => item.value));
 
+function lf(text){
+  const raw = String(text || "");
+  if(!raw || getUiLocale() === "it") return raw;
+  return FIELD_PHRASE_EN[raw] || raw;
+}
+
+function lfFill(it, vars = {}){
+  let out = lf(it);
+  for(const [key, value] of Object.entries(vars)){
+    out = out.split(`{${key}}`).join(String(value ?? ""));
+  }
+  return out;
+}
+
 export function normalizeZodiacSign(value){
   const key = String(value || "").trim().toLowerCase();
   return SIGN_SET.has(key) ? key : "";
@@ -26,7 +43,8 @@ export function normalizeZodiacSign(value){
 
 export function zodiacSignLabel(value){
   const key = normalizeZodiacSign(value);
-  return ZODIAC_SIGNS.find(item => item.value === key)?.label || "";
+  const it = ZODIAC_SIGNS.find(item => item.value === key)?.label || "";
+  return it ? lf(it) : "";
 }
 
 export function horoscopePersonId(){
@@ -102,10 +120,11 @@ export function parseHoroscopePeople(raw){
 
 export function renderZodiacSignOptions(selected = ""){
   const current = normalizeZodiacSign(selected);
+  const chooseIt = "Scegli il segno";
   return [
-    `<option value="">Scegli il segno</option>`,
+    `<option value="" data-lf-option="${esc(chooseIt)}">${esc(lf(chooseIt))}</option>`,
     ...ZODIAC_SIGNS.map(item =>
-      `<option value="${item.value}" ${item.value === current ? "selected" : ""}>${item.label}</option>`
+      `<option value="${item.value}" data-lf-option="${esc(item.label)}" ${item.value === current ? "selected" : ""}>${esc(lf(item.label))}</option>`
     )
   ].join("");
 }
@@ -119,23 +138,30 @@ function esc(value){
 }
 
 function personRowHtml(person, index){
+  const removeIt = "Rimuovi";
+  const nameIt = "Nome (facoltativo)";
+  const namePh = "Es. Marco";
+  const signIt = "Segno zodiacale";
   return `<div class="list-item-card horoscope-person-card" data-horoscope-id="${esc(person.id)}" data-horoscope-index="${index}">
     <div class="journey-step-top">
       <span class="journey-step-badge">${index + 1}</span>
-      <button type="button" class="ghost journey-remove" data-horoscope-remove="${esc(person.id)}" aria-label="Rimuovi persona">Rimuovi</button>
+      <button type="button" class="ghost journey-remove" data-horoscope-remove="${esc(person.id)}" aria-label="${esc(lf("Rimuovi persona"))}" data-lf="Rimuovi">${esc(lf(removeIt))}</button>
     </div>
-    <label>Nome (facoltativo)<input class="horoscope-person-field" data-horoscope-field="name" value="${esc(person.name || "")}" placeholder="Es. Marco" maxlength="48" autocomplete="off"></label>
-    <label>Segno zodiacale<select class="horoscope-person-field" data-horoscope-field="sign">${renderZodiacSignOptions(person.sign)}</select></label>
+    <label><span data-lf="${esc(nameIt)}">${esc(lf(nameIt))}</span><input class="horoscope-person-field" data-horoscope-field="name" value="${esc(person.name || "")}" placeholder="${esc(lf(namePh))}" data-lf-placeholder="${esc(namePh)}" maxlength="48" autocomplete="off"></label>
+    <label><span data-lf="${esc(signIt)}">${esc(lf(signIt))}</span><select class="horoscope-person-field" data-horoscope-field="sign">${renderZodiacSignOptions(person.sign)}</select></label>
   </div>`;
 }
 
 export function renderHoroscopePeoplePanel(section = {}){
   const people = horoscopePeopleForEditor(section);
+  const hintIt = "Fino a 5 persone (bundle). Ogni segno mostra l’oroscopo del giorno, aggiornato automaticamente.";
+  const peopleWord = "persone";
+  const addIt = "+ Aggiungi persona";
   return `<div class="list-items-panel horoscope-people-panel" data-horoscope-panel>
-    <p class="field-hint">Fino a <strong>${MAX_HOROSCOPE_PEOPLE} persone</strong> (bundle). Ogni segno mostra l’oroscopo <strong>del giorno</strong>, aggiornato automaticamente.</p>
+    <p class="field-hint" data-lf="${esc(hintIt)}">${esc(lf(hintIt))}</p>
     <div class="journey-steps-head">
-      <span class="journey-steps-count"><strong id="horoscopePeopleCount">${people.length}</strong> / ${MAX_HOROSCOPE_PEOPLE} persone</span>
-      <button type="button" class="primary journey-add-btn" data-horoscope-add>+ Aggiungi persona</button>
+      <span class="journey-steps-count"><strong id="horoscopePeopleCount">${people.length}</strong> / ${MAX_HOROSCOPE_PEOPLE} <span data-lf="${esc(peopleWord)}">${esc(lf(peopleWord))}</span></span>
+      <button type="button" class="primary journey-add-btn" data-horoscope-add data-lf="${esc(addIt)}">${esc(lf(addIt))}</button>
     </div>
     <div class="list-items-list journey-steps-list" id="horoscopePeopleList">${people.map(personRowHtml).join("")}</div>
     <input type="hidden" name="section_horoscope_people" value="${esc(serializeHoroscopePeople(people))}">
@@ -158,9 +184,11 @@ function renderPeopleList(formNode){
   const list = document.getElementById("horoscopePeopleList");
   if(!list || !formNode) return;
   const people = readPeopleHidden(formNode);
+  const emptyTitle = "Nessuna persona";
+  const emptyBody = "Aggiungi almeno un segno per mostrare l’oroscopo.";
   list.innerHTML = people.length
     ? people.map(personRowHtml).join("")
-    : `<div class="journey-empty"><p><strong>Nessuna persona</strong></p><p>Aggiungi almeno un segno per mostrare l’oroscopo.</p></div>`;
+    : `<div class="journey-empty"><p><strong data-lf="${esc(emptyTitle)}">${esc(lf(emptyTitle))}</strong></p><p data-lf="${esc(emptyBody)}">${esc(lf(emptyBody))}</p></div>`;
   writePeopleHidden(formNode, people);
 }
 
@@ -175,7 +203,7 @@ export function bindHoroscopePeopleEditor(formNode){
       event.stopPropagation();
       const people = readPeopleHidden(formNode);
       if(people.length >= MAX_HOROSCOPE_PEOPLE){
-        alert(`Massimo ${MAX_HOROSCOPE_PEOPLE} persone (bundle).`);
+        alert(lfFill("Massimo {n} persone (bundle).", { n: MAX_HOROSCOPE_PEOPLE }));
         return;
       }
       const next = [...people, normalizeHoroscopePerson()];
@@ -221,4 +249,21 @@ export function bindHoroscopePeopleEditor(formNode){
 export function refreshHoroscopePeopleEditor(formNode){
   if(!formNode?.querySelector?.("[data-horoscope-panel]")) return;
   renderPeopleList(formNode);
+  const panel = formNode.querySelector("[data-horoscope-panel]");
+  if(!panel) return;
+  panel.querySelectorAll("[data-lf]").forEach(el=>{
+    const src = el.getAttribute("data-lf");
+    if(src == null) return;
+    el.textContent = lf(src);
+  });
+  panel.querySelectorAll("[data-lf-placeholder]").forEach(el=>{
+    const src = el.getAttribute("data-lf-placeholder");
+    if(src == null) return;
+    el.setAttribute("placeholder", lf(src));
+  });
+  panel.querySelectorAll("[data-lf-option]").forEach(el=>{
+    const src = el.getAttribute("data-lf-option");
+    if(src == null) return;
+    el.textContent = lf(src);
+  });
 }

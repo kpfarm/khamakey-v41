@@ -8,7 +8,7 @@ import {
   normalizeHoroscopePeople,
   parseHoroscopePeople,
   normalizeZodiacSign
-} from "./moment-horoscope.js?v=186";
+} from "./moment-horoscope.js?v=218";
 
 /**
  * Sezioni escluse dal prodotto (non in menu editor, non in anteprima/pubblico).

@@ -361,3 +361,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-23 | Cursor | **Regola assoluta catena NFC→editor→/m//k/** in CODEX-COLLAB + docs/30 §0 |
 | 2026-07-23 | Cursor | **Regola assoluta upload media (cuore)** CODEX-COLLAB §5 + docs/30 N5 |
 | 2026-07-23 | Cursor | **Moments v217 / A1a**: 4 toggle RSVP label+hint EN; STOP per smoke utente |
+| 2026-07-26 | Cursor | **Moments v218 + Worker v185**: oroscopo editor+`/m/` IT\|EN (fix hardcode IT) |

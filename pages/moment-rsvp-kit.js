@@ -37,9 +37,10 @@ const RSVP_INVITE_EMOJI = {
   default:"📲"
 };
 
-import { rsvpGuestPreviewLines, readRsvpFieldsFromForm } from "./moment-rsvp-fields.js?v=217";
+import { rsvpGuestPreviewLines, readRsvpFieldsFromForm } from "./moment-rsvp-fields.js?v=220";
 import { renderRsvpResponsesShell } from "./moment-rsvp-responses.js";
-import { getUiLocale } from "./moments-i18n.js?v=216";
+import { getUiLocale } from "./moments-i18n.js?v=220";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=220";
 
 let lastShareCtx = null;
 
@@ -47,8 +48,41 @@ function esc(value){
   return String(value ?? "").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 }
 
+function lf(text){
+  const raw = String(text || "");
+  if(!raw || getUiLocale() === "it") return raw;
+  return FIELD_PHRASE_EN[raw] || raw;
+}
+
+function lfFill(it, vars = {}){
+  let out = lf(it);
+  for(const [key, value] of Object.entries(vars)){
+    out = out.split(`{${key}}`).join(String(value ?? ""));
+  }
+  return out;
+}
+
+function lfSpan(itText){
+  const it = String(itText || "");
+  return `<span data-lf="${esc(it)}">${esc(lf(it))}</span>`;
+}
+
 function inviteLocale(){
   return getUiLocale() === "en" ? "en" : "it";
+}
+
+function syncShareChromeI18n(root){
+  if(!root) return;
+  root.querySelectorAll("[data-lf]").forEach(el=>{
+    const src = el.getAttribute("data-lf");
+    if(src == null) return;
+    el.textContent = lf(src);
+  });
+  root.querySelectorAll("[data-lf-placeholder]").forEach(el=>{
+    const src = el.getAttribute("data-lf-placeholder");
+    if(src == null) return;
+    el.setAttribute("placeholder", lf(src));
+  });
 }
 
 function inviteHook(type){
@@ -87,6 +121,24 @@ export function rsvpGuestPreviewMessage(section = {}){
   return rsvpGuestPreviewLines(section);
 }
 
+function rsvpAdminSummaryHtml({ eventName = "", pageTitle = "", fieldKeys = [], customCount = 0 } = {}){
+  const label = eventName || pageTitle || lf("evento");
+  const tipIt = "Consiglio: crea un'etichetta o chat «RSVP · {label}» per tenere tutto in ordine.";
+  const tip = lfFill(tipIt, { label });
+  let moduleLine = lf("Modulo attivo: nome, presenza");
+  if(fieldKeys.length) moduleLine += lfFill(", {n} voce/i extra", { n: fieldKeys.length });
+  if(customCount) moduleLine += lfFill(", {n} voce/i personalizzata/e", { n: customCount });
+  const waIt = "Le risposte arrivano sul tuo WhatsApp e vengono salvate anche nel riepilogo sotto.";
+  const previewHint = "Anteprima messaggio che riceverai:";
+  return `<summary data-lf="Riepilogo organizzatore">${esc(lf("Riepilogo organizzatore"))}</summary>
+      <ul class="rsvp-admin-list" id="rsvpAdminList">
+        <li data-lf="${esc(waIt)}">${esc(lf(waIt))}</li>
+        <li data-rsvp-admin-tip data-lf-template="${esc(tipIt)}" data-lf-label="${esc(label)}">${esc(tip)}</li>
+        <li data-rsvp-admin-module>${esc(moduleLine)}</li>
+      </ul>
+      <p class="field-hint" data-lf="${esc(previewHint)}">${esc(lf(previewHint))}</p>`;
+}
+
 export function renderRsvpSharePanel({ publicUrl, momentType, section = {}, pageTitle = "", published = true } = {}){
   const inviteUrl = rsvpSectionUrl(publicUrl);
   const eventName = String(section.event_name || pageTitle || "").trim();
@@ -94,32 +146,33 @@ export function renderRsvpSharePanel({ publicUrl, momentType, section = {}, page
   const guestPreview = rsvpGuestPreviewLines({ ...section, event_name:eventName });
   const fieldKeys = Array.isArray(section.field_keys) ? section.field_keys : [];
   const customCount = Array.isArray(section.custom_fields) ? section.custom_fields.length : 0;
+  const warnIt = "⚠️ La pagina è in bozza: pubblicala prima di inviare il link agli invitati.";
   const publishHint = published
     ? ""
-    : `<p class="rsvp-share-warn">⚠️ La pagina è in bozza: pubblicala prima di inviare il link agli invitati.</p>`;
+    : `<p class="rsvp-share-warn" data-lf="${esc(warnIt)}">${esc(lf(warnIt))}</p>`;
+  const titleIt = "Condividi con gli invitati";
+  const linkIt = "Link invito RSVP";
+  const copyIt = "Copia";
+  const linkHint = "Il link apre la pagina direttamente sulla sezione RSVP.";
+  const shareIt = "Condividi invito";
+  const copyMsgIt = "Copia messaggio";
   return `<div class="editor-card smart-card rsvp-share-panel" id="rsvpSharePanel" data-rsvp-share>
-    <p class="ecard-title"><span class="step-badge">3</span> Condividi con gli invitati</p>
+    <p class="ecard-title"><span class="step-badge">3</span> ${lfSpan(titleIt)}</p>
     ${publishHint}
-    <label>Link invito RSVP
+    <label>${lfSpan(linkIt)}
       <div class="rsvp-link-row">
-        <input type="text" readonly value="${esc(inviteUrl)}" id="rsvpInviteLinkInput" aria-label="Link invito RSVP">
-        <button type="button" class="ghost" id="rsvpCopyInviteBtn">Copia</button>
+        <input type="text" readonly value="${esc(inviteUrl)}" id="rsvpInviteLinkInput" aria-label="${esc(lf(linkIt))}">
+        <button type="button" class="ghost" id="rsvpCopyInviteBtn" data-lf="${esc(copyIt)}">${esc(lf(copyIt))}</button>
       </div>
     </label>
-    <p class="field-hint">Il link apre la pagina direttamente sulla sezione RSVP.</p>
+    <p class="field-hint" data-lf="${esc(linkHint)}">${esc(lf(linkHint))}</p>
     <div class="rsvp-share-actions">
-      <button type="button" class="primary" id="rsvpShareInviteBtn">Condividi invito</button>
-      <button type="button" class="ghost" id="rsvpCopyInviteTextBtn">Copia messaggio</button>
+      <button type="button" class="primary" id="rsvpShareInviteBtn" data-lf="${esc(shareIt)}">${esc(lf(shareIt))}</button>
+      <button type="button" class="ghost" id="rsvpCopyInviteTextBtn" data-lf="${esc(copyMsgIt)}">${esc(lf(copyMsgIt))}</button>
     </div>
     <textarea hidden id="rsvpInviteTextStore">${esc(inviteText)}</textarea>
-    <details class="rsvp-admin-summary">
-      <summary>Riepilogo organizzatore</summary>
-      <ul class="rsvp-admin-list">
-        <li>Le risposte arrivano sul tuo <strong>WhatsApp</strong> e vengono salvate anche nel riepilogo sotto.</li>
-        <li>Consiglio: crea un'etichetta o chat «RSVP · ${esc(eventName || pageTitle || "evento")}» per tenere tutto in ordine.</li>
-        <li>Modulo attivo: nome, presenza${fieldKeys.length ? `, ${fieldKeys.length} voce/i extra` : ""}${customCount ? `, ${customCount} voce/i personalizzata/e` : ""}.</li>
-      </ul>
-      <p class="field-hint">Anteprima messaggio che riceverai:</p>
+    <details class="rsvp-admin-summary" id="rsvpAdminSummary">
+      ${rsvpAdminSummaryHtml({ eventName, pageTitle, fieldKeys, customCount })}
       <pre class="rsvp-preview-msg" id="rsvpGuestPreview">${esc(guestPreview)}</pre>
     </details>
     ${renderRsvpResponsesShell()}
@@ -131,7 +184,7 @@ export function syncRsvpSharePanel(formNode, { publicUrl, momentType, pageTitle,
   if(!panel || !formNode) return;
   const form = new FormData(formNode);
   const eventName = String(form.get("section_rsvp_event_name") || pageTitle || "").trim();
-  const extra = readRsvpFieldsFromForm(form);
+  const extra = readRsvpFieldsFromForm(form, formNode);
   const inviteUrl = rsvpSectionUrl(publicUrl);
   const linkInput = panel.querySelector("#rsvpInviteLinkInput");
   const textStore = panel.querySelector("#rsvpInviteTextStore");
@@ -142,6 +195,25 @@ export function syncRsvpSharePanel(formNode, { publicUrl, momentType, pageTitle,
   }
   if(preview){
     preview.textContent = rsvpGuestPreviewLines({ ...extra, event_name:eventName });
+  }
+  const fieldKeys = Array.isArray(extra.field_keys) ? extra.field_keys : [];
+  const customCount = Array.isArray(extra.custom_fields) ? extra.custom_fields.length : 0;
+  const label = eventName || pageTitle || lf("evento");
+  const warn = panel.querySelector(".rsvp-share-warn");
+  if(warn) warn.hidden = Boolean(published);
+  syncShareChromeI18n(panel);
+  const tip = panel.querySelector("[data-rsvp-admin-tip]");
+  if(tip){
+    const tipTpl = tip.getAttribute("data-lf-template") || "Consiglio: crea un'etichetta o chat «RSVP · {label}» per tenere tutto in ordine.";
+    tip.setAttribute("data-lf-label", label);
+    tip.textContent = lfFill(tipTpl, { label });
+  }
+  const moduleEl = panel.querySelector("[data-rsvp-admin-module]");
+  if(moduleEl){
+    let moduleLine = lf("Modulo attivo: nome, presenza");
+    if(fieldKeys.length) moduleLine += lfFill(", {n} voce/i extra", { n: fieldKeys.length });
+    if(customCount) moduleLine += lfFill(", {n} voce/i personalizzata/e", { n: customCount });
+    moduleEl.textContent = moduleLine;
   }
 }
 

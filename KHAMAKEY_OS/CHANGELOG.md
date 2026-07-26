@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v220 — RSVP i18n A1b+A2 (2026-07-26, Cursor)** — Pages
+  - Custom fields, «Cosa chiedere», share panel (Copia/Condividi/riepilogo) IT|EN via `data-lf`.
+  - `refreshRsvpShareLocale` aggiorna chrome + anteprima; read/save/normalize/WA invariati.
 - **Moments v219 + Worker v186 — storage reale + Overview i18n (2026-07-26, Cursor)** — Pages + Worker + SQL v168
   - Contatore piano: sync assoluto da R2 (`/api/media/usage-sync` + dopo upload/delete); card si aggiorna in Overview.
   - Overview: Piano Moments / hint / dashboard (Copia, Apri, Pubblicata…) IT|EN; plurali limiti EN ripuliti.

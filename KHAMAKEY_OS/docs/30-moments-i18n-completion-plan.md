@@ -294,9 +294,9 @@ Dopo:
 |-------|--------|----------|
 | Baseline (1–11e6e, WA, fix toggle, account locale) | Fatto | v216 / W v184 |
 | **A1a** RSVP 4 toggle label/hint | Fatto | v217 |
-| **A1b** RSVP custom fields chrome | Pending | v218 |
-| **A2a** RSVP share chrome statico | Pending | v219 |
-| **A2b** RSVP share refresh toggle | Pending | v220 |
+| **A1b** RSVP custom fields + step 2 chrome | Fatto | v220 |
+| **A2a** RSVP share chrome statico | Fatto | v220 |
+| **A2b** RSVP share refresh toggle | Fatto (in `refreshRsvpShareLocale`) | v220 |
 | **B1** Oroscopo editor + public locale | Fatto | v218 / W v185 |
 | **B2+B4** Dashboard + card piano Overview | Fatto (+ storage reale W v186) | v219 / W v186 |
 | **B3** Wizard | Pending | — |

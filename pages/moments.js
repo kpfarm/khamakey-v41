@@ -18,7 +18,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=216";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=219";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=220";
 import {
   uploadImage,
   uploadVideo,
@@ -150,10 +150,10 @@ import {
   sectionFillGuideForType,
   primarySectionsForType
 } from "./moment-editor-kit.js?v=186";
-import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=216";
+import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=220";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
 import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=219";
-import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=217";
+import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=220";
 import {
   renderHoroscopePeoplePanel,
   bindHoroscopePeopleEditor,

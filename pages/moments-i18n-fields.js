@@ -441,5 +441,33 @@ export const FIELD_PHRASE_EN = {
   "La lettera al futuro è aperta oggi": "The letter to the future is open today",
   "sì": "yes",
   "messaggi": "messages",
-  "da approvare": "to approve"
+  "da approvare": "to approve",
+
+  // A1b — RSVP custom fields + step 2 chrome
+  "Cosa chiedere": "What to ask",
+  "Nome e presenza sono sempre inclusi. Attiva le voci che vuoi nel modulo invitati.": "Name and attendance are always included. Turn on the fields you want in the guest form.",
+  "Voce personalizzata": "Custom field",
+  "Suggerimento": "Hint",
+  "Es. Menu scelto": "e.g. Chosen menu",
+  "Es. Carne / Pesce / Veg": "e.g. Meat / Fish / Veg",
+  "+ Aggiungi voce personalizzata": "+ Add custom field",
+  "Nome evento nel messaggio": "Event name in the message",
+  "Es. Matrimonio Marco & Giulia": "e.g. Marco & Giulia’s wedding",
+  "Compare in evidenza sopra il modulo e nel messaggio WhatsApp.": "Shown above the form and in the WhatsApp message.",
+
+  // A2a — RSVP share panel chrome
+  "Condividi con gli invitati": "Share with guests",
+  "⚠️ La pagina è in bozza: pubblicala prima di inviare il link agli invitati.": "⚠️ The page is a draft: publish it before sending the link to guests.",
+  "Link invito RSVP": "RSVP invite link",
+  "Il link apre la pagina direttamente sulla sezione RSVP.": "The link opens the page straight on the RSVP section.",
+  "Condividi invito": "Share invite",
+  "Copia messaggio": "Copy message",
+  "Riepilogo organizzatore": "Organiser summary",
+  "Le risposte arrivano sul tuo WhatsApp e vengono salvate anche nel riepilogo sotto.": "Replies arrive on your WhatsApp and are also saved in the summary below.",
+  "Consiglio: crea un'etichetta o chat «RSVP · {label}» per tenere tutto in ordine.": "Tip: create a label or chat “RSVP · {label}” to keep everything tidy.",
+  "Modulo attivo: nome, presenza": "Active form: name, attendance",
+  ", {n} voce/i extra": ", {n} extra field(s)",
+  ", {n} voce/i personalizzata/e": ", {n} custom field(s)",
+  "Anteprima messaggio che riceverai:": "Preview of the message you’ll receive:",
+  "evento": "event"
 };

@@ -1,5 +1,5 @@
-import { getUiLocale } from "./moments-i18n.js?v=217";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=217";
+import { getUiLocale } from "./moments-i18n.js?v=220";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=220";
 
 export const RSVP_OPTIONAL_FIELDS = {
   guests:{ label:"Quanti siete?", type:"number", waLabel:"👥 Ospiti", waLabelEn:"👥 Guests", placeholder:"1", hint:"Numero di persone" },
@@ -46,6 +46,24 @@ function esc(value){
   return String(value ?? "").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 }
 
+function lfSpan(itText){
+  const it = String(itText || "");
+  return `<span data-lf="${esc(it)}">${esc(lf(it))}</span>`;
+}
+
+function customRowHtml(index, field = {}){
+  const voiceIt = "Voce personalizzata";
+  const hintIt = "Suggerimento";
+  const removeIt = "Rimuovi";
+  const phLabel = "Es. Menu scelto";
+  const phHint = "Es. Carne / Pesce / Veg";
+  return `<div class="rsvp-custom-row" data-rsvp-custom-row="${index}">
+      <label>${lfSpan(voiceIt)}<input name="section_rsvp_custom_label_${index}" value="${esc(field.label || "")}" placeholder="${esc(lf(phLabel))}" data-lf-placeholder="${esc(phLabel)}"></label>
+      <label>${lfSpan(hintIt)}<input name="section_rsvp_custom_placeholder_${index}" value="${esc(field.placeholder || "")}" placeholder="${esc(lf(phHint))}" data-lf-placeholder="${esc(phHint)}"></label>
+      <button type="button" class="ghost rsvp-custom-remove" data-rsvp-custom-remove="${index}" data-lf="${esc(removeIt)}">${esc(lf(removeIt))}</button>
+    </div>`;
+}
+
 export function renderRsvpFieldsEditor(section = {}){
   const safe = normalizeRsvpSection(section);
   const toggles = Object.entries(RSVP_OPTIONAL_FIELDS).map(([key, spec])=>{
@@ -55,22 +73,23 @@ export function renderRsvpFieldsEditor(section = {}){
       <span><strong data-lf="${esc(spec.label)}">${esc(lf(spec.label))}</strong><small data-lf="${esc(spec.hint)}">${esc(lf(spec.hint))}</small></span>
     </label>`;
   }).join("");
-  const customRows = safe.custom_fields.map((field,index)=>`
-    <div class="rsvp-custom-row" data-rsvp-custom-row="${index}">
-      <label>Voce personalizzata<input name="section_rsvp_custom_label_${index}" value="${esc(field.label)}" placeholder="Es. Menu scelto"></label>
-      <label>Suggerimento<input name="section_rsvp_custom_placeholder_${index}" value="${esc(field.placeholder)}" placeholder="Es. Carne / Pesce / Veg"></label>
-      <button type="button" class="ghost rsvp-custom-remove" data-rsvp-custom-remove="${index}">Rimuovi</button>
-    </div>`).join("");
-  return `<div class="editor-card smart-card">
-    <p class="ecard-title"><span class="step-badge">2</span> Cosa chiedere</p>
-    <p class="field-hint">Nome e presenza sono sempre inclusi. Attiva le voci che vuoi nel modulo invitati.</p>
+  const customRows = safe.custom_fields.map((field,index)=>customRowHtml(index, field)).join("");
+  const titleIt = "Cosa chiedere";
+  const introIt = "Nome e presenza sono sempre inclusi. Attiva le voci che vuoi nel modulo invitati.";
+  const addIt = "+ Aggiungi voce personalizzata";
+  const eventIt = "Nome evento nel messaggio";
+  const eventPh = "Es. Matrimonio Marco & Giulia";
+  const eventHint = "Compare in evidenza sopra il modulo e nel messaggio WhatsApp.";
+  return `<div class="editor-card smart-card" data-rsvp-fields-card>
+    <p class="ecard-title"><span class="step-badge">2</span> ${lfSpan(titleIt)}</p>
+    <p class="field-hint" data-lf="${esc(introIt)}">${esc(lf(introIt))}</p>
     <div class="rsvp-field-toggles">${toggles}</div>
     <div class="rsvp-custom-fields" id="rsvpCustomFieldsList">${customRows}</div>
-    <button type="button" class="ghost rsvp-add-field" id="rsvpAddCustomField">+ Aggiungi voce personalizzata</button>
+    <button type="button" class="ghost rsvp-add-field" id="rsvpAddCustomField" data-lf="${esc(addIt)}">${esc(lf(addIt))}</button>
     <input type="hidden" name="section_rsvp_custom_count" id="rsvpCustomCount" value="${safe.custom_fields.length}">
-    <label class="rsvp-event-label">Nome evento nel messaggio
-      <input class="rsvp-event-input" name="section_rsvp_event_name" value="${esc(safe.event_name || "")}" placeholder="Es. Matrimonio Marco & Giulia">
-      <span class="field-hint">Compare in evidenza sopra il modulo e nel messaggio WhatsApp.</span>
+    <label class="rsvp-event-label">${lfSpan(eventIt)}
+      <input class="rsvp-event-input" name="section_rsvp_event_name" value="${esc(safe.event_name || "")}" placeholder="${esc(lf(eventPh))}" data-lf-placeholder="${esc(eventPh)}">
+      <span class="field-hint" data-lf="${esc(eventHint)}">${esc(lf(eventHint))}</span>
     </label>
   </div>`;
 }
@@ -120,12 +139,7 @@ export function bindRsvpFieldsEditor(formNode, onChange){
   formNode.querySelector("#rsvpAddCustomField")?.addEventListener("click",()=>{
     const count = Number(countInput?.value || 0);
     if(count >= 8) return;
-    list?.insertAdjacentHTML("beforeend",`
-      <div class="rsvp-custom-row" data-rsvp-custom-row="${count}">
-        <label>Voce personalizzata<input name="section_rsvp_custom_label_${count}" placeholder="Es. Menu scelto"></label>
-        <label>Suggerimento<input name="section_rsvp_custom_placeholder_${count}" placeholder="Es. Carne / Pesce / Veg"></label>
-        <button type="button" class="ghost rsvp-custom-remove" data-rsvp-custom-remove="${count}">Rimuovi</button>
-      </div>`);
+    list?.insertAdjacentHTML("beforeend", customRowHtml(count));
     if(countInput) countInput.value = String(count + 1);
     rerender();
   });

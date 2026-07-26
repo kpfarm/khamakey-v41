@@ -168,10 +168,13 @@ export const AUTH_MESSAGES_IT = {
   "activate.code.ph": "Es. M7K2-9XPL-H3WN",
 
   "plan.menu_name": "Moments Free",
+  "plan.eyebrow": "Piano Moments",
+  "plan.hint.free": "Limiti del piano Free incluso con il tuo oggetto NFC. I piani a pagamento arriveranno più avanti.",
+  "plan.hint.active": "Limiti attivi per questo Moment.",
   "plan.limit.storage": "Spazio totale {n} MB",
   "plan.limit.gallery": "Fino a {n} foto in galleria",
-  "plan.limit.video": "Fino a {n} video",
-  "plan.limit.audio": "Fino a {n} brano audio",
+  "plan.limit.video": "Video: fino a {n}",
+  "plan.limit.audio": "Audio: fino a {n}",
   "plan.limit.letter": "Lettera al futuro: {images} foto · {videos} video · {audio} audio · {pdfs} PDF",
   "plan.limit.files": "File max: foto {img} MB · video {vid} MB"
 };
@@ -344,10 +347,13 @@ export const AUTH_MESSAGES_EN = {
   "activate.code.ph": "e.g. M7K2-9XPL-H3WN",
 
   "plan.menu_name": "Moments Free",
+  "plan.eyebrow": "Moments plan",
+  "plan.hint.free": "Limits of the Free plan included with your NFC piece. Paid plans will arrive later.",
+  "plan.hint.active": "Active limits for this Moment.",
   "plan.limit.storage": "Total space {n} MB",
   "plan.limit.gallery": "Up to {n} gallery photos",
-  "plan.limit.video": "Up to {n} videos",
-  "plan.limit.audio": "Up to {n} audio tracks",
-  "plan.limit.letter": "Letter to the future: {images} photos · {videos} videos · {audio} audio · {pdfs} PDFs",
+  "plan.limit.video": "Video: up to {n}",
+  "plan.limit.audio": "Audio: up to {n}",
+  "plan.limit.letter": "Letter to the future: {images} photos · {videos} video · {audio} audio · {pdfs} PDF",
   "plan.limit.files": "Max file size: photos {img} MB · video {vid} MB"
 };

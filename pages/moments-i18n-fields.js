@@ -419,5 +419,27 @@ export const FIELD_PHRASE_EN = {
   "Sagittario": "Sagittarius",
   "Capricorno": "Capricorn",
   "Acquario": "Aquarius",
-  "Pesci": "Pisces"
+  "Pesci": "Pisces",
+
+  // B2 — Overview dashboard chrome
+  "📊 Il tuo evento a colpo d'occhio": "📊 Your event at a glance",
+  "Pubblicata": "Published",
+  "Bozza": "Draft",
+  "Apri": "Open",
+  "Link pagina pubblica": "Public page link",
+  "Caricamento dati…": "Loading data…",
+  "Attiva RSVP o libro ospiti per vedere le statistiche.": "Turn on RSVP or the guestbook to see stats.",
+  "Pubblica la pagina quando sei pronto": "Publish the page when you’re ready",
+  "Pagina pubblicata — condividi il link": "Page published — share the link",
+  "RSVP attivo con WhatsApp": "RSVP on with WhatsApp",
+  "RSVP: aggiungi numero WhatsApp": "RSVP: add a WhatsApp number",
+  "{n} risposta/e RSVP registrata/e": "{n} RSVP response(s) recorded",
+  "{n} messaggio/i da approvare": "{n} message(s) to approve",
+  "Libro ospiti aggiornato": "Guestbook up to date",
+  "Lettera al futuro: controlla la data di apertura": "Letter to the future: check the unlock date",
+  "Lettera si apre tra {n} giorno/i ({date})": "Letter opens in {n} day(s) ({date})",
+  "La lettera al futuro è aperta oggi": "The letter to the future is open today",
+  "sì": "yes",
+  "messaggi": "messages",
+  "da approvare": "to approve"
 };

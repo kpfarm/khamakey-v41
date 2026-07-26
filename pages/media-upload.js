@@ -10,6 +10,7 @@ export const MAX_GALLERY_IMAGES = 24;
 
 const UPLOAD_URL = `${WORKER_BASE_URL}/api/media/upload`;
 const DELETE_URL = `${WORKER_BASE_URL}/api/media/delete`;
+const USAGE_SYNC_URL = `${WORKER_BASE_URL}/api/media/usage-sync`;
 const UPLOAD_CONCURRENCY = 3;
 const SKIP_COMPRESS_MAX_BYTES = 520_000;
 const GALLERY_IMAGE_MAX_SIDE = 1600;
@@ -482,4 +483,28 @@ export async function deleteStorageObject(supabase,url){
   if(!response.ok){
     throw new Error(payload.error || payload.message || "Eliminazione file non riuscita.");
   }
+  return payload;
+}
+
+/** Ricalcola bytes usati da R2 (Worker) e aggiorna moment_media_usage. */
+export async function syncMomentMediaUsage(supabase, eventId){
+  const id = String(eventId || "").trim();
+  if(!id) return { bytes_used: 0, file_count: 0 };
+  const session = await ensureAuthSession(supabase);
+  const response = await fetch(USAGE_SYNC_URL,{
+    method:"POST",
+    headers:{
+      Authorization:`Bearer ${session.access_token}`,
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({ scope:"moments", scopeId:id })
+  });
+  const payload = await response.json().catch(()=>({}));
+  if(!response.ok){
+    throw new Error(payload.error || payload.message || "Sync storage non riuscito.");
+  }
+  return {
+    bytes_used: Number(payload.bytes_used) || 0,
+    file_count: Number(payload.file_count) || 0
+  };
 }

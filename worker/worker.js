@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v185-horoscope-i18n";
+const WORKER_VERSION = "v186-storage-usage-sync";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -296,6 +296,9 @@ export default {
       }
       if (url.pathname === "/api/media/delete" && request.method === "POST") {
         return handleMediaDelete(request, env);
+      }
+      if (url.pathname === "/api/media/usage-sync" && request.method === "POST") {
+        return handleMediaUsageSync(request, env);
       }
       if (url.pathname === "/api/moment/preview" && request.method === "POST") {
         return handleMomentPreview(request, env);
@@ -869,6 +872,60 @@ async function rpcAsUser(env, jwt, name, body) {
   return text ? JSON.parse(text) : null;
 }
 
+/** Somma reale dei file R2 sotto moments/<eventId>/ (source of truth storage). */
+async function sumMomentsR2Usage(env, scopeId) {
+  const id = String(scopeId || "").trim();
+  if (!id || !env.MEDIA) return { bytes_used: 0, file_count: 0 };
+  const prefix = `moments/${id}/`;
+  let cursor;
+  let truncated = true;
+  let bytes = 0;
+  let files = 0;
+  while (truncated) {
+    const listed = await env.MEDIA.list({ prefix, cursor, limit: 1000 });
+    for (const obj of listed.objects || []) {
+      bytes += Number(obj.size) || 0;
+      files += 1;
+    }
+    truncated = Boolean(listed.truncated);
+    cursor = listed.cursor;
+  }
+  return { bytes_used: bytes, file_count: files };
+}
+
+async function syncMomentMediaUsageFromR2(env, jwt, scopeId) {
+  const usage = await sumMomentsR2Usage(env, scopeId);
+  try {
+    await rpcAsUser(env, jwt, "set_moment_media_usage", {
+      p_event_id: scopeId,
+      p_bytes_used: usage.bytes_used,
+      p_file_count: usage.file_count
+    });
+  } catch (error) {
+    console.error("set_moment_media_usage", error);
+  }
+  return usage;
+}
+
+async function handleMediaUsageSync(request, env) {
+  if (!env.MEDIA) return cors(json({ error: "Storage Cloudflare non configurato (R2)." }, 503));
+  const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  if (!jwt) return cors(json({ error: "Accesso non autorizzato." }, 401));
+  const user = await supabaseUser(env, jwt);
+  if (!user?.email) return cors(json({ error: "Sessione non valida." }, 401));
+  const body = await request.json().catch(() => ({}));
+  const scope = String(body.scope || "moments").trim().toLowerCase();
+  const scopeId = String(body.scopeId || body.event_id || "").trim();
+  if (scope !== "moments" || !scopeId) {
+    return cors(json({ error: "scopeId Moments obbligatorio." }, 400));
+  }
+  if (!await verifyMediaScope(env, jwt, scope, scopeId)) {
+    return cors(json({ error: "Non puoi sincronizzare lo storage di questa pagina." }, 403));
+  }
+  const usage = await syncMomentMediaUsageFromR2(env, jwt, scopeId);
+  return cors(json({ ok: true, ...usage }));
+}
+
 function momentsPlanFileLimitBytes(limits, kind) {
   const src = limits && typeof limits === "object" ? limits : DEFAULT_MOMENTS_PLAN_LIMITS;
   const mbKey = kind === "image" ? "max_image_mb"
@@ -1006,21 +1063,35 @@ async function handleMediaUpload(request, env) {
       customMetadata: { scope, scopeId, kind, uploader: user.email, bytes: String(file.size) }
     });
 
+    let usage = null;
     if (scope === "moments") {
       try {
-        await rpcAsUser(env, jwt, "record_moment_media_bytes", {
-          p_event_id: scopeId,
-          p_delta_bytes: file.size,
-          p_delta_files: 1
-        });
+        usage = await syncMomentMediaUsageFromR2(env, jwt, scopeId);
       } catch (usageError) {
-        console.error("handleMediaUpload usage", usageError);
+        console.error("handleMediaUpload usage sync", usageError);
+        try {
+          await rpcAsUser(env, jwt, "record_moment_media_bytes", {
+            p_event_id: scopeId,
+            p_delta_bytes: file.size,
+            p_delta_files: 1
+          });
+        } catch (deltaError) {
+          console.error("handleMediaUpload usage delta", deltaError);
+        }
       }
     }
 
     const origin = new URL(request.url).origin;
     const url = `${origin}/cdn/${key}`;
-    return cors(json({ ok: true, url, type: kind, key, bytes: file.size }));
+    return cors(json({
+      ok: true,
+      url,
+      type: kind,
+      key,
+      bytes: file.size,
+      bytes_used: usage?.bytes_used,
+      file_count: usage?.file_count
+    }));
   } catch (error) {
     console.error("handleMediaUpload", error);
     return cors(json({ error: "Upload non riuscito. Riprova tra poco." }, 500));
@@ -1065,19 +1136,32 @@ async function handleMediaDelete(request, env) {
 
   await env.MEDIA.delete(key);
 
-  if (scope === "moments" && scopeId && deletedBytes > 0) {
+  let usage = null;
+  if (scope === "moments" && scopeId) {
     try {
-      await rpcAsUser(env, jwt, "record_moment_media_bytes", {
-        p_event_id: scopeId,
-        p_delta_bytes: -deletedBytes,
-        p_delta_files: -1
-      });
+      usage = await syncMomentMediaUsageFromR2(env, jwt, scopeId);
     } catch (usageError) {
-      console.error("handleMediaDelete usage", usageError);
+      console.error("handleMediaDelete usage sync", usageError);
+      if (deletedBytes > 0) {
+        try {
+          await rpcAsUser(env, jwt, "record_moment_media_bytes", {
+            p_event_id: scopeId,
+            p_delta_bytes: -deletedBytes,
+            p_delta_files: -1
+          });
+        } catch (deltaError) {
+          console.error("handleMediaDelete usage delta", deltaError);
+        }
+      }
     }
   }
 
-  return cors(json({ ok: true, bytes_removed: deletedBytes }));
+  return cors(json({
+    ok: true,
+    bytes_removed: deletedBytes,
+    bytes_used: usage?.bytes_used,
+    file_count: usage?.file_count
+  }));
 }
 
 async function handleMomentPreview(request, env) {

@@ -297,8 +297,9 @@ Dopo:
 | **A1b** RSVP custom fields chrome | Pending | v218 |
 | **A2a** RSVP share chrome statico | Pending | v219 |
 | **A2b** RSVP share refresh toggle | Pending | v220 |
-| **B1** Oroscopo editor + public locale | Fatto (anticipo: bug “sempre IT”) | v218 / W v185 |
-| **B2–B4** | Pending | — |
+| **B1** Oroscopo editor + public locale | Fatto | v218 / W v185 |
+| **B2+B4** Dashboard + card piano Overview | Fatto (+ storage reale W v186) | v219 / W v186 |
+| **B3** Wizard | Pending | — |
 | **C1** Worker media residuali | Pending | — |
 | **C2** Guestbook toasts | **Skip** (prodotto off) | — |
 | **D*** | Opzionale / fuori | — |

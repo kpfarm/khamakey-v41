@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v219 + Worker v186 — storage reale + Overview i18n (2026-07-26, Cursor)** — Pages + Worker + SQL v168
+  - Contatore piano: sync assoluto da R2 (`/api/media/usage-sync` + dopo upload/delete); card si aggiorna in Overview.
+  - Overview: Piano Moments / hint / dashboard (Copia, Apri, Pubblicata…) IT|EN; plurali limiti EN ripuliti.
+  - Upload/NFC/handlers media invariati nel flusso file; solo conteggio e chrome.
 - **Moments v218 + Worker v185 — oroscopo IT|EN (2026-07-26, Cursor)** — Pages + Worker
   - Editor B1: segni, label, Aggiungi/Rimuovi, empty → `data-lf` + refresh al toggle lingua.
   - Worker: `loadHoroscopeReadings` usa locale (prima hardcode `"it"`); chrome `/m/` via `mt()`; EN senza distill “giornale” IT.

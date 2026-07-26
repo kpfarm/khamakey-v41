@@ -13,12 +13,12 @@ import {
   t,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=216";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=216";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=219";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=216";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=216";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=218";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=219";
 import {
   uploadImage,
   uploadVideo,
@@ -27,6 +27,7 @@ import {
   validateImageFile,
   validateVideoFile,
   deleteStorageObject,
+  syncMomentMediaUsage,
   isCloudflareMediaUrl,
   inferMediaKind,
   fileMatchesGalleryType,
@@ -34,7 +35,7 @@ import {
   warmUploadPipeline,
   warmUploadAuth,
   MAX_GALLERY_IMAGES
-} from "./media-upload.js?v=173";
+} from "./media-upload.js?v=219";
 import {
   readGalleryMedia,
   writeGalleryMedia,
@@ -151,7 +152,7 @@ import {
 } from "./moment-editor-kit.js?v=186";
 import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=216";
 import { bindRsvpResponsesPanel } from "./moment-rsvp-responses.js";
-import { renderMomentDashboardShell, bindMomentDashboard } from "./moment-editor-dashboard.js";
+import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=219";
 import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=217";
 import {
   renderHoroscopePeoplePanel,
@@ -1407,15 +1408,15 @@ function renderPlanStorageCard(entitlements = currentEntitlements){
   const maxBytes = storageBytesLimit(ent.limits);
   const planLabel = PLAN_LABELS[ent.plan_key] || ent.plan_name || "Free";
   const planHint = ent.plan_key === "moments_free"
-    ? "Limiti del piano Free incluso con il tuo oggetto NFC. I piani a pagamento arriveranno più avanti."
-    : "Limiti attivi per questo Moment.";
+    ? t("plan.hint.free")
+    : t("plan.hint.active");
   return `<div class="plan-storage-card" id="momentPlanStorageCard" data-plan-key="${esc(ent.plan_key)}">
     <div class="plan-storage-head">
       <div>
-        <p class="eyebrow">Piano Moments</p>
+        <p class="eyebrow">${esc(t("plan.eyebrow"))}</p>
         <strong>${esc(planLabel)}</strong>
       </div>
-      <span class="plan-storage-usage">${esc(formatBytes(ent.bytes_used))} / ${esc(formatBytes(maxBytes))}</span>
+      <span class="plan-storage-usage" id="momentPlanStorageUsage">${esc(formatBytes(ent.bytes_used))} / ${esc(formatBytes(maxBytes))}</span>
     </div>
     <div class="plan-storage-bar" aria-hidden="true"><span style="width:${pct}%"></span></div>
     <p class="field-hint plan-storage-hint">${esc(planHint)}</p>
@@ -1431,8 +1432,15 @@ function renderOverviewPanel(row, state, publicUrl){
   </div>`;
 }
 
-async function refreshMomentEntitlements(eventId){
+async function refreshMomentEntitlements(eventId, { syncStorage = false } = {}){
   if(!eventId) return currentEntitlements;
+  if(syncStorage){
+    try{
+      await syncMomentMediaUsage(supabase, eventId);
+    }catch(error){
+      console.warn("Sync storage Moments non riuscito", error);
+    }
+  }
   try{
     currentEntitlements = await fetchMomentEntitlements(supabase, eventId);
   }catch(error){
@@ -3063,7 +3071,7 @@ function renderDetail(id){
   const letterMedia = migrateLetterMediaSection(state.sections.letter_future);
   writeGalleryMedia(editorForm,"letter_future",letterMedia);
   renderGalleryGrid(editorForm,"letter_future");
-  refreshMomentEntitlements(row.id).catch(()=>{});
+  refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
   for(const key of LIST_SECTION_KEYS){
     const items = itemsFromSection(state.sections[key], LIST_SECTION_MODES[key]);
     writeListItems(editorForm,key,items);
@@ -3160,6 +3168,7 @@ async function uploadCoverImage(file,row,formNode){
     bindCoverFramer(formNode);
     markEditorDirty(formNode);
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
+    refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
     setUploadStatus(status,t("save.reminder_cover"),"ok");
   }catch(error){
     setUploadStatus(status,error.message || localizeFieldPhrase("Upload non riuscito."),"error");
@@ -3199,7 +3208,7 @@ async function uploadGalleryImages(files,row,formNode,key){
     enableSection(formNode,key);
     markEditorDirty(formNode);
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
-    refreshMomentEntitlements(row.id).catch(()=>{});
+    refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
     const count = items?.length || batchSize;
     const label = key === "letter_future" ? t("save.label_letter")
       : key === "video" ? t("save.label_video")
@@ -3226,8 +3235,9 @@ async function uploadSectionVideo(file,row,formNode){
     markEditorDirty(formNode);
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
     if(oldUrl && isCloudflareMediaUrl(oldUrl) && oldUrl !== url){
-      deleteStorageObject(supabase,oldUrl).catch(()=>{});
+      await deleteStorageObject(supabase,oldUrl).catch(()=>{});
     }
+    refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
   }catch(error){
     alert(error.message || localizeFieldPhrase("Upload video non riuscito."));
   }finally{
@@ -3274,8 +3284,9 @@ async function uploadMusicAudio(file,row,formNode){
     markEditorDirty(formNode);
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
     if(oldUrl && isCloudflareMediaUrl(oldUrl) && oldUrl !== url){
-      deleteStorageObject(supabase,oldUrl).catch(()=>{});
+      await deleteStorageObject(supabase,oldUrl).catch(()=>{});
     }
+    refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
   }catch(error){
     alert(error.message || localizeFieldPhrase("Upload audio non riuscito."));
   }finally{
@@ -3298,8 +3309,9 @@ async function uploadSectionPhoto(key,file,row,formNode){
     markEditorDirty(formNode);
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
     if(oldUrl && isCloudflareMediaUrl(oldUrl) && oldUrl !== url){
-      deleteStorageObject(supabase,oldUrl).catch(()=>{});
+      await deleteStorageObject(supabase,oldUrl).catch(()=>{});
     }
+    refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
   }catch(error){
     alert(error.message || localizeFieldPhrase("Upload foto non riuscito."));
   }finally{
@@ -3433,8 +3445,9 @@ async function replaceGalleryImage(file,row,formNode,key,mediaId){
     markEditorDirty(formNode);
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
     if(result?.oldUrl && isCloudflareMediaUrl(result.oldUrl) && result.oldUrl !== result.item?.url){
-      deleteStorageObject(supabase,result.oldUrl).catch(()=>{});
+      await deleteStorageObject(supabase,result.oldUrl).catch(()=>{});
     }
+    refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
     promptSaveReminder(t("save.reminder_photo"));
   }catch(error){
     const message = error.message || localizeFieldPhrase("Sostituzione non riuscita.");
@@ -3604,7 +3617,11 @@ function bindMediaUploadDelegation(){
       markEditorDirty(formNode);
       schedulePreviewUpdate(formNode,{immediate:true,force:true});
       if(removed?.url && isCloudflareMediaUrl(removed.url)){
-        deleteStorageObject(supabase,removed.url).catch(()=>{});
+        deleteStorageObject(supabase,removed.url)
+          .then(()=>refreshMomentEntitlements(row.id, { syncStorage:true }))
+          .catch(()=>refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{}));
+      }else{
+        refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
       }
       return;
     }
@@ -4488,6 +4505,11 @@ function syncLangSwitchers(locale = getUiLocale()){
     run("mediaModal", ()=>syncMediaModalChrome());
     run("rsvpShare", ()=>refreshRsvpShareLocale(editorForm));
     run("horoscope", ()=>refreshHoroscopePeopleEditor(editorForm));
+    run("dashboard", ()=>refreshMomentDashboardLocale());
+    run("planCard", ()=>{
+      const card = document.getElementById("momentPlanStorageCard");
+      if(card) card.outerHTML = renderPlanStorageCard(currentEntitlements);
+    });
   }
   run("accountMenu", ()=>{ if(currentUser) refreshAccountMenu(); });
   run("accountPanels", ()=>{ if(appView === "account") renderAccountPanels(); });

@@ -2,8 +2,8 @@
 
 import { summarizeRsvpResponses, fetchMomentRsvpResponses } from "./moment-rsvp-responses.js";
 import { summarizeGuestbookMessages, fetchMomentGuestbookMessages } from "./moment-guestbook-kit.js";
-import { getUiLocale } from "./moments-i18n.js?v=219";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=219";
+import { getUiLocale } from "./moments-i18n.js?v=222";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=222";
 
 function esc(value){
   return String(value ?? "").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
@@ -63,6 +63,16 @@ export function renderMomentDashboardShell({ publicUrl = "", published = false, 
       <input type="text" readonly value="${esc(publicUrl)}" id="dashPublicUrl" aria-label="${esc(lf("Link pagina pubblica"))}">
       <button type="button" class="ghost" id="dashCopyLinkBtn" data-lf="${esc(copyIt)}">${esc(lf(copyIt))}</button>
       <button type="button" class="ghost" id="dashOpenPageBtn" data-lf="${esc(openIt)}">${esc(lf(openIt))}</button>
+    </div>
+    <div class="dash-qr-row" id="dashQrRow" ${publicUrl ? "" : "hidden"}>
+      <div class="dash-qr-frame">
+        <img id="dashQrImg" alt="${esc(lf("QR della pagina"))}" width="128" height="128">
+      </div>
+      <div class="dash-qr-meta">
+        <p class="dash-qr-title" data-lf="${esc("QR della pagina")}">${esc(lf("QR della pagina"))}</p>
+        <p class="dash-qr-hint" data-lf="${esc("Inquadra per aprire la pagina pubblica (stesso link NFC).")}">${esc(lf("Inquadra per aprire la pagina pubblica (stesso link NFC)."))}</p>
+        <button type="button" class="ghost" id="dashDownloadQrBtn" data-lf="${esc("Scarica QR")}">${esc(lf("Scarica QR"))}</button>
+      </div>
     </div>
     <div class="dash-stats" id="dashStats">
       <span class="dash-stat" data-lf="${esc(loadingIt)}">${esc(lf(loadingIt))}</span>
@@ -161,18 +171,67 @@ export async function paintMomentDashboard({
 
   const copyBtn = panel.querySelector("#dashCopyLinkBtn");
   const openBtn = panel.querySelector("#dashOpenPageBtn");
+  const qrRow = panel.querySelector("#dashQrRow");
+  const qrImg = panel.querySelector("#dashQrImg");
+  const qrBtn = panel.querySelector("#dashDownloadQrBtn");
+
+  if(publicUrl && qrRow && qrImg){
+    qrRow.hidden = false;
+    ensureDashQr(publicUrl, qrImg).catch(()=>{
+      qrRow.hidden = true;
+    });
+  }else if(qrRow){
+    qrRow.hidden = true;
+  }
+
   if(copyBtn && copyBtn.dataset.dashBound !== "1"){
     copyBtn.dataset.dashBound = "1";
     copyBtn.addEventListener("click",()=>{
-      if(publicUrl && typeof copyText === "function") copyText(publicUrl, copyBtn);
+      const ctx = lastDashboardCtx || {};
+      const url = ctx.publicUrl || publicUrl;
+      const copyFn = ctx.copyText || copyText;
+      if(url && typeof copyFn === "function") copyFn(url, copyBtn);
     });
   }
   if(openBtn && openBtn.dataset.dashBound !== "1"){
     openBtn.dataset.dashBound = "1";
     openBtn.addEventListener("click",()=>{
-      if(publicUrl) window.open(publicUrl,"_blank","noopener");
+      const url = lastDashboardCtx?.publicUrl || publicUrl;
+      if(url) window.open(url,"_blank","noopener");
     });
   }
+  if(qrBtn && qrBtn.dataset.dashBound !== "1"){
+    qrBtn.dataset.dashBound = "1";
+    qrBtn.addEventListener("click",()=>{
+      const ctx = lastDashboardCtx || {};
+      downloadDashQr(ctx.publicUrl || publicUrl, ctx.slug || slug);
+    });
+  }
+}
+
+async function ensureDashQr(publicUrl, imgEl){
+  if(!publicUrl || !imgEl) return;
+  if(imgEl.dataset.qrUrl === publicUrl && imgEl.getAttribute("src")) return;
+  const QRCode = (await import("https://esm.sh/qrcode@1.5.3")).default;
+  const dataUrl = await QRCode.toDataURL(publicUrl, {
+    width: 512,
+    margin: 1,
+    errorCorrectionLevel: "M",
+    color: { dark: "#0f172a", light: "#ffffff" }
+  });
+  imgEl.src = dataUrl;
+  imgEl.dataset.qrUrl = publicUrl;
+}
+
+function downloadDashQr(publicUrl, slug){
+  const img = document.getElementById("dashQrImg");
+  const src = img?.getAttribute("src") || "";
+  if(!publicUrl || !src) return;
+  const safe = String(slug || "moment").replace(/[^a-z0-9-]+/gi, "-").replace(/^-|-$/g, "").toLowerCase() || "moment";
+  const a = document.createElement("a");
+  a.download = `khamakey-qr-${safe}.png`;
+  a.href = src;
+  a.click();
 }
 
 export function refreshMomentDashboardLocale(){

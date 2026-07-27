@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v222 — QR in Riepilogo editor (2026-07-27, Cursor)** — Pages
+  - Dashboard Overview: anteprima QR + Scarica PNG (URL pubblico `/m/slug`, stesso del chip NFC).
+  - IT\|EN chrome; nessun tocco Worker / upload / attivazione.
 - **Admin / Officina v179 — QR Cricut in lotto (2026-07-27, Cursor)** — Pages
   - PDF etichette da 4 a **5 sezioni**: + quadretti QR 28×28 mm (stesso URL `/m/slug` del chip NFC).
   - Numerazione da 1 allineata; QR **mai** contiene il codice di attivazione.

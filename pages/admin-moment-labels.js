@@ -2,6 +2,7 @@ import { formatMomentCodeDisplay, normalizeMomentCode, packagingBarcodeForRow } 
 import { WORKER_BASE_URL } from "./config.js";
 import { jsPDF } from "https://esm.sh/jspdf@2.5.2";
 import JsBarcode from "https://esm.sh/jsbarcode@3.11.6";
+import QRCode from "https://esm.sh/qrcode@1.5.3";
 
 /** A4 in mm */
 const A4 = { w: 210, h: 297 };
@@ -13,6 +14,12 @@ const OVAL = { w: 52, h: 22 };
 const BAR_RECT = { w: 42, h: 16 };
 /** Chip NFC: URL completo da copiare sul tag */
 const LINK_RECT = { w: 72, h: 18 };
+/**
+ * QR pagina destinazione (= stesso URL del chip NFC).
+ * Solo /m/<slug> — mai il codice di attivazione (sicurezza scaffale).
+ * Contorno nero = taglio Cricut Print Then Cut.
+ */
+const QR_SQUARE = { w: 28, h: 28 };
 const NUM_BOX = { w: 10, h: 10 };
 
 const SHEET = {
@@ -70,6 +77,18 @@ function barcodeDataUrl(value, { height = 28, width = 1.05 } = {}){
     margin: 0
   });
   return canvas.toDataURL("image/png");
+}
+
+/** QR data URL — payload = solo URL pubblico /m/… (stesso del chip). */
+async function qrDataUrl(url){
+  const target = String(url || "").trim();
+  if(!target) return "";
+  return QRCode.toDataURL(target, {
+    width: 512,
+    margin: 1,
+    errorCorrectionLevel: "M",
+    color: { dark: "#0f172a", light: "#ffffff" }
+  });
 }
 
 function setCutStroke(doc){
@@ -199,6 +218,34 @@ function drawLinkRectLabel(doc, x, y, _index1, row){
   doc.text(shown, x + LINK_RECT.w / 2, startY, { align: "center" });
 }
 
+/**
+ * Quadretto QR ritagliabile (confezione / backup NFC).
+ * Contorno = taglio; contenuto = solo URL /m/<slug>.
+ */
+function drawQrSquareLabel(doc, x, y, index1, row, qrImg){
+  setCutStroke(doc);
+  doc.rect(x, y, QR_SQUARE.w, QR_SQUARE.h, "S");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(4.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text(String(index1), x + 1.6, y + 3.2);
+
+  const topReserve = 4.2;
+  const sidePad = 2.4;
+  const imgSize = Math.min(QR_SQUARE.w - sidePad * 2, QR_SQUARE.h - topReserve - sidePad);
+  const imgX = x + (QR_SQUARE.w - imgSize) / 2;
+  const imgY = y + topReserve;
+  if(qrImg){
+    doc.addImage(qrImg, "PNG", imgX, imgY, imgSize, imgSize);
+  }else{
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(5);
+    doc.setTextColor(148, 163, 184);
+    doc.text("QR n/d", x + QR_SQUARE.w / 2, y + QR_SQUARE.h / 2 + 2, { align: "center" });
+  }
+}
+
 function computeGrid(cellW, cellH){
   const usableW = A4.w - SHEET.marginX * 2;
   const usableH = SHEET.footerY - SHEET.marginY - SHEET.headerH - 4;
@@ -247,16 +294,17 @@ function drawGridSection(doc, rows, meta, {
 }
 
 /**
- * Sezione 1 — panoramica: # | ovale codice | barcode+codice | URL NFC completo
+ * Sezione 1 — panoramica: # | ovale codice | barcode | URL NFC | QR
  */
-function drawOverviewSection(doc, rows, meta, barcodeCache){
-  const colNumW = 12;
+function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
+  const colNumW = 10;
   const colCodeW = OVAL.w;
   const colBarW = BAR_RECT.w;
-  const colLinkW = Math.min(LINK_RECT.w, 78);
-  const rowH = Math.max(OVAL.h, BAR_RECT.h, LINK_RECT.h, NUM_BOX.h) + 2;
-  const gap = 2.5;
-  const tableW = colNumW + gap + colCodeW + gap + colBarW + gap + colLinkW;
+  const colQrW = QR_SQUARE.w;
+  const colLinkW = Math.min(LINK_RECT.w, 58);
+  const rowH = Math.max(OVAL.h, BAR_RECT.h, LINK_RECT.h, QR_SQUARE.h, NUM_BOX.h) + 2;
+  const gap = 2;
+  const tableW = colNumW + gap + colCodeW + gap + colBarW + gap + colLinkW + gap + colQrW;
   const startX = Math.max(SHEET.marginX, (A4.w - tableW) / 2);
   const topY = SHEET.marginY + SHEET.headerH + 2;
   const usableH = SHEET.footerY - topY - 6;
@@ -277,16 +325,18 @@ function drawOverviewSection(doc, rows, meta, barcodeCache){
 
     const headY = topY - 2;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(5.5);
+    doc.setFontSize(5);
     doc.setTextColor(71, 85, 105);
     let hx = startX;
-    doc.text("NUMERO", hx, headY);
+    doc.text("N°", hx, headY);
     hx += colNumW + gap;
-    doc.text("CODICE DI ATTIVAZIONE", hx, headY);
+    doc.text("CODICE ATTIVAZIONE", hx, headY);
     hx += colCodeW + gap;
     doc.text("BARCODE", hx, headY);
     hx += colBarW + gap;
-    doc.text("LINK NFC (URL completo)", hx, headY);
+    doc.text("LINK NFC", hx, headY);
+    hx += colLinkW + gap;
+    doc.text("QR PAGINA", hx, headY);
 
     const start = page * perPage;
     const slice = rows.slice(start, start + perPage);
@@ -295,7 +345,7 @@ function drawOverviewSection(doc, rows, meta, barcodeCache){
       const y = topY + 2 + i * (rowH + 2);
       let x = startX;
 
-      drawNumberBadge(doc, x + 1, y + (rowH - NUM_BOX.h) / 2, n);
+      drawNumberBadge(doc, x, y + (rowH - NUM_BOX.h) / 2, n);
       x += colNumW + gap;
 
       drawOvalLabel(doc, x, y + (rowH - OVAL.h) / 2, n, row);
@@ -310,12 +360,16 @@ function drawOverviewSection(doc, rows, meta, barcodeCache){
       setCutStroke(doc);
       doc.rect(linkX, linkY, colLinkW, LINK_RECT.h, "S");
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(5.2);
+      doc.setFontSize(4.8);
       doc.setTextColor(15, 23, 42);
       const full = nfcUrlForRow(row) || "—";
       const linkLines = doc.splitTextToSize(full, colLinkW - 3).slice(0, 2);
       const textY = linkLines.length > 1 ? linkY + 6.5 : linkY + 10;
       doc.text(linkLines, linkX + colLinkW / 2, textY, { align: "center" });
+      x += colLinkW + gap;
+
+      const url = nfcUrlForRow(row);
+      drawQrSquareLabel(doc, x, y + (rowH - QR_SQUARE.h) / 2, n, row, qrCache.get(url));
     });
 
     drawFooter(doc, "Foglio di controllo — abbinamento pezzo a pezzo (non tagliare)");
@@ -355,9 +409,22 @@ function drawLinkCutSection(doc, rows, meta){
   });
 }
 
+function drawQrCutSection(doc, rows, meta, qrCache){
+  drawGridSection(doc, rows, meta, {
+    sectionTitle: "5 · QR pagina destinazione (quadretti) · Cricut",
+    cellW: QR_SQUARE.w,
+    cellH: QR_SQUARE.h,
+    cutSheet: true,
+    drawCell: (d, x, y, n, row)=>{
+      const url = nfcUrlForRow(row);
+      drawQrSquareLabel(d, x, y, n, row, qrCache.get(url));
+    }
+  });
+}
+
 /**
- * PDF 4 sezioni: panoramica · ovali (testo+codice) · barcode · URL NFC
- * Numerazione continua da 1 in panoramica/ovali.
+ * PDF 5 sezioni: panoramica · ovali · barcode · URL NFC · QR quadretti
+ * Numerazione continua da 1. QR = stesso URL del chip (/m/slug), mai il codice attivazione.
  */
 export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etichette"){
   if(!rows.length){
@@ -367,32 +434,49 @@ export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etich
 
   const meta = batchMeta(rows);
   const barcodeCache = new Map();
+  const qrCache = new Map();
   await Promise.all(rows.map(async row=>{
     const packageCode = packagingBarcode(row);
     if(packageCode && !barcodeCache.has(packageCode)){
       barcodeCache.set(packageCode, barcodeDataUrl(packageCode, { height: 28, width: 1.05 }));
+    }
+    const url = nfcUrlForRow(row);
+    if(url && !qrCache.has(url)){
+      try{
+        qrCache.set(url, await qrDataUrl(url));
+      }catch(error){
+        console.warn("QR non generato per", url, error);
+        qrCache.set(url, "");
+      }
     }
   }));
 
   const doc = new jsPDF({ unit: "mm", format: "a4", compress: true, orientation: "portrait" });
   doc.__hasContent = false;
 
-  drawOverviewSection(doc, rows, meta, barcodeCache);
+  drawOverviewSection(doc, rows, meta, barcodeCache, qrCache);
   drawOvalCutSection(doc, rows, meta);
   drawBarcodeCutSection(doc, rows, meta, barcodeCache);
   drawLinkCutSection(doc, rows, meta);
+  drawQrCutSection(doc, rows, meta, qrCache);
 
   const stamp = new Date().toISOString().slice(0, 10);
   const safeStem = String(filenameStem || "khamakey-lotto").replace(/[^a-z0-9-]+/gi, "-").replace(/^-|-$/g, "").toLowerCase();
-  doc.save(`${safeStem}-${stamp}-${rows.length}pz-cricut4.pdf`);
+  doc.save(`${safeStem}-${stamp}-${rows.length}pz-cricut5.pdf`);
   return true;
 }
 
-export const LABEL_SIZE_MM = { oval: { ...OVAL }, barcode: { ...BAR_RECT }, link: { ...LINK_RECT } };
+export const LABEL_SIZE_MM = {
+  oval: { ...OVAL },
+  barcode: { ...BAR_RECT },
+  link: { ...LINK_RECT },
+  qr: { ...QR_SQUARE }
+};
 export function labelGridInfo(){
   return {
     oval: computeGrid(OVAL.w, OVAL.h),
     barcode: computeGrid(BAR_RECT.w, BAR_RECT.h),
-    link: computeGrid(LINK_RECT.w, LINK_RECT.h)
+    link: computeGrid(LINK_RECT.w, LINK_RECT.h),
+    qr: computeGrid(QR_SQUARE.w, QR_SQUARE.h)
   };
 }

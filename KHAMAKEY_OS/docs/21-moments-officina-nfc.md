@@ -7,7 +7,7 @@
 | Attività | Dove |
 |----------|------|
 | Modelli prodotto magazzino (codice MOM-…) | Officina NFC |
-| Generazione codici, PDF etichette Cricut (4 sezioni) | Officina NFC |
+| Generazione codici, PDF etichette Cricut (5 sezioni) | Officina NFC |
 | Link chip `/m/<slug>`, attivazione editor | Officina NFC |
 | Clienti attivati, pagine `/m/` | Officina NFC → Clienti |
 | Supporto tecnico (codice, NFC, pagina) | Officina NFC → Supporto |
@@ -17,8 +17,8 @@
 ```text
 Officina NFC
   Modello (MOM-KEY-WED) → genera pezzo/i
-  → CSV + PDF 4 sezioni Cricut: panoramica · ovali (spiega+codice) · barcode · URL NFC completo
-  → stampa/taglia etichette · programma chip con URL completo · codice in inserto
+  → CSV + PDF 5 sezioni Cricut: panoramica · ovali (spiega+codice) · barcode · URL NFC · QR pagina (quadretti)
+  → stampa/taglia etichette · programma chip con URL completo · codice in inserto · QR in confezione
   → scaffale
 
 Cliente
@@ -43,14 +43,15 @@ Prima il codice compariva sulla pagina pre-attivazione e spesso coincideva con `
 3. `/k/<codice>` non risolve pezzi `available` (solo dopo claim)
 4. CSV/PDF restano la fonte del codice per stampa inserto
 
-### PDF etichette Cricut (Admin v177)
+### PDF etichette Cricut (Admin v179)
 
-Export magazzino → un PDF A4 con **4 sezioni** (si ripaginano se il lotto è grande), stessa numerazione da 1:
+Export magazzino → un PDF A4 con **5 sezioni** (si ripaginano se il lotto è grande), stessa numerazione da 1:
 
-1. **Panoramica** — CATEGORIA / QUANTITÀ + `# · ovale · barcode · URL NFC completo` (foglio di controllo, non da tagliare)
+1. **Panoramica** — CATEGORIA / QUANTITÀ + `# · ovale · barcode · URL NFC · QR` (foglio di controllo, non da tagliare)
 2. **Ovali codice** (52×22 mm) — inserto confezione: testo *«Per attivare la pagina»* + codice + *«Inseriscilo nell'app Moments»*
 3. **Rettangoli barcode** (42×16 mm) — solo barcode magazzino (niente codice attivazione, niente # nel riquadro)
 4. **Rettangoli link NFC** (72×18 mm) — URL completo `https://link.khamakeymoments.com/m/<slug>` da copiare sul chip
+5. **Quadretti QR** (28×28 mm) — stesso URL del chip (`/m/<slug>`); backup confezione / Print Then Cut Cricut — **mai** il codice di attivazione nel QR
 
 **Azione officina:** pezzi già in magazzino con chip vecchio `/k/CODICE` vanno **riprogrammati** con il nuovo Link NFC URL completo dal magazzino.
 

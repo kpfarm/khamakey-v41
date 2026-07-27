@@ -365,3 +365,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-26 | Cursor | **Moments v219 + Worker v186 + SQL v168**: storage R2 reale + Overview i18n |
 | 2026-07-26 | Cursor | **Moments v220**: RSVP A1b+A2 custom fields + share panel EN |
 | 2026-07-26 | Cursor | **Moments v221 + Worker v187**: chiusura i18n A–C (wizard, responses, media `/m/`) |
+| 2026-07-27 | Cursor | **Admin / Officina v179**: PDF Cricut 5ª sezione — QR pagina 28×28 mm (stesso `/m/slug` del chip) |

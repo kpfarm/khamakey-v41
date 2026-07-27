@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin / Officina v179 — QR Cricut in lotto (2026-07-27, Cursor)** — Pages
+  - PDF etichette da 4 a **5 sezioni**: + quadretti QR 28×28 mm (stesso URL `/m/slug` del chip NFC).
+  - Numerazione da 1 allineata; QR **mai** contiene il codice di attivazione.
+  - Nessun cambio Worker / attivazione / editor Moments / upload.
 - **Moments v221 + Worker v187 — chiusura piano i18n A–C (2026-07-26, Cursor)** — Pages + Worker
   - B3 wizard onboarding EN; pannello risposte RSVP EN; C1 `Apri PDF/foto/mappa` via `mt()`.
   - NFC/upload/Salva/RSVP submit invariati.

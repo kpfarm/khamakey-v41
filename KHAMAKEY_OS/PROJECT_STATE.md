@@ -94,7 +94,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v178** | Reset pezzo reso/refurb (SQL v167): nuovo codice attivazione, stesso slug NFC. |
+| **Admin / Officina Moments** | **v179** | PDF Cricut 5 sezioni: + QR pagina (28×28 mm, stesso `/m/slug` del chip). |
 | **Worker NFC** | **v187-media-i18n** | C1: Apri PDF/foto/mappa IT\|EN; storage sync v186; oroscopo v185. |
 | **Moments editor** | **v221** | Piano i18n A–C chiuso (wizard, RSVP responses, RSVP share/fields). |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |

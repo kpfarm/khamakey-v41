@@ -193,7 +193,9 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> Tenere Moments stabile. Basi 10k: [`docs/24-pronti-per-10k-moments.md`](docs/24-pronti-per-10k-moments.md). Smoke: [`docs/23-smoke-moments.md`](docs/23-smoke-moments.md).  
+> **Oggi 2026-07-29:** eseguire go-live smoke [`docs/31-go-live-smoke-moments.md`](docs/31-go-live-smoke-moments.md) (critici NFC + upload + QR).  
+> Storico: [`docs/23-smoke-moments.md`](docs/23-smoke-moments.md). Basi 10k: [`docs/24-pronti-per-10k-moments.md`](docs/24-pronti-per-10k-moments.md).  
+> Dopo smoke verde: Moments pronto; prossimo prodotto tipico = Stripe Plus/Pro.  
 > Live 2026-07-22: Moments **v186** · Worker **v182-hero-description**.  
 > Nessun cambio a `renderMomentPage` / RPC Moments senza smoke su slug reale.
 

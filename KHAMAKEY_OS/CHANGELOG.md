@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Go-live smoke Moments (2026-07-29, Cursor)** — Docs
+  - Checklist test funzionale: [`docs/31-go-live-smoke-moments.md`](docs/31-go-live-smoke-moments.md) (critici NFC, upload, QR Officina/editor).
 - **Moments v222 — QR in Riepilogo editor (2026-07-27, Cursor)** — Pages
   - Dashboard Overview: anteprima QR + Scarica PNG (URL pubblico `/m/slug`, stesso del chip NFC).
   - IT\|EN chrome; nessun tocco Worker / upload / attivazione.

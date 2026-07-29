@@ -4787,8 +4787,9 @@ p{color:#6B6470;line-height:1.55;margin:0 0 12px}
 .badge{display:inline-block;margin:8px 0 16px;padding:8px 14px;border-radius:999px;background:#F3E3DE;color:#071A3C;font-size:13px;font-weight:650;border:1px solid #E0B8B6}
 .button{display:inline-flex;justify-content:center;align-items:center;width:100%;border-radius:12px;background:linear-gradient(135deg,#AA626C 0%,#071A3C 100%);color:#fff;padding:14px 16px;text-decoration:none;font-weight:700;margin-top:8px}
 .hint{font-size:13px;color:#6B6470;margin-top:14px}
-.steps{text-align:left;margin:16px 0 8px;padding:14px 14px 10px;border-radius:14px;background:#FFF9F5;border:1px solid #E8D4CE}
-.steps li{margin:0 0 8px;color:#18202F;font-size:14px;line-height:1.4}
+.steps{text-align:left;margin:16px 0 8px;padding:14px 16px 12px;padding-inline-start:2.1rem;border-radius:14px;background:#FFF9F5;border:1px solid #E8D4CE;list-style-position:outside}
+.steps li{margin:0 0 8px;padding-inline-end:4px;color:#18202F;font-size:14px;line-height:1.45}
+.steps li:last-child{margin-bottom:0}
 .steps strong{color:#071A3C}
 .legal{margin-top:16px;font-size:12px;color:#6B6470}
 .legal a{color:#071A3C;font-weight:700;text-decoration:none;margin:0 8px}
@@ -4796,18 +4797,18 @@ p{color:#6B6470;line-height:1.55;margin:0 0 12px}
 </style></head>
 <body><main class="card">
 <img class="logo" src="${attr(logoSrc)}" alt="KhamaKey Moments">
-<p class="eyebrow">Prodotto NFC</p>
+<p class="eyebrow">KhamaKey Moments</p>
 <h1>Pronto da attivare</h1>
-<p>Il link di questo oggetto è già riservato. Il <strong>codice di attivazione</strong> non è sul chip: lo trovi nell’inserto dentro la confezione.</p>
+<p>Per creare la tua pagina ti serve il <strong>codice</strong> che trovi nella confezione.</p>
 ${lineLabel ? `<span class="badge">${escapeHtml(lineLabel)}</span>` : ""}
 <span class="badge">${escapeHtml(typeLabel)}</span>
 <ol class="steps">
-<li><strong>Apri la confezione</strong> e prendi il biglietto con il codice.</li>
+<li><strong>Apri la confezione</strong> e prendi il codice.</li>
 <li><strong>Entra in Area Moments</strong> e inserisci il codice.</li>
-<li>Crea la pagina: dopo, questo stesso link mostrerà il tuo ricordo.</li>
+<li><strong>Personalizza</strong> la pagina del tuo ricordo.</li>
 </ol>
 <a class="button" href="${attr(pagesBase)}/moments.html">Attiva in Area Moments</a>
-<p class="hint">Senza il codice della confezione non si può attivare la pagina — così il prodotto resta sicuro in negozio.</p>
+<p class="hint">Il codice è nell’inserto della confezione.</p>
 <p class="legal"><a href="${attr(pagesBase)}/moments-privacy.html" target="_blank" rel="noopener">Privacy</a><a href="${attr(pagesBase)}/moments-terms.html" target="_blank" rel="noopener">Termini</a></p>
 </main></body></html>`;
 }

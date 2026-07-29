@@ -23,6 +23,7 @@ Officina NFC
 
 Cliente
   apre confezione → codice sull’inserto → moments.html → editor → pagina /m/ live
+  (pagina pre-attivazione: messaggio semplice «codice in confezione», senza dettagli chip/scaffale)
 ```
 
 ## Formato codici (v156 + sicurezza v160)

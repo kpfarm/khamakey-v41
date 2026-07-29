@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v189 — pagina pre-attivazione (2026-07-29, Cursor)** — Worker
+  - Copy più semplice (niente chip/negozio); hint solo «codice in confezione»; numeri lista dentro il riquadro.
 - **Moments v223 + Worker v188 — preview locale (2026-07-29, Cursor)** — Pages + Worker
   - Anteprima editor e «Apri pagina» usano la lingua UI (IT|EN) per chrome + oroscopo.
   - Copia/Condividi restano URL senza `?lang=` (ospiti). `/m/` NFC senza `?lang=` invariato.

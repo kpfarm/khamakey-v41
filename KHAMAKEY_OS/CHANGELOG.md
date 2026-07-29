@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v223 + Worker v188 — preview locale (2026-07-29, Cursor)** — Pages + Worker
+  - Anteprima editor e «Apri pagina» usano la lingua UI (IT|EN) per chrome + oroscopo.
+  - Copia/Condividi restano URL senza `?lang=` (ospiti). `/m/` NFC senza `?lang=` invariato.
 - **Go-live smoke Moments (2026-07-29, Cursor)** — Docs
   - Checklist test funzionale: [`docs/31-go-live-smoke-moments.md`](docs/31-go-live-smoke-moments.md) (critici NFC, upload, QR Officina/editor).
 - **Moments v222 — QR in Riepilogo editor (2026-07-27, Cursor)** — Pages

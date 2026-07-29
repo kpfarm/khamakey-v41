@@ -169,3 +169,26 @@ export function applyChromeI18n(root = document) {
     if (key) el.setAttribute("title", t(key));
   });
 }
+
+/**
+ * Locale for public chrome / horoscope when testing from the editor.
+ * Only it|en (Worker Moments public locales). Guests on /m/ without ?lang= unchanged.
+ */
+export function uiLocaleForPublicPage() {
+  return getUiLocale() === "en" ? "en" : "it";
+}
+
+/** Append ?lang= from editor UI — for "Open page" / preview only, not for share/copy. */
+export function appendUiLangToPublicUrl(url) {
+  const raw = String(url || "").trim();
+  if (!raw) return "";
+  const lang = uiLocaleForPublicPage();
+  try {
+    const parsed = new URL(raw);
+    parsed.searchParams.set("lang", lang);
+    return parsed.toString();
+  } catch {
+    const join = raw.includes("?") ? "&" : "?";
+    return `${raw}${join}lang=${encodeURIComponent(lang)}`;
+  }
+}

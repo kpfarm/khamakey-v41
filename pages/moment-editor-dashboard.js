@@ -2,7 +2,7 @@
 
 import { summarizeRsvpResponses, fetchMomentRsvpResponses } from "./moment-rsvp-responses.js";
 import { summarizeGuestbookMessages, fetchMomentGuestbookMessages } from "./moment-guestbook-kit.js";
-import { getUiLocale } from "./moments-i18n.js?v=222";
+import { getUiLocale, appendUiLangToPublicUrl } from "./moments-i18n.js?v=223";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=222";
 
 function esc(value){
@@ -197,7 +197,7 @@ export async function paintMomentDashboard({
     openBtn.dataset.dashBound = "1";
     openBtn.addEventListener("click",()=>{
       const url = lastDashboardCtx?.publicUrl || publicUrl;
-      if(url) window.open(url,"_blank","noopener");
+      if(url) window.open(appendUiLangToPublicUrl(url),"_blank","noopener");
     });
   }
   if(qrBtn && qrBtn.dataset.dashBound !== "1"){

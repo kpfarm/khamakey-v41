@@ -368,3 +368,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-27 | Cursor | **Admin / Officina v179**: PDF Cricut 5ª sezione — QR pagina 28×28 mm (stesso `/m/slug` del chip) |
 | 2026-07-27 | Cursor | **Moments v222**: Riepilogo editor — QR pagina + Scarica PNG (stesso URL pubblico) |
 | 2026-07-29 | Cursor | **Go-live checklist**: `docs/31-go-live-smoke-moments.md` (NFC + upload + QR + Officina) |
+| 2026-07-29 | Cursor | **Moments v223 + Worker v188**: anteprima/Apri seguono lingua UI; ospiti `/m/` invariati |

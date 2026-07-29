@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v187-media-i18n";
+const WORKER_VERSION = "v188-preview-locale";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1172,6 +1172,17 @@ async function handleMediaDelete(request, env) {
   }));
 }
 
+/**
+ * Lingua anteprima editor: solo da body.lang / body.locale se valida.
+ * Non usa Accept-Language — così non cambia il comportamento ospiti su /m/.
+ * Default it (come prima) se manca o non supportata.
+ */
+function resolveMomentPreviewLocale(body = {}) {
+  const forced = String(body?.lang || body?.locale || "").toLowerCase().slice(0, 2);
+  if (MOMENTS_PUBLIC_LOCALES.includes(forced)) return forced;
+  return "it";
+}
+
 async function handleMomentPreview(request, env) {
   const ip = request.headers.get("cf-connecting-ip") || "anon";
   if (!await checkRateLimit(env, `moment-preview:${ip}`, 45, 1)) {
@@ -1192,8 +1203,9 @@ async function handleMomentPreview(request, env) {
     description: String(body.description || pageState.subtitle || pageState.description || "").trim(),
     state: pageState
   };
+  const locale = resolveMomentPreviewLocale(body);
   const origin = new URL(request.url).origin;
-  const pageHtml = await renderMomentPage(page, origin, env);
+  const pageHtml = await renderMomentPage(page, origin, env, locale);
   return cors(new Response(pageHtml, {
     status: 200,
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }

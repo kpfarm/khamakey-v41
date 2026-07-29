@@ -1,7 +1,7 @@
 # 31 — Go-live Moments: checklist test funzionale
 
 > **Data test:** 2026-07-29 · **Chi:** _________________  
-> **Versioni attese:** Editor Moments **v222** · Admin/Officina **v179** · Worker **v187-media-i18n**  
+> **Versioni attese:** Editor Moments **v223** · Admin/Officina **v179** · Worker **v188-preview-locale**  
 > **Scopo:** ultimo giro prima di considerare il software pronto. Segna ✅ / ❌ / N/A + nota breve.  
 > Smoke storici: [`23-smoke-moments.md`](23-smoke-moments.md) · i18n [`28-moments-i18n-smoke.md`](28-moments-i18n-smoke.md)
 
@@ -13,8 +13,8 @@
 
 | # | Check | Come | Esito | Nota |
 |---|-------|------|-------|------|
-| 0.1 | Worker live | `https://link.khamakeymoments.com/health` → `version` = `v187-media-i18n`, `media: true` | ⬜ | |
-| 0.2 | Editor cache | `moments.html` / Network → `moments.js?v=222`, `moments.css?v=222` | ⬜ | hard refresh se serve |
+| 0.1 | Worker live | `https://link.khamakeymoments.com/health` → `version` = `v188-preview-locale`, `media: true` | ⬜ | |
+| 0.2 | Editor cache | `moments.html` / Network → `moments.js?v=223`, `moments.css?v=223` | ⬜ | hard refresh se serve |
 | 0.3 | Officina cache | `moments-admin` → `admin.js?v=179` | ⬜ | |
 
 ---
@@ -68,6 +68,7 @@
 | 4.1 | Contenuti | Titolo, media, sezioni attive ok su `/m/` | ⬜ | |
 | 4.2 | Footer legale | Privacy + Termini (o link) presenti | ⬜ | |
 | 4.3 | Locale chrome | `?lang=en` o Accept-Language: chrome EN, **testi cliente invariati** | ⬜ | spot check |
+| 4.3b | Oroscopo vs lingua editor | Editor EN → anteprima EN + Apri con `?lang=en`; NFC senza `?lang=` resta browser | ⬜ | v223 / Worker v188 |
 | 4.4 | RSVP WA *(se attivo)* | Invio da `/m/` → arriva in editor / WA | ⬜ | N/A se off |
 | 4.5 | Oroscopo *(se attivo)* | Persone/segni in editor → testo su `/m/` | ⬜ | N/A se off |
 

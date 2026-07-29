@@ -4,6 +4,7 @@ import { normalizeMomentCode, formatMomentCodeDisplay, isValidMomentCode } from 
 import {
   applyChromeI18n,
   applyDocumentLang,
+  appendUiLangToPublicUrl,
   getUiLocale,
   hasStoredUiLocale,
   onUiLocaleChange,
@@ -11,8 +12,9 @@ import {
   registerMessages,
   setUiLocale,
   t,
+  uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
-} from "./moments-i18n.js?v=216";
+} from "./moments-i18n.js?v=223";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=219";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=216";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=216";
@@ -152,7 +154,7 @@ import {
 } from "./moment-editor-kit.js?v=186";
 import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=221";
 import { bindRsvpResponsesPanel, refreshRsvpResponsesLocale } from "./moment-rsvp-responses.js?v=221";
-import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=222";
+import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=223";
 import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=221";
 import {
   renderHoroscopePeoplePanel,
@@ -1303,9 +1305,10 @@ function syncMobileNav(panelId){
 
 function bindEditorPageActions(publicUrl, pageTitle){
   document.getElementById("editorOpenPageBtn")?.addEventListener("click",()=>{
-    if(publicUrl) window.open(publicUrl,"_blank","noopener");
+    if(publicUrl) window.open(appendUiLangToPublicUrl(publicUrl),"_blank","noopener");
   });
   document.getElementById("editorSharePageBtn")?.addEventListener("click",()=>{
+    // Share/copy: URL pulito per gli ospiti (senza ?lang= forzato dall'editor)
     if(publicUrl) sharePageUrl(publicUrl, pageTitle || "KhamaKey Moments");
   });
   document.getElementById("editorCopyLinkBtn")?.addEventListener("click",()=>{
@@ -4073,7 +4076,7 @@ function schedulePreviewUpdate(formNode,options = {}){
     }catch{
       return;
     }
-    const hash = JSON.stringify(state);
+    const hash = JSON.stringify({ state, lang: uiLocaleForPublicPage() });
     if(!options.force && hash === lastPreviewHash) return;
     lastPreviewHash = hash;
     renderPreview(state,{ force:options.force });
@@ -4155,7 +4158,8 @@ async function renderPreview(state,options = {}){
         title:state.title,
         description:state.description || state.subtitle,
         slug:rows.find(item=>item.id === activeId)?.slug || "",
-        page_state:state
+        page_state:state,
+        lang: uiLocaleForPublicPage()
       })
     });
     if(requestId !== previewFetchId) return;
@@ -4520,6 +4524,7 @@ function syncLangSwitchers(locale = getUiLocale()){
     run("rsvpResponses", ()=>refreshRsvpResponsesLocale());
     run("horoscope", ()=>refreshHoroscopePeopleEditor(editorForm));
     run("dashboard", ()=>refreshMomentDashboardLocale());
+    run("preview", ()=>schedulePreviewUpdate(editorForm,{ immediate:true, force:true }));
     run("planCard", ()=>{
       const card = document.getElementById("momentPlanStorageCard");
       if(card) card.outerHTML = renderPlanStorageCard(currentEntitlements);

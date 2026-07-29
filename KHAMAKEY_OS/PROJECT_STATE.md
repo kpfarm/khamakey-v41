@@ -95,8 +95,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v179** | PDF Cricut 5 sezioni: + QR pagina (28×28 mm, stesso `/m/slug` del chip). |
-| **Worker NFC** | **v187-media-i18n** | C1: Apri PDF/foto/mappa IT\|EN; storage sync v186; oroscopo v185. |
-| **Moments editor** | **v222** | Riepilogo: QR pagina pubblica + Scarica QR (stesso `/m/slug`). |
+| **Worker NFC** | **v188-preview-locale** | Anteprima editor rispetta `lang` UI; `/m/` ospiti invariato. |
+| **Moments editor** | **v223** | Anteprima + Apri pagina seguono lingua UI (oroscopo EN); Copia/Condividi URL pulito. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v167 (prod)** | v167 reset pezzo reso; v166 USAGE `app_private`; v165 ingest store. |

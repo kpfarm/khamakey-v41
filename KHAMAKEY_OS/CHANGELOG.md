@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v229 — Salva e cambia prodotto (2026-07-30, Cursor)** — Pages
+  - Switch pezzo con modifiche: dialog **Salva e cambia** / Cambia senza salvare / Annulla.
+  - Lock durante Salva/upload/switch; ricarica sempre `page_state` dal DB (ok anche con tanti pezzi).
 - **Moments v228 — PIN attivazione (2026-07-30, Cursor)** — Pages
   - Bug: PIN scelto in attivazione hashato col **codice NFC** mentre `/m/` verifica con lo **slug opaco** → sempre «PIN non corretto».
   - Fix: dopo `activate_moment_code` rilegge lo slug reale e scrive `pin_hash` corretto via `save_my_moment_page`.

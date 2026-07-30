@@ -375,3 +375,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-30 | Cursor | **Moments v226 + SQL v169**: Amore non parte più verde; bootstrap auto template+save; seed EN; multi-prodotto ok |
 | 2026-07-30 | Cursor | **Moments v227**: fix banner Salva doppio / «non salvato» fantasma dopo save riuscito |
 | 2026-07-30 | Cursor | **Moments v228**: PIN attivazione hashato sullo slug reale (non sul codice NFC) |
+| 2026-07-30 | Cursor | **Moments v229**: Salva e cambia prodotto (dialog 3 scelte + lock switch) |

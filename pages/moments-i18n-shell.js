@@ -22,7 +22,13 @@ export const SHELL_MESSAGES_IT = {
   "shell.live_preview": "Anteprima live",
   "shell.preview_iframe": "Anteprima della tua pagina",
   "shell.confirm_switch": "Hai modifiche non salvate (testi, colori, foto…). Cambiando prodotto le perdi. Continuare senza salvare?",
-  "shell.confirm_undo": "Annullare le modifiche non salvate e tornare all'ultima versione salvata?"
+  "shell.confirm_undo": "Annullare le modifiche non salvate e tornare all'ultima versione salvata?",
+  "shell.switch_title": "Modifiche non salvate",
+  "shell.switch_body": "Stai passando a un altro prodotto. Cosa vuoi fare con le modifiche di questa pagina?",
+  "shell.switch_save": "Salva e cambia",
+  "shell.switch_discard": "Cambia senza salvare",
+  "shell.switch_cancel": "Annulla",
+  "shell.switch_busy": "Attendi: salvataggio o caricamento in corso."
 };
 
 export const SHELL_MESSAGES_EN = {
@@ -47,5 +53,11 @@ export const SHELL_MESSAGES_EN = {
   "shell.live_preview": "Live preview",
   "shell.preview_iframe": "Preview of your page",
   "shell.confirm_switch": "You have unsaved changes (text, colours, photos…). Switching pages discards them. Continue without saving?",
-  "shell.confirm_undo": "Discard unsaved changes and restore the last saved version?"
+  "shell.confirm_undo": "Discard unsaved changes and restore the last saved version?",
+  "shell.switch_title": "Unsaved changes",
+  "shell.switch_body": "You’re switching to another product. What should we do with this page’s changes?",
+  "shell.switch_save": "Save and switch",
+  "shell.switch_discard": "Switch without saving",
+  "shell.switch_cancel": "Cancel",
+  "shell.switch_busy": "Please wait: save or upload in progress."
 };

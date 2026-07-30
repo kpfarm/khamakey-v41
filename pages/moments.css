@@ -448,6 +448,11 @@ textarea{min-height:86px;resize:vertical}
 .media-modal-preview audio{width:100%}
 .media-modal-close{position:absolute;top:10px;right:10px;width:34px;height:34px;border:0;border-radius:999px;background:var(--soft);font-size:1.2rem;cursor:pointer}
 body.media-modal-open{overflow:hidden}
+.switch-unsaved-card{gap:14px}
+.switch-unsaved-card h3{margin:0;font-size:1.15rem}
+.switch-unsaved-card p{margin:0;color:var(--muted,#64748b);line-height:1.45}
+.switch-unsaved-actions{display:grid;gap:8px}
+.switch-unsaved-actions .danger-text{color:#b91c1c}
 .section-box{border:1px solid var(--border);border-radius:12px;background:var(--soft);overflow:hidden}
 .section-box summary{list-style:none;cursor:pointer;padding:12px;font-weight:900;color:var(--navy);display:flex;align-items:center;gap:8px}
 .section-box summary::-webkit-details-marker{display:none}

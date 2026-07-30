@@ -16,7 +16,7 @@ import {
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=224";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=219";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=226";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=226";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
@@ -353,6 +353,7 @@ let previewFetchId = 0;
 let saveInFlight = false;
 /** Durante bootstrap template: niente banner «non salvato» a metà salvataggio automatico. */
 let suppressDirtyUi = false;
+let switchInFlight = false;
 const SECTION_PHOTO_FIELDS = {
   countdown:{ field:"image_url", previewId:"countdownPhotoPreview", fileId:"countdownPhotoFile", label:"Carica foto" },
   pet:{ field:"pet_photo", previewId:"petPhotoPreview", fileId:"petPhotoFile", label:"Carica foto" },
@@ -980,14 +981,7 @@ function refreshAccountMenu(){
       userMenu?.classList.remove("open");
       const nextId = button.dataset.menuObjectId;
       if(!nextId) return;
-      if(editorDirty && activeId && nextId !== activeId && !confirm(t("shell.confirm_switch"))) return;
-      try{
-        await ensureEventPageState(nextId, { force:true });
-        showEditorView();
-        renderDetail(nextId);
-      }catch(error){
-        showAppLoadError(error);
-      }
+      await openMomentProduct(nextId);
     });
   });
 }
@@ -1583,6 +1577,78 @@ async function ensureEventPageState(eventId, { force = false } = {}){
   return row;
 }
 
+/** Dialog 3 scelte: salva / scarta / annulla. */
+function askUnsavedSwitchChoice(){
+  return new Promise(resolve=>{
+    document.getElementById("switchUnsavedModal")?.remove();
+    const modal = document.createElement("div");
+    modal.id = "switchUnsavedModal";
+    modal.className = "media-modal switch-unsaved-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "switchUnsavedTitle");
+    modal.innerHTML = `
+      <div class="media-modal-backdrop" data-switch-choice="cancel"></div>
+      <div class="media-modal-card switch-unsaved-card">
+        <h3 id="switchUnsavedTitle">${esc(t("shell.switch_title"))}</h3>
+        <p>${esc(t("shell.switch_body"))}</p>
+        <div class="switch-unsaved-actions">
+          <button type="button" class="primary" data-switch-choice="save">${esc(t("shell.switch_save"))}</button>
+          <button type="button" class="ghost danger-text" data-switch-choice="discard">${esc(t("shell.switch_discard"))}</button>
+          <button type="button" class="ghost" data-switch-choice="cancel">${esc(t("shell.switch_cancel"))}</button>
+        </div>
+      </div>`;
+    const finish = choice=>{
+      modal.remove();
+      document.body.classList.remove("media-modal-open");
+      resolve(choice);
+    };
+    modal.addEventListener("click", event=>{
+      const choice = event.target?.closest?.("[data-switch-choice]")?.dataset?.switchChoice;
+      if(choice) finish(choice);
+    });
+    document.body.appendChild(modal);
+    document.body.classList.add("media-modal-open");
+    modal.querySelector('[data-switch-choice="save"]')?.focus();
+  });
+}
+
+/** Apre un altro pezzo dello stesso account (safe anche con molti prodotti). */
+async function openMomentProduct(nextId, { resetPanel = false } = {}){
+  if(!nextId) return;
+  if(nextId === activeId && appView === "editor") return;
+  if(switchInFlight || saveInFlight || uploadBusy){
+    showEditorSaveFeedback(t("shell.switch_busy"), "error");
+    return;
+  }
+  if(editorDirty && activeId && nextId !== activeId){
+    const choice = await askUnsavedSwitchChoice();
+    if(choice === "cancel") return;
+    if(choice === "save"){
+      const row = rows.find(item=>item.id === activeId);
+      const form = document.getElementById("momentEditorForm");
+      if(!row || !form){
+        showEditorSaveFeedback(t("save.fail"), "error");
+        return;
+      }
+      const saved = await saveMoment({ preventDefault(){}, currentTarget:form }, row);
+      if(!saved) return;
+    }
+  }
+  switchInFlight = true;
+  try{
+    if(resetPanel) activeEditorPanel = "cover";
+    await ensureEventPageState(nextId, { force:true });
+    showEditorView();
+    renderDetail(nextId);
+  }catch(error){
+    console.error(error);
+    showAppLoadError(error);
+  }finally{
+    switchInFlight = false;
+  }
+}
+
 async function loadObjects({ render = true } = {}){
   let query = supabase
     .from("moment_events")
@@ -1645,17 +1711,7 @@ function bindObjectSwitcher(root){
     button.addEventListener("click",async()=>{
       const nextId = button.dataset.objectId;
       if(!nextId) return;
-      if(nextId === activeId && appView === "editor") return;
-      if(editorDirty && activeId && nextId !== activeId && !confirm(t("shell.confirm_switch"))) return;
-      activeEditorPanel = "cover";
-      try{
-        await ensureEventPageState(nextId, { force:true });
-        showEditorView();
-        renderDetail(nextId);
-      }catch(error){
-        console.error(error);
-        alert(error.message || "Impossibile aprire la pagina.");
-      }
+      await openMomentProduct(nextId, { resetPanel:true });
     });
   });
 }

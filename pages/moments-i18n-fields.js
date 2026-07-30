@@ -482,6 +482,8 @@ export const FIELD_PHRASE_EN = {
   "Titolo, tipo pagina e foto.": "Title, page type and photo.",
   "2. Template": "2. Template",
   "Tocca «Prepara tutto per me» per partire dal modello del tuo prodotto.": "Tap “Set everything up for me” to start from your product template.",
+  "2. Modello prodotto": "2. Product template",
+  "Colori e sezioni del tuo prodotto (es. Amore) sono già pronti e salvati — personalizzali pure.": "Colours and sections for your product (e.g. Love) are already ready and saved — feel free to personalise them.",
   "3. Contenuti": "3. Content",
   "Modifica testi e media. In «Altre sezioni» aggiungi solo ciò che ti serve.": "Edit texts and media. In “More sections” add only what you need.",
   "4. Pubblica": "4. Publish",

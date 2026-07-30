@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v226 + SQL v169 — bootstrap categoria (2026-07-30, Cursor)** — Pages + SQL
+  - Prima apertura: applica look+template della categoria e **salva subito** (niente verde Amore, niente «scopri Prepara tutto»).
+  - Testi seed del modello in EN se UI EN; guida onboarding aggiornata.
+  - Attivazione NFC: seed `colorPalette`/look per categoria (Amore→rosso). Switch multi-prodotto: dati salvati restano (v225+v226).
 - **Moments v225 — switch prodotti / salvataggio (2026-07-30, Cursor)** — Pages
   - Cambio prodotto: ricarica sempre `page_state` dal DB (niente cache vuota/stale).
   - «Prepara tutto per me» salva subito dopo il template; avviso switch più chiaro.

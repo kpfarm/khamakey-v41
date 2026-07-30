@@ -16,11 +16,12 @@ import {
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=224";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=219";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=216";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=216";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=226";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=226";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=222";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=226";
+import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
   uploadVideo,
@@ -1902,8 +1903,8 @@ function confirmApplyMomentTemplate(type){
   );
 }
 
-function applyTemplateToForm(formNode,type){
-  const template = templateForType(type);
+function applyTemplateToForm(formNode,type, { skipReminder = false } = {}){
+  const template = localizeMomentTemplate(templateForType(type), getUiLocale());
   if(template.subtitle) formNode.elements.subtitle.value = template.subtitle;
   if(template.pill && formNode.elements.pill) formNode.elements.pill.value = template.pill;
   for(const [key,section] of Object.entries(template.sections)){
@@ -1952,7 +1953,42 @@ function applyTemplateToForm(formNode,type){
   const suggestedLook = suggestLookForMomentType(normalizeMomentType(type));
   if(suggestedLook && PAGE_LOOKS[suggestedLook]) applyPageLook(formNode, suggestedLook, { preview:false });
   schedulePreviewUpdate(formNode,{immediate:true,force:true});
-  promptSaveReminder(t("save.reminder_template"));
+  if(!skipReminder) promptSaveReminder(t("save.reminder_template"));
+}
+
+/** Pagina appena attivata: quasi vuota → applica modello categoria e salva. */
+function needsFreshTemplateBootstrap(row){
+  if(!row?.id) return false;
+  // Solo dopo un bootstrap riuscito (salvato in DB). Ignora sessionStorage "done" della v225
+  // che applicava il template in sola UI senza Salva.
+  if(localStorage.getItem(`moments_bootstrapped_${row.id}`) === "1") return false;
+  if(sessionStorage.getItem(templateSeedKey(row.id)) === "bootstrapping") return false;
+  const state = mergedState(row);
+  const hasContent = Boolean(state.subtitle || state.description || state.cover_url);
+  const enabledSections = Object.values(state.sections || {}).filter(section=>section?.enabled).length;
+  // Seed attivazione: poche sezioni vuote, senza sottotitolo/copertina
+  return !hasContent && enabledSections <= 2;
+}
+
+async function bootstrapFreshMomentPage(row, formNode){
+  if(!row?.id || !formNode || !needsFreshTemplateBootstrap(row)) return;
+  const eventId = row.id;
+  sessionStorage.setItem(templateSeedKey(eventId), "bootstrapping");
+  const type = lockedMomentType(row);
+  applyTemplateToForm(formNode, type, { skipReminder:true });
+  if(activeId !== eventId) return;
+  const saved = await saveMoment({ preventDefault(){}, currentTarget:formNode }, row);
+  if(activeId !== eventId) return;
+  if(!saved){
+    sessionStorage.removeItem(templateSeedKey(eventId));
+    promptSaveReminder(t("save.reminder_model", { type: TYPE_LABELS[type] || type }));
+    return;
+  }
+  sessionStorage.setItem(templateSeedKey(eventId), "done");
+  localStorage.setItem(`moments_bootstrapped_${eventId}`, "1");
+  localStorage.setItem(onboardingKey(eventId), "done");
+  document.getElementById("onboardingWizard")?.remove();
+  showEditorSaveFeedback(t("save.reminder_model", { type: TYPE_LABELS[type] || type }), "ok");
 }
 
 function onboardingKey(eventId){
@@ -2474,10 +2510,11 @@ function renderOnboardingWizard(row){
   const start = "Inizia → Copertina";
   const steps = [
     { strong:"1. Copertina", span:"Titolo, tipo pagina e foto." },
-    { strong:"2. Template", span:"Tocca «Prepara tutto per me» per partire dal modello del tuo prodotto." },
+    { strong:"2. Modello prodotto", span:"Colori e sezioni del tuo prodotto (es. Amore) sono già pronti e salvati — personalizzali pure." },
     { strong:"3. Contenuti", span:"Modifica testi e media. In «Altre sezioni» aggiungi solo ciò che ti serve." },
     { strong:"4. Pubblica", span:"Salva e condividi il link NFC." }
   ];
+  void row;
   const stepsHtml = steps.map((step, index)=>`
       <li class="${index === 0 ? "active" : ""}"><strong data-lf="${esc(step.strong)}">${esc(localizeFieldPhrase(step.strong))}</strong><span data-lf="${esc(step.span)}">${esc(localizeFieldPhrase(step.span))}</span></li>`).join("");
   return `<div class="onboarding-wizard" id="onboardingWizard" data-onboarding-wizard>
@@ -3144,13 +3181,9 @@ function renderDetail(id){
       }
     }
   });
-  if(showWizard && sessionStorage.getItem(templateSeedKey(row.id)) !== "done"){
-    applyTemplateToForm(editorForm, currentMomentType);
-    sessionStorage.setItem(templateSeedKey(row.id), "done");
-    savedEditorSnapshot = JSON.stringify(readFormState(editorForm));
-    editorDirty = true;
-    updateSaveStatus(false);
-    promptSaveReminder(t("save.reminder_model", { type: TYPE_LABELS[currentMomentType] || currentMomentType }));
+  if(needsFreshTemplateBootstrap(row)){
+    // Applica look+sezioni categoria e salva subito: niente verde di default, niente perdita al cambio prodotto
+    bootstrapFreshMomentPage(row, editorForm);
   }
   setEditorChromeVisible(true);
 }
@@ -4194,13 +4227,13 @@ async function renderPreview(state,options = {}){
 async function saveMoment(event,row){
   event.preventDefault();
   const formNode = event.currentTarget || document.getElementById("momentEditorForm");
-  if(!formNode) return;
+  if(!formNode) return false;
   let state;
   try{
     state = sanitizeStateForSave(readFormState(formNode));
   }catch(error){
     showEditorSaveFeedback(error.message || t("save.check_fields"),"error");
-    return;
+    return false;
   }
   if(!adminMode){
     state.type = lockedMomentType(row);
@@ -4208,15 +4241,20 @@ async function saveMoment(event,row){
   const pin = String(new FormData(formNode).get("access_pin") || "").trim();
   const publicVisible = new FormData(formNode).get("public_visible") === "true";
   const pinEnabled = new FormData(formNode).get("pin_enabled") === "true";
-  if(!state.title) return showEditorSaveFeedback(t("save.need_title"),"error");
+  if(!state.title){
+    showEditorSaveFeedback(t("save.need_title"),"error");
+    return false;
+  }
   if(state.sections?.letter_future?.enabled){
     const letter = state.sections.letter_future;
     const hasLetter = Boolean(String(letter.body || "").trim() || letter.unlock_date || migrateLetterMediaSection(letter).length);
     if(!hasLetter){
-      return showEditorSaveFeedback(t("save.letter_empty"),"error");
+      showEditorSaveFeedback(t("save.letter_empty"),"error");
+      return false;
     }
     if(letter.media?.some(item=>String(item?.url || "").startsWith("blob:"))){
-      return showEditorSaveFeedback(t("save.letter_blob"),"error");
+      showEditorSaveFeedback(t("save.letter_blob"),"error");
+      return false;
     }
   }
   // Senza WhatsApp: spegni RSVP in automatico (niente blocco, UX semplice)
@@ -4254,7 +4292,8 @@ async function saveMoment(event,row){
         pinHash = await momentPinHash(row.slug,validatePin(pin));
         rememberPin(row.id,pin);
       }catch(pinError){
-        return showEditorSaveFeedback(pinError.message || t("save.pin_invalid"),"error");
+        showEditorSaveFeedback(pinError.message || t("save.pin_invalid"),"error");
+        return false;
       }
     }
     const { error } = adminMode
@@ -4281,7 +4320,7 @@ async function saveMoment(event,row){
     if(error){
       console.error(error);
       showEditorSaveFeedback(error.message || t("save.fail"),"error");
-      return;
+      return false;
     }
     savedEditorSnapshot = JSON.stringify(state);
     lastPreviewHash = savedEditorSnapshot;
@@ -4337,12 +4376,14 @@ async function saveMoment(event,row){
       state,
       copyText
     });
+    return true;
   }catch(error){
     console.error(error);
     const msg = String(error?.message || "").includes("Load failed")
       ? t("save.fail_network")
       : (error?.message || t("save.fail"));
     showEditorSaveFeedback(msg,"error");
+    return false;
   }
 }
 

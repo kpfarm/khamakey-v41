@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v188-preview-locale";
+const WORKER_VERSION = "v190-public-locale";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -238,12 +238,17 @@ function zodiacSignLabelPublic(signKey, locale = "it") {
   return mt(locale, `horoscope.sign.${key}`) || ZODIAC_SIGN_LABELS[key] || key;
 }
 
-function resolveMomentsPublicLocale(request) {
+function resolveMomentsPublicLocale(request, pageState = null) {
   try {
     const url = new URL(request.url);
     const forced = String(url.searchParams.get("lang") || "").toLowerCase().slice(0, 2);
     if (MOMENTS_PUBLIC_LOCALES.includes(forced)) return forced;
   } catch { /* ignore */ }
+  // Lingua scelta nell'editor (salvata in page_state) — oroscopo + chrome pubblico.
+  const fromPage = String(pageState?.public_locale || pageState?.ui_locale || "")
+    .toLowerCase()
+    .slice(0, 2);
+  if (MOMENTS_PUBLIC_LOCALES.includes(fromPage)) return fromPage;
   const preferred = parseAcceptLanguage(request.headers.get("Accept-Language"));
   for (const code of preferred) {
     if (MOMENTS_PUBLIC_LOCALES.includes(code)) return code;
@@ -448,7 +453,7 @@ async function handleMomentPage(request, env, ctx, slug) {
     return html(notFound("Moment non pubblicato"), 404);
   }
 
-  const locale = resolveMomentsPublicLocale(request);
+  const locale = resolveMomentsPublicLocale(request, page.state || {});
   const pinRequired = Boolean(page.pin_required);
   if (pinRequired && !page.pin_valid) {
     return html(renderMomentPinGate(page, url.origin, Boolean(pin), env, locale), 401, {

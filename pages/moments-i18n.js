@@ -22,7 +22,8 @@ export const messages = {
     "common.loading": "Caricamento...",
     "lang.it": "Italiano",
     "lang.en": "English",
-    "lang.switch": "Lingua"
+    "lang.switch": "Lingua",
+    "lang.save_hint": "Salva per aggiornare la lingua della pagina pubblica (oroscopo incluso)."
   },
   en: {
     "boot.opening": "Opening…",
@@ -34,7 +35,8 @@ export const messages = {
     "common.loading": "Loading...",
     "lang.it": "Italiano",
     "lang.en": "English",
-    "lang.switch": "Language"
+    "lang.switch": "Language",
+    "lang.save_hint": "Save to update the public page language (including the horoscope)."
   }
 };
 

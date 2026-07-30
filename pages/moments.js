@@ -14,7 +14,7 @@ import {
   t,
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
-} from "./moments-i18n.js?v=223";
+} from "./moments-i18n.js?v=224";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=219";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=216";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=216";
@@ -154,7 +154,7 @@ import {
 } from "./moment-editor-kit.js?v=186";
 import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=221";
 import { bindRsvpResponsesPanel, refreshRsvpResponsesLocale } from "./moment-rsvp-responses.js?v=221";
-import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=223";
+import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=224";
 import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=221";
 import {
   renderHoroscopePeoplePanel,
@@ -3893,6 +3893,7 @@ function sanitizeStateForSave(state){
   }catch{
     throw new Error("Contenuti non validi. Controlla testi e allegati della lettera al futuro.");
   }
+  clone.public_locale = uiLocaleForPublicPage();
   const stripBlob = value=>{
     const url = String(value || "").trim();
     return url.startsWith("blob:") ? "" : url;
@@ -4001,6 +4002,8 @@ function readFormState(formNode){
     subtitle:String(form.get("subtitle") || "").trim(),
     // name distinto da eventuali altri "description" (es. ticket assistenza)
     description:String(form.get("page_description") || form.get("description") || "").trim(),
+    // Lingua pagina pubblica (oroscopo + chrome /m/) — segue IT|EN dell'editor al Salva
+    public_locale: uiLocaleForPublicPage(),
     pill:String(form.get("pill") || "").trim(),
     cover_url:String(form.get("cover_url") || "").trim(),
     cover_focus_x:Number(form.get("cover_focus_x") || 50),
@@ -4544,6 +4547,11 @@ function bindLangSwitchers(){
       if(!code || code === getUiLocale()) return;
       setUiLocale(code);
       persistUiLocaleToAccount(code);
+      const form = document.getElementById("momentEditorForm");
+      if(form){
+        markEditorDirty(form);
+        showEditorSaveFeedback(t("lang.save_hint"),"");
+      }
     });
   });
   onUiLocaleChange(syncLangSwitchers);

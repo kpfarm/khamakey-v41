@@ -2,7 +2,7 @@
 
 import { summarizeRsvpResponses, fetchMomentRsvpResponses } from "./moment-rsvp-responses.js";
 import { summarizeGuestbookMessages, fetchMomentGuestbookMessages } from "./moment-guestbook-kit.js";
-import { getUiLocale, appendUiLangToPublicUrl } from "./moments-i18n.js?v=223";
+import { getUiLocale, appendUiLangToPublicUrl } from "./moments-i18n.js?v=224";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=222";
 
 function esc(value){

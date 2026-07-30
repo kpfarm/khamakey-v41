@@ -370,3 +370,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-29 | Cursor | **Go-live checklist**: `docs/31-go-live-smoke-moments.md` (NFC + upload + QR + Officina) |
 | 2026-07-29 | Cursor | **Moments v223 + Worker v188**: anteprima/Apri seguono lingua UI; ospiti `/m/` invariati |
 | 2026-07-29 | Cursor | **Worker v189**: pagina pre-attivazione — copy cliente + fix padding lista |
+| 2026-07-30 | Cursor | **Moments v224 + Worker v190**: `public_locale` al Salva → oroscopo `/m/` nella lingua editor |

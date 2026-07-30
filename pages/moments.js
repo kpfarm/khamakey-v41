@@ -644,16 +644,43 @@ async function activateCode({ code, title, pin }){
   const cleanCode = normalizeCode(code);
   if(!isValidMomentCode(cleanCode)) throw new Error("Il codice deve contenere 8-32 lettere o numeri (es. M7K2-9XPL-H3WN).");
   const cleanPin = validatePin(pin);
-  const publicSlug = cleanCode.toLowerCase();
+  // Lo slug pubblico è opaco (≠ codice) da v160. Non hashare il PIN col codice:
+  // altrimenti /m/slug rifiuta sempre il PIN scelto in attivazione.
   const { data,error } = await supabase.rpc("activate_moment_code",{
     p_code:cleanCode,
     p_title:title,
-    p_slug:publicSlug,
+    p_slug:cleanCode.toLowerCase(),
     p_moment_type:"free",
-    p_pin_hash:await momentPinHash(publicSlug,cleanPin)
+    p_pin_hash:null
   });
   if(error) throw error;
-  return (Array.isArray(data) ? data[0] : data) || {};
+  const item = (Array.isArray(data) ? data[0] : data) || {};
+  if(item.event_id && item.slug){
+    await bindMomentPinAfterActivation(item.event_id, item.slug, cleanPin, title);
+  }
+  return item;
+}
+
+/** Scrive pin_hash con lo slug reale restituito dall'attivazione. */
+async function bindMomentPinAfterActivation(eventId, slug, pin, title){
+  const pinHash = await momentPinHash(slug, pin);
+  const { data:row, error:readError } = await supabase
+    .from("moment_events")
+    .select("title,description,moment_type,page_state,public_visible")
+    .eq("id", eventId)
+    .maybeSingle();
+  if(readError) throw readError;
+  const { error:saveError } = await supabase.rpc("save_my_moment_page",{
+    p_event_id:eventId,
+    p_title:row?.title || title || "",
+    p_moment_type:row?.moment_type || "free",
+    p_description:row?.description || "",
+    p_page_state:row?.page_state && typeof row.page_state === "object" ? row.page_state : {},
+    p_public_visible:row?.public_visible !== false,
+    p_pin_enabled:true,
+    p_pin_hash:pinHash
+  });
+  if(saveError) throw saveError;
 }
 
 async function momentPinHash(slug,pin){

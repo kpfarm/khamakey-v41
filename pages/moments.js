@@ -14,7 +14,7 @@ import {
   t,
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
-} from "./moments-i18n.js?v=224";
+} from "./moments-i18n.js?v=230";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=219";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=226";
@@ -4715,7 +4715,13 @@ function bindLangSwitchers(){
       const form = document.getElementById("momentEditorForm");
       if(form){
         markEditorDirty(form);
-        showEditorSaveFeedback(t("lang.save_hint"),"");
+        promptSaveReminder(t("lang.save_hint"));
+        const barMsg = document.querySelector("#momentsSaveBar .save-msg");
+        if(barMsg){
+          barMsg.removeAttribute("data-i18n-html");
+          barMsg.innerHTML = `<strong>${esc(t("save.attention"))}</strong> ${esc(t("lang.save_hint"))}`;
+        }
+        showEditorSaveFeedback(t("lang.save_hint"), "");
       }
     });
   });

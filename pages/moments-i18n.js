@@ -23,7 +23,7 @@ export const messages = {
     "lang.it": "Italiano",
     "lang.en": "English",
     "lang.switch": "Lingua",
-    "lang.save_hint": "Salva per aggiornare la lingua della pagina pubblica (oroscopo incluso)."
+    "lang.save_hint": "Hai cambiato lingua: tocca Salva per aggiornare la pagina pubblica (oroscopo incluso)."
   },
   en: {
     "boot.opening": "Opening…",
@@ -36,7 +36,7 @@ export const messages = {
     "lang.it": "Italiano",
     "lang.en": "English",
     "lang.switch": "Language",
-    "lang.save_hint": "Save to update the public page language (including the horoscope)."
+    "lang.save_hint": "Language changed: tap Save to update the public page (including the horoscope)."
   }
 };
 

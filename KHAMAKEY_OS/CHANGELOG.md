@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v230 — banner cambio lingua (2026-07-30, Cursor)** — Pages
+  - IT↔EN: banner Salva + hint con messaggio chiaro («tocca Salva per aggiornare la pagina pubblica»).
 - **Moments v229 — Salva e cambia prodotto (2026-07-30, Cursor)** — Pages
   - Switch pezzo con modifiche: dialog **Salva e cambia** / Cambia senza salvare / Annulla.
   - Lock durante Salva/upload/switch; ricarica sempre `page_state` dal DB (ok anche con tanti pezzi).

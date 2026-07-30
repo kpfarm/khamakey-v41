@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v227 — salvataggio stabile (2026-07-30, Cursor)** — Pages
+  - Snapshot dirty allineato a `sanitizeStateForSave` (niente banner «non salvato» subito dopo un Salva ok).
+  - Bootstrap template silenzioso + lock anti doppio Salva; un solo messaggio di esito.
 - **Moments v226 + SQL v169 — bootstrap categoria (2026-07-30, Cursor)** — Pages + SQL
   - Prima apertura: applica look+template della categoria e **salva subito** (niente verde Amore, niente «scopri Prepara tutto»).
   - Testi seed del modello in EN se UI EN; guida onboarding aggiornata.

@@ -350,6 +350,9 @@ let savedEditorSnapshot = "";
 let lastPreviewHash = "";
 let previewDebounceTimer = null;
 let previewFetchId = 0;
+let saveInFlight = false;
+/** Durante bootstrap template: niente banner «non salvato» a metà salvataggio automatico. */
+let suppressDirtyUi = false;
 const SECTION_PHOTO_FIELDS = {
   countdown:{ field:"image_url", previewId:"countdownPhotoPreview", fileId:"countdownPhotoFile", label:"Carica foto" },
   pet:{ field:"pet_photo", previewId:"petPhotoPreview", fileId:"petPhotoFile", label:"Carica foto" },
@@ -1975,20 +1978,29 @@ async function bootstrapFreshMomentPage(row, formNode){
   const eventId = row.id;
   sessionStorage.setItem(templateSeedKey(eventId), "bootstrapping");
   const type = lockedMomentType(row);
-  applyTemplateToForm(formNode, type, { skipReminder:true });
-  if(activeId !== eventId) return;
-  const saved = await saveMoment({ preventDefault(){}, currentTarget:formNode }, row);
-  if(activeId !== eventId) return;
-  if(!saved){
-    sessionStorage.removeItem(templateSeedKey(eventId));
-    promptSaveReminder(t("save.reminder_model", { type: TYPE_LABELS[type] || type }));
-    return;
+  suppressDirtyUi = true;
+  try{
+    applyTemplateToForm(formNode, type, { skipReminder:true });
+    if(activeId !== eventId) return;
+    const saved = await saveMoment({ preventDefault(){}, currentTarget:formNode }, row, { quietOk:true });
+    if(activeId !== eventId) return;
+    if(!saved){
+      sessionStorage.removeItem(templateSeedKey(eventId));
+      showEditorSaveFeedback(t("save.reminder_model", { type: TYPE_LABELS[type] || type }), "error");
+      return;
+    }
+    sessionStorage.setItem(templateSeedKey(eventId), "done");
+    localStorage.setItem(`moments_bootstrapped_${eventId}`, "1");
+    localStorage.setItem(onboardingKey(eventId), "done");
+    document.getElementById("onboardingWizard")?.remove();
+    clearTimeout(markEditorDirty.timer);
+    try{ savedEditorSnapshot = formSnapshotForDirty(formNode); }catch{ /* ignore */ }
+    editorDirty = false;
+    updateSaveStatus(true);
+    showEditorSaveFeedback(t("save.reminder_model", { type: TYPE_LABELS[type] || type }), "ok");
+  }finally{
+    suppressDirtyUi = false;
   }
-  sessionStorage.setItem(templateSeedKey(eventId), "done");
-  localStorage.setItem(`moments_bootstrapped_${eventId}`, "1");
-  localStorage.setItem(onboardingKey(eventId), "done");
-  document.getElementById("onboardingWizard")?.remove();
-  showEditorSaveFeedback(t("save.reminder_model", { type: TYPE_LABELS[type] || type }), "ok");
 }
 
 function onboardingKey(eventId){
@@ -3018,7 +3030,11 @@ function renderDetail(id){
   mobilePreviewMode = false;
   setPreviewFabLabel();
   editorShell?.classList.remove("show-preview");
-  savedEditorSnapshot = JSON.stringify(readFormState(editorForm));
+  try{
+    savedEditorSnapshot = formSnapshotForDirty(editorForm);
+  }catch{
+    savedEditorSnapshot = JSON.stringify(readFormState(editorForm));
+  }
   lastPreviewHash = "";
   updateSaveStatus(true);
   document.getElementById("editorUndoBtn")?.addEventListener("click",revertEditorChanges);
@@ -3070,9 +3086,9 @@ function renderDetail(id){
       }
       currentMomentType = nextType;
       applySuggestedLookForType(editorForm, nextType);
-      syncEditorKitUi(editorForm);
-      markEditorDirty(editorForm);
-    });
+    syncEditorKitUi(editorForm);
+    markEditorDirty(editorForm);
+  });
   }
   bindDesignPanelHandlers(editorForm);
   updateDesignSwatch(editorForm);
@@ -3625,8 +3641,8 @@ function bindMediaUploadDelegation(){
   if(detail.dataset.mediaBound === "1") return;
   detail.dataset.mediaBound = "1";
   detail.addEventListener("click",event=>{
-    const formNode = document.getElementById("momentEditorForm");
-    const row = rows.find(item=>item.id === activeId);
+      const formNode = document.getElementById("momentEditorForm");
+      const row = rows.find(item=>item.id === activeId);
     if(!formNode || !row){
       if(event.target.closest("[data-gallery-add],[data-gallery-remove],[data-gallery-replace]")){
         alert(localizeFieldPhrase("Editor non pronto. Ricarica la pagina e riprova."));
@@ -4075,7 +4091,13 @@ function readFormState(formNode){
   };
 }
 
+function formSnapshotForDirty(formNode){
+  // Stesso percorso del Salva: altrimenti sanitize (public_locale/RSVP/…) fa ripartire il banner «non salvato».
+  return JSON.stringify(sanitizeStateForSave(readFormState(formNode)));
+}
+
 function markEditorDirty(formNode){
+  if(suppressDirtyUi) return;
   // Dirty immediato: evita JSON.stringify a ogni keystroke (costoso su form grandi)
   if(!editorDirty){
     editorDirty = true;
@@ -4085,13 +4107,13 @@ function markEditorDirty(formNode){
   }
   clearTimeout(markEditorDirty.timer);
   markEditorDirty.timer = setTimeout(()=>{
-    if(!formNode) return;
+    if(!formNode || suppressDirtyUi || saveInFlight) return;
     try{
-      const snapshot = JSON.stringify(readFormState(formNode));
-      editorDirty = snapshot !== savedEditorSnapshot;
-      updateSaveStatus(!editorDirty);
-      const flag = document.getElementById("unsavedFlag");
-      if(flag) flag.hidden = !editorDirty;
+    const snapshot = formSnapshotForDirty(formNode);
+    editorDirty = snapshot !== savedEditorSnapshot;
+    updateSaveStatus(!editorDirty);
+    const flag = document.getElementById("unsavedFlag");
+    if(flag) flag.hidden = !editorDirty;
     }catch{
       /* ignore parse errors during typing */
     }
@@ -4186,52 +4208,55 @@ async function renderPreview(state,options = {}){
   const preview = document.getElementById("momentPreview");
   if(!preview) return;
   if(!options.force && !shouldLivePreview()) return;
-  const requestId = ++previewFetchId;
-  const { iframe, status } = ensurePreviewShell(preview);
-  if(!iframe) return;
-  if(status) status.textContent = "Aggiornamento…";
-  try{
-    const response = await fetch(`${WORKER_BASE_URL}/api/moment/preview`,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        title:state.title,
+    const requestId = ++previewFetchId;
+    const { iframe, status } = ensurePreviewShell(preview);
+    if(!iframe) return;
+    if(status) status.textContent = "Aggiornamento…";
+    try{
+      const response = await fetch(`${WORKER_BASE_URL}/api/moment/preview`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          title:state.title,
         description:state.description || state.subtitle,
         slug:rows.find(item=>item.id === activeId)?.slug || "",
         page_state:state,
         lang: uiLocaleForPublicPage()
-      })
-    });
-    if(requestId !== previewFetchId) return;
-    if(response.status === 429) throw new Error("Troppe anteprime — attendi un attimo.");
-    if(!response.ok) throw new Error("Anteprima non disponibile");
-    const html = await response.text();
-    iframe.onload = ()=>{
+        })
+      });
       if(requestId !== previewFetchId) return;
-      fitPreviewStage();
+    if(response.status === 429) throw new Error("Troppe anteprime — attendi un attimo.");
+      if(!response.ok) throw new Error("Anteprima non disponibile");
+      const html = await response.text();
+      iframe.onload = ()=>{
+        if(requestId !== previewFetchId) return;
+        fitPreviewStage();
+        if(status) status.textContent = "";
+      };
+      iframe.srcdoc = html;
+      setTimeout(()=>{
+        if(requestId === previewFetchId) fitPreviewStage();
+      },120);
+    }catch(error){
+      if(requestId !== previewFetchId) return;
+      iframe.onload = null;
+      iframe.srcdoc = `<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#64748b"><p><strong>Anteprima non disponibile</strong></p><p>${esc(error.message || "Riprova tra poco.")}</p></body></html>`;
+      iframe.style.height = "240px";
       if(status) status.textContent = "";
-    };
-    iframe.srcdoc = html;
-    setTimeout(()=>{
-      if(requestId === previewFetchId) fitPreviewStage();
-    },120);
-  }catch(error){
-    if(requestId !== previewFetchId) return;
-    iframe.onload = null;
-    iframe.srcdoc = `<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#64748b"><p><strong>Anteprima non disponibile</strong></p><p>${esc(error.message || "Riprova tra poco.")}</p></body></html>`;
-    iframe.style.height = "240px";
-    if(status) status.textContent = "";
-  }
+    }
 }
 
-async function saveMoment(event,row){
+async function saveMoment(event,row, options = {}){
   event.preventDefault();
+  if(saveInFlight) return false;
   const formNode = event.currentTarget || document.getElementById("momentEditorForm");
   if(!formNode) return false;
+  saveInFlight = true;
   let state;
   try{
     state = sanitizeStateForSave(readFormState(formNode));
   }catch(error){
+    saveInFlight = false;
     showEditorSaveFeedback(error.message || t("save.check_fields"),"error");
     return false;
   }
@@ -4242,6 +4267,7 @@ async function saveMoment(event,row){
   const publicVisible = new FormData(formNode).get("public_visible") === "true";
   const pinEnabled = new FormData(formNode).get("pin_enabled") === "true";
   if(!state.title){
+    saveInFlight = false;
     showEditorSaveFeedback(t("save.need_title"),"error");
     return false;
   }
@@ -4249,10 +4275,12 @@ async function saveMoment(event,row){
     const letter = state.sections.letter_future;
     const hasLetter = Boolean(String(letter.body || "").trim() || letter.unlock_date || migrateLetterMediaSection(letter).length);
     if(!hasLetter){
+      saveInFlight = false;
       showEditorSaveFeedback(t("save.letter_empty"),"error");
       return false;
     }
     if(letter.media?.some(item=>String(item?.url || "").startsWith("blob:"))){
+      saveInFlight = false;
       showEditorSaveFeedback(t("save.letter_blob"),"error");
       return false;
     }
@@ -4289,8 +4317,8 @@ async function saveMoment(event,row){
     let pinHash = null;
     if(pin){
       try{
-        pinHash = await momentPinHash(row.slug,validatePin(pin));
-        rememberPin(row.id,pin);
+      pinHash = await momentPinHash(row.slug,validatePin(pin));
+      rememberPin(row.id,pin);
       }catch(pinError){
         showEditorSaveFeedback(pinError.message || t("save.pin_invalid"),"error");
         return false;
@@ -4322,7 +4350,12 @@ async function saveMoment(event,row){
       showEditorSaveFeedback(error.message || t("save.fail"),"error");
       return false;
     }
-    savedEditorSnapshot = JSON.stringify(state);
+    clearTimeout(markEditorDirty.timer);
+    try{
+      savedEditorSnapshot = formSnapshotForDirty(formNode);
+    }catch{
+      savedEditorSnapshot = JSON.stringify(state);
+    }
     lastPreviewHash = savedEditorSnapshot;
     lastSavedMomentType = normalizeMomentType(state.type);
     currentMomentType = lastSavedMomentType;
@@ -4334,12 +4367,14 @@ async function saveMoment(event,row){
       barMsg.innerHTML = t("shell.save_bar");
     }
     localStorage.setItem(onboardingKey(row.id),"done");
-    showEditorSaveFeedback(
-      rsvpAutoOff
-        ? t("save.ok_rsvp_off")
-        : t("save.ok"),
-      "ok"
-    );
+    if(!options.quietOk){
+      showEditorSaveFeedback(
+        rsvpAutoOff
+          ? t("save.ok_rsvp_off")
+          : t("save.ok"),
+        "ok"
+      );
+    }
     const hint = document.getElementById("editorActionHint");
     if(hint) hint.hidden = true;
     // Soft update: niente reload completo dell'editor (più fluido)
@@ -4384,6 +4419,8 @@ async function saveMoment(event,row){
       : (error?.message || t("save.fail"));
     showEditorSaveFeedback(msg,"error");
     return false;
+  }finally{
+    saveInFlight = false;
   }
 }
 
@@ -4457,8 +4494,8 @@ document.getElementById("signupNextStep")?.addEventListener("click",async()=>{
     if(row.status && String(row.status) !== "available"){
       return setStatus(statusNode,t("auth.msg.code_unavailable"),"error");
     }
-    setStatus(statusNode,"");
-    setSignupStep(2);
+  setStatus(statusNode,"");
+  setSignupStep(2);
     await refreshActivationCodeTypeHint(code, document.getElementById("momentsSignupTypeHint"));
   }catch(error){
     console.error(error);

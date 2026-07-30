@@ -373,3 +373,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-30 | Cursor | **Moments v224 + Worker v190**: `public_locale` al Salva → oroscopo `/m/` nella lingua editor |
 | 2026-07-30 | Cursor | **Moments v225**: fix switch prodotti (reload DB) + Prepara tutto salva subito |
 | 2026-07-30 | Cursor | **Moments v226 + SQL v169**: Amore non parte più verde; bootstrap auto template+save; seed EN; multi-prodotto ok |
+| 2026-07-30 | Cursor | **Moments v227**: fix banner Salva doppio / «non salvato» fantasma dopo save riuscito |

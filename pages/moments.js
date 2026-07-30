@@ -799,7 +799,7 @@ function showAccountHub(tab = "products"){
         showEditorView();
         if(activeId){
           try{
-            await ensureEventPageState(activeId);
+            await ensureEventPageState(activeId, { force:true });
             renderDetail(activeId);
           }catch(error){
             showAppLoadError(error);
@@ -951,7 +951,7 @@ function refreshAccountMenu(){
       if(!nextId) return;
       if(editorDirty && activeId && nextId !== activeId && !confirm(t("shell.confirm_switch"))) return;
       try{
-        await ensureEventPageState(nextId);
+        await ensureEventPageState(nextId, { force:true });
         showEditorView();
         renderDetail(nextId);
       }catch(error){
@@ -1535,10 +1535,12 @@ function renderEmptyState(message = "",prefillCode = ""){
   bindActivationForm(document.getElementById("emptyActivationForm"),document.getElementById("emptyActivationStatus"));
 }
 
-async function ensureEventPageState(eventId){
+async function ensureEventPageState(eventId, { force = false } = {}){
   const row = rows.find(item=>item.id === eventId);
   if(!row) return null;
-  if(row.page_state && typeof row.page_state === "object") return row;
+  const cached = row.page_state;
+  const hasCached = cached && typeof cached === "object" && Object.keys(cached).length > 0;
+  if(!force && hasCached) return row;
   const { data,error } = await supabase
     .from("moment_events")
     .select("page_state,description,title,moment_type,event_type,pin_enabled,public_visible,nfc_code")
@@ -1616,7 +1618,7 @@ function bindObjectSwitcher(root){
       if(editorDirty && activeId && nextId !== activeId && !confirm(t("shell.confirm_switch"))) return;
       activeEditorPanel = "cover";
       try{
-        await ensureEventPageState(nextId);
+        await ensureEventPageState(nextId, { force:true });
         showEditorView();
         renderDetail(nextId);
       }catch(error){
@@ -1895,7 +1897,7 @@ function confirmApplyMomentTemplate(type){
   const label = TYPE_LABELS[type] || type;
   return window.confirm(
     `«Prepara tutto per me» sostituirà testi, sezioni attive, ordine e colori con il modello «${label}».\n\n` +
-    "I contenuti attuali andranno persi se poi salvi la pagina. Operazione irreversibile.\n\n" +
+    "Poi salveremo subito la pagina, così non perdi il lavoro se cambi prodotto.\n\n" +
     "Continuare?"
   );
 }
@@ -3012,10 +3014,12 @@ function renderDetail(id){
     if(event.target?.name === "theme_variant") updateDesignSwatch(editorForm);
     schedulePreviewUpdate(editorForm,{immediate:isSectionToggle || event.target?.name === "theme_variant"});
   });
-  document.getElementById("applyMomentTemplate")?.addEventListener("click",()=>{
+  document.getElementById("applyMomentTemplate")?.addEventListener("click",async()=>{
     const type = lockedMomentType(row);
     if(!confirmApplyMomentTemplate(type)) return;
     applyTemplateToForm(editorForm,type);
+    // Salva subito: altrimenti al cambio prodotto si perde template/colori/copertina
+    await saveMoment({ preventDefault(){}, currentTarget:editorForm }, row);
   });
   if(adminMode){
     document.getElementById("momentTypeSelect")?.addEventListener("change",event=>{

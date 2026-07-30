@@ -371,3 +371,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-29 | Cursor | **Moments v223 + Worker v188**: anteprima/Apri seguono lingua UI; ospiti `/m/` invariati |
 | 2026-07-29 | Cursor | **Worker v189**: pagina pre-attivazione — copy cliente + fix padding lista |
 | 2026-07-30 | Cursor | **Moments v224 + Worker v190**: `public_locale` al Salva → oroscopo `/m/` nella lingua editor |
+| 2026-07-30 | Cursor | **Moments v225**: fix switch prodotti (reload DB) + Prepara tutto salva subito |

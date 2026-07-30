@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v225 — switch prodotti / salvataggio (2026-07-30, Cursor)** — Pages
+  - Cambio prodotto: ricarica sempre `page_state` dal DB (niente cache vuota/stale).
+  - «Prepara tutto per me» salva subito dopo il template; avviso switch più chiaro.
 - **Moments v224 + Worker v190 — public_locale (2026-07-30, Cursor)** — Pages + Worker
   - Al Salva scrive `page_state.public_locale` dalla lingua UI; `/m/` la usa per chrome + oroscopo (dopo `?lang=`).
   - NFC/upload invariati; serve un Salva dopo il cambio IT→EN.

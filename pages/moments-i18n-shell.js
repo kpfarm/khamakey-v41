@@ -21,7 +21,7 @@ export const SHELL_MESSAGES_IT = {
   "shell.pin_off": "PIN disattivo",
   "shell.live_preview": "Anteprima live",
   "shell.preview_iframe": "Anteprima della tua pagina",
-  "shell.confirm_switch": "Hai modifiche non salvate. Vuoi cambiare oggetto senza salvare?",
+  "shell.confirm_switch": "Hai modifiche non salvate (testi, colori, foto…). Cambiando prodotto le perdi. Continuare senza salvare?",
   "shell.confirm_undo": "Annullare le modifiche non salvate e tornare all'ultima versione salvata?"
 };
 
@@ -46,6 +46,6 @@ export const SHELL_MESSAGES_EN = {
   "shell.pin_off": "PIN off",
   "shell.live_preview": "Live preview",
   "shell.preview_iframe": "Preview of your page",
-  "shell.confirm_switch": "You have unsaved changes. Switch page without saving?",
+  "shell.confirm_switch": "You have unsaved changes (text, colours, photos…). Switching pages discards them. Continue without saving?",
   "shell.confirm_undo": "Discard unsaved changes and restore the last saved version?"
 };

@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v191 — pre-attivazione brand (2026-08-01, Cursor)** — Worker
+  - Pagina «Pronto da attivare»: rimosso eyebrow doppio «KhamaKey Moments»; resta solo il wordmark.
 - **Moments v230 — banner cambio lingua (2026-07-30, Cursor)** — Pages
   - IT↔EN: banner Salva + hint con messaggio chiaro («tocca Salva per aggiornare la pagina pubblica»).
 - **Moments v229 — Salva e cambia prodotto (2026-07-30, Cursor)** — Pages

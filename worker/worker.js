@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v190-public-locale";
+const WORKER_VERSION = "v191-activation-brand";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -4786,7 +4786,6 @@ body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:syste
 background:radial-gradient(circle at 12% 8%,rgba(217,140,149,.18) 0%,transparent 42%),radial-gradient(circle at 90% 90%,rgba(170,98,108,.12) 0%,transparent 45%),#FFF9F5}
 .card{width:min(100%,440px);background:#fff;border:1px solid #E8D4CE;border-radius:22px;padding:28px 24px 24px;box-shadow:0 18px 50px rgba(7,26,60,.10);text-align:center}
 .logo{display:block;width:min(240px,78%);height:auto;margin:0 auto 18px}
-.eyebrow{color:#AA626C;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin:0 0 8px}
 h1{color:#071A3C;font-size:clamp(1.45rem,5vw,1.85rem);line-height:1.2;margin:0 0 12px;font-weight:700}
 p{color:#6B6470;line-height:1.55;margin:0 0 12px}
 .badge{display:inline-block;margin:8px 0 16px;padding:8px 14px;border-radius:999px;background:#F3E3DE;color:#071A3C;font-size:13px;font-weight:650;border:1px solid #E0B8B6}
@@ -4802,7 +4801,6 @@ p{color:#6B6470;line-height:1.55;margin:0 0 12px}
 </style></head>
 <body><main class="card">
 <img class="logo" src="${attr(logoSrc)}" alt="KhamaKey Moments">
-<p class="eyebrow">KhamaKey Moments</p>
 <h1>Pronto da attivare</h1>
 <p>Per creare la tua pagina ti serve il <strong>codice</strong> che trovi nella confezione.</p>
 ${lineLabel ? `<span class="badge">${escapeHtml(lineLabel)}</span>` : ""}

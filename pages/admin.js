@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=179";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=180";
 import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=177";
 import {
   generateMomentSku,
@@ -167,9 +167,11 @@ const momentBulkCount = document.getElementById("momentBulkCount");
 const momentBulkAgent = document.getElementById("momentBulkAgent");
 const momentBulkChannel = document.getElementById("momentBulkChannel");
 const momentBulkStatus = document.getElementById("momentBulkStatus");
+const momentBulkBuild = document.getElementById("momentBulkBuild");
 const momentBulkApply = document.getElementById("momentBulkApply");
 const momentBulkClearAgent = document.getElementById("momentBulkClearAgent");
 const momentBulkClearOrder = document.getElementById("momentBulkClearOrder");
+const momentFilterBuild = document.getElementById("momentFilterBuild");
 const momentTableCount = document.getElementById("momentTableCount");
 const momentExportFiltered = document.getElementById("momentExportFiltered");
 const momentExportSelected = document.getElementById("momentExportSelected");
@@ -732,6 +734,17 @@ function renderAgentHierarchySelects(selectedParentId=""){
     <option value="${esc(row.id)}">${esc(row.name)}</option>
   `).join("");
   if(priceListItemSelect) priceListItemSelect.innerHTML = listItemOptions;
+}
+
+function buildStageLabel(value){
+  return {
+    digital: "Solo digitale",
+    assembled: "In prodotto"
+  }[value] || "Solo digitale";
+}
+
+function normalizeBuildStage(value){
+  return String(value || "").trim().toLowerCase() === "assembled" ? "assembled" : "digital";
 }
 
 function soldChannelLabel(value){
@@ -1672,6 +1685,7 @@ function momentExportRows(rows,filenameStem="khamakey-moments"){
     "Lotto",
     "Template",
     "Stato",
+    "Fabbricazione",
     "Canale",
     "Agente",
     "Ordine",
@@ -1691,6 +1705,7 @@ function momentExportRows(rows,filenameStem="khamakey-moments"){
       row.batch_label || "",
       momentTemplateLabel(row.product_type),
       row.status,
+      buildStageLabel(normalizeBuildStage(row.build_stage)),
       soldChannelLabel(row.sold_channel || "non_specificato"),
       agentLabelById(row.assigned_agent_id),
       orderLabelById(row.platform_order_id),
@@ -1744,6 +1759,7 @@ function getMomentProductFilters(){
     line:momentFilterLine?.value || "",
     batch:momentFilterBatch?.value || "",
     status:momentFilterStatus?.value || "",
+    build:momentFilterBuild?.value || "",
     sku:momentFilterSku?.value || "",
     dateFrom:momentFilterDateFrom?.value || "",
     dateTo:momentFilterDateTo?.value || "",
@@ -1801,15 +1817,17 @@ function catalogForMomentCode(row){
 }
 
 function filteredMomentProducts(){
-  const { line,batch,status,sku,dateFrom,dateTo,agent,channel,order,search } = getMomentProductFilters();
+  const { line,batch,status,build,sku,dateFrom,dateTo,agent,channel,order,search } = getMomentProductFilters();
   return momentProductRows.filter(row=>{
     const rowLine = row.product_line || "non_specificato";
     const rowBatch = row.batch_label || "senza_lotto";
     const rowAgent = row.assigned_agent_id || "";
     const rowChannel = row.sold_channel || "";
+    const rowBuild = normalizeBuildStage(row.build_stage);
     if(line && rowLine !== line) return false;
     if(batch && rowBatch !== batch) return false;
     if(status && row.status !== status) return false;
+    if(build && rowBuild !== build) return false;
     if(!momentCatalogMatchesCode(row,sku)) return false;
     if(!momentRowMatchesCreatedDate(row,dateFrom,dateTo)) return false;
     if(agent === "__none__" && rowAgent) return false;
@@ -1825,7 +1843,7 @@ function filteredMomentProducts(){
 
 function hasActiveMomentProductFilters(){
   const f = getMomentProductFilters();
-  return Boolean(f.line || f.batch || f.status || f.sku || f.dateFrom || f.dateTo || f.agent || f.channel || f.order || f.search);
+  return Boolean(f.line || f.batch || f.status || f.build || f.sku || f.dateFrom || f.dateTo || f.agent || f.channel || f.order || f.search);
 }
 
 function clearMomentInventoryFilters({ refresh = true } = {}){
@@ -1833,6 +1851,7 @@ function clearMomentInventoryFilters({ refresh = true } = {}){
   if(momentFilterLine) momentFilterLine.value = "";
   if(momentFilterBatch) momentFilterBatch.value = "";
   if(momentFilterStatus) momentFilterStatus.value = "";
+  if(momentFilterBuild) momentFilterBuild.value = "";
   if(momentFilterSku) momentFilterSku.value = "";
   if(momentFilterDateFrom) momentFilterDateFrom.value = "";
   if(momentFilterDateTo) momentFilterDateTo.value = "";
@@ -1885,6 +1904,7 @@ function renderMomentProductsTable(rows){
     const activationUrl = momentActivationUrl(row);
     const catalog = catalogForMomentCode(row);
     const claimed = row.status === "claimed";
+    const build = normalizeBuildStage(row.build_stage);
     const checked = selectedMomentCodes.has(row.code) ? "checked" : "";
     const productLabel = catalog ? `${catalog.sku} · ${catalog.name}` : (row.product_label || momentTemplateLabel(row.product_type));
     const trace = [
@@ -1892,6 +1912,9 @@ function renderMomentProductsTable(rows){
       agentLabelById(row.assigned_agent_id),
       row.platform_order_id ? orderLabelById(row.platform_order_id) : ""
     ].filter(value=>value && value !== "-" && value !== "Non specificato").join(" · ") || "-";
+    const buildToggle = build === "assembled"
+      ? `<button class="small-action" type="button" data-build-stage="${esc(row.code)}" data-build-next="digital" title="Segna come solo digitale">In prodotto</button>`
+      : `<button class="small-action" type="button" data-build-stage="${esc(row.code)}" data-build-next="assembled" title="Segna come inserito nel pezzo">Solo digitale</button>`;
     return `<tr class="inventory-row">
       <td class="col-select">${claimed ? "" : `<input type="checkbox" data-moment-select="${esc(row.code)}" ${checked} aria-label="Seleziona ${esc(row.code)}">`}</td>
       <td class="col-code" data-label="Codice"><strong>${esc(formatMomentCodeDisplay(row.code))}</strong><div class="muted-cell">${esc(productLabel)}${row.packaging_barcode ? `<br>Barcode: ${esc(row.packaging_barcode)}` : ""}</div></td>
@@ -1902,10 +1925,11 @@ function renderMomentProductsTable(rows){
       <td class="col-created" data-label="Creato">${esc(row.created_at ? dateShort(row.created_at) : "-")}</td>
       <td class="col-trace" data-label="Traccia">${row.platform_order_id ? `<button type="button" class="link-button" data-order-open="${esc(row.platform_order_id)}">${esc(trace)}</button>` : esc(trace)}</td>
       <td class="col-status" data-label="Stato"><span class="status-pill ${esc(row.status)}">${esc(row.status)}</span></td>
+      <td class="col-build" data-label="Pezzo"><span class="status-pill build-${esc(build)}">${esc(buildStageLabel(build))}</span><div class="muted-cell">${buildToggle}</div></td>
       <td class="col-client" data-label="Cliente">${esc(row.claimed_by_email || "-")}</td>
       <td class="col-actions"><button class="small-action" type="button" data-code-edit="${esc(row.code)}">Modifica</button></td>
     </tr>`;
-  }).join("") : `<tr><td colspan="11">${emptyMsg}</td></tr>`;
+  }).join("") : `<tr><td colspan="12">${emptyMsg}</td></tr>`;
 }
 
 function selectHasValue(select, value){
@@ -2003,7 +2027,7 @@ async function loadMomentProducts(){
   try{
     const { data,error } = await supabase
       .from("moment_activation_codes")
-      .select("code,packaging_barcode,status,public_slug,product_type,product_line,batch_label,product_label,public_url,claimed_by_email,claimed_at,created_at,sold_channel,assigned_agent_id,platform_order_id")
+      .select("code,packaging_barcode,status,build_stage,public_slug,product_type,product_line,batch_label,product_label,public_url,claimed_by_email,claimed_at,created_at,sold_channel,assigned_agent_id,platform_order_id")
       .order("created_at",{ascending:false})
       .limit(2000);
     if(error) throw error;
@@ -2021,7 +2045,7 @@ async function loadMomentProducts(){
     if(seq !== momentProductsLoadSeq) return;
     console.error(error);
     momentProductsLoaded = true;
-    momentProductsTable.innerHTML = `<tr><td colspan="11">Prodotti Moments non disponibili. ${esc(error.message || "Ricarica la pagina.")}</td></tr>`;
+    momentProductsTable.innerHTML = `<tr><td colspan="12">Prodotti Moments non disponibili. ${esc(error.message || "Ricarica la pagina.")}</td></tr>`;
     if(momentTableCount) momentTableCount.textContent = "Errore caricamento";
   }
 }
@@ -4316,6 +4340,13 @@ function openCodeDrawer(code,kind="moment"){
     statusSelect.value = row.status === "claimed" ? "claimed" : (row.status || "available");
   }
   if(channelSelect) channelSelect.value = row.sold_channel || "";
+  const buildSelect = document.getElementById("codeEditBuild");
+  if(buildSelect && kind === "moment"){
+    buildSelect.value = normalizeBuildStage(row.build_stage);
+    buildSelect.closest("label")?.removeAttribute("hidden");
+  }else if(buildSelect){
+    buildSelect.closest("label")?.setAttribute("hidden","");
+  }
   try{
     renderAgentOptions(row.assigned_agent_id || "");
   }catch(error){
@@ -4373,10 +4404,30 @@ async function saveCodeEdit(event){
   const rows = isBusiness ? businessProductRows : momentProductRows;
   const table = isBusiness ? "business_activation_codes" : "moment_activation_codes";
   const row = rows.find(item=>item.code === code);
+  const nextBuild = !isBusiness ? normalizeBuildStage(form.elements.build_stage?.value) : null;
+
+  // Pezzi attivati: solo fabbricazione (ops), senza toccare status/canale.
   if(row?.status === "claimed"){
-    setFormStatus(codeEditFormStatus,"Codice già attivato: non modificabile.","error");
+    if(isBusiness){
+      setFormStatus(codeEditFormStatus,"Codice già attivato: non modificabile.","error");
+      return;
+    }
+    setFormStatus(codeEditFormStatus,"Salvataggio fabbricazione...");
+    const { error } = await supabase.rpc("set_moment_codes_build_stage",{
+      p_codes:[code],
+      p_build_stage:nextBuild
+    });
+    if(error){
+      console.error(error);
+      setFormStatus(codeEditFormStatus,error.message || "Salvataggio non riuscito. Applica SQL v170.","error");
+      return;
+    }
+    setFormStatus(codeEditFormStatus,"Fabbricazione aggiornata.","ok");
+    await Promise.all([loadMomentProducts(),loadMomentInventoryStats(),loadMomentAgentInventoryStats()]);
+    closeCodeDrawer();
     return;
   }
+
   const payload = {
     status:form.elements.status.value,
     sold_channel:form.elements.sold_channel.value || null,
@@ -4384,6 +4435,7 @@ async function saveCodeEdit(event){
     batch_label:String(form.elements.batch_label.value || "").trim() || null,
     updated_at:new Date().toISOString()
   };
+  if(!isBusiness && nextBuild) payload.build_stage = nextBuild;
   setFormStatus(codeEditFormStatus,"Salvataggio...");
   const { error } = await supabase.from(table).update(payload).eq("code",code);
   if(error){
@@ -4398,6 +4450,26 @@ async function saveCodeEdit(event){
     await Promise.all([loadMomentProducts(),loadMomentInventoryStats(),loadMomentAgentInventoryStats()]);
   }
   closeCodeDrawer();
+}
+
+async function setMomentCodesBuildStage(codes, buildStage){
+  const list = (codes || []).map(code=>String(code || "").trim().toUpperCase()).filter(Boolean);
+  const stage = normalizeBuildStage(buildStage);
+  if(!list.length) return 0;
+  if(!hasPermission("moments.write")){
+    alert("Permesso moments.write richiesto.");
+    return 0;
+  }
+  const { data, error } = await supabase.rpc("set_moment_codes_build_stage",{
+    p_codes:list,
+    p_build_stage:stage
+  });
+  if(error){
+    console.error(error);
+    alert(error.message || "Aggiornamento fabbricazione non riuscito. Applica SQL v170.");
+    return 0;
+  }
+  return Number(data || 0);
 }
 
 async function unlinkCodeOrder(){
@@ -4593,17 +4665,26 @@ async function applyMomentBulk(action={}){
     alert("Permesso moments.write richiesto.");
     return;
   }
-  const { error } = await supabase.rpc("bulk_update_moment_activation_codes",{
-    p_codes:codes,
-    p_status:action.status || null,
-    p_sold_channel:action.channel ?? null,
-    p_assigned_agent_id:action.agentId ?? null,
-    p_clear_agent:Boolean(action.clearAgent),
-    p_clear_order:Boolean(action.clearOrder)
-  });
-  if(error){
-    alert(error.message || "Aggiornamento bulk non riuscito.");
-    return;
+  const hasFulfillmentChange = Boolean(
+    action.status || action.channel || action.agentId || action.clearAgent || action.clearOrder
+  );
+  if(hasFulfillmentChange){
+    const { error } = await supabase.rpc("bulk_update_moment_activation_codes",{
+      p_codes:codes,
+      p_status:action.status || null,
+      p_sold_channel:action.channel ?? null,
+      p_assigned_agent_id:action.agentId ?? null,
+      p_clear_agent:Boolean(action.clearAgent),
+      p_clear_order:Boolean(action.clearOrder)
+    });
+    if(error){
+      alert(error.message || "Aggiornamento bulk non riuscito.");
+      return;
+    }
+  }
+  if(action.buildStage){
+    const n = await setMomentCodesBuildStage(codes, action.buildStage);
+    if(!n && !hasFulfillmentChange) return;
   }
   selectedMomentCodes.clear();
   if(momentSelectAll) momentSelectAll.checked = false;
@@ -6123,6 +6204,7 @@ document.getElementById("momentInventoryQuickFilters")?.addEventListener("click"
   // I chip rapidi ripartono da zero: evita filtri SKU/lotto/date “appiccicati” che svuotano la tabella
   clearMomentInventoryFilters({ refresh: false });
   if(momentFilterStatus) momentFilterStatus.value = chip.dataset.momentQuickStatus || "";
+  if(momentFilterBuild) momentFilterBuild.value = chip.dataset.momentQuickBuild || "";
   if(momentFilterOrder){
     momentFilterOrder.value = chip.dataset.momentQuickOrder !== undefined
       ? (chip.dataset.momentQuickOrder || "")
@@ -6256,7 +6338,7 @@ momentSearchClear?.addEventListener("click",()=>{
   clearMomentInventoryFilters();
 });
 
-[momentFilterLine,momentFilterBatch,momentFilterStatus,momentFilterSku,momentFilterDateFrom,momentFilterDateTo,momentFilterAgent,momentFilterChannel,momentFilterOrder].forEach(node=>{
+[momentFilterLine,momentFilterBatch,momentFilterStatus,momentFilterBuild,momentFilterSku,momentFilterDateFrom,momentFilterDateTo,momentFilterAgent,momentFilterChannel,momentFilterOrder].forEach(node=>{
   if(node) node.addEventListener("change",()=>{
     syncMomentQuickChips();
     refreshMomentTable();
@@ -6279,9 +6361,18 @@ momentProductsTable?.addEventListener("change",event=>{
   toggleMomentCodeSelection(input.dataset.momentSelect,input.checked);
 });
 
-momentProductsTable?.addEventListener("click",event=>{
+momentProductsTable?.addEventListener("click",async event=>{
   if(event.target.closest("[data-moment-clear-filters]")){
     clearMomentInventoryFilters();
+    return;
+  }
+  const buildBtn = event.target.closest("[data-build-stage]");
+  if(buildBtn){
+    event.preventDefault();
+    const code = buildBtn.getAttribute("data-build-stage");
+    const next = buildBtn.getAttribute("data-build-next") || "assembled";
+    const n = await setMomentCodesBuildStage([code], next);
+    if(n) await loadMomentProducts();
     return;
   }
   const editBtn = event.target.closest("[data-code-edit]");
@@ -6297,7 +6388,8 @@ momentBulkApply?.addEventListener("click",()=>{
   applyMomentBulk({
     status:momentBulkStatus?.value || null,
     channel:momentBulkChannel?.value || null,
-    agentId:momentBulkAgent?.value || null
+    agentId:momentBulkAgent?.value || null,
+    buildStage:momentBulkBuild?.value || null
   });
 });
 momentBulkClearAgent?.addEventListener("click",()=>applyMomentBulk({clearAgent:true}));
@@ -6477,18 +6569,22 @@ function syncMomentQuickChips(){
   const bar = document.getElementById("momentInventoryQuickFilters");
   if(!bar) return;
   const status = momentFilterStatus?.value || "";
+  const build = momentFilterBuild?.value || "";
   const order = momentFilterOrder?.value || "";
   const extra = !!(momentFilterLine?.value || momentFilterBatch?.value || momentFilterChannel?.value || momentFilterAgent?.value);
   bar.querySelectorAll(".filter-chip").forEach(chip=>{
     const chipStatus = chip.dataset.momentQuickStatus || "";
+    const chipBuild = chip.dataset.momentQuickBuild;
     const chipOrder = chip.dataset.momentQuickOrder;
     let match = false;
-    if(chipOrder === undefined && !chipStatus){
-      match = !status && !order && !extra;
+    if(chipBuild !== undefined){
+      match = !extra && !status && !order && build === chipBuild;
+    }else if(chipOrder === undefined && !chipStatus){
+      match = !status && !order && !build && !extra;
     }else if(chipOrder !== undefined){
-      match = !extra && order === chipOrder && !status;
+      match = !extra && order === chipOrder && !status && !build;
     }else{
-      match = !extra && status === chipStatus && !order;
+      match = !extra && status === chipStatus && !order && !build;
     }
     chip.classList.toggle("active", match);
   });

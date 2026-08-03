@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=179">
+  <link rel="stylesheet" href="admin.css?v=180">
   <script>
     // Dominio Moments: questo è l'admin Business — vai subito all'Officina Moments.
     (function () {
@@ -542,9 +542,11 @@
               <button type="button" class="filter-chip active" data-moment-quick data-moment-quick-status="">Tutti</button>
               <button type="button" class="filter-chip" data-moment-quick data-moment-quick-status="available">Solo disponibili</button>
               <button type="button" class="filter-chip" data-moment-quick data-moment-quick-status="claimed">Già attivati</button>
+              <button type="button" class="filter-chip" data-moment-quick data-moment-quick-build="digital">Solo digitali</button>
+              <button type="button" class="filter-chip" data-moment-quick data-moment-quick-build="assembled">In prodotto</button>
               <button type="button" class="filter-chip" data-moment-quick data-moment-quick-order="__none__">Senza ordine</button>
             </div>
-            <p class="filter-hint">Per filtri più precisi (lotto, agente, canale) usa i menu sotto. Seleziona più righe per azioni in blocco.</p>
+            <p class="filter-hint">«In prodotto» = chip + codice già nel pezzo fisico. «Digitali» = ancora da assemblare. Seleziona più righe per azioni in blocco.</p>
             <div class="inventory-filters inventory-filters-4" id="momentInventoryFilters">
               <label>Linea
                 <select id="momentFilterLine"><option value="">Tutte</option></select>
@@ -559,6 +561,13 @@
                   <option value="claimed">Attivati</option>
                   <option value="paused">In pausa</option>
                   <option value="archived">Archiviati</option>
+                </select>
+              </label>
+              <label>Fabbricazione
+                <select id="momentFilterBuild">
+                  <option value="">Tutti</option>
+                  <option value="digital">Solo digitali</option>
+                  <option value="assembled">In prodotto</option>
                 </select>
               </label>
               <label>SKU / modello
@@ -610,6 +619,11 @@
                 <option value="paused">In pausa</option>
                 <option value="archived">Archiviato</option>
               </select>
+              <select id="momentBulkBuild">
+                <option value="">Fabbricazione…</option>
+                <option value="assembled">Segna in prodotto</option>
+                <option value="digital">Segna solo digitale</option>
+              </select>
               <button type="button" class="small-action" id="momentBulkApply">Applica ai selezionati</button>
               <button type="button" class="small-action" id="momentBulkClearAgent">Rimuovi agente</button>
               <button type="button" class="small-action" id="momentBulkClearOrder">Scollega ordine</button>
@@ -630,9 +644,9 @@
               <table>
                 <thead><tr>
                   <th><input type="checkbox" id="momentSelectAll" aria-label="Seleziona tutti"></th>
-                  <th>Codice</th><th>Link NFC</th><th>Attivazione</th><th>Linea</th><th>Lotto</th><th>Creato</th><th>Tracciabilita'</th><th>Stato</th><th>Cliente</th><th>Azioni</th>
+                  <th>Codice</th><th>Link NFC</th><th>Attivazione</th><th>Linea</th><th>Lotto</th><th>Creato</th><th>Tracciabilita'</th><th>Stato</th><th>Pezzo</th><th>Cliente</th><th>Azioni</th>
                 </tr></thead>
-                <tbody id="momentProductsTable"><tr><td colspan="11">Caricamento prodotti...</td></tr></tbody>
+                <tbody id="momentProductsTable"><tr><td colspan="12">Caricamento prodotti...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -1986,6 +2000,12 @@
               <option value="claimed" disabled>Attivato (non modificabile)</option>
             </select>
           </label>
+          <label>Fabbricazione
+            <select name="build_stage" id="codeEditBuild">
+              <option value="digital">Solo digitale — ancora da inserire nel pezzo</option>
+              <option value="assembled">In prodotto — chip e codice già nel pezzo</option>
+            </select>
+          </label>
           <label>Canale vendita
             <select name="sold_channel" id="codeEditChannel">
               <option value="">Non assegnato</option>
@@ -2112,6 +2132,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=179"></script>
+  <script type="module" src="admin.js?v=180"></script>
 </body>
 </html>

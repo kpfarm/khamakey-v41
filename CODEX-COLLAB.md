@@ -239,7 +239,7 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Stripe webhook / ingest** | Predisposto — libero | handler Stripe in `worker/worker.js`, RPC `ingest_stripe_checkout_event` |
 | **Shopify Moments** | Operativo — libero | webhook ordini, catalogo vendita, sync bozze |
 | **Editor Business — contratto pubblico** | Condiviso | `publicStateFromEditor`, renderer `/p/` nel Worker |
-| **Admin / Officina Moments** | **Libero** (live **v179**) | `admin.html`, `moments-admin.html`, `admin.js`, `admin.css`, `admin-guide.js`, `admin-moment-labels.js` — coordinarsi se stesso pannello |
+| **Admin / Officina Moments** | **Libero** (live **v180** — build_stage) | `admin.html`, `moments-admin.html`, `admin.js`, `admin.css`, `admin-guide.js`, `admin-moment-labels.js` — coordinarsi se stesso pannello |
 | **Moments editor** | **Libero** (live **v230** — banner lingua) | `moments.html`, `moments.js`, `moments-i18n*.js`, `moment-rsvp-*.js`, `moment-horoscope.js`, `moments.css`, `moment-editor-dashboard.js` |
 | **Security hardening (audit 2026-07-11)** | Completato e deployato (vedi `PROJECT_STATE.md`) | Regole assolute CSP/RLS/dati restano vincolanti |
 | **`worker/worker.js`** | **Libero** (live **v191-activation-brand**) | Chi tocca `worker.js` prende lock esplicito e non parallelizza |

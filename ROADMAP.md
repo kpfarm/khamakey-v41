@@ -378,3 +378,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-07-30 | Cursor | **Moments v229**: Salva e cambia prodotto (dialog 3 scelte + lock switch) |
 | 2026-07-30 | Cursor | **Moments v230**: banner Salva esplicito al cambio lingua IT↔EN |
 | 2026-08-01 | Cursor | **Worker v191**: pagina pre-attivazione — solo wordmark, niente doppio «KhamaKey Moments» |
+| 2026-08-03 | Cursor | **Admin v180 + SQL v170**: magazzino `build_stage` digital/assembled (ops, non blocca attivazione) |

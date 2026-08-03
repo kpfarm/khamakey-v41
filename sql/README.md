@@ -53,12 +53,13 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 47 | `khamakey-moments-unit-reset-v167.sql` | Reset pezzo reso/refurb: RPC `admin_reset_moment_unit_for_resale` + log; stesso `public_slug` (chip NFC), nuovo codice attivazione |
 | 48 | `khamakey-moments-media-usage-set-v168.sql` | RPC `set_moment_media_usage` — imposta bytes/file count assoluti (sync R2 Worker) |
 | 49 | `khamakey-moments-activation-look-v169.sql` | Seed look/palette per categoria all'attivazione (Amore→rosso, ecc.) |
+| 50 | `khamakey-moments-build-stage-v170.sql` | Magazzino: `build_stage` digital/assembled + RPC `set_moment_codes_build_stage` (ops only, non blocca attivazione) |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 
 **`khamakey-integrations-i18n-v66-production.sql` non è nella sequenza.** È una patch storica applicata a mano nel SQL Editor di Supabase quando su produzione `platform_integrations`/`platform_payment_transactions` risultavano già create fuori sequenza. `khamakey-integrations-i18n-v66.sql` è già completo e idempotente (crea quelle tabelle solo se assenti) e la copre interamente: non serve applicare entrambe. Il file `-production` resta nel repo solo come traccia storica — non eseguirlo di nuovo.
 
-**Stato produzione (2026-07-30):** v169 (`activation-look`) da applicare su `cuxlwaocjqwzluycznyp` insieme a Moments v226. Contatore storage Overview sincronizzato da R2 (v168).
+**Stato produzione (2026-08-03):** v170 (`build_stage`) applicato su `cuxlwaocjqwzluycznyp` con Officina Admin **v180**.
 
 ## Supabase SQL Editor
 

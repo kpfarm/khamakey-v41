@@ -62,7 +62,9 @@ export const MOMENTS_CONSOLE_GUIDES = {
       "Se la tabella sembra vuota: chip «Tutti» o «Mostra tutti» — i filtri a volte nascondono i pezzi."
     ],
     legend: [
-      { pill: "available", label: "Disponibile — in scaffale o pronto spedizione" },
+      { pill: "available", label: "Disponibile — non ancora attivato dal cliente" },
+      { pill: "build-assembled", label: "In prodotto — chip e codice già nel pezzo fisico" },
+      { pill: "build-digital", label: "Solo digitale — generato, ancora da assemblare" },
       { pill: "claimed active", label: "Attivato dal cliente" },
       { pill: "paused archived", label: "Fuori rotazione" }
     ],

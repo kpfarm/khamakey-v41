@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin Officina v180 + SQL v170 — build_stage (2026-08-03, Cursor)** — Admin + SQL
+  - Magazzino Moments: flag fabbricazione `digital` / `assembled` (pezzo fisico sì/no).
+  - Filtri rapidi, colonna Pezzo, bulk e Modifica; non blocca attivazione/NFC.
 - **Worker v191 — pre-attivazione brand (2026-08-01, Cursor)** — Worker
   - Pagina «Pronto da attivare»: rimosso eyebrow doppio «KhamaKey Moments»; resta solo il wordmark.
 - **Moments v230 — banner cambio lingua (2026-07-30, Cursor)** — Pages

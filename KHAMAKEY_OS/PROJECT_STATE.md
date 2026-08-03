@@ -94,7 +94,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v179** | PDF Cricut 5 sezioni: + QR pagina (28×28 mm, stesso `/m/slug` del chip). |
+| **Admin / Officina Moments** | **v180** | Magazzino: `build_stage` digital/assembled (pezzo fisico); PDF Cricut 5 sezioni. |
 | **Worker NFC** | **v191-activation-brand** | Pre-attivazione: solo wordmark (niente doppio brand); `/m/` con `public_locale`. |
 | **Moments editor** | **v225** | Fix switch prodotti: reload DB; «Prepara tutto» salva subito. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |

@@ -16,15 +16,27 @@
 
 ```text
 Officina NFC
-  Modello (MOM-KEY-WED) → genera pezzo/i
-  → CSV + PDF 5 sezioni Cricut: panoramica · ovali (spiega+codice) · barcode · URL NFC · QR pagina (quadretti)
-  → stampa/taglia etichette · programma chip con URL completo · codice in inserto · QR in confezione
-  → scaffale
+  Modello (MOM-KEY-WED) → genera pezzo/i  (build_stage = digital)
+    → CSV + PDF 5 sezioni Cricut: panoramica · ovali (spiega+codice) · barcode · URL NFC · QR pagina (quadretti)
+    → stampa/taglia etichette · programma chip con URL completo · codice in inserto · QR in confezione
+    → in Officina: segna «In prodotto» (build_stage = assembled)
+    → scaffale / spedizione / regalo
 
 Cliente
   apre confezione → codice sull’inserto → moments.html → editor → pagina /m/ live
   (pagina pre-attivazione: messaggio semplice «codice in confezione», senza dettagli chip/scaffale)
 ```
+
+## Fabbricazione (`build_stage`) — Admin v180 + SQL v170
+
+| Valore | Significato | Tipico |
+|--------|-------------|--------|
+| `digital` | Codice generato, pezzo non ancora assemblato | Appena creato / etichette da stampare |
+| `assembled` | Chip + inserto già nel prodotto fisico | Scaffale, spedito, regalato — anche se non attivato |
+
+- **Indipendente** da `status` (`available` / `claimed`): un regalo non attivato resta `available` + `assembled`.
+- **Non blocca** attivazione cliente, NFC o `/m/` — è solo per te in Officina.
+- UI: colonna **Pezzo**, chip «Solo digitali» / «In prodotto», bulk, Modifica codice.
 
 ## Formato codici (v156 + sicurezza v160)
 

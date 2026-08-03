@@ -380,3 +380,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-01 | Cursor | **Worker v191**: pagina pre-attivazione — solo wordmark, niente doppio «KhamaKey Moments» |
 | 2026-08-03 | Cursor | **Admin v180 + SQL v170**: magazzino `build_stage` digital/assembled (ops, non blocca attivazione) |
 | 2026-08-03 | Cursor | **Worker v192**: PIN gate — primo tap «Apri pagina» su mobile (tastiera non mangia il click) |
+| 2026-08-03 | Cursor | **Admin v181 + Worker v193**: admin `khamakeymoments@gmail.com` + `spricci721@gmail.com` |

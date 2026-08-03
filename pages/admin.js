@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=180";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=181";
 import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=177";
 import {
   generateMomentSku,
@@ -73,7 +73,9 @@ const SIMPLE_TAB_REDIRECT = {
 
 const ADMIN_EMAILS = new Set([
   "kristianperelli@gmail.com",
-  "info.khamakey@gmail.com"
+  "info.khamakey@gmail.com",
+  "khamakeymoments@gmail.com",
+  "spricci721@gmail.com"
 ]);
 
 const PERMISSIONS = [

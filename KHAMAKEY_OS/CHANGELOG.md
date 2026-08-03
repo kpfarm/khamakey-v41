@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v181 + Worker v193 — staff Moments (2026-08-03, Cursor)** — Admin + Worker + Supabase
+  - `platform_members`: `khamakeymoments@gmail.com` e `spricci721@gmail.com` come admin (`admin.full`).
+  - Allowlist ADMIN_EMAILS aggiornata in Officina e Worker.
 - **Worker v192 — PIN gate tap (2026-08-03, Cursor)** — Worker
   - Form PIN `/m/`: primo tap su «Apri pagina» invia subito (fix iOS/Android dove il primo tocco chiudeva solo la tastiera).
 - **Admin Officina v180 + SQL v170 — build_stage (2026-08-03, Cursor)** — Admin + SQL

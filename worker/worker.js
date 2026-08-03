@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v192-pin-gate-tap";
+const WORKER_VERSION = "v193-admin-emails";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -5018,7 +5018,9 @@ function escapeHtml(value) {
 
 const ADMIN_EMAILS = new Set([
   "kristianperelli@gmail.com",
-  "info.khamakey@gmail.com"
+  "info.khamakey@gmail.com",
+  "khamakeymoments@gmail.com",
+  "spricci721@gmail.com"
 ]);
 
 /** Inbox umana Moments (notify ticket) — non concede permessi admin. */

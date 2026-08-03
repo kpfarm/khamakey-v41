@@ -184,6 +184,10 @@ textarea{min-height:86px;resize:vertical}
 .account-panel-card{padding:18px;background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 24px -10px rgba(7,26,60,.08)}
 .account-panel-card h3{margin:0 0 6px;font-size:1.05rem}
 .account-panel-card > p{margin:0 0 14px;color:var(--muted);font-size:.84rem;line-height:1.45}
+.support-inbox-line{margin:0 0 14px!important;font-size:1rem!important;font-weight:800;color:var(--navy)!important}
+.support-inbox-line a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.support-mail-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.support-mail-actions .primary{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 .account-profile-grid{display:grid;gap:10px}
 .account-profile-row{display:grid;gap:2px;padding:10px 12px;border-radius:10px;background:var(--soft);border:1px solid transparent}
 .account-profile-row span{font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}

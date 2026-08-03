@@ -14,8 +14,8 @@ import {
   t,
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
-} from "./moments-i18n.js?v=230";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=219";
+} from "./moments-i18n.js?v=231";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=231";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=226";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
@@ -902,28 +902,20 @@ function renderAccountPanels(){
     return;
   }
   if(activeAccountTab === "support"){
+    const row = rows.find(item=>item.id === activeId) || rows[0] || null;
+    const inbox = t("account.support.inbox");
     accountPanels.innerHTML = `
       <div class="account-panel-card">
         <h3>${esc(t("account.support.title"))}</h3>
         <p>${esc(t("account.support.lead"))}</p>
-        <form class="support-inline-form" id="momentSupportForm">
-          <label><span>${esc(t("account.support.subject"))}</span><input name="subject" type="text" placeholder="${esc(t("account.support.subject.ph"))}" required></label>
-          <label><span>${esc(t("account.support.priority"))}</span>
-            <select name="priority">
-              <option value="normal">${esc(t("account.support.priority.normal"))}</option>
-              <option value="high">${esc(t("account.support.priority.high"))}</option>
-              <option value="urgent">${esc(t("account.support.priority.urgent"))}</option>
-              <option value="low">${esc(t("account.support.priority.low"))}</option>
-            </select>
-          </label>
-          <label><span>${esc(t("account.support.details"))}</span><textarea name="description" rows="4" placeholder="${esc(t("account.support.details.ph"))}" required></textarea></label>
-          <button type="submit" class="primary">${esc(t("account.support.submit"))}</button>
-          <p class="status" id="momentSupportStatus" aria-live="polite"></p>
-        </form>
+        <p class="support-inbox-line"><a href="mailto:${esc(inbox)}">${esc(inbox)}</a></p>
+        <div class="support-mail-actions">
+          <a class="primary" id="momentSupportMailBtn" href="#">${esc(t("account.support.mail_cta"))}</a>
+          <button type="button" class="ghost" id="momentSupportCopyBtn">${esc(t("account.support.copy"))}</button>
+        </div>
+        <p class="status" id="momentSupportStatus" aria-live="polite"></p>
       </div>`;
-    const supportForm = document.getElementById("momentSupportForm");
-    const row = rows.find(item=>item.id === activeId) || rows[0] || null;
-    supportForm?.addEventListener("submit",event=>submitMomentSupportTicket(event, row));
+    bindMomentSupportMailActions(row);
     return;
   }
   accountPanels.innerHTML = `
@@ -1497,53 +1489,37 @@ function renderObjectsPanel(){
   return "";
 }
 
-async function submitMomentSupportTicket(event,row){
-  event.preventDefault();
-  const status = document.getElementById("momentSupportStatus");
-  if(!currentUser) return setStatus(status,t("account.support.login"),"error");
-  const form = event.currentTarget;
-  const subject = String(form.elements.subject.value || "").trim();
-  const description = String(form.elements.description.value || "").trim();
-  const priority = form.elements.priority.value || "normal";
-  if(!subject || !description) return setStatus(status,t("account.support.fill"),"error");
-  setStatus(status,t("account.support.sending"));
-  const detail = [
-    `Cliente: ${currentUser.email || ""}`,
-    description,
-    row?.slug ? `Pagina Moments: ${row.slug}` : "",
-    row?.id ? `ID evento: ${row.id}` : ""
-  ].filter(Boolean).join("\n\n");
-  const { error } = await supabase.from("platform_support_tickets").insert({
-    profile_id:currentUser.id,
-    subject,
-    priority,
-    description:detail,
-    status:"open",
-    source:"moments_editor"
+const MOMENT_SUPPORT_INBOX = "info@khamakeymoments.com";
+
+function momentSupportMailtoHref(row){
+  const email = String(currentUser?.email || "").trim();
+  const slug = String(row?.slug || "").trim();
+  const page = String(row?.title || row?.page_state?.title || slug || "—").trim();
+  const slugLabel = slug ? ` · ${slug}` : "";
+  const subject = t("account.support.mail_subject", { slug: slugLabel });
+  const body = t("account.support.mail_body", {
+    email: email || "—",
+    page: page || "—",
+    slug: slug || "—"
   });
-  if(error){
-    console.error(error);
-    setStatus(status,error.message || t("account.support.fail"),"error");
-    return;
+  return `mailto:${MOMENT_SUPPORT_INBOX}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+function bindMomentSupportMailActions(row){
+  const status = document.getElementById("momentSupportStatus");
+  const mailBtn = document.getElementById("momentSupportMailBtn");
+  const copyBtn = document.getElementById("momentSupportCopyBtn");
+  if(mailBtn){
+    mailBtn.setAttribute("href", momentSupportMailtoHref(row));
   }
-  try{
-    const { data:sessionData } = await supabase.auth.getSession();
-    const token = sessionData?.session?.access_token;
-    if(token){
-      await fetch(`${WORKER_BASE_URL}/api/moment/support-notify`,{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
-          Authorization:`Bearer ${token}`
-        },
-        body:JSON.stringify({ subject, description:detail, priority })
-      });
+  copyBtn?.addEventListener("click", async ()=>{
+    try{
+      await navigator.clipboard.writeText(MOMENT_SUPPORT_INBOX);
+      setStatus(status, t("account.support.copied"), "ok");
+    }catch{
+      setStatus(status, t("account.support.copy_fail"), "error");
     }
-  }catch(notifyError){
-    console.warn("Avviso email supporto non inviato", notifyError);
-  }
-  form.reset();
-  setStatus(status,t("account.support.ok"),"ok");
+  });
 }
 
 function renderEmptyState(message = "",prefillCode = ""){

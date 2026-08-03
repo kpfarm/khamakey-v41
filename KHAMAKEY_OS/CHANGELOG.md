@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v231 — assistenza via email (2026-08-03, Cursor)** — Pages
+  - Account → Assistenza: niente ticket in-app; mailto `info@khamakeymoments.com` (+ copia indirizzo).
+  - Officina Supporto: nota canale principale Gmail; ticket storici restano.
 - **Admin v181 + Worker v193 — staff Moments (2026-08-03, Cursor)** — Admin + Worker + Supabase
   - `platform_members`: `khamakeymoments@gmail.com` e `spricci721@gmail.com` come admin (`admin.full`).
   - Allowlist ADMIN_EMAILS aggiornata in Officina e Worker.

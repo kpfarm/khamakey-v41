@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v183 — ricerca barcode magazzino (2026-08-04, Cursor)** — Admin
+  - Officina Magazzino: cerca pezzi anche per `packaging_barcode` (scan/copia senza trattini).
 - **Moments v231 — assistenza via email (2026-08-03, Cursor)** — Pages
   - Account → Assistenza: niente ticket in-app; mailto `info@khamakeymoments.com` (+ copia indirizzo).
   - Officina Supporto: nota canale principale Gmail; ticket storici restano.

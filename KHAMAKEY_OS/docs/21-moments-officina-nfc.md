@@ -94,5 +94,6 @@ SQL: `sql/khamakey-moments-unit-reset-v167.sql` (RPC `admin_reset_moment_unit_fo
 - URL produzione: `https://app.khamakeymoments.com/moments-admin`
 - Su dominio Moments, `admin.html` (Business) reindirizza a `moments-admin.html`
 - Se il magazzino sembra vuoto ma i codici esistono in DB: chip **Tutti** o **Mostra tutti** (filtri orfani)
+- Ricerca magazzino (v183): codice attivazione, **barcode confezione**, slug `/m/`, lotto, email cliente
 
 Vedi anche [`19-admin-console-operativa.md`](19-admin-console-operativa.md).

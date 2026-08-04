@@ -94,7 +94,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v181** | Admin: + `khamakeymoments@` / `spricci721@`; magazzino `build_stage`. |
+| **Admin / Officina Moments** | **v183** | Magazzino: ricerca anche per barcode confezione; `build_stage`. |
 | **Worker NFC** | **v193-admin-emails** | Allowlist admin Moments; PIN gate tap; `public_locale`. |
 | **Moments editor** | **v231** | Assistenza via email `info@khamakeymoments.com` (niente ticket in-app). |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |

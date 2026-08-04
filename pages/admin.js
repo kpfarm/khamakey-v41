@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=181";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=183";
 import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=177";
 import {
   generateMomentSku,
@@ -1778,6 +1778,7 @@ function momentRowMatchesSearch(row,search){
   const activationUrl = momentActivationUrl(row);
   const haystack = [
     row.code,
+    row.packaging_barcode,
     row.public_slug,
     nfcUrl,
     activationUrl,
@@ -1787,7 +1788,16 @@ function momentRowMatchesSearch(row,search){
     row.product_line,
     orderLabelById(row.platform_order_id)
   ].filter(Boolean).join(" ").toLowerCase();
-  return haystack.includes(search);
+  if(haystack.includes(search)) return true;
+  // Barcode / codice senza spazi o trattini (scan o copia da etichetta)
+  const compact = search.replace(/[^a-z0-9]/gi, "");
+  if(!compact) return false;
+  const compactHay = [
+    row.code,
+    row.packaging_barcode,
+    row.public_slug
+  ].filter(Boolean).join(" ").toLowerCase().replace(/[^a-z0-9]/gi, "");
+  return compactHay.includes(compact);
 }
 
 function momentCatalogMatchesCode(row,catalogId){

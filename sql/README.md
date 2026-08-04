@@ -54,12 +54,13 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 48 | `khamakey-moments-media-usage-set-v168.sql` | RPC `set_moment_media_usage` — imposta bytes/file count assoluti (sync R2 Worker) |
 | 49 | `khamakey-moments-activation-look-v169.sql` | Seed look/palette per categoria all'attivazione (Amore→rosso, ecc.) |
 | 50 | `khamakey-moments-build-stage-v170.sql` | Magazzino: `build_stage` digital/assembled + RPC `set_moment_codes_build_stage` (ops only, non blocca attivazione) |
+| 51 | `khamakey-moments-video-limit-v171.sql` | Moments: `max_video_mb` → 50 su piani Free/Plus/Pro (resta 1 clip sul Free) |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 
 **`khamakey-integrations-i18n-v66-production.sql` non è nella sequenza.** È una patch storica applicata a mano nel SQL Editor di Supabase quando su produzione `platform_integrations`/`platform_payment_transactions` risultavano già create fuori sequenza. `khamakey-integrations-i18n-v66.sql` è già completo e idempotente (crea quelle tabelle solo se assenti) e la copre interamente: non serve applicare entrambe. Il file `-production` resta nel repo solo come traccia storica — non eseguirlo di nuovo.
 
-**Stato produzione (2026-08-03):** v170 (`build_stage`) applicato su `cuxlwaocjqwzluycznyp` con Officina Admin **v180**.
+**Stato produzione (2026-08-04):** v171 (`max_video_mb` 50) applicato su `cuxlwaocjqwzluycznyp` con Moments **v232** / Worker **v194**.
 
 ## Supabase SQL Editor
 

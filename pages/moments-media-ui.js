@@ -1,4 +1,4 @@
-import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=173";
+import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=232";
 import {
   normalizeMediaItem,
   normalizeMediaList,
@@ -17,7 +17,7 @@ import {
   migrateLetterMediaSection
 } from "./moment-media.js?v=216";
 import { getUiLocale } from "./moments-i18n.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=216";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=232";
 
 let mediaEditContext = null;
 

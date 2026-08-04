@@ -14,13 +14,13 @@ import {
   t,
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
-} from "./moments-i18n.js?v=231";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=231";
+} from "./moments-i18n.js?v=232";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=232";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=226";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=226";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=232";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -38,7 +38,7 @@ import {
   warmUploadPipeline,
   warmUploadAuth,
   MAX_GALLERY_IMAGES
-} from "./media-upload.js?v=219";
+} from "./media-upload.js?v=232";
 import {
   readGalleryMedia,
   writeGalleryMedia,
@@ -85,7 +85,7 @@ import {
   PLAN_LABELS,
   storageBytesLimit,
   storageUsagePercent
-} from "./moment-plans.js?v=183";
+} from "./moment-plans.js?v=232";
 import { LIST_SECTION_MODES, itemsFromSection } from "./moment-list-items.js";
 import {
   renderListItemsPanel,
@@ -131,7 +131,7 @@ import {
   sectionFillGuide,
   sectionHasContent,
   isSectionExcluded
-} from "./moment-sections.js?v=186";
+} from "./moment-sections.js?v=232";
 import {
   TYPE_LABELS,
   renderCategorySelect,

@@ -95,8 +95,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v183** | Magazzino: ricerca anche per barcode confezione; `build_stage`. |
-| **Worker NFC** | **v193-admin-emails** | Allowlist admin Moments; PIN gate tap; `public_locale`. |
-| **Moments editor** | **v231** | Assistenza via email `info@khamakeymoments.com` (niente ticket in-app). |
+| **Worker NFC** | **v194-video-50mb** | Upload video fino a 50 MB; allowlist admin; PIN gate. |
+| **Moments editor** | **v232** | Video max 50 MB (1 clip Free); assistenza email. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v167 (prod)** | v167 reset pezzo reso; v166 USAGE `app_private`; v165 ingest store. |

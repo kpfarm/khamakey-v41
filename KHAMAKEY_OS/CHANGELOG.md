@@ -8,6 +8,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v232 + Worker v194 + SQL v171 — video 50 MB (2026-08-04, Cursor)** — Pages + Worker + SQL
+  - Piano Free resta **1 video**; tetto file video alzato a **50 MB** (client, Worker, `platform_plans`).
+- **Business progetto distaccato — scaffold (2026-08-04, Cursor)** — Business
+  - Nuova cartella `business/` (pages / worker / sql / docs) separata da Moments.
+  - ADR `decisions/003-business-progetto-distaccato.md`: stack cloud parallelo, Moments non si sposta.
+  - Scaffold Pages stub + Worker `khamakey-business-nfc` + config placeholder (nessun deploy Moments).
 - **Admin v183 — ricerca barcode magazzino (2026-08-04, Cursor)** — Admin
   - Officina Magazzino: cerca pezzi anche per `packaging_barcode` (scan/copia senza trattini).
 - **Moments v231 — assistenza via email (2026-08-03, Cursor)** — Pages

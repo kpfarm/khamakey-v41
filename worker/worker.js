@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v193-admin-emails";
+const WORKER_VERSION = "v194-video-50mb";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -784,7 +784,7 @@ function tooManyRequests() {
 
 const MEDIA_LIMITS = {
   image: 8 * 1024 * 1024,
-  video: 25 * 1024 * 1024,
+  video: 50 * 1024 * 1024,
   audio: 12 * 1024 * 1024,
   pdf: 15 * 1024 * 1024
 };
@@ -792,7 +792,7 @@ const MEDIA_LIMITS = {
 const DEFAULT_MOMENTS_PLAN_LIMITS = {
   storage_mb: 250,
   max_image_mb: 8,
-  max_video_mb: 25,
+  max_video_mb: 50,
   max_audio_mb: 12,
   max_pdf_mb: 15
 };

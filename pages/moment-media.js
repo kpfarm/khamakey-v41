@@ -1,13 +1,13 @@
 /** Modello media Moments — foto, video, audio, PDF con titolo e descrizione. */
 
-import { inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=173";
+import { inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=232";
 import {
   DEFAULT_MOMENTS_LIMITS,
   mediaLimitsFromPlan,
   normalizePlanLimits
-} from "./moment-plans.js?v=173";
+} from "./moment-plans.js?v=232";
 import { getUiLocale } from "./moments-i18n.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=216";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=232";
 
 function lf(text){
   const raw = String(text || "");

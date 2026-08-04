@@ -105,7 +105,7 @@ Definiti in `moment-themes.js` e `worker.js`:
 | `POST /api/media/delete` | Worker | Cancella file R2 (solo proprietario) |
 | `GET /cdn/{path}` | Worker | Serve file pubblici |
 
-Limiti server (Worker `MEDIA_LIMITS` / piano): immagine 8 MB · video 25 MB · audio 12 MB · **PDF 15 MB**.  
+Limiti server (Worker `MEDIA_LIMITS` / piano): immagine 8 MB · video 50 MB · audio 12 MB · **PDF 15 MB**.  
 Compressione WebP client-side per immagini (max 1920px, q0.82).  
 Moments: quota totale per prodotto in `platform_plans.limits.storage_mb` + contatore `moment_media_usage` (SQL v161).
 

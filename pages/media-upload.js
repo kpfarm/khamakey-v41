@@ -3,7 +3,7 @@ import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL } from "./confi
 
 export const MEDIA_BUCKET = "khamakey-media";
 export const MAX_IMAGE_MB = 8;
-export const MAX_VIDEO_MB = 25;
+export const MAX_VIDEO_MB = 50;
 export const MAX_AUDIO_MB = 12;
 export const MAX_PDF_MB = 15;
 export const MAX_GALLERY_IMAGES = 24;

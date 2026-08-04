@@ -14,7 +14,7 @@ export const DEFAULT_MOMENTS_LIMITS = Object.freeze({
   letter_pdfs: 1,
   journey_steps: 24,
   max_image_mb: 8,
-  max_video_mb: 25,
+  max_video_mb: 50,
   max_audio_mb: 12,
   max_pdf_mb: 15
 });

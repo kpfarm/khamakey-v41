@@ -468,7 +468,7 @@ export function sectionFillGuide(key){
     dedication:"Lettera personale: destinatario, testo e firma. Appare come busta elegante.",
     timeline:"Ogni tappa: data, luogo, descrizione, foto e link mappa. Trascina ☰ per riordinare.",
     gallery:"Carica le foto con Aggiungi foto. Titolo e descrizione per ogni immagine — in pagina si aprono ingrandite al tocco.",
-    video:"Carica uno o più video (MP4/MOV, max 25 MB) con titolo e descrizione — in pagina scorrono come la galleria. Il numero dipende dal piano Free/Plus/Pro.",
+    video:"Carica uno o più video (MP4/MOV, max 50 MB) con titolo e descrizione — in pagina scorrono come la galleria. Il numero dipende dal piano Free/Plus/Pro.",
     promises:"Tocca «Aggiungi promessa» per ogni voce — niente più righe manuali.",
     dreams:"Tocca «Aggiungi sogno» — puoi segnare quelli già realizzati.",
     countdown:"Scegli data e ora — compare il timer live. Puoi aggiungere anche una foto.",

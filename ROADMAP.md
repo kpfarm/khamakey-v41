@@ -387,4 +387,5 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-05 | Cursor | **Moments v233 + Worker v195**: fix salvataggi (save-bar stale, didascalie, YouTube, scroll galleria) |
 | 2026-08-05 | Cursor | **Worker v196**: galleria `/m/` — foto/frame non bloccano più lo scroll verticale |
 | 2026-08-05 | Cursor | **Moments v234 + Worker v197**: firma — tolto fallback «Voi»; salvataggio nome più affidabile |
+| 2026-08-05 | Cursor | **Moments v235**: hardening salvataggi (Account/logout, mid-flight dirty, draft, live fields, bootstrap) |
 | 2026-08-04 | Cursor | **Business parallelo**: cartella `business/` + Supabase `qsieubbdkvtlvdsucmye` + Pages `khamakey-business` + Worker `khamakey-business-nfc` + R2 dedicato (Moments non toccato) |

@@ -404,21 +404,21 @@ export function readSectionFromForm(form, key, formNode = null){
     base.items = normalizeListItems(parseListItems(form.get(`section_${key}_items`)), LIST_SECTION_MODES[key]);
   }
   if(key === "letter_future"){
-    base.recipient = String(form.get(`section_${key}_recipient`) || "").trim();
-    base.unlock_date = String(form.get(`section_${key}_unlock_date`) || "").trim();
+    base.recipient = val(`section_${key}_recipient`);
+    base.unlock_date = val(`section_${key}_unlock_date`);
     base.media = parseMediaList(form.get(`section_${key}_media`));
     const first = base.media[0];
-    base.media_type = first?.type || String(form.get(`section_${key}_media_type`) || "").trim();
-    base.media_url = first?.url || String(form.get(`section_${key}_media_url`) || "").trim();
-    base.media_title = first?.title || String(form.get(`section_${key}_media_title`) || "").trim();
+    base.media_type = first?.type || val(`section_${key}_media_type`);
+    base.media_url = first?.url || val(`section_${key}_media_url`);
+    base.media_title = first?.title || val(`section_${key}_media_title`);
   }
   if(key === "pet"){
-    base.pet_name = String(form.get(`section_${key}_pet_name`) || "").trim();
-    base.pet_emoji = String(form.get(`section_${key}_pet_emoji`) || "🐾").trim() || "🐾";
-    base.pet_photo = String(form.get(`section_${key}_pet_photo`) || "").trim();
+    base.pet_name = val(`section_${key}_pet_name`);
+    base.pet_emoji = val(`section_${key}_pet_emoji`) || "🐾";
+    base.pet_photo = val(`section_${key}_pet_photo`);
   }
   if(key === "quote"){
-    base.author = String(form.get(`section_${key}_author`) || "").trim();
+    base.author = val(`section_${key}_author`);
   }
   if(key === "signature"){
     // Live DOM: evita perdita nome firma su iOS / pannelli nascosti (prima poteva restare vuoto → "Voi" in pubblico)
@@ -430,13 +430,13 @@ export function readSectionFromForm(form, key, formNode = null){
     base.images = base.media.map(item=>item.url);
   }
   if(key === "video"){
-    base.video_url = String(form.get(`section_${key}_video_url`) || "").trim();
-    base.video_title = String(form.get(`section_${key}_video_title`) || "").trim();
-    base.video_description = String(form.get(`section_${key}_video_description`) || "").trim();
+    base.video_url = val(`section_${key}_video_url`);
+    base.video_title = val(`section_${key}_video_title`);
+    base.video_description = val(`section_${key}_video_description`);
   }
   if(key === "timeline"){
     base.items = parseJourneySteps(form.get(`section_${key}_items`));
-    base.scroll_layout = form.get(`section_${key}_scroll_layout`) === "on";
+    base.scroll_layout = liveCheckboxOn(form, formNode, `section_${key}_scroll_layout`);
   }
   return base;
 }

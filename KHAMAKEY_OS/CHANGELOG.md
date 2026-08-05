@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v235 — hardening salvataggi (2026-08-05, Cursor)** — Pages
+  - Account/logout con bozze: dialogo Salva/Scarta; ritorno Account senza wipe se dirty.
+  - Salva mid-flight: se digiti durante RPC resta «non salvato»; blocco durante upload; feedback se Salva già in corso.
+  - Draft sessionStorage + restore; bootstrap non resta bloccato; campi pet/quote/letter/video/cover live.
 - **Moments v234 + Worker v197 — firma senza «Voi» (2026-08-05, Cursor)** — Pages + Worker
   - Pagina pubblica: niente più fallback inventato `Voi` se manca il nome; solo testo cliente.
   - Editor: `sign_name` / `sign_subtitle` letti dal DOM live al Salva.

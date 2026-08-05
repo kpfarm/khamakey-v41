@@ -14,10 +14,10 @@ import {
   t,
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
-} from "./moments-i18n.js?v=233";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=233";
+} from "./moments-i18n.js?v=235";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=235";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=233";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=235";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=232";
@@ -60,7 +60,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=233";
+} from "./moments-media-ui.js?v=235";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -132,7 +132,7 @@ import {
   sectionFillGuide,
   sectionHasContent,
   isSectionExcluded
-} from "./moment-sections.js?v=234";
+} from "./moment-sections.js?v=235";
 import {
   TYPE_LABELS,
   renderCategorySelect,
@@ -352,6 +352,7 @@ let lastPreviewHash = "";
 let previewDebounceTimer = null;
 let previewFetchId = 0;
 let saveInFlight = false;
+let bootstrapInFlight = false;
 /** Durante bootstrap template: niente banner «non salvato» a metà salvataggio automatico. */
 let suppressDirtyUi = false;
 let switchInFlight = false;
@@ -811,7 +812,22 @@ function showEditorView(){
   setEditorChromeVisible(Boolean(document.getElementById("momentEditorShell")));
 }
 
-function showAccountHub(tab = "products"){
+async function showAccountHub(tab = "products"){
+  // Non buttare via bozze: Account nascondeva l'editor e al ritorno rimontava dal DB
+  if(appView === "editor" && editorDirty && document.getElementById("momentEditorForm")){
+    const choice = await askUnsavedSwitchChoice();
+    if(choice === "cancel") return;
+    if(choice === "save"){
+      const row = rows.find(item=>item.id === activeId);
+      const form = document.getElementById("momentEditorForm");
+      if(!row || !form){
+        showEditorSaveFeedback(t("save.fail"), "error");
+        return;
+      }
+      const saved = await saveMoment({ preventDefault(){}, currentTarget:form }, row);
+      if(!saved) return;
+    }
+  }
   appView = "account";
   activeAccountTab = tab || "products";
   app?.classList.add("account-mode");
@@ -830,6 +846,12 @@ function showAccountHub(tab = "products"){
       backBtn.addEventListener("click",async()=>{
         if(!rows.length) return;
         showEditorView();
+        // Se ci sono modifiche nel form ancora in DOM, non rimontare dal DB
+        if(editorDirty && document.getElementById("momentEditorForm")){
+          setEditorChromeVisible(true);
+          updateSaveStatus(false);
+          return;
+        }
         if(activeId){
           try{
             await ensureEventPageState(activeId, { force:true });
@@ -1594,7 +1616,7 @@ function askUnsavedSwitchChoice(){
 async function openMomentProduct(nextId, { resetPanel = false } = {}){
   if(!nextId) return;
   if(nextId === activeId && appView === "editor") return;
-  if(switchInFlight || saveInFlight || uploadBusy){
+  if(switchInFlight || saveInFlight || uploadBusy || bootstrapInFlight){
     showEditorSaveFeedback(t("shell.switch_busy"), "error");
     return;
   }
@@ -2034,16 +2056,23 @@ function needsFreshTemplateBootstrap(row){
 }
 
 async function bootstrapFreshMomentPage(row, formNode){
-  if(!row?.id || !formNode || !needsFreshTemplateBootstrap(row)) return;
+  if(!row?.id || !formNode || !needsFreshTemplateBootstrap(row) || bootstrapInFlight) return;
   const eventId = row.id;
   sessionStorage.setItem(templateSeedKey(eventId), "bootstrapping");
   const type = lockedMomentType(row);
   suppressDirtyUi = true;
+  bootstrapInFlight = true;
   try{
     applyTemplateToForm(formNode, type, { skipReminder:true });
-    if(activeId !== eventId) return;
+    if(activeId !== eventId){
+      sessionStorage.removeItem(templateSeedKey(eventId));
+      return;
+    }
     const saved = await saveMoment({ preventDefault(){}, currentTarget:formNode }, row, { quietOk:true });
-    if(activeId !== eventId) return;
+    if(activeId !== eventId){
+      sessionStorage.removeItem(templateSeedKey(eventId));
+      return;
+    }
     if(!saved){
       sessionStorage.removeItem(templateSeedKey(eventId));
       showEditorSaveFeedback(t("save.reminder_model", { type: TYPE_LABELS[type] || type }), "error");
@@ -2052,6 +2081,7 @@ async function bootstrapFreshMomentPage(row, formNode){
     sessionStorage.setItem(templateSeedKey(eventId), "done");
     localStorage.setItem(`moments_bootstrapped_${eventId}`, "1");
     localStorage.setItem(onboardingKey(eventId), "done");
+    clearEditorDraft(eventId);
     document.getElementById("onboardingWizard")?.remove();
     clearTimeout(markEditorDirty.timer);
     try{ savedEditorSnapshot = formSnapshotForDirty(formNode); }catch{ /* ignore */ }
@@ -2060,6 +2090,7 @@ async function bootstrapFreshMomentPage(row, formNode){
     showEditorSaveFeedback(t("save.reminder_model", { type: TYPE_LABELS[type] || type }), "ok");
   }finally{
     suppressDirtyUi = false;
+    bootstrapInFlight = false;
   }
 }
 
@@ -3010,13 +3041,28 @@ function promptSaveReminder(message = t("save.reminder_default")){
 
 function renderDetail(id){
   activeId = id;
-  const row = rows.find(item=>item.id === id);
+  let row = rows.find(item=>item.id === id);
   if(!row){
     showAccountHub("products");
     return;
   }
   showEditorView();
   if(activeEditorPanel === "objects") activeEditorPanel = "cover";
+  let restoredDraft = false;
+  if(!needsFreshTemplateBootstrap(row)){
+    const draftState = peekEditorDraft(id);
+    if(draftState){
+      row = {
+        ...row,
+        title: draftState.title || row.title,
+        description: draftState.description || row.description,
+        page_state: draftState
+      };
+      const idx = rows.findIndex(item => item.id === id);
+      if(idx >= 0) rows[idx] = row;
+      restoredDraft = true;
+    }
+  }
   let state;
   try{
     state = mergedState(row);
@@ -3275,6 +3321,10 @@ function renderDetail(id){
   if(needsFreshTemplateBootstrap(row)){
     // Applica look+sezioni categoria e salva subito: niente verde di default, niente perdita al cambio prodotto
     bootstrapFreshMomentPage(row, editorForm);
+  }else if(restoredDraft){
+    editorDirty = true;
+    updateSaveStatus(false);
+    promptSaveReminder(t("save.draft_restored"));
   }
   setEditorChromeVisible(true);
 }
@@ -4076,8 +4126,63 @@ function sanitizeStateForSave(state){
   return clone;
 }
 
+function liveTopField(formNode, form, name){
+  const el = formNode?.elements?.[name] || formNode?.querySelector?.(`[name="${name}"]`);
+  if(el && typeof el.value === "string" && el.type !== "checkbox" && el.type !== "radio" && el.type !== "file"){
+    return String(el.value || "").trim();
+  }
+  return String(form.get(name) || "").trim();
+}
+
+function liveTopChecked(formNode, form, name){
+  const el = formNode?.elements?.[name] || formNode?.querySelector?.(`[name="${name}"]`);
+  if(el && (el.type === "checkbox" || el.type === "radio")) return Boolean(el.checked);
+  const raw = form.get(name);
+  return raw === "on" || raw === "true";
+}
+
+function editorDraftKey(eventId){
+  return `moments_editor_draft_v1_${eventId}`;
+}
+
+function clearEditorDraft(eventId){
+  if(!eventId) return;
+  try{ sessionStorage.removeItem(editorDraftKey(eventId)); }catch{ /* ignore */ }
+}
+
+function stashEditorDraft(){
+  if(!editorDirty || !activeId || saveInFlight || bootstrapInFlight) return;
+  const formNode = document.getElementById("momentEditorForm");
+  if(!formNode) return;
+  try{
+    flushGalleryInlineFields(formNode);
+    const state = sanitizeStateForSave(readFormState(formNode));
+    const payload = JSON.stringify({ t: Date.now(), state });
+    if(payload.length > 180000) return;
+    sessionStorage.setItem(editorDraftKey(activeId), payload);
+  }catch{ /* ignore quota / serialize */ }
+}
+
+function peekEditorDraft(eventId){
+  if(!eventId) return null;
+  try{
+    const raw = sessionStorage.getItem(editorDraftKey(eventId));
+    if(!raw) return null;
+    const parsed = JSON.parse(raw);
+    if(!parsed?.state || typeof parsed.state !== "object") return null;
+    if(Date.now() - Number(parsed.t || 0) > 24 * 60 * 60 * 1000){
+      clearEditorDraft(eventId);
+      return null;
+    }
+    return parsed.state;
+  }catch{
+    return null;
+  }
+}
+
 function readFormState(formNode){
   const form = new FormData(formNode);
+  const live = name => liveTopField(formNode, form, name);
   const sections = {};
   for(const key of Object.keys(DEFAULT_SECTIONS)){
     sections[key] = readSectionFromForm(form, key, formNode);
@@ -4096,19 +4201,20 @@ function readFormState(formNode){
   sections.music = {
     ...sections.music,
     media:musicMedia,
-    audio_url:musicFirst?.url || "",
-    audio_title:musicFirst?.title || "",
-    audio_description:musicFirst?.description || "",
-    image_url:String(form.get("section_music_image_url") || sections.music.image_url || "").trim()
+    audio_url:musicFirst?.url || sections.music.audio_url || "",
+    audio_title:musicFirst?.title || sections.music.audio_title || "",
+    audio_description:musicFirst?.description || sections.music.audio_description || "",
+    // Live first (FormData su pannello nascosto può essere stale)
+    image_url:sections.music.image_url || live("section_music_image_url")
   };
   const videoMedia = readGalleryMedia(formNode,"video");
   const videoFirst = videoMedia[0];
   sections.video = {
     ...sections.video,
     media:videoMedia,
-    video_url:videoFirst?.url || "",
-    video_title:videoFirst?.title || "",
-    video_description:videoFirst?.description || ""
+    video_url:videoFirst?.url || sections.video.video_url || "",
+    video_title:videoFirst?.title || sections.video.video_title || "",
+    video_description:videoFirst?.description || sections.video.video_description || ""
   };
   for(const key of LIST_SECTION_KEYS){
     sections[key] = {
@@ -4124,38 +4230,36 @@ function readFormState(formNode){
   sections.letter_future.media_type = letterFirst?.type || "";
   sections.letter_future.media_url = letterFirst?.url || "";
   sections.letter_future.media_title = letterFirst?.title || "";
+  syncPinnedSectionsInput(formNode);
   return {
-    title:String(form.get("title") || "").trim(),
-    type:normalizeMomentType(form.get("moment_type")),
-    subtitle:String(form.get("subtitle") || "").trim(),
+    title:live("title"),
+    type:normalizeMomentType(live("moment_type") || form.get("moment_type")),
+    subtitle:live("subtitle"),
     // name distinto da eventuali altri "description" (es. ticket assistenza)
-    description:String(form.get("page_description") || form.get("description") || "").trim(),
+    description:live("page_description") || live("description"),
     // Lingua pagina pubblica (oroscopo + chrome /m/) — segue IT|EN dell'editor al Salva
     public_locale: uiLocaleForPublicPage(),
-    pill:String(form.get("pill") || "").trim(),
-    cover_url:String(form.get("cover_url") || "").trim(),
-    cover_focus_x:Number(form.get("cover_focus_x") || 50),
-    cover_focus_y:Number(form.get("cover_focus_y") || 50),
-    cover_zoom:Math.min(200, Math.max(100, Number(form.get("cover_zoom") || 100))),
+    pill:live("pill"),
+    cover_url:live("cover_url"),
+    cover_focus_x:Number(live("cover_focus_x") || 50),
+    cover_focus_y:Number(live("cover_focus_y") || 50),
+    cover_zoom:Math.min(200, Math.max(100, Number(live("cover_zoom") || 100))),
     profile_photo:"",
-    colorPalette:canonicalizePalette(String(form.get("color_palette") || "verde")),
-    themeVariant:String(form.get("theme_variant") || "chiaro"),
-    heroStyle:String(form.get("hero_style") || "classico"),
-    heroCut:String(form.get("hero_cut") || "dritto"),
-    heroFade:String(form.get("hero_fade") || "on") !== "off",
-    fontPair:String(form.get("font_pair") || "classic"),
+    colorPalette:canonicalizePalette(live("color_palette") || "verde"),
+    themeVariant:live("theme_variant") || "chiaro",
+    heroStyle:live("hero_style") || "classico",
+    heroCut:live("hero_cut") || "dritto",
+    heroFade:live("hero_fade") !== "off",
+    fontPair:live("font_pair") || "classic",
     pageDecor:"none",
-    show_together_counter:form.get("show_together_counter") === "on",
-    together_since:String(form.get("together_since") || "").trim(),
-    counter_label:String(form.get("counter_label") || "").trim(),
-    show_counter_hms:form.get("show_counter_hms") === "on",
-    anniversary_emails:form.get("anniversary_emails") === "on",
-    theme:String(form.get("page_theme") || "classic"),
+    show_together_counter:liveTopChecked(formNode, form, "show_together_counter"),
+    together_since:live("together_since"),
+    counter_label:live("counter_label"),
+    show_counter_hms:liveTopChecked(formNode, form, "show_counter_hms"),
+    anniversary_emails:liveTopChecked(formNode, form, "anniversary_emails"),
+    theme:live("page_theme") || "classic",
     sectionOrder:sectionOrder.filter(key => !isSectionExcluded(key)),
-    pinned_sections:String(form.get("pinned_sections") || "")
-      .split(",")
-      .map(value=>value.trim())
-      .filter(key => key && !isSectionExcluded(key)),
+    pinned_sections:[...pinnedExtraSections].filter(key => key && !isSectionExcluded(key)),
     sections: (()=>{
       const next = { ...sections };
       for(const key of Object.keys(next)){
@@ -4323,7 +4427,14 @@ async function renderPreview(state,options = {}){
 
 async function saveMoment(event,row, options = {}){
   event.preventDefault();
-  if(saveInFlight) return false;
+  if(saveInFlight){
+    showEditorSaveFeedback(t("save.busy"), "error");
+    return false;
+  }
+  if(uploadBusy){
+    showEditorSaveFeedback(t("save.wait_upload"), "error");
+    return false;
+  }
   const formNode = event.currentTarget || document.getElementById("momentEditorForm");
   if(!formNode) return false;
   // Evita salvataggio sul form staccato dopo cambio pezzo
@@ -4348,9 +4459,16 @@ async function saveMoment(event,row, options = {}){
   if(!adminMode){
     state.type = lockedMomentType(row);
   }
-  const pin = String(new FormData(formNode).get("access_pin") || "").trim();
-  const publicVisible = new FormData(formNode).get("public_visible") === "true";
-  const pinEnabled = new FormData(formNode).get("pin_enabled") === "true";
+  const pin = liveTopField(formNode, new FormData(formNode), "access_pin");
+  const publicVisibleEl = formNode.querySelector('[name="public_visible"]');
+  const pinEnabledEl = formNode.querySelector('[name="pin_enabled"]');
+  const publicVisible = publicVisibleEl
+    ? (publicVisibleEl.type === "checkbox" ? publicVisibleEl.checked : publicVisibleEl.value === "true")
+    : new FormData(formNode).get("public_visible") === "true";
+  const pinEnabled = pinEnabledEl
+    ? (pinEnabledEl.type === "checkbox" ? pinEnabledEl.checked : pinEnabledEl.value === "true")
+    : new FormData(formNode).get("pin_enabled") === "true";
+  const persistedSnapshot = JSON.stringify(state);
   if(!state.title){
     saveInFlight = false;
     showEditorSaveFeedback(t("save.need_title"),"error");
@@ -4436,18 +4554,24 @@ async function saveMoment(event,row, options = {}){
       return false;
     }
     clearTimeout(markEditorDirty.timer);
+    clearEditorDraft(row.id);
+    // Se durante il Salva hanno digitato altro, non marcare "salvato" a falso
+    let moreEditsDuringSave = false;
     try{
-      savedEditorSnapshot = formSnapshotForDirty(formNode);
+      const nowSnap = formSnapshotForDirty(formNode);
+      savedEditorSnapshot = persistedSnapshot;
+      moreEditsDuringSave = nowSnap !== persistedSnapshot;
+      editorDirty = moreEditsDuringSave;
     }catch{
-      savedEditorSnapshot = JSON.stringify(state);
+      savedEditorSnapshot = persistedSnapshot;
+      editorDirty = false;
     }
     lastPreviewHash = savedEditorSnapshot;
     lastSavedMomentType = normalizeMomentType(state.type);
     currentMomentType = lastSavedMomentType;
-    editorDirty = false;
-    updateSaveStatus(true);
+    updateSaveStatus(!editorDirty);
     const barMsg = document.querySelector("#momentsSaveBar .save-msg");
-    if(barMsg){
+    if(barMsg && editorDirty){
       barMsg.setAttribute("data-i18n-html", "shell.save_bar");
       barMsg.innerHTML = t("shell.save_bar");
     }
@@ -4456,8 +4580,10 @@ async function saveMoment(event,row, options = {}){
       const emptyEnabled = Object.entries(state.sections || {})
         .filter(([key, section]) => section?.enabled && !sectionHasContent(key, section))
         .map(([key]) => SECTION_LABELS[key] || key);
-      let okMsg = rsvpAutoOff ? t("save.ok_rsvp_off") : t("save.ok");
-      if(emptyEnabled.length){
+      let okMsg = moreEditsDuringSave
+        ? t("save.ok_more_edits")
+        : (rsvpAutoOff ? t("save.ok_rsvp_off") : t("save.ok"));
+      if(!moreEditsDuringSave && emptyEnabled.length){
         okMsg = `${okMsg} ${t("save.ok_empty_sections", { list: emptyEnabled.slice(0, 3).join(", ") })}`;
       }
       showEditorSaveFeedback(okMsg, "ok");
@@ -4638,6 +4764,20 @@ signupForm?.addEventListener("submit",async event=>{
 });
 
 document.getElementById("momentsLogout")?.addEventListener("click",async()=>{
+  if(editorDirty && document.getElementById("momentEditorForm")){
+    const choice = await askUnsavedSwitchChoice();
+    if(choice === "cancel") return;
+    if(choice === "save"){
+      const row = rows.find(item=>item.id === activeId);
+      const form = document.getElementById("momentEditorForm");
+      if(row && form){
+        const saved = await saveMoment({ preventDefault(){}, currentTarget:form }, row);
+        if(!saved) return;
+      }
+    }else{
+      stashEditorDraft();
+    }
+  }
   await supabase.auth.signOut();
   activeId = "";
   rows = [];
@@ -4646,7 +4786,14 @@ document.getElementById("momentsLogout")?.addEventListener("click",async()=>{
 });
 
 window.addEventListener("beforeunload",event=>{
-  if(editorDirty) event.preventDefault();
+  if(editorDirty){
+    stashEditorDraft();
+    event.preventDefault();
+  }
+});
+window.addEventListener("pagehide", ()=>{ stashEditorDraft(); });
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState === "hidden") stashEditorDraft();
 });
 
 /* i18n: register + bind AFTER lets/consts init (TDZ-safe). Never block boot. */

@@ -98,8 +98,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v183** | Magazzino: ricerca anche per barcode confezione; `build_stage`. |
-| **Worker NFC** | **v199-upload-quota-safe** | Upload Moments: entitlements fail-closed, post-check quota + rollback, rate-limit fail-closed. |
-| **Moments editor** | **v236** | Live: salva ottimistico + discard clear draft (deploy 2026-08-06). |
+| **Worker NFC** | **v200-upload-kind-caps** | Upload: fail-closed quota + cap oggetti video/audio/PDF + rollback race. |
+| **Moments editor** | **v237** | canFitBytes pre-upload; allineato Worker v200. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v172 (prod)** | v172 salva ottimistico applicata 2026-08-06; v171 video 50MB; v170 build_stage. |

@@ -1,4 +1,4 @@
-import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=232";
+import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=237";
 import {
   normalizeMediaItem,
   normalizeMediaList,
@@ -16,6 +16,7 @@ import {
   migrateMusicSectionMedia,
   migrateLetterMediaSection
 } from "./moment-media.js?v=216";
+import { canFitBytes, formatBytes, storageBytesLimit } from "./moment-plans.js?v=237";
 import { getUiLocale } from "./moments-i18n.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=232";
 
@@ -202,12 +203,20 @@ function canAddFiles(current,batch,key = "gallery"){
   return filtered;
 }
 
-export async function uploadGalleryMedia({supabase,row,formNode,key,files,onStatus,onBusy}){
+export async function uploadGalleryMedia({supabase,row,formNode,key,files,onStatus,onBusy,entitlements}){
   if(!row?.id) throw new Error(lf("Pagina non selezionata. Ricarica l'editor e riprova."));
   const limits = mediaLimitsForKey(key);
   const current = readGalleryMedia(formNode,key);
   const batch = canAddFiles(current,[...files].slice(0,limits.maxItems - current.length),key);
   if(!batch.length) throw new Error(lf("Nessun file selezionato."));
+  if(entitlements){
+    const batchBytes = batch.reduce((sum, file) => sum + (Number(file?.size) || 0), 0);
+    if(!canFitBytes(entitlements, batchBytes)){
+      const used = formatBytes(entitlements.bytes_used);
+      const max = formatBytes(storageBytesLimit(entitlements.limits));
+      throw new Error(lfFill("Spazio insufficiente ({used} / {max}). Rimuovi file o passa a Plus/Pro.", { used, max }));
+    }
+  }
   onStatus?.(lfFill("Preparazione {n} file...", { n: batch.length }));
   onBusy?.(true);
   const uploadedItems = [];

@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v199-upload-quota-safe";
+const WORKER_VERSION = "v200-upload-kind-caps";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -800,6 +800,11 @@ const MEDIA_LIMITS = {
 
 const DEFAULT_MOMENTS_PLAN_LIMITS = {
   storage_mb: 250,
+  video_clips: 1,
+  letter_videos: 1,
+  music_audio: 1,
+  letter_audio: 1,
+  letter_pdfs: 1,
   max_image_mb: 8,
   max_video_mb: 50,
   max_audio_mb: 12,
@@ -913,6 +918,46 @@ async function sumMomentsR2Usage(env, scopeId) {
     cursor = listed.cursor;
   }
   return { bytes_used: bytes, file_count: files };
+}
+
+/** Conta oggetti sotto un prefisso R2 (paginato). */
+async function countR2PrefixObjects(env, prefix) {
+  const clean = String(prefix || "").trim();
+  if (!clean || !env.MEDIA) return 0;
+  let cursor;
+  let truncated = true;
+  let files = 0;
+  while (truncated) {
+    const listed = await env.MEDIA.list({ prefix: clean, cursor, limit: 1000 });
+    files += (listed.objects || []).length;
+    truncated = Boolean(listed.truncated);
+    cursor = listed.cursor;
+  }
+  return files;
+}
+
+/**
+ * Tetto oggetti per kind su R2 (folder condivide sezione + lettera).
+ * Immagini: nessun cap folder (cover/galleria/journey condividono images/).
+ */
+function momentsKindObjectCap(limits, kind) {
+  const src = limits && typeof limits === "object" ? limits : DEFAULT_MOMENTS_PLAN_LIMITS;
+  const n = (key) => {
+    const v = Number(src[key]);
+    return Number.isFinite(v) && v >= 0 ? Math.floor(v) : Number(DEFAULT_MOMENTS_PLAN_LIMITS[key]) || 0;
+  };
+  if (kind === "video") return n("video_clips") + n("letter_videos");
+  if (kind === "audio") return n("music_audio") + n("letter_audio");
+  if (kind === "pdf") return n("letter_pdfs");
+  return null;
+}
+
+function momentsKindFolder(kind) {
+  if (kind === "image") return "images";
+  if (kind === "video") return "videos";
+  if (kind === "audio") return "audio";
+  if (kind === "pdf") return "documents";
+  return "";
 }
 
 async function syncMomentMediaUsageFromR2(env, jwt, scopeId) {
@@ -1093,6 +1138,33 @@ async function handleMediaUpload(request, env) {
           storage_mb: storageMb
         }, 413));
       }
+
+      // Cap oggetti video/audio/PDF (folder R2). Immagini escluse: cover/galleria/journey condividono images/.
+      const kindCap = momentsKindObjectCap(planLimits, kind);
+      if (kindCap != null) {
+        const folderName = momentsKindFolder(kind);
+        let kindCount = 0;
+        try {
+          kindCount = await countR2PrefixObjects(env, `moments/${scopeId}/${folderName}/`);
+        } catch (countError) {
+          console.error("handleMediaUpload kind count", countError);
+          return cors(json({
+            error: "Non riesco a verificare i limiti del piano. Riprova tra poco.",
+            code: "plan_count_unavailable"
+          }, 503));
+        }
+        if (kindCount >= kindCap) {
+          const label = kind === "video" ? "video" : kind === "audio" ? "audio" : "PDF";
+          return cors(json({
+            error: `Limite raggiunto: massimo ${kindCap} ${label} per questo Moment (piano attuale). Rimuovi un file o passa a Plus/Pro.`,
+            code: "plan_kind_limit",
+            kind,
+            kind_count: kindCount,
+            kind_cap: kindCap,
+            plan_key: planKey
+          }, 413));
+        }
+      }
     }
 
     const kindLimit = scope === "moments"
@@ -1102,10 +1174,7 @@ async function handleMediaUpload(request, env) {
       return cors(json({ error: `File troppo grande per ${kind}.` }, 413));
     }
 
-    const folder = kind === "image" ? "images"
-      : kind === "video" ? "videos"
-        : kind === "audio" ? "audio"
-          : "documents";
+    const folder = momentsKindFolder(kind) || "documents";
     const ext = mediaExtFromMime(mime);
     const key = `${scope}/${scopeId}/${folder}/${crypto.randomUUID()}.${ext}`;
     await env.MEDIA.put(key, file.stream(), {
@@ -1132,8 +1201,7 @@ async function handleMediaUpload(request, env) {
         }
       }
 
-      // Post-check anti-race: se la somma R2 supera il piano, rollback del solo file appena messo.
-      if (usage && Number(usage.bytes_used) > maxBytes) {
+      const rollbackQuota = async (payload) => {
         try {
           await env.MEDIA.delete(key);
         } catch (delError) {
@@ -1145,15 +1213,46 @@ async function handleMediaUpload(request, env) {
         } catch (rollSyncError) {
           console.error("handleMediaUpload quota rollback sync", rollSyncError);
         }
-        const usedAfter = Number(rolled?.bytes_used ?? usage.bytes_used) || 0;
-        const usedMb = (usedAfter / (1024 * 1024)).toFixed(1);
         return cors(json({
+          ...payload,
+          bytes_used: Number(rolled?.bytes_used ?? payload.bytes_used) || 0,
+          file_count: Number(rolled?.file_count ?? usage?.file_count) || 0
+        }, 413));
+      };
+
+      // Post-check anti-race bytes.
+      if (usage && Number(usage.bytes_used) > maxBytes) {
+        const usedMb = (Number(usage.bytes_used) / (1024 * 1024)).toFixed(1);
+        return rollbackQuota({
           error: `Spazio esaurito per questo Moment (${usedMb} / ${storageMb} MB). Passa a Plus o Pro, oppure rimuovi file.`,
           code: "storage_quota",
           plan_key: planKey,
-          bytes_used: usedAfter,
+          bytes_used: usage.bytes_used,
           storage_mb: storageMb
-        }, 413));
+        });
+      }
+
+      // Post-check anti-race conteggio kind (video/audio/PDF).
+      const kindCap = momentsKindObjectCap(planLimits, kind);
+      if (kindCap != null) {
+        try {
+          const kindCount = await countR2PrefixObjects(env, `moments/${scopeId}/${folder}/`);
+          if (kindCount > kindCap) {
+            const label = kind === "video" ? "video" : kind === "audio" ? "audio" : "PDF";
+            return rollbackQuota({
+              error: `Limite raggiunto: massimo ${kindCap} ${label} per questo Moment (piano attuale). Rimuovi un file o passa a Plus/Pro.`,
+              code: "plan_kind_limit",
+              kind,
+              kind_count: kindCount,
+              kind_cap: kindCap,
+              plan_key: planKey,
+              bytes_used: usage?.bytes_used
+            });
+          }
+        } catch (postCountError) {
+          console.error("handleMediaUpload kind post-count", postCountError);
+          // Non rollback su errore list: pre-check già passato; evita perdita file legittimo.
+        }
       }
     }
 

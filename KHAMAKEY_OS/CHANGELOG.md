@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v237 + Worker v200 — upload kind caps (2026-08-06, Cursor)** — Pages + Worker
+  - Server: tetto oggetti video/audio/PDF (sezione+lettera) con pre-check + post-check/rollback.
+  - Client: `canFitBytes` prima degli upload (niente batch inutili a quota piena).
+  - GC orfani R2 **non** toccato (troppo rischioso senza smoke).
 - **Worker v199 — upload quota safe (2026-08-06, Cursor)** — Worker
   - Moments upload: se `get_moment_entitlements` non risponde → 503 (niente PUT senza quota).
   - Post-check: dopo PUT, se somma R2 > piano → delete del file appena caricato + 413.

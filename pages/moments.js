@@ -38,7 +38,7 @@ import {
   warmUploadPipeline,
   warmUploadAuth,
   MAX_GALLERY_IMAGES
-} from "./media-upload.js?v=232";
+} from "./media-upload.js?v=237";
 import {
   readGalleryMedia,
   writeGalleryMedia,
@@ -60,7 +60,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=236";
+} from "./moments-media-ui.js?v=237";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -77,6 +77,7 @@ import {
   setActivePlanLimits
 } from "./moment-media.js?v=216";
 import {
+  canFitBytes,
   emptyEntitlements,
   fetchMomentEntitlements,
   formatBytes,
@@ -86,7 +87,7 @@ import {
   PLAN_LABELS,
   storageBytesLimit,
   storageUsagePercent
-} from "./moment-plans.js?v=232";
+} from "./moment-plans.js?v=237";
 import { LIST_SECTION_MODES, itemsFromSection } from "./moment-list-items.js";
 import {
   renderListItemsPanel,
@@ -3348,11 +3349,22 @@ function setCoverUrl(formNode, url){
   if(hidden) hidden.value = url || "";
 }
 
+function assertCanFitUploadBytes(fileOrFiles){
+  const list = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
+  const bytes = list.reduce((sum, file) => sum + (Number(file?.size) || 0), 0);
+  if(!canFitBytes(currentEntitlements, bytes)){
+    const used = formatBytes(currentEntitlements.bytes_used);
+    const max = formatBytes(storageBytesLimit(currentEntitlements.limits));
+    throw new Error(`Spazio insufficiente (${used} / ${max}). Rimuovi file o passa a Plus/Pro.`);
+  }
+}
+
 async function uploadCoverImage(file,row,formNode){
   const status = document.getElementById("coverUploadStatus");
   setUploadStatus(status,localizeFieldPhrase("Caricamento in corso..."));
   uploadBusy = true;
   try{
+    assertCanFitUploadBytes(file);
     const url = await uploadImage(supabase,{scope:"moments",scopeId:row.id,file});
     setCoverUrl(formNode, url);
     const slot = formNode.querySelector("#coverFramerSlot");
@@ -3395,12 +3407,14 @@ async function uploadGalleryImages(files,row,formNode,key){
   const batchSize = [...files].filter(Boolean).length;
   enableSection(formNode,key);
   try{
+    assertCanFitUploadBytes([...files].filter(Boolean));
     const items = await uploadGalleryMedia({
       supabase,
       row,
       formNode,
       key,
       files,
+      entitlements: currentEntitlements,
       onStatus:(msg,type)=>setUploadStatus(status,msg,type),
       onBusy:busy=>{ uploadBusy = busy; }
     });
@@ -3425,6 +3439,7 @@ async function uploadSectionVideo(file,row,formNode){
   uploadBusy = true;
   try{
     validateVideoFile(file);
+    assertCanFitUploadBytes(file);
     const url = await uploadVideo(supabase,{scope:"moments",scopeId:row.id,file});
     const urlInput = formNode.querySelector('[name="section_video_video_url"]');
     const oldUrl = urlInput?.value || "";
@@ -3470,6 +3485,7 @@ async function uploadMusicAudio(file,row,formNode){
   const panel = document.getElementById("musicAudioPanel");
   uploadBusy = true;
   try{
+    assertCanFitUploadBytes(file);
     const url = await uploadAudio(supabase,{scope:"moments",scopeId:row.id,file});
     const urlInput = formNode.querySelector('[name="section_music_audio_url"]');
     const oldUrl = urlInput?.value || "";
@@ -3499,6 +3515,7 @@ async function uploadSectionPhoto(key,file,row,formNode){
   uploadBusy = true;
   try{
     validateImageFile(file);
+    assertCanFitUploadBytes(file);
     const url = await uploadImage(supabase,{scope:"moments",scopeId:row.id,file});
     const input = formNode.querySelector(`[name="section_${key}_${config.field}"]`);
     const oldUrl = input?.value || "";
@@ -3630,6 +3647,7 @@ async function replaceGalleryImage(file,row,formNode,key,mediaId){
   const status = document.getElementById(`galleryUploadStatus_${key}`);
   enableSection(formNode,key);
   try{
+    // Replace: niente pre-check bytes stretto (il vecchio file viene rimosso dopo); server resta autorità.
     const result = await replaceGalleryMediaItem({
       supabase,
       row,
@@ -3726,6 +3744,7 @@ function openJourneyFilePicker(formNode,stepId){
 async function uploadJourneyStepImage(file,row,formNode,stepId){
   try{
     validateImageFile(file);
+    assertCanFitUploadBytes(file);
     const { oldUrl } = await uploadJourneyStepPhoto({
       supabase,
       row,

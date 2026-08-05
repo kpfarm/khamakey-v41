@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v196-gallery-scroll";
+const WORKER_VERSION = "v197-signature-voi";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -4469,8 +4469,20 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   }
 
   if (key === "signature") {
-    const label = section.title || "Questo momento appartiene a";
-    return `<article class="${rv} moment-signature"><p class="moment-signature-label">${escapeHtml(label)}</p><p class="moment-signature-name">${escapeHtml(section.sign_name || "Voi")}</p>${section.sign_subtitle ? `<p class="moment-signature-sub">${escapeHtml(section.sign_subtitle)}</p>` : section.body ? `<p class="moment-signature-sub">${escapeHtml(section.body)}</p>` : ""}</article>`;
+    const label = String(section.title || "").trim() || "Questo momento appartiene a";
+    const name = String(section.sign_name || "").trim();
+    const sub = String(section.sign_subtitle || section.body || "").trim();
+    // Mai inventare "Voi": solo ciò che ha scritto il cliente
+    const nameHtml = name
+      ? `<p class="moment-signature-name">${escapeHtml(name)}</p>`
+      : (sub ? `<p class="moment-signature-name">${escapeHtml(sub)}</p>` : "");
+    const subHtml = name && sub
+      ? `<p class="moment-signature-sub">${escapeHtml(sub)}</p>`
+      : "";
+    if (!nameHtml) {
+      return `<article class="${rv} moment-signature"><p class="moment-signature-label">${escapeHtml(label)}</p><p class="moment-empty-hint">Aggiungi i nomi nella firma finale.</p></article>`;
+    }
+    return `<article class="${rv} moment-signature"><p class="moment-signature-label">${escapeHtml(label)}</p>${nameHtml}${subHtml}</article>`;
   }
 
   if (key === "dedication" && (section.body || section.recipient)) {

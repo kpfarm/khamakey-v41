@@ -421,8 +421,9 @@ export function readSectionFromForm(form, key, formNode = null){
     base.author = String(form.get(`section_${key}_author`) || "").trim();
   }
   if(key === "signature"){
-    base.sign_name = String(form.get(`section_${key}_sign_name`) || "").trim();
-    base.sign_subtitle = String(form.get(`section_${key}_sign_subtitle`) || "").trim();
+    // Live DOM: evita perdita nome firma su iOS / pannelli nascosti (prima poteva restare vuoto → "Voi" in pubblico)
+    base.sign_name = val(`section_${key}_sign_name`);
+    base.sign_subtitle = val(`section_${key}_sign_subtitle`);
   }
   if(key === "gallery"){
     base.media = parseMediaList(form.get(`section_${key}_media`)).filter(item=>item.type === "image");

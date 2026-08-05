@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v234 + Worker v197 — firma senza «Voi» (2026-08-05, Cursor)** — Pages + Worker
+  - Pagina pubblica: niente più fallback inventato `Voi` se manca il nome; solo testo cliente.
+  - Editor: `sign_name` / `sign_subtitle` letti dal DOM live al Salva.
 - **Worker v196 — scroll galleria verticale (2026-08-05, Cursor)** — Worker
   - Su `/m/`: `touch-action` anche su foto/frame + lock asse gesto (verticale = pagina, orizzontale = galleria).
 - **Moments v233 + Worker v195 — fix salvataggi (2026-08-05, Cursor)** — Pages + Worker

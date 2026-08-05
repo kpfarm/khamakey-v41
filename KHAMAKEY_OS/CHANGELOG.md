@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v199 — upload quota safe (2026-08-06, Cursor)** — Worker
+  - Moments upload: se `get_moment_entitlements` non risponde → 503 (niente PUT senza quota).
+  - Post-check: dopo PUT, se somma R2 > piano → delete del file appena caricato + 413.
+  - Rate limit upload fail-closed (limiter down → 503); RSVP/PIN/guestbook restano fail-open.
 - **Moments v236 + Worker v198 + SQL v172 — pre-lancio live (2026-08-06, Cursor)** — Pages + Worker + SQL
   - Salva ottimistico: conflitto multi-sessione → messaggio + ricarica (niente overwrite silenzioso).
   - Discard / Account / logout: clear draft (niente bozze “zombie”).

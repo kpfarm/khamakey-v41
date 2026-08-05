@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v198-launch-horoscope";
+const WORKER_VERSION = "v199-upload-quota-safe";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -762,8 +762,9 @@ async function handleMomentSupportNotify(request, env) {
 }
 
 // Rate limiting su Postgres (check_rate_limit, sql/khamakey-rate-limit-v76.sql): niente infra nuova.
-// Fail-open: se il limiter stesso non risponde, non blocchiamo il servizio per questo.
-async function checkRateLimit(env, key, maxAttempts, windowMinutes, lockMinutes) {
+// Default fail-open: se il limiter non risponde, non blocchiamo RSVP/PIN/guestbook.
+// Upload media usa failClosed:true — meglio rifiutare che accettare flood senza tetto.
+async function checkRateLimit(env, key, maxAttempts, windowMinutes, lockMinutes, options = {}) {
   try {
     const allowed = await rpc(env, "check_rate_limit", {
       p_key: key,
@@ -774,12 +775,20 @@ async function checkRateLimit(env, key, maxAttempts, windowMinutes, lockMinutes)
     return allowed !== false;
   } catch (error) {
     console.error("check_rate_limit", error);
+    if (options && options.failClosed) return false;
     return true;
   }
 }
 
 function tooManyRequests() {
   return cors(json({ error: "Troppe richieste. Riprova tra qualche minuto." }, 429));
+}
+
+function mediaRateLimitUnavailable() {
+  return cors(json({
+    error: "Controllo anti-abuso temporaneamente non disponibile. Riprova tra poco.",
+    code: "rate_limit_unavailable"
+  }, 503));
 }
 
 const MEDIA_LIMITS = {
@@ -1013,9 +1022,21 @@ async function handleMediaUpload(request, env) {
     if (!jwt) return cors(json({ error: "Accesso non autorizzato." }, 401));
     const user = await supabaseUser(env, jwt);
     if (!user?.email) return cors(json({ error: "Sessione non valida." }, 401));
-    if (!await checkRateLimit(env, `media-upload:${user.email}`, 60, 60)) {
-      return tooManyRequests();
+
+    // Fail-closed solo qui: se il limiter non risponde, niente PUT (altri endpoint restano fail-open).
+    let mediaRateAllowed;
+    try {
+      mediaRateAllowed = await rpc(env, "check_rate_limit", {
+        p_key: `media-upload:${user.email}`,
+        p_max_attempts: 60,
+        p_window_minutes: 60,
+        p_lock_minutes: null
+      });
+    } catch (rateError) {
+      console.error("handleMediaUpload rate_limit", rateError);
+      return mediaRateLimitUnavailable();
     }
+    if (mediaRateAllowed === false) return tooManyRequests();
 
     const form = await request.formData();
     const file = form.get("file");
@@ -1033,28 +1054,44 @@ async function handleMediaUpload(request, env) {
     }
 
     let planLimits = DEFAULT_MOMENTS_PLAN_LIMITS;
+    let planKey = "moments_free";
+    let storageMb = DEFAULT_MOMENTS_PLAN_LIMITS.storage_mb;
+    let maxBytes = storageMb * 1024 * 1024;
+
     if (scope === "moments") {
+      // Fail-closed: senza entitlements leggibili non si carica (niente bypass quota).
+      let entitlements;
       try {
-        const entitlements = await rpcAsUser(env, jwt, "get_moment_entitlements", { p_event_id: scopeId });
-        planLimits = entitlements?.limits && typeof entitlements.limits === "object"
-          ? entitlements.limits
-          : DEFAULT_MOMENTS_PLAN_LIMITS;
-        const storageMb = Number(planLimits.storage_mb) || DEFAULT_MOMENTS_PLAN_LIMITS.storage_mb;
-        const bytesUsed = Number(entitlements?.bytes_used) || 0;
-        const maxBytes = Math.max(0, storageMb) * 1024 * 1024;
-        if (bytesUsed + file.size > maxBytes) {
-          const usedMb = (bytesUsed / (1024 * 1024)).toFixed(1);
-          return cors(json({
-            error: `Spazio esaurito per questo Moment (${usedMb} / ${storageMb} MB). Passa a Plus o Pro, oppure rimuovi file.`,
-            code: "storage_quota",
-            plan_key: entitlements?.plan_key || "moments_free",
-            bytes_used: bytesUsed,
-            storage_mb: storageMb
-          }, 413));
-        }
+        entitlements = await rpcAsUser(env, jwt, "get_moment_entitlements", { p_event_id: scopeId });
       } catch (entError) {
         console.error("handleMediaUpload entitlements", entError);
-        // Fallback ai limiti file globali se RPC non disponibile
+        return cors(json({
+          error: "Non riesco a verificare lo spazio disponibile. Riprova tra poco.",
+          code: "entitlements_unavailable"
+        }, 503));
+      }
+      if (!entitlements || typeof entitlements !== "object") {
+        return cors(json({
+          error: "Non riesco a verificare lo spazio disponibile. Riprova tra poco.",
+          code: "entitlements_unavailable"
+        }, 503));
+      }
+      planLimits = entitlements.limits && typeof entitlements.limits === "object"
+        ? entitlements.limits
+        : DEFAULT_MOMENTS_PLAN_LIMITS;
+      planKey = entitlements?.plan_key || "moments_free";
+      storageMb = Number(planLimits.storage_mb) || DEFAULT_MOMENTS_PLAN_LIMITS.storage_mb;
+      const bytesUsed = Number(entitlements?.bytes_used) || 0;
+      maxBytes = Math.max(0, storageMb) * 1024 * 1024;
+      if (bytesUsed + file.size > maxBytes) {
+        const usedMb = (bytesUsed / (1024 * 1024)).toFixed(1);
+        return cors(json({
+          error: `Spazio esaurito per questo Moment (${usedMb} / ${storageMb} MB). Passa a Plus o Pro, oppure rimuovi file.`,
+          code: "storage_quota",
+          plan_key: planKey,
+          bytes_used: bytesUsed,
+          storage_mb: storageMb
+        }, 413));
       }
     }
 
@@ -1082,6 +1119,8 @@ async function handleMediaUpload(request, env) {
         usage = await syncMomentMediaUsageFromR2(env, jwt, scopeId);
       } catch (usageError) {
         console.error("handleMediaUpload usage sync", usageError);
+        // Misura fallita: non cancelliamo il file (evita perdita upload legittimo).
+        // Pre-check entitlements già passato; race rara resta solo se list R2 è down.
         try {
           await rpcAsUser(env, jwt, "record_moment_media_bytes", {
             p_event_id: scopeId,
@@ -1091,6 +1130,30 @@ async function handleMediaUpload(request, env) {
         } catch (deltaError) {
           console.error("handleMediaUpload usage delta", deltaError);
         }
+      }
+
+      // Post-check anti-race: se la somma R2 supera il piano, rollback del solo file appena messo.
+      if (usage && Number(usage.bytes_used) > maxBytes) {
+        try {
+          await env.MEDIA.delete(key);
+        } catch (delError) {
+          console.error("handleMediaUpload quota rollback delete", delError);
+        }
+        let rolled = null;
+        try {
+          rolled = await syncMomentMediaUsageFromR2(env, jwt, scopeId);
+        } catch (rollSyncError) {
+          console.error("handleMediaUpload quota rollback sync", rollSyncError);
+        }
+        const usedAfter = Number(rolled?.bytes_used ?? usage.bytes_used) || 0;
+        const usedMb = (usedAfter / (1024 * 1024)).toFixed(1);
+        return cors(json({
+          error: `Spazio esaurito per questo Moment (${usedMb} / ${storageMb} MB). Passa a Plus o Pro, oppure rimuovi file.`,
+          code: "storage_quota",
+          plan_key: planKey,
+          bytes_used: usedAfter,
+          storage_mb: storageMb
+        }, 413));
       }
     }
 

@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v194-video-50mb";
+const WORKER_VERSION = "v195-save-youtube";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -2370,13 +2370,17 @@ function youtubeVideoId(raw) {
   if (!url) return "";
   try {
     const parsed = new URL(url);
-    if (parsed.hostname.includes("youtu.be")) return parsed.pathname.slice(1).split("/")[0];
-    if (parsed.hostname.includes("youtube.com")) {
-      if (parsed.pathname.startsWith("/embed/")) return parsed.pathname.split("/")[2] || "";
+    const host = parsed.hostname.replace(/^www\./, "").toLowerCase();
+    if (host === "youtu.be") return parsed.pathname.slice(1).split("/")[0] || "";
+    if (host.endsWith("youtube.com") || host.endsWith("youtube-nocookie.com")) {
+      const parts = parsed.pathname.split("/").filter(Boolean);
+      if (parts[0] === "embed" || parts[0] === "shorts" || parts[0] === "live" || parts[0] === "v") {
+        return parts[1] || "";
+      }
       return parsed.searchParams.get("v") || "";
     }
   } catch {}
-  const short = url.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
+  const short = url.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:embed|shorts|live|v)\/|v=)([\w-]{11})/);
   return short ? short[1] : "";
 }
 
@@ -3093,7 +3097,7 @@ body.nav-open{overflow:hidden}
 .moment-number small{display:block;font-family:${f.ui};font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:${c.muted};margin-top:8px;line-height:1.35}
 .moment-gallery-hint{margin:4px 0 0;font-family:${f.ui};font-size:.78rem;font-weight:600;color:${c.muted};text-align:center}
 .moment-gallery{margin-top:10px;width:100%;max-width:100%;min-width:0;overflow:hidden}
-.moment-gallery-scroll{display:block;width:100%;max-width:100%;min-width:0;margin:12px 0 0;padding:0 0 12px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:0}
+.moment-gallery-scroll{display:block;width:100%;max-width:100%;min-width:0;margin:12px 0 0;padding:0 0 12px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;overscroll-behavior-x:contain;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:0}
 .moment-gallery-scroll::-webkit-scrollbar{display:none}
 .moment-letter-pdf-card,.moment-letter-audio-card{min-width:min(72vw,240px)}
 .moment-letter-pdf-link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:min(72vw,240px);aspect-ratio:4/3;border-radius:16px;background:${c.bl2};border:1px solid color-mix(in srgb,${c.go} 18%,transparent);text-decoration:none;color:${c.ink};scroll-snap-align:center;box-shadow:0 8px 22px rgba(0,0,0,.08)}

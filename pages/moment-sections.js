@@ -381,12 +381,13 @@ export function readSectionFromForm(form, key, formNode = null){
     base.event_name = val(`section_${key}_event_name`);
   }
   if(key === "music"){
-    base.spotify_url = String(form.get(`section_${key}_spotify_url`) || "").trim();
-    base.youtube_url = String(form.get(`section_${key}_youtube_url`) || "").trim();
-    base.audio_url = String(form.get(`section_${key}_audio_url`) || "").trim();
-    base.audio_title = String(form.get(`section_${key}_audio_title`) || "").trim();
-    base.audio_description = String(form.get(`section_${key}_audio_description`) || "").trim();
-    base.image_url = String(form.get(`section_${key}_image_url`) || "").trim();
+    // Live DOM: FormData su iOS/pannelli nascosti può perdere YouTube/Spotify
+    base.spotify_url = val(`section_${key}_spotify_url`);
+    base.youtube_url = val(`section_${key}_youtube_url`);
+    base.audio_url = val(`section_${key}_audio_url`);
+    base.audio_title = val(`section_${key}_audio_title`);
+    base.audio_description = val(`section_${key}_audio_description`);
+    base.image_url = val(`section_${key}_image_url`);
   }
   if(key === "horoscope"){
     const rawPeople = liveFieldValue(form, formNode, `section_${key}_people`)
@@ -504,13 +505,17 @@ export function youtubeVideoId(raw){
   if(!url) return "";
   try{
     const parsed = new URL(url);
-    if(parsed.hostname.includes("youtu.be")) return parsed.pathname.slice(1).split("/")[0];
-    if(parsed.hostname.includes("youtube.com")){
-      if(parsed.pathname.startsWith("/embed/")) return parsed.pathname.split("/")[2] || "";
+    const host = parsed.hostname.replace(/^www\./, "").toLowerCase();
+    if(host === "youtu.be") return parsed.pathname.slice(1).split("/")[0] || "";
+    if(host.endsWith("youtube.com") || host.endsWith("youtube-nocookie.com")){
+      const parts = parsed.pathname.split("/").filter(Boolean);
+      if(parts[0] === "embed" || parts[0] === "shorts" || parts[0] === "live" || parts[0] === "v"){
+        return parts[1] || "";
+      }
       return parsed.searchParams.get("v") || "";
     }
   }catch{}
-  const short = url.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
+  const short = url.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:embed|shorts|live|v)\/|v=)([\w-]{11})/);
   return short ? short[1] : "";
 }
 

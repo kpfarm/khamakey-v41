@@ -14,10 +14,10 @@ import {
   t,
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
-} from "./moments-i18n.js?v=232";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=232";
+} from "./moments-i18n.js?v=233";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=233";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=226";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=233";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=232";
@@ -42,6 +42,7 @@ import {
 import {
   readGalleryMedia,
   writeGalleryMedia,
+  flushGalleryInlineFields,
   renderGalleryGrid,
   uploadGalleryMedia,
   replaceGalleryMediaItem,
@@ -59,7 +60,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=216";
+} from "./moments-media-ui.js?v=233";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -131,7 +132,7 @@ import {
   sectionFillGuide,
   sectionHasContent,
   isSectionExcluded
-} from "./moment-sections.js?v=232";
+} from "./moment-sections.js?v=233";
 import {
   TYPE_LABELS,
   renderCategorySelect,
@@ -2696,6 +2697,29 @@ function setPreviewFabLabel(){
   fab.setAttribute("data-i18n", mobilePreviewMode ? "shell.edit" : "shell.preview");
 }
 
+/** Click Salva (topbar / barra mobile): sempre pezzo + form attivi, mai closure del primo render. */
+function ensureMomentsSaveDelegation(){
+  if(document.body.dataset.momentsSaveBound === "1") return;
+  document.body.dataset.momentsSaveBound = "1";
+  document.body.addEventListener("click", event=>{
+    const button = event.target?.closest?.(
+      'button[type="submit"][form="momentEditorForm"], .editor-save-btn, #momentsSaveBar .btn-save'
+    );
+    if(!button) return;
+    const app = document.querySelector(".moments-app");
+    if(!app || app.hidden) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const formNode = document.getElementById("momentEditorForm");
+    const currentRow = rows.find(item => item.id === activeId);
+    if(!formNode || !currentRow){
+      showEditorSaveFeedback(t("save.fail"), "error");
+      return;
+    }
+    saveMoment({ preventDefault(){}, currentTarget:formNode }, currentRow);
+  });
+}
+
 function updateSaveStatus(saved){
   const node = document.getElementById("editorSaveStatus");
   if(node){
@@ -3102,16 +3126,8 @@ function renderDetail(id){
     document.getElementById("editorUndoBtnMobile")?.addEventListener("click",revertEditorChanges);
   }
   editorForm.addEventListener("submit",event=>saveMoment(event,row));
-  // Pulsanti Salva fuori dal form: chiama direttamente saveMoment (no validation HTML)
-  document.querySelectorAll('button[type="submit"][form="momentEditorForm"], .editor-save-btn, #momentsSaveBar .btn-save').forEach(button=>{
-    if(button.dataset.momentsSaveBound === "1") return;
-    button.dataset.momentsSaveBound = "1";
-    button.addEventListener("click",event=>{
-      event.preventDefault();
-      event.stopPropagation();
-      saveMoment({ preventDefault(){}, currentTarget:editorForm }, row);
-    });
-  });
+  // Salva top/bottom: delega una sola volta → sempre form + pezzo correnti (no closure stale)
+  ensureMomentsSaveDelegation();
   syncRsvpWhatsappWarn(editorForm);
   editorForm.addEventListener("input",event=>{
     markEditorDirty(editorForm);
@@ -4310,9 +4326,19 @@ async function saveMoment(event,row, options = {}){
   if(saveInFlight) return false;
   const formNode = event.currentTarget || document.getElementById("momentEditorForm");
   if(!formNode) return false;
+  // Evita salvataggio sul form staccato dopo cambio pezzo
+  const liveForm = document.getElementById("momentEditorForm");
+  if(liveForm && formNode !== liveForm){
+    return saveMoment({ preventDefault(){}, currentTarget:liveForm }, rows.find(item => item.id === activeId) || row, options);
+  }
+  if(row?.id && activeId && row.id !== activeId){
+    const liveRow = rows.find(item => item.id === activeId);
+    if(liveRow) return saveMoment({ preventDefault(){}, currentTarget:formNode }, liveRow, options);
+  }
   saveInFlight = true;
   let state;
   try{
+    flushGalleryInlineFields(formNode);
     state = sanitizeStateForSave(readFormState(formNode));
   }catch(error){
     saveInFlight = false;
@@ -4427,12 +4453,14 @@ async function saveMoment(event,row, options = {}){
     }
     localStorage.setItem(onboardingKey(row.id),"done");
     if(!options.quietOk){
-      showEditorSaveFeedback(
-        rsvpAutoOff
-          ? t("save.ok_rsvp_off")
-          : t("save.ok"),
-        "ok"
-      );
+      const emptyEnabled = Object.entries(state.sections || {})
+        .filter(([key, section]) => section?.enabled && !sectionHasContent(key, section))
+        .map(([key]) => SECTION_LABELS[key] || key);
+      let okMsg = rsvpAutoOff ? t("save.ok_rsvp_off") : t("save.ok");
+      if(emptyEnabled.length){
+        okMsg = `${okMsg} ${t("save.ok_empty_sections", { list: emptyEnabled.slice(0, 3).join(", ") })}`;
+      }
+      showEditorSaveFeedback(okMsg, "ok");
     }
     const hint = document.getElementById("editorActionHint");
     if(hint) hint.hidden = true;

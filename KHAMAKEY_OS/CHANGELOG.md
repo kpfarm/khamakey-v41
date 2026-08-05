@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v233 + Worker v195 — fix salvataggi (2026-08-05, Cursor)** — Pages + Worker
+  - Salva barra mobile/topbar: sempre pezzo + form correnti (niente closure stale dopo cambio prodotto).
+  - Flush didascalie galleria prima del Salva; YouTube/Spotify letti dal DOM live; Shorts/live/m.
+  - Avviso se sezione attiva ma vuota (non compare su `/m/`); Anteprima mobile navy quando Salva è visibile; galleria pubblica `touch-action: pan-x pan-y`.
 - **Moments v232 + Worker v194 + SQL v171 — video 50 MB (2026-08-04, Cursor)** — Pages + Worker + SQL
   - Piano Free resta **1 video**; tetto file video alzato a **50 MB** (client, Worker, `platform_plans`).
 - **Business progetto distaccato — scaffold (2026-08-04, Cursor)** — Business

@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-22** (Descrizione breve in hero — Moments v186 / Worker v182)
+> Ultimo aggiornamento: **2026-08-04** (Business progetto distaccato — scaffold + Supabase nuovo)
 
 ### Fonte di verità versioni
 
@@ -82,9 +82,12 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Agente / track | File principali | Non toccare |
 |----------------|-----------------|-------------|
-| **Business editor** | `pages/editor.html`, `pages/editor-ui.css`, `pages/public-page.css`, `pages/app.js` (iframe Business) | `pages/moments.html`, `pages/moments.js`, RSVP/guestbook Moments |
-| **Moments editor** | `pages/moments.html`, `pages/moments.js`, `pages/moment-*.js`, Worker sezioni `/m/` | Wizard/collaudo/catalogo Business in `editor.html` |
-| **Admin / piattaforma** | `pages/admin.html`, `sql/`, `worker/worker.js` (hub) | — |
+| **Business (progetto parallelo)** | `business/**` — Pages/Worker/SQL/docs dedicati | Moments live: `pages/`, `worker/`, `sql/`, Supabase `cuxlwaocjqwzluycznyp` |
+| **Moments editor** | `pages/moments.html`, `pages/moments.js`, `pages/moment-*.js`, Worker sezioni `/m/` | `business/**` salvo coordinamento esplicito |
+| **Admin / Officina Moments** | `pages/admin.html`, `moments-admin.html`, `sql/`, `worker/worker.js` | Deploy Business (`khamakey-business*`) |
+| **Business legacy in root** (archivio) | `pages/editor.html`, `pages/app.js` — non evolvere qui | Nuovo lavoro solo in `business/` |
+
+**Supabase Business (nuovo, 2026-08-04):** progetto `KhamaKey Business` ref `qsieubbdkvtlvdsucmye` (eu-west-1) — org KhamaKey. Moments resta `cuxlwaocjqwzluycznyp`.
 
 **Regole:** incrementare `?v=` solo sul componente modificato; aggiornare questa tabella versioni dopo ogni release.
 
@@ -95,8 +98,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v183** | Magazzino: ricerca anche per barcode confezione; `build_stage`. |
-| **Worker NFC** | **v194-video-50mb** | Upload video fino a 50 MB; allowlist admin; PIN gate. |
-| **Moments editor** | **v232** | Video max 50 MB (1 clip Free); assistenza email. |
+| **Worker NFC** | **v195-save-youtube** | YouTube Shorts/live; scroll galleria; save-related. |
+| **Moments editor** | **v233** | Fix Salva multi-pezzo + didascalie galleria + YouTube; Anteprima ≠ Salva. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v167 (prod)** | v167 reset pezzo reso; v166 USAGE `app_private`; v165 ingest store. |

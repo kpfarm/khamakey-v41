@@ -384,3 +384,5 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-03 | Cursor | **Moments v231**: assistenza = email a `info@khamakeymoments.com` (niente ticket in-app) |
 | 2026-08-04 | Cursor | **Admin v183**: magazzino Moments — ricerca anche per barcode confezione |
 | 2026-08-04 | Cursor | **Moments v232 + Worker v194 + SQL v171**: video Free ancora 1 clip, max file **50 MB** |
+| 2026-08-05 | Cursor | **Moments v233 + Worker v195**: fix salvataggi (save-bar stale, didascalie, YouTube, scroll galleria) |
+| 2026-08-04 | Cursor | **Business parallelo**: cartella `business/` + Supabase `qsieubbdkvtlvdsucmye` + Pages `khamakey-business` + Worker `khamakey-business-nfc` + R2 dedicato (Moments non toccato) |

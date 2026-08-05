@@ -83,6 +83,27 @@ export function writeGalleryMedia(formNode,key,media){
   if(field) field.value = serialized;
 }
 
+/** Sincronizza titolo/descrizione dai campi inline al JSON nascosto (prima del Salva). */
+export function flushGalleryInlineFields(formNode){
+  if(!formNode) return;
+  const rows = formNode.querySelectorAll(".media-edit-row[data-media-section][data-media-id]");
+  if(!rows.length) return;
+  const byKey = new Map();
+  rows.forEach(row=>{
+    const key = row.dataset.mediaSection;
+    if(!key) return;
+    if(!byKey.has(key)) byKey.set(key, readGalleryMedia(formNode, key));
+    const media = byKey.get(key);
+    const index = media.findIndex(item=>item.id === row.dataset.mediaId);
+    if(index < 0) return;
+    const titleEl = row.querySelector(".media-row-title");
+    const descEl = row.querySelector(".media-row-desc");
+    if(titleEl) media[index].title = titleEl.value.trim();
+    if(descEl) media[index].description = descEl.value.trim();
+  });
+  byKey.forEach((media, key)=> writeGalleryMedia(formNode, key, media));
+}
+
 export function renderGalleryGrid(formNode,key){
   const root = document.getElementById(`galleryOrganized_${key}`);
   if(!root) return;

@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v196 — scroll galleria verticale (2026-08-05, Cursor)** — Worker
+  - Su `/m/`: `touch-action` anche su foto/frame + lock asse gesto (verticale = pagina, orizzontale = galleria).
 - **Moments v233 + Worker v195 — fix salvataggi (2026-08-05, Cursor)** — Pages + Worker
   - Salva barra mobile/topbar: sempre pezzo + form correnti (niente closure stale dopo cambio prodotto).
   - Flush didascalie galleria prima del Salva; YouTube/Spotify letti dal DOM live; Shorts/live/m.

@@ -98,7 +98,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v183** | Magazzino: ricerca anche per barcode confezione; `build_stage`. |
-| **Worker NFC** | **v195-save-youtube** | YouTube Shorts/live; scroll galleria; save-related. |
+| **Worker NFC** | **v196-gallery-scroll** | Galleria `/m/`: scroll verticale non bloccato dalle foto. |
 | **Moments editor** | **v233** | Fix Salva multi-pezzo + didascalie galleria + YouTube; Anteprima ≠ Salva. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |

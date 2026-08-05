@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v195-save-youtube";
+const WORKER_VERSION = "v196-gallery-scroll";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -2834,19 +2834,26 @@ function closeLightbox(){
   document.getElementById("momentLightboxMedia").innerHTML="";
   document.body.style.overflow="";
 }
-/* Tap vs swipe: lo scroll laterale deve vincere sul telefono */
+/* Tap vs swipe: asse dominante — verticale = scroll pagina, orizzontale = galleria, tap = lightbox */
 document.querySelectorAll(".moment-gallery-scroll").forEach(function(scroller){
-  var startX=0,startY=0,dragging=false;
+  var startX=0,startY=0,axis=null,dragging=false;
   scroller.addEventListener("pointerdown",function(e){
-    startX=e.clientX;startY=e.clientY;dragging=false;
+    startX=e.clientX;startY=e.clientY;axis=null;dragging=false;
   },{passive:true});
   scroller.addEventListener("pointermove",function(e){
-    if(Math.abs(e.clientX-startX)>12||Math.abs(e.clientY-startY)>12)dragging=true;
+    var dx=Math.abs(e.clientX-startX), dy=Math.abs(e.clientY-startY);
+    if(dx<10&&dy<10) return;
+    dragging=true;
+    if(axis) return;
+    // Soglia: verticale vince se è chiaramente dominante (scroll pagina)
+    axis = dy > dx * 1.15 ? "v" : "h";
   },{passive:true});
+  scroller.addEventListener("pointerup",function(){ axis=null; },{passive:true});
+  scroller.addEventListener("pointercancel",function(){ axis=null; },{passive:true});
   scroller.addEventListener("click",function(e){
     var node=e.target.closest("[data-media-open]");
     if(!node||!scroller.contains(node))return;
-    if(dragging){e.preventDefault();e.stopPropagation();return;}
+    if(dragging || axis === "v" || axis === "h"){e.preventDefault();e.stopPropagation();return;}
     e.preventDefault();
     openMedia(Number(node.getAttribute("data-media-open")));
   });
@@ -3111,8 +3118,8 @@ body.nav-open{overflow:hidden}
 .moment-gallery-scroll.is-single{display:flex;justify-content:center;overflow-x:hidden;scroll-snap-type:none}
 .moment-gallery-scroll.is-single .moment-gallery-track{width:auto;max-width:100%;margin:0 auto;justify-content:center}
 .moment-gallery-scroll.is-single .moment-gallery-figure{flex:0 0 auto;width:min(86vw,300px);max-width:100%;scroll-snap-align:none}
-.moment-gallery-figure{margin:0;display:grid;gap:8px;flex:0 0 220px;width:220px;max-width:70vw;scroll-snap-align:start;outline:none;border:0;background:transparent;padding:0;text-align:left;touch-action:pan-x}
-.moment-gallery-frame{position:relative;overflow:hidden;border-radius:18px;width:100%;aspect-ratio:4/5;background:#0f172a;box-shadow:0 10px 28px rgba(15,23,42,.12);touch-action:pan-x;cursor:pointer}
+.moment-gallery-figure{margin:0;display:grid;gap:8px;flex:0 0 220px;width:220px;max-width:70vw;scroll-snap-align:start;outline:none;border:0;background:transparent;padding:0;text-align:left;touch-action:pan-x pan-y}
+.moment-gallery-frame{position:relative;overflow:hidden;border-radius:18px;width:100%;aspect-ratio:4/5;background:#0f172a;box-shadow:0 10px 28px rgba(15,23,42,.12);touch-action:pan-x pan-y;cursor:pointer}
 .moment-gallery-frame[data-media-open]:focus-visible{box-shadow:0 0 0 3px ${c.go}66}
 .moment-gallery-frame img,.moment-gallery-frame video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none;background:#0f172a;border:0;border-radius:0;box-shadow:none;aspect-ratio:auto;max-width:none}
 .moment-gallery-frame video{object-position:center center}

@@ -1,0 +1,9 @@
+{% comment %}
+  Email pubblica KhamaKey Moments.
+  Override: Impostazioni negozio Shopify → Email cliente, se vuoi un altro indirizzo.
+{% endcomment %}
+{% assign moments_email = 'info@khamakeymoments.com' %}
+{% if shop.email != blank and shop.email contains 'khamakeymoments.com' %}
+  {% assign moments_email = shop.email %}
+{% endif %}
+{{- moments_email -}}

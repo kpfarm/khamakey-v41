@@ -1,0 +1,70 @@
+{% if section.settings.heading != blank %}
+  {% assign cta_heading = section.settings.heading %}
+{% else %}
+  {% assign cta_heading = 'landing.cta_heading' | t %}
+{% endif %}
+{% if section.settings.text != blank %}
+  {% assign cta_text = section.settings.text %}
+{% else %}
+  {% assign cta_text = 'landing.cta_text' | t %}
+{% endif %}
+{% if section.settings.button_label != blank %}
+  {% assign cta_button = section.settings.button_label %}
+{% else %}
+  {% assign cta_button = 'landing.cta_button' | t %}
+{% endif %}
+
+<section class="section section--tight">
+  <div class="page-width">
+    <div class="cta-band">
+      {% if cta_heading != blank %}
+        <h2>{{ cta_heading }}</h2>
+      {% endif %}
+      {% if cta_text != blank %}
+        <p class="lede">{{ cta_text }}</p>
+      {% endif %}
+      {% if cta_button != blank %}
+        <div class="btn-group" style="justify-content:center">
+          <a class="btn btn--primary" href="{{ section.settings.button_link | default: routes.all_products_collection_url }}">{{ cta_button }}</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "CTA finale",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Lascia i testi vuoti per usare le traduzioni IT/EN."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titolo (override)"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Testo (override)"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "CTA (override)"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link CTA"
+    }
+  ],
+  "presets": [
+    {
+      "name": "CTA finale"
+    }
+  ]
+}
+{% endschema %}

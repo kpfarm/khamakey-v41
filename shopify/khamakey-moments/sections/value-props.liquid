@@ -1,0 +1,193 @@
+{% if section.settings.heading != blank %}
+  {% assign props_heading = section.settings.heading %}
+{% else %}
+  {% assign props_heading = 'landing.props_heading' | t %}
+{% endif %}
+
+{% if section.settings.prop_1_title != blank %}
+  {% assign prop_1_title = section.settings.prop_1_title %}
+{% else %}
+  {% assign prop_1_title = 'landing.prop_1_title' | t %}
+{% endif %}
+{% if section.settings.prop_1_text != blank %}
+  {% assign prop_1_text = section.settings.prop_1_text %}
+{% else %}
+  {% assign prop_1_text = 'landing.prop_1_text' | t %}
+{% endif %}
+{% if section.settings.prop_2_title != blank %}
+  {% assign prop_2_title = section.settings.prop_2_title %}
+{% else %}
+  {% assign prop_2_title = 'landing.prop_2_title' | t %}
+{% endif %}
+{% if section.settings.prop_2_text != blank %}
+  {% assign prop_2_text = section.settings.prop_2_text %}
+{% else %}
+  {% assign prop_2_text = 'landing.prop_2_text' | t %}
+{% endif %}
+{% if section.settings.prop_3_title != blank %}
+  {% assign prop_3_title = section.settings.prop_3_title %}
+{% else %}
+  {% assign prop_3_title = 'landing.prop_3_title' | t %}
+{% endif %}
+{% if section.settings.prop_3_text != blank %}
+  {% assign prop_3_text = section.settings.prop_3_text %}
+{% else %}
+  {% assign prop_3_text = 'landing.prop_3_text' | t %}
+{% endif %}
+{% if section.settings.prop_4_title != blank %}
+  {% assign prop_4_title = section.settings.prop_4_title %}
+{% else %}
+  {% assign prop_4_title = 'landing.prop_4_title' | t %}
+{% endif %}
+{% if section.settings.prop_4_text != blank %}
+  {% assign prop_4_text = section.settings.prop_4_text %}
+{% else %}
+  {% assign prop_4_text = 'landing.prop_4_text' | t %}
+{% endif %}
+
+<section class="section">
+  <div class="page-width">
+    <div class="section-heading {% if section.settings.center %}text-center{% endif %}">
+      {% if props_heading != blank %}
+        <h2>{{ props_heading }}</h2>
+      {% endif %}
+      {% if section.settings.text != blank %}
+        <p class="lede">{{ section.settings.text }}</p>
+      {% endif %}
+    </div>
+    <div class="props">
+      {% if section.blocks.size > 0 %}
+        {% for block in section.blocks %}
+          <article class="prop" {{ block.shopify_attributes }}>
+            <h3>{{ block.settings.title }}</h3>
+            <p>{{ block.settings.text }}</p>
+          </article>
+        {% endfor %}
+      {% else %}
+        <article class="prop">
+          <h3>{{ prop_1_title }}</h3>
+          <p>{{ prop_1_text }}</p>
+        </article>
+        <article class="prop">
+          <h3>{{ prop_2_title }}</h3>
+          <p>{{ prop_2_text }}</p>
+        </article>
+        <article class="prop">
+          <h3>{{ prop_3_title }}</h3>
+          <p>{{ prop_3_text }}</p>
+        </article>
+        <article class="prop">
+          <h3>{{ prop_4_title }}</h3>
+          <p>{{ prop_4_text }}</p>
+        </article>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Punti di forza",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "center",
+      "label": "Centra intestazione",
+      "default": true
+    },
+    {
+      "type": "paragraph",
+      "content": "Campi vuoti = testi tradotti IT/EN/DE. Se li riempi, traduci le altre lingue con Translate & Adapt. I blocchi sostituiscono i 4 punti sotto."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titolo"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Sottotitolo"
+    },
+    {
+      "type": "header",
+      "content": "Punto 1"
+    },
+    {
+      "type": "text",
+      "id": "prop_1_title",
+      "label": "Titolo 1"
+    },
+    {
+      "type": "textarea",
+      "id": "prop_1_text",
+      "label": "Testo 1"
+    },
+    {
+      "type": "header",
+      "content": "Punto 2"
+    },
+    {
+      "type": "text",
+      "id": "prop_2_title",
+      "label": "Titolo 2"
+    },
+    {
+      "type": "textarea",
+      "id": "prop_2_text",
+      "label": "Testo 2"
+    },
+    {
+      "type": "header",
+      "content": "Punto 3"
+    },
+    {
+      "type": "text",
+      "id": "prop_3_title",
+      "label": "Titolo 3"
+    },
+    {
+      "type": "textarea",
+      "id": "prop_3_text",
+      "label": "Testo 3"
+    },
+    {
+      "type": "header",
+      "content": "Punto 4"
+    },
+    {
+      "type": "text",
+      "id": "prop_4_title",
+      "label": "Titolo 4"
+    },
+    {
+      "type": "textarea",
+      "id": "prop_4_text",
+      "label": "Testo 4"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "prop",
+      "name": "Punto di forza",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titolo"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Testo"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Punti di forza"
+    }
+  ]
+}
+{% endschema %}

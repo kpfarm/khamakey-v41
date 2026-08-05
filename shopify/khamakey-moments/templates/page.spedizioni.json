@@ -1,0 +1,13 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-legal",
+      "settings": {
+        "heading": "Informazioni sulle spedizioni",
+        "draft_note": "Bozza operativa. Adatta tempi, costi e corrieri reali quando li hai definiti.",
+        "body": "<h2>Italia</h2><p>Spediamo in Italia con corriere espresso. Tempi indicativi di consegna: <strong>24/48 ore lavorative</strong> dalla conferma ordine (salvo festivi o ritardi del corriere).</p><h2>Costi</h2><p>Il costo di spedizione viene calcolato al checkout in base a destinazione e peso. Eventuali soglie di spedizione gratuita saranno indicate in negozio.</p><h2>Tracking</h2><p>Dopo la spedizione ricevi un’email con il codice di tracking, quando disponibile.</p><h2>Internazionale</h2><p>Al momento le spedizioni sono concentrate sull’Italia. Per altre destinazioni contattaci prima dell’ordine.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

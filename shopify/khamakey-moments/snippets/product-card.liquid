@@ -1,0 +1,43 @@
+{% doc %}
+  Product card for grids.
+  @param {product} product - Product to render
+{% enddoc %}
+
+<article class="product-card">
+  <a href="{{ product.url }}" class="product-card__media-wrap">
+    <div class="product-card__media">
+      {% if product.featured_media %}
+        {{
+          product.featured_media
+          | image_url: width: 800
+          | image_tag:
+            widths: '280, 400, 560, 800',
+            sizes: '(min-width: 1100px) 25vw, (min-width: 768px) 33vw, 50vw',
+            loading: 'lazy',
+            alt: product.featured_media.alt | default: product.title
+        }}
+      {% else %}
+        <img
+          src="{{ 'product-love.jpg' | asset_url }}"
+          alt="{{ product.title | escape }}"
+          width="800"
+          height="800"
+          loading="lazy"
+        >
+      {% endif %}
+    </div>
+    {% unless product.available %}
+      <span class="product-card__badge">{{ 'products.sold_out' | t }}</span>
+    {% elsif product.compare_at_price > product.price %}
+      <span class="product-card__badge">{{ 'products.sale' | t }}</span>
+    {% endunless %}
+  </a>
+  <div class="product-card__body">
+    <h3 class="product-card__title">
+      <a href="{{ product.url }}">{{ product.title }}</a>
+    </h3>
+    <p class="product-card__price {% unless product.available %}price--sold-out{% endunless %}">
+      {% render 'price', product: product %}
+    </p>
+  </div>
+</article>

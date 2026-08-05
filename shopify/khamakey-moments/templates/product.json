@@ -1,0 +1,30 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "settings": {
+        "lead": "Non un semplice portachiavi: \n\nUn accesso ai vostri ricordi più belli. KhamaKey Moments trasforma un semplice portachiavi in un custode prezioso dei tuoi ricordi più cari. Il design è elegante e ricco di significato: un cuore rosso e la frase \"L'amore è la chiave di tutto\" impreziosiscono una base rossa resistente, pensata per accompagnarti nella vita di tutti i giorni. Ma il vero valore di questo oggetto va ben oltre la sua forma: KhamaKey Moments ti permette di raccogliere in un unico luogo le foto più significative, i video delle emozioni condivise, la musica che ha fatto da colonna sonora alla tua storia, i luoghi speciali che hai vissuto e le lettere o i messaggi più belli da conservare e rileggere in ogni momento. Piccolo nelle dimensioni, ma immenso nel valore emotivo, è l'idea regalo perfetta per chi ama i gesti autentici e carichi di sentimento. Un dono originale e indimenticabile per celebrare ogni storia d'amore, amicizia o legame speciale.",
+        "show_description_top": false,
+        "pack_badge": "",
+        "shipping_note": "",
+        "included_heading": "",
+        "show_trust": false,
+        "trust_1": "",
+        "trust_2": "",
+        "trust_3": ""
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

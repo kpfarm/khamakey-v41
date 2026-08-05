@@ -1,0 +1,94 @@
+<section>
+  <div class="trust-strip" aria-label="{{ 'landing.trust_shipping' | t | escape }}">
+    <div class="page-width">
+      <ul class="trust-strip__list">
+        <li class="trust-strip__item">
+          <span class="trust-strip__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 7h11v10H3V7zm11 3h4l3 3v4h-7v-7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="7.5" cy="18.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="18.5" r="1.5" fill="currentColor"/></svg>
+          </span>
+          <span>{{ 'landing.trust_shipping' | t }}</span>
+        </li>
+        <li class="trust-strip__item">
+          <span class="trust-strip__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M7 8c2.5 2.2 2.5 5.8 0 8M10.5 6c3.5 3 3.5 9 0 12M14 4.5c4.4 3.7 4.4 11.3 0 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><rect x="3.5" y="3.5" width="17" height="17" rx="4" stroke="currentColor" stroke-width="1.5"/></svg>
+          </span>
+          <span>{{ 'landing.trust_nfc' | t }}</span>
+        </li>
+        <li class="trust-strip__item">
+          <span class="trust-strip__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 3.5v5.2c0 5-3.4 8.4-8 9.8-4.6-1.4-8-4.8-8-9.8V6.5L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12.2l2 2 4-4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span>{{ 'landing.trust_update' | t }}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page-width">
+    <header class="collection-header">
+      <p class="eyebrow">{{ 'collections.title' | t }}</p>
+      <h1>{{ collection.title }}</h1>
+      {% if collection.description != blank %}
+        <div class="rte">{{ collection.description }}</div>
+      {% else %}
+        <p>{{ 'collections.moments_lede' | t }}</p>
+      {% endif %}
+    </header>
+
+    {% paginate collection.products by section.settings.products_per_page %}
+      {% if collection.products.size > 0 %}
+        <div class="product-grid {% if section.settings.columns == 4 %}product-grid--4{% endif %}">
+          {% for product in collection.products %}
+            {% render 'product-card', product: product %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>{{ 'collections.empty' | t }}</p>
+      {% endif %}
+
+      {% if paginate.pages > 1 %}
+        <nav class="pagination" aria-label="{{ 'general.pagination' | t }}">
+          {% if paginate.previous %}
+            <a href="{{ paginate.previous.url }}">←</a>
+          {% endif %}
+          {% for part in paginate.parts %}
+            {% if part.is_link %}
+              <a href="{{ part.url }}">{{ part.title }}</a>
+            {% else %}
+              <span class="{% if part.title == paginate.current_page %}current{% endif %}">{{ part.title }}</span>
+            {% endif %}
+          {% endfor %}
+          {% if paginate.next %}
+            <a href="{{ paginate.next.url }}">→</a>
+          {% endif %}
+        </nav>
+      {% endif %}
+    {% endpaginate %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collezione",
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 8,
+      "max": 36,
+      "step": 4,
+      "label": "Prodotti per pagina",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "label": "Colonne desktop",
+      "default": 3
+    }
+  ]
+}
+{% endschema %}

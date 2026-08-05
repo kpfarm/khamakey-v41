@@ -1,0 +1,6 @@
+# KhamaKey Moments — Shopify CLI theme config
+# Store: https://khamakeymoments.com (dj0wgt-0g.myshopify.com)
+
+[environments.production]
+store = "dj0wgt-0g.myshopify.com"
+path = "."

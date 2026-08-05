@@ -1,0 +1,18 @@
+{
+  "sections": {
+    "how": {
+      "type": "how-it-works",
+      "settings": {
+        "anchor": "come-funziona",
+        "center": true
+      }
+    },
+    "cta": {
+      "type": "cta-band",
+      "settings": {
+        "button_link": "shopify://collections/all"
+      }
+    }
+  },
+  "order": ["how", "cta"]
+}

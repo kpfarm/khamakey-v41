@@ -1,0 +1,171 @@
+{% if pages.contact != blank %}
+  {% assign contact_page_url = pages.contact.url %}
+{% elsif pages.contatti != blank %}
+  {% assign contact_page_url = pages.contatti.url %}
+{% else %}
+  {% assign contact_page_url = '/pages/contact' %}
+{% endif %}
+
+{% if pages.spedizioni != blank %}
+  {% assign shipping_page_url = pages.spedizioni.url %}
+{% else %}
+  {% assign shipping_page_url = '/pages/spedizioni' %}
+{% endif %}
+
+{% if pages.resi != blank %}
+  {% assign returns_page_url = pages.resi.url %}
+{% else %}
+  {% assign returns_page_url = '/pages/resi' %}
+{% endif %}
+
+{% if pages.termini != blank %}
+  {% assign terms_page_url = pages.termini.url %}
+{% else %}
+  {% assign terms_page_url = '/pages/termini' %}
+{% endif %}
+
+{% if shop.privacy_policy != blank %}
+  {% assign privacy_page_url = shop.privacy_policy.url %}
+{% else %}
+  {% assign privacy_page_url = '/policies/privacy-policy' %}
+{% endif %}
+
+<footer class="site-footer" role="contentinfo">
+  <div class="page-width">
+    <div class="site-footer__grid">
+      <div>
+        <div class="site-footer__brand">{{ section.settings.brand_title | default: shop.name }}</div>
+        {% if section.settings.brand_text != blank %}
+          <p>{{ section.settings.brand_text }}</p>
+        {% else %}
+          <p>{{ 'footer.brand_text' | t }}</p>
+        {% endif %}
+        {% if section.settings.newsletter_enable %}
+          {% form 'customer', class: 'newsletter-form' %}
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            <label class="visually-hidden" for="FooterEmail">{{ 'newsletter.email' | t }}</label>
+            <input
+              id="FooterEmail"
+              type="email"
+              name="contact[email]"
+              placeholder="{{ 'newsletter.placeholder' | t }}"
+              required
+              autocomplete="email"
+            >
+            <button class="btn btn--primary" type="submit">{{ 'newsletter.submit' | t }}</button>
+          {% endform %}
+        {% endif %}
+      </div>
+
+      <div>
+        <h3>{{ section.settings.shop_menu_title }}</h3>
+        <div class="site-footer__links">
+          <a href="{{ routes.root_url }}">{{ 'general.home' | t }}</a>
+          <a href="{{ routes.all_products_collection_url }}">{{ 'general.products' | t }}</a>
+          <a href="{{ contact_page_url }}">{{ 'general.contact' | t }}</a>
+        </div>
+      </div>
+
+      <div>
+        <h3>{{ section.settings.help_menu_title | default: 'Assistenza' }}</h3>
+        <div class="site-footer__links">
+          <a href="{{ shipping_page_url }}">{{ 'policies.shipping' | t }}</a>
+          <a href="{{ returns_page_url }}">{{ 'policies.refund' | t }}</a>
+          <a href="{{ privacy_page_url }}">{{ 'policies.privacy' | t }}</a>
+          <a href="{{ terms_page_url }}">{{ 'policies.terms' | t }}</a>
+          <a href="{{ contact_page_url }}">{{ 'general.contact' | t }}</a>
+        </div>
+      </div>
+
+      <div>
+        <h3>{{ 'general.follow_us' | t }}</h3>
+        <div class="site-footer__links">
+          {% if settings.social_instagram != blank %}
+            <a href="{{ settings.social_instagram }}" target="_blank" rel="noopener">Instagram</a>
+          {% endif %}
+          {% if settings.social_tiktok != blank %}
+            <a href="{{ settings.social_tiktok }}" target="_blank" rel="noopener">TikTok</a>
+          {% endif %}
+          {% if settings.social_facebook != blank %}
+            <a href="{{ settings.social_facebook }}" target="_blank" rel="noopener">Facebook</a>
+          {% endif %}
+          {% capture moments_email %}{% render 'moments-email' %}{% endcapture %}
+          {% assign moments_email = moments_email | strip %}
+          <a href="mailto:{{ moments_email }}">{{ moments_email }}</a>
+          <a href="{{ contact_page_url }}">{{ 'general.contact' | t }}</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <div>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. {{ section.settings.copyright_extra }}</div>
+      {% if section.settings.show_payment_icons %}
+        <div class="payment-icons" aria-label="{{ 'general.payment_methods' | t }}">
+          {% for type in shop.enabled_payment_types %}
+            {{ type | payment_type_svg_tag }}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    {
+      "type": "text",
+      "id": "brand_title",
+      "label": "Titolo brand",
+      "default": "KhamaKey Moments"
+    },
+    {
+      "type": "textarea",
+      "id": "brand_text",
+      "label": "Testo brand (override — vuoto = IT/EN da locales)"
+    },
+    {
+      "type": "text",
+      "id": "shop_menu_title",
+      "label": "Titolo colonna shop",
+      "default": "Shop"
+    },
+    {
+      "type": "link_list",
+      "id": "shop_menu",
+      "label": "Menu shop (footer)",
+      "default": "footer"
+    },
+    {
+      "type": "text",
+      "id": "help_menu_title",
+      "label": "Titolo colonna assistenza",
+      "default": "Assistenza"
+    },
+    {
+      "type": "link_list",
+      "id": "help_menu",
+      "label": "Menu assistenza (opzionale — altrimenti policy Shopify)"
+    },
+    {
+      "type": "checkbox",
+      "id": "newsletter_enable",
+      "label": "Mostra newsletter",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_icons",
+      "label": "Mostra icone pagamento",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "copyright_extra",
+      "label": "Testo copyright extra",
+      "default": "Tutti i diritti riservati."
+    }
+  ]
+}
+{% endschema %}

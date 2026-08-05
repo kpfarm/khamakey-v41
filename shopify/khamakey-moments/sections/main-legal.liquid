@@ -1,0 +1,41 @@
+<section class="page-width legal-page page-width--narrow" style="margin-inline:auto">
+  {% if section.settings.draft_note != blank %}
+    <p class="draft-note">{{ section.settings.draft_note }}</p>
+  {% endif %}
+
+  <h1>{{ page.title | default: section.settings.heading }}</h1>
+
+  <div class="rte">
+    {% if section.settings.body != blank %}
+      {{ section.settings.body }}
+    {% else %}
+      {{ page.content }}
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Pagina legale",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titolo (se pagina senza titolo)",
+      "default": "Informazioni"
+    },
+    {
+      "type": "text",
+      "id": "draft_note",
+      "label": "Nota bozza (opzionale)",
+      "default": "Bozza operativa: puoi modificarla dal tema o sostituirla con la policy ufficiale Shopify."
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Contenuto",
+      "default": "<p>Contenuto in aggiornamento.</p>"
+    }
+  ]
+}
+{% endschema %}

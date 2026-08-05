@@ -1,0 +1,79 @@
+<section class="page-width legal-page">
+  <div class="section-heading">
+    <p class="eyebrow">{{ section.settings.eyebrow }}</p>
+    <h1>{{ page.title | default: section.settings.heading }}</h1>
+    {% if section.settings.intro != blank %}
+      <p class="lede">{{ section.settings.intro }}</p>
+    {% endif %}
+  </div>
+
+  <div class="contact-grid">
+    <div>
+      {% if section.settings.sidebar_text != blank %}
+        <div class="rte">{{ section.settings.sidebar_text }}</div>
+      {% endif %}
+      {% capture moments_email %}{% render 'moments-email' %}{% endcapture %}
+      {% assign moments_email = moments_email | strip %}
+      <p><strong>Email:</strong> <a href="mailto:{{ moments_email }}">{{ moments_email }}</a></p>
+    </div>
+
+    <div>
+      {% form 'contact', class: 'contact-form' %}
+        {% if form.posted_successfully? %}
+          <p>{{ 'contact.success' | t }}</p>
+        {% endif %}
+        {{ form.errors | default_errors }}
+
+        <label>
+          {{ 'contact.name' | t }}
+          <input type="text" name="contact[name]" required autocomplete="name">
+        </label>
+        <label>
+          {{ 'contact.email' | t }}
+          <input type="email" name="contact[email]" required autocomplete="email">
+        </label>
+        <label>
+          {{ 'contact.phone' | t }}
+          <input type="tel" name="contact[phone]" autocomplete="tel">
+        </label>
+        <label>
+          {{ 'contact.message' | t }}
+          <textarea name="contact[body]" rows="6" required></textarea>
+        </label>
+        <button type="submit" class="btn btn--primary btn--full">{{ 'contact.submit' | t }}</button>
+      {% endform %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Contatti",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Supporto"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titolo fallback",
+      "default": "Contatti"
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Intro",
+      "default": "Domande su ordini, spedizioni o Moments? Scrivici: ti rispondiamo al più presto."
+    },
+    {
+      "type": "richtext",
+      "id": "sidebar_text",
+      "label": "Testo laterale",
+      "default": "<p>Orari supporto: lun–ven 9:00–18:00 (CET).</p><p>Per assistenza sulla tua pagina Moments, indica il numero ordine nel messaggio.</p>"
+    }
+  ]
+}
+{% endschema %}

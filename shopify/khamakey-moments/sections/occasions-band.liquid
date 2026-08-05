@@ -1,0 +1,143 @@
+{% if section.settings.eyebrow != blank %}
+  {% assign occ_eyebrow = section.settings.eyebrow %}
+{% else %}
+  {% assign occ_eyebrow = 'landing.occasions_eyebrow' | t %}
+{% endif %}
+{% if section.settings.heading != blank %}
+  {% assign occ_heading = section.settings.heading %}
+{% else %}
+  {% assign occ_heading = 'landing.occasions_heading' | t %}
+{% endif %}
+{% if section.settings.text != blank %}
+  {% assign occ_text = section.settings.text %}
+{% else %}
+  {% assign occ_text = 'landing.occasions_text' | t %}
+{% endif %}
+
+<section class="section section--tight" id="{{ section.settings.anchor | default: 'occasioni' }}">
+  <div class="page-width">
+    <div class="section-heading {% if section.settings.center %}text-center{% endif %}">
+      {% if occ_eyebrow != blank %}
+        <p class="eyebrow">{{ occ_eyebrow }}</p>
+      {% endif %}
+      {% if occ_heading != blank %}
+        <h2>{{ occ_heading }}</h2>
+      {% endif %}
+      {% if occ_text != blank %}
+        <p class="lede">{{ occ_text }}</p>
+      {% endif %}
+    </div>
+
+    <div class="occasions">
+      {% if section.blocks.size > 0 %}
+        {% for block in section.blocks %}
+          <article class="occasion-card" {{ block.shopify_attributes }}>
+            <span class="occasion-card__mark" aria-hidden="true">{{ forloop.index }}</span>
+            <h3>{{ block.settings.title }}</h3>
+            <p>{{ block.settings.text }}</p>
+            {% if block.settings.link != blank %}
+              <a class="occasion-card__link" href="{{ block.settings.link }}">
+                {% if block.settings.link_label != blank %}
+                  {{ block.settings.link_label }}
+                {% else %}
+                  {{ 'landing.occasions_link' | t }}
+                {% endif %}
+              </a>
+            {% endif %}
+          </article>
+        {% endfor %}
+      {% else %}
+        <article class="occasion-card">
+          <span class="occasion-card__mark" aria-hidden="true">1</span>
+          <h3>{{ 'landing.occasion_1_title' | t }}</h3>
+          <p>{{ 'landing.occasion_1_text' | t }}</p>
+          <a class="occasion-card__link" href="{{ routes.all_products_collection_url }}">{{ 'landing.occasions_link' | t }}</a>
+        </article>
+        <article class="occasion-card">
+          <span class="occasion-card__mark" aria-hidden="true">2</span>
+          <h3>{{ 'landing.occasion_2_title' | t }}</h3>
+          <p>{{ 'landing.occasion_2_text' | t }}</p>
+          <a class="occasion-card__link" href="{{ routes.all_products_collection_url }}">{{ 'landing.occasions_link' | t }}</a>
+        </article>
+        <article class="occasion-card">
+          <span class="occasion-card__mark" aria-hidden="true">3</span>
+          <h3>{{ 'landing.occasion_3_title' | t }}</h3>
+          <p>{{ 'landing.occasion_3_text' | t }}</p>
+          <a class="occasion-card__link" href="{{ routes.all_products_collection_url }}">{{ 'landing.occasions_link' | t }}</a>
+        </article>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Occasioni",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Tre occasioni di regalo. Testi vuoti = traduzioni. Con blocchi: override manuale."
+    },
+    {
+      "type": "text",
+      "id": "anchor",
+      "label": "ID ancora",
+      "default": "occasioni"
+    },
+    {
+      "type": "checkbox",
+      "id": "center",
+      "label": "Centra intestazione",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titolo"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Sottotitolo"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "occasion",
+      "name": "Occasione",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titolo"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Testo"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Testo link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Occasioni"
+    }
+  ]
+}
+{% endschema %}

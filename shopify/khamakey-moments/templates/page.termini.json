@@ -1,0 +1,13 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-legal",
+      "settings": {
+        "heading": "Termini e condizioni di vendita",
+        "draft_note": "Bozza. Da allineare a ragione sociale, P.IVA e condizioni di vendita reali.",
+        "body": "<h2>Oggetto</h2><p>Questi termini regolano l’acquisto di prodotti KhamaKey Moments sul negozio online e l’accesso al servizio di pagina Moments collegato al prodotto.</p><h2>Prodotti e servizio</h2><p>I Moments sono portachiavi che, avvicinati allo smartphone, aprono una pagina di ricordi personalizzata. La pagina si crea e aggiorna online dopo l’acquisto.</p><h2>Prezzi e pagamenti</h2><p>I prezzi sono indicati in euro e possono includere o escludere IVA secondo quanto mostrato al checkout. Il pagamento è gestito in sicurezza da Shopify e dai provider abilitati.</p><h2>Pagina Moments</h2><p>L’acquisto include l’accesso alla pagina Moments collegata al prodotto, con le funzioni previste per creare e aggiornare i ricordi (foto, musica, dedica e contenuti correlati).</p><h2>Responsabilità</h2><p>KhamaKey non è responsabile di usi impropri del prodotto, contenuti caricati dall’utente nella pagina Moments o interruzioni di servizi di terzi.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

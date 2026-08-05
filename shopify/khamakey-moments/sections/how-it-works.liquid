@@ -1,0 +1,194 @@
+{% if section.settings.eyebrow != blank %}
+  {% assign how_eyebrow = section.settings.eyebrow %}
+{% else %}
+  {% assign how_eyebrow = 'landing.how_eyebrow' | t %}
+{% endif %}
+{% if section.settings.heading != blank %}
+  {% assign how_heading = section.settings.heading %}
+{% else %}
+  {% assign how_heading = 'landing.how_heading' | t %}
+{% endif %}
+{% if section.settings.text != blank %}
+  {% assign how_lede = section.settings.text %}
+{% else %}
+  {% assign how_lede = 'landing.how_lede' | t %}
+{% endif %}
+
+{% if section.settings.step_1_title != blank %}
+  {% assign how_1_title = section.settings.step_1_title %}
+{% else %}
+  {% assign how_1_title = 'landing.how_1_title' | t %}
+{% endif %}
+{% if section.settings.step_1_text != blank %}
+  {% assign how_1_text = section.settings.step_1_text %}
+{% else %}
+  {% assign how_1_text = 'landing.how_1_text' | t %}
+{% endif %}
+{% if section.settings.step_2_title != blank %}
+  {% assign how_2_title = section.settings.step_2_title %}
+{% else %}
+  {% assign how_2_title = 'landing.how_2_title' | t %}
+{% endif %}
+{% if section.settings.step_2_text != blank %}
+  {% assign how_2_text = section.settings.step_2_text %}
+{% else %}
+  {% assign how_2_text = 'landing.how_2_text' | t %}
+{% endif %}
+{% if section.settings.step_3_title != blank %}
+  {% assign how_3_title = section.settings.step_3_title %}
+{% else %}
+  {% assign how_3_title = 'landing.how_3_title' | t %}
+{% endif %}
+{% if section.settings.step_3_text != blank %}
+  {% assign how_3_text = section.settings.step_3_text %}
+{% else %}
+  {% assign how_3_text = 'landing.how_3_text' | t %}
+{% endif %}
+
+<section class="section section--tight" id="{{ section.settings.anchor | default: 'come-funziona' }}">
+  <div class="page-width">
+    <div class="section-heading {% if section.settings.center %}text-center{% endif %}">
+      {% if how_eyebrow != blank %}
+        <p class="eyebrow">{{ how_eyebrow }}</p>
+      {% endif %}
+      {% if how_heading != blank %}
+        <h2>{{ how_heading }}</h2>
+      {% endif %}
+      {% if how_lede != blank %}
+        <p class="lede">{{ how_lede }}</p>
+      {% endif %}
+    </div>
+
+    <div class="steps">
+      {% if section.blocks.size > 0 %}
+        {% for block in section.blocks %}
+          <article class="step-card" {{ block.shopify_attributes }}>
+            <span class="step-card__num">{{ forloop.index }}</span>
+            <h3>{{ block.settings.title }}</h3>
+            <p>{{ block.settings.text }}</p>
+          </article>
+        {% endfor %}
+      {% else %}
+        <article class="step-card">
+          <span class="step-card__num">1</span>
+          <h3>{{ how_1_title }}</h3>
+          <p>{{ how_1_text }}</p>
+        </article>
+        <article class="step-card">
+          <span class="step-card__num">2</span>
+          <h3>{{ how_2_title }}</h3>
+          <p>{{ how_2_text }}</p>
+        </article>
+        <article class="step-card">
+          <span class="step-card__num">3</span>
+          <h3>{{ how_3_title }}</h3>
+          <p>{{ how_3_text }}</p>
+        </article>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Come funziona",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor",
+      "label": "ID ancora",
+      "default": "come-funziona"
+    },
+    {
+      "type": "checkbox",
+      "id": "center",
+      "label": "Centra intestazione",
+      "default": true
+    },
+    {
+      "type": "paragraph",
+      "content": "Campi vuoti = testi tradotti IT/EN/DE del tema. Se li riempi qui, traduci le altre lingue con Translate & Adapt. I blocchi “Passaggio” sostituiscono i 3 step sotto."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titolo"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Sottotitolo"
+    },
+    {
+      "type": "header",
+      "content": "Passo 1"
+    },
+    {
+      "type": "text",
+      "id": "step_1_title",
+      "label": "Titolo passo 1"
+    },
+    {
+      "type": "textarea",
+      "id": "step_1_text",
+      "label": "Testo passo 1"
+    },
+    {
+      "type": "header",
+      "content": "Passo 2"
+    },
+    {
+      "type": "text",
+      "id": "step_2_title",
+      "label": "Titolo passo 2"
+    },
+    {
+      "type": "textarea",
+      "id": "step_2_text",
+      "label": "Testo passo 2"
+    },
+    {
+      "type": "header",
+      "content": "Passo 3"
+    },
+    {
+      "type": "text",
+      "id": "step_3_title",
+      "label": "Titolo passo 3"
+    },
+    {
+      "type": "textarea",
+      "id": "step_3_text",
+      "label": "Testo passo 3"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Passaggio",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titolo"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Testo"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Come funziona"
+    }
+  ]
+}
+{% endschema %}

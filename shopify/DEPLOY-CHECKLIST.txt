@@ -1,0 +1,52 @@
+KhamaKey Moments — checklist deploy Shopify
+==========================================
+
+FILE
+----
+shopify/khamakey-moments-theme.zip
+
+1) TEMA
+- Admin → Negozio online → Temi → Carica zip → Pubblica
+- Personalizza → Logo: rimuovi logo testo/serif se presente (usa wordmark del tema)
+- Hard refresh / finestra privata
+
+2) LINGUE
+- Impostazioni → Lingue → aggiungi e pubblica: English, Deutsch (+ altre quando serve)
+- Lo switch lingue appare in header con 2+ lingue pubblicate
+- Translate & Adapt traduce anche:
+  - prodotti / collezioni
+  - pagine (Spedizioni, Resi, Termini, Contatti, Come funziona)
+  - policy Shopify (Privacy, Termini, Spedizione, Reso) se presenti in Impostazioni → Policy
+- Testi tema (homepage, FAQ, menu, scheda generica): locales IT / EN / DE nel tema
+
+
+3) PAGINE (testi già nel tema)
+- Contatti (handle contact) → template "contact"
+- Nuova: Spedizioni → handle "spedizioni" → template "spedizioni"
+- Nuova: Resi e rimborsi → handle "resi" → template "resi"
+- Nuova: Termini e condizioni → handle "termini" → template "termini"
+- Pagina esistente "Come funziona" → template "come-funziona" (opzionale ma consigliato)
+- Aggiungi la traduzione inglese di ciascuna pagina
+
+4) SHOP — catalogo attuale
+- Crea 3 collezioni: Love, Wedding, Amicizia (+ traduzione Friendship)
+- 4 portachiavi Moments per ciascuna (12 prodotti totali)
+- Completa foto / prezzi / varianti (titoli e descrizioni IT + EN)
+- Collega una collezione (o "all") nella sezione homepage "Collezione in evidenza"
+- Per UI "Singolo / Set da 2": crea opzione prodotto "Pacchetto" (+ Pack in EN)
+- Rinomina/archivia i vecchi prodotti (Amore / Matrimonio / Famiglia) se non servono più
+
+5) EMAIL
+- Contatto pubblico tema: info@khamakeymoments.com
+- Admin → Impostazioni → Notifiche / Dettagli negozio:
+  - Email mittente / contatto negozio = info@khamakeymoments.com
+  - Verifica dominio email (Shopify + DNS) se richiesto
+- Casella reale: crea/inoltra info@ su Google Workspace / provider DNS
+
+6) COPY
+- Testi del tema già in chiave vendita (emozione + collezioni)
+- Non aggiungere in Admin descrizioni tecniche su come è fatto il software
+
+7) DOPO
+- Smoke IT + EN: Home, Prodotti, scheda, Contatti, Spedizioni, Resi, Termini, Privacy, Carrello
+- Test checkout con ordine di prova

@@ -1,0 +1,119 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "KhamaKey Moments",
+    "theme_version": "1.0.0",
+    "theme_author": "KhamaKey",
+    "theme_documentation_url": "https://www.khamakey.it",
+    "theme_support_url": "https://www.khamakey.it"
+  },
+  {
+    "name": "Brand",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo"
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon (opzionale)",
+        "info": "Se vuoto usa la K Moments inclusa nel tema (Blu Notte + Rosa Ricordo)."
+      },
+      {
+        "type": "range",
+        "id": "logo_width",
+        "min": 80,
+        "max": 280,
+        "step": 4,
+        "unit": "px",
+        "label": "Larghezza logo",
+        "default": 160
+      },
+      {
+        "type": "color",
+        "id": "color_primary",
+        "label": "Rosa Ricordo",
+        "default": "#AA626C"
+      },
+      {
+        "type": "color",
+        "id": "color_secondary",
+        "label": "Blu Notte",
+        "default": "#071A3C"
+      },
+      {
+        "type": "color",
+        "id": "color_accent",
+        "label": "Rosa Luce (CTA)",
+        "default": "#D98C95"
+      },
+      {
+        "type": "color",
+        "id": "color_text",
+        "label": "Testo",
+        "default": "#18202F"
+      },
+      {
+        "type": "color",
+        "id": "color_background",
+        "label": "Sfondo",
+        "default": "#FFF9F5"
+      },
+      {
+        "type": "color",
+        "id": "color_surface",
+        "label": "Superficie",
+        "default": "#F3E3DE"
+      }
+    ]
+  },
+  {
+    "name": "Tipografia",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Font brand fissi: titoli Cormorant Garamond, testo Outfit. Non usare i font Shopify (Assistant/Inter) — spezzano il look Moments."
+      }
+    ]
+  },
+  {
+    "name": "Social",
+    "settings": [
+      {
+        "type": "text",
+        "id": "social_instagram",
+        "label": "Instagram URL",
+        "default": "https://www.instagram.com/"
+      },
+      {
+        "type": "text",
+        "id": "social_tiktok",
+        "label": "TikTok URL"
+      },
+      {
+        "type": "text",
+        "id": "social_facebook",
+        "label": "Facebook URL"
+      }
+    ]
+  },
+  {
+    "name": "Carrello",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "cart_note_enable",
+        "label": "Abilita nota ordine",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "cart_empty_message",
+        "label": "Messaggio carrello vuoto",
+        "default": "Il carrello è vuoto. Scopri i nostri Moments."
+      }
+    ]
+  }
+]

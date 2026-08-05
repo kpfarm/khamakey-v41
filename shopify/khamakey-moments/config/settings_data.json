@@ -1,0 +1,29 @@
+{
+  "current": {
+    "color_primary": "#AA626C",
+    "color_secondary": "#071A3C",
+    "color_accent": "#D98C95",
+    "color_text": "#18202F",
+    "color_background": "#FFF9F5",
+    "color_surface": "#F0E8E4",
+    "logo_width": 160,
+    "cart_note_enable": true,
+    "cart_empty_message": "Il carrello è vuoto. Scopri i nostri Moments.",
+    "sections": {
+      "header": {
+        "type": "header",
+        "settings": {
+          "menu": "main-menu",
+          "sticky": true
+        }
+      },
+      "footer": {
+        "type": "footer",
+        "settings": {
+          "show_payment_icons": true,
+          "newsletter_enable": true
+        }
+      }
+    }
+  }
+}

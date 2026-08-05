@@ -1,0 +1,157 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero": {
+      "type": "hero-landing",
+      "settings": {
+        "image": "shopify://shop_images/D6F461C2-9061-46F1-97E3-246EE5EF749D.png",
+        "eyebrow": "IL RICORDO CHE NON RESTA FERMO NEL TEMPO",
+        "heading": "Un tocco. Il tuo ricordo, sempre vivo.",
+        "text": "Dentro ogni oggetto Khamakey Moments c'è un chip NFC collegato a una pagina tutta tua. Con il codice di attivazione incluso accedi al tuo editor personale e, quando vuoi, cambi foto, parole, video : il ricordo si aggiorna, cresce e racconta la vostra storia oggi, non solo il giorno in cui l'avete regalato.",
+        "button_label": "Scopri i prodotti",
+        "button_link": "shopify://collections/all",
+        "button_secondary_label": "",
+        "button_secondary_link": "#come-funziona"
+      }
+    },
+    "trust": {
+      "type": "trust-strip",
+      "settings": {
+        "heading": "Garanzie"
+      }
+    },
+    "story_split_MDfqAx": {
+      "type": "story-split",
+      "settings": {
+        "anchor": "storia",
+        "reverse": true,
+        "image": "shopify://shop_images/Schermata_2026-08-04_alle_15.41.52.png",
+        "eyebrow": "SEMPLICISSIMO",
+        "heading": "Tre passi. Un ricordo indimenticabile.",
+        "text": "<p><em>Nessuna app da installare. Ti basta lo smartphone che hai già in tasca.</em></p><ul><li><strong>Scegli il tuo regalo</strong></li></ul><p>Scegli il regalo NFC che preferisci. Ogni prodotto include l’accesso al tuo editor personale e un codice di attivazione.</p><ul><li><strong>Crea la tua storia</strong></li></ul><p>Accedi all’editor e personalizza la tua pagina con foto, video, playlist, lettere, messaggi vocali, dediche, date importanti e molto altro.</p><ul><li><strong> Regala un’emozione</strong></li></ul><p>Chi riceve il regalo dovrà solo avvicinare lo smartphone all’oggetto NFC per accedere alla pagina che hai creato. Nessuna app da scaricare, solo un ricordo da vivere.</p>",
+        "button_label": "Scopri i prodotti",
+        "button_link": "shopify://collections/all"
+      }
+    },
+    "featured_product": {
+      "type": "featured-product",
+      "settings": {
+        "product": "portachiavi-amore",
+        "reverse": false,
+        "anchor": "prodotto",
+        "eyebrow": "",
+        "heading": "",
+        "text": "",
+        "button_label": ""
+      }
+    },
+    "occasions": {
+      "type": "occasions-band",
+      "settings": {
+        "anchor": "occasioni",
+        "center": true,
+        "eyebrow": "",
+        "heading": "",
+        "text": ""
+      }
+    },
+    "props": {
+      "type": "value-props",
+      "settings": {
+        "center": true,
+        "heading": "",
+        "text": ""
+      }
+    },
+    "faq": {
+      "type": "faq",
+      "blocks": {
+        "faq_x86HCi": {
+          "type": "faq",
+          "settings": {
+            "question": "Per quanto tempo resta attiva la pagina dei ricordi?",
+            "answer": "<p>La pagina dei ricordi resta attiva per sempre. Una volta acquistato l'oggetto, non ci sono abbonamenti né costi aggiuntivi: potrai aggiornarla e rivederla quando vuoi, per tutta la vita.</p>"
+          }
+        },
+        "faq_jQ3F6Y": {
+          "type": "faq",
+          "settings": {
+            "question": "Serve un'app?",
+            "answer": "<p>No. Chi riceve il regalo avvicina lo smartphone e la pagina si apre subito.</p>"
+          }
+        },
+        "faq_VqbcRL": {
+          "type": "faq",
+          "settings": {
+            "question": "Per chi è pensato?",
+            "answer": "<p>Per le persone che ami e che per te sono speciali: un regalo NFC unico, pensato per ogni legame e ogni occasione importante.</p>"
+          }
+        },
+        "faq_tdReeE": {
+          "type": "faq",
+          "settings": {
+            "question": "Posso cambiare i ricordi dopo?",
+            "answer": "<p>Sì. Puoi aggiornare la pagina quando vuoi: nuovi momenti, nuove emozioni, stessa magia al tocco.</p>"
+          }
+        },
+        "faq_BV8jnt": {
+          "type": "faq",
+          "settings": {
+            "question": "Cosa posso mettere nella pagina del regalo?",
+            "answer": "<p>Foto, musica, una dedica e i ricordi che contano — la pagina del regalo è il cuore di tutto.</p>"
+          }
+        },
+        "faq_RkxiiE": {
+          "type": "faq",
+          "settings": {
+            "question": "Funziona con tutti gli smartphone?",
+            "answer": "<p>Sì, funziona con la maggior parte degli smartphone moderni, sia iPhone che Android, grazie alla tecnologia NFC. </p><p>Se il telefono non lo rileva subito, controlla che l'NFC sia attivo:</p><p>Su Android si trova in <strong>Impostazioni</strong> &gt; <strong>Connessione</strong> (o Dispositivi collegati) &gt; <strong>NFC</strong>; </p><p>Su iPhone (dal modello 7 in su) è già attivo di default. </p>"
+          }
+        }
+      },
+      "block_order": [
+        "faq_x86HCi",
+        "faq_jQ3F6Y",
+        "faq_VqbcRL",
+        "faq_tdReeE",
+        "faq_BV8jnt",
+        "faq_RkxiiE"
+      ],
+      "settings": {
+        "anchor": "faq",
+        "center": true,
+        "open_first": false,
+        "eyebrow": "",
+        "heading": "",
+        "text": ""
+      }
+    },
+    "cta": {
+      "type": "cta-band",
+      "settings": {
+        "heading": "",
+        "text": "",
+        "button_label": "",
+        "button_link": "shopify://products/portachiavi-amore"
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "trust",
+    "story_split_MDfqAx",
+    "featured_product",
+    "occasions",
+    "props",
+    "faq",
+    "cta"
+  ]
+}

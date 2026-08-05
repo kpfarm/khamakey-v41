@@ -1,0 +1,161 @@
+{% if section.settings.eyebrow != blank %}
+  {% assign feat_eyebrow = section.settings.eyebrow %}
+{% else %}
+  {% assign feat_eyebrow = 'landing.featured_eyebrow' | t %}
+{% endif %}
+{% if section.settings.heading != blank %}
+  {% assign feat_heading = section.settings.heading %}
+{% else %}
+  {% assign feat_heading = 'landing.featured_heading' | t %}
+{% endif %}
+{% if section.settings.text != blank %}
+  {% assign feat_text = section.settings.text %}
+{% else %}
+  {% assign feat_text = 'landing.featured_text' | t %}
+{% endif %}
+{% if section.settings.view_all_label != blank %}
+  {% assign feat_view_all = section.settings.view_all_label %}
+{% else %}
+  {% assign feat_view_all = 'landing.featured_view_all' | t %}
+{% endif %}
+
+<section class="section" id="prodotti">
+  <div class="page-width">
+    <div class="section-heading {% if section.settings.center %}text-center{% endif %}">
+      {% if feat_eyebrow != blank %}
+        <p class="eyebrow">{{ feat_eyebrow }}</p>
+      {% endif %}
+      {% if feat_heading != blank %}
+        <h2>{{ feat_heading }}</h2>
+      {% endif %}
+      {% if feat_text != blank %}
+        <p class="lede">{{ feat_text }}</p>
+      {% endif %}
+    </div>
+
+    {% assign collection = collections[section.settings.collection] %}
+    {% if collection != blank and collection.products_count > 0 %}
+      <div class="product-grid {% if section.settings.columns == 4 %}product-grid--4{% endif %}">
+        {% for product in collection.products limit: section.settings.products_to_show %}
+          {% render 'product-card', product: product %}
+        {% endfor %}
+      </div>
+      {% if section.settings.show_view_all and collection.all_products_count > section.settings.products_to_show %}
+        <div class="btn-group" style="justify-content:center;margin-top:2rem">
+          <a class="btn btn--ghost" href="{{ collection.url }}">{{ feat_view_all }}</a>
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="product-grid">
+        <article class="product-card">
+          <a href="{{ routes.all_products_collection_url }}" class="product-card__media-wrap">
+            <div class="product-card__media">
+              <img src="{{ 'product-love.jpg' | asset_url }}" alt="{{ 'landing.collection_love' | t | escape }}" width="800" height="800" loading="lazy">
+            </div>
+          </a>
+          <div class="product-card__body">
+            <h3 class="product-card__title"><a href="{{ routes.all_products_collection_url }}">{{ 'landing.collection_love' | t }}</a></h3>
+            <p class="product-card__price">{{ 'landing.collection_count' | t }}</p>
+          </div>
+        </article>
+        <article class="product-card">
+          <a href="{{ routes.all_products_collection_url }}" class="product-card__media-wrap">
+            <div class="product-card__media">
+              <img src="{{ 'hero-moments.jpg' | asset_url }}" alt="{{ 'landing.collection_wedding' | t | escape }}" width="800" height="800" loading="lazy">
+            </div>
+          </a>
+          <div class="product-card__body">
+            <h3 class="product-card__title"><a href="{{ routes.all_products_collection_url }}">{{ 'landing.collection_wedding' | t }}</a></h3>
+            <p class="product-card__price">{{ 'landing.collection_count' | t }}</p>
+          </div>
+        </article>
+        <article class="product-card">
+          <a href="{{ routes.all_products_collection_url }}" class="product-card__media-wrap">
+            <div class="product-card__media" style="display:grid;place-items:center;background:linear-gradient(160deg,#071A3C,#2a3d66)">
+              <span style="font-family:var(--font-heading);font-size:1.5rem;color:#fff;letter-spacing:.04em">{{ 'landing.collection_friendship' | t }}</span>
+            </div>
+          </a>
+          <div class="product-card__body">
+            <h3 class="product-card__title"><a href="{{ routes.all_products_collection_url }}">{{ 'landing.collection_friendship' | t }}</a></h3>
+            <p class="product-card__price">{{ 'landing.collection_count' | t }}</p>
+          </div>
+        </article>
+      </div>
+      <p class="lede" style="margin-top:1.5rem;text-align:center;font-size:.92rem">
+        {{ 'landing.featured_setup_note' | t }}
+      </p>
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collezione in evidenza",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "center",
+      "label": "Centra intestazione",
+      "default": true
+    },
+    {
+      "type": "paragraph",
+      "content": "Lascia i testi vuoti per usare le traduzioni IT/EN."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow (override)"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titolo (override)"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Sottotitolo (override)"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collezione"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "label": "Prodotti da mostrare",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "label": "Colonne (desktop)",
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "Mostra “Vedi tutti”",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "view_all_label",
+      "label": "Testo “Vedi tutti” (override)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collezione in evidenza"
+    }
+  ]
+}
+{% endschema %}

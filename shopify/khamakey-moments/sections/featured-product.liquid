@@ -1,0 +1,137 @@
+{% comment %}
+  Showcase prodotto in home: prezzo + CTA acquisto.
+  Campi testo vuoti = traduzioni landing.featured_product_*.
+{% endcomment %}
+
+{% assign fp = section.settings.product %}
+{% if fp == blank %}
+  {% assign fp = collections.all.products.first %}
+{% endif %}
+
+{% if section.settings.eyebrow != blank %}
+  {% assign fp_eyebrow = section.settings.eyebrow %}
+{% else %}
+  {% assign fp_eyebrow = 'landing.featured_product_eyebrow' | t %}
+{% endif %}
+{% if section.settings.heading != blank %}
+  {% assign fp_heading = section.settings.heading %}
+{% else %}
+  {% assign fp_heading = 'landing.featured_product_heading' | t %}
+{% endif %}
+{% if section.settings.text != blank %}
+  {% assign fp_text = section.settings.text %}
+{% else %}
+  {% assign fp_text = 'landing.featured_product_text' | t %}
+{% endif %}
+{% if section.settings.button_label != blank %}
+  {% assign fp_cta = section.settings.button_label %}
+{% else %}
+  {% assign fp_cta = 'landing.featured_product_cta' | t %}
+{% endif %}
+
+<section class="section" id="{{ section.settings.anchor | default: 'prodotto' }}">
+  <div class="page-width">
+    {% if fp != blank %}
+      <div class="featured-product {% if section.settings.reverse %}featured-product--reverse{% endif %}">
+        <div class="featured-product__media">
+          <a href="{{ fp.url }}" aria-label="{{ fp.title | escape }}">
+            {% if fp.featured_media %}
+              {{
+                fp.featured_media
+                | image_url: width: 1400
+                | image_tag:
+                  widths: '600, 900, 1200, 1400',
+                  sizes: '(min-width: 900px) 48vw, 100vw',
+                  loading: 'lazy',
+                  alt: fp.featured_media.alt | default: fp.title
+              }}
+            {% else %}
+              <img src="{{ 'product-love.jpg' | asset_url }}" alt="{{ fp.title | escape }}" width="1200" height="1200" loading="lazy">
+            {% endif %}
+          </a>
+        </div>
+        <div class="featured-product__copy">
+          {% if fp_eyebrow != blank %}
+            <p class="eyebrow">{{ fp_eyebrow }}</p>
+          {% endif %}
+          {% if fp_heading != blank %}
+            <h2>{{ fp_heading }}</h2>
+          {% else %}
+            <h2>{{ fp.title }}</h2>
+          {% endif %}
+          <p class="featured-product__price">{% render 'price', product: fp %}</p>
+          {% if fp_text != blank %}
+            <p class="lede">{{ fp_text }}</p>
+          {% endif %}
+          <div class="btn-group">
+            <a class="btn btn--primary" href="{{ fp.url }}">{{ fp_cta }}</a>
+            <a class="btn btn--ghost" href="{{ routes.all_products_collection_url }}">{{ 'landing.featured_view_all' | t }}</a>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="section-heading text-center">
+        <p class="eyebrow">{{ fp_eyebrow }}</p>
+        <h2>{{ fp_heading }}</h2>
+        <p class="lede">{{ fp_text }}</p>
+        <div class="btn-group" style="justify-content:center;margin-top:1.25rem">
+          <a class="btn btn--primary" href="{{ routes.all_products_collection_url }}">{{ fp_cta }}</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Prodotto in evidenza",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Mostra un prodotto con prezzo e CTA. Testi vuoti = traduzioni del tema."
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Prodotto"
+    },
+    {
+      "type": "checkbox",
+      "id": "reverse",
+      "label": "Inverti layout (testo a sinistra)",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "anchor",
+      "label": "ID ancora",
+      "default": "prodotto"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titolo"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Testo"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "CTA"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Prodotto in evidenza"
+    }
+  ]
+}
+{% endschema %}

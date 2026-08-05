@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Anteprima — KhamaKey Moments Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../khamakey-moments/assets/base.css?v=11">
+  <style>
+    :root {
+      --color-primary: #AA626C;
+      --color-secondary: #071A3C;
+      --color-accent: #D98C95;
+      --color-text: #18202F;
+      --color-bg: #FFF9F5;
+      --color-surface: #F3E3DE;
+      --logo-width: 168px;
+      --font-heading: 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'Outfit', system-ui, sans-serif;
+    }
+    .preview-bar {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      padding: 0.5rem 0.85rem 0.65rem;
+      background: #071A3C;
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+    }
+    .preview-bar__actions {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 0.15rem;
+    }
+    .preview-bar .pill {
+      flex: 0 0 auto;
+      white-space: nowrap;
+      display: inline-flex;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      color: #fff;
+      text-decoration: none;
+    }
+    .preview-bar .pill.is-active {
+      background: #D98C95;
+      border-color: #D98C95;
+    }
+    .site-header { top: 2.6rem; }
+  </style>
+</head>
+<body data-page="home">
+  <div class="preview-bar">
+    <div data-i18n="preview.bar">Anteprima locale — IT/EN · portachiavi Moments</div>
+    <div class="preview-bar__actions">
+      <a class="pill is-active" href="index.html">Landing</a>
+      <a class="pill" href="product.html">Scheda prodotto</a>
+      <a class="pill" href="collection.html">Shop</a>
+      <a class="pill" href="contact.html">Contatti</a>
+      <a class="pill" href="shipping.html">Spedizioni</a>
+      <a class="pill" href="privacy.html">Privacy</a>
+      <a class="pill" href="terms.html">Termini</a>
+    </div>
+  </div>
+  <div data-chrome-header></div>
+
+  <main>
+    <section class="hero">
+      <div class="hero__media">
+        <img src="../../KHAMAKEY_OS/assets/marketing/product/moments-wedding-lifestyle.png" alt="KhamaKey Moments" width="1600" height="1000">
+      </div>
+      <div class="hero__overlay" aria-hidden="true"></div>
+      <div class="page-width">
+        <div class="hero__content">
+          <p class="eyebrow" data-i18n="hero.eyebrow">Il regalo che racconta la vostra storia</p>
+          <h1 data-i18n="hero.h1">Portachiavi Moments</h1>
+          <p class="lede" data-i18n="hero.lede">Love, Wedding, Amicizia: tre collezioni per i momenti che contano. Un tocco con lo smartphone e si apre la pagina dei vostri ricordi — foto, musica, dedica. Senza app.</p>
+          <div class="btn-group">
+            <a class="btn btn--primary" href="collection.html" data-i18n="hero.cta">Scopri le collezioni</a>
+            <a class="btn btn--ghost" href="#come-funziona" style="color:#fff;border-color:rgba(255,255,255,.45)" data-i18n="hero.cta2">Come funziona</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="trust-strip" aria-label="Garanzie">
+      <div class="page-width">
+        <ul class="trust-strip__list">
+          <li class="trust-strip__item">
+            <span class="trust-strip__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 7h11v10H3V7zm11 3h4l3 3v4h-7v-7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="7.5" cy="18.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="18.5" r="1.5" fill="currentColor"/></svg>
+            </span>
+            <span data-i18n="trust.1">Senza app</span>
+          </li>
+          <li class="trust-strip__item">
+            <span class="trust-strip__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M7 8c2.5 2.2 2.5 5.8 0 8M10.5 6c3.5 3 3.5 9 0 12M14 4.5c4.4 3.7 4.4 11.3 0 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><rect x="3.5" y="3.5" width="17" height="17" rx="4" stroke="currentColor" stroke-width="1.5"/></svg>
+            </span>
+            <span data-i18n="trust.2">Piano Free incluso</span>
+          </li>
+          <li class="trust-strip__item">
+            <span class="trust-strip__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 3.5v5.2c0 5-3.4 8.4-8 9.8-4.6-1.4-8-4.8-8-9.8V6.5L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12.2l2 2 4-4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span data-i18n="trust.3">Ricordi sempre aggiornabili</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="storia">
+      <div class="page-width">
+        <div class="split">
+          <div class="split__media">
+            <img src="../../KHAMAKEY_OS/assets/marketing/product/khamakey-love-keyring.png" alt="KhamaKey Moments Love" width="900" height="900">
+          </div>
+          <div class="split__copy">
+            <p class="eyebrow" data-i18n="story.eyebrow">Il gesto che resta</p>
+            <h2 data-i18n="story.h2">Non un gadget. Un ricordo da tenere vicino.</h2>
+            <p data-i18n="story.p1">Un regalo bello da vedere, ancora più bello da vivere: chi lo riceve avvicina il telefono e scopre la storia che avete preparato insieme.</p>
+            <p data-i18n="story.p2">Tre collezioni di portachiavi — Love, Wedding, Amicizia — per dire “ti penso” in un modo nuovo, personale e indimenticabile.</p>
+            <div class="btn-group">
+              <a class="btn btn--secondary" href="collection.html" data-i18n="story.cta">Scopri le collezioni</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight" id="come-funziona">
+      <div class="page-width">
+        <div class="section-heading text-center">
+          <p class="eyebrow" data-i18n="how.eyebrow">Semplicissimo</p>
+          <h2 data-i18n="how.h2">Tre passi. Un regalo indimenticabile.</h2>
+          <p class="lede" data-i18n="how.lede">Niente app da scaricare. Funziona con lo smartphone che hai già in tasca.</p>
+        </div>
+        <div class="steps">
+          <article class="step-card">
+            <span class="step-card__num">1</span>
+            <h3 data-i18n="how.1t">Scegli il tuo regalo</h3>
+            <p data-i18n="how.1p">Scegli l’oggetto NFC che preferisci. Ogni prodotto include l’accesso al tuo editor personale e un codice di attivazione.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-card__num">2</span>
+            <h3 data-i18n="how.2t">Crea la tua storia</h3>
+            <p data-i18n="how.2p">Accedi all’editor e personalizza la tua pagina con foto, video, playlist, lettere, messaggi vocali, dediche, date importanti e molto altro.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-card__num">3</span>
+            <h3 data-i18n="how.3t">Regala un’emozione</h3>
+            <p data-i18n="how.3p">Chi riceve il regalo dovrà solo avvicinare lo smartphone all’oggetto NFC per accedere alla pagina che hai creato. Nessuna app da scaricare, solo un ricordo da vivere.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="prodotti">
+      <div class="page-width">
+        <div class="section-heading text-center">
+          <p class="eyebrow" data-i18n="feat.eyebrow">Le collezioni</p>
+          <h2 data-i18n="feat.h2">Love · Wedding · Amicizia</h2>
+          <p class="lede" data-i18n="feat.lede">Quattro portachiavi Moments per ogni collezione. Scegli lo stile, prepara i ricordi, regala l’emozione.</p>
+        </div>
+        <div class="product-grid">
+          <article class="product-card">
+            <a href="collection.html" class="product-card__media-wrap">
+              <div class="product-card__media">
+                <img src="../../KHAMAKEY_OS/assets/marketing/product/khamakey-love-keyring.png" alt="Collezione Love">
+              </div>
+            </a>
+            <div class="product-card__body">
+              <h3 class="product-card__title"><a href="collection.html" data-i18n="feat.love">Love</a></h3>
+              <p class="product-card__price" data-i18n="feat.count">4 portachiavi Moments</p>
+            </div>
+          </article>
+          <article class="product-card">
+            <a href="collection.html" class="product-card__media-wrap">
+              <div class="product-card__media">
+                <img src="../../KHAMAKEY_OS/assets/marketing/product/moments-wedding-lifestyle.png" alt="Collezione Wedding">
+              </div>
+            </a>
+            <div class="product-card__body">
+              <h3 class="product-card__title"><a href="collection.html" data-i18n="feat.wedding">Wedding</a></h3>
+              <p class="product-card__price" data-i18n="feat.count">4 portachiavi Moments</p>
+            </div>
+          </article>
+          <article class="product-card">
+            <a href="collection.html" class="product-card__media-wrap">
+              <div class="product-card__media" style="display:grid;place-items:center;background:linear-gradient(160deg,#071A3C,#2a3d66)">
+                <span style="font-family:var(--font-heading);font-size:1.5rem;color:#fff;letter-spacing:.04em" data-i18n="feat.friendship">Amicizia</span>
+              </div>
+            </a>
+            <div class="product-card__body">
+              <h3 class="product-card__title"><a href="collection.html" data-i18n="feat.friendship">Amicizia</a></h3>
+              <p class="product-card__price" data-i18n="feat.count">4 portachiavi Moments</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-width">
+        <div class="section-heading text-center">
+          <h2 data-i18n="props.h2">Il regalo che non si dimentica</h2>
+        </div>
+        <div class="props">
+          <article class="prop"><h3 data-i18n="props.1t">L’emozione al primo tocco</h3><p data-i18n="props.1p">Avvicina lo smartphone e la storia si apre: foto, musica, dedica. Un regalo che sorprende davvero.</p></article>
+          <article class="prop"><h3 data-i18n="props.2t">Sempre con voi</h3><p data-i18n="props.2p">Aggiorna i ricordi quando vuoi: nuovi scatti, una canzone, un messaggio. Il Moments resta, la storia cresce.</p></article>
+          <article class="prop"><h3 data-i18n="props.3t">Tre collezioni, un gesto</h3><p data-i18n="props.3p">Portachiavi Moments per amore, matrimonio e amicizia — pensati per anniversari, nozze, compleanni e “solo perché”.</p></article>
+          <article class="prop"><h3 data-i18n="props.4t">Niente abbonamenti obbligatori</h3><p data-i18n="props.4p">Il piano Free è incluso con l’acquisto: tutte le funzioni per creare e vivere la tua pagina Moments.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="page-width">
+        <div class="section-heading text-center">
+          <p class="eyebrow" data-i18n="faq.eyebrow">Domande frequenti</p>
+          <h2 data-i18n="faq.h2">Tutto quello che ti serve sapere</h2>
+        </div>
+        <div class="faq" style="margin-inline:auto">
+          <details open>
+            <summary data-i18n="faq.1q">Serve un’app?</summary>
+            <p data-i18n="faq.1a">No. Chi riceve il Moments avvicina lo smartphone e la pagina si apre subito. Per i telefoni più datati è disponibile anche un QR Code.</p>
+          </details>
+          <details>
+            <summary data-i18n="faq.2q">Cosa posso mettere nella pagina?</summary>
+            <p data-i18n="faq.2a">Foto, musica, dedica e altri contenuti della vostra storia — il cuore del regalo è quello che scegliete di condividere.</p>
+          </details>
+          <details>
+            <summary data-i18n="faq.3q">C’è un abbonamento?</summary>
+            <p data-i18n="faq.3a">No obbligatorio. Con l’acquisto hai il piano Free Moments: tutte le funzioni. Solo in futuro piani opzionali se vorrai più spazio o contenuti.</p>
+          </details>
+          <details>
+            <summary data-i18n="faq.4q">Posso cambiare i ricordi dopo?</summary>
+            <p data-i18n="faq.4a">Sì. Puoi aggiornare la pagina quando vuoi: nuovi momenti, nuove emozioni, stessa magia al tocco.</p>
+          </details>
+          <details>
+            <summary data-i18n="faq.5q">Per chi è pensato?</summary>
+            <p data-i18n="faq.5a">Per chi ama, per chi sposa, per chi è amico — tre collezioni di portachiavi Moments, quattro modelli ciascuna, per ogni occasione speciale.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="page-width">
+        <div class="cta-band">
+          <h2 data-i18n="cta.h2">Pronto a regalare un Moments?</h2>
+          <p class="lede" data-i18n="cta.lede">Scegli Love, Wedding o Amicizia. Quattro modelli per collezione — il resto lo fate voi, con i vostri ricordi.</p>
+          <div class="btn-group" style="justify-content:center">
+            <a class="btn btn--primary" href="collection.html" data-i18n="cta.btn">Vai alle collezioni</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-chrome-footer></div>
+  <script src="i18n.js?v=1"></script>
+  <script src="chrome.js?v=9"></script>
+</body>
+</html>

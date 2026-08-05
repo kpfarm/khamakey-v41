@@ -1,0 +1,32 @@
+{% doc %}
+  Price display for product or variant.
+  @param {product} [product] - Product object
+  @param {variant} [variant] - Optional variant
+  @param {boolean} [show_from] - Prefix "da" when price range
+{% enddoc %}
+
+{% liquid
+  if variant
+    assign target = variant
+    assign price = target.price
+    assign compare = target.compare_at_price
+    assign show_range = false
+  else
+    assign price = product.price
+    assign compare = product.compare_at_price
+    if product.price_varies
+      assign show_range = true
+      assign price = product.price_min
+    else
+      assign show_range = false
+    endif
+  endif
+%}
+
+<span data-product-price>
+  {%- if show_range and show_from != false -%}{{ 'products.price_from' | t }} {% endif -%}
+  {{ price | money }}
+</span>
+<span data-product-compare class="product__compare"{% if compare <= price %} hidden{% endif %}>
+  {%- if compare > price -%}{{ compare | money }}{%- endif -%}
+</span>

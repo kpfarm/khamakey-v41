@@ -1,0 +1,128 @@
+{% if pages.contact != blank %}
+  {% assign contact_page_url = pages.contact.url %}
+{% elsif pages.contatti != blank %}
+  {% assign contact_page_url = pages.contatti.url %}
+{% else %}
+  {% assign contact_page_url = '/pages/contact' %}
+{% endif %}
+
+{% if pages.spedizioni != blank %}
+  {% assign shipping_page_url = pages.spedizioni.url %}
+{% else %}
+  {% assign shipping_page_url = '/pages/spedizioni' %}
+{% endif %}
+
+{% if pages.resi != blank %}
+  {% assign returns_page_url = pages.resi.url %}
+{% else %}
+  {% assign returns_page_url = '/pages/resi' %}
+{% endif %}
+
+{% if pages.termini != blank %}
+  {% assign terms_page_url = pages.termini.url %}
+{% else %}
+  {% assign terms_page_url = '/pages/termini' %}
+{% endif %}
+
+{% if shop.privacy_policy != blank %}
+  {% assign privacy_page_url = shop.privacy_policy.url %}
+{% elsif pages.privacy != blank %}
+  {% assign privacy_page_url = pages.privacy.url %}
+{% else %}
+  {% assign privacy_page_url = '/policies/privacy-policy' %}
+{% endif %}
+
+{% if pages['come-funziona'] != blank %}
+  {% assign how_url = pages['come-funziona'].url %}
+{% else %}
+  {% assign how_url = routes.root_url | append: '#come-funziona' %}
+{% endif %}
+
+<header class="site-header" role="banner">
+  <div class="page-width site-header__inner">
+    <a class="site-header__logo" href="{{ routes.root_url }}" aria-label="{{ shop.name }}">
+      {% if settings.logo != blank %}
+        {{ settings.logo | image_url: width: 400 | image_tag: widths: '160, 240, 320, 400', sizes: '(max-width: 768px) 42vw, 160px', alt: shop.name }}
+      {% else %}
+        <img
+          class="site-header__logo-img"
+          src="{{ 'khamakey-moments-wordmark-on-light.png' | asset_url }}"
+          alt="{{ shop.name | escape }}"
+          width="168"
+          height="21"
+          loading="eager"
+        >
+      {% endif %}
+    </a>
+
+    <nav class="site-nav" aria-label="{{ 'accessibility.main_navigation' | t }}">
+      <a href="{{ routes.root_url }}" {% if request.path == '/' %}aria-current="page"{% endif %}>{{ 'general.home' | t }}</a>
+      <a href="{{ routes.all_products_collection_url }}">{{ 'general.products' | t }}</a>
+      <a href="{{ how_url }}">{{ 'general.how_it_works' | t }}</a>
+      <a href="{{ contact_page_url }}" {% if request.path contains '/pages/contact' or request.path contains '/pages/contatti' %}aria-current="page"{% endif %}>{{ 'general.contact' | t }}</a>
+    </nav>
+
+    <div class="site-header__actions">
+      {% render 'language-switcher', form_id: 'LocalizationForm-header' %}
+      <a class="icon-btn" href="{{ routes.search_url }}" aria-label="{{ 'general.search' | t }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </a>
+      <a class="icon-btn" href="{{ routes.cart_url }}" aria-label="{{ 'general.cart' | t }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 7h12l-1 12H7L6 7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M9 7a3 3 0 016 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        {% if cart.item_count > 0 %}
+          <span class="cart-count">{{ cart.item_count }}</span>
+        {% endif %}
+      </a>
+      <button
+        class="icon-btn menu-toggle"
+        type="button"
+        data-menu-toggle
+        aria-expanded="false"
+        aria-controls="MobileNav"
+        aria-label="{{ 'accessibility.menu' | t }}"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav id="MobileNav" class="mobile-nav" data-mobile-nav aria-label="{{ 'accessibility.mobile_navigation' | t }}">
+    <span class="mobile-nav__label">{{ 'general.menu_label' | t }}</span>
+    <a href="{{ routes.root_url }}" {% if request.path == '/' %}aria-current="page"{% endif %}>{{ 'general.home' | t }}</a>
+    <a href="{{ routes.all_products_collection_url }}">{{ 'general.products' | t }}</a>
+    <a href="{{ how_url }}">{{ 'general.how_it_works' | t }}</a>
+    <a href="{{ contact_page_url }}">{{ 'general.contact' | t }}</a>
+
+    <span class="mobile-nav__label">{{ 'general.assistenza' | t }}</span>
+    <a href="{{ shipping_page_url }}">{{ 'policies.shipping' | t }}</a>
+    <a href="{{ returns_page_url }}">{{ 'policies.refund' | t }}</a>
+    <a href="{{ privacy_page_url }}">{{ 'policies.privacy' | t }}</a>
+    <a href="{{ terms_page_url }}">{{ 'policies.terms' | t }}</a>
+
+    <div class="mobile-nav__lang">
+      {% render 'language-switcher', form_id: 'LocalizationForm-mobile' %}
+    </div>
+  </nav>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "sticky",
+      "label": "Header fisso",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

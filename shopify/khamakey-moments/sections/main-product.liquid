@@ -1,0 +1,329 @@
+<section class="page-width">
+  <div class="product">
+    <div class="product__gallery">
+      <div class="product__main-image">
+        {% if product.selected_or_first_available_variant.featured_media %}
+          {% assign featured = product.selected_or_first_available_variant.featured_media %}
+        {% else %}
+          {% assign featured = product.featured_media %}
+        {% endif %}
+
+        {% if featured %}
+          <img
+            data-product-main-image
+            src="{{ featured | image_url: width: 1200 }}"
+            srcset="{{ featured | image_url: width: 600 }} 600w, {{ featured | image_url: width: 900 }} 900w, {{ featured | image_url: width: 1200 }} 1200w, {{ featured | image_url: width: 1600 }} 1600w"
+            sizes="(min-width: 900px) 50vw, 100vw"
+            width="{{ featured.width }}"
+            height="{{ featured.height }}"
+            alt="{{ featured.alt | default: product.title | escape }}"
+            loading="eager"
+          >
+        {% else %}
+          <img
+            data-product-main-image
+            src="{{ 'product-love.jpg' | asset_url }}"
+            alt="{{ product.title | escape }}"
+            width="1024"
+            height="1024"
+            loading="eager"
+          >
+        {% endif %}
+      </div>
+
+      {% assign gallery_images = product.media | where: 'media_type', 'image' %}
+      {% if gallery_images.size > 1 %}
+        <div class="product__thumbs" role="list">
+          {% for media in gallery_images %}
+            <button
+              type="button"
+              data-product-thumb
+              data-full-src="{{ media | image_url: width: 1600 }}"
+              data-srcset="{{ media | image_url: width: 600 }} 600w, {{ media | image_url: width: 900 }} 900w, {{ media | image_url: width: 1200 }} 1200w, {{ media | image_url: width: 1600 }} 1600w"
+              data-alt="{{ media.alt | default: product.title | escape }}"
+              class="{% if media == featured %}is-active{% endif %}"
+              aria-label="{{ 'products.media_thumb' | t: index: forloop.index }}"
+            >
+              {{
+                media
+                | image_url: width: 240
+                | image_tag: loading: 'lazy', alt: media.alt | default: product.title
+              }}
+            </button>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="product__info">
+      <p class="eyebrow">{{ product.vendor | default: shop.name }}</p>
+      <h1>{{ product.title }}</h1>
+      <p class="product__price">
+        {% render 'price', product: product %}
+      </p>
+
+      {% if section.settings.lead != blank %}
+        <p class="product__lead">{{ section.settings.lead }}</p>
+      {% else %}
+        <p class="product__lead">{{ 'product.lead' | t }}</p>
+      {% endif %}
+
+      {% assign bullet_blocks = section.blocks | where: 'type', 'bullet' %}
+      {% if bullet_blocks.size > 0 %}
+        <ul class="product__bullets">
+          {% for block in bullet_blocks %}
+            <li {{ block.shopify_attributes }}>{{ block.settings.text }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% assign current_variant = product.selected_or_first_available_variant %}
+
+      <script type="application/json" data-product-variants>
+        {{ product.variants | json }}
+      </script>
+      {% form 'product', product %}
+        <div class="product-form" data-product-form>
+          <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id>
+
+          {% comment %}
+            Hide selectors when there is only one sellable variant, or a leftover
+            Shopify "Title / Standard" single option (not a real customer choice).
+          {% endcomment %}
+          {% assign show_variant_picker = false %}
+          {% if product.variants.size > 1 %}
+            {% assign show_variant_picker = true %}
+          {% endif %}
+
+          {% if show_variant_picker %}
+            {% for option in product.options_with_values %}
+              {% if option.values.size < 2 %}{% continue %}{% endif %}
+              {% assign option_down = option.name | downcase %}
+              {% assign is_pack = false %}
+              {% if option_down == 'pacchetto' or option_down == 'formato' or option_down == 'pack' %}
+                {% assign is_pack = true %}
+              {% endif %}
+
+              {% if is_pack %}
+                {% assign option_index = forloop.index0 %}
+                <div class="product__pack">
+                  <div class="product__pack-label">{{ option.name }}</div>
+                  <div class="product__pack-options">
+                    {% for value in option.values %}
+                      {% assign value_down = value | downcase %}
+                      <label class="pack-option {% if option.selected_value == value %}is-selected{% endif %}">
+                        <input
+                          type="radio"
+                          name="pack-ui-{{ section.id }}"
+                          value="{{ value | escape }}"
+                          data-pack-radio
+                          {% if option.selected_value == value %}checked{% endif %}
+                        >
+                        {% if value_down contains '2' or value_down contains 'set' or value_down contains 'coppia' %}
+                          <span class="pack-option__badge">{{ section.settings.pack_badge }}</span>
+                        {% endif %}
+                        <span class="pack-option__title">{{ value }}</span>
+                        <span class="pack-option__price">
+                          {% for variant in product.variants %}
+                            {% if variant.options[option_index] == value %}
+                              {{ variant.price | money }}
+                              {% break %}
+                            {% endif %}
+                          {% endfor %}
+                        </span>
+                      </label>
+                    {% endfor %}
+                  </div>
+                  <select
+                    id="Option-{{ section.id }}-{{ forloop.index0 }}"
+                    class="visually-hidden"
+                    data-variant-select
+                    data-pack-select
+                    aria-hidden="true"
+                    tabindex="-1"
+                  >
+                    {% for value in option.values %}
+                      <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              {% else %}
+                <div class="product-form__row">
+                  <label for="Option-{{ section.id }}-{{ forloop.index0 }}">{{ option.name }}</label>
+                  <select
+                    id="Option-{{ section.id }}-{{ forloop.index0 }}"
+                    data-variant-select
+                  >
+                    {% for value in option.values %}
+                      <option
+                        value="{{ value | escape }}"
+                        {% if option.selected_value == value %}selected{% endif %}
+                      >
+                        {{ value }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+
+          <div class="product-form__row">
+            <label for="Quantity-{{ section.id }}">{{ 'products.quantity' | t }}</label>
+            <input
+              id="Quantity-{{ section.id }}"
+              type="number"
+              name="quantity"
+              value="1"
+              min="1"
+            >
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn--primary btn--full"
+            name="add"
+            {% unless current_variant.available %}disabled{% endunless %}
+            data-add-label="{{ 'products.add_to_cart' | t | escape }}"
+            data-soldout-label="{{ 'products.sold_out' | t | escape }}"
+          >
+            {% if current_variant.available %}
+              {{ 'products.add_to_cart' | t }}
+            {% else %}
+              {{ 'products.sold_out' | t }}
+            {% endif %}
+          </button>
+
+          {{ form | payment_button }}
+          {% if section.settings.shipping_note != blank %}
+            <p class="product__meta-note">{{ section.settings.shipping_note }}</p>
+          {% else %}
+            <p class="product__meta-note">{{ 'product.shipping_note' | t }}</p>
+          {% endif %}
+        </div>
+      {% endform %}
+
+      {% if section.settings.show_trust %}
+        <div class="product__trust">
+          <div>✓ {% if section.settings.trust_1 != blank %}{{ section.settings.trust_1 }}{% else %}{{ 'product.trust_1' | t }}{% endif %}</div>
+          <div>✓ {% if section.settings.trust_2 != blank %}{{ section.settings.trust_2 }}{% else %}{{ 'product.trust_2' | t }}{% endif %}</div>
+          <div>✓ {% if section.settings.trust_3 != blank %}{{ section.settings.trust_3 }}{% else %}{{ 'product.trust_3' | t }}{% endif %}</div>
+        </div>
+      {% endif %}
+
+      {% assign included_blocks = section.blocks | where: 'type', 'included' %}
+      <div class="product__included">
+        <h3>{% if section.settings.included_heading != blank %}{{ section.settings.included_heading }}{% else %}{{ 'products.included_heading' | t }}{% endif %}</h3>
+        <ul>
+          {% if included_blocks.size > 0 %}
+            {% for block in included_blocks %}
+              <li {{ block.shopify_attributes }}>{{ block.settings.text }}</li>
+            {% endfor %}
+          {% else %}
+            <li>{{ 'product.included_1' | t }}</li>
+            <li>{{ 'product.included_2' | t }}</li>
+            <li>{{ 'product.included_3' | t }}</li>
+            <li>{{ 'product.included_4' | t }}</li>
+          {% endif %}
+        </ul>
+      </div>
+
+      {% if product.description != blank %}
+        <div class="product__description rte">
+          <h3>{{ 'products.description' | t }}</h3>
+          {{ product.description }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Prodotto",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Lascia i testi vuoti per usare le traduzioni IT/EN (locales → product.*)."
+    },
+    {
+      "type": "textarea",
+      "id": "lead",
+      "label": "Sottotitolo vendita (override)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description_top",
+      "label": "Anteprima descrizione sopra il form (se manca sottotitolo)",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "pack_badge",
+      "label": "Badge set da 2",
+      "default": "-20%"
+    },
+    {
+      "type": "text",
+      "id": "shipping_note",
+      "label": "Nota sotto CTA (override)"
+    },
+    {
+      "type": "text",
+      "id": "included_heading",
+      "label": "Titolo “Incluso” (override)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_trust",
+      "label": "Mostra messaggi di fiducia",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "trust_1",
+      "label": "Messaggio 1 (override)"
+    },
+    {
+      "type": "text",
+      "id": "trust_2",
+      "label": "Messaggio 2 (override)"
+    },
+    {
+      "type": "text",
+      "id": "trust_3",
+      "label": "Messaggio 3 (override)"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "bullet",
+      "name": "Punto vendita",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Opzionale: aggiungi questo blocco solo se vuoi di nuovo un elenco puntato sotto il prezzo."
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Testo",
+          "default": "Il regalo che apre una storia: foto, musica e dedica al tocco del telefono"
+        }
+      ]
+    },
+    {
+      "type": "included",
+      "name": "Voce incluso",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Testo",
+          "default": "Pagina Moments da creare e aggiornare online"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

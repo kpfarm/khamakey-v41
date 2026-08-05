@@ -1,0 +1,13 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-legal",
+      "settings": {
+        "heading": "Politica di reso e rimborso",
+        "draft_note": "Bozza B2C Italia/UE. Fallla rivedere (recesso 14 giorni; valuta eccezioni se Moments già attivato).",
+        "body": "<h2>Diritto di recesso</h2><p>Hai <strong>14 giorni</strong> dalla ricezione del prodotto per esercitare il diritto di recesso, senza dover fornire una motivazione, secondo la normativa consumeristica vigente.</p><h2>Come richiedere un reso</h2><p>Scrivi dalla pagina <a href=\"/pages/contact\">Contatti</a> indicando numero ordine e motivo. Ti indicheremo le istruzioni di restituzione.</p><h2>Condizioni</h2><p>Il prodotto deve essere integro, non danneggiato e nella confezione originale quando possibile. Se la pagina Moments è già stata creata e usata, potremmo valutare caso per caso (diritti digitali / uso del servizio).</p><h2>Rimborsi</h2><p>Dopo il controllo del reso, il rimborso avviene con lo stesso metodo di pagamento usato in ordine, nei tempi previsti dalla legge e dal circuito di pagamento.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

@@ -1,0 +1,123 @@
+{% if section.settings.eyebrow != blank %}
+  {% assign story_eyebrow = section.settings.eyebrow %}
+{% else %}
+  {% assign story_eyebrow = 'landing.story_eyebrow' | t %}
+{% endif %}
+{% if section.settings.heading != blank %}
+  {% assign story_heading = section.settings.heading %}
+{% else %}
+  {% assign story_heading = 'landing.story_heading' | t %}
+{% endif %}
+{% if section.settings.button_label != blank %}
+  {% assign story_cta = section.settings.button_label %}
+{% else %}
+  {% assign story_cta = 'landing.story_cta' | t %}
+{% endif %}
+
+<section class="section" id="{{ section.settings.anchor | default: 'storia' }}">
+  <div class="page-width">
+    <div class="split {% if section.settings.reverse %}split--reverse{% endif %}">
+      <div class="split__media">
+        {% if section.settings.image != blank %}
+          {{
+            section.settings.image
+            | image_url: width: 1400
+            | image_tag:
+              widths: '600, 900, 1200, 1400',
+              sizes: '(min-width: 880px) 50vw, 100vw',
+              loading: 'lazy',
+              alt: section.settings.image.alt | default: story_heading
+          }}
+        {% else %}
+          <img
+            src="{{ 'product-love.jpg' | asset_url }}"
+            alt="{{ story_heading | escape }}"
+            width="900"
+            height="900"
+            loading="lazy"
+          >
+        {% endif %}
+      </div>
+      <div class="split__copy">
+        {% if story_eyebrow != blank %}
+          <p class="eyebrow">{{ story_eyebrow }}</p>
+        {% endif %}
+        {% if story_heading != blank %}
+          <h2>{{ story_heading }}</h2>
+        {% endif %}
+        {% if section.settings.text != blank %}
+          <div class="rte">{{ section.settings.text }}</div>
+        {% else %}
+          <div class="rte">
+            <p>{{ 'landing.story_p1' | t }}</p>
+            <p>{{ 'landing.story_p2' | t }}</p>
+          </div>
+        {% endif %}
+        {% if story_cta != blank %}
+          <div class="btn-group">
+            <a class="btn btn--secondary" href="{{ section.settings.button_link | default: routes.all_products_collection_url }}">{{ story_cta }}</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Storia / split",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor",
+      "label": "ID ancora",
+      "default": "storia"
+    },
+    {
+      "type": "checkbox",
+      "id": "reverse",
+      "label": "Inverti layout",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Immagine"
+    },
+    {
+      "type": "paragraph",
+      "content": "Lascia i testi vuoti per usare le traduzioni IT/EN del tema."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow (override)"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titolo (override)"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Testo (override)"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "CTA (override)"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link CTA"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Storia / split"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,87 @@
+<section class="trust-strip" aria-label="{{ section.settings.heading | default: 'Garanzie' | escape }}">
+  <div class="page-width">
+    <ul class="trust-strip__list">
+      {% if section.blocks.size > 0 %}
+        {% for block in section.blocks %}
+          <li class="trust-strip__item" {{ block.shopify_attributes }}>
+            <span class="trust-strip__icon" aria-hidden="true">
+              {% case block.settings.icon %}
+                {% when 'truck' %}
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M3 7h11v10H3V7zm11 3h4l3 3v4h-7v-7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="7.5" cy="18.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="18.5" r="1.5" fill="currentColor"/></svg>
+                {% when 'nfc' %}
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M7 8c2.5 2.2 2.5 5.8 0 8M10.5 6c3.5 3 3.5 9 0 12M14 4.5c4.4 3.7 4.4 11.3 0 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><rect x="3.5" y="3.5" width="17" height="17" rx="4" stroke="currentColor" stroke-width="1.5"/></svg>
+                {% when 'shield' %}
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 3.5v5.2c0 5-3.4 8.4-8 9.8-4.6-1.4-8-4.8-8-9.8V6.5L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12.2l2 2 4-4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                {% else %}
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 3.5v5.2c0 5-3.4 8.4-8 9.8-4.6-1.4-8-4.8-8-9.8V6.5L12 3z" stroke="currentColor" stroke-width="1.7"/></svg>
+              {% endcase %}
+            </span>
+            <span>{{ block.settings.text }}</span>
+          </li>
+        {% endfor %}
+      {% else %}
+        <li class="trust-strip__item">
+          <span class="trust-strip__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M7 8c2.5 2.2 2.5 5.8 0 8M10.5 6c3.5 3 3.5 9 0 12M14 4.5c4.4 3.7 4.4 11.3 0 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><rect x="3.5" y="3.5" width="17" height="17" rx="4" stroke="currentColor" stroke-width="1.5"/></svg>
+          </span>
+          <span>{{ 'landing.trust_nfc' | t }}</span>
+        </li>
+        <li class="trust-strip__item">
+          <span class="trust-strip__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 3.5v5.2c0 5-3.4 8.4-8 9.8-4.6-1.4-8-4.8-8-9.8V6.5L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12.2l2 2 4-4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span>{{ 'landing.trust_update' | t }}</span>
+        </li>
+        <li class="trust-strip__item">
+          <span class="trust-strip__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 7h11v10H3V7zm11 3h4l3 3v4h-7v-7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="7.5" cy="18.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="18.5" r="1.5" fill="currentColor"/></svg>
+          </span>
+          <span>{{ 'landing.trust_shipping' | t }}</span>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Trust strip",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Etichetta accessibilità",
+      "default": "Garanzie"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Voce",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icona",
+          "options": [
+            { "value": "truck", "label": "Spedizione" },
+            { "value": "nfc", "label": "NFC / no app" },
+            { "value": "shield", "label": "Pagina Moments" }
+          ],
+          "default": "truck"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Testo"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust strip"
+    }
+  ]
+}
+{% endschema %}

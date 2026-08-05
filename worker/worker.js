@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v197-signature-voi";
+const WORKER_VERSION = "v198-launch-horoscope";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1415,7 +1415,11 @@ async function renderMomentPage(page, origin, env = {}, locale = "it") {
   const hasCounter = Boolean(state.show_together_counter && state.together_since);
   const counterHtml = renderTogetherCounter(state, colors, locale);
   const momentType = String(state.type || page.moment_type || "free").trim().toLowerCase();
-  const horoscopeReadings = await loadHoroscopeReadingsForSections(sections, env, locale);
+  // Oroscopo: mai bloccare la pagina oltre ~900ms (lancio / traffico di massa)
+  const wantsHoroscope = ordered.some(({ key }) => key === "horoscope");
+  const horoscopeReadings = wantsHoroscope
+    ? await withTimeout(loadHoroscopeReadingsForSections(sections, env, locale), 900, {})
+    : {};
   const live = { horoscopeReadings, locale };
   const sectionHtml = ordered.length
     ? ordered.map(({ key, section }) => `<div class="moment-section-anchor" id="moment-section-${escapeHtml(key)}">${renderMomentSection(key, section, colors, momentType, fonts, page.slug || "", live)}</div>`).join("")
@@ -2009,20 +2013,52 @@ async function cacheHoroscopePayload(cacheUrl, payload) {
   }
 }
 
+async function withTimeout(promise, ms, fallback) {
+  let timer;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise(resolve => {
+        timer = setTimeout(() => resolve(fallback), ms);
+      })
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 async function fetchAstroWayDailyOnce(env, sign, language, date) {
   const apiKey = String(env.ASTROWAY_API_KEY || "").trim();
   if (!apiKey) {
     return { text: "", disclaimer: "", unavailable: true, reason: "missing_key", sign, date, language };
   }
-  const response = await fetch(ASTROWAY_DAILY_URL, {
-    method: "POST",
-    headers: {
-      "X-Api-Key": apiKey,
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    },
-    body: JSON.stringify({ sign, date, language })
-  });
+  const controller = new AbortController();
+  const abortTimer = setTimeout(() => controller.abort(), 750);
+  let response;
+  try {
+    response = await fetch(ASTROWAY_DAILY_URL, {
+      method: "POST",
+      headers: {
+        "X-Api-Key": apiKey,
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      body: JSON.stringify({ sign, date, language }),
+      signal: controller.signal
+    });
+  } catch (error) {
+    clearTimeout(abortTimer);
+    return {
+      text: "",
+      disclaimer: "",
+      unavailable: true,
+      reason: error?.name === "AbortError" ? "timeout" : "fetch_error",
+      sign,
+      date,
+      language
+    };
+  }
+  clearTimeout(abortTimer);
   const raw = await response.text().catch(() => "");
   let body = null;
   try { body = raw ? JSON.parse(raw) : null; } catch { body = null; }

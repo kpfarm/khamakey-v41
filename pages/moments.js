@@ -14,10 +14,10 @@ import {
   t,
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
-} from "./moments-i18n.js?v=235";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=235";
+} from "./moments-i18n.js?v=236";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=236";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=235";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=236";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=232";
@@ -60,7 +60,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=235";
+} from "./moments-media-ui.js?v=236";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -826,6 +826,8 @@ async function showAccountHub(tab = "products"){
       }
       const saved = await saveMoment({ preventDefault(){}, currentTarget:form }, row);
       if(!saved) return;
+    }else if(activeId){
+      clearEditorDraft(activeId);
     }
   }
   appView = "account";
@@ -1567,7 +1569,7 @@ async function ensureEventPageState(eventId, { force = false } = {}){
   if(!force && hasCached) return row;
   const { data,error } = await supabase
     .from("moment_events")
-    .select("page_state,description,title,moment_type,event_type,pin_enabled,public_visible,nfc_code")
+    .select("page_state,description,title,moment_type,event_type,pin_enabled,public_visible,nfc_code,updated_at")
     .eq("id",eventId)
     .maybeSingle();
   if(error) throw error;
@@ -1632,6 +1634,9 @@ async function openMomentProduct(nextId, { resetPanel = false } = {}){
       }
       const saved = await saveMoment({ preventDefault(){}, currentTarget:form }, row);
       if(!saved) return;
+    }else{
+      // Scarta: non far riapparire le bozze al rientro
+      clearEditorDraft(activeId);
     }
   }
   switchInFlight = true;
@@ -1651,7 +1656,7 @@ async function openMomentProduct(nextId, { resetPanel = false } = {}){
 async function loadObjects({ render = true } = {}){
   let query = supabase
     .from("moment_events")
-    .select("id,title,slug,event_type,moment_type,status,description,nfc_code,pin_enabled,public_visible,owner_email,created_at")
+    .select("id,title,slug,event_type,moment_type,status,description,nfc_code,pin_enabled,public_visible,owner_email,created_at,updated_at")
     .order("created_at",{ascending:false});
   if(adminMode && adminEventId){
     query = query.eq("id",adminEventId);
@@ -4527,31 +4532,39 @@ async function saveMoment(event,row, options = {}){
         return false;
       }
     }
-    const { error } = adminMode
-      ? await supabase.rpc("admin_save_moment_page",{
-          p_event_id:row.id,
-          p_title:state.title,
-          p_moment_type:state.type,
-          p_description:state.description,
-          p_page_state:state,
-          p_public_visible:publicVisible,
-          p_pin_enabled:pinEnabled,
-          p_pin_hash:pinHash
-        })
-      : await supabase.rpc("save_my_moment_page",{
-          p_event_id:row.id,
-          p_title:state.title,
-          p_moment_type:state.type,
-          p_description:state.description,
-          p_page_state:state,
-          p_public_visible:publicVisible,
-          p_pin_enabled:pinEnabled,
-          p_pin_hash:pinHash
-        });
+    const savePayload = {
+      p_event_id:row.id,
+      p_title:state.title,
+      p_moment_type:state.type,
+      p_description:state.description,
+      p_page_state:state,
+      p_public_visible:publicVisible,
+      p_pin_enabled:pinEnabled,
+      p_pin_hash:pinHash,
+      p_expected_updated_at: row.updated_at || null
+    };
+    const { data: saveData, error } = adminMode
+      ? await supabase.rpc("admin_save_moment_page", savePayload)
+      : await supabase.rpc("save_my_moment_page", savePayload);
     if(error){
       console.error(error);
+      const msg = String(error.message || "");
+      if(msg.includes("CONFLICT_STALE_SAVE")){
+        showEditorSaveFeedback(t("save.conflict_stale"), "error");
+        try{
+          await ensureEventPageState(row.id, { force:true });
+          renderDetail(row.id);
+        }catch(reloadError){
+          console.error(reloadError);
+        }
+        return false;
+      }
       showEditorSaveFeedback(error.message || t("save.fail"),"error");
       return false;
+    }
+    const saveRow = Array.isArray(saveData) ? saveData[0] : saveData;
+    if(saveRow?.result_updated_at){
+      row.updated_at = saveRow.result_updated_at;
     }
     clearTimeout(markEditorDirty.timer);
     clearEditorDraft(row.id);
@@ -4774,8 +4787,8 @@ document.getElementById("momentsLogout")?.addEventListener("click",async()=>{
         const saved = await saveMoment({ preventDefault(){}, currentTarget:form }, row);
         if(!saved) return;
       }
-    }else{
-      stashEditorDraft();
+    }else if(activeId){
+      clearEditorDraft(activeId);
     }
   }
   await supabase.auth.signOut();

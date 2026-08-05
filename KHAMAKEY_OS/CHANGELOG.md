@@ -8,10 +8,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
-- **Moments v236 + Worker v198 + SQL v172 — pre-lancio massa (2026-08-05, Cursor)** — Pages + Worker + SQL
+- **Moments v236 + Worker v198 + SQL v172 — pre-lancio live (2026-08-06, Cursor)** — Pages + Worker + SQL
   - Salva ottimistico: conflitto multi-sessione → messaggio + ricarica (niente overwrite silenzioso).
   - Discard / Account / logout: clear draft (niente bozze “zombie”).
   - `/m/`: oroscopo con timeout 900ms + AbortSignal AstroWay (pagina non resta appesa).
+  - **Deploy:** SQL v172 su `cuxlwaocjqwzluycznyp` + Pages v236 + Worker v198 già live.
 - **Moments v235 — hardening salvataggi (2026-08-05, Cursor)** — Pages
   - Account/logout con bozze: dialogo Salva/Scarta; ritorno Account senza wipe se dirty.
   - Salva mid-flight: se digiti durante RPC resta «non salvato»; blocco durante upload; feedback se Salva già in corso.

@@ -99,10 +99,10 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v183** | Magazzino: ricerca anche per barcode confezione; `build_stage`. |
 | **Worker NFC** | **v198-launch-horoscope** | Oroscopo non blocca `/m/` oltre 900ms; firma/galleria OK. |
-| **Moments editor** | **v236** | Pre-lancio: salva ottimistico + discard clear draft. |
+| **Moments editor** | **v236** | Live: salva ottimistico + discard clear draft (deploy 2026-08-06). |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
-| **SQL Supabase** | **≥ v167 (prod)** | v167 reset pezzo reso; v166 USAGE `app_private`; v165 ingest store. |
+| **SQL Supabase Moments** | **≥ v172 (prod)** | v172 salva ottimistico applicata 2026-08-06; v171 video 50MB; v170 build_stage. |
 | **Prossima release piattaforma** | **collegare Stripe** sui `moments_plus` / `moments_pro` | Prezzi già in seed (€4,90/€39 Plus · €9,90/€79 Pro). |
 
 ---

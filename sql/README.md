@@ -61,7 +61,7 @@ Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gl
 
 **`khamakey-integrations-i18n-v66-production.sql` non è nella sequenza.** È una patch storica applicata a mano nel SQL Editor di Supabase quando su produzione `platform_integrations`/`platform_payment_transactions` risultavano già create fuori sequenza. `khamakey-integrations-i18n-v66.sql` è già completo e idempotente (crea quelle tabelle solo se assenti) e la copre interamente: non serve applicare entrambe. Il file `-production` resta nel repo solo come traccia storica — non eseguirlo di nuovo.
 
-**Stato produzione (2026-08-05):** v171 ok. **v172 da applicare** su Moments `cuxlwaocjqwzluycznyp` (SQL Editor) **prima** di usare Moments **v236** — altrimenti Salva fallisce.
+**Stato produzione (2026-08-06):** v171 + **v172 applicata** su Moments `cuxlwaocjqwzluycznyp` (MCP `apply_migration`). Moments **v236** può andare in deploy.
 
 ## Supabase SQL Editor
 

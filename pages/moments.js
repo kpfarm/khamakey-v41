@@ -132,7 +132,7 @@ import {
   sectionFillGuide,
   sectionHasContent,
   isSectionExcluded
-} from "./moment-sections.js?v=235";
+} from "./moment-sections.js?v=236";
 import {
   TYPE_LABELS,
   renderCategorySelect,

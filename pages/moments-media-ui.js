@@ -1,4 +1,4 @@
-import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=237";
+import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=238";
 import {
   normalizeMediaItem,
   normalizeMediaList,
@@ -18,7 +18,7 @@ import {
 } from "./moment-media.js?v=216";
 import { canFitBytes, formatBytes, storageBytesLimit } from "./moment-plans.js?v=237";
 import { getUiLocale } from "./moments-i18n.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=232";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=238";
 
 let mediaEditContext = null;
 
@@ -606,7 +606,7 @@ export function renderGalleryUploadPanel(section,key){
   const intro = isLetter
     ? `<p><strong data-lf="Allegati sigillati">${esc(lf("Allegati sigillati"))}</strong></p><p class="field-hint" data-lf="Foto, video, audio o PDF che si sbloccano insieme alla lettera. Tocca Aggiungi, poi Salva.">${esc(lf("Foto, video, audio o PDF che si sbloccano insieme alla lettera. Tocca Aggiungi, poi Salva."))}</p>`
     : isVideo
-      ? `<p><strong data-lf="Video">${esc(lf("Video"))}</strong></p><p class="field-hint" data-lf="Carica uno o più video — in pagina scorrono come la galleria. Titolo e descrizione sotto ciascuno, poi Salva.">${esc(lf("Carica uno o più video — in pagina scorrono come la galleria. Titolo e descrizione sotto ciascuno, poi Salva."))}</p>`
+      ? `<p><strong data-lf="Video">${esc(lf("Video"))}</strong></p><p class="field-hint" data-lf="Carica video MP4/MOV. Titolo e descrizione sotto ciascuno, poi Salva. Il numero massimo dipende dal piano.">${esc(lf("Carica video MP4/MOV. Titolo e descrizione sotto ciascuno, poi Salva. Il numero massimo dipende dal piano."))}</p>`
       : isMusic
         ? `<p><strong data-lf="Audio">${esc(lf("Audio"))}</strong></p><p class="field-hint" data-lf="Messaggi vocali o brani — complemento a Spotify/YouTube. Poi Salva.">${esc(lf("Messaggi vocali o brani — complemento a Spotify/YouTube. Poi Salva."))}</p>`
         : `<p><strong data-lf="Galleria foto">${esc(lf("Galleria foto"))}</strong></p><p class="field-hint" data-lf="Solo immagini qui. Tocca Aggiungi foto, scrivi titolo e descrizione, poi Salva.">${esc(lf("Solo immagini qui. Tocca Aggiungi foto, scrivi titolo e descrizione, poi Salva."))}</p>`;

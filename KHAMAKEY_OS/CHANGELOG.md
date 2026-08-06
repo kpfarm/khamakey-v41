@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v238 + Worker v202 — lightbox per sezione (2026-08-06, Cursor)** — Pages + Worker
+  - Fix: tap su video non apre più galleria+video insieme (media scoped alla sezione).
+  - `/m/` video: tolto hint «Tocca ▶…»; frecce lightbox nascoste se un solo item.
+  - Editor: copy video senza «uno o più» fuorviante sul Free.
 - **Worker v201 — galleria senza hint (2026-08-06, Cursor)** — Worker
   - Pagina pubblica foto: rimosso testo fisso «Scorri le foto · tocca ＋ per ingrandire».
 - **Moments v237 + Worker v200 — upload kind caps (2026-08-06, Cursor)** — Pages + Worker

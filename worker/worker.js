@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v201-gallery-no-hint";
+const WORKER_VERSION = "v202-lightbox-scope";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -2998,8 +2998,34 @@ document.querySelectorAll(".moment-guestbook").forEach(function(section){
 
 var lb=document.getElementById("momentLightbox");
 if(lb){
-var media=[];document.querySelectorAll(".moment-gallery-data").forEach(function(node){try{media=media.concat(JSON.parse(node.textContent||"[]"));}catch(e){}});
+var media=[];
 var currentIndex=0;
+var prevBtn=document.getElementById("momentLightboxPrev");
+var nextBtn=document.getElementById("momentLightboxNext");
+/** Solo i media della stessa sezione/card — non unire galleria + video + lettera. */
+function mediaFromTrigger(node){
+  if(!node) return [];
+  var host=node.closest(".moment-card-gallery") || node.closest("article") || node.closest(".moment-gallery");
+  var dataNode=null;
+  if(host) dataNode=host.querySelector(".moment-gallery-data");
+  if(!dataNode){
+    var walk=node.parentElement;
+    while(walk && walk!==document.body){
+      var kids=walk.children || [];
+      for(var ci=0; ci<kids.length; ci++){
+        if(kids[ci].classList && kids[ci].classList.contains("moment-gallery-data")){
+          dataNode=kids[ci];
+          break;
+        }
+      }
+      if(dataNode) break;
+      var list=walk.querySelectorAll(".moment-gallery-data");
+      if(list.length===1){ dataNode=list[0]; break; }
+      walk=walk.parentElement;
+    }
+  }
+  try{ return JSON.parse((dataNode && dataNode.textContent) || "[]"); }catch(e){ return []; }
+}
 function paintMedia(){
   var item=media[currentIndex];
   if(!item)return;
@@ -3012,15 +3038,18 @@ function paintMedia(){
   descEl.textContent=item.description||"";
   descEl.hidden=!item.description;
   if(counter)counter.textContent=media.length>1?(currentIndex+1)+" / "+media.length:"";
+  if(prevBtn) prevBtn.hidden=media.length<=1;
+  if(nextBtn) nextBtn.hidden=media.length<=1;
   wrap.innerHTML=item.type==="video"
     ?'<video src="'+item.url+'" controls playsinline autoplay></video>'
     :item.type==="audio"
       ?'<audio src="'+item.url+'" controls autoplay></audio>'
       :'<img src="'+item.url+'" alt="'+(item.title||"").replace(/"/g,"&quot;")+'">';
 }
-function openMedia(i){
+function openMedia(i, list){
+  if(Array.isArray(list)) media=list;
   if(!media.length)return;
-  currentIndex=(i+media.length)%media.length;
+  currentIndex=((Number(i)||0)%media.length+media.length)%media.length;
   paintMedia();
   lb.classList.add("open");
   lb.setAttribute("aria-hidden","false");
@@ -3053,7 +3082,7 @@ document.querySelectorAll(".moment-gallery-scroll").forEach(function(scroller){
     if(!node||!scroller.contains(node))return;
     if(dragging || axis === "v" || axis === "h"){e.preventDefault();e.stopPropagation();return;}
     e.preventDefault();
-    openMedia(Number(node.getAttribute("data-media-open")));
+    openMedia(Number(node.getAttribute("data-media-open")), mediaFromTrigger(node));
   });
   scroller.querySelectorAll("video").forEach(function(video){
     var nudge=function(){
@@ -3070,7 +3099,7 @@ document.addEventListener("keydown",function(e){
   var node=e.target.closest("[data-media-open]");
   if(node&&(e.key==="Enter"||e.key===" ")){
     e.preventDefault();
-    openMedia(Number(node.getAttribute("data-media-open")));
+    openMedia(Number(node.getAttribute("data-media-open")), mediaFromTrigger(node));
     return;
   }
   if(!lb.classList.contains("open"))return;
@@ -4868,9 +4897,9 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     }).join("");
     const payload = media.map(({ type, url, title, description }) => ({ type, url, title, description }));
     const json = JSON.stringify(payload).replace(/</g, "\\u003c");
-    const hint = single ? mt(locale, "video.tap_one") : mt(locale, "video.tap_many");
     const scrollClass = single ? "moment-gallery-scroll is-single" : "moment-gallery-scroll";
-    return `<article class="${rv} moment-card-gallery">${headBlock}${body}<p class="moment-gallery-hint">${escapeHtml(hint)}</p><div class="moment-gallery"><div class="${scrollClass}"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
+    // Niente hint «Tocca ▶…»: il badge VIDEO + ▶ sul frame bastano.
+    return `<article class="${rv} moment-card-gallery">${headBlock}${body}<div class="moment-gallery"><div class="${scrollClass}"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
   }
 
   if (key === "quote" && !section.body) {

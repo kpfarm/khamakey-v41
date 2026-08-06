@@ -8,6 +8,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v241 + Worker v205 — mile performance a rischio ~0 (2026-08-06, Cursor)** — Pages + Worker
+  - `/m/`: niente `@import` Google Fonts; link solo per pair attiva + font categoria se serve.
+  - CSS override solo della categoria corrente (~−35KB su Free vs ship di tutte le categorie).
+  - Cover: `fetchpriority=high` + preload; nav scroll throttled con `requestAnimationFrame`.
+  - Editor: `warmUploadPipeline` (HEIC) solo al primo click/file picker, non all’avvio.
 - **Moments v240 + Worker v204 — niente etichette forzate (2026-08-06, Cursor)** — Pages + Worker
   - Contatore: senza `counter_label` restano solo i numeri (niente «Insieme da»).
   - Dedica / lettera: destinatario così com’è scritto (niente «Caro/a» automatico).

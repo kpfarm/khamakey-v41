@@ -20,7 +20,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=236";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=238";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=239";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -3902,6 +3902,8 @@ function renderGalleryUpload(section,key){
 }
 
 function renderSectionTitleField(key, section){
+  // Firma: etichetta dedicata sopra i nomi (niente doppio «Titolo sezione» generico).
+  if(key === "signature") return "";
   const placeholder = DEFAULT_SECTIONS[key]?.title || SECTION_LABELS[key] || "";
   const hint = "Compare nel menu della pagina e come titolo della sezione.";
   return `<label>${lfSpan("Titolo sezione")}<input name="section_${esc(key)}_title" value="${esc(section.title || "")}" placeholder="Es. ${esc(placeholder)}"><span class="field-hint" data-lf="${esc(hint)}">${esc(localizeFieldPhrase(hint))}</span></label>`;
@@ -3973,6 +3975,7 @@ function sectionEditor(key,section,standalone=false){
   const quoteFields = key === "quote" ? `
     <label>${lfSpan("Autore")}<input name="section_${esc(key)}_author" value="${esc(safe.author || "")}" placeholder="${esc(localizeFieldPhrase("Es. William Shakespeare"))}" data-lf-placeholder="Es. William Shakespeare"></label>` : "";
   const signatureFields = key === "signature" ? `
+    <label>${lfSpan("Etichetta sopra i nomi")}<input name="section_${esc(key)}_title" value="${esc(safe.title || "")}" placeholder="${esc(localizeFieldPhrase("Es. Questo momento appartiene a"))}" data-lf-placeholder="Es. Questo momento appartiene a"><span class="field-hint" data-lf="Testo piccolo sopra la firma. Vuoto = non compare in pagina.">${esc(localizeFieldPhrase("Testo piccolo sopra la firma. Vuoto = non compare in pagina."))}</span></label>
     <label>${lfSpan("Nome firma")}<input name="section_${esc(key)}_sign_name" value="${esc(safe.sign_name || "")}" placeholder="${esc(localizeFieldPhrase("Es. Marco & Giulia"))}" data-lf-placeholder="Es. Marco & Giulia"></label>
     <label>${lfSpan("Sottotitolo")}<input name="section_${esc(key)}_sign_subtitle" value="${esc(safe.sign_subtitle || "")}" placeholder="${esc(localizeFieldPhrase("Es. Per sempre"))}" data-lf-placeholder="Es. Per sempre"></label>` : "";
   const horoscopeFields = key === "horoscope" ? `

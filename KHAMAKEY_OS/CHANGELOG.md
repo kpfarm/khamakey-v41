@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v239 + Worker v203 — etichetta firma editabile (2026-08-06, Cursor)** — Pages + Worker
+  - Tolto fallback forzato «Questo momento appartiene a»; etichetta solo se titolo compilato.
+  - Editor: campo chiaro «Etichetta sopra i nomi» (vuoto = nascosta in pagina).
 - **Moments v238 + Worker v202 — lightbox per sezione (2026-08-06, Cursor)** — Pages + Worker
   - Fix: tap su video non apre più galleria+video insieme (media scoped alla sezione).
   - `/m/` video: tolto hint «Tocca ▶…»; frecce lightbox nascoste se un solo item.

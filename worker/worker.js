@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v202-lightbox-scope";
+const WORKER_VERSION = "v203-signature-label";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -48,6 +48,7 @@ const MOMENTS_PUBLIC_I18N = {
     "gallery.hint": "Scorri gli allegati · tocca per aprire",
     "gallery.photos_hint": "Scorri le foto · tocca ＋ per ingrandire",
     "gallery.journey_hint": "Scorri le tappe",
+    "signature.default_label": "Questo momento appartiene a",
     "video.open": "Apri video",
     "video.tap_one": "Tocca ▶ per aprire",
     "video.tap_many": "Scorri i video · tocca ▶ per aprire",
@@ -156,6 +157,7 @@ const MOMENTS_PUBLIC_I18N = {
     "gallery.hint": "Swipe attachments · tap to open",
     "gallery.photos_hint": "Swipe photos · tap ＋ to enlarge",
     "gallery.journey_hint": "Swipe the stops",
+    "signature.default_label": "This moment belongs to",
     "video.open": "Open video",
     "video.tap_one": "Tap ▶ to open",
     "video.tap_many": "Swipe videos · tap ▶ to open",
@@ -4696,7 +4698,11 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   }
 
   if (key === "signature") {
-    const label = String(section.title || "").trim() || "Questo momento appartiene a";
+    // Solo titolo cliente: niente etichetta forzata se il campo è vuoto.
+    const label = String(section.title || "").trim();
+    const labelHtml = label
+      ? `<p class="moment-signature-label">${escapeHtml(label)}</p>`
+      : "";
     const name = String(section.sign_name || "").trim();
     const sub = String(section.sign_subtitle || section.body || "").trim();
     // Mai inventare "Voi": solo ciò che ha scritto il cliente
@@ -4707,9 +4713,9 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
       ? `<p class="moment-signature-sub">${escapeHtml(sub)}</p>`
       : "";
     if (!nameHtml) {
-      return `<article class="${rv} moment-signature"><p class="moment-signature-label">${escapeHtml(label)}</p><p class="moment-empty-hint">Aggiungi i nomi nella firma finale.</p></article>`;
+      return `<article class="${rv} moment-signature">${labelHtml}<p class="moment-empty-hint">Aggiungi i nomi nella firma finale.</p></article>`;
     }
-    return `<article class="${rv} moment-signature"><p class="moment-signature-label">${escapeHtml(label)}</p>${nameHtml}${subHtml}</article>`;
+    return `<article class="${rv} moment-signature">${labelHtml}${nameHtml}${subHtml}</article>`;
   }
 
   if (key === "dedication" && (section.body || section.recipient)) {
@@ -4928,8 +4934,9 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   }
 
   if (key === "signature" && !section.sign_name && !section.sign_subtitle) {
-    const label = section.title || "Questo momento appartiene a";
-    return `<article class="${rv} moment-signature"><p class="moment-signature-label">${escapeHtml(label)}</p><p class="moment-empty-hint">Aggiungi i nomi nella firma finale.</p></article>`;
+    const label = String(section.title || "").trim();
+    const labelHtml = label ? `<p class="moment-signature-label">${escapeHtml(label)}</p>` : "";
+    return `<article class="${rv} moment-signature">${labelHtml}<p class="moment-empty-hint">Aggiungi i nomi nella firma finale.</p></article>`;
   }
 
   if (key === "intro" && !section.body) {

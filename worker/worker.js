@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v203-signature-label";
+const WORKER_VERSION = "v204-no-forced-labels";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -2597,6 +2597,13 @@ function formatUnlockDate(raw) {
   return date.toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" });
 }
 
+/** Destinatario così come scritto dal cliente — niente prefisso «Caro/a» forzato. */
+function renderLetterRecipientLine(recipient) {
+  const text = String(recipient || "").trim();
+  if (!text) return "";
+  return `<p class="moment-letter-to">${escapeHtml(text)}</p>`;
+}
+
 function isLetterUnlocked(unlockDate) {
   const raw = String(unlockDate || "").trim();
   if (!raw) return true;
@@ -2678,7 +2685,8 @@ function renderTogetherCounter(state, colors, locale = "it") {
   const date = String(state.together_since).slice(0, 10);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return "";
   const live = Boolean(state.show_counter_hms);
-  const label = String(state.counter_label || "").trim() || mt(locale, "counter.default_label");
+  const label = String(state.counter_label || "").trim();
+  const labelHtml = label ? `<div class="moment-counter-label">${escapeHtml(label)}</div>` : "";
   const grid = live
     ? `<span class="moment-counter-unit"><b data-unit="days">0</b><small>${escapeHtml(mt(locale, "counter.days"))}</small></span>
 <span class="moment-counter-unit"><b data-unit="hours">0</b><small>${escapeHtml(mt(locale, "counter.hours"))}</small></span>
@@ -2688,7 +2696,7 @@ function renderTogetherCounter(state, colors, locale = "it") {
 <span class="moment-counter-unit"><b data-unit="months">0</b><small>${escapeHtml(mt(locale, "counter.months"))}</small></span>
 <span class="moment-counter-unit"><b data-unit="days">0</b><small>${escapeHtml(mt(locale, "counter.days"))}</small></span>`;
   return `<section class="moment-counter rv" id="moment-section-counter" data-since="${attr(date)}" data-hms="${live ? "1" : "0"}">
-<div class="moment-counter-label">${escapeHtml(label)}</div>
+${labelHtml}
 <div class="moment-counter-grid">${grid}</div></section>`;
 }
 
@@ -4719,7 +4727,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   }
 
   if (key === "dedication" && (section.body || section.recipient)) {
-    const recipient = section.recipient ? `<p class="moment-letter-to">Caro/a ${escapeHtml(section.recipient)},</p>` : "";
+    const recipient = renderLetterRecipientLine(section.recipient);
     const sign = section.signature ? `<span class="moment-letter-sign">${escapeHtml(section.signature)}</span>` : "";
     return `<article class="${rv}">${head(section.title || "Dedica")}${renderSectionTag("", colors)}<div class="moment-letter">${recipient}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${sign}<span class="moment-letter-heart" aria-hidden="true">♥</span></div></article>`;
   }
@@ -4846,7 +4854,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     if (!unlocked) {
       return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<div class="moment-sealed"><div class="moment-sealed-icon" aria-hidden="true">🔒</div><p>Questa lettera è sigillata${when ? ` fino al <strong>${escapeHtml(when)}</strong>` : ""}.</p><p class="moment-sealed-date">Torna in quella data per rileggerla.</p></div></article>`;
     }
-    const recipient = section.recipient ? `<p class="moment-letter-to">Caro/a ${escapeHtml(section.recipient)},</p>` : "";
+    const recipient = renderLetterRecipientLine(section.recipient);
     const media = renderLetterFutureMedia(section, locale);
     return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<div class="moment-letter">${recipient}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${media}<span class="moment-letter-heart" aria-hidden="true">♥</span></div></article>`;
   }

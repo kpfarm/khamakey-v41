@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v240 + Worker v204 — niente etichette forzate (2026-08-06, Cursor)** — Pages + Worker
+  - Contatore: senza `counter_label` restano solo i numeri (niente «Insieme da»).
+  - Dedica / lettera: destinatario così com’è scritto (niente «Caro/a» automatico).
 - **Moments v239 + Worker v203 — etichetta firma editabile (2026-08-06, Cursor)** — Pages + Worker
   - Tolto fallback forzato «Questo momento appartiene a»; etichetta solo se titolo compilato.
   - Editor: campo chiaro «Etichetta sopra i nomi» (vuoto = nascosta in pagina).

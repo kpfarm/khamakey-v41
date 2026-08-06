@@ -20,7 +20,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=236";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=239";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=240";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -2473,7 +2473,7 @@ function renderCounterPanel(state){
     <div class="section-editor-stack ${state.show_together_counter ? "" : "is-muted"}">
       <div class="editor-card smart-card">
         <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Da quale giorno?")}</p>
-        <label>${lfSpan("Testo sopra il contatore")}<input name="counter_label" value="${esc(state.counter_label || "")}" placeholder="${esc(localizeFieldPhrase("Es. Insieme da, Ti sopporto da"))}" data-lf-placeholder="Es. Insieme da, Ti sopporto da"></label>
+        <label>${lfSpan("Testo sopra il contatore")}<input name="counter_label" value="${esc(state.counter_label || "")}" placeholder="${esc(localizeFieldPhrase("Es. Insieme da, Ti sopporto da"))}" data-lf-placeholder="Es. Insieme da, Ti sopporto da"><span class="field-hint" data-lf="Vuoto = in pagina restano solo i numeri, senza etichetta sopra.">${esc(localizeFieldPhrase("Vuoto = in pagina restano solo i numeri, senza etichetta sopra."))}</span></label>
         <label>${lfSpan("Data speciale")}<input type="date" name="together_since" value="${esc(state.together_since || "")}"></label>
         <p class="field-hint">${lfSpan("Solo il giorno (es. primo appuntamento). Non serve ora: il conteggio parte dalla mezzanotte di quella data.")}</p>
       </div>
@@ -3925,7 +3925,7 @@ function sectionEditor(key,section,standalone=false){
   const listHint = hints[key] && key !== "timeline"
     ? `<p class="section-hint" data-lf="${esc(hints[key])}">${esc(localizeFieldPhrase(hints[key]))}</p>` : "";
   const dedicationFields = key === "dedication" ? `
-    <label>${lfSpan("Destinatario")}<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="${esc(localizeFieldPhrase("Es. Marco, amici, futuro noi"))}" data-lf-placeholder="Es. Marco, amici, futuro noi"></label>
+    <label>${lfSpan("Destinatario")}<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="${esc(localizeFieldPhrase("Es. Caro Marco, / Marco / amici"))}" data-lf-placeholder="Es. Caro Marco, / Marco / amici"><span class="field-hint" data-lf="Compare così com’è scritto. Se vuoi «Caro/a…», scrivilo tu nel campo.">${esc(localizeFieldPhrase("Compare così com’è scritto. Se vuoi «Caro/a…», scrivilo tu nel campo."))}</span></label>
     <label>${lfSpan("Firma")}<input name="section_${esc(key)}_signature" value="${esc(safe.signature || "")}" placeholder="${esc(localizeFieldPhrase("Es. Con amore, i tuoi nomi"))}" data-lf-placeholder="Es. Con amore, i tuoi nomi"></label>` : "";
   const countdownFields = key === "countdown" ? `
     <div class="editor-card">
@@ -3957,7 +3957,7 @@ function sectionEditor(key,section,standalone=false){
     </div>` : "";
   const listItemsPanel = LIST_SECTION_KEYS.has(key) ? renderListItemsPanel(key, safe) : "";
   const letterFutureFields = key === "letter_future" ? `
-    <label>${lfSpan("Destinatario")}<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="${esc(localizeFieldPhrase("Es. noi tra 10 anni"))}" data-lf-placeholder="Es. noi tra 10 anni"></label>
+    <label>${lfSpan("Destinatario")}<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="${esc(localizeFieldPhrase("Es. Caro noi del futuro, / noi tra 10 anni"))}" data-lf-placeholder="Es. Caro noi del futuro, / noi tra 10 anni"><span class="field-hint" data-lf="Compare così com’è scritto. Se vuoi «Caro/a…», scrivilo tu nel campo.">${esc(localizeFieldPhrase("Compare così com’è scritto. Se vuoi «Caro/a…», scrivilo tu nel campo."))}</span></label>
     <label>${lfSpan("Data di apertura")}<input type="datetime-local" name="section_${esc(key)}_unlock_date" value="${esc(safe.unlock_date || "")}"></label>
     ${renderGalleryUploadPanel(safe, "letter_future")}` : "";
   const rsvpFields = key === "rsvp" ? `

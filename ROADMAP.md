@@ -395,4 +395,5 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-06 | Cursor | **Worker v201**: galleria pubblica senza hint istruttivo sotto il titolo |
 | 2026-08-06 | Cursor | **Moments v238 + Worker v202**: lightbox scoped per sezione (fix mix galleria/video) |
 | 2026-08-06 | Cursor | **Moments v239 + Worker v203**: firma — etichetta editabile, niente testo forzato |
+| 2026-08-06 | Cursor | **Moments v240 + Worker v204**: niente «Insieme da» / «Caro/a» forzati |
 | 2026-08-04 | Cursor | **Business parallelo**: cartella `business/` + Supabase `qsieubbdkvtlvdsucmye` + Pages `khamakey-business` + Worker `khamakey-business-nfc` + R2 dedicato (Moments non toccato) |

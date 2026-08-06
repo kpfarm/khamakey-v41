@@ -98,8 +98,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v183** | Magazzino: ricerca anche per barcode confezione; `build_stage`. |
-| **Worker NFC** | **v203-signature-label** | Firma: etichetta solo se titolo cliente; lightbox v202. |
-| **Moments editor** | **v239** | Firma: campo «Etichetta sopra i nomi» chiaro; vuoto = nascosta. |
+| **Worker NFC** | **v204-no-forced-labels** | Niente «Insieme da» / «Caro/a» forzati; firma/lightbox ok. |
+| **Moments editor** | **v240** | Hint contatore/destinatario: vuoto o testo cliente, senza prefissi. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v172 (prod)** | v172 salva ottimistico applicata 2026-08-06; v171 video 50MB; v170 build_stage. |

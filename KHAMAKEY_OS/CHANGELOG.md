@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v201 — galleria senza hint (2026-08-06, Cursor)** — Worker
+  - Pagina pubblica foto: rimosso testo fisso «Scorri le foto · tocca ＋ per ingrandire».
 - **Moments v237 + Worker v200 — upload kind caps (2026-08-06, Cursor)** — Pages + Worker
   - Server: tetto oggetti video/audio/PDF (sezione+lettera) con pre-check + post-check/rollback.
   - Client: `canFitBytes` prima degli upload (niente batch inutili a quota piena).

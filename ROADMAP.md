@@ -392,4 +392,5 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-06 | Cursor | **Go-live pre-lancio**: SQL **v172** applicata su Moments + Pages **v236** deploy (`app.khamakeymoments.com`); Worker v198 già live |
 | 2026-08-06 | Cursor | **Worker v199**: upload Moments fail-closed (entitlements + rate limit) + post-check quota con rollback R2 |
 | 2026-08-06 | Cursor | **Moments v237 + Worker v200**: cap server video/audio/PDF + canFitBytes client; GC orfani rimandato |
+| 2026-08-06 | Cursor | **Worker v201**: galleria pubblica senza hint istruttivo sotto il titolo |
 | 2026-08-04 | Cursor | **Business parallelo**: cartella `business/` + Supabase `qsieubbdkvtlvdsucmye` + Pages `khamakey-business` + Worker `khamakey-business-nfc` + R2 dedicato (Moments non toccato) |

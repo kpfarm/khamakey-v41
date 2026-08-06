@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v200-upload-kind-caps";
+const WORKER_VERSION = "v201-gallery-no-hint";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -4844,7 +4844,8 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     }).join("");
     const payload = media.map(({ type, url, title, description }) => ({ type, url, title, description }));
     const json = JSON.stringify(payload).replace(/</g, "\\u003c");
-    return `<article class="${rv} moment-card-gallery">${headBlock}<p class="moment-gallery-hint">${escapeHtml(mt(locale, "gallery.photos_hint"))}</p><div class="moment-gallery"><div class="moment-gallery-scroll"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
+    // Niente hint istruttivo sotto il titolo: la galleria parla da sola (+ resta sul frame).
+    return `<article class="${rv} moment-card-gallery">${headBlock}<div class="moment-gallery"><div class="moment-gallery-scroll"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
   }
 
   if (key === "video") {

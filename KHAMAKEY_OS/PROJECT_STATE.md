@@ -98,7 +98,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v183** | Magazzino: ricerca anche per barcode confezione; `build_stage`. |
-| **Worker NFC** | **v200-upload-kind-caps** | Upload: fail-closed quota + cap oggetti video/audio/PDF + rollback race. |
+| **Worker NFC** | **v201-gallery-no-hint** | Galleria `/m/`: tolto hint «Scorri le foto…»; upload caps v200 restano. |
 | **Moments editor** | **v237** | canFitBytes pre-upload; allineato Worker v200. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |

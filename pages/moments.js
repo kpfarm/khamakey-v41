@@ -3677,11 +3677,9 @@ function bindMediaUploads(root,row){
   const formNode = document.getElementById("momentEditorForm");
   if(!formNode) return;
   root.querySelector("[data-upload-target='cover']")?.addEventListener("click",()=>{
-    warmUploadPipeline();
     document.getElementById("coverFileInput")?.click();
   });
   document.getElementById("coverFileInput")?.addEventListener("change",async event=>{
-    warmUploadPipeline();
     const file = event.target.files?.[0];
     event.target.value = "";
     if(!file || uploadBusy) return;
@@ -3689,12 +3687,10 @@ function bindMediaUploads(root,row){
   });
   formNode.querySelectorAll("input[id^='galleryFile_']").forEach(input=>{
     input.addEventListener("change",async event=>{
-      warmUploadPipeline();
       await handleGalleryFileInputChange(event.currentTarget,row,formNode);
     });
   });
   document.getElementById("journeyStepFile")?.addEventListener("change",async event=>{
-    warmUploadPipeline();
     const file = event.target.files?.[0];
     const stepId = journeyUploadStepId;
     journeyUploadStepId = null;
@@ -3769,7 +3765,6 @@ async function uploadJourneyStepImage(file,row,formNode,stepId){
 }
 
 function openGalleryFilePicker(formNode,key,type = "",{ replaceId = "", multiple } = {}){
-  warmUploadPipeline();
   setEditorPanel(`section-${key}`);
   enableSection(formNode,key);
   const input = document.getElementById(`galleryFile_${key}`);
@@ -4681,6 +4676,7 @@ supabase = createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
   auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
 });
 bindUploadClient(supabase);
+warmUploadPipeline();
 bindPasswordToggles();
 bindCodeInputs();
 bindMediaUploadDelegation();

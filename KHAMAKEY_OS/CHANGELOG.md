@@ -8,6 +8,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v240 ripristinato + Worker v207 — firma calligrafica (2026-08-06, Cursor)** — Pages + Worker
+  - Editor riportato a v240 (annullato HEIC lazy v241).
+  - Firma: nomi/messaggio in **Great Vibes** anche con font pair elegant/modern.
+  - Se c’è solo il testo messaggio (senza `sign_name`), non viene più reso come nome gigante in serif.
+  - Foto galleria “?”: file R2 **404** (asset mancante) — non regressione renderer; va ricaricata dall’editor.
 - **Worker v206 — rollback CSS perf (2026-08-06, Cursor)** — Worker
   - v205 aveva corrotto il renderer (`renderSectionTag` perso + refactor CSS) → Error 1101 su `/m/` e anteprima con sezioni.
   - Ripristinato `worker.js` a base v204 + version bump; anteprima/galleria/dedica di nuovo 200.

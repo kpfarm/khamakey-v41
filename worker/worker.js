@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v206-revert-perf-css";
+const WORKER_VERSION = "v207-signature-script";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1836,8 +1836,9 @@ function resolveMomentFontPair(key) {
   const pairs = {
     classic:{display:'"Great Vibes", cursive',body:'"Cormorant Infant", Georgia, serif',ui:'"DM Sans", sans-serif',google:"family=Great+Vibes&family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;600;700"},
     romantic:{display:'"Great Vibes", cursive',body:'"Cormorant Infant", Georgia, serif',ui:'"DM Sans", sans-serif',google:"family=Great+Vibes&family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;600;700"},
-    elegant:{display:'"Cormorant Infant", Georgia, serif',body:'"Cormorant Infant", Georgia, serif',ui:'"DM Sans", sans-serif',google:"family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;600;700"},
-    modern:{display:'"DM Sans", sans-serif',body:'"DM Sans", sans-serif',ui:'"DM Sans", sans-serif',google:"family=DM+Sans:wght@400;600;700"}
+    // Great Vibes sempre caricato: la firma resta calligrafica anche con pair elegant/modern
+    elegant:{display:'"Cormorant Infant", Georgia, serif',body:'"Cormorant Infant", Georgia, serif',ui:'"DM Sans", sans-serif',google:"family=Great+Vibes&family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;600;700"},
+    modern:{display:'"DM Sans", sans-serif',body:'"DM Sans", sans-serif',ui:'"DM Sans", sans-serif',google:"family=Great+Vibes&family=DM+Sans:wght@400;600;700"}
   };
   return pairs[key] || pairs.classic;
 }
@@ -3502,7 +3503,7 @@ body.nav-open{overflow:hidden}
 .moment-signature{text-align:center;padding:42px 20px 48px}
 .moment-signature-label{font-family:${f.ui};font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:${c.muted};margin:0 0 10px}
 .moment-signature-name {
-  font-family:${f.display}!important;
+  font-family:"Great Vibes", cursive !important;
   font-size:clamp(2.2rem,9vw,3.2rem)!important;
   color:${c.go}!important;
   text-shadow: none !important;
@@ -3520,6 +3521,14 @@ body.nav-open{overflow:hidden}
   border-radius: 999px;
 }
 .moment-signature-sub{font-style:italic;color:${c.muted};margin-top:10px;font-size:1rem}
+.moment-signature-message{
+  font-family:"Great Vibes", cursive !important;
+  font-size:clamp(1.45rem,5.5vw,2rem)!important;
+  line-height:1.35;
+  color:${c.go}!important;
+  margin:14px auto 0;
+  max-width:28ch;
+}
 .moment-gallery-empty,.moment-empty-hint{font-family:${f.ui};font-size:.88rem;line-height:1.55;color:${c.muted};font-style:italic;margin:12px 0 0;padding:14px 16px;border-radius:12px;background:${c.cardSoft};border:1px dashed ${c.lineStrong};text-align:center}
 .moment-gallery-group{margin-top:20px}
 .moment-gallery-group:first-child{margin-top:8px}
@@ -4712,18 +4721,22 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
       ? `<p class="moment-signature-label">${escapeHtml(label)}</p>`
       : "";
     const name = String(section.sign_name || "").trim();
-    const sub = String(section.sign_subtitle || section.body || "").trim();
-    // Mai inventare "Voi": solo ciò che ha scritto il cliente
+    const sub = String(section.sign_subtitle || "").trim();
+    const message = String(section.body || "").trim();
+    // Mai inventare "Voi". Il messaggio lungo NON va nel nome gigante.
     const nameHtml = name
       ? `<p class="moment-signature-name">${escapeHtml(name)}</p>`
-      : (sub ? `<p class="moment-signature-name">${escapeHtml(sub)}</p>` : "");
-    const subHtml = name && sub
+      : "";
+    const subHtml = sub
       ? `<p class="moment-signature-sub">${escapeHtml(sub)}</p>`
       : "";
-    if (!nameHtml) {
+    const messageHtml = message
+      ? `<p class="moment-signature-message">${escapeHtml(message)}</p>`
+      : "";
+    if (!nameHtml && !subHtml && !messageHtml) {
       return `<article class="${rv} moment-signature">${labelHtml}<p class="moment-empty-hint">Aggiungi i nomi nella firma finale.</p></article>`;
     }
-    return `<article class="${rv} moment-signature">${labelHtml}${nameHtml}${subHtml}</article>`;
+    return `<article class="${rv} moment-signature">${labelHtml}${nameHtml}${subHtml}${messageHtml}</article>`;
   }
 
   if (key === "dedication" && (section.body || section.recipient)) {

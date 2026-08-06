@@ -98,7 +98,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v183** | Magazzino: ricerca anche per barcode confezione; `build_stage`. |
-| **Worker NFC** | **v205-perf-mile** | CSS per categoria, no @import font, cover preload, scroll rAF. |
+| **Worker NFC** | **v206-revert-perf-css** | Rollback CSS perf v205 (rompeva `/m/` + anteprima). |
 | **Moments editor** | **v241** | HEIC warm solo al primo file picker (niente fetch avvio). |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |

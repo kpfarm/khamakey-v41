@@ -60,7 +60,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=238";
+} from "./moments-media-ui.js?v=242";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -75,7 +75,7 @@ import {
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
   setActivePlanLimits
-} from "./moment-media.js?v=216";
+} from "./moment-media.js?v=242";
 import {
   canFitBytes,
   emptyEntitlements,
@@ -132,8 +132,9 @@ import {
   sectionFieldHints,
   sectionFillGuide,
   sectionHasContent,
-  isSectionExcluded
-} from "./moment-sections.js?v=238";
+  isSectionExcluded,
+  youtubeVideoId
+} from "./moment-sections.js?v=242";
 import {
   TYPE_LABELS,
   renderCategorySelect,
@@ -2014,7 +2015,7 @@ function applyTemplateToForm(formNode,type, { skipReminder = false } = {}){
       if(askGuests) askGuests.checked = section.field_keys ? section.field_keys.includes("guests") : section.ask_guests !== false;
       if(askNotes) askNotes.checked = section.field_keys ? section.field_keys.includes("notes") : section.ask_notes !== false;
     }
-    ["recipient","signature","event_label","target_date","spotify_url","author","sign_name","sign_subtitle","whatsapp_number","event_name"].forEach(field=>{
+    ["recipient","signature","event_label","target_date","spotify_url","youtube_url","author","sign_name","sign_subtitle","whatsapp_number","event_name"].forEach(field=>{
       const input = formNode.querySelector(`[name="section_${key}_${field}"]`);
       if(input) input.value = section[field] || "";
     });
@@ -3255,6 +3256,7 @@ function renderDetail(id){
   bindSectionEnableHandlers(editorForm);
   bindSectionToggleButtons(editorForm);
   bindExtrasPanel(editorForm);
+  bindYoutubeInputs(editorForm);
   if(window.__momentsPreviewResizeBound !== "1"){
     window.__momentsPreviewResizeBound = "1";
     window.addEventListener("resize",()=>fitPreviewStage(),{passive:true});
@@ -3909,6 +3911,47 @@ function renderSectionTitleField(key, section){
   return `<label>${lfSpan("Titolo sezione")}<input name="section_${esc(key)}_title" value="${esc(section.title || "")}" placeholder="Es. ${esc(placeholder)}"><span class="field-hint" data-lf="${esc(hint)}">${esc(localizeFieldPhrase(hint))}</span></label>`;
 }
 
+function renderYoutubeThumb(rawUrl){
+  const id = youtubeVideoId(rawUrl);
+  if(!id) return `<div class="youtube-thumb-preview" data-youtube-thumb hidden></div>`;
+  return `<div class="youtube-thumb-preview" data-youtube-thumb>
+    <img src="https://img.youtube.com/vi/${esc(id)}/hqdefault.jpg" alt="Anteprima YouTube" loading="lazy" decoding="async">
+    <span data-lf="Anteprima YouTube — tocca Salva per pubblicarlo">${esc(localizeFieldPhrase("Anteprima YouTube — tocca Salva per pubblicarlo"))}</span>
+  </div>`;
+}
+
+function syncYoutubeThumbForInput(input){
+  if(!input) return;
+  const host = input.closest("label")?.parentElement || input.parentElement;
+  let box = host?.querySelector?.("[data-youtube-thumb]");
+  if(!box && host){
+    host.insertAdjacentHTML("beforeend", `<div class="youtube-thumb-preview" data-youtube-thumb hidden></div>`);
+    box = host.querySelector("[data-youtube-thumb]");
+  }
+  if(!box) return;
+  const id = youtubeVideoId(input.value);
+  if(!id){
+    box.hidden = true;
+    box.innerHTML = "";
+    return;
+  }
+  box.hidden = false;
+  box.innerHTML = `<img src="https://img.youtube.com/vi/${esc(id)}/hqdefault.jpg" alt="Anteprima YouTube" loading="lazy" decoding="async"><span data-lf="Anteprima YouTube — tocca Salva per pubblicarlo">${esc(localizeFieldPhrase("Anteprima YouTube — tocca Salva per pubblicarlo"))}</span>`;
+}
+
+function bindYoutubeInputs(formNode){
+  if(!formNode || formNode.dataset.youtubeBound === "1") return;
+  formNode.dataset.youtubeBound = "1";
+  const sync = event=>{
+    const input = event.target?.closest?.("[data-youtube-input]");
+    if(!input) return;
+    syncYoutubeThumbForInput(input);
+  };
+  formNode.addEventListener("input", sync);
+  formNode.addEventListener("change", sync);
+  formNode.querySelectorAll("[data-youtube-input]").forEach(syncYoutubeThumbForInput);
+}
+
 function sectionOrderDisplayLabel(formNode, momentType, key){
   const custom = String(formNode?.querySelector(`[name="section_${key}_title"]`)?.value || "").trim();
   if(custom) return custom;
@@ -3941,8 +3984,9 @@ function sectionEditor(key,section,standalone=false){
   const musicFields = key === "music" ? `
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Collegamenti")}</p>
-      <label>${lfSpan("Link Spotify")}<input name="section_${esc(key)}_spotify_url" value="${esc(safe.spotify_url || "")}" placeholder="https://open.spotify.com/track/..."><span class="field-hint" data-lf="Link pubblico — non file caricati.">${esc(localizeFieldPhrase("Link pubblico — non file caricati."))}</span></label>
-      <label>${lfSpan("Link YouTube")}<input name="section_${esc(key)}_youtube_url" value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..."><span class="field-hint" data-lf="Link pubblico del video.">${esc(localizeFieldPhrase("Link pubblico del video."))}</span></label>
+      <label>${lfSpan("Link Spotify")}<input name="section_${esc(key)}_spotify_url" value="${esc(safe.spotify_url || "")}" placeholder="https://open.spotify.com/track/..." autocomplete="off" inputmode="url"><span class="field-hint" data-lf="Link pubblico — non file caricati.">${esc(localizeFieldPhrase("Link pubblico — non file caricati."))}</span></label>
+      <label>${lfSpan("Link YouTube")}<input name="section_${esc(key)}_youtube_url" data-youtube-input value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..." autocomplete="off" inputmode="url"><span class="field-hint" data-lf="Link pubblico del video. Dopo l’incolla tocca Salva.">${esc(localizeFieldPhrase("Link pubblico del video. Dopo l’incolla tocca Salva."))}</span></label>
+      ${renderYoutubeThumb(safe.youtube_url)}
       ${renderMusicAudioPanel(safe)}
     </div>
     <div class="editor-card">
@@ -3952,7 +3996,12 @@ function sectionEditor(key,section,standalone=false){
     </div>` : "";
   const videoFields = key === "video" ? `
     <div class="editor-card">
-      <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Video del ricordo")}</p>
+      <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Link YouTube")}</p>
+      <label>${lfSpan("Link YouTube")}<input name="section_${esc(key)}_youtube_url" data-youtube-input value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..." autocomplete="off" inputmode="url"><span class="field-hint" data-lf="Incolla il link del video. Dopo l’incolla tocca Salva — compare in pagina pubblica.">${esc(localizeFieldPhrase("Incolla il link del video. Dopo l’incolla tocca Salva — compare in pagina pubblica."))}</span></label>
+      ${renderYoutubeThumb(safe.youtube_url)}
+    </div>
+    <div class="editor-card">
+      <p class="ecard-title"><span class="step-badge">2</span> ${lfSpan("Oppure carica un video")}</p>
       ${renderVideoSectionPanel(safe)}
     </div>` : "";
   const listItemsPanel = LIST_SECTION_KEYS.has(key) ? renderListItemsPanel(key, safe) : "";
@@ -4013,7 +4062,7 @@ function sectionEditor(key,section,standalone=false){
       return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Galleria foto")}</p>${guideHint}${titleField}${galleryField}</div>`;
     }
     if(key === "video"){
-      return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Video")}</p>${guideHint}${titleField}${videoFields}</div>`;
+      return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Video")}</p>${guideHint}${titleField}</div>${videoFields}`;
     }
     if(key === "timeline"){
       return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Tappe del percorso")}</p>${guideHint}${titleField}${journeyField}</div>`;
@@ -4127,10 +4176,21 @@ function sanitizeStateForSave(state){
   }
   if(sections.video){
     sections.video.video_url = stripBlob(sections.video.video_url);
+    sections.video.youtube_url = stripBlob(sections.video.youtube_url);
+    if(!sections.video.youtube_url && youtubeVideoId(sections.video.video_url)){
+      sections.video.youtube_url = sections.video.video_url;
+      sections.video.video_url = "";
+    }
   }
   if(sections.music){
     sections.music.audio_url = stripBlob(sections.music.audio_url);
     sections.music.image_url = stripBlob(sections.music.image_url);
+    sections.music.spotify_url = stripBlob(sections.music.spotify_url);
+    sections.music.youtube_url = stripBlob(sections.music.youtube_url);
+    if(!sections.music.youtube_url && youtubeVideoId(sections.music.spotify_url)){
+      sections.music.youtube_url = sections.music.spotify_url;
+      sections.music.spotify_url = "";
+    }
   }
   for(const key of LIST_SECTION_KEYS){
     if(sections[key]?.items){
@@ -4225,6 +4285,14 @@ function readFormState(formNode){
   };
   const musicMedia = readGalleryMedia(formNode,"music");
   const musicFirst = musicMedia[0];
+  let musicYoutube = live("section_music_youtube_url") || sections.music.youtube_url || "";
+  let musicSpotify = live("section_music_spotify_url") || sections.music.spotify_url || "";
+  if(!musicYoutube && youtubeVideoId(musicSpotify)){
+    musicYoutube = musicSpotify;
+    musicSpotify = "";
+  }else if(musicYoutube && musicSpotify === musicYoutube){
+    musicSpotify = "";
+  }
   sections.music = {
     ...sections.music,
     media:musicMedia,
@@ -4232,14 +4300,25 @@ function readFormState(formNode){
     audio_title:musicFirst?.title || sections.music.audio_title || "",
     audio_description:musicFirst?.description || sections.music.audio_description || "",
     // Live first (FormData su pannello nascosto può essere stale)
-    image_url:sections.music.image_url || live("section_music_image_url")
+    image_url:sections.music.image_url || live("section_music_image_url"),
+    spotify_url:musicSpotify,
+    youtube_url:musicYoutube
   };
-  const videoMedia = readGalleryMedia(formNode,"video");
+  const videoMedia = readGalleryMedia(formNode,"video").filter(item=>!youtubeVideoId(item.url));
   const videoFirst = videoMedia[0];
+  let videoYoutube = live("section_video_youtube_url") || sections.video.youtube_url || "";
+  let videoFileUrl = videoFirst?.url || sections.video.video_url || "";
+  if(!videoYoutube && youtubeVideoId(videoFileUrl)){
+    videoYoutube = videoFileUrl;
+    videoFileUrl = "";
+  }else if(youtubeVideoId(videoFileUrl)){
+    videoFileUrl = "";
+  }
   sections.video = {
     ...sections.video,
     media:videoMedia,
-    video_url:videoFirst?.url || sections.video.video_url || "",
+    video_url:videoFileUrl,
+    youtube_url:videoYoutube,
     video_title:videoFirst?.title || sections.video.video_title || "",
     video_description:videoFirst?.description || sections.video.video_description || ""
   };
@@ -4478,6 +4557,19 @@ async function saveMoment(event,row, options = {}){
   try{
     flushGalleryInlineFields(formNode);
     state = sanitizeStateForSave(readFormState(formNode));
+    // Cintura: se il DOM ha ancora YouTube e lo state no, non perdere il link al Salva
+    const liveMusicYt = String(formNode.querySelector('[name="section_music_youtube_url"]')?.value || "").trim();
+    const liveVideoYt = String(formNode.querySelector('[name="section_video_youtube_url"]')?.value || "").trim();
+    if(liveMusicYt && state.sections?.music){
+      state.sections.music.youtube_url = liveMusicYt;
+      if(youtubeVideoId(state.sections.music.spotify_url) && state.sections.music.spotify_url === liveMusicYt){
+        state.sections.music.spotify_url = "";
+      }
+    }
+    if(liveVideoYt && state.sections?.video){
+      state.sections.video.youtube_url = liveVideoYt;
+      if(youtubeVideoId(state.sections.video.video_url)) state.sections.video.video_url = "";
+    }
   }catch(error){
     saveInFlight = false;
     showEditorSaveFeedback(error.message || t("save.check_fields"),"error");

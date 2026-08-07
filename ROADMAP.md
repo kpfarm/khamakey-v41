@@ -397,6 +397,8 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-06 | Cursor | **Moments v239 + Worker v203**: firma — etichetta editabile, niente testo forzato |
 | 2026-08-06 | Cursor | **Moments v240 + Worker v204**: niente «Insieme da» / «Caro/a» forzati |
 | 2026-08-06 | Cursor | **Moments v241 + Worker v205**: mile perf a rischio ~0 (CSS categoria, font, cover, scroll, HEIC) |
+| 2026-08-07 | Cursor | **Moments v242 + Worker v208**: fix critico YouTube (salva + pagina pubblica + sezione Video) |
 | 2026-08-06 | Cursor | **Worker v206**: rollback CSS perf v205 — restore `/m/` + anteprima (1101) |
 | 2026-08-06 | Cursor | **Moments v240 ripristinato + Worker v207**: firma Great Vibes; messaggio non come nome |
+| 2026-08-07 | Cursor | **Officina home**: testo più corto + flusso in `<details>` — zero tocchi a form pezzi/magazzino |
 | 2026-08-04 | Cursor | **Business parallelo**: cartella `business/` + Supabase `qsieubbdkvtlvdsucmye` + Pages `khamakey-business` + Worker `khamakey-business-nfc` + R2 dedicato (Moments non toccato) |

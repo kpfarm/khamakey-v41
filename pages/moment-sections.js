@@ -48,7 +48,7 @@ export const DEFAULT_SECTIONS = {
   rsvp:{ enabled:false, title:"Conferma presenza", body:"Compila il modulo e invia la risposta su WhatsApp.", whatsapp_number:"", event_name:"", ask_guests:true, ask_notes:true, field_keys:["guests","notes"], custom_fields:[], images:[] },
   guestbook:{ enabled:false, title:"Libro degli ospiti", body:"Lascia un pensiero — apparirà dopo l'approvazione dell'organizzatore.", images:[] },
   gallery:{ enabled:false, title:"Galleria foto", body:"", images:[], media:[] },
-  video:{ enabled:false, title:"Il nostro video", body:"", video_url:"", video_title:"", video_description:"", media:[], images:[] },
+  video:{ enabled:false, title:"Il nostro video", body:"", video_url:"", youtube_url:"", video_title:"", video_description:"", media:[], images:[] },
   promises:{ enabled:false, title:"Le nostre promesse", body:"", items:[], images:[] },
   places:{ enabled:false, title:"Luoghi del cuore", body:"", images:[] },
   dreams:{ enabled:false, title:"Sogni insieme", body:"", items:[], images:[] },
@@ -263,6 +263,18 @@ export function migrateSections(rawSections = {}){
       sections.video.video_description = first.description || sections.video.video_description || "";
     }
   }
+  if(sections.video){
+    if(!sections.video.youtube_url && youtubeVideoId(sections.video.video_url)){
+      sections.video.youtube_url = sections.video.video_url;
+      sections.video.video_url = "";
+    }
+  }
+  if(sections.music){
+    if(!sections.music.youtube_url && youtubeVideoId(sections.music.spotify_url)){
+      sections.music.youtube_url = sections.music.spotify_url;
+      sections.music.spotify_url = "";
+    }
+  }
   if(sections.letter_future){
     sections.letter_future.media = migrateLetterMediaSection(sections.letter_future);
     const first = sections.letter_future.media[0];
@@ -303,7 +315,11 @@ export function sectionHasContent(key, section){
     case "gallery":
       return normalizeMediaList(section).some(item=>item.type === "image");
     case "video":
-      return Boolean(String(section.video_url || "").trim());
+      return Boolean(
+        String(section.video_url || "").trim()
+        || String(section.youtube_url || "").trim()
+        || normalizeMediaList(section).some(item=>item.type === "video")
+      );
     case "rsvp":
       return Boolean(String(section.whatsapp_number || "").replace(/\D/g, ""));
     case "guestbook":
@@ -340,14 +356,36 @@ export function sectionIsVisible(key, section){
 
 export { parseLineItems } from "./moment-list-items.js";
 
-/** Legge un campo dal DOM live (più affidabile di FormData su pannelli display:none / iOS). */
+/**
+ * Legge un campo dal DOM live (più affidabile di FormData su pannelli display:none / iOS).
+ * Evita RadioNodeList.value (vuoto se ci sono omonimi non-radio) e preferisce il primo valore non vuoto.
+ */
 function liveFieldValue(form, formNode, name){
-  const el = formNode?.elements?.[name] || formNode?.querySelector?.(`[name="${name}"]`);
-  if(el && typeof el.value === "string" && el.type !== "checkbox" && el.type !== "radio" && el.type !== "file"){
-    return String(el.value || "").trim();
+  // Nomi Moments sono [a-z0-9_]; evita form.elements[name] (RadioNodeList.value → "" su omonimi).
+  const safeName = String(name || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const nodes = formNode ? [...formNode.querySelectorAll(`[name="${safeName}"]`)] : [];
+  let checkboxOn = false;
+  let firstText = "";
+  for(const el of nodes){
+    const type = String(el.type || "").toLowerCase();
+    if(type === "file") continue;
+    if(type === "checkbox"){
+      if(el.checked) checkboxOn = true;
+      continue;
+    }
+    if(type === "radio"){
+      if(el.checked) return String(el.value || "").trim();
+      continue;
+    }
+    const value = String(el.value || "").trim();
+    if(value) return value;
+    if(!firstText) firstText = value;
   }
-  if(el?.type === "checkbox") return el.checked ? "on" : "";
-  const raw = form.get(name);
+  if(nodes.some(el => String(el.type || "").toLowerCase() === "checkbox")){
+    return checkboxOn ? "on" : "";
+  }
+  if(nodes.length) return firstText;
+  const raw = form?.get?.(name);
   return raw == null ? "" : String(raw).trim();
 }
 
@@ -431,8 +469,21 @@ export function readSectionFromForm(form, key, formNode = null){
   }
   if(key === "video"){
     base.video_url = val(`section_${key}_video_url`);
+    base.youtube_url = val(`section_${key}_youtube_url`);
     base.video_title = val(`section_${key}_video_title`);
     base.video_description = val(`section_${key}_video_description`);
+    // Se il link YouTube è finito nel campo upload/legacy, salvalo come youtube_url
+    if(!base.youtube_url && youtubeVideoId(base.video_url)){
+      base.youtube_url = base.video_url;
+      base.video_url = "";
+    }
+  }
+  if(key === "music"){
+    // YouTube incollato per sbaglio nel campo Spotify
+    if(!base.youtube_url && youtubeVideoId(base.spotify_url)){
+      base.youtube_url = base.spotify_url;
+      base.spotify_url = "";
+    }
   }
   if(key === "timeline"){
     base.items = parseJourneySteps(form.get(`section_${key}_items`));

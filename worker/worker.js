@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v207-signature-script";
+const WORKER_VERSION = "v208-youtube-persist";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -2394,7 +2394,7 @@ function resolveMomentSections(state) {
     rsvp:{enabled:false,title:"",body:"",whatsapp_number:"",event_name:"",ask_guests:true,ask_notes:true,images:[]},
     guestbook:{enabled:false,title:"",body:"",images:[]},
     gallery:{enabled:false,title:"",body:"",images:[]},
-    video:{enabled:false,title:"",body:"",video_url:"",video_title:"",video_description:"",media:[],images:[]},
+    video:{enabled:false,title:"",body:"",video_url:"",youtube_url:"",video_title:"",video_description:"",media:[],images:[]},
     promises:{enabled:false,title:"",body:"",images:[]},
     places:{enabled:false,title:"",body:"",images:[]},
     dreams:{enabled:false,title:"",body:"",images:[]},
@@ -2429,12 +2429,24 @@ function resolveMomentSections(state) {
     const galleryImages = allMedia.filter(item => item.type === "image");
     base.gallery.media = galleryImages;
     base.gallery.images = galleryImages.map(item => item.url);
-    if (!base.video) base.video = { enabled: false, title: "", body: "", video_url: "", video_title: "", video_description: "", images: [] };
+    if (!base.video) base.video = { enabled: false, title: "", body: "", video_url: "", youtube_url: "", video_title: "", video_description: "", images: [] };
     if (galleryVideos.length && !String(base.video.video_url || "").trim()) {
       const first = galleryVideos[0];
       base.video.video_url = first.url;
       base.video.video_title = first.title || base.video.video_title || "";
       base.video.video_description = first.description || base.video.video_description || "";
+    }
+  }
+  if (base.video) {
+    if (!base.video.youtube_url && youtubeVideoId(base.video.video_url)) {
+      base.video.youtube_url = base.video.video_url;
+      base.video.video_url = "";
+    }
+  }
+  if (base.music) {
+    if (!base.music.youtube_url && youtubeVideoId(base.music.spotify_url)) {
+      base.music.youtube_url = base.music.spotify_url;
+      base.music.spotify_url = "";
     }
   }
   const journeySteps = resolveJourneyStepsWorker(base.timeline, base.places);
@@ -2470,7 +2482,7 @@ function momentSectionHasContent(key, section) {
     case "gallery":
       return normalizeMomentMedia(section).some(item => item.type === "image");
     case "video":
-      return migrateVideoSectionMedia(section).length > 0;
+      return migrateVideoSectionMedia(section).length > 0 || Boolean(youtubeVideoId(section.youtube_url) || youtubeVideoId(section.video_url));
     case "rsvp":
       // RSVP pubblico solo con WhatsApp organizzatore (obbligatorio).
       return Boolean(normalizeWhatsAppDigits(section.whatsapp_number));
@@ -4906,10 +4918,17 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
 
   if (key === "video") {
     const media = migrateVideoSectionMedia(section);
+    const youtube = youtubeEmbedFromUrl(section.youtube_url || (youtubeVideoId(section.video_url) ? section.video_url : ""));
     const headBlock = head(section.title || "Video");
     const body = section.body ? `<p>${escapeHtml(section.body)}</p>` : "";
+    if (!media.length && !youtube) {
+      return `<article class="${rv} moment-card-gallery">${headBlock}${body}<p class="moment-empty-hint">Aggiungi un link YouTube o carica un video MP4/MOV nell'editor.</p></article>`;
+    }
+    const ytBlock = youtube
+      ? `<div class="moment-youtube"><iframe src="${attr(youtube)}" loading="lazy" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen title="Video YouTube"></iframe></div>`
+      : "";
     if (!media.length) {
-      return `<article class="${rv} moment-card-gallery">${headBlock}${body}<p class="moment-empty-hint">Carica uno o più video MP4/MOV nell'editor.</p></article>`;
+      return `<article class="${rv}">${headBlock}${body}${ytBlock}</article>`;
     }
     const single = media.length === 1;
     const cards = media.map((item, idx) => {
@@ -4926,7 +4945,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     const json = JSON.stringify(payload).replace(/</g, "\\u003c");
     const scrollClass = single ? "moment-gallery-scroll is-single" : "moment-gallery-scroll";
     // Niente hint «Tocca ▶…»: il badge VIDEO + ▶ sul frame bastano.
-    return `<article class="${rv} moment-card-gallery">${headBlock}${body}<div class="moment-gallery"><div class="${scrollClass}"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
+    return `<article class="${rv} moment-card-gallery">${headBlock}${body}${ytBlock}<div class="moment-gallery"><div class="${scrollClass}"><div class="moment-gallery-track">${cards}</div></div></div><script type="application/json" class="moment-gallery-data">${json}</script></article>`;
   }
 
   if (key === "quote" && !section.body) {
@@ -5003,10 +5022,10 @@ function normalizeMomentMedia(section) {
 }
 
 function migrateVideoSectionMedia(section = {}) {
-  const list = normalizeMomentMedia(section).filter(item => item.type === "video");
+  const list = normalizeMomentMedia(section).filter(item => item.type === "video" && !youtubeVideoId(item.url));
   if (list.length) return list;
   const url = String(section.video_url || "").trim();
-  if (!url || safeUrl(url) === "#") return [];
+  if (!url || safeUrl(url) === "#" || youtubeVideoId(url)) return [];
   return [{
     type: "video",
     url,

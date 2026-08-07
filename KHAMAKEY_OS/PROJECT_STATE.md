@@ -97,9 +97,9 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v183** | Magazzino: ricerca anche per barcode confezione; `build_stage`. |
-| **Worker NFC** | **v207-signature-script** | Firma sempre Great Vibes; messaggio body non più come nome gigante. |
-| **Moments editor** | **v240** | Ripristinato post v241 (HEIC lazy annullato). |
+| **Admin / Officina Moments** | **v183** (+ home HTML leggera) | Home meno verbose; **nessun cambio** form creazione pezzi/magazzino. |
+| **Worker NFC** | **v208-youtube-persist** | YouTube in sezione Video + music; niente `<video src=youtube>`. |
+| **Moments editor** | **v242** | Fix critico: link YouTube che non restava al Salva / pagina pubblica. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v172 (prod)** | v172 salva ottimistico applicata 2026-08-06; v171 video 50MB; v170 build_stage. |

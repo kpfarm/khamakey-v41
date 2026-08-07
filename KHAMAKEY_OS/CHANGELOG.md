@@ -8,6 +8,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v242 + Worker v208 — fix YouTube che spariva (2026-08-07, Cursor)** — Pages + Worker
+  - Bug critico: link YouTube in editor (anteprima ok) non restava al Salva / pagina pubblica vuota.
+  - `liveFieldValue` non usa più `form.elements[name]` (RadioNodeList → valore vuoto).
+  - YouTube anche in sezione **Video**; migrazione se il link era finito in Spotify/`video_url`.
+  - Anteprima thumbnail YouTube in editor + CSP `img.youtube.com`; cintura DOM al Salva.
 - **Moments v240 ripristinato + Worker v207 — firma calligrafica (2026-08-06, Cursor)** — Pages + Worker
   - Editor riportato a v240 (annullato HEIC lazy v241).
   - Firma: nomi/messaggio in **Great Vibes** anche con font pair elegant/modern.

@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=190">
-  <link rel="stylesheet" href="moments-admin.css?v=190">
+  <link rel="stylesheet" href="admin.css?v=191">
+  <link rel="stylesheet" href="moments-admin.css?v=191">
 </head>
 <body>
   <main class="admin-shell locked" id="adminShell">
@@ -556,6 +556,11 @@
                 <tbody id="momentProductsTable"><tr><td colspan="12">Caricamento prodotti...</td></tr></tbody>
               </table>
             </div>
+            <div class="inventory-pager" id="momentProductsPager" hidden>
+              <button type="button" class="small-action" id="momentPagePrev">← Precedenti</button>
+              <span id="momentPageLabel">—</span>
+              <button type="button" class="small-action" id="momentPageNext">Successivi →</button>
+            </div>
           </div>
         </section>
         <section class="admin-panel" data-panel="support">
@@ -924,5 +929,5 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=190"></script>
+  <script type="module" src="admin.js?v=191"></script>
 </body>

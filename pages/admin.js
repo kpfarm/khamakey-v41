@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=190";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=191";
 import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=177";
 import {
   generateMomentSku,
@@ -364,6 +364,13 @@ let currentCodeRow = null;
 let currentPlatformOrder = null;
 let momentProductsLoadSeq = 0;
 let momentProductsLoaded = false;
+/** Magazzino pezzi: paginazione server-side (pronta per ~20k) */
+const MOMENT_PAGE_SIZE = 100;
+let momentProductsPage = 0;
+let momentProductsTotal = 0;
+/** Codici già legati a ordini (per Spedizioni NFC), non solo la pagina corrente */
+let momentOrderLinkedRows = [];
+const MOMENT_PRODUCT_SELECT = "code,packaging_barcode,status,build_stage,public_slug,product_type,product_line,batch_label,product_label,public_url,claimed_by_email,claimed_at,created_at,sold_channel,assigned_agent_id,platform_order_id";
 
 const PRODUCT_LINE_LABELS = {
   orsetto:"Orsetto NFC",
@@ -1828,29 +1835,74 @@ function catalogForMomentCode(row){
   return momentCatalogRows.find(catalog=>momentCatalogMatchesCode(row,catalog.id)) || null;
 }
 
-function filteredMomentProducts(){
+function escapeIlike(value){
+  return String(value || "").replace(/[%_,]/g, ch => `\\${ch}`);
+}
+
+/** Applica i filtri Magazzino sulla query Supabase (server-side). */
+function applyMomentProductFiltersToQuery(query){
   const { line,batch,status,build,sku,dateFrom,dateTo,agent,channel,order,search } = getMomentProductFilters();
-  return momentProductRows.filter(row=>{
-    const rowLine = row.product_line || "non_specificato";
-    const rowBatch = row.batch_label || "senza_lotto";
-    const rowAgent = row.assigned_agent_id || "";
-    const rowChannel = row.sold_channel || "";
-    const rowBuild = normalizeBuildStage(row.build_stage);
-    if(line && rowLine !== line) return false;
-    if(batch && rowBatch !== batch) return false;
-    if(status && row.status !== status) return false;
-    if(build && rowBuild !== build) return false;
-    if(!momentCatalogMatchesCode(row,sku)) return false;
-    if(!momentRowMatchesCreatedDate(row,dateFrom,dateTo)) return false;
-    if(agent === "__none__" && rowAgent) return false;
-    if(agent && agent !== "__none__" && rowAgent !== agent) return false;
-    if(channel === "__none__" && rowChannel) return false;
-    if(channel && channel !== "__none__" && rowChannel !== channel) return false;
-    if(order === "__none__" && row.platform_order_id) return false;
-    if(order === "__linked__" && !row.platform_order_id) return false;
-    if(!momentRowMatchesSearch(row,search)) return false;
-    return true;
-  });
+  if(line) query = query.eq("product_line", line);
+  if(batch === "senza_lotto"){
+    query = query.or("batch_label.is.null,batch_label.eq.senza_lotto");
+  }else if(batch){
+    query = query.eq("batch_label", batch);
+  }
+  if(status) query = query.eq("status", status);
+  if(build) query = query.eq("build_stage", build);
+  if(sku){
+    const catalog = momentCatalogRows.find(item=>item.id === sku);
+    if(catalog?.product_line) query = query.eq("product_line", catalog.product_line);
+    if(catalog?.product_type) query = query.eq("product_type", normalizeMomentType(catalog.product_type));
+  }
+  if(dateFrom) query = query.gte("created_at", `${dateFrom}T00:00:00.000Z`);
+  if(dateTo) query = query.lte("created_at", `${dateTo}T23:59:59.999Z`);
+  if(agent === "__none__") query = query.is("assigned_agent_id", null);
+  else if(agent) query = query.eq("assigned_agent_id", agent);
+  if(channel === "__none__") query = query.or("sold_channel.is.null,sold_channel.eq.non_specificato");
+  else if(channel) query = query.eq("sold_channel", channel);
+  if(order === "__none__") query = query.is("platform_order_id", null);
+  else if(order === "__linked__") query = query.not("platform_order_id", "is", null);
+  if(search){
+    const q = escapeIlike(search);
+    const compact = escapeIlike(search.replace(/[^a-zA-Z0-9]/g, ""));
+    const parts = [
+      `code.ilike.%${q}%`,
+      `packaging_barcode.ilike.%${q}%`,
+      `public_slug.ilike.%${q}%`,
+      `claimed_by_email.ilike.%${q}%`,
+      `batch_label.ilike.%${q}%`,
+      `product_label.ilike.%${q}%`
+    ];
+    if(compact && compact !== q) parts.push(`code.ilike.%${compact}%`, `packaging_barcode.ilike.%${compact}%`);
+    query = query.or(parts.join(","));
+  }
+  return query;
+}
+
+/** La pagina corrente è già filtrata lato server. */
+function filteredMomentProducts(){
+  return momentProductRows.slice();
+}
+
+async function fetchAllMomentProductsMatchingFilters({ max = 25000 } = {}){
+  const pageSize = 1000;
+  const rows = [];
+  for(let from = 0; from < max; from += pageSize){
+    const to = Math.min(from + pageSize - 1, max - 1);
+    let query = supabase
+      .from("moment_activation_codes")
+      .select(MOMENT_PRODUCT_SELECT)
+      .order("created_at",{ascending:false})
+      .range(from, to);
+    query = applyMomentProductFiltersToQuery(query);
+    const { data, error } = await query;
+    if(error) throw error;
+    const chunk = data || [];
+    rows.push(...chunk);
+    if(chunk.length < pageSize) break;
+  }
+  return rows;
 }
 
 function hasActiveMomentProductFilters(){
@@ -1871,24 +1923,48 @@ function clearMomentInventoryFilters({ refresh = true } = {}){
   if(momentFilterChannel) momentFilterChannel.value = "";
   if(momentFilterOrder) momentFilterOrder.value = "";
   syncMomentQuickChips();
-  if(refresh) refreshMomentTable();
+  if(refresh) loadMomentProducts({ page: 0 });
+}
+
+function momentProductsPageCount(){
+  return Math.max(1, Math.ceil(momentProductsTotal / MOMENT_PAGE_SIZE) || 1);
+}
+
+function renderMomentProductsPager(){
+  const pager = document.getElementById("momentProductsPager");
+  const label = document.getElementById("momentPageLabel");
+  const prev = document.getElementById("momentPagePrev");
+  const next = document.getElementById("momentPageNext");
+  if(!pager || !label) return;
+  const pages = momentProductsPageCount();
+  const show = momentProductsLoaded && momentProductsTotal > MOMENT_PAGE_SIZE;
+  pager.hidden = !show;
+  const from = momentProductsTotal ? momentProductsPage * MOMENT_PAGE_SIZE + 1 : 0;
+  const to = Math.min(momentProductsTotal, (momentProductsPage + 1) * MOMENT_PAGE_SIZE);
+  label.textContent = momentProductsTotal
+    ? `${fmt(from)}–${fmt(to)} di ${fmt(momentProductsTotal)} · pag. ${momentProductsPage + 1}/${pages}`
+    : "0 pezzi";
+  if(prev) prev.disabled = momentProductsPage <= 0;
+  if(next) next.disabled = momentProductsPage >= pages - 1;
 }
 
 function refreshMomentTable(){
   const rows = filteredMomentProducts();
   renderMomentProductsTable(rows);
   if(momentTableCount){
-    const total = momentProductRows.length;
     if(!momentProductsLoaded){
       momentTableCount.textContent = "Caricamento…";
-    }else if(!total){
-      momentTableCount.textContent = "0 codici in magazzino";
-    }else if(rows.length === total){
-      momentTableCount.textContent = `${fmt(rows.length)} codici`;
+    }else if(!momentProductsTotal){
+      momentTableCount.textContent = hasActiveMomentProductFilters()
+        ? "0 codici con questi filtri"
+        : "0 codici in magazzino";
+    }else if(hasActiveMomentProductFilters()){
+      momentTableCount.textContent = `${fmt(momentProductsTotal)} con filtri · pagina ${momentProductsPage + 1}`;
     }else{
-      momentTableCount.textContent = `${fmt(rows.length)} di ${fmt(total)} (filtri attivi)`;
+      momentTableCount.textContent = `${fmt(momentProductsTotal)} codici`;
     }
   }
+  renderMomentProductsPager();
   updateMomentBulkBar();
 }
 
@@ -1908,9 +1984,11 @@ function renderMomentProductsTable(rows){
   if(!momentProductsTable) return;
   const emptyMsg = !momentProductsLoaded
     ? "Caricamento codici…"
-    : !momentProductRows.length
-      ? "Nessun codice in magazzino. Genera un lotto sopra."
-      : `Nessun codice con questi filtri (${fmt(momentProductRows.length)} in magazzino). <button type="button" class="link-button" data-moment-clear-filters>Mostra tutti</button>`;
+    : !momentProductsTotal
+      ? (hasActiveMomentProductFilters()
+        ? `Nessun codice con questi filtri. <button type="button" class="link-button" data-moment-clear-filters>Mostra tutti</button>`
+        : "Nessun codice in magazzino. Genera un lotto sopra.")
+      : "Nessun codice in questa pagina.";
   momentProductsTable.innerHTML = rows.length ? rows.map(row=>{
     const nfcUrl = momentNfcUrl(row);
     const activationUrl = momentActivationUrl(row);
@@ -1955,8 +2033,15 @@ function populateMomentFilters(){
   const batchValue = momentFilterBatch.value;
   const skuValue = momentFilterSku?.value || "";
   const agentValue = momentFilterAgent?.value || "";
-  const lines = [...new Set(momentProductRows.map(row=>row.product_line || "non_specificato"))].sort();
-  const batches = [...new Set(momentProductRows.map(row=>row.batch_label || "senza_lotto"))].sort();
+  // Opzioni da riepilogo lotti (tutti gli stock), non solo dalla pagina corrente
+  const lines = [...new Set([
+    ...momentInventoryRows.map(row=>row.product_line || "non_specificato"),
+    ...momentProductRows.map(row=>row.product_line || "non_specificato")
+  ])].sort();
+  const batches = [...new Set([
+    ...momentInventoryRows.map(row=>row.batch_label || "senza_lotto"),
+    ...momentProductRows.map(row=>row.batch_label || "senza_lotto")
+  ])].sort();
   momentFilterLine.innerHTML = `<option value="">Tutte le linee</option>` + lines.map(value=>`
     <option value="${esc(value)}" ${value === lineValue ? "selected" : ""}>${esc(productLineLabel(value))}</option>
   `).join("");
@@ -1974,17 +2059,19 @@ function populateMomentFilters(){
   }
   populateMomentAgentFilter();
   if(momentFilterAgent && !selectHasValue(momentFilterAgent, agentValue)) momentFilterAgent.value = "";
-  // Filtri orfani (SKU/lotto/canale) non devono nascondere i pezzi in silenzio
-  if(momentProductsLoaded && momentProductRows.length && !filteredMomentProducts().length && hasActiveMomentProductFilters()){
-    console.warn("Filtri magazzino Moments senza risultati — reset automatico.");
-    clearMomentInventoryFilters({ refresh: false });
-  }
 }
 
 function populateMomentAgentFilter(){
   if(!momentFilterAgent) return;
   const agentValue = momentFilterAgent.value;
-  const agentIds = [...new Set(momentProductRows.map(row=>row.assigned_agent_id).filter(Boolean))];
+  const fromAgents = (typeof agentRows !== "undefined" && Array.isArray(agentRows))
+    ? agentRows.map(row=>row.id).filter(Boolean)
+    : [];
+  const agentIds = [...new Set([
+    ...fromAgents,
+    ...momentProductRows.map(row=>row.assigned_agent_id).filter(Boolean),
+    ...momentOrderLinkedRows.map(row=>row.assigned_agent_id).filter(Boolean)
+  ])];
   momentFilterAgent.innerHTML = `<option value="">Tutti gli agenti</option>`
     + `<option value="__none__" ${agentValue === "__none__" ? "selected" : ""}>Senza agente</option>`
     + agentIds.map(id=>`
@@ -2130,24 +2217,58 @@ async function loadMomentInventoryStats(){
     if(error) throw error;
     momentInventoryRows = data || [];
     renderMomentInventoryStats();
+    try{ populateMomentFilters(); }catch{ /* filtri opzionali */ }
   }catch(error){
     console.error(error);
     momentInventoryStats.innerHTML = `<p class="inventory-stats-empty">Statistiche lotti non disponibili. Applica lo script SQL v42.</p>`;
   }
 }
 
-async function loadMomentProducts(){
+async function loadMomentOrderLinkedCodes(orderIds = []){
+  const ids = [...new Set((orderIds || []).filter(Boolean))];
+  if(!ids.length){
+    momentOrderLinkedRows = [];
+    return;
+  }
+  const rows = [];
+  const chunkSize = 80;
+  for(let i = 0; i < ids.length; i += chunkSize){
+    const slice = ids.slice(i, i + chunkSize);
+    const { data, error } = await supabase
+      .from("moment_activation_codes")
+      .select(MOMENT_PRODUCT_SELECT)
+      .in("platform_order_id", slice)
+      .limit(5000);
+    if(error) throw error;
+    rows.push(...(data || []));
+  }
+  momentOrderLinkedRows = rows;
+}
+
+async function loadMomentProducts({ page = momentProductsPage } = {}){
   if(!momentProductsTable) return;
   const seq = ++momentProductsLoadSeq;
+  const safePage = Math.max(0, Number(page) || 0);
+  const from = safePage * MOMENT_PAGE_SIZE;
+  const to = from + MOMENT_PAGE_SIZE - 1;
   try{
-    const { data,error } = await supabase
+    let query = supabase
       .from("moment_activation_codes")
-      .select("code,packaging_barcode,status,build_stage,public_slug,product_type,product_line,batch_label,product_label,public_url,claimed_by_email,claimed_at,created_at,sold_channel,assigned_agent_id,platform_order_id")
+      .select(MOMENT_PRODUCT_SELECT, { count: "exact" })
       .order("created_at",{ascending:false})
-      .limit(2000);
+      .range(from, to);
+    query = applyMomentProductFiltersToQuery(query);
+    const { data, error, count } = await query;
     if(error) throw error;
     if(seq !== momentProductsLoadSeq) return; // risposta stale: ignora
     momentProductRows = data || [];
+    momentProductsTotal = Number(count || 0);
+    momentProductsPage = safePage;
+    // Se filtri/cancellazioni hanno ridotto le pagine, riposiziona
+    const maxPage = Math.max(0, Math.ceil(momentProductsTotal / MOMENT_PAGE_SIZE) - 1);
+    if(momentProductsPage > maxPage){
+      return loadMomentProducts({ page: maxPage });
+    }
     momentProductsLoaded = true;
     try{
       populateMomentFilters();
@@ -2162,6 +2283,7 @@ async function loadMomentProducts(){
     momentProductsLoaded = true;
     momentProductsTable.innerHTML = `<tr><td colspan="12">Prodotti Moments non disponibili. ${esc(error.message || "Ricarica la pagina.")}</td></tr>`;
     if(momentTableCount) momentTableCount.textContent = "Errore caricamento";
+    renderMomentProductsPager();
   }
 }
 
@@ -3264,6 +3386,12 @@ async function loadPlatformOrders(){
       .limit(200);
     if(error) throw error;
     platformOrderRows = data || [];
+    try{
+      await loadMomentOrderLinkedCodes(platformOrderRows.map(row=>row.id));
+    }catch(linkError){
+      console.warn("Codici legati agli ordini non caricati", linkError);
+      momentOrderLinkedRows = [];
+    }
     refreshOrdersTable();
     refreshNfcShippingConsole();
     if(momentProductsLoaded) refreshMomentTable();
@@ -3307,6 +3435,9 @@ function refreshOrdersTable(){
 }
 
 function nfcCodesForOrder(orderId){
+  if(!orderId) return [];
+  const linked = momentOrderLinkedRows.filter(row=>row.platform_order_id === orderId);
+  if(linked.length) return linked;
   return momentProductRows.filter(row=>row.platform_order_id === orderId);
 }
 
@@ -4426,11 +4557,25 @@ function closeMomentDrawer(){
   currentMoment = null;
 }
 
-function openCodeDrawer(code,kind="moment"){
+async function openCodeDrawer(code,kind="moment"){
   const clean = String(code || "").trim().toUpperCase();
-  const row = kind === "business"
+  let row = kind === "business"
     ? businessProductRows.find(item=>String(item.code || "").toUpperCase() === clean)
-    : momentProductRows.find(item=>String(item.code || "").toUpperCase() === clean);
+    : momentProductRows.find(item=>String(item.code || "").toUpperCase() === clean)
+      || momentOrderLinkedRows.find(item=>String(item.code || "").toUpperCase() === clean);
+  if(!row && kind === "moment" && clean){
+    try{
+      const { data, error } = await supabase
+        .from("moment_activation_codes")
+        .select(MOMENT_PRODUCT_SELECT)
+        .eq("code", clean)
+        .maybeSingle();
+      if(error) throw error;
+      row = data || null;
+    }catch(error){
+      console.warn("openCodeDrawer: fetch codice fallito", error);
+    }
+  }
   if(!row || !codeDrawer){
     console.warn("openCodeDrawer: codice o drawer non trovato", clean, kind);
     return;
@@ -6329,7 +6474,7 @@ document.getElementById("momentInventoryQuickFilters")?.addEventListener("click"
     node.classList.toggle("active", node === chip);
   });
   syncMomentQuickChips();
-  refreshMomentTable();
+  loadMomentProducts({ page: 0 });
 });
 
 function onSupportQuickClick(event){
@@ -6446,7 +6591,7 @@ if(momentSearchInput){
   let searchTimer = null;
   momentSearchInput.addEventListener("input",()=>{
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(refreshMomentTable,180);
+    searchTimer = setTimeout(()=>loadMomentProducts({ page: 0 }),220);
   });
 }
 momentSearchClear?.addEventListener("click",()=>{
@@ -6456,9 +6601,18 @@ momentSearchClear?.addEventListener("click",()=>{
 [momentFilterLine,momentFilterBatch,momentFilterStatus,momentFilterBuild,momentFilterSku,momentFilterDateFrom,momentFilterDateTo,momentFilterAgent,momentFilterChannel,momentFilterOrder].forEach(node=>{
   if(node) node.addEventListener("change",()=>{
     syncMomentQuickChips();
-    refreshMomentTable();
+    loadMomentProducts({ page: 0 });
     renderMomentInventoryStats();
   });
+});
+
+document.getElementById("momentPagePrev")?.addEventListener("click",()=>{
+  if(momentProductsPage <= 0) return;
+  loadMomentProducts({ page: momentProductsPage - 1 });
+});
+document.getElementById("momentPageNext")?.addEventListener("click",()=>{
+  if(momentProductsPage >= momentProductsPageCount() - 1) return;
+  loadMomentProducts({ page: momentProductsPage + 1 });
 });
 
 function ensureSelectOption(select, value, label){
@@ -6489,7 +6643,7 @@ function applyInventoryLotRowFilter(root, row){
       if(momentFilterLine && line) momentFilterLine.value = line;
     }
     syncMomentQuickChips();
-    refreshMomentTable();
+    loadMomentProducts({ page: 0 });
     renderMomentInventoryStats();
     return;
   }
@@ -6589,19 +6743,59 @@ momentBulkApply?.addEventListener("click",()=>{
 momentBulkClearAgent?.addEventListener("click",()=>applyMomentBulk({clearAgent:true}));
 momentBulkClearOrder?.addEventListener("click",()=>applyMomentBulk({clearOrder:true}));
 
-momentExportFiltered?.addEventListener("click",()=>{
-  momentExportRows(filteredMomentProducts(), "khamakey-magazzino");
+momentExportFiltered?.addEventListener("click",async ()=>{
+  try{
+    const rows = await fetchAllMomentProductsMatchingFilters();
+    momentExportRows(rows, "khamakey-magazzino");
+  }catch(error){
+    console.error(error);
+    alert(error.message || "Export CSV non riuscito.");
+  }
 });
-momentExportSelected?.addEventListener("click",()=>{
-  const rows = momentProductRows.filter(row=>selectedMomentCodes.has(row.code));
-  momentExportRows(rows, "khamakey-selezione");
+momentExportSelected?.addEventListener("click",async ()=>{
+  try{
+    const codes = [...selectedMomentCodes];
+    if(!codes.length){
+      alert("Nessun codice selezionato.");
+      return;
+    }
+    const { data, error } = await supabase
+      .from("moment_activation_codes")
+      .select(MOMENT_PRODUCT_SELECT)
+      .in("code", codes);
+    if(error) throw error;
+    momentExportRows(data || [], "khamakey-selezione");
+  }catch(error){
+    console.error(error);
+    alert(error.message || "Export selezione non riuscito.");
+  }
 });
 momentLabelsFiltered?.addEventListener("click",async event=>{
-  await runLabelExport(filteredMomentProducts(), "khamakey-etichette", event.currentTarget);
+  try{
+    const rows = await fetchAllMomentProductsMatchingFilters();
+    await runLabelExport(rows, "khamakey-etichette", event.currentTarget);
+  }catch(error){
+    console.error(error);
+    alert(error.message || "PDF etichette non riuscito.");
+  }
 });
 momentLabelsSelected?.addEventListener("click",async event=>{
-  const rows = momentProductRows.filter(row=>selectedMomentCodes.has(row.code));
-  await runLabelExport(rows, "khamakey-etichette-selezione", event.currentTarget);
+  try{
+    const codes = [...selectedMomentCodes];
+    if(!codes.length){
+      alert("Nessun codice selezionato.");
+      return;
+    }
+    const { data, error } = await supabase
+      .from("moment_activation_codes")
+      .select(MOMENT_PRODUCT_SELECT)
+      .in("code", codes);
+    if(error) throw error;
+    await runLabelExport(data || [], "khamakey-etichette-selezione", event.currentTarget);
+  }catch(error){
+    console.error(error);
+    alert(error.message || "PDF selezione non riuscito.");
+  }
 });
 
 agentsTable?.addEventListener("click",event=>{

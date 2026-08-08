@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=190">
+  <link rel="stylesheet" href="admin.css?v=191">
   <script>
     // Dominio Moments: questo è l'admin Business — vai subito all'Officina Moments.
     (function () {
@@ -648,6 +648,11 @@
                 </tr></thead>
                 <tbody id="momentProductsTable"><tr><td colspan="12">Caricamento prodotti...</td></tr></tbody>
               </table>
+            </div>
+            <div class="inventory-pager" id="momentProductsPager" hidden>
+              <button type="button" class="small-action" id="momentPagePrev">← Precedenti</button>
+              <span id="momentPageLabel">—</span>
+              <button type="button" class="small-action" id="momentPageNext">Successivi →</button>
             </div>
           </div>
         </section>
@@ -2132,6 +2137,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=190"></script>
+  <script type="module" src="admin.js?v=191"></script>
 </body>
 </html>

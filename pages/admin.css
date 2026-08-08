@@ -337,6 +337,10 @@ tr:last-child td{border-bottom:0}
 .inventory-lot-row.is-active{background:#EFF6FF}
 .inventory-lot-row:focus-visible{outline:2px solid #93C5FD;outline-offset:-2px}
 .inventory-lots-meta{margin:0;color:var(--muted);font-size:.72rem;font-weight:800}
+.inventory-pager{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:10px 0 0;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#F8FAFC}
+.inventory-pager[hidden]{display:none!important}
+.inventory-pager span{color:var(--navy);font-size:.78rem;font-weight:900}
+.inventory-pager .small-action:disabled{opacity:.45;cursor:not-allowed}
 /* Legacy card grid (report agenti e simili) */
 .inventory-stats:has(.inventory-stat-card){grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 .shipping-stage-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0 18px}

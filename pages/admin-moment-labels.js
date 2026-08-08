@@ -10,10 +10,16 @@ const A4 = { w: 210, h: 297 };
 /** Forme etichette Cricut (contorno = percorso di taglio) */
 /** Inserto confezione: testo “a cosa serve” + codice attivazione (rettangolo compatto) */
 const CODE_RECT = { w: 44, h: 15 };
+/** Spazio sopra il contorno per il N° pezzo (fuori dal taglio) */
+const CODE_NUM_H = 3.4;
+const CODE_CELL = { w: CODE_RECT.w, h: CODE_RECT.h + CODE_NUM_H };
 /** @deprecated alias — stesso rettangolo codice */
 const OVAL = CODE_RECT;
-/** Solo barcode magazzino (esterno confezione) */
-const BAR_RECT = { w: 42, h: 16 };
+/**
+ * Barcode magazzino — proporzioni tipo etichetta CODE128 retail (~33×12 mm),
+ * non un riquadro troppo grande rispetto alle barre.
+ */
+const BAR_RECT = { w: 33, h: 12 };
 /** Chip NFC: URL completo da copiare sul tag */
 const LINK_RECT = { w: 72, h: 18 };
 /**
@@ -69,7 +75,7 @@ function batchMeta(rows){
   return { category, qty: rows.length, lotTitle: label || sku || "Lotto KhamaKey Moments" };
 }
 
-function barcodeDataUrl(value, { height = 28, width = 1.05 } = {}){
+function barcodeDataUrl(value, { height = 36, width = 1.2 } = {}){
   const canvas = document.createElement("canvas");
   JsBarcode(canvas, String(value || ""), {
     format: "CODE128",
@@ -153,34 +159,40 @@ function drawNumberBadge(doc, x, y, n, size = NUM_BOX){
 
 /**
  * Inserto in confezione: rettangolo compatto + codice in evidenza.
+ * Il N° pezzo sta FUORI dal contorno di taglio (sopra a sinistra).
  * (Non mischiare con barcode o URL NFC.)
  */
 function drawCodeRectLabel(doc, x, y, index1, row){
+  const showNum = index1 != null && index1 !== "" && Number(index1) > 0;
+  const boxY = showNum ? y + CODE_NUM_H : y;
   const cx = x + CODE_RECT.w / 2;
+
+  if(showNum){
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(15, 23, 42);
+    doc.text(String(index1), x, y + 2.4);
+  }
+
   setCutStroke(doc);
-  doc.roundedRect(x, y, CODE_RECT.w, CODE_RECT.h, 1.2, 1.2, "S");
+  doc.roundedRect(x, boxY, CODE_RECT.w, CODE_RECT.h, 1.2, 1.2, "S");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(4.6);
-  doc.setTextColor(100, 116, 139);
-  doc.text(String(index1), x + 1.8, y + 3.2);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(5);
-  doc.setTextColor(71, 85, 105);
-  doc.text("Attiva la pagina Moments", cx, y + 3.4, { align: "center" });
+  doc.setFontSize(6.6);
+  doc.setTextColor(15, 23, 42);
+  doc.text("Attiva la pagina Moments", cx, boxY + 3.9, { align: "center" });
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.2);
+  doc.setFontSize(9.4);
   doc.setTextColor(15, 23, 42);
   const code = activationCodeDisplay(row);
-  const lines = doc.splitTextToSize(code, CODE_RECT.w - 3.5);
-  doc.text(lines.slice(0, 1), cx, y + 9.1, { align: "center" });
+  const lines = doc.splitTextToSize(code, CODE_RECT.w - 3.2);
+  doc.text(lines.slice(0, 1), cx, boxY + 9.2, { align: "center" });
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(4.5);
-  doc.setTextColor(100, 116, 139);
-  doc.text("Inserisci il codice nell'app", cx, y + 13.1, { align: "center" });
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6.2);
+  doc.setTextColor(15, 23, 42);
+  doc.text("Inserisci il codice nell'app", cx, boxY + 13.3, { align: "center" });
 }
 
 /** @deprecated nome storico — ora rettangolo */
@@ -189,7 +201,7 @@ function drawOvalLabel(doc, x, y, index1, row){
 }
 
 /**
- * Etichetta esterna confezione: solo barcode magazzino (+ cifre).
+ * Etichetta esterna confezione: solo barcode magazzino (+ cifre leggibili).
  * Niente codice attivazione e niente numero d'ordine nel riquadro.
  */
 function drawBarcodeRectLabel(doc, x, y, _index1, row, barcodeImg){
@@ -198,16 +210,17 @@ function drawBarcodeRectLabel(doc, x, y, _index1, row, barcodeImg){
 
   const packageCode = packagingBarcode(row);
   if(barcodeImg){
-    const pad = 1.2;
-    const barW = BAR_RECT.w - pad * 2;
-    const barH = 7.5;
-    doc.addImage(barcodeImg, "PNG", x + pad, y + 2.2, barW, barH);
+    const padX = 1.2;
+    const padTop = 1.1;
+    const barW = BAR_RECT.w - padX * 2;
+    const barH = 5.8;
+    doc.addImage(barcodeImg, "PNG", x + padX, y + padTop, barW, barH);
   }
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(5);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
   doc.setTextColor(15, 23, 42);
-  doc.text(packageCode || "—", x + BAR_RECT.w / 2, y + BAR_RECT.h - 1.8, { align: "center" });
+  doc.text(packageCode || "—", x + BAR_RECT.w / 2, y + BAR_RECT.h - 1.4, { align: "center" });
 }
 
 /** Etichetta programmazione chip: solo URL completo. */
@@ -355,7 +368,8 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
       drawNumberBadge(doc, x, y + (rowH - NUM_BOX.h) / 2, n);
       x += colNumW + gap;
 
-      drawCodeRectLabel(doc, x, y + (rowH - CODE_RECT.h) / 2, n, row);
+      // N° già nel badge a sinistra — niente numero dentro/sopra il riquadro codice
+      drawCodeRectLabel(doc, x, y + (rowH - CODE_RECT.h) / 2, null, row);
       x += colCodeW + gap;
 
       const pkg = packagingBarcode(row);
@@ -386,8 +400,8 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
 function drawOvalCutSection(doc, rows, meta){
   drawGridSection(doc, rows, meta, {
     sectionTitle: "2 · Etichette codice (rettangoli) · Cricut",
-    cellW: CODE_RECT.w,
-    cellH: CODE_RECT.h,
+    cellW: CODE_CELL.w,
+    cellH: CODE_CELL.h,
     cutSheet: true,
     drawCell: (d, x, y, n, row)=>drawCodeRectLabel(d, x, y, n, row)
   });
@@ -445,7 +459,7 @@ export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etich
   await Promise.all(rows.map(async row=>{
     const packageCode = packagingBarcode(row);
     if(packageCode && !barcodeCache.has(packageCode)){
-      barcodeCache.set(packageCode, barcodeDataUrl(packageCode, { height: 28, width: 1.05 }));
+      barcodeCache.set(packageCode, barcodeDataUrl(packageCode, { height: 36, width: 1.2 }));
     }
     const url = nfcUrlForRow(row);
     if(url && !qrCache.has(url)){
@@ -476,14 +490,15 @@ export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etich
 export const LABEL_SIZE_MM = {
   oval: { ...CODE_RECT },
   code: { ...CODE_RECT },
+  codeCell: { ...CODE_CELL },
   barcode: { ...BAR_RECT },
   link: { ...LINK_RECT },
   qr: { ...QR_SQUARE }
 };
 export function labelGridInfo(){
   return {
-    oval: computeGrid(CODE_RECT.w, CODE_RECT.h),
-    code: computeGrid(CODE_RECT.w, CODE_RECT.h),
+    oval: computeGrid(CODE_CELL.w, CODE_CELL.h),
+    code: computeGrid(CODE_CELL.w, CODE_CELL.h),
     barcode: computeGrid(BAR_RECT.w, BAR_RECT.h),
     link: computeGrid(LINK_RECT.w, LINK_RECT.h),
     qr: computeGrid(QR_SQUARE.w, QR_SQUARE.h)

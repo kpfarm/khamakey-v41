@@ -399,6 +399,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-06 | Cursor | **Moments v241 + Worker v205**: mile perf a rischio ~0 (CSS categoria, font, cover, scroll, HEIC) |
 | 2026-08-07 | Cursor | **Moments v242 + Worker v208**: fix critico YouTube (salva + pagina pubblica + sezione Video) |
 | 2026-08-08 | Cursor | **Admin v184**: PDF etichette — codice attivazione rettangolo compatto (niente ovale) |
+| 2026-08-08 | Cursor | **Admin v185**: PDF — N° fuori riquadro, testi leggibili, barcode più compatto |
 | 2026-08-06 | Cursor | **Worker v206**: rollback CSS perf v205 — restore `/m/` + anteprima (1101) |
 | 2026-08-06 | Cursor | **Moments v240 ripristinato + Worker v207**: firma Great Vibes; messaggio non come nome |
 | 2026-08-07 | Cursor | **Officina home**: testo più corto + flusso in `<details>` — zero tocchi a form pezzi/magazzino |

@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v185 — PDF etichette polish (2026-08-08, Cursor)** — Pages
+  - N° pezzo fuori dal contorno di taglio; testi guida più scuri/grandi; barcode 33×12 mm con cifre bold.
 - **Admin v184 — PDF codice attivazione rettangolo (2026-08-08, Cursor)** — Pages
   - Etichetta codice: da ovale 52×22 a rettangolo arrotondato 44×15 mm, testo più grande.
   - Nessun cambio alla generazione pezzi/magazzino/NFC.

@@ -404,6 +404,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-08 | Cursor | **Admin v187**: PDF — riquadro link come prima, solo testo URL più grande |
 | 2026-08-08 | Cursor | **Admin v188**: PDF — N° pezzo fuori dal contorno QR |
 | 2026-08-08 | Cursor | **Admin v189**: Magazzino — stock in tabella compatta scrollabile |
+| 2026-08-08 | Cursor | **Admin v190**: Magazzino — tabella pezzi a scorrimento (no pagina infinita) |
 | 2026-08-06 | Cursor | **Worker v206**: rollback CSS perf v205 — restore `/m/` + anteprima (1101) |
 | 2026-08-06 | Cursor | **Moments v240 ripristinato + Worker v207**: firma Great Vibes; messaggio non come nome |
 | 2026-08-07 | Cursor | **Officina home**: testo più corto + flusso in `<details>` — zero tocchi a form pezzi/magazzino |

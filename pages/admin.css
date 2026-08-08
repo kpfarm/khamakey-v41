@@ -201,6 +201,20 @@ h1{font-family:"Syne",sans-serif;margin:0;color:var(--navy);font-size:1.7rem}
 .task-list span,.permission-item span{display:block;color:var(--muted);font-size:.74rem;line-height:1.4}
 .table-wrap{overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:12px;max-width:100%}
 .table-wrap table{min-width:640px}
+/* Magazzino pezzi: altezza fissa + scroll, niente pagina infinita */
+.inventory-table-wrap{
+  max-height:min(62vh,560px);
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  background:#fff;
+}
+.inventory-table-wrap thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:#F8FAFC;
+  box-shadow:0 1px 0 var(--border);
+}
 table{width:100%;border-collapse:collapse;background:white}
 th,td{padding:12px;border-bottom:1px solid var(--border);text-align:left;font-size:.78rem}
 th{background:#F8FAFC;color:var(--navy);font-weight:900}
@@ -537,10 +551,12 @@ textarea{width:100%;border:1px solid var(--border);border-radius:10px;background
   .admin-card{padding:14px}
   .gate-card{margin:24px auto;padding:22px 18px}
 
-  /* Magazzino: card stack invece di tabella orizzontale rotta */
+  /* Magazzino: card stack invece di tabella orizzontale rotta (resta scrollabile) */
   .inventory-table-wrap{
-    border:0;
-    overflow:visible;
+    border:1px solid var(--border);
+    max-height:min(70vh,640px);
+    overflow:auto;
+    padding:0 0 4px;
   }
   .inventory-table-wrap table.inventory-table{
     min-width:0;

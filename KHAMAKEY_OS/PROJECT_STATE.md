@@ -97,7 +97,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v183** (+ home HTML leggera) | Home meno verbose; **nessun cambio** form creazione pezzi/magazzino. |
+| **Admin / Officina Moments** | **v184** | PDF etichette: codice attivazione in rettangolo compatto (ex ovale). Form pezzi/magazzino intatti. |
 | **Worker NFC** | **v208-youtube-persist** | YouTube in sezione Video + music; niente `<video src=youtube>`. |
 | **Moments editor** | **v242** | Fix critico: link YouTube che non restava al Salva / pagina pubblica. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |

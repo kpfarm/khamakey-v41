@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v184 — PDF codice attivazione rettangolo (2026-08-08, Cursor)** — Pages
+  - Etichetta codice: da ovale 52×22 a rettangolo arrotondato 44×15 mm, testo più grande.
+  - Nessun cambio alla generazione pezzi/magazzino/NFC.
 - **Moments v242 + Worker v208 — fix YouTube che spariva (2026-08-07, Cursor)** — Pages + Worker
   - Bug critico: link YouTube in editor (anteprima ok) non restava al Salva / pagina pubblica vuota.
   - `liveFieldValue` non usa più `form.elements[name]` (RadioNodeList → valore vuoto).

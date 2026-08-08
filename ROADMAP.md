@@ -406,6 +406,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-08 | Cursor | **Admin v189**: Magazzino — stock in tabella compatta scrollabile |
 | 2026-08-08 | Cursor | **Admin v190**: Magazzino — tabella pezzi a scorrimento (no pagina infinita) |
 | 2026-08-08 | Cursor | **Admin v191**: Magazzino — paginazione server-side pezzi (100/pagina, ~20k) |
+| 2026-08-08 | Cursor | **Admin v192 + SQL v171**: Gestisci linee oggetto fisico (add/rename/delete) |
 | 2026-08-06 | Cursor | **Worker v206**: rollback CSS perf v205 — restore `/m/` + anteprima (1101) |
 | 2026-08-06 | Cursor | **Moments v240 ripristinato + Worker v207**: firma Great Vibes; messaggio non come nome |
 | 2026-08-07 | Cursor | **Officina home**: testo più corto + flusso in `<details>` — zero tocchi a form pezzi/magazzino |

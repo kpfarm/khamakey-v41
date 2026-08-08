@@ -54,6 +54,7 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 48 | `khamakey-moments-media-usage-set-v168.sql` | RPC `set_moment_media_usage` — imposta bytes/file count assoluti (sync R2 Worker) |
 | 49 | `khamakey-moments-activation-look-v169.sql` | Seed look/palette per categoria all'attivazione (Amore→rosso, ecc.) |
 | 50 | `khamakey-moments-build-stage-v170.sql` | Magazzino: `build_stage` digital/assembled + RPC `set_moment_codes_build_stage` (ops only, non blocca attivazione) |
+| 51 | `khamakey-moments-product-lines-v171.sql` | Anagrafica linee oggetto fisico + RPC rename/delete (Officina Magazzino) |
 | 51 | `khamakey-moments-video-limit-v171.sql` | Moments: `max_video_mb` → 50 su piani Free/Plus/Pro (resta 1 clip sul Free) |
 | 52 | `khamakey-moments-save-optimistic-v172.sql` | Salva ottimistico: `p_expected_updated_at` → CONFLICT_STALE_SAVE se altra sessione ha salvato |
 

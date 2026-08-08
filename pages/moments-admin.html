@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=191">
-  <link rel="stylesheet" href="moments-admin.css?v=191">
+  <link rel="stylesheet" href="admin.css?v=192">
+  <link rel="stylesheet" href="moments-admin.css?v=192">
 </head>
 <body>
   <main class="admin-shell locked" id="adminShell">
@@ -218,14 +218,8 @@
                 <fieldset class="moment-wizard-step">
                   <legend>1 · Oggetto e template</legend>
                   <label>Linea oggetto
-                    <select name="product_line">
-                      <option value="portachiavi">Portachiavi NFC</option>
-                      <option value="orsetto">Orsetto NFC</option>
-                      <option value="card">Card NFC</option>
-                      <option value="magnete">Magnete NFC</option>
-                      <option value="tag">Tag / tessera NFC</option>
-                      <option value="confezione">Confezione regalo</option>
-                      <option value="altro">Altra linea (personalizzata)</option>
+                    <select name="product_line" data-product-line-select>
+                      <option value="">Caricamento linee…</option>
                     </select>
                   </label>
                   <p class="field-hint wide-field" data-product-line-hint>Oggetto più venduto — coppia, regalo, eventi.</p>
@@ -323,14 +317,8 @@
                 </div>
               </label>
               <label>Linea oggetto
-                <select name="product_line">
-                  <option value="portachiavi">Portachiavi NFC</option>
-                  <option value="orsetto">Orsetto NFC</option>
-                  <option value="card">Card NFC</option>
-                  <option value="magnete">Magnete NFC</option>
-                  <option value="tag">Tag / tessera NFC</option>
-                  <option value="confezione">Confezione regalo</option>
-                  <option value="altro">Altra linea (personalizzata)</option>
+                <select name="product_line" data-product-line-select>
+                  <option value="">Caricamento linee…</option>
                 </select>
               </label>
               <label class="wide-field" data-product-line-custom-wrap hidden>Nome nuova linea
@@ -390,6 +378,24 @@
               <button type="button" class="primary-action primary-outline" data-admin-tab-jump="momentNewProduct">Vai a Nuovo prodotto</button>
             </details>
 
+            <details class="admin-details" id="momentProductLinesPanel">
+              <summary>Gestisci linee oggetto fisico</summary>
+              <p class="field-hint wide-field">Aggiungi, rinomina o elimina le linee (Orsetto, Portachiavi, custom…). Le linee di sistema si possono solo disattivare. Elimina solo se non ci sono pezzi/modelli collegati.</p>
+              <form class="admin-form compact-form" id="momentProductLineForm">
+                <label class="wide-field">Nome nuova linea
+                  <input name="label" type="text" required placeholder="Es. Ciondolo NFC, Portafoto…">
+                </label>
+                <button class="primary-action" type="submit">Aggiungi linea</button>
+                <p class="form-status" id="momentProductLineStatus"></p>
+              </form>
+              <div class="table-wrap" style="margin-top:10px">
+                <table>
+                  <thead><tr><th>Nome</th><th>Slug</th><th>Tipo</th><th>Stato</th><th>Azioni</th></tr></thead>
+                  <tbody id="momentProductLinesTable"><tr><td colspan="5">Caricamento linee…</td></tr></tbody>
+                </table>
+              </div>
+            </details>
+
             <details class="admin-details" open>
               <summary>Genera nuovo stock in magazzino</summary>
               <form class="admin-form compact-form moment-batch-form" id="momentBatchForm" data-moment-auto-form>
@@ -399,15 +405,12 @@
                   </select>
                 </label>
                 <label>Linea oggetto fisico
-                  <select name="product_line" required>
-                    <option value="orsetto">Orsetto NFC</option>
-                    <option value="portachiavi">Portachiavi NFC</option>
-                    <option value="card">Card NFC</option>
-                    <option value="magnete">Magnete NFC</option>
-                    <option value="tag">Tag / tessera NFC</option>
-                    <option value="confezione">Confezione regalo</option>
-                    <option value="altro">Altro oggetto</option>
+                  <select name="product_line" data-product-line-select required>
+                    <option value="">Caricamento linee…</option>
                   </select>
+                </label>
+                <label class="wide-field" data-product-line-custom-wrap hidden>Nome nuova linea
+                  <input name="product_line_custom" type="text" placeholder="Es. Ciondolo NFC…">
                 </label>
                 <label>Quantità
                   <input name="quantity" type="number" min="1" max="500" value="1">
@@ -892,15 +895,8 @@
               <input name="quantity" type="number" min="1" max="500" value="1" required>
             </label>
             <label>Linea oggetto
-              <select name="product_line">
+              <select name="product_line" data-product-line-select data-product-line-empty="Qualsiasi disponibile">
                 <option value="">Qualsiasi disponibile</option>
-                <option value="orsetto">Orsetto NFC</option>
-                <option value="portachiavi">Portachiavi NFC</option>
-                <option value="card">Card NFC</option>
-                <option value="magnete">Magnete NFC</option>
-                <option value="tag">Tag / tessera NFC</option>
-                <option value="confezione">Confezione regalo</option>
-                <option value="altro">Altro oggetto</option>
               </select>
             </label>
             <label>Agente (opzionale)
@@ -929,5 +925,5 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=191"></script>
+  <script type="module" src="admin.js?v=192"></script>
 </body>

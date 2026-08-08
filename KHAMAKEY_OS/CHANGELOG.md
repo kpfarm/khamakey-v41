@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v192 + SQL v171 — Gestisci linee oggetto (2026-08-08, Cursor)** — Pages + Supabase
+  - Tabella `platform_moment_product_lines`; Officina Magazzino: aggiungi / rinomina / disattiva / elimina (se inutilizzata).
 - **Admin v191 — Magazzino pezzi paginati (2026-08-08, Cursor)** — Pages
   - Codici: 100/pagina da Supabase (count + range), filtri server-side; CSV/PDF filtri caricano tutti i match; pronto per ~20k.
 - **Admin v190 — Magazzino pezzi scroll (2026-08-08, Cursor)** — Pages

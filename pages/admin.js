@@ -1,13 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=191";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=192";
 import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=177";
 import {
   generateMomentSku,
   generateMomentProductName,
   wireMomentProductAutofill,
   normalizeMomentSku
-} from "./moments-admin-helpers.js?v=163";
+} from "./moments-admin-helpers.js?v=192";
 import {
   TYPE_LABELS,
   normalizeMomentType,
@@ -382,6 +382,12 @@ const PRODUCT_LINE_LABELS = {
   altro:"Altro oggetto",
   non_specificato:"Non specificato"
 };
+
+/** Anagrafica linee da Supabase (`platform_moment_product_lines`) */
+let momentProductLineRows = [];
+const momentProductLinesTable = document.getElementById("momentProductLinesTable");
+const momentProductLineForm = document.getElementById("momentProductLineForm");
+const momentProductLineStatus = document.getElementById("momentProductLineStatus");
 
 const SOLD_CHANNEL_LABELS = {
   direct:"Diretto / sito",
@@ -1465,7 +1471,192 @@ function refreshMomentsTable(){
 }
 
 function productLineLabel(value){
-  return PRODUCT_LINE_LABELS[value] || value || "Non specificato";
+  const slug = String(value || "").trim();
+  if(!slug) return "Non specificato";
+  const row = momentProductLineRows.find(item=>item.slug === slug);
+  if(row?.label) return row.label;
+  return PRODUCT_LINE_LABELS[slug] || slug;
+}
+
+function slugifyProductLine(label){
+  return String(label || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "")
+    .slice(0, 48);
+}
+
+function fillProductLineSelects(){
+  const active = momentProductLineRows.filter(row=>row.active !== false);
+  document.querySelectorAll("[data-product-line-select]").forEach(select=>{
+    const prev = select.value;
+    const emptyLabel = select.getAttribute("data-product-line-empty") || "";
+    const allowEmpty = select.hasAttribute("data-product-line-empty") || !select.required;
+    const options = [];
+    if(allowEmpty || emptyLabel){
+      options.push(`<option value="">${esc(emptyLabel || "—")}</option>`);
+    }
+    active.forEach(row=>{
+      options.push(`<option value="${esc(row.slug)}">${esc(row.label)}</option>`);
+    });
+    options.push(`<option value="__new__">+ Nuova linea…</option>`);
+    select.innerHTML = options.join("");
+    if(prev && [...select.options].some(opt=>opt.value === prev)) select.value = prev;
+    else if(!allowEmpty && active[0]) select.value = active[0].slug;
+    const form = select.closest("form");
+    const wrap = form?.querySelector("[data-product-line-custom-wrap]");
+    if(wrap) wrap.hidden = select.value !== "__new__";
+  });
+}
+
+function renderMomentProductLinesTable(){
+  if(!momentProductLinesTable) return;
+  if(!momentProductLineRows.length){
+    momentProductLinesTable.innerHTML = `<tr><td colspan="5">Nessuna linea. Aggiungine una sopra.</td></tr>`;
+    return;
+  }
+  momentProductLinesTable.innerHTML = momentProductLineRows.map(row=>{
+    const tipo = row.is_system ? "Sistema" : "Custom";
+    const stato = row.active ? "Attiva" : "Disattivata";
+    const renameBtn = `<button type="button" class="small-action" data-line-rename="${esc(row.slug)}">Rinomina</button>`;
+    const toggleBtn = row.is_system
+      ? `<button type="button" class="small-action" data-line-toggle="${esc(row.slug)}" data-line-active="${row.active ? "0" : "1"}">${row.active ? "Disattiva" : "Attiva"}</button>`
+      : "";
+    const deleteBtn = row.is_system
+      ? ""
+      : `<button type="button" class="small-action" data-line-delete="${esc(row.slug)}">Elimina</button>`;
+    return `<tr>
+      <td><strong>${esc(row.label)}</strong></td>
+      <td><code>${esc(row.slug)}</code></td>
+      <td>${esc(tipo)}</td>
+      <td><span class="status-pill ${row.active ? "available" : "paused"}">${esc(stato)}</span></td>
+      <td class="row-actions">${renameBtn}${toggleBtn}${deleteBtn}</td>
+    </tr>`;
+  }).join("");
+}
+
+async function loadMomentProductLines(){
+  try{
+    const { data, error } = await supabase
+      .from("platform_moment_product_lines")
+      .select("slug,label,is_system,active,sort_order")
+      .order("sort_order",{ascending:true})
+      .order("label",{ascending:true});
+    if(error) throw error;
+    momentProductLineRows = data || [];
+  }catch(error){
+    console.warn("Linee prodotto non caricate", error);
+    momentProductLineRows = Object.entries(PRODUCT_LINE_LABELS)
+      .filter(([slug])=>!["altro","non_specificato"].includes(slug))
+      .map(([slug,label], i)=>({ slug, label, is_system:true, active:true, sort_order:(i+1)*10 }));
+  }
+  fillProductLineSelects();
+  renderMomentProductLinesTable();
+}
+
+async function ensureProductLineRecord(slug, label){
+  const cleanSlug = slugifyProductLine(slug || label);
+  const cleanLabel = String(label || slug || "").trim();
+  if(!cleanSlug || cleanSlug.length < 2) throw new Error("Nome linea troppo corto.");
+  if(["altro","non_specificato","__new__"].includes(cleanSlug)) throw new Error("Nome linea riservato.");
+  const existing = momentProductLineRows.find(row=>row.slug === cleanSlug);
+  if(existing) return existing;
+  const { data, error } = await supabase
+    .from("platform_moment_product_lines")
+    .upsert({
+      slug: cleanSlug,
+      label: cleanLabel || cleanSlug,
+      is_system: false,
+      active: true,
+      sort_order: 200,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "slug" })
+    .select("slug,label,is_system,active,sort_order")
+    .single();
+  if(error) throw error;
+  await loadMomentProductLines();
+  return data;
+}
+
+async function saveMomentProductLine(event){
+  event.preventDefault();
+  if(!hasPermission("moments.write")){
+    setFormStatus(momentProductLineStatus, "Serve permesso moments.write.", "error");
+    return;
+  }
+  const label = String(event.currentTarget.elements.label?.value || "").trim();
+  try{
+    await ensureProductLineRecord(label, label);
+    event.currentTarget.reset();
+    setFormStatus(momentProductLineStatus, `Linea «${label}» aggiunta.`, "ok");
+  }catch(error){
+    console.error(error);
+    setFormStatus(momentProductLineStatus, error.message || "Salvataggio linea non riuscito.", "error");
+  }
+}
+
+async function renameMomentProductLine(slug){
+  const row = momentProductLineRows.find(item=>item.slug === slug);
+  if(!row) return;
+  const newLabel = prompt("Nuovo nome linea:", row.label);
+  if(newLabel == null) return;
+  const label = String(newLabel).trim();
+  if(!label) return;
+  let newSlug = row.slug;
+  if(!row.is_system){
+    const maybeSlug = prompt("Slug tecnico (lascia uguale se non serve cambiare):", row.slug);
+    if(maybeSlug == null) return;
+    newSlug = slugifyProductLine(maybeSlug) || row.slug;
+  }
+  try{
+    const { error } = await supabase.rpc("rename_moment_product_line", {
+      p_old_slug: row.slug,
+      p_new_slug: newSlug,
+      p_new_label: label
+    });
+    if(error) throw error;
+    await Promise.all([
+      loadMomentProductLines(),
+      loadMomentInventoryStats(),
+      loadMomentProducts({ page: momentProductsPage }),
+      loadMomentCatalog()
+    ]);
+    alert(`Linea aggiornata: ${label}`);
+  }catch(error){
+    console.error(error);
+    alert(error.message || "Rinomina non riuscita.");
+  }
+}
+
+async function toggleMomentProductLine(slug, active){
+  try{
+    const { error } = await supabase
+      .from("platform_moment_product_lines")
+      .update({ active: !!active, updated_at: new Date().toISOString() })
+      .eq("slug", slug);
+    if(error) throw error;
+    await loadMomentProductLines();
+  }catch(error){
+    console.error(error);
+    alert(error.message || "Aggiornamento non riuscito.");
+  }
+}
+
+async function deleteMomentProductLine(slug){
+  const row = momentProductLineRows.find(item=>item.slug === slug);
+  if(!row || row.is_system) return;
+  if(!confirm(`Eliminare la linea «${row.label}»?\nSolo se non ci sono pezzi o modelli collegati.`)) return;
+  try{
+    const { error } = await supabase.rpc("delete_moment_product_line", { p_slug: slug });
+    if(error) throw error;
+    await loadMomentProductLines();
+  }catch(error){
+    console.error(error);
+    alert(error.message || "Eliminazione non riuscita.");
+  }
 }
 
 function momentTemplateLabel(value){
@@ -1478,29 +1669,48 @@ function existingMomentSkus(){
 
 function resolveProductLine(form){
   const line = form.elements.product_line?.value || "portachiavi";
-  if(line !== "altro") return line;
-  const custom = String(form.elements.product_line_custom?.value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+  if(line !== "altro" && line !== "__new__") return line;
+  const custom = slugifyProductLine(form.elements.product_line_custom?.value || "");
   return custom || "altro";
 }
 
-function ensureMomentCatalogFields(form){
+async function resolveProductLineAsync(form){
+  const selected = form.elements.product_line?.value || "portachiavi";
+  if(selected !== "altro" && selected !== "__new__") return selected;
+  const label = String(form.elements.product_line_custom?.value || "").trim();
+  const slug = slugifyProductLine(label);
+  if(!slug) throw new Error("Inserisci il nome della nuova linea.");
+  await ensureProductLineRecord(slug, label);
+  if(form.elements.product_line){
+    form.elements.product_line.value = slug;
+  }
+  const wrap = form.querySelector("[data-product-line-custom-wrap]");
+  if(wrap) wrap.hidden = true;
+  return slug;
+}
+
+async function ensureMomentCatalogFields(form){
   const lineSelect = form.elements.product_line?.value || "portachiavi";
   const customLine = form.elements.product_line_custom?.value || "";
-  const product_line = resolveProductLine(form);
+  const product_line = await resolveProductLineAsync(form);
   const product_type = normalizeMomentType(form.elements.product_type?.value);
   let sku = normalizeMomentSku(form.elements.sku?.value);
   let name = String(form.elements.name?.value || "").trim();
   if(!sku){
     sku = generateMomentSku({
-      productLine: lineSelect,
+      productLine: lineSelect === "__new__" || lineSelect === "altro" ? "__new__" : product_line,
       productType: product_type,
-      customLine,
+      customLine: customLine || productLineLabel(product_line),
       existingSkus: existingMomentSkus()
     });
     if(form.elements.sku) form.elements.sku.value = sku;
   }
   if(!name){
-    name = generateMomentProductName(lineSelect, product_type, customLine);
+    name = generateMomentProductName(
+      lineSelect === "__new__" || lineSelect === "altro" ? "__new__" : product_line,
+      product_type,
+      customLine || productLineLabel(product_line)
+    );
     if(form.elements.name) form.elements.name.value = name;
   }
   return { sku, name, product_line, product_type };
@@ -1661,12 +1871,22 @@ function applyMomentBatchCatalog(){
   if(!momentBatchForm || !momentBatchCatalog) return;
   const row = momentCatalogRows.find(item=>item.id === momentBatchCatalog.value);
   if(!row) return;
-  const knownLines = ["portachiavi","orsetto","card","magnete","tag","confezione","altro"];
-  momentBatchForm.elements.product_line.value = knownLines.includes(row.product_line) ? row.product_line : "altro";
+  const lineSelect = momentBatchForm.elements.product_line;
+  if(lineSelect){
+    const slug = row.product_line || "";
+    if(slug && ![...lineSelect.options].some(opt=>opt.value === slug)){
+      lineSelect.insertAdjacentHTML("beforeend", `<option value="${esc(slug)}">${esc(productLineLabel(slug))}</option>`);
+    }
+    if(slug) lineSelect.value = slug;
+  }
+  const customWrap = momentBatchForm.querySelector("[data-product-line-custom-wrap]");
+  if(customWrap) customWrap.hidden = true;
   momentBatchForm.elements.product_type.value = normalizeMomentType(row.product_type || "free");
-  momentBatchForm.elements.prefix.value = String(row.sku || "MOMENT").replace(/[^A-Z0-9]/gi,"").toUpperCase().slice(0,12) || "MOMENT";
-  momentBatchForm.elements.prefix.dataset.autoFilled = "1";
-  if(!String(momentBatchForm.elements.batch_label.value || "").trim() || momentBatchForm.elements.batch_label.dataset.autoFilled === "1"){
+  if(momentBatchForm.elements.prefix){
+    momentBatchForm.elements.prefix.value = String(row.sku || "MOMENT").replace(/[^A-Z0-9]/gi,"").toUpperCase().slice(0,12) || "MOMENT";
+    momentBatchForm.elements.prefix.dataset.autoFilled = "1";
+  }
+  if(momentBatchForm.elements.batch_label && (!String(momentBatchForm.elements.batch_label.value || "").trim() || momentBatchForm.elements.batch_label.dataset.autoFilled === "1")){
     const today = new Date().toISOString().slice(0,10);
     momentBatchForm.elements.batch_label.value = `${row.sku} · ${today}`;
     momentBatchForm.elements.batch_label.dataset.autoFilled = "1";
@@ -2992,19 +3212,24 @@ async function loadMomentCatalog(){
 function editMomentCatalog(id){
   const row = momentCatalogRows.find(item=>item.id === id);
   if(!row || !momentCatalogForm) return;
-  const knownLines = ["portachiavi","orsetto","card","magnete","tag","confezione","altro"];
-  const line = knownLines.includes(row.product_line) ? row.product_line : "altro";
+  const line = row.product_line || "portachiavi";
   editingMomentCatalogId = row.id;
   momentCatalogForm.elements.sku.value = row.sku || "";
   momentCatalogForm.elements.sku.dataset.autoFilled = "0";
   momentCatalogForm.elements.name.value = row.name || "";
   momentCatalogForm.elements.name.dataset.autoFilled = "0";
-  momentCatalogForm.elements.product_line.value = line;
+  const lineSelect = momentCatalogForm.elements.product_line;
+  if(lineSelect){
+    if(line && ![...lineSelect.options].some(opt=>opt.value === line)){
+      lineSelect.insertAdjacentHTML("beforeend", `<option value="${esc(line)}">${esc(productLineLabel(line))}</option>`);
+    }
+    lineSelect.value = line;
+  }
   if(momentCatalogForm.elements.product_line_custom){
-    momentCatalogForm.elements.product_line_custom.value = line === "altro" ? (row.product_line || "") : "";
+    momentCatalogForm.elements.product_line_custom.value = "";
   }
   const customWrap = momentCatalogForm.querySelector("[data-product-line-custom-wrap]");
-  if(customWrap) customWrap.hidden = line !== "altro";
+  if(customWrap) customWrap.hidden = true;
   momentCatalogForm.elements.product_type.innerHTML = renderCategorySelect(row.product_type || "free");
   momentCatalogForm.elements.product_type.value = normalizeMomentType(row.product_type || "free");
   momentCatalogForm.elements.sale_price.value = row.sale_price || 0;
@@ -3120,7 +3345,13 @@ async function saveMomentCatalog(event){
     setFormStatus(momentCatalogFormStatus,"Per pubblicare online servono immagine e descrizione (min. 20 caratteri).","error");
     return;
   }
-  const { sku, name, product_line, product_type } = ensureMomentCatalogFields(form);
+  let sku, name, product_line, product_type;
+  try{
+    ({ sku, name, product_line, product_type } = await ensureMomentCatalogFields(form));
+  }catch(lineError){
+    setFormStatus(momentCatalogFormStatus, lineError.message || "Linea non valida.", "error");
+    return;
+  }
   const payload = {
     sku,
     name,
@@ -3178,7 +3409,13 @@ async function saveQuickMomentCatalog(event){
     return;
   }
   const form = event.currentTarget;
-  const { sku, name, product_line, product_type } = ensureMomentCatalogFields(form);
+  let sku, name, product_line, product_type;
+  try{
+    ({ sku, name, product_line, product_type } = await ensureMomentCatalogFields(form));
+  }catch(lineError){
+    setFormStatus(momentQuickCatalogStatus, lineError.message || "Linea non valida.", "error");
+    return;
+  }
   if(!name){
     setFormStatus(momentQuickCatalogStatus,"Scegli linea oggetto e template — il nome si compila da solo.","error");
     return;
@@ -3234,7 +3471,13 @@ async function saveMomentNewProduct(event, { goToInventory = false, createSingle
     return;
   }
   const form = event.currentTarget;
-  const { sku, name, product_line, product_type } = ensureMomentCatalogFields(form);
+  let sku, name, product_line, product_type;
+  try{
+    ({ sku, name, product_line, product_type } = await ensureMomentCatalogFields(form));
+  }catch(lineError){
+    setFormStatus(momentNewProductStatus, lineError.message || "Linea non valida.", "error");
+    return;
+  }
   if(!name){
     setFormStatus(momentNewProductStatus,"Scegli linea oggetto e template pagina.","error");
     return;
@@ -5510,9 +5753,17 @@ async function createMomentBatch(event){
   const form = event.currentTarget;
   const catalog = momentCatalogRows.find(item=>item.id === form.elements.catalog_id?.value);
   const quantity = Math.min(500,Math.max(1,Number(form.elements.quantity.value || 1)));
-  const prefixSource = catalog?.sku || form.elements.prefix.value || "MOMENT";
+  const prefixSource = catalog?.sku || form.elements.prefix?.value || "MOMENT";
   const prefix = String(prefixSource).trim().toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,12) || "MOMENT";
-  const productLine = String(catalog?.product_line || form.elements.product_line.value || "").trim();
+  let productLine = "";
+  try{
+    productLine = catalog?.product_line
+      ? String(catalog.product_line).trim()
+      : await resolveProductLineAsync(form);
+  }catch(lineError){
+    setFormStatus(momentBatchStatus, lineError.message || "Linea non valida.", "error");
+    return;
+  }
   const productType = normalizeMomentType(catalog?.product_type || form.elements.product_type.value);
   const batchLabel = String(form.elements.batch_label.value || "").trim();
   const soldChannel = String(form.elements.sold_channel?.value || "").trim() || null;
@@ -6042,6 +6293,7 @@ async function loadAdminSession(){
   showAdmin(userData.user,currentMember);
   const loaders = IS_MOMENTS_CONSOLE ? [
     loadDashboard,
+    loadMomentProductLines,
     loadMoments,
     loadMomentCustomers,
     loadMomentProducts,
@@ -6053,6 +6305,7 @@ async function loadAdminSession(){
     loadTicketCategories
   ] : [
     loadDashboard,
+    loadMomentProductLines,
     loadClients,
     loadCrm,
     loadMoments,
@@ -6859,6 +7112,33 @@ document.querySelectorAll("[data-batch-qty]").forEach(button=>{
   });
 });
 if(momentBatchForm) momentBatchForm.addEventListener("submit",createMomentBatch);
+momentProductLineForm?.addEventListener("submit", saveMomentProductLine);
+momentProductLinesTable?.addEventListener("click", event=>{
+  const renameBtn = event.target.closest("[data-line-rename]");
+  if(renameBtn){
+    renameMomentProductLine(renameBtn.getAttribute("data-line-rename"));
+    return;
+  }
+  const toggleBtn = event.target.closest("[data-line-toggle]");
+  if(toggleBtn){
+    toggleMomentProductLine(
+      toggleBtn.getAttribute("data-line-toggle"),
+      toggleBtn.getAttribute("data-line-active") === "1"
+    );
+    return;
+  }
+  const deleteBtn = event.target.closest("[data-line-delete]");
+  if(deleteBtn){
+    deleteMomentProductLine(deleteBtn.getAttribute("data-line-delete"));
+  }
+});
+document.querySelectorAll("[data-product-line-select]").forEach(select=>{
+  select.addEventListener("change",()=>{
+    const form = select.closest("form");
+    const wrap = form?.querySelector("[data-product-line-custom-wrap]");
+    if(wrap) wrap.hidden = select.value !== "__new__";
+  });
+});
 if(businessBatchForm) businessBatchForm.addEventListener("submit",saveBusinessBatch);
 if(businessProvisionForm) businessProvisionForm.addEventListener("submit",provisionBusinessCustomer);
 businessSearchInput?.addEventListener("input",refreshBusinessTable);

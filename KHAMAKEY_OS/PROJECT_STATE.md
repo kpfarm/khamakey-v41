@@ -97,7 +97,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v191** | Magazzino: paginazione server-side pezzi (pronta per ~20k). |
+| **Admin / Officina Moments** | **v192** | Magazzino: gestione linee oggetto (+ SQL v171). |
 | **Worker NFC** | **v208-youtube-persist** | YouTube in sezione Video + music; niente `<video src=youtube>`. |
 | **Moments editor** | **v242** | Fix critico: link YouTube che non restava al Salva / pagina pubblica. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |

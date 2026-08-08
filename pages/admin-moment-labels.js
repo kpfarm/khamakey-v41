@@ -21,7 +21,7 @@ const OVAL = CODE_RECT;
  */
 const BAR_RECT = { w: 33, h: 12 };
 /** Chip NFC: URL completo da copiare sul tag */
-const LINK_RECT = { w: 78, h: 22 };
+const LINK_RECT = { w: 72, h: 18 };
 /**
  * QR pagina destinazione (= stesso URL del chip NFC).
  * Solo /m/<slug> — mai il codice di attivazione (sicurezza scaffale).
@@ -230,14 +230,12 @@ function drawLinkRectLabel(doc, x, y, _index1, row){
 
   const full = nfcUrlForRow(row) || "—";
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.6);
+  doc.setFontSize(7);
   doc.setTextColor(15, 23, 42);
-  const lines = doc.splitTextToSize(full, LINK_RECT.w - 4);
-  const shown = lines.slice(0, 3);
-  const lineH = 3.6;
-  const blockH = shown.length * lineH;
-  const startY = y + (LINK_RECT.h - blockH) / 2 + 2.6;
-  doc.text(shown, x + LINK_RECT.w / 2, startY, { align: "center", lineHeightFactor: 1.15 });
+  const lines = doc.splitTextToSize(full, LINK_RECT.w - 3.5);
+  const shown = lines.slice(0, 2);
+  const startY = shown.length > 1 ? y + 7.2 : y + 10.5;
+  doc.text(shown, x + LINK_RECT.w / 2, startY, { align: "center" });
 }
 
 /**

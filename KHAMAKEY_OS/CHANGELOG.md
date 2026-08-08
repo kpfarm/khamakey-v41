@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v187 — PDF testo link NFC (2026-08-08, Cursor)** — Pages
+  - Riquadro URL di nuovo 72×18 mm; solo font URL più grande (~7 pt bold).
 - **Admin v186 — PDF link NFC leggibile (2026-08-08, Cursor)** — Pages
   - Riquadro URL NFC 78×22 mm, testo bold ~7.6 pt (fino a 3 righe).
 - **Admin v185 — PDF etichette polish (2026-08-08, Cursor)** — Pages

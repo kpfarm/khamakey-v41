@@ -298,7 +298,33 @@ tr:last-child td{border-bottom:0}
 .admin-form.moment-sku-form{grid-template-columns:repeat(3,minmax(0,1fr))}
 .admin-form.compact-form .form-status,.admin-form.moment-batch-form .form-status,.admin-form.moment-sku-form .form-status{grid-column:1/-1}
 .admin-form.moment-batch-form button{grid-column:1/-1}
-.inventory-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:14px 0 18px}
+.inventory-stats{display:grid;gap:12px;margin:14px 0 18px}
+.inventory-lots{display:grid;gap:10px}
+.inventory-lots-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#fff}
+.inventory-lots-summary>strong{color:var(--navy);font-size:.88rem}
+.inventory-lots-totals{display:flex;flex-wrap:wrap;gap:10px 14px;font-size:.74rem;font-weight:800;color:var(--muted)}
+.inventory-lots-totals b{color:var(--navy);font-weight:900}
+.inventory-lots-totals .available b{color:#175CD3}
+.inventory-lots-totals .claimed b{color:#027A48}
+.inventory-lots-search{display:grid;gap:5px;font-size:.72rem;font-weight:900;color:var(--navy)}
+.inventory-lots-search input{width:100%;border:1px solid var(--border);border-radius:10px;padding:9px 11px;font:inherit;font-size:.84rem;background:#fff}
+.inventory-lots-scroll{max-height:420px;overflow:auto;border:1px solid var(--border);border-radius:12px;background:#fff}
+.inventory-lots-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.inventory-lots-table th,.inventory-lots-table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle}
+.inventory-lots-table th{position:sticky;top:0;background:#F8FAFC;color:var(--muted);font-size:.66rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;z-index:1}
+.inventory-lots-table td.num,.inventory-lots-table th:nth-last-child(-n+5){text-align:right;font-variant-numeric:tabular-nums}
+.inventory-lots-table td.available{color:#175CD3;font-weight:900}
+.inventory-lots-table td.claimed{color:#027A48;font-weight:900}
+.inventory-lots-table td.pct{min-width:72px}
+.inventory-lots-pct{display:inline-block;min-width:2.2em;font-weight:900;color:var(--navy)}
+.inventory-progress-inline{display:block;margin-top:4px;height:4px}
+.inventory-lot-row{cursor:pointer}
+.inventory-lot-row:hover{background:#F8FAFC}
+.inventory-lot-row.is-active{background:#EFF6FF}
+.inventory-lot-row:focus-visible{outline:2px solid #93C5FD;outline-offset:-2px}
+.inventory-lots-meta{margin:0;color:var(--muted);font-size:.72rem;font-weight:800}
+/* Legacy card grid (report agenti e simili) */
+.inventory-stats:has(.inventory-stat-card){grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 .shipping-stage-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0 18px}
 .shipping-stage-card{border:1px solid var(--border);border-radius:14px;background:#fff;padding:14px;display:grid;gap:6px}
 .shipping-stage-card span{color:var(--muted);font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em}

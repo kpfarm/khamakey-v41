@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v189 — Magazzino stock tabella (2026-08-08, Cursor)** — Pages
+  - Lotti stock: da griglia card a tabella compatta + riepilogo + ricerca + click per filtrare pezzi.
 - **Admin v188 — PDF N° fuori QR (2026-08-08, Cursor)** — Pages
   - Quadretti QR: N° pezzo sopra il contorno di taglio; QR centrato nel riquadro.
 - **Admin v187 — PDF testo link NFC (2026-08-08, Cursor)** — Pages

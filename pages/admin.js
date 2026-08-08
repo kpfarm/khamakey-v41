@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=188";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=189";
 import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=177";
 import {
   generateMomentSku,
@@ -1992,32 +1992,135 @@ function populateMomentAgentFilter(){
     `).join("");
 }
 
-function renderMomentInventoryStats(){
-  if(!momentInventoryStats) return;
-  if(!momentInventoryRows.length){
-    momentInventoryStats.innerHTML = `<p class="inventory-stats-empty">Nessun lotto generato. Crea il primo batch per vedere totali e attivazioni.</p>`;
+function inventoryLotSearchQuery(root){
+  return String(root?.querySelector("[data-inventory-lot-search]")?.value || "").trim().toLowerCase();
+}
+
+function filterInventoryLotRows(rows, q, mapRow){
+  if(!q) return rows;
+  return rows.filter(row=>{
+    const hay = mapRow(row).join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+}
+
+function inventoryLotsTotals(rows){
+  return rows.reduce((acc, row)=>{
+    acc.total += Number(row.total_count || 0);
+    acc.available += Number(row.available_count || 0);
+    acc.claimed += Number(row.claimed_count || 0);
+    acc.paused += Number(row.paused_count || 0);
+    return acc;
+  }, { total:0, available:0, claimed:0, paused:0 });
+}
+
+function renderInventoryLotsTable({
+  root,
+  rows,
+  emptyText,
+  searchPlaceholder,
+  columns,
+  mapSearch,
+  rowAttrs,
+  activeBatch = "",
+  activeLine = "",
+  keepSearchFocus = false
+}){
+  if(!root) return;
+  if(!rows.length){
+    root.innerHTML = `<p class="inventory-stats-empty">${emptyText}</p>`;
     return;
   }
-  momentInventoryStats.innerHTML = momentInventoryRows.map(row=>{
-    const claimed = Number(row.claimed_count || 0);
-    const total = Number(row.total_count || 0);
-    const pct = total ? Math.round((claimed / total) * 100) : 0;
-    return `<article class="inventory-stat-card">
-      <div class="inventory-stat-head">
-        <strong>${esc(productLineLabel(row.product_line))}</strong>
-        <span>${esc(row.batch_label === "senza_lotto" ? "Senza lotto" : row.batch_label)}</span>
+  const q = inventoryLotSearchQuery(root);
+  const visible = filterInventoryLotRows(rows, q, mapSearch);
+  const totals = inventoryLotsTotals(rows);
+  const shownTotals = inventoryLotsTotals(visible);
+
+  root.innerHTML = `
+    <div class="inventory-lots">
+      <div class="inventory-lots-summary" aria-label="Riepilogo stock">
+        <strong>${fmt(rows.length)} lotti</strong>
+        <div class="inventory-lots-totals">
+          <span>Tot <b>${fmt(totals.total)}</b></span>
+          <span class="available">Disp <b>${fmt(totals.available)}</b></span>
+          <span class="claimed">Att <b>${fmt(totals.claimed)}</b></span>
+          <span>Pausa <b>${fmt(totals.paused)}</b></span>
+        </div>
       </div>
-      <div class="inventory-stat-meta">Template: ${esc(momentTemplateLabel(row.product_type))}</div>
-      <div class="inventory-stat-grid">
-        <div><span>Totale</span><strong>${fmt(row.total_count)}</strong></div>
-        <div><span>Disponibili</span><strong class="available">${fmt(row.available_count)}</strong></div>
-        <div><span>Attivati</span><strong class="claimed">${fmt(row.claimed_count)}</strong></div>
-        <div><span>In pausa</span><strong>${fmt(row.paused_count)}</strong></div>
+      <label class="inventory-lots-search">Cerca lotto
+        <input type="search" data-inventory-lot-search placeholder="${esc(searchPlaceholder)}" value="${esc(q)}">
+      </label>
+      <div class="inventory-lots-scroll">
+        <table class="inventory-lots-table">
+          <thead>
+            <tr>${columns.map(col=>`<th>${esc(col)}</th>`).join("")}</tr>
+          </thead>
+          <tbody>
+            ${visible.length ? visible.map(row=>{
+              const claimed = Number(row.claimed_count || 0);
+              const total = Number(row.total_count || 0);
+              const pct = total ? Math.round((claimed / total) * 100) : 0;
+              const attrs = rowAttrs(row);
+              const isActive = attrs.batch && attrs.batch === activeBatch
+                && (!attrs.line || !activeLine || attrs.line === activeLine);
+              return `<tr class="inventory-lot-row${isActive ? " is-active" : ""}" role="button" tabindex="0"
+                data-lot-batch="${esc(attrs.batch)}"
+                data-lot-line="${esc(attrs.line || "")}"
+                data-lot-sku="${esc(attrs.sku || "")}"
+                title="Filtra pezzi di questo lotto">
+                ${attrs.cells}
+                <td class="num">${fmt(row.total_count)}</td>
+                <td class="num available">${fmt(row.available_count)}</td>
+                <td class="num claimed">${fmt(row.claimed_count)}</td>
+                <td class="num">${fmt(row.paused_count)}</td>
+                <td class="pct">
+                  <span class="inventory-lots-pct">${pct}%</span>
+                  <span class="inventory-progress inventory-progress-inline" aria-hidden="true"><span style="width:${pct}%"></span></span>
+                </td>
+              </tr>`;
+            }).join("") : `<tr><td colspan="${columns.length}">Nessun lotto corrisponde alla ricerca.</td></tr>`}
+          </tbody>
+        </table>
       </div>
-      <div class="inventory-progress" aria-hidden="true"><span style="width:${pct}%"></span></div>
-      <p class="inventory-stat-foot">${fmt(claimed)} attivati su ${fmt(total)} (${pct}%)</p>
-    </article>`;
-  }).join("");
+      ${q ? `<p class="inventory-lots-meta">${fmt(visible.length)} di ${fmt(rows.length)} lotti · pezzi in questi lotti: Tot ${fmt(shownTotals.total)}</p>` : `<p class="inventory-lots-meta">Clicca una riga per filtrare i pezzi sotto.</p>`}
+    </div>`;
+
+  if(keepSearchFocus){
+    const searchInput = root.querySelector("[data-inventory-lot-search]");
+    if(searchInput){
+      searchInput.focus();
+      const len = searchInput.value.length;
+      searchInput.setSelectionRange(len, len);
+    }
+  }
+}
+
+function renderMomentInventoryStats({ keepSearchFocus = false } = {}){
+  renderInventoryLotsTable({
+    root: momentInventoryStats,
+    rows: momentInventoryRows,
+    emptyText: "Nessun lotto generato. Crea il primo batch per vedere totali e attivazioni.",
+    searchPlaceholder: "Es. Orsetti blu, portachiavi, Amore…",
+    columns: ["Linea", "Lotto", "Template", "Tot", "Disp", "Att", "Pausa", "%"],
+    activeBatch: momentFilterBatch?.value || "",
+    activeLine: momentFilterLine?.value || "",
+    keepSearchFocus,
+    mapSearch: row=>[
+      productLineLabel(row.product_line),
+      row.batch_label === "senza_lotto" ? "Senza lotto" : row.batch_label,
+      momentTemplateLabel(row.product_type),
+      row.product_line,
+      row.batch_label,
+      row.product_type
+    ],
+    rowAttrs: row=>({
+      batch: row.batch_label || "senza_lotto",
+      line: row.product_line || "",
+      cells: `<td>${esc(productLineLabel(row.product_line))}</td>
+        <td>${esc(row.batch_label === "senza_lotto" ? "Senza lotto" : row.batch_label)}</td>
+        <td>${esc(momentTemplateLabel(row.product_type))}</td>`
+    })
+  });
 }
 
 async function loadMomentInventoryStats(){
@@ -2139,32 +2242,32 @@ function populateBusinessFilters(){
   `).join("");
 }
 
-function renderBusinessInventoryStats(){
-  if(!businessInventoryStats) return;
-  if(!businessInventoryRows.length){
-    businessInventoryStats.innerHTML = `<p class="inventory-stats-empty">Nessun lotto Business. Genera il primo batch di codici NFC.</p>`;
-    return;
-  }
-  businessInventoryStats.innerHTML = businessInventoryRows.map(row=>{
-    const claimed = Number(row.claimed_count || 0);
-    const total = Number(row.total_count || 0);
-    const pct = total ? Math.round((claimed / total) * 100) : 0;
-    return `<article class="inventory-stat-card">
-      <div class="inventory-stat-head">
-        <strong>${esc(row.sku || "SKU")}</strong>
-        <span>${esc(row.batch_label === "senza_lotto" ? "Senza lotto" : row.batch_label)}</span>
-      </div>
-      <div class="inventory-stat-meta">Linea: ${esc(row.product_line || "—")}</div>
-      <div class="inventory-stat-grid">
-        <div><span>Totale</span><strong>${fmt(row.total_count)}</strong></div>
-        <div><span>Disponibili</span><strong class="available">${fmt(row.available_count)}</strong></div>
-        <div><span>Attivati</span><strong class="claimed">${fmt(row.claimed_count)}</strong></div>
-        <div><span>In pausa</span><strong>${fmt(row.paused_count)}</strong></div>
-      </div>
-      <div class="inventory-progress" aria-hidden="true"><span style="width:${pct}%"></span></div>
-      <p class="inventory-stat-foot">${fmt(claimed)} attivati su ${fmt(total)} (${pct}%)</p>
-    </article>`;
-  }).join("");
+function renderBusinessInventoryStats({ keepSearchFocus = false } = {}){
+  renderInventoryLotsTable({
+    root: businessInventoryStats,
+    rows: businessInventoryRows,
+    emptyText: "Nessun lotto Business. Genera il primo batch di codici NFC.",
+    searchPlaceholder: "Es. SKU, lotto, linea…",
+    columns: ["SKU", "Lotto", "Linea", "Tot", "Disp", "Att", "Pausa", "%"],
+    activeBatch: businessFilterBatch?.value || "",
+    activeLine: businessFilterLine?.value || "",
+    keepSearchFocus,
+    mapSearch: row=>[
+      row.sku,
+      row.batch_label === "senza_lotto" ? "Senza lotto" : row.batch_label,
+      row.product_line,
+      row.sku,
+      row.batch_label
+    ],
+    rowAttrs: row=>({
+      batch: row.batch_label || "senza_lotto",
+      line: row.product_line || "",
+      sku: row.sku || "",
+      cells: `<td>${esc(row.sku || "SKU")}</td>
+        <td>${esc(row.batch_label === "senza_lotto" ? "Senza lotto" : row.batch_label)}</td>
+        <td>${esc(row.product_line || "—")}</td>`
+    })
+  });
 }
 
 async function loadBusinessInventoryStats(){
@@ -6354,8 +6457,87 @@ momentSearchClear?.addEventListener("click",()=>{
   if(node) node.addEventListener("change",()=>{
     syncMomentQuickChips();
     refreshMomentTable();
+    renderMomentInventoryStats();
   });
 });
+
+function ensureSelectOption(select, value, label){
+  if(!select || !value) return;
+  if(selectHasValue(select, value)) return;
+  const opt = document.createElement("option");
+  opt.value = value;
+  opt.textContent = label || value;
+  select.appendChild(opt);
+}
+
+function applyInventoryLotRowFilter(root, row){
+  if(!row) return;
+  const batch = row.getAttribute("data-lot-batch") || "";
+  const line = row.getAttribute("data-lot-line") || "";
+  const sku = row.getAttribute("data-lot-sku") || "";
+  const isMoments = root === momentInventoryStats;
+  if(isMoments){
+    const same = (momentFilterBatch?.value || "") === batch
+      && (!line || (momentFilterLine?.value || "") === line);
+    if(same){
+      if(momentFilterBatch) momentFilterBatch.value = "";
+      if(momentFilterLine) momentFilterLine.value = "";
+    }else{
+      ensureSelectOption(momentFilterBatch, batch, batch === "senza_lotto" ? "Senza lotto" : batch);
+      ensureSelectOption(momentFilterLine, line, productLineLabel(line));
+      if(momentFilterBatch) momentFilterBatch.value = batch;
+      if(momentFilterLine && line) momentFilterLine.value = line;
+    }
+    syncMomentQuickChips();
+    refreshMomentTable();
+    renderMomentInventoryStats();
+    return;
+  }
+  if(root === businessInventoryStats){
+    const same = (businessFilterBatch?.value || "") === batch
+      && (!line || (businessFilterLine?.value || "") === line)
+      && (!sku || (businessFilterSku?.value || "") === sku);
+    if(same){
+      if(businessFilterBatch) businessFilterBatch.value = "";
+      if(businessFilterLine) businessFilterLine.value = "";
+      if(businessFilterSku) businessFilterSku.value = "";
+    }else{
+      ensureSelectOption(businessFilterBatch, batch, batch === "senza_lotto" ? "Senza lotto" : batch);
+      ensureSelectOption(businessFilterLine, line, line);
+      ensureSelectOption(businessFilterSku, sku, sku);
+      if(businessFilterBatch) businessFilterBatch.value = batch;
+      if(businessFilterLine && line) businessFilterLine.value = line;
+      if(businessFilterSku && sku) businessFilterSku.value = sku;
+    }
+    refreshBusinessTable();
+    renderBusinessInventoryStats();
+  }
+}
+
+function bindInventoryLotsRoot(root, rerender){
+  if(!root || root.dataset.lotsBound === "1") return;
+  root.dataset.lotsBound = "1";
+  let searchTimer = null;
+  root.addEventListener("input", event=>{
+    if(!event.target.closest("[data-inventory-lot-search]")) return;
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(()=>rerender({ keepSearchFocus:true }), 140);
+  });
+  root.addEventListener("click", event=>{
+    const row = event.target.closest(".inventory-lot-row");
+    if(!row || !root.contains(row)) return;
+    applyInventoryLotRowFilter(root, row);
+  });
+  root.addEventListener("keydown", event=>{
+    if(event.key !== "Enter" && event.key !== " ") return;
+    const row = event.target.closest(".inventory-lot-row");
+    if(!row || !root.contains(row)) return;
+    event.preventDefault();
+    applyInventoryLotRowFilter(root, row);
+  });
+}
+bindInventoryLotsRoot(momentInventoryStats, renderMomentInventoryStats);
+bindInventoryLotsRoot(businessInventoryStats, renderBusinessInventoryStats);
 
 momentSelectAll?.addEventListener("change",event=>{
   const checked = event.target.checked;
@@ -6491,7 +6673,10 @@ businessSearchClear?.addEventListener("click",()=>{
   refreshBusinessTable();
 });
 [businessFilterStatus,businessFilterBatch,businessFilterSku,businessFilterLine].forEach(node=>{
-  node?.addEventListener("change",refreshBusinessTable);
+  node?.addEventListener("change",()=>{
+    refreshBusinessTable();
+    renderBusinessInventoryStats();
+  });
 });
 businessExportFiltered?.addEventListener("click",()=>{
   businessExportRows(filteredBusinessProducts(),"khamakey-business-magazzino");

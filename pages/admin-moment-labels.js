@@ -28,6 +28,9 @@ const LINK_RECT = { w: 72, h: 18 };
  * Contorno nero = taglio Cricut Print Then Cut.
  */
 const QR_SQUARE = { w: 28, h: 28 };
+/** Spazio sopra il contorno QR per il N° pezzo (fuori dal taglio) */
+const QR_NUM_H = 3.4;
+const QR_CELL = { w: QR_SQUARE.w, h: QR_SQUARE.h + QR_NUM_H };
 const NUM_BOX = { w: 10, h: 10 };
 
 const SHEET = {
@@ -240,29 +243,33 @@ function drawLinkRectLabel(doc, x, y, _index1, row){
 
 /**
  * Quadretto QR ritagliabile (confezione / backup NFC).
- * Contorno = taglio; contenuto = solo URL /m/<slug>.
+ * Contorno = taglio; N° pezzo FUORI (sopra a sinistra); contenuto = solo URL /m/<slug>.
  */
 function drawQrSquareLabel(doc, x, y, index1, row, qrImg){
+  const showNum = index1 != null && index1 !== "" && Number(index1) > 0;
+  const boxY = showNum ? y + QR_NUM_H : y;
+
+  if(showNum){
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(15, 23, 42);
+    doc.text(String(index1), x, y + 2.4);
+  }
+
   setCutStroke(doc);
-  doc.rect(x, y, QR_SQUARE.w, QR_SQUARE.h, "S");
+  doc.rect(x, boxY, QR_SQUARE.w, QR_SQUARE.h, "S");
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(4.5);
-  doc.setTextColor(100, 116, 139);
-  doc.text(String(index1), x + 1.6, y + 3.2);
-
-  const topReserve = 4.2;
-  const sidePad = 2.4;
-  const imgSize = Math.min(QR_SQUARE.w - sidePad * 2, QR_SQUARE.h - topReserve - sidePad);
-  const imgX = x + (QR_SQUARE.w - imgSize) / 2;
-  const imgY = y + topReserve;
+  const pad = 2.2;
+  const imgSize = QR_SQUARE.w - pad * 2;
+  const imgX = x + pad;
+  const imgY = boxY + pad;
   if(qrImg){
     doc.addImage(qrImg, "PNG", imgX, imgY, imgSize, imgSize);
   }else{
     doc.setFont("helvetica", "normal");
     doc.setFontSize(5);
     doc.setTextColor(148, 163, 184);
-    doc.text("QR n/d", x + QR_SQUARE.w / 2, y + QR_SQUARE.h / 2 + 2, { align: "center" });
+    doc.text("QR n/d", x + QR_SQUARE.w / 2, boxY + QR_SQUARE.h / 2 + 2, { align: "center" });
   }
 }
 
@@ -390,7 +397,8 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
       x += colLinkW + gap;
 
       const url = nfcUrlForRow(row);
-      drawQrSquareLabel(doc, x, y + (rowH - QR_SQUARE.h) / 2, n, row, qrCache.get(url));
+      // N° già nel badge a sinistra — niente numero dentro/sopra il QR in panoramica
+      drawQrSquareLabel(doc, x, y + (rowH - QR_SQUARE.h) / 2, null, row, qrCache.get(url));
     });
 
     drawFooter(doc, "Foglio di controllo — abbinamento pezzo a pezzo (non tagliare)");
@@ -433,8 +441,8 @@ function drawLinkCutSection(doc, rows, meta){
 function drawQrCutSection(doc, rows, meta, qrCache){
   drawGridSection(doc, rows, meta, {
     sectionTitle: "5 · QR pagina destinazione (quadretti) · Cricut",
-    cellW: QR_SQUARE.w,
-    cellH: QR_SQUARE.h,
+    cellW: QR_CELL.w,
+    cellH: QR_CELL.h,
     cutSheet: true,
     drawCell: (d, x, y, n, row)=>{
       const url = nfcUrlForRow(row);
@@ -493,7 +501,8 @@ export const LABEL_SIZE_MM = {
   codeCell: { ...CODE_CELL },
   barcode: { ...BAR_RECT },
   link: { ...LINK_RECT },
-  qr: { ...QR_SQUARE }
+  qr: { ...QR_SQUARE },
+  qrCell: { ...QR_CELL }
 };
 export function labelGridInfo(){
   return {
@@ -501,6 +510,6 @@ export function labelGridInfo(){
     code: computeGrid(CODE_CELL.w, CODE_CELL.h),
     barcode: computeGrid(BAR_RECT.w, BAR_RECT.h),
     link: computeGrid(LINK_RECT.w, LINK_RECT.h),
-    qr: computeGrid(QR_SQUARE.w, QR_SQUARE.h)
+    qr: computeGrid(QR_CELL.w, QR_CELL.h)
   };
 }

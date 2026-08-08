@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v188 — PDF N° fuori QR (2026-08-08, Cursor)** — Pages
+  - Quadretti QR: N° pezzo sopra il contorno di taglio; QR centrato nel riquadro.
 - **Admin v187 — PDF testo link NFC (2026-08-08, Cursor)** — Pages
   - Riquadro URL di nuovo 72×18 mm; solo font URL più grande (~7 pt bold).
 - **Admin v186 — PDF link NFC leggibile (2026-08-08, Cursor)** — Pages

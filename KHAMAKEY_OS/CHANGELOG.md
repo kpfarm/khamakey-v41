@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v243 + Worker v209 — multi-pet sezione Animale (2026-08-09, Cursor)** — Pages + Worker
+  - Fino a 6 animali: nome, emoji, foto, racconto; array `sections.pet.pets`.
+  - Migrazione automatica dal singolo `pet_name` / `pet_photo` / `body`.
+  - Campi legacy sincronizzati dal primo animale per compatibilità.
 - **Admin v192 + SQL v171 — Gestisci linee oggetto (2026-08-08, Cursor)** — Pages + Supabase
   - Tabella `platform_moment_product_lines`; Officina Magazzino: aggiungi / rinomina / disattiva / elimina (se inutilizzata).
 - **Admin v191 — Magazzino pezzi paginati (2026-08-08, Cursor)** — Pages

@@ -9,6 +9,11 @@ import {
   parseHoroscopePeople,
   normalizeZodiacSign
 } from "./moment-horoscope.js?v=218";
+import {
+  normalizePets,
+  parsePets,
+  syncLegacyPetFields
+} from "./moment-pets.js?v=243";
 
 /**
  * Sezioni escluse dal prodotto (non in menu editor, non in anteprima/pubblico).
@@ -57,7 +62,7 @@ export const DEFAULT_SECTIONS = {
   horoscope:{ enabled:false, title:"Oroscopo del giorno", body:"", people:[], images:[] },
   letter_future:{ enabled:false, title:"Lettera al futuro", body:"", recipient:"", unlock_date:"", media:[], media_type:"", media_url:"", media_title:"", images:[] },
   rituals:{ enabled:false, title:"I nostri rituali", body:"", items:[], images:[] },
-  pet:{ enabled:false, title:"Il nostro compagno", body:"", pet_name:"", pet_emoji:"🐾", pet_photo:"", images:[] },
+  pet:{ enabled:false, title:"Il nostro compagno", body:"", pets:[], pet_name:"", pet_emoji:"🐾", pet_photo:"", images:[] },
   numbers:{ enabled:false, title:"I nostri numeri", body:"", items:[], images:[] },
   quote:{ enabled:false, title:"", body:"", author:"", images:[] },
   signature:{ enabled:false, title:"", body:"", sign_name:"", sign_subtitle:"", images:[] }
@@ -288,6 +293,15 @@ export function migrateSections(rawSections = {}){
     sections.horoscope.people = normalizeHoroscopePeople(sections.horoscope);
     delete sections.horoscope.sign;
   }
+  if(sections.pet){
+    const hadPets = Array.isArray(sections.pet.pets) && sections.pet.pets.length;
+    const migrated = syncLegacyPetFields(sections.pet);
+    sections.pet = migrated;
+    // Legacy single: racconto era in section.body → ora sul primo animale
+    if(!hadPets && migrated.pets[0]?.body){
+      sections.pet.body = "";
+    }
+  }
   for(const key of Object.keys(LIST_SECTION_MODES)){
     if(!sections[key]) continue;
     const hadItems = Array.isArray(sections[key].items) && sections[key].items.length;
@@ -339,7 +353,7 @@ export function sectionHasContent(key, section){
     case "letter_future":
       return Boolean(section.body || section.unlock_date || migrateLetterMediaSection(section).length);
     case "pet":
-      return Boolean(section.pet_name || section.body || section.pet_photo);
+      return normalizePets(section).length > 0 || Boolean(String(section.body || "").trim());
     case "quote":
       return Boolean(section.body || section.author);
     case "signature":
@@ -451,9 +465,30 @@ export function readSectionFromForm(form, key, formNode = null){
     base.media_title = first?.title || val(`section_${key}_media_title`);
   }
   if(key === "pet"){
-    base.pet_name = val(`section_${key}_pet_name`);
-    base.pet_emoji = val(`section_${key}_pet_emoji`) || "🐾";
-    base.pet_photo = val(`section_${key}_pet_photo`);
+    const rawPets = liveFieldValue(form, formNode, `section_${key}_pets`)
+      || form.get(`section_${key}_pets`)
+      || "[]";
+    base.pets = parsePets(rawPets);
+    // Compat: vecchi campi singoli (se il pannello multi non è ancora nel DOM)
+    if(!base.pets.length){
+      const legacyName = val(`section_${key}_pet_name`);
+      const legacyPhoto = val(`section_${key}_pet_photo`);
+      const legacyEmoji = val(`section_${key}_pet_emoji`) || "🐾";
+      if(legacyName || legacyPhoto || base.body){
+        base.pets = parsePets([{
+          name: legacyName,
+          emoji: legacyEmoji,
+          photo: legacyPhoto,
+          body: base.body
+        }]);
+        if(base.pets[0]?.body) base.body = "";
+      }
+    }
+    const synced = syncLegacyPetFields({ ...base, pets: base.pets });
+    base.pets = synced.pets;
+    base.pet_name = synced.pet_name;
+    base.pet_emoji = synced.pet_emoji;
+    base.pet_photo = synced.pet_photo;
   }
   if(key === "quote"){
     base.author = val(`section_${key}_author`);
@@ -529,7 +564,7 @@ export function sectionFillGuide(key){
     horoscope:"Aggiungi fino a 5 persone (nome facoltativo + segno). In pagina compare l’oroscopo del giorno per ciascuno, aggiornato automaticamente.",
     letter_future:"Scrivi la lettera, scegli la data di apertura e allega foto, video, audio o PDF (limiti dal piano). Riceverai un'email il giorno dell'apertura.",
     rituals:"Tocca «Aggiungi rituale» per ogni abitudine quotidiana.",
-    pet:"Nome, emoji e foto del vostro compagno a quattro zampe.",
+    pet:"Aggiungi fino a 6 animali — nome, emoji, foto e racconto per ciascuno.",
     numbers:"Tocca «Aggiungi numero» — es. 365 + «giorni insieme».",
     quote:"Titolo facoltativo, citazione e autore — testo grande in pagina.",
     signature:"Titolo della chiusura (es. «Con amore»), poi nomi e sottotitolo.",

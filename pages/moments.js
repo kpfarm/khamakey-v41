@@ -20,7 +20,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=236";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=240";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=243";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -134,7 +134,7 @@ import {
   sectionHasContent,
   isSectionExcluded,
   youtubeVideoId
-} from "./moment-sections.js?v=242";
+} from "./moment-sections.js?v=243";
 import {
   TYPE_LABELS,
   renderCategorySelect,
@@ -165,6 +165,13 @@ import {
   bindHoroscopePeopleEditor,
   refreshHoroscopePeopleEditor
 } from "./moment-horoscope.js?v=218";
+import {
+  renderPetsPanel,
+  bindPetsEditor,
+  refreshPetsEditor,
+  setPetPhoto,
+  getPetPhoto
+} from "./moment-pets.js?v=243";
 
 const auth = document.getElementById("momentsAuth");
 const app = document.getElementById("momentsApp");
@@ -360,9 +367,9 @@ let suppressDirtyUi = false;
 let switchInFlight = false;
 const SECTION_PHOTO_FIELDS = {
   countdown:{ field:"image_url", previewId:"countdownPhotoPreview", fileId:"countdownPhotoFile", label:"Carica foto" },
-  pet:{ field:"pet_photo", previewId:"petPhotoPreview", fileId:"petPhotoFile", label:"Carica foto" },
   music:{ field:"image_url", previewId:"musicPhotoPreview", fileId:"musicPhotoFile", label:"Carica immagine" }
 };
+let pendingPetPhotoId = null;
 const LIST_SECTION_KEYS = new Set(Object.keys(LIST_SECTION_MODES));
 let uploadBusy = false;
 let currentEntitlements = emptyEntitlements();
@@ -3282,6 +3289,8 @@ function renderDetail(id){
   bindListItemsEditor(editorForm);
   bindHoroscopePeopleEditor(editorForm);
   refreshHoroscopePeopleEditor(editorForm);
+  bindPetsEditor(editorForm);
+  refreshPetsEditor(editorForm);
   const journeySteps = resolveJourneySteps(state.sections.timeline,state.sections.places);
   writeJourneySteps(editorForm,"timeline",journeySteps);
   renderJourneySteps(editorForm,"timeline");
@@ -3537,6 +3546,39 @@ async function uploadSectionPhoto(key,file,row,formNode){
   }
 }
 
+async function uploadPetPhoto(petId,file,row,formNode){
+  if(!petId) return;
+  uploadBusy = true;
+  try{
+    validateImageFile(file);
+    assertCanFitUploadBytes(file);
+    const url = await uploadImage(supabase,{scope:"moments",scopeId:row.id,file});
+    const oldUrl = setPetPhoto(formNode, petId, url);
+    enableSection(formNode,"pet");
+    markEditorDirty(formNode);
+    schedulePreviewUpdate(formNode,{immediate:true,force:true});
+    if(oldUrl && isCloudflareMediaUrl(oldUrl) && oldUrl !== url){
+      await deleteStorageObject(supabase,oldUrl).catch(()=>{});
+    }
+    refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
+  }catch(error){
+    alert(error.message || localizeFieldPhrase("Upload foto non riuscito."));
+  }finally{
+    uploadBusy = false;
+  }
+}
+
+function removePetPhoto(petId,formNode){
+  if(!petId || !formNode) return;
+  const oldUrl = getPetPhoto(formNode, petId);
+  setPetPhoto(formNode, petId, "");
+  markEditorDirty(formNode);
+  schedulePreviewUpdate(formNode,{immediate:true,force:true});
+  if(oldUrl && isCloudflareMediaUrl(oldUrl)){
+    deleteStorageObject(supabase,oldUrl).catch(()=>{});
+  }
+}
+
 function sectionPhotoPreviewHtml(key,url){
   const config = SECTION_PHOTO_FIELDS[key];
   const labelIt = config?.label || "Carica foto";
@@ -3714,9 +3756,12 @@ function bindMediaUploads(root,row){
   });
   document.getElementById("petPhotoFile")?.addEventListener("change",async event=>{
     const file = event.target.files?.[0];
+    const petId = pendingPetPhotoId || event.target.dataset.pendingPetId || "";
+    pendingPetPhotoId = null;
+    event.target.dataset.pendingPetId = "";
     event.target.value = "";
-    if(!file || uploadBusy) return;
-    await uploadSectionPhoto("pet",file,row,formNode);
+    if(!file || uploadBusy || !petId) return;
+    await uploadPetPhoto(petId,file,row,formNode);
   });
   document.getElementById("countdownPhotoFile")?.addEventListener("change",async event=>{
     const file = event.target.files?.[0];
@@ -3891,6 +3936,23 @@ function bindMediaUploadDelegation(){
       removeSectionPhoto(sectionPhotoRemove.dataset.sectionPhotoRemove,formNode);
       return;
     }
+    const petPhotoUpload = event.target.closest("[data-pet-photo-upload]");
+    if(petPhotoUpload){
+      event.preventDefault();
+      const id = petPhotoUpload.dataset.petPhotoUpload;
+      const input = document.getElementById("petPhotoFile");
+      if(!input || !id) return;
+      pendingPetPhotoId = id;
+      input.dataset.pendingPetId = id;
+      requestAnimationFrame(()=>{ input.click(); });
+      return;
+    }
+    const petPhotoRemove = event.target.closest("[data-pet-photo-remove]");
+    if(petPhotoRemove){
+      event.preventDefault();
+      removePetPhoto(petPhotoRemove.dataset.petPhotoRemove, formNode);
+      return;
+    }
   });
 }
 
@@ -4018,9 +4080,10 @@ function sectionEditor(key,section,standalone=false){
     </div>
     ${renderRsvpFieldsEditor(safe)}` : "";
   const petFields = key === "pet" ? `
-    <label>${lfSpan("Nome")}<input name="section_${esc(key)}_pet_name" value="${esc(safe.pet_name || "")}" placeholder="${esc(localizeFieldPhrase("Es. Luna"))}" data-lf-placeholder="Es. Luna"></label>
-    <label>${lfSpan("Emoji")}<input name="section_${esc(key)}_pet_emoji" value="${esc(safe.pet_emoji || "🐾")}" maxlength="4" placeholder="🐾"></label>
-    ${renderSectionPhotoPanel(key, safe, "pet_photo", SECTION_PHOTO_FIELDS.pet)}` : "";
+    <div class="editor-card">
+      <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Animali")}</p>
+      ${renderPetsPanel(safe)}
+    </div>` : "";
   const quoteFields = key === "quote" ? `
     <label>${lfSpan("Autore")}<input name="section_${esc(key)}_author" value="${esc(safe.author || "")}" placeholder="${esc(localizeFieldPhrase("Es. William Shakespeare"))}" data-lf-placeholder="Es. William Shakespeare"></label>` : "";
   const signatureFields = key === "signature" ? `
@@ -4032,11 +4095,11 @@ function sectionEditor(key,section,standalone=false){
       <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Persone e segni")}</p>
       ${renderHoroscopePeoplePanel(safe)}
     </div>` : "";
-  const bodyLabelIt = key === "quote" ? "Citazione" : key === "dedication" || key === "letter_future" ? "Testo della lettera" : key === "pet" ? "Racconto" : "Contenuto";
+  const bodyLabelIt = key === "quote" ? "Citazione" : key === "dedication" || key === "letter_future" ? "Testo della lettera" : key === "pet" ? "Introduzione (facoltativa)" : "Contenuto";
   const bodyLabel = lfSpan(bodyLabelIt);
   const writeHere = localizeFieldPhrase("Scrivi qui...");
-  const bodyField = key === "timeline" || key === "gallery" || key === "video" || key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" || LIST_SECTION_KEYS.has(key)
-    ? (key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" ? `<details class="design-advanced editor-card"><summary>${lfSpan("Testo extra (facoltativo)")}</summary><label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="${esc(writeHere)}" data-lf-placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></details>` : "")
+  const bodyField = key === "timeline" || key === "gallery" || key === "video" || key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" || key === "pet" || LIST_SECTION_KEYS.has(key)
+    ? (key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" || key === "pet" ? `<details class="design-advanced editor-card"><summary>${lfSpan(key === "pet" ? "Introduzione (facoltativa)" : "Testo extra (facoltativo)")}</summary><label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="${esc(writeHere)}" data-lf-placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></details>` : "")
     : `<label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="${esc(writeHere)}" data-lf-placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label>`;
   const titleField = renderSectionTitleField(key, safe);
   const guideHint = `<p class="field-hint" data-lf-section-guide="${esc(key)}">${esc(guide)}</p>`;
@@ -4075,6 +4138,9 @@ function sectionEditor(key,section,standalone=false){
     }
     if(key === "horoscope"){
       return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Oroscopo")}</p>${guideHint}${titleField}${horoscopeFields}${bodyField}</div>`;
+    }
+    if(key === "pet"){
+      return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Animale")}</p>${guideHint}${titleField}${petFields}${bodyField}</div>`;
     }
     if(isSectionExcluded(key)) return "";
     return `<div class="editor-card"><p class="ecard-title">${icon} <span data-lf-section-guide-title="${esc(key)}">${esc(guide.split(".")[0])}</span></p>${fields.replace(galleryField,"").replace(journeyField,"")}</div>`;
@@ -4969,6 +5035,7 @@ function syncLangSwitchers(locale = getUiLocale()){
     run("rsvpShare", ()=>refreshRsvpShareLocale(editorForm));
     run("rsvpResponses", ()=>refreshRsvpResponsesLocale());
     run("horoscope", ()=>refreshHoroscopePeopleEditor(editorForm));
+    run("pets", ()=>refreshPetsEditor(editorForm));
     run("dashboard", ()=>refreshMomentDashboardLocale());
     run("preview", ()=>schedulePreviewUpdate(editorForm,{ immediate:true, force:true }));
     run("planCard", ()=>{

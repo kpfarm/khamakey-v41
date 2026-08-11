@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v244 — upload foto compressione cauta (2026-08-11, Cursor)** — Pages
+  - Comprime solo foto **> 2 MB**; se fallisce o non risparmia ≥10% → file originale.
+  - Niente tocco a video, Worker `/m/`, Salva o NFC.
 - **Moments v243 + Worker v209 — multi-pet sezione Animale (2026-08-09, Cursor)** — Pages + Worker
   - Fino a 6 animali: nome, emoji, foto, racconto; array `sections.pet.pets`.
   - Migrazione automatica dal singolo `pet_name` / `pet_photo` / `body`.

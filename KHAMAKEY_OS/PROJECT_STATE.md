@@ -99,7 +99,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v192** | Magazzino: gestione linee oggetto (+ SQL v171). |
 | **Worker NFC** | **v209-multi-pet** | Sezione Animale: fino a 6 animali (`pets[]`); compat legacy single. |
-| **Moments editor** | **v243** | Sezione Animale multi-pet (add/remove, foto e racconto per animale). |
+| **Moments editor** | **v244** | Upload foto: comprime solo se >2 MB; fallback all’originale. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v172 (prod)** | v172 salva ottimistico applicata 2026-08-06; v171 video 50MB; v170 build_stage. |

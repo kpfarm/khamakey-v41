@@ -38,7 +38,7 @@ import {
   warmUploadPipeline,
   warmUploadAuth,
   MAX_GALLERY_IMAGES
-} from "./media-upload.js?v=237";
+} from "./media-upload.js?v=244";
 import {
   readGalleryMedia,
   writeGalleryMedia,

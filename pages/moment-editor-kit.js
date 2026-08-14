@@ -1,6 +1,6 @@
 /** Kit editor — sezioni consigliate, opzionali e etichette adattive per tipo pagina. */
 import { MOMENT_TYPE_GROUPS, normalizeMomentType } from "./moment-categories.js?v=180";
-import { SECTION_ORDER_DEFAULT, sectionFillGuide, SECTION_ICONS, isSectionExcluded } from "./moment-sections.js?v=232";
+import { SECTION_ORDER_DEFAULT, sectionFillGuide, SECTION_ICONS, isSectionExcluded } from "./moment-sections.js?v=243";
 
 export { SECTION_ICONS };
 
@@ -211,7 +211,7 @@ const TYPE_VOCAB = {
   },
   pet:{
     labels:{ intro:"Il nostro compagno", pet:"Scheda del pet", letter_future:"Lettera al nostro amico", quote:"Citazione", gallery:"Foto del pet" },
-    subtitles:{ pet:"Nome, emoji e storia del vostro amico", letter_future:"Parole per il vostro compagno" }
+    subtitles:{ pet:"Fino a 6 animali — nome, emoji, foto e storia", letter_future:"Parole per il vostro compagno" }
   },
   travel:{
     labels:{

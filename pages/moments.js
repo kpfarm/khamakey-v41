@@ -14,13 +14,13 @@ import {
   t,
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
-} from "./moments-i18n.js?v=232";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=232";
+} from "./moments-i18n.js?v=236";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=236";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=226";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=236";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=232";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=243";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -38,10 +38,11 @@ import {
   warmUploadPipeline,
   warmUploadAuth,
   MAX_GALLERY_IMAGES
-} from "./media-upload.js?v=232";
+} from "./media-upload.js?v=244";
 import {
   readGalleryMedia,
   writeGalleryMedia,
+  flushGalleryInlineFields,
   renderGalleryGrid,
   uploadGalleryMedia,
   replaceGalleryMediaItem,
@@ -59,7 +60,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=216";
+} from "./moments-media-ui.js?v=242";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -74,8 +75,9 @@ import {
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
   setActivePlanLimits
-} from "./moment-media.js?v=216";
+} from "./moment-media.js?v=242";
 import {
+  canFitBytes,
   emptyEntitlements,
   fetchMomentEntitlements,
   formatBytes,
@@ -85,7 +87,7 @@ import {
   PLAN_LABELS,
   storageBytesLimit,
   storageUsagePercent
-} from "./moment-plans.js?v=232";
+} from "./moment-plans.js?v=237";
 import { LIST_SECTION_MODES, itemsFromSection } from "./moment-list-items.js";
 import {
   renderListItemsPanel,
@@ -130,8 +132,9 @@ import {
   sectionFieldHints,
   sectionFillGuide,
   sectionHasContent,
-  isSectionExcluded
-} from "./moment-sections.js?v=232";
+  isSectionExcluded,
+  youtubeVideoId
+} from "./moment-sections.js?v=243";
 import {
   TYPE_LABELS,
   renderCategorySelect,
@@ -162,6 +165,13 @@ import {
   bindHoroscopePeopleEditor,
   refreshHoroscopePeopleEditor
 } from "./moment-horoscope.js?v=218";
+import {
+  renderPetsPanel,
+  bindPetsEditor,
+  refreshPetsEditor,
+  setPetPhoto,
+  getPetPhoto
+} from "./moment-pets.js?v=243";
 
 const auth = document.getElementById("momentsAuth");
 const app = document.getElementById("momentsApp");
@@ -351,14 +361,15 @@ let lastPreviewHash = "";
 let previewDebounceTimer = null;
 let previewFetchId = 0;
 let saveInFlight = false;
+let bootstrapInFlight = false;
 /** Durante bootstrap template: niente banner «non salvato» a metà salvataggio automatico. */
 let suppressDirtyUi = false;
 let switchInFlight = false;
 const SECTION_PHOTO_FIELDS = {
   countdown:{ field:"image_url", previewId:"countdownPhotoPreview", fileId:"countdownPhotoFile", label:"Carica foto" },
-  pet:{ field:"pet_photo", previewId:"petPhotoPreview", fileId:"petPhotoFile", label:"Carica foto" },
   music:{ field:"image_url", previewId:"musicPhotoPreview", fileId:"musicPhotoFile", label:"Carica immagine" }
 };
+let pendingPetPhotoId = null;
 const LIST_SECTION_KEYS = new Set(Object.keys(LIST_SECTION_MODES));
 let uploadBusy = false;
 let currentEntitlements = emptyEntitlements();
@@ -810,7 +821,24 @@ function showEditorView(){
   setEditorChromeVisible(Boolean(document.getElementById("momentEditorShell")));
 }
 
-function showAccountHub(tab = "products"){
+async function showAccountHub(tab = "products"){
+  // Non buttare via bozze: Account nascondeva l'editor e al ritorno rimontava dal DB
+  if(appView === "editor" && editorDirty && document.getElementById("momentEditorForm")){
+    const choice = await askUnsavedSwitchChoice();
+    if(choice === "cancel") return;
+    if(choice === "save"){
+      const row = rows.find(item=>item.id === activeId);
+      const form = document.getElementById("momentEditorForm");
+      if(!row || !form){
+        showEditorSaveFeedback(t("save.fail"), "error");
+        return;
+      }
+      const saved = await saveMoment({ preventDefault(){}, currentTarget:form }, row);
+      if(!saved) return;
+    }else if(activeId){
+      clearEditorDraft(activeId);
+    }
+  }
   appView = "account";
   activeAccountTab = tab || "products";
   app?.classList.add("account-mode");
@@ -829,6 +857,12 @@ function showAccountHub(tab = "products"){
       backBtn.addEventListener("click",async()=>{
         if(!rows.length) return;
         showEditorView();
+        // Se ci sono modifiche nel form ancora in DOM, non rimontare dal DB
+        if(editorDirty && document.getElementById("momentEditorForm")){
+          setEditorChromeVisible(true);
+          updateSaveStatus(false);
+          return;
+        }
         if(activeId){
           try{
             await ensureEventPageState(activeId, { force:true });
@@ -1544,7 +1578,7 @@ async function ensureEventPageState(eventId, { force = false } = {}){
   if(!force && hasCached) return row;
   const { data,error } = await supabase
     .from("moment_events")
-    .select("page_state,description,title,moment_type,event_type,pin_enabled,public_visible,nfc_code")
+    .select("page_state,description,title,moment_type,event_type,pin_enabled,public_visible,nfc_code,updated_at")
     .eq("id",eventId)
     .maybeSingle();
   if(error) throw error;
@@ -1593,7 +1627,7 @@ function askUnsavedSwitchChoice(){
 async function openMomentProduct(nextId, { resetPanel = false } = {}){
   if(!nextId) return;
   if(nextId === activeId && appView === "editor") return;
-  if(switchInFlight || saveInFlight || uploadBusy){
+  if(switchInFlight || saveInFlight || uploadBusy || bootstrapInFlight){
     showEditorSaveFeedback(t("shell.switch_busy"), "error");
     return;
   }
@@ -1609,6 +1643,9 @@ async function openMomentProduct(nextId, { resetPanel = false } = {}){
       }
       const saved = await saveMoment({ preventDefault(){}, currentTarget:form }, row);
       if(!saved) return;
+    }else{
+      // Scarta: non far riapparire le bozze al rientro
+      clearEditorDraft(activeId);
     }
   }
   switchInFlight = true;
@@ -1628,7 +1665,7 @@ async function openMomentProduct(nextId, { resetPanel = false } = {}){
 async function loadObjects({ render = true } = {}){
   let query = supabase
     .from("moment_events")
-    .select("id,title,slug,event_type,moment_type,status,description,nfc_code,pin_enabled,public_visible,owner_email,created_at")
+    .select("id,title,slug,event_type,moment_type,status,description,nfc_code,pin_enabled,public_visible,owner_email,created_at,updated_at")
     .order("created_at",{ascending:false});
   if(adminMode && adminEventId){
     query = query.eq("id",adminEventId);
@@ -1985,7 +2022,7 @@ function applyTemplateToForm(formNode,type, { skipReminder = false } = {}){
       if(askGuests) askGuests.checked = section.field_keys ? section.field_keys.includes("guests") : section.ask_guests !== false;
       if(askNotes) askNotes.checked = section.field_keys ? section.field_keys.includes("notes") : section.ask_notes !== false;
     }
-    ["recipient","signature","event_label","target_date","spotify_url","author","sign_name","sign_subtitle","whatsapp_number","event_name"].forEach(field=>{
+    ["recipient","signature","event_label","target_date","spotify_url","youtube_url","author","sign_name","sign_subtitle","whatsapp_number","event_name"].forEach(field=>{
       const input = formNode.querySelector(`[name="section_${key}_${field}"]`);
       if(input) input.value = section[field] || "";
     });
@@ -2033,16 +2070,23 @@ function needsFreshTemplateBootstrap(row){
 }
 
 async function bootstrapFreshMomentPage(row, formNode){
-  if(!row?.id || !formNode || !needsFreshTemplateBootstrap(row)) return;
+  if(!row?.id || !formNode || !needsFreshTemplateBootstrap(row) || bootstrapInFlight) return;
   const eventId = row.id;
   sessionStorage.setItem(templateSeedKey(eventId), "bootstrapping");
   const type = lockedMomentType(row);
   suppressDirtyUi = true;
+  bootstrapInFlight = true;
   try{
     applyTemplateToForm(formNode, type, { skipReminder:true });
-    if(activeId !== eventId) return;
+    if(activeId !== eventId){
+      sessionStorage.removeItem(templateSeedKey(eventId));
+      return;
+    }
     const saved = await saveMoment({ preventDefault(){}, currentTarget:formNode }, row, { quietOk:true });
-    if(activeId !== eventId) return;
+    if(activeId !== eventId){
+      sessionStorage.removeItem(templateSeedKey(eventId));
+      return;
+    }
     if(!saved){
       sessionStorage.removeItem(templateSeedKey(eventId));
       showEditorSaveFeedback(t("save.reminder_model", { type: TYPE_LABELS[type] || type }), "error");
@@ -2051,6 +2095,7 @@ async function bootstrapFreshMomentPage(row, formNode){
     sessionStorage.setItem(templateSeedKey(eventId), "done");
     localStorage.setItem(`moments_bootstrapped_${eventId}`, "1");
     localStorage.setItem(onboardingKey(eventId), "done");
+    clearEditorDraft(eventId);
     document.getElementById("onboardingWizard")?.remove();
     clearTimeout(markEditorDirty.timer);
     try{ savedEditorSnapshot = formSnapshotForDirty(formNode); }catch{ /* ignore */ }
@@ -2059,6 +2104,7 @@ async function bootstrapFreshMomentPage(row, formNode){
     showEditorSaveFeedback(t("save.reminder_model", { type: TYPE_LABELS[type] || type }), "ok");
   }finally{
     suppressDirtyUi = false;
+    bootstrapInFlight = false;
   }
 }
 
@@ -2435,7 +2481,7 @@ function renderCounterPanel(state){
     <div class="section-editor-stack ${state.show_together_counter ? "" : "is-muted"}">
       <div class="editor-card smart-card">
         <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Da quale giorno?")}</p>
-        <label>${lfSpan("Testo sopra il contatore")}<input name="counter_label" value="${esc(state.counter_label || "")}" placeholder="${esc(localizeFieldPhrase("Es. Insieme da, Ti sopporto da"))}" data-lf-placeholder="Es. Insieme da, Ti sopporto da"></label>
+        <label>${lfSpan("Testo sopra il contatore")}<input name="counter_label" value="${esc(state.counter_label || "")}" placeholder="${esc(localizeFieldPhrase("Es. Insieme da, Ti sopporto da"))}" data-lf-placeholder="Es. Insieme da, Ti sopporto da"><span class="field-hint" data-lf="Vuoto = in pagina restano solo i numeri, senza etichetta sopra.">${esc(localizeFieldPhrase("Vuoto = in pagina restano solo i numeri, senza etichetta sopra."))}</span></label>
         <label>${lfSpan("Data speciale")}<input type="date" name="together_since" value="${esc(state.together_since || "")}"></label>
         <p class="field-hint">${lfSpan("Solo il giorno (es. primo appuntamento). Non serve ora: il conteggio parte dalla mezzanotte di quella data.")}</p>
       </div>
@@ -2694,6 +2740,29 @@ function setPreviewFabLabel(){
   if(!fab) return;
   fab.textContent = mobilePreviewMode ? t("shell.edit") : t("shell.preview");
   fab.setAttribute("data-i18n", mobilePreviewMode ? "shell.edit" : "shell.preview");
+}
+
+/** Click Salva (topbar / barra mobile): sempre pezzo + form attivi, mai closure del primo render. */
+function ensureMomentsSaveDelegation(){
+  if(document.body.dataset.momentsSaveBound === "1") return;
+  document.body.dataset.momentsSaveBound = "1";
+  document.body.addEventListener("click", event=>{
+    const button = event.target?.closest?.(
+      'button[type="submit"][form="momentEditorForm"], .editor-save-btn, #momentsSaveBar .btn-save'
+    );
+    if(!button) return;
+    const app = document.querySelector(".moments-app");
+    if(!app || app.hidden) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const formNode = document.getElementById("momentEditorForm");
+    const currentRow = rows.find(item => item.id === activeId);
+    if(!formNode || !currentRow){
+      showEditorSaveFeedback(t("save.fail"), "error");
+      return;
+    }
+    saveMoment({ preventDefault(){}, currentTarget:formNode }, currentRow);
+  });
 }
 
 function updateSaveStatus(saved){
@@ -2986,13 +3055,28 @@ function promptSaveReminder(message = t("save.reminder_default")){
 
 function renderDetail(id){
   activeId = id;
-  const row = rows.find(item=>item.id === id);
+  let row = rows.find(item=>item.id === id);
   if(!row){
     showAccountHub("products");
     return;
   }
   showEditorView();
   if(activeEditorPanel === "objects") activeEditorPanel = "cover";
+  let restoredDraft = false;
+  if(!needsFreshTemplateBootstrap(row)){
+    const draftState = peekEditorDraft(id);
+    if(draftState){
+      row = {
+        ...row,
+        title: draftState.title || row.title,
+        description: draftState.description || row.description,
+        page_state: draftState
+      };
+      const idx = rows.findIndex(item => item.id === id);
+      if(idx >= 0) rows[idx] = row;
+      restoredDraft = true;
+    }
+  }
   let state;
   try{
     state = mergedState(row);
@@ -3102,16 +3186,8 @@ function renderDetail(id){
     document.getElementById("editorUndoBtnMobile")?.addEventListener("click",revertEditorChanges);
   }
   editorForm.addEventListener("submit",event=>saveMoment(event,row));
-  // Pulsanti Salva fuori dal form: chiama direttamente saveMoment (no validation HTML)
-  document.querySelectorAll('button[type="submit"][form="momentEditorForm"], .editor-save-btn, #momentsSaveBar .btn-save').forEach(button=>{
-    if(button.dataset.momentsSaveBound === "1") return;
-    button.dataset.momentsSaveBound = "1";
-    button.addEventListener("click",event=>{
-      event.preventDefault();
-      event.stopPropagation();
-      saveMoment({ preventDefault(){}, currentTarget:editorForm }, row);
-    });
-  });
+  // Salva top/bottom: delega una sola volta → sempre form + pezzo correnti (no closure stale)
+  ensureMomentsSaveDelegation();
   syncRsvpWhatsappWarn(editorForm);
   editorForm.addEventListener("input",event=>{
     markEditorDirty(editorForm);
@@ -3187,6 +3263,7 @@ function renderDetail(id){
   bindSectionEnableHandlers(editorForm);
   bindSectionToggleButtons(editorForm);
   bindExtrasPanel(editorForm);
+  bindYoutubeInputs(editorForm);
   if(window.__momentsPreviewResizeBound !== "1"){
     window.__momentsPreviewResizeBound = "1";
     window.addEventListener("resize",()=>fitPreviewStage(),{passive:true});
@@ -3212,6 +3289,8 @@ function renderDetail(id){
   bindListItemsEditor(editorForm);
   bindHoroscopePeopleEditor(editorForm);
   refreshHoroscopePeopleEditor(editorForm);
+  bindPetsEditor(editorForm);
+  refreshPetsEditor(editorForm);
   const journeySteps = resolveJourneySteps(state.sections.timeline,state.sections.places);
   writeJourneySteps(editorForm,"timeline",journeySteps);
   renderJourneySteps(editorForm,"timeline");
@@ -3259,6 +3338,10 @@ function renderDetail(id){
   if(needsFreshTemplateBootstrap(row)){
     // Applica look+sezioni categoria e salva subito: niente verde di default, niente perdita al cambio prodotto
     bootstrapFreshMomentPage(row, editorForm);
+  }else if(restoredDraft){
+    editorDirty = true;
+    updateSaveStatus(false);
+    promptSaveReminder(t("save.draft_restored"));
   }
   setEditorChromeVisible(true);
 }
@@ -3277,11 +3360,22 @@ function setCoverUrl(formNode, url){
   if(hidden) hidden.value = url || "";
 }
 
+function assertCanFitUploadBytes(fileOrFiles){
+  const list = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
+  const bytes = list.reduce((sum, file) => sum + (Number(file?.size) || 0), 0);
+  if(!canFitBytes(currentEntitlements, bytes)){
+    const used = formatBytes(currentEntitlements.bytes_used);
+    const max = formatBytes(storageBytesLimit(currentEntitlements.limits));
+    throw new Error(`Spazio insufficiente (${used} / ${max}). Rimuovi file o passa a Plus/Pro.`);
+  }
+}
+
 async function uploadCoverImage(file,row,formNode){
   const status = document.getElementById("coverUploadStatus");
   setUploadStatus(status,localizeFieldPhrase("Caricamento in corso..."));
   uploadBusy = true;
   try{
+    assertCanFitUploadBytes(file);
     const url = await uploadImage(supabase,{scope:"moments",scopeId:row.id,file});
     setCoverUrl(formNode, url);
     const slot = formNode.querySelector("#coverFramerSlot");
@@ -3324,12 +3418,14 @@ async function uploadGalleryImages(files,row,formNode,key){
   const batchSize = [...files].filter(Boolean).length;
   enableSection(formNode,key);
   try{
+    assertCanFitUploadBytes([...files].filter(Boolean));
     const items = await uploadGalleryMedia({
       supabase,
       row,
       formNode,
       key,
       files,
+      entitlements: currentEntitlements,
       onStatus:(msg,type)=>setUploadStatus(status,msg,type),
       onBusy:busy=>{ uploadBusy = busy; }
     });
@@ -3354,6 +3450,7 @@ async function uploadSectionVideo(file,row,formNode){
   uploadBusy = true;
   try{
     validateVideoFile(file);
+    assertCanFitUploadBytes(file);
     const url = await uploadVideo(supabase,{scope:"moments",scopeId:row.id,file});
     const urlInput = formNode.querySelector('[name="section_video_video_url"]');
     const oldUrl = urlInput?.value || "";
@@ -3399,6 +3496,7 @@ async function uploadMusicAudio(file,row,formNode){
   const panel = document.getElementById("musicAudioPanel");
   uploadBusy = true;
   try{
+    assertCanFitUploadBytes(file);
     const url = await uploadAudio(supabase,{scope:"moments",scopeId:row.id,file});
     const urlInput = formNode.querySelector('[name="section_music_audio_url"]');
     const oldUrl = urlInput?.value || "";
@@ -3428,6 +3526,7 @@ async function uploadSectionPhoto(key,file,row,formNode){
   uploadBusy = true;
   try{
     validateImageFile(file);
+    assertCanFitUploadBytes(file);
     const url = await uploadImage(supabase,{scope:"moments",scopeId:row.id,file});
     const input = formNode.querySelector(`[name="section_${key}_${config.field}"]`);
     const oldUrl = input?.value || "";
@@ -3444,6 +3543,39 @@ async function uploadSectionPhoto(key,file,row,formNode){
     alert(error.message || localizeFieldPhrase("Upload foto non riuscito."));
   }finally{
     uploadBusy = false;
+  }
+}
+
+async function uploadPetPhoto(petId,file,row,formNode){
+  if(!petId) return;
+  uploadBusy = true;
+  try{
+    validateImageFile(file);
+    assertCanFitUploadBytes(file);
+    const url = await uploadImage(supabase,{scope:"moments",scopeId:row.id,file});
+    const oldUrl = setPetPhoto(formNode, petId, url);
+    enableSection(formNode,"pet");
+    markEditorDirty(formNode);
+    schedulePreviewUpdate(formNode,{immediate:true,force:true});
+    if(oldUrl && isCloudflareMediaUrl(oldUrl) && oldUrl !== url){
+      await deleteStorageObject(supabase,oldUrl).catch(()=>{});
+    }
+    refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
+  }catch(error){
+    alert(error.message || localizeFieldPhrase("Upload foto non riuscito."));
+  }finally{
+    uploadBusy = false;
+  }
+}
+
+function removePetPhoto(petId,formNode){
+  if(!petId || !formNode) return;
+  const oldUrl = getPetPhoto(formNode, petId);
+  setPetPhoto(formNode, petId, "");
+  markEditorDirty(formNode);
+  schedulePreviewUpdate(formNode,{immediate:true,force:true});
+  if(oldUrl && isCloudflareMediaUrl(oldUrl)){
+    deleteStorageObject(supabase,oldUrl).catch(()=>{});
   }
 }
 
@@ -3559,6 +3691,7 @@ async function replaceGalleryImage(file,row,formNode,key,mediaId){
   const status = document.getElementById(`galleryUploadStatus_${key}`);
   enableSection(formNode,key);
   try{
+    // Replace: niente pre-check bytes stretto (il vecchio file viene rimosso dopo); server resta autorità.
     const result = await replaceGalleryMediaItem({
       supabase,
       row,
@@ -3623,9 +3756,12 @@ function bindMediaUploads(root,row){
   });
   document.getElementById("petPhotoFile")?.addEventListener("change",async event=>{
     const file = event.target.files?.[0];
+    const petId = pendingPetPhotoId || event.target.dataset.pendingPetId || "";
+    pendingPetPhotoId = null;
+    event.target.dataset.pendingPetId = "";
     event.target.value = "";
-    if(!file || uploadBusy) return;
-    await uploadSectionPhoto("pet",file,row,formNode);
+    if(!file || uploadBusy || !petId) return;
+    await uploadPetPhoto(petId,file,row,formNode);
   });
   document.getElementById("countdownPhotoFile")?.addEventListener("change",async event=>{
     const file = event.target.files?.[0];
@@ -3655,6 +3791,7 @@ function openJourneyFilePicker(formNode,stepId){
 async function uploadJourneyStepImage(file,row,formNode,stepId){
   try{
     validateImageFile(file);
+    assertCanFitUploadBytes(file);
     const { oldUrl } = await uploadJourneyStepPhoto({
       supabase,
       row,
@@ -3799,6 +3936,23 @@ function bindMediaUploadDelegation(){
       removeSectionPhoto(sectionPhotoRemove.dataset.sectionPhotoRemove,formNode);
       return;
     }
+    const petPhotoUpload = event.target.closest("[data-pet-photo-upload]");
+    if(petPhotoUpload){
+      event.preventDefault();
+      const id = petPhotoUpload.dataset.petPhotoUpload;
+      const input = document.getElementById("petPhotoFile");
+      if(!input || !id) return;
+      pendingPetPhotoId = id;
+      input.dataset.pendingPetId = id;
+      requestAnimationFrame(()=>{ input.click(); });
+      return;
+    }
+    const petPhotoRemove = event.target.closest("[data-pet-photo-remove]");
+    if(petPhotoRemove){
+      event.preventDefault();
+      removePetPhoto(petPhotoRemove.dataset.petPhotoRemove, formNode);
+      return;
+    }
   });
 }
 
@@ -3812,9 +3966,52 @@ function renderGalleryUpload(section,key){
 }
 
 function renderSectionTitleField(key, section){
+  // Firma: etichetta dedicata sopra i nomi (niente doppio «Titolo sezione» generico).
+  if(key === "signature") return "";
   const placeholder = DEFAULT_SECTIONS[key]?.title || SECTION_LABELS[key] || "";
   const hint = "Compare nel menu della pagina e come titolo della sezione.";
   return `<label>${lfSpan("Titolo sezione")}<input name="section_${esc(key)}_title" value="${esc(section.title || "")}" placeholder="Es. ${esc(placeholder)}"><span class="field-hint" data-lf="${esc(hint)}">${esc(localizeFieldPhrase(hint))}</span></label>`;
+}
+
+function renderYoutubeThumb(rawUrl){
+  const id = youtubeVideoId(rawUrl);
+  if(!id) return `<div class="youtube-thumb-preview" data-youtube-thumb hidden></div>`;
+  return `<div class="youtube-thumb-preview" data-youtube-thumb>
+    <img src="https://img.youtube.com/vi/${esc(id)}/hqdefault.jpg" alt="Anteprima YouTube" loading="lazy" decoding="async">
+    <span data-lf="Anteprima YouTube — tocca Salva per pubblicarlo">${esc(localizeFieldPhrase("Anteprima YouTube — tocca Salva per pubblicarlo"))}</span>
+  </div>`;
+}
+
+function syncYoutubeThumbForInput(input){
+  if(!input) return;
+  const host = input.closest("label")?.parentElement || input.parentElement;
+  let box = host?.querySelector?.("[data-youtube-thumb]");
+  if(!box && host){
+    host.insertAdjacentHTML("beforeend", `<div class="youtube-thumb-preview" data-youtube-thumb hidden></div>`);
+    box = host.querySelector("[data-youtube-thumb]");
+  }
+  if(!box) return;
+  const id = youtubeVideoId(input.value);
+  if(!id){
+    box.hidden = true;
+    box.innerHTML = "";
+    return;
+  }
+  box.hidden = false;
+  box.innerHTML = `<img src="https://img.youtube.com/vi/${esc(id)}/hqdefault.jpg" alt="Anteprima YouTube" loading="lazy" decoding="async"><span data-lf="Anteprima YouTube — tocca Salva per pubblicarlo">${esc(localizeFieldPhrase("Anteprima YouTube — tocca Salva per pubblicarlo"))}</span>`;
+}
+
+function bindYoutubeInputs(formNode){
+  if(!formNode || formNode.dataset.youtubeBound === "1") return;
+  formNode.dataset.youtubeBound = "1";
+  const sync = event=>{
+    const input = event.target?.closest?.("[data-youtube-input]");
+    if(!input) return;
+    syncYoutubeThumbForInput(input);
+  };
+  formNode.addEventListener("input", sync);
+  formNode.addEventListener("change", sync);
+  formNode.querySelectorAll("[data-youtube-input]").forEach(syncYoutubeThumbForInput);
 }
 
 function sectionOrderDisplayLabel(formNode, momentType, key){
@@ -3833,7 +4030,7 @@ function sectionEditor(key,section,standalone=false){
   const listHint = hints[key] && key !== "timeline"
     ? `<p class="section-hint" data-lf="${esc(hints[key])}">${esc(localizeFieldPhrase(hints[key]))}</p>` : "";
   const dedicationFields = key === "dedication" ? `
-    <label>${lfSpan("Destinatario")}<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="${esc(localizeFieldPhrase("Es. Marco, amici, futuro noi"))}" data-lf-placeholder="Es. Marco, amici, futuro noi"></label>
+    <label>${lfSpan("Destinatario")}<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="${esc(localizeFieldPhrase("Es. Caro Marco, / Marco / amici"))}" data-lf-placeholder="Es. Caro Marco, / Marco / amici"><span class="field-hint" data-lf="Compare così com’è scritto. Se vuoi «Caro/a…», scrivilo tu nel campo.">${esc(localizeFieldPhrase("Compare così com’è scritto. Se vuoi «Caro/a…», scrivilo tu nel campo."))}</span></label>
     <label>${lfSpan("Firma")}<input name="section_${esc(key)}_signature" value="${esc(safe.signature || "")}" placeholder="${esc(localizeFieldPhrase("Es. Con amore, i tuoi nomi"))}" data-lf-placeholder="Es. Con amore, i tuoi nomi"></label>` : "";
   const countdownFields = key === "countdown" ? `
     <div class="editor-card">
@@ -3849,8 +4046,9 @@ function sectionEditor(key,section,standalone=false){
   const musicFields = key === "music" ? `
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Collegamenti")}</p>
-      <label>${lfSpan("Link Spotify")}<input name="section_${esc(key)}_spotify_url" value="${esc(safe.spotify_url || "")}" placeholder="https://open.spotify.com/track/..."><span class="field-hint" data-lf="Link pubblico — non file caricati.">${esc(localizeFieldPhrase("Link pubblico — non file caricati."))}</span></label>
-      <label>${lfSpan("Link YouTube")}<input name="section_${esc(key)}_youtube_url" value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..."><span class="field-hint" data-lf="Link pubblico del video.">${esc(localizeFieldPhrase("Link pubblico del video."))}</span></label>
+      <label>${lfSpan("Link Spotify")}<input name="section_${esc(key)}_spotify_url" value="${esc(safe.spotify_url || "")}" placeholder="https://open.spotify.com/track/..." autocomplete="off" inputmode="url"><span class="field-hint" data-lf="Link pubblico — non file caricati.">${esc(localizeFieldPhrase("Link pubblico — non file caricati."))}</span></label>
+      <label>${lfSpan("Link YouTube")}<input name="section_${esc(key)}_youtube_url" data-youtube-input value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..." autocomplete="off" inputmode="url"><span class="field-hint" data-lf="Link pubblico del video. Dopo l’incolla tocca Salva.">${esc(localizeFieldPhrase("Link pubblico del video. Dopo l’incolla tocca Salva."))}</span></label>
+      ${renderYoutubeThumb(safe.youtube_url)}
       ${renderMusicAudioPanel(safe)}
     </div>
     <div class="editor-card">
@@ -3860,12 +4058,17 @@ function sectionEditor(key,section,standalone=false){
     </div>` : "";
   const videoFields = key === "video" ? `
     <div class="editor-card">
-      <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Video del ricordo")}</p>
+      <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Link YouTube")}</p>
+      <label>${lfSpan("Link YouTube")}<input name="section_${esc(key)}_youtube_url" data-youtube-input value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..." autocomplete="off" inputmode="url"><span class="field-hint" data-lf="Incolla il link del video. Dopo l’incolla tocca Salva — compare in pagina pubblica.">${esc(localizeFieldPhrase("Incolla il link del video. Dopo l’incolla tocca Salva — compare in pagina pubblica."))}</span></label>
+      ${renderYoutubeThumb(safe.youtube_url)}
+    </div>
+    <div class="editor-card">
+      <p class="ecard-title"><span class="step-badge">2</span> ${lfSpan("Oppure carica un video")}</p>
       ${renderVideoSectionPanel(safe)}
     </div>` : "";
   const listItemsPanel = LIST_SECTION_KEYS.has(key) ? renderListItemsPanel(key, safe) : "";
   const letterFutureFields = key === "letter_future" ? `
-    <label>${lfSpan("Destinatario")}<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="${esc(localizeFieldPhrase("Es. noi tra 10 anni"))}" data-lf-placeholder="Es. noi tra 10 anni"></label>
+    <label>${lfSpan("Destinatario")}<input name="section_${esc(key)}_recipient" value="${esc(safe.recipient || "")}" placeholder="${esc(localizeFieldPhrase("Es. Caro noi del futuro, / noi tra 10 anni"))}" data-lf-placeholder="Es. Caro noi del futuro, / noi tra 10 anni"><span class="field-hint" data-lf="Compare così com’è scritto. Se vuoi «Caro/a…», scrivilo tu nel campo.">${esc(localizeFieldPhrase("Compare così com’è scritto. Se vuoi «Caro/a…», scrivilo tu nel campo."))}</span></label>
     <label>${lfSpan("Data di apertura")}<input type="datetime-local" name="section_${esc(key)}_unlock_date" value="${esc(safe.unlock_date || "")}"></label>
     ${renderGalleryUploadPanel(safe, "letter_future")}` : "";
   const rsvpFields = key === "rsvp" ? `
@@ -3877,12 +4080,14 @@ function sectionEditor(key,section,standalone=false){
     </div>
     ${renderRsvpFieldsEditor(safe)}` : "";
   const petFields = key === "pet" ? `
-    <label>${lfSpan("Nome")}<input name="section_${esc(key)}_pet_name" value="${esc(safe.pet_name || "")}" placeholder="${esc(localizeFieldPhrase("Es. Luna"))}" data-lf-placeholder="Es. Luna"></label>
-    <label>${lfSpan("Emoji")}<input name="section_${esc(key)}_pet_emoji" value="${esc(safe.pet_emoji || "🐾")}" maxlength="4" placeholder="🐾"></label>
-    ${renderSectionPhotoPanel(key, safe, "pet_photo", SECTION_PHOTO_FIELDS.pet)}` : "";
+    <div class="editor-card">
+      <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Animali")}</p>
+      ${renderPetsPanel(safe)}
+    </div>` : "";
   const quoteFields = key === "quote" ? `
     <label>${lfSpan("Autore")}<input name="section_${esc(key)}_author" value="${esc(safe.author || "")}" placeholder="${esc(localizeFieldPhrase("Es. William Shakespeare"))}" data-lf-placeholder="Es. William Shakespeare"></label>` : "";
   const signatureFields = key === "signature" ? `
+    <label>${lfSpan("Etichetta sopra i nomi")}<input name="section_${esc(key)}_title" value="${esc(safe.title || "")}" placeholder="${esc(localizeFieldPhrase("Es. Questo momento appartiene a"))}" data-lf-placeholder="Es. Questo momento appartiene a"><span class="field-hint" data-lf="Testo piccolo sopra la firma. Vuoto = non compare in pagina.">${esc(localizeFieldPhrase("Testo piccolo sopra la firma. Vuoto = non compare in pagina."))}</span></label>
     <label>${lfSpan("Nome firma")}<input name="section_${esc(key)}_sign_name" value="${esc(safe.sign_name || "")}" placeholder="${esc(localizeFieldPhrase("Es. Marco & Giulia"))}" data-lf-placeholder="Es. Marco & Giulia"></label>
     <label>${lfSpan("Sottotitolo")}<input name="section_${esc(key)}_sign_subtitle" value="${esc(safe.sign_subtitle || "")}" placeholder="${esc(localizeFieldPhrase("Es. Per sempre"))}" data-lf-placeholder="Es. Per sempre"></label>` : "";
   const horoscopeFields = key === "horoscope" ? `
@@ -3890,11 +4095,11 @@ function sectionEditor(key,section,standalone=false){
       <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Persone e segni")}</p>
       ${renderHoroscopePeoplePanel(safe)}
     </div>` : "";
-  const bodyLabelIt = key === "quote" ? "Citazione" : key === "dedication" || key === "letter_future" ? "Testo della lettera" : key === "pet" ? "Racconto" : "Contenuto";
+  const bodyLabelIt = key === "quote" ? "Citazione" : key === "dedication" || key === "letter_future" ? "Testo della lettera" : key === "pet" ? "Introduzione (facoltativa)" : "Contenuto";
   const bodyLabel = lfSpan(bodyLabelIt);
   const writeHere = localizeFieldPhrase("Scrivi qui...");
-  const bodyField = key === "timeline" || key === "gallery" || key === "video" || key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" || LIST_SECTION_KEYS.has(key)
-    ? (key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" ? `<details class="design-advanced editor-card"><summary>${lfSpan("Testo extra (facoltativo)")}</summary><label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="${esc(writeHere)}" data-lf-placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></details>` : "")
+  const bodyField = key === "timeline" || key === "gallery" || key === "video" || key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" || key === "pet" || LIST_SECTION_KEYS.has(key)
+    ? (key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" || key === "pet" ? `<details class="design-advanced editor-card"><summary>${lfSpan(key === "pet" ? "Introduzione (facoltativa)" : "Testo extra (facoltativo)")}</summary><label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="${esc(writeHere)}" data-lf-placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></details>` : "")
     : `<label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="${esc(writeHere)}" data-lf-placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label>`;
   const titleField = renderSectionTitleField(key, safe);
   const guideHint = `<p class="field-hint" data-lf-section-guide="${esc(key)}">${esc(guide)}</p>`;
@@ -3920,7 +4125,7 @@ function sectionEditor(key,section,standalone=false){
       return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Galleria foto")}</p>${guideHint}${titleField}${galleryField}</div>`;
     }
     if(key === "video"){
-      return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Video")}</p>${guideHint}${titleField}${videoFields}</div>`;
+      return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Video")}</p>${guideHint}${titleField}</div>${videoFields}`;
     }
     if(key === "timeline"){
       return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Tappe del percorso")}</p>${guideHint}${titleField}${journeyField}</div>`;
@@ -3933,6 +4138,9 @@ function sectionEditor(key,section,standalone=false){
     }
     if(key === "horoscope"){
       return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Oroscopo")}</p>${guideHint}${titleField}${horoscopeFields}${bodyField}</div>`;
+    }
+    if(key === "pet"){
+      return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Animale")}</p>${guideHint}${titleField}${petFields}${bodyField}</div>`;
     }
     if(isSectionExcluded(key)) return "";
     return `<div class="editor-card"><p class="ecard-title">${icon} <span data-lf-section-guide-title="${esc(key)}">${esc(guide.split(".")[0])}</span></p>${fields.replace(galleryField,"").replace(journeyField,"")}</div>`;
@@ -4034,10 +4242,21 @@ function sanitizeStateForSave(state){
   }
   if(sections.video){
     sections.video.video_url = stripBlob(sections.video.video_url);
+    sections.video.youtube_url = stripBlob(sections.video.youtube_url);
+    if(!sections.video.youtube_url && youtubeVideoId(sections.video.video_url)){
+      sections.video.youtube_url = sections.video.video_url;
+      sections.video.video_url = "";
+    }
   }
   if(sections.music){
     sections.music.audio_url = stripBlob(sections.music.audio_url);
     sections.music.image_url = stripBlob(sections.music.image_url);
+    sections.music.spotify_url = stripBlob(sections.music.spotify_url);
+    sections.music.youtube_url = stripBlob(sections.music.youtube_url);
+    if(!sections.music.youtube_url && youtubeVideoId(sections.music.spotify_url)){
+      sections.music.youtube_url = sections.music.spotify_url;
+      sections.music.spotify_url = "";
+    }
   }
   for(const key of LIST_SECTION_KEYS){
     if(sections[key]?.items){
@@ -4060,8 +4279,63 @@ function sanitizeStateForSave(state){
   return clone;
 }
 
+function liveTopField(formNode, form, name){
+  const el = formNode?.elements?.[name] || formNode?.querySelector?.(`[name="${name}"]`);
+  if(el && typeof el.value === "string" && el.type !== "checkbox" && el.type !== "radio" && el.type !== "file"){
+    return String(el.value || "").trim();
+  }
+  return String(form.get(name) || "").trim();
+}
+
+function liveTopChecked(formNode, form, name){
+  const el = formNode?.elements?.[name] || formNode?.querySelector?.(`[name="${name}"]`);
+  if(el && (el.type === "checkbox" || el.type === "radio")) return Boolean(el.checked);
+  const raw = form.get(name);
+  return raw === "on" || raw === "true";
+}
+
+function editorDraftKey(eventId){
+  return `moments_editor_draft_v1_${eventId}`;
+}
+
+function clearEditorDraft(eventId){
+  if(!eventId) return;
+  try{ sessionStorage.removeItem(editorDraftKey(eventId)); }catch{ /* ignore */ }
+}
+
+function stashEditorDraft(){
+  if(!editorDirty || !activeId || saveInFlight || bootstrapInFlight) return;
+  const formNode = document.getElementById("momentEditorForm");
+  if(!formNode) return;
+  try{
+    flushGalleryInlineFields(formNode);
+    const state = sanitizeStateForSave(readFormState(formNode));
+    const payload = JSON.stringify({ t: Date.now(), state });
+    if(payload.length > 180000) return;
+    sessionStorage.setItem(editorDraftKey(activeId), payload);
+  }catch{ /* ignore quota / serialize */ }
+}
+
+function peekEditorDraft(eventId){
+  if(!eventId) return null;
+  try{
+    const raw = sessionStorage.getItem(editorDraftKey(eventId));
+    if(!raw) return null;
+    const parsed = JSON.parse(raw);
+    if(!parsed?.state || typeof parsed.state !== "object") return null;
+    if(Date.now() - Number(parsed.t || 0) > 24 * 60 * 60 * 1000){
+      clearEditorDraft(eventId);
+      return null;
+    }
+    return parsed.state;
+  }catch{
+    return null;
+  }
+}
+
 function readFormState(formNode){
   const form = new FormData(formNode);
+  const live = name => liveTopField(formNode, form, name);
   const sections = {};
   for(const key of Object.keys(DEFAULT_SECTIONS)){
     sections[key] = readSectionFromForm(form, key, formNode);
@@ -4077,22 +4351,42 @@ function readFormState(formNode){
   };
   const musicMedia = readGalleryMedia(formNode,"music");
   const musicFirst = musicMedia[0];
+  let musicYoutube = live("section_music_youtube_url") || sections.music.youtube_url || "";
+  let musicSpotify = live("section_music_spotify_url") || sections.music.spotify_url || "";
+  if(!musicYoutube && youtubeVideoId(musicSpotify)){
+    musicYoutube = musicSpotify;
+    musicSpotify = "";
+  }else if(musicYoutube && musicSpotify === musicYoutube){
+    musicSpotify = "";
+  }
   sections.music = {
     ...sections.music,
     media:musicMedia,
-    audio_url:musicFirst?.url || "",
-    audio_title:musicFirst?.title || "",
-    audio_description:musicFirst?.description || "",
-    image_url:String(form.get("section_music_image_url") || sections.music.image_url || "").trim()
+    audio_url:musicFirst?.url || sections.music.audio_url || "",
+    audio_title:musicFirst?.title || sections.music.audio_title || "",
+    audio_description:musicFirst?.description || sections.music.audio_description || "",
+    // Live first (FormData su pannello nascosto può essere stale)
+    image_url:sections.music.image_url || live("section_music_image_url"),
+    spotify_url:musicSpotify,
+    youtube_url:musicYoutube
   };
-  const videoMedia = readGalleryMedia(formNode,"video");
+  const videoMedia = readGalleryMedia(formNode,"video").filter(item=>!youtubeVideoId(item.url));
   const videoFirst = videoMedia[0];
+  let videoYoutube = live("section_video_youtube_url") || sections.video.youtube_url || "";
+  let videoFileUrl = videoFirst?.url || sections.video.video_url || "";
+  if(!videoYoutube && youtubeVideoId(videoFileUrl)){
+    videoYoutube = videoFileUrl;
+    videoFileUrl = "";
+  }else if(youtubeVideoId(videoFileUrl)){
+    videoFileUrl = "";
+  }
   sections.video = {
     ...sections.video,
     media:videoMedia,
-    video_url:videoFirst?.url || "",
-    video_title:videoFirst?.title || "",
-    video_description:videoFirst?.description || ""
+    video_url:videoFileUrl,
+    youtube_url:videoYoutube,
+    video_title:videoFirst?.title || sections.video.video_title || "",
+    video_description:videoFirst?.description || sections.video.video_description || ""
   };
   for(const key of LIST_SECTION_KEYS){
     sections[key] = {
@@ -4108,38 +4402,36 @@ function readFormState(formNode){
   sections.letter_future.media_type = letterFirst?.type || "";
   sections.letter_future.media_url = letterFirst?.url || "";
   sections.letter_future.media_title = letterFirst?.title || "";
+  syncPinnedSectionsInput(formNode);
   return {
-    title:String(form.get("title") || "").trim(),
-    type:normalizeMomentType(form.get("moment_type")),
-    subtitle:String(form.get("subtitle") || "").trim(),
+    title:live("title"),
+    type:normalizeMomentType(live("moment_type") || form.get("moment_type")),
+    subtitle:live("subtitle"),
     // name distinto da eventuali altri "description" (es. ticket assistenza)
-    description:String(form.get("page_description") || form.get("description") || "").trim(),
+    description:live("page_description") || live("description"),
     // Lingua pagina pubblica (oroscopo + chrome /m/) — segue IT|EN dell'editor al Salva
     public_locale: uiLocaleForPublicPage(),
-    pill:String(form.get("pill") || "").trim(),
-    cover_url:String(form.get("cover_url") || "").trim(),
-    cover_focus_x:Number(form.get("cover_focus_x") || 50),
-    cover_focus_y:Number(form.get("cover_focus_y") || 50),
-    cover_zoom:Math.min(200, Math.max(100, Number(form.get("cover_zoom") || 100))),
+    pill:live("pill"),
+    cover_url:live("cover_url"),
+    cover_focus_x:Number(live("cover_focus_x") || 50),
+    cover_focus_y:Number(live("cover_focus_y") || 50),
+    cover_zoom:Math.min(200, Math.max(100, Number(live("cover_zoom") || 100))),
     profile_photo:"",
-    colorPalette:canonicalizePalette(String(form.get("color_palette") || "verde")),
-    themeVariant:String(form.get("theme_variant") || "chiaro"),
-    heroStyle:String(form.get("hero_style") || "classico"),
-    heroCut:String(form.get("hero_cut") || "dritto"),
-    heroFade:String(form.get("hero_fade") || "on") !== "off",
-    fontPair:String(form.get("font_pair") || "classic"),
+    colorPalette:canonicalizePalette(live("color_palette") || "verde"),
+    themeVariant:live("theme_variant") || "chiaro",
+    heroStyle:live("hero_style") || "classico",
+    heroCut:live("hero_cut") || "dritto",
+    heroFade:live("hero_fade") !== "off",
+    fontPair:live("font_pair") || "classic",
     pageDecor:"none",
-    show_together_counter:form.get("show_together_counter") === "on",
-    together_since:String(form.get("together_since") || "").trim(),
-    counter_label:String(form.get("counter_label") || "").trim(),
-    show_counter_hms:form.get("show_counter_hms") === "on",
-    anniversary_emails:form.get("anniversary_emails") === "on",
-    theme:String(form.get("page_theme") || "classic"),
+    show_together_counter:liveTopChecked(formNode, form, "show_together_counter"),
+    together_since:live("together_since"),
+    counter_label:live("counter_label"),
+    show_counter_hms:liveTopChecked(formNode, form, "show_counter_hms"),
+    anniversary_emails:liveTopChecked(formNode, form, "anniversary_emails"),
+    theme:live("page_theme") || "classic",
     sectionOrder:sectionOrder.filter(key => !isSectionExcluded(key)),
-    pinned_sections:String(form.get("pinned_sections") || "")
-      .split(",")
-      .map(value=>value.trim())
-      .filter(key => key && !isSectionExcluded(key)),
+    pinned_sections:[...pinnedExtraSections].filter(key => key && !isSectionExcluded(key)),
     sections: (()=>{
       const next = { ...sections };
       for(const key of Object.keys(next)){
@@ -4307,13 +4599,43 @@ async function renderPreview(state,options = {}){
 
 async function saveMoment(event,row, options = {}){
   event.preventDefault();
-  if(saveInFlight) return false;
+  if(saveInFlight){
+    showEditorSaveFeedback(t("save.busy"), "error");
+    return false;
+  }
+  if(uploadBusy){
+    showEditorSaveFeedback(t("save.wait_upload"), "error");
+    return false;
+  }
   const formNode = event.currentTarget || document.getElementById("momentEditorForm");
   if(!formNode) return false;
+  // Evita salvataggio sul form staccato dopo cambio pezzo
+  const liveForm = document.getElementById("momentEditorForm");
+  if(liveForm && formNode !== liveForm){
+    return saveMoment({ preventDefault(){}, currentTarget:liveForm }, rows.find(item => item.id === activeId) || row, options);
+  }
+  if(row?.id && activeId && row.id !== activeId){
+    const liveRow = rows.find(item => item.id === activeId);
+    if(liveRow) return saveMoment({ preventDefault(){}, currentTarget:formNode }, liveRow, options);
+  }
   saveInFlight = true;
   let state;
   try{
+    flushGalleryInlineFields(formNode);
     state = sanitizeStateForSave(readFormState(formNode));
+    // Cintura: se il DOM ha ancora YouTube e lo state no, non perdere il link al Salva
+    const liveMusicYt = String(formNode.querySelector('[name="section_music_youtube_url"]')?.value || "").trim();
+    const liveVideoYt = String(formNode.querySelector('[name="section_video_youtube_url"]')?.value || "").trim();
+    if(liveMusicYt && state.sections?.music){
+      state.sections.music.youtube_url = liveMusicYt;
+      if(youtubeVideoId(state.sections.music.spotify_url) && state.sections.music.spotify_url === liveMusicYt){
+        state.sections.music.spotify_url = "";
+      }
+    }
+    if(liveVideoYt && state.sections?.video){
+      state.sections.video.youtube_url = liveVideoYt;
+      if(youtubeVideoId(state.sections.video.video_url)) state.sections.video.video_url = "";
+    }
   }catch(error){
     saveInFlight = false;
     showEditorSaveFeedback(error.message || t("save.check_fields"),"error");
@@ -4322,9 +4644,16 @@ async function saveMoment(event,row, options = {}){
   if(!adminMode){
     state.type = lockedMomentType(row);
   }
-  const pin = String(new FormData(formNode).get("access_pin") || "").trim();
-  const publicVisible = new FormData(formNode).get("public_visible") === "true";
-  const pinEnabled = new FormData(formNode).get("pin_enabled") === "true";
+  const pin = liveTopField(formNode, new FormData(formNode), "access_pin");
+  const publicVisibleEl = formNode.querySelector('[name="public_visible"]');
+  const pinEnabledEl = formNode.querySelector('[name="pin_enabled"]');
+  const publicVisible = publicVisibleEl
+    ? (publicVisibleEl.type === "checkbox" ? publicVisibleEl.checked : publicVisibleEl.value === "true")
+    : new FormData(formNode).get("public_visible") === "true";
+  const pinEnabled = pinEnabledEl
+    ? (pinEnabledEl.type === "checkbox" ? pinEnabledEl.checked : pinEnabledEl.value === "true")
+    : new FormData(formNode).get("pin_enabled") === "true";
+  const persistedSnapshot = JSON.stringify(state);
   if(!state.title){
     saveInFlight = false;
     showEditorSaveFeedback(t("save.need_title"),"error");
@@ -4383,56 +4712,74 @@ async function saveMoment(event,row, options = {}){
         return false;
       }
     }
-    const { error } = adminMode
-      ? await supabase.rpc("admin_save_moment_page",{
-          p_event_id:row.id,
-          p_title:state.title,
-          p_moment_type:state.type,
-          p_description:state.description,
-          p_page_state:state,
-          p_public_visible:publicVisible,
-          p_pin_enabled:pinEnabled,
-          p_pin_hash:pinHash
-        })
-      : await supabase.rpc("save_my_moment_page",{
-          p_event_id:row.id,
-          p_title:state.title,
-          p_moment_type:state.type,
-          p_description:state.description,
-          p_page_state:state,
-          p_public_visible:publicVisible,
-          p_pin_enabled:pinEnabled,
-          p_pin_hash:pinHash
-        });
+    const savePayload = {
+      p_event_id:row.id,
+      p_title:state.title,
+      p_moment_type:state.type,
+      p_description:state.description,
+      p_page_state:state,
+      p_public_visible:publicVisible,
+      p_pin_enabled:pinEnabled,
+      p_pin_hash:pinHash,
+      p_expected_updated_at: row.updated_at || null
+    };
+    const { data: saveData, error } = adminMode
+      ? await supabase.rpc("admin_save_moment_page", savePayload)
+      : await supabase.rpc("save_my_moment_page", savePayload);
     if(error){
       console.error(error);
+      const msg = String(error.message || "");
+      if(msg.includes("CONFLICT_STALE_SAVE")){
+        showEditorSaveFeedback(t("save.conflict_stale"), "error");
+        try{
+          await ensureEventPageState(row.id, { force:true });
+          renderDetail(row.id);
+        }catch(reloadError){
+          console.error(reloadError);
+        }
+        return false;
+      }
       showEditorSaveFeedback(error.message || t("save.fail"),"error");
       return false;
     }
+    const saveRow = Array.isArray(saveData) ? saveData[0] : saveData;
+    if(saveRow?.result_updated_at){
+      row.updated_at = saveRow.result_updated_at;
+    }
     clearTimeout(markEditorDirty.timer);
+    clearEditorDraft(row.id);
+    // Se durante il Salva hanno digitato altro, non marcare "salvato" a falso
+    let moreEditsDuringSave = false;
     try{
-      savedEditorSnapshot = formSnapshotForDirty(formNode);
+      const nowSnap = formSnapshotForDirty(formNode);
+      savedEditorSnapshot = persistedSnapshot;
+      moreEditsDuringSave = nowSnap !== persistedSnapshot;
+      editorDirty = moreEditsDuringSave;
     }catch{
-      savedEditorSnapshot = JSON.stringify(state);
+      savedEditorSnapshot = persistedSnapshot;
+      editorDirty = false;
     }
     lastPreviewHash = savedEditorSnapshot;
     lastSavedMomentType = normalizeMomentType(state.type);
     currentMomentType = lastSavedMomentType;
-    editorDirty = false;
-    updateSaveStatus(true);
+    updateSaveStatus(!editorDirty);
     const barMsg = document.querySelector("#momentsSaveBar .save-msg");
-    if(barMsg){
+    if(barMsg && editorDirty){
       barMsg.setAttribute("data-i18n-html", "shell.save_bar");
       barMsg.innerHTML = t("shell.save_bar");
     }
     localStorage.setItem(onboardingKey(row.id),"done");
     if(!options.quietOk){
-      showEditorSaveFeedback(
-        rsvpAutoOff
-          ? t("save.ok_rsvp_off")
-          : t("save.ok"),
-        "ok"
-      );
+      const emptyEnabled = Object.entries(state.sections || {})
+        .filter(([key, section]) => section?.enabled && !sectionHasContent(key, section))
+        .map(([key]) => SECTION_LABELS[key] || key);
+      let okMsg = moreEditsDuringSave
+        ? t("save.ok_more_edits")
+        : (rsvpAutoOff ? t("save.ok_rsvp_off") : t("save.ok"));
+      if(!moreEditsDuringSave && emptyEnabled.length){
+        okMsg = `${okMsg} ${t("save.ok_empty_sections", { list: emptyEnabled.slice(0, 3).join(", ") })}`;
+      }
+      showEditorSaveFeedback(okMsg, "ok");
     }
     const hint = document.getElementById("editorActionHint");
     if(hint) hint.hidden = true;
@@ -4610,6 +4957,20 @@ signupForm?.addEventListener("submit",async event=>{
 });
 
 document.getElementById("momentsLogout")?.addEventListener("click",async()=>{
+  if(editorDirty && document.getElementById("momentEditorForm")){
+    const choice = await askUnsavedSwitchChoice();
+    if(choice === "cancel") return;
+    if(choice === "save"){
+      const row = rows.find(item=>item.id === activeId);
+      const form = document.getElementById("momentEditorForm");
+      if(row && form){
+        const saved = await saveMoment({ preventDefault(){}, currentTarget:form }, row);
+        if(!saved) return;
+      }
+    }else if(activeId){
+      clearEditorDraft(activeId);
+    }
+  }
   await supabase.auth.signOut();
   activeId = "";
   rows = [];
@@ -4618,7 +4979,14 @@ document.getElementById("momentsLogout")?.addEventListener("click",async()=>{
 });
 
 window.addEventListener("beforeunload",event=>{
-  if(editorDirty) event.preventDefault();
+  if(editorDirty){
+    stashEditorDraft();
+    event.preventDefault();
+  }
+});
+window.addEventListener("pagehide", ()=>{ stashEditorDraft(); });
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState === "hidden") stashEditorDraft();
 });
 
 /* i18n: register + bind AFTER lets/consts init (TDZ-safe). Never block boot. */
@@ -4667,6 +5035,7 @@ function syncLangSwitchers(locale = getUiLocale()){
     run("rsvpShare", ()=>refreshRsvpShareLocale(editorForm));
     run("rsvpResponses", ()=>refreshRsvpResponsesLocale());
     run("horoscope", ()=>refreshHoroscopePeopleEditor(editorForm));
+    run("pets", ()=>refreshPetsEditor(editorForm));
     run("dashboard", ()=>refreshMomentDashboardLocale());
     run("preview", ()=>schedulePreviewUpdate(editorForm,{ immediate:true, force:true }));
     run("planCard", ()=>{

@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-07-22** (Descrizione breve in hero — Moments v186 / Worker v182)
+> Ultimo aggiornamento: **2026-08-14** (Sync Moments live web → repo: editor v244 + multi-pet; Worker backport `v194-multi-pet`)
 
 ### Fonte di verità versioni
 
@@ -90,13 +90,13 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 ---
 
-## Versioni attuali (allineate al codice 2026-07-22)
+## Versioni attuali (allineate al codice 2026-08-14)
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v183** | Magazzino: ricerca anche per barcode confezione; `build_stage`. |
-| **Worker NFC** | **v194-video-50mb** | Upload video fino a 50 MB; allowlist admin; PIN gate. |
-| **Moments editor** | **v232** | Video max 50 MB (1 clip Free); assistenza email. |
+| **Admin / Officina Moments** | **v192** (live sync) | Magazzino + barcode; helpers Officina allineati a Pages live. |
+| **Worker NFC** | **repo `v194-multi-pet`** · **live `v209-multi-pet`** | Repo: multi-pet fino a 6 animali su base v194. Live Cloudflare è avanti (dump completo Worker non disponibile senza auth). **Non overwrite prod Worker da questo branch.** |
+| **Moments editor** | **v244** (sync da Pages live) | Multi-pet (`moment-pets.js`, max 6), i18n IT\|EN, video 50 MB, assistenza email. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase** | **≥ v167 (prod)** | v167 reset pezzo reso; v166 USAGE `app_private`; v165 ingest store. |
@@ -130,6 +130,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 - [x] **Categoria bloccata al codice NFC (v135 / SQL v157)** — tipo da magazzino, badge editor, peek signup, save lock
 - [x] Guestbook + RSVP API Worker operative
 - [x] Ticket assistenza Moments → email staff (`support-notify` Worker v144)
+- [x] **Multi-pet (live v209 / Pages v244)**: fino a 6 animali per sezione Pets (nome, emoji, foto, racconto)
 
 ### Admin
 - [x] Pannelli Business e Moments separati (`moments-admin.html` su dominio Moments)

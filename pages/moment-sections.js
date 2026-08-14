@@ -9,6 +9,11 @@ import {
   parseHoroscopePeople,
   normalizeZodiacSign
 } from "./moment-horoscope.js?v=218";
+import {
+  normalizePets,
+  parsePets,
+  syncLegacyPetFields
+} from "./moment-pets.js?v=243";
 
 /**
  * Sezioni escluse dal prodotto (non in menu editor, non in anteprima/pubblico).
@@ -48,7 +53,7 @@ export const DEFAULT_SECTIONS = {
   rsvp:{ enabled:false, title:"Conferma presenza", body:"Compila il modulo e invia la risposta su WhatsApp.", whatsapp_number:"", event_name:"", ask_guests:true, ask_notes:true, field_keys:["guests","notes"], custom_fields:[], images:[] },
   guestbook:{ enabled:false, title:"Libro degli ospiti", body:"Lascia un pensiero — apparirà dopo l'approvazione dell'organizzatore.", images:[] },
   gallery:{ enabled:false, title:"Galleria foto", body:"", images:[], media:[] },
-  video:{ enabled:false, title:"Il nostro video", body:"", video_url:"", video_title:"", video_description:"", media:[], images:[] },
+  video:{ enabled:false, title:"Il nostro video", body:"", video_url:"", youtube_url:"", video_title:"", video_description:"", media:[], images:[] },
   promises:{ enabled:false, title:"Le nostre promesse", body:"", items:[], images:[] },
   places:{ enabled:false, title:"Luoghi del cuore", body:"", images:[] },
   dreams:{ enabled:false, title:"Sogni insieme", body:"", items:[], images:[] },
@@ -57,7 +62,7 @@ export const DEFAULT_SECTIONS = {
   horoscope:{ enabled:false, title:"Oroscopo del giorno", body:"", people:[], images:[] },
   letter_future:{ enabled:false, title:"Lettera al futuro", body:"", recipient:"", unlock_date:"", media:[], media_type:"", media_url:"", media_title:"", images:[] },
   rituals:{ enabled:false, title:"I nostri rituali", body:"", items:[], images:[] },
-  pet:{ enabled:false, title:"Il nostro compagno", body:"", pet_name:"", pet_emoji:"🐾", pet_photo:"", images:[] },
+  pet:{ enabled:false, title:"Il nostro compagno", body:"", pets:[], pet_name:"", pet_emoji:"🐾", pet_photo:"", images:[] },
   numbers:{ enabled:false, title:"I nostri numeri", body:"", items:[], images:[] },
   quote:{ enabled:false, title:"", body:"", author:"", images:[] },
   signature:{ enabled:false, title:"", body:"", sign_name:"", sign_subtitle:"", images:[] }
@@ -263,6 +268,18 @@ export function migrateSections(rawSections = {}){
       sections.video.video_description = first.description || sections.video.video_description || "";
     }
   }
+  if(sections.video){
+    if(!sections.video.youtube_url && youtubeVideoId(sections.video.video_url)){
+      sections.video.youtube_url = sections.video.video_url;
+      sections.video.video_url = "";
+    }
+  }
+  if(sections.music){
+    if(!sections.music.youtube_url && youtubeVideoId(sections.music.spotify_url)){
+      sections.music.youtube_url = sections.music.spotify_url;
+      sections.music.spotify_url = "";
+    }
+  }
   if(sections.letter_future){
     sections.letter_future.media = migrateLetterMediaSection(sections.letter_future);
     const first = sections.letter_future.media[0];
@@ -275,6 +292,15 @@ export function migrateSections(rawSections = {}){
   if(sections.horoscope){
     sections.horoscope.people = normalizeHoroscopePeople(sections.horoscope);
     delete sections.horoscope.sign;
+  }
+  if(sections.pet){
+    const hadPets = Array.isArray(sections.pet.pets) && sections.pet.pets.length;
+    const migrated = syncLegacyPetFields(sections.pet);
+    sections.pet = migrated;
+    // Legacy single: racconto era in section.body → ora sul primo animale
+    if(!hadPets && migrated.pets[0]?.body){
+      sections.pet.body = "";
+    }
   }
   for(const key of Object.keys(LIST_SECTION_MODES)){
     if(!sections[key]) continue;
@@ -303,7 +329,11 @@ export function sectionHasContent(key, section){
     case "gallery":
       return normalizeMediaList(section).some(item=>item.type === "image");
     case "video":
-      return Boolean(String(section.video_url || "").trim());
+      return Boolean(
+        String(section.video_url || "").trim()
+        || String(section.youtube_url || "").trim()
+        || normalizeMediaList(section).some(item=>item.type === "video")
+      );
     case "rsvp":
       return Boolean(String(section.whatsapp_number || "").replace(/\D/g, ""));
     case "guestbook":
@@ -323,7 +353,7 @@ export function sectionHasContent(key, section){
     case "letter_future":
       return Boolean(section.body || section.unlock_date || migrateLetterMediaSection(section).length);
     case "pet":
-      return Boolean(section.pet_name || section.body || section.pet_photo);
+      return normalizePets(section).length > 0 || Boolean(String(section.body || "").trim());
     case "quote":
       return Boolean(section.body || section.author);
     case "signature":
@@ -340,14 +370,36 @@ export function sectionIsVisible(key, section){
 
 export { parseLineItems } from "./moment-list-items.js";
 
-/** Legge un campo dal DOM live (più affidabile di FormData su pannelli display:none / iOS). */
+/**
+ * Legge un campo dal DOM live (più affidabile di FormData su pannelli display:none / iOS).
+ * Evita RadioNodeList.value (vuoto se ci sono omonimi non-radio) e preferisce il primo valore non vuoto.
+ */
 function liveFieldValue(form, formNode, name){
-  const el = formNode?.elements?.[name] || formNode?.querySelector?.(`[name="${name}"]`);
-  if(el && typeof el.value === "string" && el.type !== "checkbox" && el.type !== "radio" && el.type !== "file"){
-    return String(el.value || "").trim();
+  // Nomi Moments sono [a-z0-9_]; evita form.elements[name] (RadioNodeList.value → "" su omonimi).
+  const safeName = String(name || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const nodes = formNode ? [...formNode.querySelectorAll(`[name="${safeName}"]`)] : [];
+  let checkboxOn = false;
+  let firstText = "";
+  for(const el of nodes){
+    const type = String(el.type || "").toLowerCase();
+    if(type === "file") continue;
+    if(type === "checkbox"){
+      if(el.checked) checkboxOn = true;
+      continue;
+    }
+    if(type === "radio"){
+      if(el.checked) return String(el.value || "").trim();
+      continue;
+    }
+    const value = String(el.value || "").trim();
+    if(value) return value;
+    if(!firstText) firstText = value;
   }
-  if(el?.type === "checkbox") return el.checked ? "on" : "";
-  const raw = form.get(name);
+  if(nodes.some(el => String(el.type || "").toLowerCase() === "checkbox")){
+    return checkboxOn ? "on" : "";
+  }
+  if(nodes.length) return firstText;
+  const raw = form?.get?.(name);
   return raw == null ? "" : String(raw).trim();
 }
 
@@ -381,12 +433,13 @@ export function readSectionFromForm(form, key, formNode = null){
     base.event_name = val(`section_${key}_event_name`);
   }
   if(key === "music"){
-    base.spotify_url = String(form.get(`section_${key}_spotify_url`) || "").trim();
-    base.youtube_url = String(form.get(`section_${key}_youtube_url`) || "").trim();
-    base.audio_url = String(form.get(`section_${key}_audio_url`) || "").trim();
-    base.audio_title = String(form.get(`section_${key}_audio_title`) || "").trim();
-    base.audio_description = String(form.get(`section_${key}_audio_description`) || "").trim();
-    base.image_url = String(form.get(`section_${key}_image_url`) || "").trim();
+    // Live DOM: FormData su iOS/pannelli nascosti può perdere YouTube/Spotify
+    base.spotify_url = val(`section_${key}_spotify_url`);
+    base.youtube_url = val(`section_${key}_youtube_url`);
+    base.audio_url = val(`section_${key}_audio_url`);
+    base.audio_title = val(`section_${key}_audio_title`);
+    base.audio_description = val(`section_${key}_audio_description`);
+    base.image_url = val(`section_${key}_image_url`);
   }
   if(key === "horoscope"){
     const rawPeople = liveFieldValue(form, formNode, `section_${key}_people`)
@@ -403,38 +456,73 @@ export function readSectionFromForm(form, key, formNode = null){
     base.items = normalizeListItems(parseListItems(form.get(`section_${key}_items`)), LIST_SECTION_MODES[key]);
   }
   if(key === "letter_future"){
-    base.recipient = String(form.get(`section_${key}_recipient`) || "").trim();
-    base.unlock_date = String(form.get(`section_${key}_unlock_date`) || "").trim();
+    base.recipient = val(`section_${key}_recipient`);
+    base.unlock_date = val(`section_${key}_unlock_date`);
     base.media = parseMediaList(form.get(`section_${key}_media`));
     const first = base.media[0];
-    base.media_type = first?.type || String(form.get(`section_${key}_media_type`) || "").trim();
-    base.media_url = first?.url || String(form.get(`section_${key}_media_url`) || "").trim();
-    base.media_title = first?.title || String(form.get(`section_${key}_media_title`) || "").trim();
+    base.media_type = first?.type || val(`section_${key}_media_type`);
+    base.media_url = first?.url || val(`section_${key}_media_url`);
+    base.media_title = first?.title || val(`section_${key}_media_title`);
   }
   if(key === "pet"){
-    base.pet_name = String(form.get(`section_${key}_pet_name`) || "").trim();
-    base.pet_emoji = String(form.get(`section_${key}_pet_emoji`) || "🐾").trim() || "🐾";
-    base.pet_photo = String(form.get(`section_${key}_pet_photo`) || "").trim();
+    const rawPets = liveFieldValue(form, formNode, `section_${key}_pets`)
+      || form.get(`section_${key}_pets`)
+      || "[]";
+    base.pets = parsePets(rawPets);
+    // Compat: vecchi campi singoli (se il pannello multi non è ancora nel DOM)
+    if(!base.pets.length){
+      const legacyName = val(`section_${key}_pet_name`);
+      const legacyPhoto = val(`section_${key}_pet_photo`);
+      const legacyEmoji = val(`section_${key}_pet_emoji`) || "🐾";
+      if(legacyName || legacyPhoto || base.body){
+        base.pets = parsePets([{
+          name: legacyName,
+          emoji: legacyEmoji,
+          photo: legacyPhoto,
+          body: base.body
+        }]);
+        if(base.pets[0]?.body) base.body = "";
+      }
+    }
+    const synced = syncLegacyPetFields({ ...base, pets: base.pets });
+    base.pets = synced.pets;
+    base.pet_name = synced.pet_name;
+    base.pet_emoji = synced.pet_emoji;
+    base.pet_photo = synced.pet_photo;
   }
   if(key === "quote"){
-    base.author = String(form.get(`section_${key}_author`) || "").trim();
+    base.author = val(`section_${key}_author`);
   }
   if(key === "signature"){
-    base.sign_name = String(form.get(`section_${key}_sign_name`) || "").trim();
-    base.sign_subtitle = String(form.get(`section_${key}_sign_subtitle`) || "").trim();
+    // Live DOM: evita perdita nome firma su iOS / pannelli nascosti (prima poteva restare vuoto → "Voi" in pubblico)
+    base.sign_name = val(`section_${key}_sign_name`);
+    base.sign_subtitle = val(`section_${key}_sign_subtitle`);
   }
   if(key === "gallery"){
     base.media = parseMediaList(form.get(`section_${key}_media`)).filter(item=>item.type === "image");
     base.images = base.media.map(item=>item.url);
   }
   if(key === "video"){
-    base.video_url = String(form.get(`section_${key}_video_url`) || "").trim();
-    base.video_title = String(form.get(`section_${key}_video_title`) || "").trim();
-    base.video_description = String(form.get(`section_${key}_video_description`) || "").trim();
+    base.video_url = val(`section_${key}_video_url`);
+    base.youtube_url = val(`section_${key}_youtube_url`);
+    base.video_title = val(`section_${key}_video_title`);
+    base.video_description = val(`section_${key}_video_description`);
+    // Se il link YouTube è finito nel campo upload/legacy, salvalo come youtube_url
+    if(!base.youtube_url && youtubeVideoId(base.video_url)){
+      base.youtube_url = base.video_url;
+      base.video_url = "";
+    }
+  }
+  if(key === "music"){
+    // YouTube incollato per sbaglio nel campo Spotify
+    if(!base.youtube_url && youtubeVideoId(base.spotify_url)){
+      base.youtube_url = base.spotify_url;
+      base.spotify_url = "";
+    }
   }
   if(key === "timeline"){
     base.items = parseJourneySteps(form.get(`section_${key}_items`));
-    base.scroll_layout = form.get(`section_${key}_scroll_layout`) === "on";
+    base.scroll_layout = liveCheckboxOn(form, formNode, `section_${key}_scroll_layout`);
   }
   return base;
 }
@@ -468,7 +556,7 @@ export function sectionFillGuide(key){
     dedication:"Lettera personale: destinatario, testo e firma. Appare come busta elegante.",
     timeline:"Ogni tappa: data, luogo, descrizione, foto e link mappa. Trascina ☰ per riordinare.",
     gallery:"Carica le foto con Aggiungi foto. Titolo e descrizione per ogni immagine — in pagina si aprono ingrandite al tocco.",
-    video:"Carica uno o più video (MP4/MOV, max 50 MB) con titolo e descrizione — in pagina scorrono come la galleria. Il numero dipende dal piano Free/Plus/Pro.",
+    video:"Carica video MP4/MOV (max 50 MB) con titolo e descrizione. Quanti ne puoi aggiungere dipende dal piano Free/Plus/Pro.",
     promises:"Tocca «Aggiungi promessa» per ogni voce — niente più righe manuali.",
     dreams:"Tocca «Aggiungi sogno» — puoi segnare quelli già realizzati.",
     countdown:"Scegli data e ora — compare il timer live. Puoi aggiungere anche una foto.",
@@ -476,7 +564,7 @@ export function sectionFillGuide(key){
     horoscope:"Aggiungi fino a 5 persone (nome facoltativo + segno). In pagina compare l’oroscopo del giorno per ciascuno, aggiornato automaticamente.",
     letter_future:"Scrivi la lettera, scegli la data di apertura e allega foto, video, audio o PDF (limiti dal piano). Riceverai un'email il giorno dell'apertura.",
     rituals:"Tocca «Aggiungi rituale» per ogni abitudine quotidiana.",
-    pet:"Nome, emoji e foto del vostro compagno a quattro zampe.",
+    pet:"Aggiungi fino a 6 animali — nome, emoji, foto e racconto per ciascuno.",
     numbers:"Tocca «Aggiungi numero» — es. 365 + «giorni insieme».",
     quote:"Titolo facoltativo, citazione e autore — testo grande in pagina.",
     signature:"Titolo della chiusura (es. «Con amore»), poi nomi e sottotitolo.",
@@ -504,13 +592,17 @@ export function youtubeVideoId(raw){
   if(!url) return "";
   try{
     const parsed = new URL(url);
-    if(parsed.hostname.includes("youtu.be")) return parsed.pathname.slice(1).split("/")[0];
-    if(parsed.hostname.includes("youtube.com")){
-      if(parsed.pathname.startsWith("/embed/")) return parsed.pathname.split("/")[2] || "";
+    const host = parsed.hostname.replace(/^www\./, "").toLowerCase();
+    if(host === "youtu.be") return parsed.pathname.slice(1).split("/")[0] || "";
+    if(host.endsWith("youtube.com") || host.endsWith("youtube-nocookie.com")){
+      const parts = parsed.pathname.split("/").filter(Boolean);
+      if(parts[0] === "embed" || parts[0] === "shorts" || parts[0] === "live" || parts[0] === "v"){
+        return parts[1] || "";
+      }
       return parsed.searchParams.get("v") || "";
     }
   }catch{}
-  const short = url.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
+  const short = url.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:embed|shorts|live|v)\/|v=)([\w-]{11})/);
   return short ? short[1] : "";
 }
 

@@ -93,6 +93,7 @@
 | 2026-07-15 | Codex | **Business Editor v123**: corretto handshake editor/app dopo reload per caricare stato cloud e link pagina finale |
 | 2026-07-15 | Codex | **Admin v133**: trasformata Spedizioni NFC in console operativa con pipeline ordini/codici e azioni evasione |
 | 2026-07-15 | Claude Code | **Business Editor v124**: audit upload + fix — video su R2 (prima blob perso al reload), limite 25 MB allineato al server, pulizia file orfani R2 su sostituzione/rimozione media. Pendenti PDF/documenti base64 (lock worker.js) |
+| 2026-08-14 | Cursor Cloud | **Sync Moments live → repo**: Pages **v244** + `moment-pets` (max 6 animali); Worker backport multi-pet `v194-multi-pet` (live Cloudflare resta `v209-multi-pet` — non overwrite prod) |
 
 ---
 

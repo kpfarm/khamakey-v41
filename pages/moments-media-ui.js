@@ -1,4 +1,4 @@
-import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=232";
+import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=244";
 import {
   normalizeMediaItem,
   normalizeMediaList,
@@ -15,9 +15,10 @@ import {
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
   migrateLetterMediaSection
-} from "./moment-media.js?v=216";
+} from "./moment-media.js?v=242";
+import { canFitBytes, formatBytes, storageBytesLimit } from "./moment-plans.js?v=237";
 import { getUiLocale } from "./moments-i18n.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=232";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=243";
 
 let mediaEditContext = null;
 
@@ -81,6 +82,27 @@ export function writeGalleryMedia(formNode,key,media){
   const serialized = serializeMediaList(list);
   const field = formNode.querySelector(`textarea[name="section_${key}_media"], input[name="section_${key}_media"]`);
   if(field) field.value = serialized;
+}
+
+/** Sincronizza titolo/descrizione dai campi inline al JSON nascosto (prima del Salva). */
+export function flushGalleryInlineFields(formNode){
+  if(!formNode) return;
+  const rows = formNode.querySelectorAll(".media-edit-row[data-media-section][data-media-id]");
+  if(!rows.length) return;
+  const byKey = new Map();
+  rows.forEach(row=>{
+    const key = row.dataset.mediaSection;
+    if(!key) return;
+    if(!byKey.has(key)) byKey.set(key, readGalleryMedia(formNode, key));
+    const media = byKey.get(key);
+    const index = media.findIndex(item=>item.id === row.dataset.mediaId);
+    if(index < 0) return;
+    const titleEl = row.querySelector(".media-row-title");
+    const descEl = row.querySelector(".media-row-desc");
+    if(titleEl) media[index].title = titleEl.value.trim();
+    if(descEl) media[index].description = descEl.value.trim();
+  });
+  byKey.forEach((media, key)=> writeGalleryMedia(formNode, key, media));
 }
 
 export function renderGalleryGrid(formNode,key){
@@ -181,12 +203,20 @@ function canAddFiles(current,batch,key = "gallery"){
   return filtered;
 }
 
-export async function uploadGalleryMedia({supabase,row,formNode,key,files,onStatus,onBusy}){
+export async function uploadGalleryMedia({supabase,row,formNode,key,files,onStatus,onBusy,entitlements}){
   if(!row?.id) throw new Error(lf("Pagina non selezionata. Ricarica l'editor e riprova."));
   const limits = mediaLimitsForKey(key);
   const current = readGalleryMedia(formNode,key);
   const batch = canAddFiles(current,[...files].slice(0,limits.maxItems - current.length),key);
   if(!batch.length) throw new Error(lf("Nessun file selezionato."));
+  if(entitlements){
+    const batchBytes = batch.reduce((sum, file) => sum + (Number(file?.size) || 0), 0);
+    if(!canFitBytes(entitlements, batchBytes)){
+      const used = formatBytes(entitlements.bytes_used);
+      const max = formatBytes(storageBytesLimit(entitlements.limits));
+      throw new Error(lfFill("Spazio insufficiente ({used} / {max}). Rimuovi file o passa a Plus/Pro.", { used, max }));
+    }
+  }
   onStatus?.(lfFill("Preparazione {n} file...", { n: batch.length }));
   onBusy?.(true);
   const uploadedItems = [];
@@ -576,7 +606,7 @@ export function renderGalleryUploadPanel(section,key){
   const intro = isLetter
     ? `<p><strong data-lf="Allegati sigillati">${esc(lf("Allegati sigillati"))}</strong></p><p class="field-hint" data-lf="Foto, video, audio o PDF che si sbloccano insieme alla lettera. Tocca Aggiungi, poi Salva.">${esc(lf("Foto, video, audio o PDF che si sbloccano insieme alla lettera. Tocca Aggiungi, poi Salva."))}</p>`
     : isVideo
-      ? `<p><strong data-lf="Video">${esc(lf("Video"))}</strong></p><p class="field-hint" data-lf="Carica uno o più video — in pagina scorrono come la galleria. Titolo e descrizione sotto ciascuno, poi Salva.">${esc(lf("Carica uno o più video — in pagina scorrono come la galleria. Titolo e descrizione sotto ciascuno, poi Salva."))}</p>`
+      ? `<p><strong data-lf="Video">${esc(lf("Video"))}</strong></p><p class="field-hint" data-lf="Carica video MP4/MOV. Titolo e descrizione sotto ciascuno, poi Salva. Il numero massimo dipende dal piano.">${esc(lf("Carica video MP4/MOV. Titolo e descrizione sotto ciascuno, poi Salva. Il numero massimo dipende dal piano."))}</p>`
       : isMusic
         ? `<p><strong data-lf="Audio">${esc(lf("Audio"))}</strong></p><p class="field-hint" data-lf="Messaggi vocali o brani — complemento a Spotify/YouTube. Poi Salva.">${esc(lf("Messaggi vocali o brani — complemento a Spotify/YouTube. Poi Salva."))}</p>`
         : `<p><strong data-lf="Galleria foto">${esc(lf("Galleria foto"))}</strong></p><p class="field-hint" data-lf="Solo immagini qui. Tocca Aggiungi foto, scrivi titolo e descrizione, poi Salva.">${esc(lf("Solo immagini qui. Tocca Aggiungi foto, scrivi titolo e descrizione, poi Salva."))}</p>`;

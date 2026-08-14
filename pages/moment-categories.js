@@ -161,7 +161,7 @@ export const MOMENT_TEMPLATES = {
   }, { pill:"Album · Ogni foto è un ricordo", subtitle:"Le foto che contano" }),
   pet: kit("pet", {
     intro:{ enabled:true, title:"Il nostro compagno", body:"Chi è, come è arrivato e perché riempie la casa di gioia." },
-    pet:{ enabled:true, title:"Il nostro amico", body:"Un piccolo racconto del vostro legame.", pet_name:"", pet_emoji:"🐾", pet_photo:"" },
+    pet:{ enabled:true, title:"Il nostro amico", body:"", pets:[{ name:"", emoji:"🐾", photo:"", body:"Un piccolo racconto del vostro legame." }], pet_name:"", pet_emoji:"🐾", pet_photo:"" },
     gallery:{ enabled:true, title:"Foto", body:"", media:[], images:[] },
     quote:{ enabled:true, title:"", body:"Amore incondizionato a quattro zampe.", author:"" },
     signature:{ enabled:true, title:"", body:"", sign_name:"La famiglia", sign_subtitle:"Che lo ama" }

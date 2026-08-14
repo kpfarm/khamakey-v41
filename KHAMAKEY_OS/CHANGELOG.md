@@ -8,6 +8,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+### Sync
+- **Moments live web → repo (2026-08-14, Cursor Cloud)** — Pages + Worker pet
+  - Allineati i file Moments/Officina da `khamakey-app.pages.dev` (editor **v244**, `moment-pets.js` fino a **6 animali**, admin Moments **v192**).
+  - Conferma: multi-pet era già live (`Worker v209-multi-pet`) ma **assente da `main`**.
+  - Worker in repo: backport render `section.pets[]` + legacy single → `WORKER_VERSION=v194-multi-pet`. Dump completo live non recuperabile (MCP Cloudflare senza auth): **non fare deploy Worker da questo branch sopra la prod**.
+
 - **Moments v232 + Worker v194 + SQL v171 — video 50 MB (2026-08-04, Cursor)** — Pages + Worker + SQL
   - Piano Free resta **1 video**; tetto file video alzato a **50 MB** (client, Worker, `platform_plans`).
 - **Business progetto distaccato — scaffold (2026-08-04, Cursor)** — Business

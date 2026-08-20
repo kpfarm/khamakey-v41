@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v212-supabase-down-guard";
+const WORKER_VERSION = "v213-multi-pet";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1956,6 +1956,32 @@ function normalizeHoroscopePeopleWorker(section = {}) {
   return legacy ? [{ name: "", sign: legacy }] : [];
 }
 
+function normalizePetWorker(raw = {}) {
+  const emoji = String(raw?.emoji || raw?.pet_emoji || "🐾").trim().slice(0, 8) || "🐾";
+  return {
+    name: String(raw?.name || raw?.pet_name || "").trim().slice(0, 64),
+    emoji,
+    photo: String(raw?.photo || raw?.pet_photo || "").trim(),
+    body: String(raw?.body || "").trim().slice(0, 2000)
+  };
+}
+
+function normalizePetsWorker(section = {}) {
+  const fromPets = Array.isArray(section.pets)
+    ? section.pets.map(normalizePetWorker).filter(pet => pet.name || pet.photo || pet.body)
+    : [];
+  if (fromPets.length) return fromPets.slice(0, 6);
+  if (section.pet_name || section.pet_photo || section.body) {
+    return [normalizePetWorker({
+      name: section.pet_name,
+      emoji: section.pet_emoji,
+      photo: section.pet_photo,
+      body: section.body
+    })];
+  }
+  return [];
+}
+
 function horoscopeDateRome() {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Rome",
@@ -2456,7 +2482,7 @@ function resolveMomentSections(state) {
     horoscope:{enabled:false,title:"",body:"",people:[],images:[]},
     letter_future:{enabled:false,title:"",body:"",recipient:"",unlock_date:"",media:[],media_type:"",media_url:"",media_title:"",images:[]},
     rituals:{enabled:false,title:"",body:"",images:[]},
-    pet:{enabled:false,title:"",body:"",pet_name:"",pet_emoji:"🐾",pet_photo:"",images:[]},
+    pet:{enabled:false,title:"",body:"",pets:[],pet_name:"",pet_emoji:"🐾",pet_photo:"",images:[]},
     numbers:{enabled:false,title:"",body:"",images:[]},
     quote:{enabled:false,title:"",body:"",author:"",images:[]},
     signature:{enabled:false,title:"",body:"",sign_name:"",sign_subtitle:"",images:[]}
@@ -2467,6 +2493,18 @@ function resolveMomentSections(state) {
   }
   if (base.horoscope) {
     base.horoscope.people = normalizeHoroscopePeopleWorker(base.horoscope);
+  }
+  if (base.pet) {
+    const hadPets = Array.isArray(base.pet.pets) && base.pet.pets.length;
+    base.pet.pets = normalizePetsWorker(base.pet);
+    const first = base.pet.pets[0];
+    if (first) {
+      base.pet.pet_name = first.name;
+      base.pet.pet_emoji = first.emoji || "🐾";
+      base.pet.pet_photo = first.photo;
+    }
+    // Legacy single: body era il racconto → ora sul primo animale
+    if (!hadPets && first?.body) base.pet.body = "";
   }
   if (raw.schedule && !raw.timeline) base.timeline = { ...base.timeline, ...raw.schedule };
   if (raw.message && !raw.dedication) base.dedication = { ...base.dedication, ...raw.message };
@@ -2556,7 +2594,7 @@ function momentSectionHasContent(key, section) {
     case "letter_future":
       return Boolean(section.body || section.unlock_date || letterMediaItems(section).length);
     case "pet":
-      return Boolean(section.pet_name || section.body || section.pet_photo);
+      return normalizePetsWorker(section).length > 0 || Boolean(String(section.body || "").trim());
     case "quote":
       return Boolean(section.body || section.author);
     case "signature":
@@ -3398,9 +3436,15 @@ body.nav-open{overflow:hidden}
 .moment-sealed-date{font-family:${f.ui};font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:${c.muted};margin-top:8px}
 .moment-rituals{display:grid;gap:12px;margin-top:10px}
 .moment-ritual{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:${c.cardSoft};border:1px solid ${c.line};border-left:3px solid ${c.go};box-shadow:none}
-.moment-pet-card{display:grid;justify-items:center;text-align:center;gap:12px;margin-top:8px}
+.moment-pets-grid{display:grid;gap:22px;margin-top:8px}
+.moment-pets-grid.is-multi{grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:24px;align-items:start}
+.moment-pet-card{display:grid;justify-items:center;text-align:center;gap:12px}
 .moment-pet-photo{width:120px;height:120px;border-radius:999px;object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 12px 32px rgba(15,23,42,.12)}
+.moment-pets-grid.is-multi .moment-pet-photo{width:100px;height:100px}
 .moment-pet-name{font-family:${f.body};font-size:1.35rem;margin:0;color:${cardInk};font-weight:600}
+.moment-pets-grid.is-multi .moment-pet-name{font-size:1.15rem}
+.moment-pet-story{font-size:.95rem;line-height:1.55;margin:0;color:${c.muted};max-width:36ch}
+.moment-pet-intro{margin:0 0 14px;line-height:1.55;color:${cardInk}}
 .moment-numbers{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:12px}
 .moment-number{flex:1 1 100px;max-width:140px;text-align:center;padding:16px 10px;border-radius:18px;background:${c.cardSoft};border:1px solid ${c.line};border-top:3px solid ${c.go};box-shadow:none}
 .moment-number b{display:block;font-size:clamp(1.6rem,7vw,2rem);font-weight:700;font-style:normal;color:${c.go};line-height:1;font-family:${f.ui}}
@@ -4937,11 +4981,24 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<div class="moment-letter">${recipient}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${media}<span class="moment-letter-heart" aria-hidden="true">♥</span></div></article>`;
   }
 
-  if (key === "pet" && (section.pet_name || section.body || section.pet_photo)) {
-    const photo = safeUrl(section.pet_photo || "") !== "#" ? `<img class="moment-pet-photo" src="${attr(section.pet_photo)}" alt="${attr(section.pet_name || "Pet")}">` : "";
-    const name = section.pet_name ? `<p class="moment-pet-name">${escapeHtml(section.pet_emoji || "🐾")} ${escapeHtml(section.pet_name)}</p>` : "";
-    const body = section.body ? `<p>${escapeHtml(section.body)}</p>` : "";
-    return `<article class="${rv}">${head(section.title || "Il nostro compagno")}<div class="moment-pet-card">${photo}${name}${body}</div></article>`;
+  if (key === "pet") {
+    const pets = normalizePetsWorker(section);
+    const intro = String(section.body || "").trim();
+    if (pets.length || intro) {
+      const cards = pets.map(pet => {
+        const photo = safeUrl(pet.photo || "") !== "#"
+          ? `<img class="moment-pet-photo" src="${attr(pet.photo)}" alt="${attr(pet.name || "Pet")}">`
+          : "";
+        const name = pet.name
+          ? `<p class="moment-pet-name">${escapeHtml(pet.emoji || "🐾")} ${escapeHtml(pet.name)}</p>`
+          : (pet.emoji ? `<p class="moment-pet-name">${escapeHtml(pet.emoji)}</p>` : "");
+        const story = pet.body ? `<p class="moment-pet-story">${escapeHtml(pet.body)}</p>` : "";
+        return `<div class="moment-pet-card">${photo}${name}${story}</div>`;
+      }).join("");
+      const gridClass = pets.length > 1 ? "moment-pets-grid is-multi" : "moment-pets-grid";
+      const introHtml = intro ? `<p class="moment-pet-intro">${escapeHtml(intro)}</p>` : "";
+      return `<article class="${rv}">${head(section.title || "Il nostro compagno")}${introHtml}${pets.length ? `<div class="${gridClass}">${cards}</div>` : ""}</article>`;
+    }
   }
 
   if (key === "gallery") {
@@ -5010,8 +5067,8 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     return `<article class="${rv}">${head(section.title || "Musica")}<p class="moment-empty-hint">Aggiungi Spotify, YouTube, un audio o un'immagine.</p></article>`;
   }
 
-  if (key === "pet" && !section.pet_name && !section.body && !section.pet_photo) {
-    return `<article class="${rv}">${head(section.title || "Il nostro compagno")}<p class="moment-empty-hint">Aggiungi nome, foto e racconto.</p></article>`;
+  if (key === "pet" && !normalizePetsWorker(section).length && !String(section.body || "").trim()) {
+    return `<article class="${rv}">${head(section.title || "Il nostro compagno")}<p class="moment-empty-hint">Aggiungi uno o più animali con nome, foto e racconto.</p></article>`;
   }
 
   if (key === "letter_future" && !section.body && !section.unlock_date && !letterMediaItems(section).length) {

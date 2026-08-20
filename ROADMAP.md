@@ -409,6 +409,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-08 | Cursor | **Admin v192 + SQL v171**: Gestisci linee oggetto fisico (add/rename/delete) |
 | 2026-08-09 | Cursor | **Moments v243 + Worker v209**: sezione Animale multi-pet (fino a 6) |
 | 2026-08-11 | Cursor | **Moments v244**: upload foto — compressione solo >2 MB + fallback originale |
+| 2026-08-20 | Cursor | **Worker v212**: diagnosi outage — Supabase 530/1016; guard HTML 503 su /m/ /k/ /p/ |
 | 2026-08-06 | Cursor | **Worker v206**: rollback CSS perf v205 — restore `/m/` + anteprima (1101) |
 | 2026-08-06 | Cursor | **Moments v240 ripristinato + Worker v207**: firma Great Vibes; messaggio non come nome |
 | 2026-08-07 | Cursor | **Officina home**: testo più corto + flusso in `<details>` — zero tocchi a form pezzi/magazzino |

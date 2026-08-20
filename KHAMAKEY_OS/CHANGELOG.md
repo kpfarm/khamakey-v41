@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v212 — guard Supabase down (2026-08-20, Cursor)** — Worker
+  - Diagnosi live: Supabase `cuxlwaocjqwzluycznyp` risponde **530 / error 1016** (Origin DNS) → login Moments + `/m/` `/k/` `/p/` non funzionano.
+  - Non era un regressione multi-pet: anche rollback a v208 falliva allo stesso modo.
+  - `/health` espone probe `supabase`; `/m/` `/k/` `/p/` tornano messaggio 503 invece di Cloudflare 1101.
 - **Moments v244 — upload foto compressione cauta (2026-08-11, Cursor)** — Pages
   - Comprime solo foto **> 2 MB**; se fallisce o non risparmia ≥10% → file originale.
   - Niente tocco a video, Worker `/m/`, Salva o NFC.

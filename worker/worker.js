@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v209-multi-pet";
+const WORKER_VERSION = "v212-supabase-down-guard";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -373,7 +373,7 @@ export default {
         return handleBusinessSyncTranslations(request, env);
       }
       if (url.pathname === "/health") {
-        return json(buildIntegrationsHealth(env));
+        return json(await buildIntegrationsHealth(env));
       }
       if (url.pathname === "/api/moment/horoscope-probe" && request.method === "GET") {
         return handleHoroscopeProbe(request, env, url);
@@ -383,11 +383,19 @@ export default {
       }
       return html(notFound("Pagina non trovata"), 404);
     } catch (error) {
-      console.error(error);
-      if (url.pathname.startsWith("/api/")) {
-        return cors(json({ error: "Errore temporaneo del server." }, 500));
+      const message = String(error?.message || error || "unknown");
+      console.error("worker_fetch_error", message);
+      try {
+        if (url.pathname.startsWith("/api/")) {
+          return cors(json({ error: "Errore temporaneo del server.", detail: message.slice(0, 160) }, 500));
+        }
+        return html(notFound("Errore temporaneo"), 500);
+      } catch {
+        return new Response("Errore temporaneo", {
+          status: 500,
+          headers: { "Content-Type": "text/plain;charset=utf-8" }
+        });
       }
-      return html(notFound("Errore temporaneo"), 500);
     }
   },
   async scheduled(event, env, ctx) {
@@ -412,62 +420,83 @@ async function handleNfc(request, env, ctx, code) {
       return Response.redirect(`${new URL(request.url).origin}/p/${encodeURIComponent(target.slug)}`, 302);
     }
   } catch (error) {
-    console.warn("resolve_khamakey_code non disponibile, uso resolve_nfc", error);
+    console.warn("resolve_khamakey_code non disponibile, uso resolve_nfc", String(error?.message || error));
   }
-  const rows = await rpc(env, "resolve_nfc", { p_code: code.toUpperCase() });
-  const item = rows?.[0];
-  if (!item) return html(notFound("Prodotto NFC non ancora associato"), 404);
+  try {
+    const rows = await rpc(env, "resolve_nfc", { p_code: code.toUpperCase() });
+    const item = rows?.[0];
+    if (!item) return html(notFound("Prodotto NFC non ancora associato"), 404);
 
-  ctx.waitUntil(track(env, request, item.business_id, "nfc_tap", "nfc").catch(() => {}));
-  return Response.redirect(`${new URL(request.url).origin}/p/${encodeURIComponent(item.slug)}`, 302);
+    ctx.waitUntil(track(env, request, item.business_id, "nfc_tap", "nfc").catch(() => {}));
+    return Response.redirect(`${new URL(request.url).origin}/p/${encodeURIComponent(item.slug)}`, 302);
+  } catch (error) {
+    console.error("handleNfc", String(error?.message || error));
+    return html(notFound("Servizio NFC temporaneamente non disponibile. Riprova tra poco."), 503);
+  }
 }
 
 async function handlePublicPage(request, env, ctx, slug) {
-  const rows = await rpc(env, "get_public_business", { p_slug: slug });
-  const page = rows?.[0];
-  if (!page) return html(notFound("Pagina non pubblicata"), 404);
+  try {
+    const rows = await rpc(env, "get_public_business", { p_slug: slug });
+    const page = rows?.[0];
+    if (!page) return html(notFound("Pagina non pubblicata"), 404);
 
-  const locale = resolveVisitorLocale(request, page.state || {});
-  const localizedPage = { ...page, state: localizePublicState(page.state || {}, locale) };
+    const locale = resolveVisitorLocale(request, page.state || {});
+    const localizedPage = { ...page, state: localizePublicState(page.state || {}, locale) };
 
-  ctx.waitUntil(track(env, request, page.business_id, "page_view", "public_page").catch(() => {}));
-  return html(renderPage(localizedPage, new URL(request.url).origin, env, locale), 200, {
-    "Cache-Control": "public, max-age=10, s-maxage=15"
-  });
+    ctx.waitUntil(track(env, request, page.business_id, "page_view", "public_page").catch(() => {}));
+    return html(renderPage(localizedPage, new URL(request.url).origin, env, locale), 200, {
+      "Cache-Control": "public, max-age=10, s-maxage=15"
+    });
+  } catch (error) {
+    console.error("handlePublicPage", String(error?.message || error));
+    return html(notFound("Servizio temporaneamente non disponibile. Riprova tra poco."), 503);
+  }
 }
 
 async function handleMomentPage(request, env, ctx, slug) {
-  const url = new URL(request.url);
-  const pin = String(url.searchParams.get("pin") || "");
-  const momentVisitor = await visitorId(request, env.VISITOR_SALT || "khamakey");
-  const rows = await rpc(env, "get_public_moment", {
-    p_slug: slug,
-    p_pin_hash: pin ? await momentPinHash(slug, pin) : null,
-    p_visitor_key: momentVisitor
-  });
-  const page = rows?.[0];
-  if (!page) {
-    const activationRows = await rpc(env, "get_moment_activation_page", { p_slug: slug }).catch(() => null);
-    const activation = activationRows?.[0];
-    if (activation) {
-      return html(renderMomentActivationPage(activation, url.origin, env), 200, { "Cache-Control": "public, max-age=30, s-maxage=60" });
+  try {
+    const url = new URL(request.url);
+    const pin = String(url.searchParams.get("pin") || "");
+    const momentVisitor = await visitorId(request, env.VISITOR_SALT || "khamakey");
+    let rows = null;
+    try {
+      rows = await rpc(env, "get_public_moment", {
+        p_slug: slug,
+        p_pin_hash: pin ? await momentPinHash(slug, pin) : null,
+        p_visitor_key: momentVisitor
+      });
+    } catch (error) {
+      console.error("get_public_moment", String(error?.message || error));
+      return html(notFound("Servizio Moments temporaneamente non disponibile. Riprova tra poco."), 503);
     }
-    return html(notFound("Moment non pubblicato"), 404);
-  }
+    const page = rows?.[0];
+    if (!page) {
+      const activationRows = await rpc(env, "get_moment_activation_page", { p_slug: slug }).catch(() => null);
+      const activation = activationRows?.[0];
+      if (activation) {
+        return html(renderMomentActivationPage(activation, url.origin, env), 200, { "Cache-Control": "public, max-age=30, s-maxage=60" });
+      }
+      return html(notFound("Moment non pubblicato"), 404);
+    }
 
-  const locale = resolveMomentsPublicLocale(request, page.state || {});
-  const pinRequired = Boolean(page.pin_required);
-  if (pinRequired && !page.pin_valid) {
-    return html(renderMomentPinGate(page, url.origin, Boolean(pin), env, locale), 401, {
-      "Cache-Control": "no-store",
+    const locale = resolveMomentsPublicLocale(request, page.state || {});
+    const pinRequired = Boolean(page.pin_required);
+    if (pinRequired && !page.pin_valid) {
+      return html(renderMomentPinGate(page, url.origin, Boolean(pin), env, locale), 401, {
+        "Cache-Control": "no-store",
+        "Vary": "Accept-Language"
+      });
+    }
+
+    return html(await renderMomentPage(page, url.origin, env, locale), 200, {
+      "Cache-Control": pinRequired ? "private, no-store" : "public, max-age=30, s-maxage=60",
       "Vary": "Accept-Language"
     });
+  } catch (error) {
+    console.error("handleMomentPage", String(error?.message || error));
+    return html(notFound("Servizio Moments temporaneamente non disponibile. Riprova tra poco."), 503);
   }
-
-  return html(await renderMomentPage(page, url.origin, env, locale), 200, {
-    "Cache-Control": pinRequired ? "private, no-store" : "public, max-age=30, s-maxage=60",
-    "Vary": "Accept-Language"
-  });
 }
 
 async function handleEvent(request, env) {
@@ -663,15 +692,29 @@ async function track(env, request, businessId, eventType, source, metadata = {})
 }
 
 async function rpc(env, name, body) {
-  const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/${name}`, {
-    method: "POST",
-    headers: {
-      apikey: env.SUPABASE_PUBLISHABLE_KEY,
-      Authorization: `Bearer ${env.SUPABASE_PUBLISHABLE_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
+  const base = String(env.SUPABASE_URL || "").trim().replace(/\/$/, "");
+  const key = String(env.SUPABASE_PUBLISHABLE_KEY || "").trim();
+  if (!base || !key) {
+    const error = new Error("Supabase non configurato sul Worker (mancano SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY).");
+    error.status = 503;
+    throw error;
+  }
+  let response;
+  try {
+    response = await fetch(`${base}/rest/v1/rpc/${name}`, {
+      method: "POST",
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+  } catch (networkError) {
+    const error = new Error(`Supabase non raggiungibile: ${String(networkError?.message || networkError).slice(0, 160)}`);
+    error.status = 503;
+    throw error;
+  }
   const text = await response.text();
   if (!response.ok) {
     let message = `Supabase RPC ${name}: ${response.status}`;
@@ -681,11 +724,21 @@ async function rpc(env, name, body) {
     } catch {
       if (text) message = text.slice(0, 240);
     }
+    // 530/1016 = DNS/origin Supabase (progetto in pausa o DNS rotto)
+    if (response.status === 530 || /1016|1020|origin dns/i.test(message)) {
+      message = "Supabase non raggiungibile (530/1016). Controlla che il progetto non sia in pausa.";
+    }
     const error = new Error(message);
     error.status = response.status;
     throw error;
   }
-  return text ? JSON.parse(text) : null;
+  try {
+    return text ? JSON.parse(text) : null;
+  } catch {
+    const error = new Error(`Supabase RPC ${name}: risposta non valida`);
+    error.status = 502;
+    throw error;
+  }
 }
 
 function guestbookErrorMessage(error) {
@@ -1903,32 +1956,6 @@ function normalizeHoroscopePeopleWorker(section = {}) {
   return legacy ? [{ name: "", sign: legacy }] : [];
 }
 
-function normalizePetWorker(raw = {}) {
-  const emoji = String(raw?.emoji || raw?.pet_emoji || "🐾").trim().slice(0, 8) || "🐾";
-  return {
-    name: String(raw?.name || raw?.pet_name || "").trim().slice(0, 64),
-    emoji,
-    photo: String(raw?.photo || raw?.pet_photo || "").trim(),
-    body: String(raw?.body || "").trim().slice(0, 2000)
-  };
-}
-
-function normalizePetsWorker(section = {}) {
-  const fromPets = Array.isArray(section.pets)
-    ? section.pets.map(normalizePetWorker).filter(pet => pet.name || pet.photo || pet.body)
-    : [];
-  if (fromPets.length) return fromPets.slice(0, 6);
-  if (section.pet_name || section.pet_photo || section.body) {
-    return [normalizePetWorker({
-      name: section.pet_name,
-      emoji: section.pet_emoji,
-      photo: section.pet_photo,
-      body: section.body
-    })];
-  }
-  return [];
-}
-
 function horoscopeDateRome() {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Rome",
@@ -2429,7 +2456,7 @@ function resolveMomentSections(state) {
     horoscope:{enabled:false,title:"",body:"",people:[],images:[]},
     letter_future:{enabled:false,title:"",body:"",recipient:"",unlock_date:"",media:[],media_type:"",media_url:"",media_title:"",images:[]},
     rituals:{enabled:false,title:"",body:"",images:[]},
-    pet:{enabled:false,title:"",body:"",pets:[],pet_name:"",pet_emoji:"🐾",pet_photo:"",images:[]},
+    pet:{enabled:false,title:"",body:"",pet_name:"",pet_emoji:"🐾",pet_photo:"",images:[]},
     numbers:{enabled:false,title:"",body:"",images:[]},
     quote:{enabled:false,title:"",body:"",author:"",images:[]},
     signature:{enabled:false,title:"",body:"",sign_name:"",sign_subtitle:"",images:[]}
@@ -2440,18 +2467,6 @@ function resolveMomentSections(state) {
   }
   if (base.horoscope) {
     base.horoscope.people = normalizeHoroscopePeopleWorker(base.horoscope);
-  }
-  if (base.pet) {
-    const hadPets = Array.isArray(base.pet.pets) && base.pet.pets.length;
-    base.pet.pets = normalizePetsWorker(base.pet);
-    const first = base.pet.pets[0];
-    if (first) {
-      base.pet.pet_name = first.name;
-      base.pet.pet_emoji = first.emoji || "🐾";
-      base.pet.pet_photo = first.photo;
-    }
-    // Legacy single: body era il racconto → ora sul primo animale
-    if (!hadPets && first?.body) base.pet.body = "";
   }
   if (raw.schedule && !raw.timeline) base.timeline = { ...base.timeline, ...raw.schedule };
   if (raw.message && !raw.dedication) base.dedication = { ...base.dedication, ...raw.message };
@@ -2541,7 +2556,7 @@ function momentSectionHasContent(key, section) {
     case "letter_future":
       return Boolean(section.body || section.unlock_date || letterMediaItems(section).length);
     case "pet":
-      return normalizePetsWorker(section).length > 0 || Boolean(String(section.body || "").trim());
+      return Boolean(section.pet_name || section.body || section.pet_photo);
     case "quote":
       return Boolean(section.body || section.author);
     case "signature":
@@ -3383,15 +3398,9 @@ body.nav-open{overflow:hidden}
 .moment-sealed-date{font-family:${f.ui};font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:${c.muted};margin-top:8px}
 .moment-rituals{display:grid;gap:12px;margin-top:10px}
 .moment-ritual{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:${c.cardSoft};border:1px solid ${c.line};border-left:3px solid ${c.go};box-shadow:none}
-.moment-pets-grid{display:grid;gap:22px;margin-top:8px}
-.moment-pets-grid.is-multi{grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:24px;align-items:start}
-.moment-pet-card{display:grid;justify-items:center;text-align:center;gap:12px}
+.moment-pet-card{display:grid;justify-items:center;text-align:center;gap:12px;margin-top:8px}
 .moment-pet-photo{width:120px;height:120px;border-radius:999px;object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 12px 32px rgba(15,23,42,.12)}
-.moment-pets-grid.is-multi .moment-pet-photo{width:100px;height:100px}
 .moment-pet-name{font-family:${f.body};font-size:1.35rem;margin:0;color:${cardInk};font-weight:600}
-.moment-pets-grid.is-multi .moment-pet-name{font-size:1.15rem}
-.moment-pet-story{font-size:.95rem;line-height:1.55;margin:0;color:${c.muted};max-width:36ch}
-.moment-pet-intro{margin:0 0 14px;line-height:1.55;color:${cardInk}}
 .moment-numbers{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:12px}
 .moment-number{flex:1 1 100px;max-width:140px;text-align:center;padding:16px 10px;border-radius:18px;background:${c.cardSoft};border:1px solid ${c.line};border-top:3px solid ${c.go};box-shadow:none}
 .moment-number b{display:block;font-size:clamp(1.6rem,7vw,2rem);font-weight:700;font-style:normal;color:${c.go};line-height:1;font-family:${f.ui}}
@@ -4928,24 +4937,11 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<div class="moment-letter">${recipient}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${media}<span class="moment-letter-heart" aria-hidden="true">♥</span></div></article>`;
   }
 
-  if (key === "pet") {
-    const pets = normalizePetsWorker(section);
-    const intro = String(section.body || "").trim();
-    if (pets.length || intro) {
-      const cards = pets.map(pet => {
-        const photo = safeUrl(pet.photo || "") !== "#"
-          ? `<img class="moment-pet-photo" src="${attr(pet.photo)}" alt="${attr(pet.name || "Pet")}">`
-          : "";
-        const name = pet.name
-          ? `<p class="moment-pet-name">${escapeHtml(pet.emoji || "🐾")} ${escapeHtml(pet.name)}</p>`
-          : (pet.emoji ? `<p class="moment-pet-name">${escapeHtml(pet.emoji)}</p>` : "");
-        const story = pet.body ? `<p class="moment-pet-story">${escapeHtml(pet.body)}</p>` : "";
-        return `<div class="moment-pet-card">${photo}${name}${story}</div>`;
-      }).join("");
-      const gridClass = pets.length > 1 ? "moment-pets-grid is-multi" : "moment-pets-grid";
-      const introHtml = intro ? `<p class="moment-pet-intro">${escapeHtml(intro)}</p>` : "";
-      return `<article class="${rv}">${head(section.title || "Il nostro compagno")}${introHtml}${pets.length ? `<div class="${gridClass}">${cards}</div>` : ""}</article>`;
-    }
+  if (key === "pet" && (section.pet_name || section.body || section.pet_photo)) {
+    const photo = safeUrl(section.pet_photo || "") !== "#" ? `<img class="moment-pet-photo" src="${attr(section.pet_photo)}" alt="${attr(section.pet_name || "Pet")}">` : "";
+    const name = section.pet_name ? `<p class="moment-pet-name">${escapeHtml(section.pet_emoji || "🐾")} ${escapeHtml(section.pet_name)}</p>` : "";
+    const body = section.body ? `<p>${escapeHtml(section.body)}</p>` : "";
+    return `<article class="${rv}">${head(section.title || "Il nostro compagno")}<div class="moment-pet-card">${photo}${name}${body}</div></article>`;
   }
 
   if (key === "gallery") {
@@ -5014,8 +5010,8 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     return `<article class="${rv}">${head(section.title || "Musica")}<p class="moment-empty-hint">Aggiungi Spotify, YouTube, un audio o un'immagine.</p></article>`;
   }
 
-  if (key === "pet" && !normalizePetsWorker(section).length && !String(section.body || "").trim()) {
-    return `<article class="${rv}">${head(section.title || "Il nostro compagno")}<p class="moment-empty-hint">Aggiungi uno o più animali con nome, foto e racconto.</p></article>`;
+  if (key === "pet" && !section.pet_name && !section.body && !section.pet_photo) {
+    return `<article class="${rv}">${head(section.title || "Il nostro compagno")}<p class="moment-empty-hint">Aggiungi nome, foto e racconto.</p></article>`;
   }
 
   if (key === "letter_future" && !section.body && !section.unlock_date && !letterMediaItems(section).length) {
@@ -6315,14 +6311,53 @@ function resendConfigured(env) {
   return Boolean(env.RESEND_API_KEY);
 }
 
-function buildIntegrationsHealth(env) {
+async function probeSupabaseRpc(env) {
+  const url = String(env.SUPABASE_URL || "").trim();
+  const key = String(env.SUPABASE_PUBLISHABLE_KEY || "").trim();
+  if (!url || !key) {
+    return { ok: false, reason: "missing_secrets", urlConfigured: Boolean(url), keyConfigured: Boolean(key) };
+  }
+  try {
+    const response = await fetch(`${url}/rest/v1/rpc/get_public_moment`, {
+      method: "POST",
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ p_slug: "__health__", p_pin_hash: null, p_visitor_key: "health" })
+    });
+    const text = await response.text();
+    // 200 (vuoto/righe) o 4xx applicativi = rete+auth ok; 5xx/network = problema
+    return {
+      ok: response.status > 0 && response.status < 500,
+      status: response.status,
+      body: String(text || "").slice(0, 100),
+      host: (() => {
+        try { return new URL(url).host; } catch { return "invalid_url"; }
+      })()
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: String(error?.message || error).slice(0, 160),
+      host: (() => {
+        try { return new URL(url).host; } catch { return "invalid_url"; }
+      })()
+    };
+  }
+}
+
+async function buildIntegrationsHealth(env) {
   const astrowayConfigured = Boolean(String(env.ASTROWAY_API_KEY || "").trim());
+  const supabase = await probeSupabaseRpc(env);
   return {
     ok: true,
     service: "khamakey-nfc",
     version: WORKER_VERSION,
     media: Boolean(env.MEDIA),
     locales: SUPPORTED_LOCALES,
+    supabase,
     openai: { configured: openaiConfigured(env), status: openaiConfigured(env) ? "active" : "not_configured" },
     integrations: {
       shopify: { configured: shopifyConfigured(env), status: shopifyConfigured(env) ? "active" : "not_configured" },
@@ -6339,7 +6374,7 @@ async function handleIntegrationsStatus(request, env) {
   if (!jwt) return cors(json({ error: "Accesso non autorizzato." }, 401));
   const admin = await verifyPlatformAdmin(env, jwt);
   if (!admin) return cors(json({ error: "Permesso admin richiesto." }, 403));
-  return cors(json(buildIntegrationsHealth(env)));
+  return cors(json(await buildIntegrationsHealth(env)));
 }
 
 async function logWebhookEvent(env, provider, eventType, externalId, payload, status = "received") {

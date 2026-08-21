@@ -1051,6 +1051,12 @@ async function showApp(user){
     await loadObjects();
     if(!adminMode) await tryPendingActivation(user);
     warmUploadAuth(supabase);
+    // Prefetch HEIC in idle: non blocca lista/editor
+    if(typeof requestIdleCallback === "function"){
+      requestIdleCallback(()=>warmUploadPipeline(),{ timeout:5000 });
+    }else{
+      setTimeout(()=>warmUploadPipeline(),2800);
+    }
   }catch(error){
     showAppLoadError(error);
   }
@@ -3300,7 +3306,11 @@ function renderDetail(id){
     onClearPhoto:clearJourneyStepPhoto,
     onRemoveStep:removeJourneyStep
   });
-  schedulePreviewUpdate(editorForm,{immediate:true,force:true});
+  // Anteprima Worker dopo il paint dell'editor (apertura più reattiva)
+  setTimeout(()=>{
+    if(document.getElementById("momentEditorForm") !== editorForm) return;
+    schedulePreviewUpdate(editorForm,{immediate:true,force:true});
+  },320);
   ensureMobileNav();
   syncMobileNav(activeEditorPanel);
   refreshAccountMenu();
@@ -3720,6 +3730,7 @@ async function replaceGalleryImage(file,row,formNode,key,mediaId){
 function bindMediaUploads(root,row){
   const formNode = document.getElementById("momentEditorForm");
   if(!formNode) return;
+  warmUploadPipeline();
   root.querySelector("[data-upload-target='cover']")?.addEventListener("click",()=>{
     document.getElementById("coverFileInput")?.click();
   });
@@ -4834,7 +4845,7 @@ supabase = createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
   auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
 });
 bindUploadClient(supabase);
-warmUploadPipeline();
+// HEIC non al boot: altrimenti esm.sh compete con login/lista. Si scalda dopo l'app o al primo upload.
 bindPasswordToggles();
 bindCodeInputs();
 bindMediaUploadDelegation();

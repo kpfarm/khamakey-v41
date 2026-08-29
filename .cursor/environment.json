@@ -1,0 +1,20 @@
+{
+  "name": "KhamaKey v41",
+  "install": "cd worker && npm ci && ( [ -f .dev.vars ] || cp .env.example .dev.vars )",
+  "terminals": [
+    {
+      "name": "worker (wrangler dev)",
+      "command": "cd worker && npx wrangler dev --port 8787 --ip 0.0.0.0",
+      "description": "Cloudflare Worker (khamakey-nfc): public pages /p/ /m/ /k/, /health, media CDN, webhooks."
+    },
+    {
+      "name": "pages (wrangler pages dev)",
+      "command": "cd pages && npx wrangler pages dev . --port 8788 --ip 0.0.0.0",
+      "description": "Static Cloudflare Pages frontend (khamakey-app): editor, admin, moments, reseller."
+    }
+  ],
+  "ports": [
+    { "name": "worker", "port": 8787 },
+    { "name": "pages", "port": 8788 }
+  ]
+}

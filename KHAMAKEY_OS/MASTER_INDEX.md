@@ -69,6 +69,7 @@ KHAMAKEY_OS/
 | **Checklist operabilità Business + Admin** | [`docs/21-checklist-operabilita-business-admin.md`](docs/21-checklist-operabilita-business-admin.md) |
 | Officina NFC Moments | [`docs/21-moments-officina-nfc.md`](docs/21-moments-officina-nfc.md) |
 | Ops secrets / Auth checklist | [`docs/22-ops-secrets-auth-checklist.md`](docs/22-ops-secrets-auth-checklist.md) |
+| **Email Auth Moments (conferma)** | [`docs/32-moments-auth-email.md`](docs/32-moments-auth-email.md) |
 | Smoke test Moments | [`docs/23-smoke-moments.md`](docs/23-smoke-moments.md) |
 | **Go-live Moments — checklist test funzionale** | [`docs/31-go-live-smoke-moments.md`](docs/31-go-live-smoke-moments.md) |
 | **Basi solide per ~10k Moments** | [`docs/24-pronti-per-10k-moments.md`](docs/24-pronti-per-10k-moments.md) |

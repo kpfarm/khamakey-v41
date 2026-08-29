@@ -17,7 +17,7 @@ Causa: Auth Site URL (o Redirect non allowlistati) → fallback su pages.dev Bus
    - `https://app.khamakeymoments.com/moments`
    - `https://app.khamakeymoments.com/moments.html`
    - `https://app.khamakeymoments.com/**`
-4. [Auth → Email Templates → Confirm signup](https://supabase.com/dashboard/project/cuxlwaocjqwzluycznyp/auth/templates): il bottone/link deve usare `{{ .ConfirmationURL }}` (non solo `{{ .SiteURL }}`)
+4. Template conferma semplice + mittente Moments: [`docs/32-moments-auth-email.md`](32-moments-auth-email.md)
 5. Re-invia conferma o nuovo signup di test → il link deve aprire Moments, non Business
 
 Niente chiavi Business: questo progetto Supabase è Moments.

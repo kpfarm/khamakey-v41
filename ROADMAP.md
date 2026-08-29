@@ -387,3 +387,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 
 | 2026-08-29 | Cursor | **Moments Auth confirm**: link conferma email non deve aprire Business — Site URL Moments + redirect callback su /moments (docs/22 + index.html + momentsAuthRedirectTo) |
 | 2026-08-29 | Cursor | **Email Auth Moments**: template «Attiva account» + mittente `noreply@khamakeymoments.com` (`docs/32-moments-auth-email.md`) |
+| 2026-08-29 | Cursor | **Email Auth Moments**: benvenuto + grazie + wordmark (non più mail secca) |

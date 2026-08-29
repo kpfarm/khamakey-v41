@@ -3,6 +3,27 @@
 > **Solo ops.** Non richiede deploy codice. Non tocca Moments runtime.  
 > Verifica live: `GET https://link.khamakeymoments.com/health` (2026-07-20)
 
+## ⚠ Moments — link conferma email apre Business (fix dashboard)
+
+Sintomo: dopo signup Moments, **solo** il link nell’email Supabase apre il login **Business** (`khamakey-app.pages.dev` / home Business). Login/reset dall’app Moments sono ok.
+
+Causa: Auth Site URL (o Redirect non allowlistati) → fallback su pages.dev Business. Il codice Moments manda già `emailRedirectTo` → `https://app.khamakeymoments.com/moments`.
+
+**Fix (progetto `cuxlwaocjqwzluycznyp`, 2 minuti):**
+
+1. [Auth → URL Configuration](https://supabase.com/dashboard/project/cuxlwaocjqwzluycznyp/auth/url-configuration)
+2. **Site URL** = `https://app.khamakeymoments.com`
+3. **Redirect URLs** (aggiungi se mancano):
+   - `https://app.khamakeymoments.com/moments`
+   - `https://app.khamakeymoments.com/moments.html`
+   - `https://app.khamakeymoments.com/**`
+4. [Auth → Email Templates → Confirm signup](https://supabase.com/dashboard/project/cuxlwaocjqwzluycznyp/auth/templates): il bottone/link deve usare `{{ .ConfirmationURL }}` (non solo `{{ .SiteURL }}`)
+5. Re-invia conferma o nuovo signup di test → il link deve aprire Moments, non Business
+
+Niente chiavi Business: questo progetto Supabase è Moments.
+
+---
+
 ## Stato verificato (health Worker v144)
 
 | Integrazione | Stato live | Impatto Moments |

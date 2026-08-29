@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, momentsAuthRedirectTo } from "./config.js";
 import { normalizeMomentCode, formatMomentCodeDisplay, isValidMomentCode } from "./moment-codes.js";
 import {
   applyChromeI18n,
@@ -4503,7 +4503,7 @@ forgotForm?.addEventListener("submit",async event=>{
   const email = document.getElementById("momentsForgotEmail").value.trim().toLowerCase();
   if(!email) return setStatus(statusNode,t("auth.msg.email_required"),"error");
   setStatus(statusNode,t("auth.msg.forgot_sending"));
-  const { error } = await supabase.auth.resetPasswordForEmail(email,{redirectTo:authRedirectTo("/moments.html")});
+  const { error } = await supabase.auth.resetPasswordForEmail(email,{redirectTo:momentsAuthRedirectTo()});
   setStatus(statusNode,error ? (error.message || t("auth.msg.forgot_fail")) : t("auth.msg.forgot_sent"), error ? "error" : "ok");
 });
 
@@ -4581,7 +4581,7 @@ signupForm?.addEventListener("submit",async event=>{
     email,
     password:document.getElementById("momentsSignupPassword").value,
     options:{
-      emailRedirectTo:authRedirectTo("/moments.html"),
+      emailRedirectTo:momentsAuthRedirectTo(),
       data:{
         full_name:document.getElementById("momentsSignupName").value.trim(),
         product_area:"moments",

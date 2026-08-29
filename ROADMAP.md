@@ -389,3 +389,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-29 | Cursor | **Email Auth Moments**: template «Attiva account» + mittente `noreply@khamakeymoments.com` (`docs/32-moments-auth-email.md`) |
 | 2026-08-29 | Cursor | **Email Auth Moments**: passo 2 chiarito (Moments = editor della pagina); testi di benvenuto più alti |
 | 2026-08-29 | Cursor | **Email Auth Moments**: copia per uso proprio e per regalo (non solo «chi ami») |
+| 2026-08-29 | Cursor | **Email Auth Moments**: ritocco copie goffe («dietro si apre», «si apre dal chip») |

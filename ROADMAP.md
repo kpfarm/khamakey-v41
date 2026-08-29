@@ -395,3 +395,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-29 | Cursor | **Email Auth Moments**: si dice Moment, non oggetto/pezzo |
 | 2026-08-29 | Cursor | **Email Auth Moments**: passo 3 non ripete più apertura/chi tiene |
 | 2026-08-29 | Cursor | **Email Auth Moments**: dicitura mail automatica / non rispondere |
+| 2026-08-29 | Cursor | **Moments v234**: dopo signup, schermo «Controlla la tua email» (form svuotato) |

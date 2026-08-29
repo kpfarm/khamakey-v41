@@ -14,8 +14,8 @@ import {
   t,
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
-} from "./moments-i18n.js?v=232";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=232";
+} from "./moments-i18n.js?v=234";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=234";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=226";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
@@ -171,6 +171,7 @@ const loginForm = document.getElementById("momentsLoginForm");
 const signupForm = document.getElementById("momentsSignupForm");
 const forgotForm = document.getElementById("momentsForgotForm");
 const recoveryForm = document.getElementById("momentsRecoveryForm");
+const signupConfirm = document.getElementById("momentsSignupConfirm");
 const statusNode = document.getElementById("momentsAuthStatus");
 const detail = document.getElementById("momentDetail");
 const userName = document.getElementById("momentsUserName");
@@ -586,6 +587,7 @@ function showAuthTab(tab){
   signupForm.hidden = tab !== "signup";
   forgotForm.hidden = true;
   recoveryForm.hidden = true;
+  if(signupConfirm) signupConfirm.hidden = true;
   setStatus(statusNode,"");
 }
 
@@ -598,6 +600,7 @@ function showForgotForm(){
   signupForm.hidden = true;
   recoveryForm.hidden = true;
   forgotForm.hidden = false;
+  if(signupConfirm) signupConfirm.hidden = true;
   const email = document.getElementById("momentsEmail")?.value?.trim();
   if(email) document.getElementById("momentsForgotEmail").value = email;
   setStatus(statusNode,"");
@@ -612,6 +615,44 @@ function showRecoveryForm(){
   signupForm.hidden = true;
   forgotForm.hidden = true;
   recoveryForm.hidden = false;
+  if(signupConfirm) signupConfirm.hidden = true;
+  setStatus(statusNode,"");
+}
+
+function resetSignupForm(){
+  signupForm?.reset();
+  setSignupStep(1);
+  const hint = document.getElementById("momentsSignupTypeHint");
+  if(hint){
+    hint.hidden = true;
+    hint.textContent = "";
+  }
+}
+
+function refreshSignupConfirmEmail(){
+  const node = document.getElementById("momentsSignupConfirmEmail");
+  if(!node) return;
+  const email = String(node.dataset.email || "").trim();
+  node.textContent = email ? t("auth.signup.confirm.sent_to", { email }) : "";
+}
+
+function showSignupConfirm(email){
+  hideBoot();
+  auth.hidden = false;
+  recoveryMode = false;
+  authTabs.hidden = true;
+  loginForm.hidden = true;
+  signupForm.hidden = true;
+  forgotForm.hidden = true;
+  recoveryForm.hidden = true;
+  resetSignupForm();
+  if(signupConfirm) signupConfirm.hidden = false;
+  applyChromeI18n(signupConfirm);
+  const node = document.getElementById("momentsSignupConfirmEmail");
+  if(node){
+    node.dataset.email = email || "";
+    refreshSignupConfirmEmail();
+  }
   setStatus(statusNode,"");
 }
 
@@ -4497,6 +4538,12 @@ document.querySelectorAll("[data-auth-tab]").forEach(button=>button.addEventList
 
 document.getElementById("momentsForgot")?.addEventListener("click",showForgotForm);
 document.getElementById("momentsForgotBack")?.addEventListener("click",()=>showAuthTab("login"));
+document.getElementById("momentsSignupConfirmLogin")?.addEventListener("click",()=>{
+  const email = document.getElementById("momentsSignupConfirmEmail")?.dataset?.email || "";
+  showAuthTab("login");
+  const loginEmail = document.getElementById("momentsEmail");
+  if(loginEmail && email) loginEmail.value = email;
+});
 
 forgotForm?.addEventListener("submit",async event=>{
   event.preventDefault();
@@ -4605,7 +4652,7 @@ signupForm?.addEventListener("submit",async event=>{
     await showApp(data.session.user);
     if(activeId) showPinSuccessBanner(activeId,pin,title);
   }else{
-    setStatus(statusNode,t("auth.msg.signup_confirm_email"),"ok");
+    showSignupConfirm(email);
   }
 });
 
@@ -4702,6 +4749,7 @@ function bindLangSwitchers(){
     });
   });
   onUiLocaleChange(syncLangSwitchers);
+  onUiLocaleChange(refreshSignupConfirmEmail);
   syncLangSwitchers();
 }
 

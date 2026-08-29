@@ -9,6 +9,7 @@ export const PRODUCT_LINE_OPTIONS = [
   { value: "magnete", label: "Magnete NFC", sku: "MAG", hint: "Per frigo — famiglia, foto, ricordi casa." },
   { value: "tag", label: "Tag / tessera NFC", sku: "TAG", hint: "Formato piatto — eventi, badge, bundle." },
   { value: "confezione", label: "Confezione regalo", sku: "BOX", hint: "Kit regalo con NFC incluso." },
+  { value: "__new__", label: "+ Nuova linea…", sku: "OTH", hint: "Scrivi il nome della nuova linea sotto: viene salvata nell’anagrafica." },
   { value: "altro", label: "Altra linea (personalizzata)", sku: "OTH", hint: "Scrivi il nome linea sotto — utile per nuovi oggetti." }
 ];
 
@@ -45,9 +46,14 @@ export function normalizeMomentSku(value){
 }
 
 export function lineSkuCode(line, customLine = ""){
-  if(line === "altro"){
+  if(line === "altro" || line === "__new__"){
     const custom = String(customLine || "").replace(/[^A-Z0-9]/gi, "").toUpperCase().slice(0, 8);
     return custom || "OTH";
+  }
+  // Linee custom da anagrafica: usa le prime lettere dello slug
+  if(!LINE_SKU_BY_VALUE[line] && line){
+    const fromSlug = String(line).replace(/[^a-z0-9]/gi, "").toUpperCase().slice(0, 6);
+    return fromSlug || "GEN";
   }
   return LINE_SKU_BY_VALUE[line] || "GEN";
 }
@@ -69,9 +75,9 @@ export function generateMomentSku({ productLine, productType, customLine = "", e
 }
 
 export function generateMomentProductName(productLine, productType, customLine = ""){
-  const lineLabel = productLine === "altro" && customLine
+  const lineLabel = ((productLine === "altro" || productLine === "__new__") && customLine)
     ? String(customLine).trim()
-    : (PRODUCT_LINE_LABELS[productLine] || "Oggetto NFC").replace(/ NFC$/, "");
+    : (PRODUCT_LINE_LABELS[productLine] || productLine || "Oggetto NFC").replace(/ NFC$/i, "");
   const typeLabel = TYPE_LABELS[productType] || "Moments";
   return `KhamaKey ${typeLabel} — ${lineLabel}`;
 }
@@ -126,7 +132,7 @@ export function applyMomentProductAutofill(form, { existingSkus = [], force = fa
   }
 
   const customWrap = form.querySelector("[data-product-line-custom-wrap]");
-  if(customWrap) customWrap.hidden = line !== "altro";
+  if(customWrap) customWrap.hidden = !(line === "altro" || line === "__new__");
 
   const hintNode = form.querySelector("[data-product-line-hint]");
   if(hintNode) hintNode.textContent = productLineHint(line);

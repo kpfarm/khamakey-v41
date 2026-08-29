@@ -8,8 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
-- **Moments v234 — schermo conferma email dopo signup (2026-08-29, Cursor)** — Pages
-  - Dopo «Crea account» il form si chiude: schermo «Controlla la tua email» (niente dati lasciati nel form).
+- **Moments v246 live overlay (2026-08-29, Cursor)** — Pages
+  - Snapshot live v245 + schermo conferma email + redirect Auth `/moments`. Deploy: `pages/` → `khamakey-app`.
+- **Email Auth Moments — template conferma (2026-08-29, Cursor)** — Ops
   - Mail di benvenuto completa: mondo esclusivo, grazie per l’acquisto, 3 passi, bottone «Entra nel tuo spazio» (`docs/32-moments-auth-email.md`).
 - **Moments v232 + Worker v194 + SQL v171 — video 50 MB (2026-08-04, Cursor)** — Pages + Worker + SQL
   - Piano Free resta **1 video**; tetto file video alzato a **50 MB** (client, Worker, `platform_plans`).

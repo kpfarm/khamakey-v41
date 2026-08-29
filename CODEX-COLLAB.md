@@ -240,7 +240,7 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Shopify Moments** | Operativo — libero | webhook ordini, catalogo vendita, sync bozze |
 | **Editor Business — contratto pubblico** | Condiviso | `publicStateFromEditor`, renderer `/p/` nel Worker |
 | **Admin / Officina Moments** | **Libero** (live **v183** — search barcode) | `admin.html`, `moments-admin.html`, `admin.js`, `admin.css`, `admin-guide.js`, `admin-moment-labels.js` — coordinarsi se stesso pannello |
-| **Moments editor** | **Libero** (live **v232** — video 50 MB) | `moments.html`, `moments.js`, `moments-i18n*.js`, `moment-rsvp-*.js`, `moment-horoscope.js`, `moments.css`, `moment-editor-dashboard.js` |
+| **Moments editor** | **Libero** (live **v246** — conferma email + schermo check email) | `moments.html`, `moments.js`, `moments-i18n*.js`, `moment-rsvp-*.js`, `moment-horoscope.js`, `moments.css`, `moment-editor-dashboard.js` |
 | **Security hardening (audit 2026-07-11)** | Completato e deployato (vedi `PROJECT_STATE.md`) | Regole assolute CSP/RLS/dati restano vincolanti |
 | **`worker/worker.js`** | **Libero** (live **v194-video-50mb**) | Chi tocca `worker.js` prende lock esplicito e non parallelizza |
 | **Editor Business — upload media** | Completato v124 — libero | PDF catalogo / docs base64→R2 ancora pendenti (`docs/03-editor.md`) |

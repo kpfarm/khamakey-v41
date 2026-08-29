@@ -51,17 +51,15 @@ Benvenuto nel mondo KhamaKey Moments
 
 Ciao,
 
-grazie. Hai scelto KhamaKey Moments — e da oggi fai parte di un mondo riservato.
+grazie per averci scelto. Sei entrato in un mondo riservato, dove ogni oggetto apre un ricordo — non una pagina qualsiasi.
 
-Il pezzo che hai tra le mani non è un gadget. È la chiave di uno spazio privato: foto, parole, date, la vostra storia. Lo vedi tu. Lo apre chi ami, con il PIN.
+Il pezzo che hai tra le mani è la chiave. Dietro si apre uno spazio solo vostro: foto, parole, date, la storia che volete custodire. Lo curi tu. Chi ami lo vive toccando l’oggetto e aprendo con il PIN.
 
-Tre passi, e sei dentro:
+Tre passi:
 
-1. Attiva l’account
-2. Accedi a Moments
-3. Dai vita alla pagina collegata al tuo oggetto
-
-Il resto è vostro.
+1. Attiva l’account (il bottone qui sotto)
+2. Accedi a Moments: è l’area privata dove crei e aggiorni la pagina del tuo oggetto
+3. Dai vita a quella pagina. Poi chi ami la apre dal chip, con il PIN
 
 Bottone: **Entra nel tuo spazio**
 
@@ -88,8 +86,8 @@ Il team KhamaKey Moments
               <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C;">Il tuo invito</p>
               <h1 style="margin:12px 0 0;font-size:28px;line-height:1.28;font-weight:normal;">Benvenuto nel mondo KhamaKey Moments.</h1>
               <p style="margin:18px 0 0;font-size:16px;line-height:1.65;color:#18202F;">Ciao,</p>
-              <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F;">grazie per averci scelto. Da questo momento non sei solo un cliente: sei entrato in un mondo esclusivo, fatto di oggetti che aprono ricordi — non pagine qualsiasi.</p>
-              <p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F;">Il pezzo che hai tra le mani è la chiave. Dietro c’è il tuo spazio privato: foto, parole, date, la vostra storia. Lo custodisci tu. Lo vive chi ami, con il PIN.</p>
+              <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F;">grazie per averci scelto. Sei entrato in un mondo riservato, dove ogni oggetto apre un ricordo — non una pagina qualsiasi.</p>
+              <p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F;">Il pezzo che hai tra le mani è la chiave. Dietro si apre uno spazio solo vostro: foto, parole, date, la storia che volete custodire. Lo curi tu. Chi ami lo vive toccando l’oggetto e aprendo con il PIN.</p>
             </td>
           </tr>
           <tr>
@@ -99,8 +97,8 @@ Il team KhamaKey Moments
                   <td style="padding:20px 22px;font-family:Georgia,'Times New Roman',serif;color:#071A3C;">
                     <p style="margin:0 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#AA626C;">I tuoi prossimi passi</p>
                     <p style="margin:0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">1.</strong> Attiva l’account — è il bottone qui sotto.</p>
-                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">2.</strong> Accedi a Moments: sei di nuovo nel tuo spazio.</p>
-                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">3.</strong> Dai vita alla pagina collegata al tuo oggetto. Il resto è vostro.</p>
+                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">2.</strong> Accedi a Moments: è l’area privata dove crei e aggiorni la pagina del tuo oggetto.</p>
+                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">3.</strong> Dai vita a quella pagina. Poi chi ami la apre dal chip, con il PIN.</p>
                   </td>
                 </tr>
               </table>

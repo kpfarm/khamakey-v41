@@ -392,3 +392,4 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-29 | Cursor | **Email Auth Moments**: ritocco copie goffe («dietro si apre», «si apre dal chip») |
 | 2026-08-29 | Cursor | **Email Auth Moments**: PIN facoltativo (aggiungi o togli a piacere) |
 | 2026-08-29 | Cursor | **Email Auth Moments**: PIN tolto dal passo 3 (resta solo nel testo sopra) |
+| 2026-08-29 | Cursor | **Email Auth Moments**: si dice Moment, non oggetto/pezzo |

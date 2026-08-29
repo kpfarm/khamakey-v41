@@ -34,7 +34,7 @@ Struttura:
 1. Logo
 2. Invito al mondo esclusivo
 3. Grazie per aver scelto / acquistato
-4. Cosa è KhamaKey Moments (oggetto = chiave di uno spazio privato)
+4. Cosa è KhamaKey Moments (il Moment = chiave di uno spazio privato)
 5. Tre passi per entrare
 6. Bottone **Entra nel tuo spazio**
 7. Firma del team
@@ -51,15 +51,15 @@ Benvenuto nel mondo KhamaKey Moments
 
 Ciao,
 
-grazie per averci scelto. Sei entrato in un mondo riservato, dove ogni oggetto apre un ricordo — non una pagina qualsiasi.
+grazie per averci scelto. Sei entrato in un mondo riservato, dove ogni Moment apre un ricordo — non una pagina qualsiasi.
 
-Il pezzo che hai tra le mani è la chiave. Che tu lo tenga per te o lo doni, custodisce uno spazio privato: foto, parole, date, una storia. Tu la prepari da Moments. Chi ha l’oggetto può entrarvi. Il PIN è una scelta tua: lo aggiungi o lo togli quando vuoi.
+Il Moment che hai tra le mani è la chiave. Che tu lo tenga per te o lo doni, custodisce uno spazio privato: foto, parole, date, una storia. Tu la prepari da Moments. Chi ha il Moment può entrarvi. Il PIN è una scelta tua: lo aggiungi o lo togli quando vuoi.
 
 Tre passi:
 
 1. Attiva l’account (il bottone qui sotto)
-2. Accedi a Moments: è l’area privata dove crei e aggiorni la pagina del tuo oggetto
-3. Dai vita alla pagina. Chi tiene l’oggetto la apre.
+2. Accedi a Moments: è l’area privata dove crei e aggiorni la pagina del tuo Moment
+3. Dai vita alla pagina. Chi tiene il Moment la apre.
 
 Bottone: **Entra nel tuo spazio**
 
@@ -86,8 +86,8 @@ Il team KhamaKey Moments
               <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C;">Il tuo invito</p>
               <h1 style="margin:12px 0 0;font-size:28px;line-height:1.28;font-weight:normal;">Benvenuto nel mondo KhamaKey Moments.</h1>
               <p style="margin:18px 0 0;font-size:16px;line-height:1.65;color:#18202F;">Ciao,</p>
-              <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F;">grazie per averci scelto. Sei entrato in un mondo riservato, dove ogni oggetto apre un ricordo — non una pagina qualsiasi.</p>
-              <p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F;">Il pezzo che hai tra le mani è la chiave. Che tu lo tenga per te o lo doni, custodisce uno spazio privato: foto, parole, date, una storia. Tu la prepari da Moments. Chi ha l’oggetto può entrarvi. Il PIN è una scelta tua: lo aggiungi o lo togli quando vuoi.</p>
+              <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F;">grazie per averci scelto. Sei entrato in un mondo riservato, dove ogni Moment apre un ricordo — non una pagina qualsiasi.</p>
+              <p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F;">Il Moment che hai tra le mani è la chiave. Che tu lo tenga per te o lo doni, custodisce uno spazio privato: foto, parole, date, una storia. Tu la prepari da Moments. Chi ha il Moment può entrarvi. Il PIN è una scelta tua: lo aggiungi o lo togli quando vuoi.</p>
             </td>
           </tr>
           <tr>
@@ -97,8 +97,8 @@ Il team KhamaKey Moments
                   <td style="padding:20px 22px;font-family:Georgia,'Times New Roman',serif;color:#071A3C;">
                     <p style="margin:0 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#AA626C;">I tuoi prossimi passi</p>
                     <p style="margin:0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">1.</strong> Attiva l’account — è il bottone qui sotto.</p>
-                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">2.</strong> Accedi a Moments: è l’area privata dove crei e aggiorni la pagina del tuo oggetto.</p>
-                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">3.</strong> Dai vita alla pagina. Chi tiene l’oggetto la apre.</p>
+                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">2.</strong> Accedi a Moments: è l’area privata dove crei e aggiorni la pagina del tuo Moment.</p>
+                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">3.</strong> Dai vita alla pagina. Chi tiene il Moment la apre.</p>
                   </td>
                 </tr>
               </table>

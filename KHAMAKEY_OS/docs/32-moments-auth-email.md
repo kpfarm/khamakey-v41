@@ -66,6 +66,8 @@ Bottone: **Entra nel tuo spazio**
 A presto,  
 Il team KhamaKey Moments
 
+Questa è una mail automatica. Non rispondere a questo indirizzo.
+
 ## Body HTML
 
 ```html
@@ -116,6 +118,7 @@ Il team KhamaKey Moments
               <p style="margin:22px 0 0;font-size:11px;line-height:1.5;color:#8a6a70;">Se il pulsante non si apre, copia questo indirizzo:<br>
                 <a href="{{ .ConfirmationURL }}" style="color:#AA626C;word-break:break-all;">{{ .ConfirmationURL }}</a>
               </p>
+              <p style="margin:18px 0 0;font-size:11px;line-height:1.5;color:#8a6a70;">Questa è una mail automatica. Non rispondere a questo indirizzo.</p>
             </td>
           </tr>
         </table>

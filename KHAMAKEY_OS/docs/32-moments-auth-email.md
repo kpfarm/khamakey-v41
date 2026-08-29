@@ -59,7 +59,7 @@ Tre passi:
 
 1. Attiva l’account (il bottone qui sotto)
 2. Accedi a Moments: è l’area privata dove crei e aggiorni la pagina del tuo oggetto
-3. Dai vita alla pagina. Chi tiene l’oggetto la apre. Il PIN, se lo usi, lo gestisci tu.
+3. Dai vita alla pagina. Chi tiene l’oggetto la apre.
 
 Bottone: **Entra nel tuo spazio**
 
@@ -98,7 +98,7 @@ Il team KhamaKey Moments
                     <p style="margin:0 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#AA626C;">I tuoi prossimi passi</p>
                     <p style="margin:0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">1.</strong> Attiva l’account — è il bottone qui sotto.</p>
                     <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">2.</strong> Accedi a Moments: è l’area privata dove crei e aggiorni la pagina del tuo oggetto.</p>
-                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">3.</strong> Dai vita alla pagina. Chi tiene l’oggetto la apre. Il PIN, se lo usi, lo gestisci tu.</p>
+                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">3.</strong> Dai vita alla pagina. Chi tiene l’oggetto la apre.</p>
                   </td>
                 </tr>
               </table>

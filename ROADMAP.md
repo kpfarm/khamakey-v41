@@ -427,4 +427,5 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-29 | Cursor | **Moments v234**: dopo signup, schermo «Controlla la tua email» (form svuotato) |
 | 2026-08-29 | Cursor | **Moments v246**: overlay su live v245 (conferma email + Auth `/moments`) — da deployare Pages |
 | 2026-08-30 | Cursor | **Worker v214**: schermo PIN allineato palette Moments (wordmark + rosa/blu) |
+| 2026-08-30 | Cursor | **Moments v248**: switch IT/EN solo nel menu account (niente topbar) |
 | 2026-08-30 | Cursor | **GitHub sync**: push 34 commit locali su `main` (auth kpfarm OK) |

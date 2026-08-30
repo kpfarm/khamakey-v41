@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v248 — lingua nel menu account (2026-08-30, Cursor)** — Pages
+  - Rimosso switch IT/EN dalla topbar; resta nel menu avatar + schermo login.
 - **Worker v214 — PIN gate brand Moments (2026-08-30, Cursor)** — Worker
   - Schermo inserimento PIN: stessa palette di attivazione (`#071A3C` / `#AA626C`, fondo `#FFF9F5`, wordmark, CTA gradient). Logica PIN invariata.
 - **Moments v247 — merge Auth v246 + editor open v245 (2026-08-30, Cursor)** — Pages

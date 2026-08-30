@@ -99,7 +99,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v192** | Magazzino: gestione linee oggetto (+ SQL v171). |
 | **Worker NFC** | **v214-pin-brand** | Schermo PIN allineato palette Moments (rosa/blu + wordmark); multi-pet + guard Supabase. |
-| **Moments editor** | **v247** | Merge: Auth conferma email (v246) + apertura editor più reattiva (v245). |
+| **Moments editor** | **v248** | IT/EN solo nel menu account (tolto dalla topbar). |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v172 (prod)** | v172 salva ottimistico applicata 2026-08-06; v171 video 50MB; v170 build_stage. |

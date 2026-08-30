@@ -60,12 +60,19 @@ export function migrateLetterMediaSection(section = {}){
   return [];
 }
 
+function looksLikeYoutubeUrl(raw){
+  const url = String(raw || "").trim().toLowerCase();
+  return /youtu\.be\//.test(url) || /youtube(?:-nocookie)?\.com\//.test(url);
+}
+
 export function migrateVideoSectionMedia(section = {}){
   const limits = mediaLimitsForKey("video");
-  const list = normalizeMediaList(section).filter(item=>item.type === "video");
+  const list = normalizeMediaList(section)
+    .filter(item=>item.type === "video" && !looksLikeYoutubeUrl(item.url));
   if(list.length) return list.slice(0, limits.maxVideos);
   const url = String(section.video_url || "").trim();
-  if(!url) return [];
+  // YouTube non è un file MP4: non finisce in <video src="…youtube…">
+  if(!url || looksLikeYoutubeUrl(url)) return [];
   return [normalizeMediaItem({
     type:"video",
     url,

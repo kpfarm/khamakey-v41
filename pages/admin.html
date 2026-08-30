@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=183">
+  <link rel="stylesheet" href="admin.css?v=192">
   <script>
     // Dominio Moments: questo è l'admin Business — vai subito all'Officina Moments.
     (function () {
@@ -359,15 +359,12 @@
                 <input name="name" type="text" placeholder="Moments Matrimonio — Bundle coppia" required>
               </label>
               <label>Linea oggetto
-                <select name="product_line">
-                  <option value="portachiavi">Portachiavi NFC</option>
-                  <option value="orsetto">Orsetto NFC</option>
-                  <option value="card">Card NFC</option>
-                  <option value="magnete">Magnete NFC</option>
-                  <option value="tag">Tag / tessera NFC</option>
-                  <option value="confezione">Confezione regalo</option>
-                  <option value="altro">Altro</option>
+                <select name="product_line" data-product-line-select>
+                  <option value="">Caricamento linee…</option>
                 </select>
+              </label>
+              <label class="wide-field" data-product-line-custom-wrap hidden>Nome nuova linea
+                <input name="product_line_custom" type="text" placeholder="Es. Ciondolo NFC…">
               </label>
               <label>Template pagina
                 <select name="product_type" data-moment-type-select data-default-value="wedding"></select>
@@ -451,15 +448,12 @@
                   <input name="name" type="text" placeholder="KhamaKey Love — Portachiavi" required>
                 </label>
                 <label>Linea oggetto
-                  <select name="product_line">
-                    <option value="portachiavi">Portachiavi NFC</option>
-                    <option value="orsetto">Orsetto NFC</option>
-                    <option value="card">Card NFC</option>
-                    <option value="magnete">Magnete NFC</option>
-                    <option value="tag">Tag / tessera NFC</option>
-                    <option value="confezione">Confezione regalo</option>
-                    <option value="altro">Altro</option>
+                  <select name="product_line" data-product-line-select>
+                    <option value="">Caricamento linee…</option>
                   </select>
+                </label>
+                <label class="wide-field" data-product-line-custom-wrap hidden>Nome nuova linea
+                  <input name="product_line_custom" type="text" placeholder="Es. Ciondolo NFC…">
                 </label>
                 <label>Template pagina
                   <select name="product_type" data-moment-type-select data-default-value="anniversary"></select>
@@ -490,6 +484,24 @@
               </form>
             </details>
 
+            <details class="admin-details" id="momentProductLinesPanel">
+              <summary>Gestisci linee oggetto fisico</summary>
+              <p class="field-hint wide-field">Aggiungi, rinomina o elimina le linee. Le linee di sistema si possono solo disattivare. Elimina solo se non ci sono pezzi/modelli collegati.</p>
+              <form class="admin-form compact-form" id="momentProductLineForm">
+                <label class="wide-field">Nome nuova linea
+                  <input name="label" type="text" required placeholder="Es. Ciondolo NFC, Portafoto…">
+                </label>
+                <button class="primary-action" type="submit">Aggiungi linea</button>
+                <p class="form-status" id="momentProductLineStatus"></p>
+              </form>
+              <div class="table-wrap" style="margin-top:10px">
+                <table>
+                  <thead><tr><th>Nome</th><th>Slug</th><th>Tipo</th><th>Stato</th><th>Azioni</th></tr></thead>
+                  <tbody id="momentProductLinesTable"><tr><td colspan="5">Caricamento linee…</td></tr></tbody>
+                </table>
+              </div>
+            </details>
+
             <details class="admin-details" open>
               <summary>Genera nuovo stock in magazzino</summary>
               <form class="admin-form compact-form moment-batch-form" id="momentBatchForm">
@@ -499,15 +511,12 @@
                   </select>
                 </label>
                 <label>Linea oggetto fisico
-                  <select name="product_line" required>
-                    <option value="orsetto">Orsetto NFC</option>
-                    <option value="portachiavi">Portachiavi NFC</option>
-                    <option value="card">Card NFC</option>
-                    <option value="magnete">Magnete NFC</option>
-                    <option value="tag">Tag / tessera NFC</option>
-                    <option value="confezione">Confezione regalo</option>
-                    <option value="altro">Altro oggetto</option>
+                  <select name="product_line" data-product-line-select required>
+                    <option value="">Caricamento linee…</option>
                   </select>
+                </label>
+                <label class="wide-field" data-product-line-custom-wrap hidden>Nome nuova linea
+                  <input name="product_line_custom" type="text" placeholder="Es. Ciondolo NFC…">
                 </label>
                 <label>Prefisso codice
                   <input name="prefix" type="text" value="MOMENT" placeholder="MOMENT">
@@ -639,15 +648,20 @@
                 <button type="button" class="small-action primary-outline" id="momentLabelsSelected">PDF etichette (selezione)</button>
               </div>
             </div>
-            <p class="field-hint export-hint"><strong>Stampa / NFC:</strong> CSV per Excel · <strong>PDF 5 sezioni Cricut</strong> (panoramica · ovali codice · barcode · link NFC · QR pagina 28×28 mm), numerate da 1. Dopo ogni lotto scarichi CSV + PDF automaticamente.</p>
-            <div class="table-wrap">
-              <table>
+            <p class="field-hint export-hint"><strong>Stampa / NFC:</strong> CSV per Excel · <strong>PDF 5 sezioni Cricut</strong> (panoramica · rettangoli codice · barcode · link NFC · QR pagina 28×28 mm), numerate da 1. Dopo ogni lotto scarichi CSV + PDF automaticamente.</p>
+            <div class="table-wrap inventory-table-wrap">
+              <table class="inventory-table">
                 <thead><tr>
                   <th><input type="checkbox" id="momentSelectAll" aria-label="Seleziona tutti"></th>
                   <th>Codice</th><th>Link NFC</th><th>Attivazione</th><th>Linea</th><th>Lotto</th><th>Creato</th><th>Tracciabilita'</th><th>Stato</th><th>Pezzo</th><th>Cliente</th><th>Azioni</th>
                 </tr></thead>
                 <tbody id="momentProductsTable"><tr><td colspan="12">Caricamento prodotti...</td></tr></tbody>
               </table>
+            </div>
+            <div class="inventory-pager" id="momentProductsPager" hidden>
+              <button type="button" class="small-action" id="momentPagePrev">← Precedenti</button>
+              <span id="momentPageLabel">—</span>
+              <button type="button" class="small-action" id="momentPageNext">Successivi →</button>
             </div>
           </div>
         </section>
@@ -2095,15 +2109,8 @@
               <input name="quantity" type="number" min="1" max="500" value="1" required>
             </label>
             <label>Linea oggetto
-              <select name="product_line">
+              <select name="product_line" data-product-line-select data-product-line-empty="Qualsiasi disponibile">
                 <option value="">Qualsiasi disponibile</option>
-                <option value="orsetto">Orsetto NFC</option>
-                <option value="portachiavi">Portachiavi NFC</option>
-                <option value="card">Card NFC</option>
-                <option value="magnete">Magnete NFC</option>
-                <option value="tag">Tag / tessera NFC</option>
-                <option value="confezione">Confezione regalo</option>
-                <option value="altro">Altro oggetto</option>
               </select>
             </label>
             <label>Agente (opzionale)
@@ -2132,6 +2139,6 @@
     </section>
   </aside>
 
-  <script type="module" src="admin.js?v=183"></script>
+  <script type="module" src="admin.js?v=192"></script>
 </body>
 </html>

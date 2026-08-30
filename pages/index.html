@@ -6,14 +6,23 @@
   <title>KhamaKey - Accesso</title>
   <link rel="icon" href="khamakey-favicon.png">
   <script>
-    // Su dominio Moments la home Business confonde: porta all'area clienti Moments.
-    // Bypass: ?product=business
+    // Moments-first: su dominio Moments (e su callback Auth) non mostrare mai login Business.
+    // Causa tipica: Site URL Supabase ancora su khamakey-app.pages.dev → link conferma email
+    // apre questa home Business. Bypass esplicito: ?product=business
     (function () {
       try {
         var host = location.hostname || "";
         var params = new URLSearchParams(location.search || "");
         if (params.get("product") === "business") return;
-        if (/(?:^|\.)khamakeymoments\.com$/i.test(host)) {
+        var hash = String(location.hash || "");
+        var isAuthCallback = Boolean(
+          params.get("code") ||
+          params.get("token_hash") ||
+          params.get("type") ||
+          /access_token|refresh_token|type=signup|type=recovery|type=magiclink|type=invite/i.test(hash)
+        );
+        var onMomentsHost = /(?:^|\.)khamakeymoments\.com$/i.test(host);
+        if (onMomentsHost || isAuthCallback) {
           location.replace("./moments.html" + location.search + location.hash);
         }
       } catch (e) { /* ignore */ }

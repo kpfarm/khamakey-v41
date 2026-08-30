@@ -12,7 +12,10 @@ const UPLOAD_URL = `${WORKER_BASE_URL}/api/media/upload`;
 const DELETE_URL = `${WORKER_BASE_URL}/api/media/delete`;
 const USAGE_SYNC_URL = `${WORKER_BASE_URL}/api/media/usage-sync`;
 const UPLOAD_CONCURRENCY = 3;
-const SKIP_COMPRESS_MAX_BYTES = 520_000;
+/** Sotto questa soglia non comprimiamo: meno lavoro sul telefono, meno rischio qualità. */
+const SKIP_COMPRESS_MAX_BYTES = 2 * 1024 * 1024;
+/** Accettiamo il file compresso solo se risparmia almeno il 10%. */
+const MIN_COMPRESS_SAVINGS_RATIO = 0.10;
 const GALLERY_IMAGE_MAX_SIDE = 1600;
 const GALLERY_IMAGE_QUALITY = 0.78;
 const DEFAULT_IMAGE_MAX_SIDE = 1920;
@@ -145,9 +148,42 @@ function canUploadImageDirectly(file){
   const type = String(file?.type || "").toLowerCase();
   const size = Number(file?.size || 0);
   if(!size || size > SKIP_COMPRESS_MAX_BYTES) return false;
+  // GIF: non passare da canvas (rompe eventuali animazioni).
+  if(type === "image/gif") return true;
   if(type === "image/webp") return true;
   if(type === "image/jpeg" || type === "image/jpg") return true;
+  if(type === "image/png") return true;
   return false;
+}
+
+function asUploadImageFile(blobOrFile, sourceFile, ext = "webp"){
+  if(blobOrFile instanceof File) return blobOrFile;
+  const base = String(sourceFile?.name || "foto").replace(/\.\w+$/, "") || "foto";
+  const type = blobOrFile?.type || (ext === "jpg" ? "image/jpeg" : "image/webp");
+  const nameExt = type.includes("jpeg") || type.includes("jpg") ? "jpg" : ext;
+  return new File([blobOrFile], `${base}.${nameExt}`, {
+    type,
+    lastModified: sourceFile?.lastModified || Date.now()
+  });
+}
+
+/** Compressione cauta: solo file grandi; se fallisce o non conviene → originale. */
+async function buildImageUploadFile(file,{maxSide = DEFAULT_IMAGE_MAX_SIDE,quality = DEFAULT_IMAGE_QUALITY} = {}){
+  const prepared = await prepareImageFileForUpload(file);
+  if(canUploadImageDirectly(prepared)) return prepared;
+  if(Number(prepared.size || 0) <= SKIP_COMPRESS_MAX_BYTES) return prepared;
+  try{
+    const compressed = await compressImage(prepared,{maxSide,quality});
+    const out = asUploadImageFile(compressed, prepared);
+    const originalSize = Number(prepared.size || 0);
+    const outSize = Number(out.size || 0);
+    if(!outSize || !originalSize) return prepared;
+    if(outSize >= originalSize * (1 - MIN_COMPRESS_SAVINGS_RATIO)) return prepared;
+    return out;
+  }catch{
+    // Mai bloccare l'upload per un errore di compressione.
+    return prepared;
+  }
 }
 
 async function loadImageSource(file){
@@ -281,15 +317,6 @@ export function compressImage(file,{maxSide = DEFAULT_IMAGE_MAX_SIDE,quality = D
       reject(error instanceof Error ? error : new Error("Impossibile elaborare l'immagine."));
     }
   });
-}
-
-async function buildImageUploadFile(file,{maxSide = DEFAULT_IMAGE_MAX_SIDE,quality = DEFAULT_IMAGE_QUALITY} = {}){
-  const prepared = await prepareImageFileForUpload(file);
-  if(canUploadImageDirectly(prepared)) return prepared;
-  const compressed = await compressImage(prepared,{maxSide,quality});
-  if(compressed instanceof File) return compressed;
-  const base = String(prepared.name || file.name || "foto").replace(/\.\w+$/,"") || "foto";
-  return new File([compressed], `${base}.webp`, { type:compressed.type || "image/webp", lastModified:prepared.lastModified });
 }
 
 export async function ensureAuthSession(supabase = getUploadClient(),{forceRefresh = false} = {}){

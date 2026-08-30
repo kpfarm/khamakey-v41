@@ -98,7 +98,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v192** | Magazzino: gestione linee oggetto (+ SQL v171). |
-| **Worker NFC** | **v213-multi-pet** | Multi-pet + guard Supabase; live su link.khamakeymoments.com. |
+| **Worker NFC** | **v214-pin-brand** | Schermo PIN allineato palette Moments (rosa/blu + wordmark); multi-pet + guard Supabase. |
 | **Moments editor** | **v247** | Merge: Auth conferma email (v246) + apertura editor più reattiva (v245). |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |

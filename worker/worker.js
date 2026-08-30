@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v213-multi-pet";
+const WORKER_VERSION = "v214-pin-brand";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1597,11 +1597,37 @@ document.addEventListener("click",event=>{
 
 function renderMomentPinGate(page, origin, failed = false, env = {}, locale = "it") {
   const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
+  const logoSrc = `${pagesBase}/khamakey-moments-wordmark-on-light.png`;
   return `<!doctype html>
 <html lang="${attr(locale)}">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(page.title || "KhamaKey Moments")}</title>
-<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:Arial,sans-serif;background:#f5f7fa;color:#172036;padding:16px}.card{width:min(92vw,420px);background:white;border:1px solid #e2e8f0;border-radius:18px;padding:26px;box-shadow:0 18px 60px rgba(27,42,94,.12);text-align:center}h1{color:#1b2a5e;margin:0 0 8px}p{color:#64748b;line-height:1.5}input{width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:13px;margin:12px 0;text-align:center;font-size:1.2rem;letter-spacing:.16em}button{width:100%;border:0;border-radius:10px;background:#1b2a5e;color:white;padding:12px;font-weight:800;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.error{color:#d92d20;font-weight:800}.legal{margin-top:16px;font-size:12px}.legal a{color:#1b2a5e;font-weight:700;text-decoration:none;margin:0 8px}.legal a:hover{text-decoration:underline}</style></head>
-<body><form class="card" method="GET" id="pinGateForm"><h1>${escapeHtml(page.title || mt(locale, "pin.fallback_title"))}</h1><p>${escapeHtml(mt(locale, "pin.prompt"))}</p>${failed ? `<p class="error">${escapeHtml(mt(locale, "pin.wrong"))}</p>` : ""}<input id="pinGateInput" name="pin" inputmode="numeric" enterkeyhint="go" autocomplete="one-time-code" placeholder="PIN" required><button type="submit" id="pinGateSubmit">${escapeHtml(mt(locale, "pin.submit"))}</button><p class="legal"><a href="${attr(pagesBase)}/moments-privacy.html" target="_blank" rel="noopener">${escapeHtml(mt(locale, "legal.privacy"))}</a><a href="${attr(pagesBase)}/moments-terms.html" target="_blank" rel="noopener">${escapeHtml(mt(locale, "legal.terms"))}</a></p></form>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071A3C">
+<title>${escapeHtml(page.title || "KhamaKey Moments")}</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#18202F;padding:20px;
+background:radial-gradient(circle at 12% 8%,rgba(217,140,149,.18) 0%,transparent 42%),radial-gradient(circle at 90% 90%,rgba(170,98,108,.12) 0%,transparent 45%),#FFF9F5}
+.card{width:min(100%,440px);background:#fff;border:1px solid #E8D4CE;border-radius:22px;padding:28px 24px 24px;box-shadow:0 18px 50px rgba(7,26,60,.10);text-align:center}
+.logo{display:block;width:min(220px,72%);height:auto;margin:0 auto 16px}
+h1{color:#071A3C;font-size:clamp(1.35rem,5vw,1.75rem);line-height:1.2;margin:0 0 10px;font-weight:700}
+p{color:#6B6470;line-height:1.55;margin:0 0 12px}
+input{width:100%;border:1px solid #E8D4CE;border-radius:12px;padding:14px;margin:8px 0 14px;text-align:center;font-size:1.2rem;letter-spacing:.18em;color:#071A3C;background:#FFF9F5}
+input:focus{outline:2px solid rgba(170,98,108,.45);outline-offset:2px;border-color:#AA626C}
+button{width:100%;border:0;border-radius:12px;background:linear-gradient(135deg,#AA626C 0%,#071A3C 100%);color:#fff;padding:14px 16px;font-weight:700;font-size:1rem;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.error{color:#AA626C;font-weight:700}
+.legal{margin-top:16px;font-size:12px;color:#6B6470}
+.legal a{color:#071A3C;font-weight:700;text-decoration:none;margin:0 8px}
+.legal a:hover{text-decoration:underline}
+</style></head>
+<body><form class="card" method="GET" id="pinGateForm">
+<img class="logo" src="${attr(logoSrc)}" alt="KhamaKey Moments">
+<h1>${escapeHtml(page.title || mt(locale, "pin.fallback_title"))}</h1>
+<p>${escapeHtml(mt(locale, "pin.prompt"))}</p>
+${failed ? `<p class="error">${escapeHtml(mt(locale, "pin.wrong"))}</p>` : ""}
+<input id="pinGateInput" name="pin" inputmode="numeric" enterkeyhint="go" autocomplete="one-time-code" placeholder="PIN" required>
+<button type="submit" id="pinGateSubmit">${escapeHtml(mt(locale, "pin.submit"))}</button>
+<p class="legal"><a href="${attr(pagesBase)}/moments-privacy.html" target="_blank" rel="noopener">${escapeHtml(mt(locale, "legal.privacy"))}</a><a href="${attr(pagesBase)}/moments-terms.html" target="_blank" rel="noopener">${escapeHtml(mt(locale, "legal.terms"))}</a></p>
+</form>
 <script>(function(){var form=document.getElementById("pinGateForm");var btn=document.getElementById("pinGateSubmit");if(!form||!btn)return;var busy=false;function go(){if(busy)return;if(typeof form.checkValidity==="function"&&!form.checkValidity()){if(form.reportValidity)form.reportValidity();return}busy=true;if(typeof form.requestSubmit==="function")form.requestSubmit(btn);else form.submit()}btn.addEventListener("touchend",function(e){if(e.cancelable)e.preventDefault();go()},{passive:false});btn.addEventListener("click",function(e){e.preventDefault();go()});})();</script>
 </body></html>`;
 }

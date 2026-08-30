@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v214 — PIN gate brand Moments (2026-08-30, Cursor)** — Worker
+  - Schermo inserimento PIN: stessa palette di attivazione (`#071A3C` / `#AA626C`, fondo `#FFF9F5`, wordmark, CTA gradient). Logica PIN invariata.
 - **Moments v247 — merge Auth v246 + editor open v245 (2026-08-30, Cursor)** — Pages
   - Unisce conferma email / Auth `/moments` (v246) con apertura editor più reattiva (v245) e Worker multi-pet v213.
 - **Moments v246 live overlay (2026-08-29, Cursor)** — Pages

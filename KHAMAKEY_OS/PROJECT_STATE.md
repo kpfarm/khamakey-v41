@@ -98,7 +98,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v195** | Fix SVG/PNG etichette codice (font mm, leggibili). |
-| **Worker NFC** | **v215-no-empty-placeholder** | Niente «Pagina in preparazione» sotto copertina/titolo. |
+| **Worker NFC** | **v216-list-sections-no-hints** | Liste incomplete (promesse/sogni/…) non mostrano più hint «Aggiungi…». |
 | **Moments editor** | **v248** | IT/EN solo nel menu account (tolto dalla topbar). |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |

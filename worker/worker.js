@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v215-no-empty-placeholder";
+const WORKER_VERSION = "v216-list-sections-no-hints";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -2613,7 +2613,8 @@ function momentSectionHasContent(key, section) {
     case "dreams":
     case "rituals":
     case "numbers":
-      return resolveListItems(section, key === "promises" ? "promise" : key === "dreams" ? "dream" : key === "rituals" ? "ritual" : "number").length > 0 || Boolean(String(section.body || "").trim());
+      // Solo voci reali: un intro/body senza items non deve pubblicare hint «Aggiungi…»
+      return resolveListItems(section, key === "promises" ? "promise" : key === "dreams" ? "dream" : key === "rituals" ? "ritual" : "number").length > 0;
     case "countdown":
       return Boolean(section.target_date);
     case "music":
@@ -4958,25 +4959,25 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
 
   if (key === "promises") {
     const items = resolveListItems(section, "promise");
-    if (!items.length) return `<article class="${rv}">${head(section.title || "Promesse")}<p class="moment-empty-hint">Aggiungi le promesse, una card ciascuna.</p></article>`;
+    if (!items.length) return "";
     return `<article class="${rv}">${head(section.title || "Promesse")}${listIntroHtml(section.body)}<div class="moment-promises">${items.map(item => `<div class="moment-promise"><span class="moment-promise-emoji">${escapeHtml(item.emoji)}</span><span>${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
   }
 
   if (key === "dreams") {
     const items = resolveListItems(section, "dream");
-    if (!items.length) return `<article class="${rv}">${head(section.title || "Sogni")}<p class="moment-empty-hint">Aggiungi i sogni da realizzare insieme.</p></article>`;
+    if (!items.length) return "";
     return `<article class="${rv}">${head(section.title || "Sogni")}${listIntroHtml(section.body)}<div class="moment-dreams">${items.map(item => `<div class="moment-dream ${item.done ? "done" : ""}"><span class="moment-dream-mark">${item.done ? "✓" : ""}</span><span class="moment-dream-text">${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
   }
 
   if (key === "rituals") {
     const items = resolveListItems(section, "ritual");
-    if (!items.length) return `<article class="${rv}">${head(section.title || "Rituali")}<p class="moment-empty-hint">Aggiungi i rituali quotidiani.</p></article>`;
+    if (!items.length) return "";
     return `<article class="${rv}">${head(section.title)}${listIntroHtml(section.body)}<div class="moment-rituals">${items.map(item => `<div class="moment-ritual"><span class="moment-promise-emoji">${escapeHtml(item.emoji)}</span><span>${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
   }
 
   if (key === "numbers") {
     const items = resolveListItems(section, "number");
-    if (!items.length) return `<article class="${rv}">${head(section.title || "I nostri numeri")}<p class="moment-empty-hint">Es. «365 · giorni insieme».</p></article>`;
+    if (!items.length) return "";
     return `<article class="${rv}">${head(section.title)}${listIntroHtml(section.body)}<div class="moment-numbers">${items.map(item => `<div class="moment-number">${item.value ? `<b>${escapeHtml(item.value)}</b>` : ""}${item.label ? `<small>${escapeHtml(item.label)}</small>` : ""}</div>`).join("")}</div></article>`;
   }
 

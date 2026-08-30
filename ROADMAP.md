@@ -432,4 +432,5 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Admin v194**: Officina Moments — palette + favicon brand Moments |
 | 2026-08-30 | Cursor | **Admin v195**: SVG/PNG etichette codice leggibili (font mm + PNG canvas) |
 | 2026-08-30 | Cursor | **Worker v215**: niente «Pagina in preparazione» se c’è già copertina/titolo |
+| 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **GitHub sync**: push 34 commit locali su `main` (auth kpfarm OK) |

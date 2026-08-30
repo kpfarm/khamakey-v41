@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v216 — liste incomplete nascoste (2026-08-30, Cursor)** — Worker
+  - Promesse / sogni / rituali / numeri: in pubblico solo se ci sono voci; niente hint «Aggiungi…».
 - **Worker v215 — niente placeholder sotto hero (2026-08-30, Cursor)** — Worker
   - Se ci sono solo copertina/titolo (nessuna sezione), non mostra più «Pagina in preparazione».
 - **Admin v195 — SVG/PNG etichette leggibili (2026-08-30, Cursor)** — Pages

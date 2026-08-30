@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v193 — etichette codice ×2 + ZIP PDF/SVG/PNG (2026-08-30, Cursor)** — Pages
+  - Riquadro codice più stretto; tolte le frasi «Attiva la pagina Moments» / «Inserisci il codice nell'app».
+  - 2 etichette adesive per pezzo (panoramica + sezione Cricut codice).
+  - Download ZIP con PDF (5 sezioni), SVG e PNG delle etichette codice.
 - **Moments v248 — lingua nel menu account (2026-08-30, Cursor)** — Pages
   - Rimosso switch IT/EN dalla topbar; resta nel menu avatar + schermo login.
 - **Worker v214 — PIN gate brand Moments (2026-08-30, Cursor)** — Worker

@@ -3,16 +3,19 @@ import { WORKER_BASE_URL } from "./config.js";
 import { jsPDF } from "https://esm.sh/jspdf@2.5.2";
 import JsBarcode from "https://esm.sh/jsbarcode@3.11.6";
 import QRCode from "https://esm.sh/qrcode@1.5.3";
+import JSZip from "https://esm.sh/jszip@3.10.1";
 
 /** A4 in mm */
 const A4 = { w: 210, h: 297 };
 
 /** Forme etichette Cricut (contorno = percorso di taglio) */
-/** Inserto confezione: testo “a cosa serve” + codice attivazione (rettangolo compatto) */
-const CODE_RECT = { w: 44, h: 15 };
+/** Inserto confezione: solo codice attivazione (riquadro stretto, 2 copie per pezzo) */
+const CODE_RECT = { w: 36, h: 9 };
 /** Spazio sopra il contorno per il N° pezzo (fuori dal taglio) */
 const CODE_NUM_H = 3.4;
 const CODE_CELL = { w: CODE_RECT.w, h: CODE_RECT.h + CODE_NUM_H };
+/** Gap tra le 2 etichette codice affiancate (panoramica) */
+const CODE_PAIR_GAP = 2.5;
 /** @deprecated alias — stesso rettangolo codice */
 const OVAL = CODE_RECT;
 /**
@@ -76,6 +79,14 @@ function batchMeta(rows){
   const type = String(first.product_type || first.product_label || "").trim();
   const category = [sku, label, type].filter(Boolean).join(" · ") || "Lotto KhamaKey Moments";
   return { category, qty: rows.length, lotTitle: label || sku || "Lotto KhamaKey Moments" };
+}
+
+/** Ogni pezzo → 2 etichette adesive identiche (stesso N° pezzo). */
+function duplicateCodeLabelRows(rows){
+  return rows.flatMap((row, i)=>[
+    { ...row, __labelIndex: i + 1 },
+    { ...row, __labelIndex: i + 1 }
+  ]);
 }
 
 function barcodeDataUrl(value, { height = 36, width = 1.2 } = {}){
@@ -161,9 +172,8 @@ function drawNumberBadge(doc, x, y, n, size = NUM_BOX){
 }
 
 /**
- * Inserto in confezione: rettangolo compatto + codice in evidenza.
+ * Inserto in confezione: rettangolo stretto + solo codice (niente frasi guida).
  * Il N° pezzo sta FUORI dal contorno di taglio (sopra a sinistra).
- * (Non mischiare con barcode o URL NFC.)
  */
 function drawCodeRectLabel(doc, x, y, index1, row){
   const showNum = index1 != null && index1 !== "" && Number(index1) > 0;
@@ -178,24 +188,20 @@ function drawCodeRectLabel(doc, x, y, index1, row){
   }
 
   setCutStroke(doc);
-  doc.roundedRect(x, boxY, CODE_RECT.w, CODE_RECT.h, 1.2, 1.2, "S");
+  doc.roundedRect(x, boxY, CODE_RECT.w, CODE_RECT.h, 1.0, 1.0, "S");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.6);
-  doc.setTextColor(15, 23, 42);
-  doc.text("Attiva la pagina Moments", cx, boxY + 3.9, { align: "center" });
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.4);
+  doc.setFontSize(10);
   doc.setTextColor(15, 23, 42);
   const code = activationCodeDisplay(row);
-  const lines = doc.splitTextToSize(code, CODE_RECT.w - 3.2);
-  doc.text(lines.slice(0, 1), cx, boxY + 9.2, { align: "center" });
+  const lines = doc.splitTextToSize(code, CODE_RECT.w - 2.4);
+  doc.text(lines.slice(0, 1), cx, boxY + CODE_RECT.h / 2 + 1.2, { align: "center" });
+}
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.2);
-  doc.setTextColor(15, 23, 42);
-  doc.text("Inserisci il codice nell'app", cx, boxY + 13.3, { align: "center" });
+/** Due etichette codice affiancate (stesso pezzo). */
+function drawCodeRectPair(doc, x, y, index1, row){
+  drawCodeRectLabel(doc, x, y, index1, row);
+  drawCodeRectLabel(doc, x + CODE_RECT.w + CODE_PAIR_GAP, y, index1, row);
 }
 
 /** @deprecated nome storico — ora rettangolo */
@@ -288,10 +294,12 @@ function drawGridSection(doc, rows, meta, {
   cellW,
   cellH,
   drawCell,
-  cutSheet = true
+  cutSheet = true,
+  qtyOverride = null
 }){
   const grid = computeGrid(cellW, cellH);
   const pageCount = Math.max(1, Math.ceil(rows.length / grid.perPage));
+  const qtyShown = qtyOverride != null ? qtyOverride : meta.qty;
 
   for(let page = 0; page < pageCount; page += 1){
     if(doc.__hasContent) doc.addPage();
@@ -300,7 +308,7 @@ function drawGridSection(doc, rows, meta, {
     drawCategoryQtyHeader(
       doc,
       meta.category,
-      meta.qty,
+      qtyShown,
       sectionTitle,
       `foglio ${page + 1}/${pageCount} · numerazione da 1`
     );
@@ -313,7 +321,8 @@ function drawGridSection(doc, rows, meta, {
       const rowIdx = Math.floor(i / grid.cols);
       const x = grid.offsetX + col * (grid.cellW + SHEET.gapX);
       const y = SHEET.marginY + SHEET.headerH + rowIdx * (grid.cellH + SHEET.gapY);
-      drawCell(doc, x, y, absoluteIndex + 1, row);
+      const n = row.__labelIndex != null ? row.__labelIndex : absoluteIndex + 1;
+      drawCell(doc, x, y, n, row);
     });
 
     drawFooter(doc, cutSheet ? CUT_NOTE : "Foglio di controllo — abbinamento pezzo a pezzo (non tagliare)");
@@ -321,18 +330,18 @@ function drawGridSection(doc, rows, meta, {
 }
 
 /**
- * Sezione 1 — panoramica: # | rettangolo codice | barcode | URL NFC | QR
+ * Sezione 1 — panoramica: # | 2× codice | barcode | URL NFC | QR
  */
 function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
   const colNumW = 10;
-  const colCodeW = CODE_RECT.w;
+  const colCodeW = CODE_RECT.w * 2 + CODE_PAIR_GAP;
   const colBarW = BAR_RECT.w;
   const colQrW = QR_SQUARE.w;
-  const colLinkW = Math.min(LINK_RECT.w, 58);
+  const colLinkW = Math.min(LINK_RECT.w, 52);
   const rowH = Math.max(CODE_RECT.h, BAR_RECT.h, LINK_RECT.h, QR_SQUARE.h, NUM_BOX.h) + 2;
   const gap = 2;
   const tableW = colNumW + gap + colCodeW + gap + colBarW + gap + colLinkW + gap + colQrW;
-  const startX = Math.max(SHEET.marginX, (A4.w - tableW) / 2);
+  const startX = Math.max(4, (A4.w - tableW) / 2);
   const topY = SHEET.marginY + SHEET.headerH + 2;
   const usableH = SHEET.footerY - topY - 6;
   const perPage = Math.max(1, Math.floor(usableH / (rowH + 2)));
@@ -347,7 +356,7 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
       meta.category,
       meta.qty,
       "1 · Panoramica lotto (controllo)",
-      `foglio ${page + 1}/${pageCount} · stessa numerazione delle etichette`
+      `foglio ${page + 1}/${pageCount} · 2 etichette codice per pezzo`
     );
 
     const headY = topY - 2;
@@ -357,7 +366,7 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
     let hx = startX;
     doc.text("N°", hx, headY);
     hx += colNumW + gap;
-    doc.text("CODICE ATTIVAZIONE", hx, headY);
+    doc.text("CODICE ×2", hx, headY);
     hx += colCodeW + gap;
     doc.text("BARCODE", hx, headY);
     hx += colBarW + gap;
@@ -375,8 +384,7 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
       drawNumberBadge(doc, x, y + (rowH - NUM_BOX.h) / 2, n);
       x += colNumW + gap;
 
-      // N° già nel badge a sinistra — niente numero dentro/sopra il riquadro codice
-      drawCodeRectLabel(doc, x, y + (rowH - CODE_RECT.h) / 2, null, row);
+      drawCodeRectPair(doc, x, y + (rowH - CODE_RECT.h) / 2, null, row);
       x += colCodeW + gap;
 
       const pkg = packagingBarcode(row);
@@ -397,7 +405,6 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
       x += colLinkW + gap;
 
       const url = nfcUrlForRow(row);
-      // N° già nel badge a sinistra — niente numero dentro/sopra il QR in panoramica
       drawQrSquareLabel(doc, x, y + (rowH - QR_SQUARE.h) / 2, null, row, qrCache.get(url));
     });
 
@@ -406,11 +413,13 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
 }
 
 function drawOvalCutSection(doc, rows, meta){
-  drawGridSection(doc, rows, meta, {
-    sectionTitle: "2 · Etichette codice (rettangoli) · Cricut",
+  const doubled = duplicateCodeLabelRows(rows);
+  drawGridSection(doc, doubled, meta, {
+    sectionTitle: "2 · Etichette codice (rettangoli ×2) · Cricut",
     cellW: CODE_CELL.w,
     cellH: CODE_CELL.h,
     cutSheet: true,
+    qtyOverride: `${meta.qty} pezzi · ${doubled.length} etichette`,
     drawCell: (d, x, y, n, row)=>drawCodeRectLabel(d, x, y, n, row)
   });
 }
@@ -451,8 +460,110 @@ function drawQrCutSection(doc, rows, meta, qrCache){
   });
 }
 
+function escapeXml(value){
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 /**
- * PDF 5 sezioni: panoramica · rettangoli codice · barcode · URL NFC · QR quadretti
+ * Foglio SVG delle sole etichette codice (2 per pezzo) — utile Cricut / Illustrator.
+ */
+function buildCodeLabelsSvg(rows){
+  const doubled = duplicateCodeLabelRows(rows);
+  const grid = computeGrid(CODE_CELL.w, CODE_CELL.h);
+  const pageH = A4.h;
+  const pageCount = Math.max(1, Math.ceil(doubled.length / grid.perPage));
+  const pages = [];
+
+  for(let page = 0; page < pageCount; page += 1){
+    const start = page * grid.perPage;
+    const slice = doubled.slice(start, start + grid.perPage);
+    const labels = slice.map((row, i)=>{
+      const col = i % grid.cols;
+      const rowIdx = Math.floor(i / grid.cols);
+      const x = grid.offsetX + col * (grid.cellW + SHEET.gapX);
+      const y = SHEET.marginY + SHEET.headerH + rowIdx * (grid.cellH + SHEET.gapY);
+      const n = row.__labelIndex != null ? row.__labelIndex : start + i + 1;
+      const boxY = y + CODE_NUM_H;
+      const code = escapeXml(activationCodeDisplay(row));
+      return `
+        <g data-piece="${n}">
+          <text x="${x}" y="${y + 2.4}" font-family="Helvetica, Arial, sans-serif" font-size="7" font-weight="700" fill="#0f172a">${n}</text>
+          <rect x="${x}" y="${boxY}" width="${CODE_RECT.w}" height="${CODE_RECT.h}" rx="1" ry="1" fill="#fff" stroke="#000" stroke-width="0.35"/>
+          <text x="${x + CODE_RECT.w / 2}" y="${boxY + CODE_RECT.h / 2 + 1.2}" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#0f172a">${code}</text>
+        </g>`;
+    }).join("");
+
+    pages.push(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="${A4.w}mm" height="${pageH}mm" viewBox="0 0 ${A4.w} ${pageH}">
+        <rect width="100%" height="100%" fill="#fff"/>
+        <text x="${A4.w / 2}" y="10" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="8" font-weight="700" fill="#0f172a">Etichette codice attivazione ×2 · foglio ${page + 1}/${pageCount}</text>
+        ${labels}
+      </svg>`);
+  }
+
+  if(pages.length === 1) return pages[0].trim();
+  // Multi-foglio: un SVG con più viewBox affiancate in altezza
+  const totalH = pageH * pages.length;
+  const stacked = pages.map((pageSvg, idx)=>{
+    const inner = pageSvg.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
+    return `<g transform="translate(0, ${idx * pageH})">${inner}</g>`;
+  }).join("\n");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${A4.w}mm" height="${totalH}mm" viewBox="0 0 ${A4.w} ${totalH}">
+  <rect width="100%" height="100%" fill="#fff"/>
+  ${stacked}
+</svg>`;
+}
+
+/** Raster PNG del foglio etichette codice (≈150 dpi). */
+async function buildCodeLabelsPngBlob(rows){
+  const svg = buildCodeLabelsSvg(rows);
+  const dpi = 150;
+  const doubled = duplicateCodeLabelRows(rows);
+  const grid = computeGrid(CODE_CELL.w, CODE_CELL.h);
+  const pageCount = Math.max(1, Math.ceil(doubled.length / grid.perPage));
+  const pxW = Math.round((A4.w / 25.4) * dpi);
+  const pxH = Math.round((A4.h / 25.4) * dpi * pageCount);
+
+  const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  try{
+    const img = await new Promise((resolve, reject)=>{
+      const image = new Image();
+      image.onload = ()=>resolve(image);
+      image.onerror = ()=>reject(new Error("Raster SVG etichette non riuscito."));
+      image.src = url;
+    });
+    const canvas = document.createElement("canvas");
+    canvas.width = pxW;
+    canvas.height = pxH;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, pxW, pxH);
+    ctx.drawImage(img, 0, 0, pxW, pxH);
+    const pngBlob = await new Promise((resolve, reject)=>{
+      canvas.toBlob(b=>b ? resolve(b) : reject(new Error("PNG etichette non riuscito.")), "image/png");
+    });
+    return pngBlob;
+  }finally{
+    URL.revokeObjectURL(url);
+  }
+}
+
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 2500);
+}
+
+/**
+ * Pacchetto etichette: PDF (5 sezioni) + SVG + PNG delle etichette codice ×2.
  * Numerazione continua da 1. QR = stesso URL del chip (/m/slug), mai il codice attivazione.
  */
 export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etichette"){
@@ -491,7 +602,24 @@ export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etich
 
   const stamp = new Date().toISOString().slice(0, 10);
   const safeStem = String(filenameStem || "khamakey-lotto").replace(/[^a-z0-9-]+/gi, "-").replace(/^-|-$/g, "").toLowerCase();
-  doc.save(`${safeStem}-${stamp}-${rows.length}pz-cricut5.pdf`);
+  const baseName = `${safeStem}-${stamp}-${rows.length}pz`;
+
+  const pdfBlob = doc.output("blob");
+  const svgText = buildCodeLabelsSvg(rows);
+  let pngBlob = null;
+  try{
+    pngBlob = await buildCodeLabelsPngBlob(rows);
+  }catch(error){
+    console.warn("PNG etichette:", error);
+  }
+
+  const zip = new JSZip();
+  zip.file(`${baseName}-cricut5.pdf`, pdfBlob);
+  zip.file(`${baseName}-codici.svg`, svgText);
+  if(pngBlob) zip.file(`${baseName}-codici.png`, pngBlob);
+
+  const zipBlob = await zip.generateAsync({ type: "blob" });
+  downloadBlob(zipBlob, `${baseName}-etichette.zip`);
   return true;
 }
 

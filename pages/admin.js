@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=192";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=193";
 import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=177";
 import {
   generateMomentSku,
@@ -1959,7 +1959,7 @@ async function runLabelExport(rows, filenameStem, triggerButton){
   }
   const buttons = [momentLabelsFiltered,momentLabelsSelected].filter(Boolean);
   buttons.forEach(btn=>{ btn.disabled = true; });
-  if(triggerButton) triggerButton.textContent = "PDF in corso…";
+  if(triggerButton) triggerButton.textContent = "Etichette in corso…";
   try{
     const labeled = rows.map(row=>({
       ...row,
@@ -1969,11 +1969,11 @@ async function runLabelExport(rows, filenameStem, triggerButton){
     await exportMomentLabelsPdf(labeled, filenameStem);
   }catch(error){
     console.error(error);
-    alert(error.message || "Generazione PDF non riuscita.");
+    alert(error.message || "Generazione etichette non riuscita.");
   }finally{
     buttons.forEach(btn=>{ btn.disabled = false; });
-    if(momentLabelsFiltered) momentLabelsFiltered.textContent = "PDF etichette (filtri)";
-    if(momentLabelsSelected) momentLabelsSelected.textContent = "PDF etichette (selezione)";
+    if(momentLabelsFiltered) momentLabelsFiltered.textContent = "Etichette PDF+SVG+PNG (filtri)";
+    if(momentLabelsSelected) momentLabelsSelected.textContent = "Etichette PDF+SVG+PNG (selezione)";
   }
 }
 
@@ -5735,8 +5735,8 @@ async function createMomentUnitsAndExport({
     setFormStatus(
       statusNode,
       qty === 1
-        ? `1 pezzo creato · codice ${formatMomentCodeDisplay(exportRows[0].code)} · PDF etichetta scaricato.`
-        : `Creati ${rows.length} codici · lotto «${batchLabel}» · CSV + PDF etichette.`,
+        ? `1 pezzo creato · codice ${formatMomentCodeDisplay(exportRows[0].code)} · ZIP etichette (PDF+SVG+PNG) scaricato.`
+        : `Creati ${rows.length} codici · lotto «${batchLabel}» · CSV + ZIP etichette (PDF+SVG+PNG).`,
       "ok"
     );
   }
@@ -7029,7 +7029,7 @@ momentLabelsFiltered?.addEventListener("click",async event=>{
     await runLabelExport(rows, "khamakey-etichette", event.currentTarget);
   }catch(error){
     console.error(error);
-    alert(error.message || "PDF etichette non riuscito.");
+    alert(error.message || "Etichette non riuscite.");
   }
 });
 momentLabelsSelected?.addEventListener("click",async event=>{

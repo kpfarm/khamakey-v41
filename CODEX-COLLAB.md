@@ -239,7 +239,7 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Stripe webhook / ingest** | Predisposto — libero | handler Stripe in `worker/worker.js`, RPC `ingest_stripe_checkout_event` |
 | **Shopify Moments** | Operativo — libero | webhook ordini, catalogo vendita, sync bozze |
 | **Editor Business — contratto pubblico** | Condiviso | `publicStateFromEditor`, renderer `/p/` nel Worker |
-| **Admin / Officina Moments** | **Libero** (live **v195** — SVG/PNG codici leggibili) | `admin.html`, `moments-admin.html`, `admin.js`, `admin.css`, `admin-guide.js`, `admin-moment-labels.js`, `moments-admin.css` — coordinarsi se stesso pannello |
+| **Admin / Officina Moments** | **Libero** (live **v196** — SVG/PNG Cricut) | `admin.html`, `moments-admin.html`, `admin.js`, `admin.css`, `admin-guide.js`, `admin-moment-labels.js`, `moments-admin.css` — coordinarsi se stesso pannello |
 | **Moments editor** | **Libero** (live **v248** — lingua nel menu) | `moments.html`, `moments.js`, `media-upload.js`, `moments-i18n*.js`, `moment-rsvp-*.js`, `moment-horoscope.js`, `moment-pets.js`, `moments.css`, `moment-editor-dashboard.js` |
 | **Security hardening (audit 2026-07-11)** | Completato e deployato (vedi `PROJECT_STATE.md`) | Regole assolute CSP/RLS/dati restano vincolanti |
 | **`worker/worker.js`** | **Libero** (live **v213-multi-pet**) | Chi tocca `worker.js` prende lock esplicito e non parallelizza |

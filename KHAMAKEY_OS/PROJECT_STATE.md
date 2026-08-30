@@ -97,7 +97,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v195** | Fix SVG/PNG etichette codice (font mm, leggibili). |
+| **Admin / Officina Moments** | **v196** | SVG/PNG codici: no titolo, sfondo trasparente, casella bianca senza bordo. |
 | **Worker NFC** | **v216-list-sections-no-hints** | Liste incomplete (promesse/sogni/…) non mostrano più hint «Aggiungi…». |
 | **Moments editor** | **v248** | IT/EN solo nel menu account (tolto dalla topbar). |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |

@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v196 — SVG/PNG Cricut puliti (2026-08-30, Cursor)** — Pages
+  - Export codici: niente titolo, sfondo trasparente, casella bianca senza contorno nero (taglio Explore 4 più semplice).
 - **Worker v216 — liste incomplete nascoste (2026-08-30, Cursor)** — Worker
   - Promesse / sogni / rituali / numeri: in pubblico solo se ci sono voci; niente hint «Aggiungi…».
 - **Worker v215 — niente placeholder sotto hero (2026-08-30, Cursor)** — Worker

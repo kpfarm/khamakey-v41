@@ -485,8 +485,8 @@ function codeFontMmForDisplay(code){
 }
 
 /**
- * Foglio SVG delle sole etichette codice (2 per pezzo) — utile Cricut / Illustrator.
- * Unità = mm (allineate al PDF). Font in mm, non in pt.
+ * Foglio SVG etichette codice (2 per pezzo) — Cricut Print Then Cut.
+ * Nessun titolo, sfondo trasparente, casella bianca senza bordo nero.
  */
 function buildCodeLabelsSvg(rows){
   const doubled = duplicateCodeLabelRows(rows);
@@ -495,7 +495,6 @@ function buildCodeLabelsSvg(rows){
   const pageCount = Math.max(1, Math.ceil(doubled.length / grid.perPage));
   const pages = [];
   const numFs = svgFontMm(7);
-  const titleFs = svgFontMm(8);
 
   for(let page = 0; page < pageCount; page += 1){
     const start = page * grid.perPage;
@@ -515,15 +514,13 @@ function buildCodeLabelsSvg(rows){
       return `
         <g data-piece="${n}">
           <text x="${x}" y="${y + numFs}" font-family="Helvetica, Arial, sans-serif" font-size="${numFs}" font-weight="700" fill="#0f172a">${n}</text>
-          <rect x="${x}" y="${boxY}" width="${CODE_RECT.w}" height="${CODE_RECT.h}" rx="1" ry="1" fill="#fff" stroke="#000" stroke-width="0.35"/>
+          <rect x="${x}" y="${boxY}" width="${CODE_RECT.w}" height="${CODE_RECT.h}" rx="1" ry="1" fill="#ffffff" stroke="none"/>
           <text x="${x + CODE_RECT.w / 2}" y="${baseline}" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="${codeFs}" font-weight="700" fill="#0f172a" textLength="${textW}" lengthAdjust="spacingAndGlyphs">${code}</text>
         </g>`;
     }).join("");
 
     pages.push(`
       <svg xmlns="http://www.w3.org/2000/svg" width="${A4.w}mm" height="${pageH}mm" viewBox="0 0 ${A4.w} ${pageH}">
-        <rect width="100%" height="100%" fill="#fff"/>
-        <text x="${A4.w / 2}" y="${8 + titleFs * 0.3}" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="${titleFs}" font-weight="700" fill="#0f172a">Etichette codice attivazione ×2 · foglio ${page + 1}/${pageCount}</text>
         ${labels}
       </svg>`);
   }
@@ -535,12 +532,11 @@ function buildCodeLabelsSvg(rows){
     return `<g transform="translate(0, ${idx * pageH})">${inner}</g>`;
   }).join("\n");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${A4.w}mm" height="${totalH}mm" viewBox="0 0 ${A4.w} ${totalH}">
-  <rect width="100%" height="100%" fill="#fff"/>
   ${stacked}
 </svg>`;
 }
 
-/** Raster PNG del foglio etichette codice (300 dpi) — disegnato a canvas, non da SVG rotto. */
+/** Raster PNG etichette codice (300 dpi, alpha) — solo caselle bianche + testo, no titolo/bordo. */
 async function buildCodeLabelsPngBlob(rows){
   const doubled = duplicateCodeLabelRows(rows);
   const grid = computeGrid(CODE_CELL.w, CODE_CELL.h);
@@ -554,8 +550,7 @@ async function buildCodeLabelsPngBlob(rows){
   canvas.width = pxW;
   canvas.height = pxH;
   const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, pxW, pxH);
+  ctx.clearRect(0, 0, pxW, pxH);
   ctx.textBaseline = "alphabetic";
 
   const drawRoundRect = (rx, ry, rw, rh, radius)=>{
@@ -571,16 +566,6 @@ async function buildCodeLabelsPngBlob(rows){
 
   for(let page = 0; page < pageCount; page += 1){
     const pageOffsetY = page * A4.h * scale;
-    const titleFs = svgFontMm(8) * scale;
-    ctx.fillStyle = "#0f172a";
-    ctx.font = `700 ${titleFs}px Helvetica, Arial, sans-serif`;
-    ctx.textAlign = "center";
-    ctx.fillText(
-      `Etichette codice attivazione ×2 · foglio ${page + 1}/${pageCount}`,
-      pxW / 2,
-      pageOffsetY + (8 + svgFontMm(8) * 0.3) * scale
-    );
-
     const start = page * grid.perPage;
     const slice = doubled.slice(start, start + grid.perPage);
     slice.forEach((row, i)=>{
@@ -599,17 +584,16 @@ async function buildCodeLabelsPngBlob(rows){
       const boxW = CODE_RECT.w * scale;
       const boxH = CODE_RECT.h * scale;
 
+      // N° pezzo fuori dalla casella (guida magazzino, non nel taglio bianco)
       ctx.fillStyle = "#0f172a";
       ctx.textAlign = "left";
       ctx.font = `700 ${svgFontMm(7) * scale}px Helvetica, Arial, sans-serif`;
       ctx.fillText(String(n), x, y + svgFontMm(7) * scale);
 
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 0.35 * scale;
+      // Casella bianca senza contorno
       ctx.fillStyle = "#ffffff";
       drawRoundRect(x, boxY, boxW, boxH, 1 * scale);
       ctx.fill();
-      ctx.stroke();
 
       ctx.fillStyle = "#0f172a";
       ctx.textAlign = "center";

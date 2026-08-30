@@ -414,3 +414,15 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-06 | Cursor | **Moments v240 ripristinato + Worker v207**: firma Great Vibes; messaggio non come nome |
 | 2026-08-07 | Cursor | **Officina home**: testo più corto + flusso in `<details>` — zero tocchi a form pezzi/magazzino |
 | 2026-08-04 | Cursor | **Business parallelo**: cartella `business/` + Supabase `qsieubbdkvtlvdsucmye` + Pages `khamakey-business` + Worker `khamakey-business-nfc` + R2 dedicato (Moments non toccato) |
+| 2026-08-29 | Cursor | **Moments Auth confirm**: link conferma email non deve aprire Business — Site URL Moments + redirect callback su /moments (docs/22 + index.html + momentsAuthRedirectTo) |
+| 2026-08-29 | Cursor | **Email Auth Moments**: template «Attiva account» + mittente `noreply@khamakeymoments.com` (`docs/32-moments-auth-email.md`) |
+| 2026-08-29 | Cursor | **Email Auth Moments**: passo 2 chiarito (Moments = editor della pagina); testi di benvenuto più alti |
+| 2026-08-29 | Cursor | **Email Auth Moments**: copia per uso proprio e per regalo (non solo «chi ami») |
+| 2026-08-29 | Cursor | **Email Auth Moments**: ritocco copie goffe («dietro si apre», «si apre dal chip») |
+| 2026-08-29 | Cursor | **Email Auth Moments**: PIN facoltativo (aggiungi o togli a piacere) |
+| 2026-08-29 | Cursor | **Email Auth Moments**: PIN tolto dal passo 3 (resta solo nel testo sopra) |
+| 2026-08-29 | Cursor | **Email Auth Moments**: si dice Moment, non oggetto/pezzo |
+| 2026-08-29 | Cursor | **Email Auth Moments**: passo 3 non ripete più apertura/chi tiene |
+| 2026-08-29 | Cursor | **Email Auth Moments**: dicitura mail automatica / non rispondere |
+| 2026-08-29 | Cursor | **Moments v234**: dopo signup, schermo «Controlla la tua email» (form svuotato) |
+| 2026-08-29 | Cursor | **Moments v246**: overlay su live v245 (conferma email + Auth `/moments`) — da deployare Pages |

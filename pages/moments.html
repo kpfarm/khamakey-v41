@@ -8,7 +8,7 @@
   <link rel="icon" href="khamakey-favicon.png">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="moments.css?v=245">
+  <link rel="stylesheet" href="moments.css?v=247">
 </head>
 <body class="session-pending">
   <main class="moments-boot" id="momentsBoot" aria-live="polite">
@@ -136,6 +136,16 @@
           </div>
         </form>
 
+        <div id="momentsSignupConfirm" class="auth-form signup-confirm" hidden>
+          <div class="form-intro">
+            <h2 data-i18n="auth.signup.confirm.title">Controlla la tua email</h2>
+            <p data-i18n="auth.signup.confirm.lead">Ti abbiamo inviato un link per confermare l’account. Apri la mail, poi torna qui e accedi.</p>
+            <p class="signup-confirm-email" id="momentsSignupConfirmEmail"></p>
+          </div>
+          <p class="field-hint" data-i18n="auth.signup.confirm.hint">Dopo la conferma, accedi con la stessa email. Il Moment si collega da solo.</p>
+          <button type="button" class="primary" id="momentsSignupConfirmLogin" data-i18n="auth.signup.confirm.login">Ho confermato, accedi</button>
+        </div>
+
         <p id="momentsAuthStatus" class="status" aria-live="polite"></p>
         <nav class="auth-legal" data-i18n-aria="auth.legal.nav" aria-label="Informazioni legali">
           <a href="./moments-privacy.html" data-i18n="auth.legal.privacy">Privacy</a>
@@ -235,6 +245,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=245"></script>
+  <script type="module" src="moments.js?v=247"></script>
 </body>
 </html>

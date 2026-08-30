@@ -8,6 +8,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v247 — merge Auth v246 + editor open v245 (2026-08-30, Cursor)** — Pages
+  - Unisce conferma email / Auth `/moments` (v246) con apertura editor più reattiva (v245) e Worker multi-pet v213.
+- **Moments v246 live overlay (2026-08-29, Cursor)** — Pages
+  - Snapshot live v245 + schermo conferma email + redirect Auth `/moments`. Deploy: `pages/` → `khamakey-app`.
+- **Email Auth Moments — template conferma (2026-08-29, Cursor)** — Ops
+  - Mail di benvenuto completa: mondo esclusivo, grazie per l’acquisto, 3 passi, bottone «Entra nel tuo spazio» (`docs/32-moments-auth-email.md`).
 - **Worker v212 — guard Supabase down (2026-08-20, Cursor)** — Worker
   - Diagnosi live: Supabase `cuxlwaocjqwzluycznyp` risponde **530 / error 1016** (Origin DNS) → login Moments + `/m/` `/k/` `/p/` non funzionano.
   - Non era un regressione multi-pet: anche rollback a v208 falliva allo stesso modo.

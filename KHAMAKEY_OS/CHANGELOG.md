@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v194 — brand Officina Moments (2026-08-30, Cursor)** — Pages
+  - Favicon Moments (`khamakey-moments-favicon.png`), wordmark Moments, palette rosa/blu al posto del verde Business.
 - **Admin v193 — etichette codice ×2 + ZIP PDF/SVG/PNG (2026-08-30, Cursor)** — Pages
   - Riquadro codice più stretto; tolte le frasi «Attiva la pagina Moments» / «Inserisci il codice nell'app».
   - 2 etichette adesive per pezzo (panoramica + sezione Cricut codice).

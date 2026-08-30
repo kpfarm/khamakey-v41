@@ -429,4 +429,5 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v214**: schermo PIN allineato palette Moments (wordmark + rosa/blu) |
 | 2026-08-30 | Cursor | **Moments v248**: switch IT/EN solo nel menu account (niente topbar) |
 | 2026-08-30 | Cursor | **Admin v193**: codice ×2 senza frasi guida + ZIP PDF/SVG/PNG |
+| 2026-08-30 | Cursor | **Admin v194**: Officina Moments — palette + favicon brand Moments |
 | 2026-08-30 | Cursor | **GitHub sync**: push 34 commit locali su `main` (auth kpfarm OK) |

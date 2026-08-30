@@ -1,8 +1,32 @@
-/* KhamaKey Moments — consolle operativa dedicata */
+/* KhamaKey Moments — Officina NFC: palette ufficiale Moments (non Business) */
 html[data-admin-product="moments"]{
-  --moments-accent:#4CAF27;
-  --moments-accent-soft:#E8F5E0;
-  --moments-glow:rgba(76,175,39,0.12);
+  --rosa-ricordo:#AA626C;
+  --blu-notte:#071A3C;
+  --rosa-luce:#D98C95;
+  --rosa-cipria:#F3E3DE;
+  --avorio:#FFF9F5;
+  --antracite:#18202F;
+  --navy:var(--blu-notte);
+  /* Remap accenti admin.css (verde Business → rosa Moments) */
+  --green:var(--rosa-ricordo);
+  --green-dark:var(--rosa-ricordo);
+  --bg:var(--avorio);
+  --text:var(--antracite);
+  --border:rgba(7,26,60,.12);
+  --muted:rgba(24,32,47,.62);
+  --moments-accent:var(--rosa-ricordo);
+  --moments-accent-soft:var(--rosa-cipria);
+  --moments-glow:rgba(170,98,108,.14);
+  --brand-gradient:linear-gradient(135deg,var(--rosa-ricordo) 0%,var(--blu-notte) 100%);
+}
+
+html[data-admin-product="moments"] body,
+html[data-admin-product="moments"]{
+  background:
+    radial-gradient(circle at 12% 8%, rgba(217,140,149,.16) 0%, transparent 42%),
+    radial-gradient(circle at 90% 90%, rgba(170,98,108,.10) 0%, transparent 45%),
+    var(--avorio);
+  color:var(--antracite);
 }
 
 html[data-admin-product="moments"] .admin-shell:not(.locked){
@@ -26,12 +50,20 @@ html[data-admin-product="moments"] .admin-shell:not(.locked){
 }
 
 html[data-admin-product="moments"] .admin-sidebar{
-  background:linear-gradient(180deg,#0a1228 0%,#091024 100%);
-  border-right:1px solid rgba(159,232,112,0.12);
+  background:linear-gradient(180deg,#071A3C 0%,#0A1630 100%);
+  border-right:1px solid rgba(170,98,108,.22);
+}
+
+html[data-admin-product="moments"] .admin-logo img{
+  background:transparent;
+  border-radius:0;
+  padding:0;
+  width:min(172px,100%);
+  height:auto;
 }
 
 html[data-admin-product="moments"] .admin-logo span{
-  color:#B8F090;
+  color:#F3E3DE;
   letter-spacing:.14em;
 }
 
@@ -42,20 +74,32 @@ html[data-admin-product="moments"] .admin-logo-badge{
   margin-top:4px;
   padding:4px 8px;
   border-radius:999px;
-  background:rgba(76,175,39,0.15);
-  color:#B8F090;
+  background:rgba(170,98,108,.22);
+  color:#F3E3DE;
   font-size:.62rem;
   font-weight:900;
   letter-spacing:.08em;
   text-transform:uppercase;
 }
 
+html[data-admin-product="moments"] .nav-group-toggle::after,
+html[data-admin-product="moments"] .nav-group.nav-intent .nav-group-toggle::before{
+  color:#D98C95;
+  background:#D98C95;
+  box-shadow:0 0 0 3px rgba(170,98,108,.2);
+}
+
 html[data-admin-product="moments"] .nav-intent[data-nav-intent="today"] .nav-group-toggle{
-  color:#B8F090;
+  color:#F3E3DE;
+}
+
+html[data-admin-product="moments"] .eyebrow{
+  color:var(--rosa-ricordo);
 }
 
 html[data-admin-product="moments"] .admin-topbar h1{
   font-size:clamp(1.35rem,2.5vw,1.75rem);
+  color:var(--blu-notte);
 }
 
 html[data-admin-product="moments"] .moments-console-tag{
@@ -64,7 +108,7 @@ html[data-admin-product="moments"] .moments-console-tag{
   padding:3px 8px;
   border-radius:999px;
   background:var(--moments-accent-soft);
-  color:var(--green-dark,#246517);
+  color:var(--rosa-ricordo);
   font-size:.62rem;
   font-weight:900;
   letter-spacing:.06em;
@@ -73,8 +117,8 @@ html[data-admin-product="moments"] .moments-console-tag{
 }
 
 html[data-admin-product="moments"] .panel-welcome.moments-welcome{
-  border:1px solid rgba(76,175,39,0.25);
-  background:linear-gradient(135deg,rgba(76,175,39,0.06) 0%,rgba(255,255,255,0.95) 55%);
+  border:1px solid rgba(170,98,108,.28);
+  background:linear-gradient(135deg,rgba(243,227,222,.9) 0%,rgba(255,255,255,.96) 55%);
 }
 
 html[data-admin-product="moments"] .moments-flow-card{
@@ -83,7 +127,7 @@ html[data-admin-product="moments"] .moments-flow-card{
   border-radius:14px;
   background:white;
   border:1px solid var(--border);
-  box-shadow:0 8px 24px -12px rgba(27,42,94,0.12);
+  box-shadow:0 8px 24px -12px rgba(7,26,60,.12);
 }
 
 html[data-admin-product="moments"] .moments-flow-title{
@@ -115,7 +159,7 @@ html[data-admin-product="moments"] .moments-flow-steps li{
   gap:4px;
   padding:10px 12px;
   border-radius:12px;
-  background:var(--soft,#F8FAFC);
+  background:var(--soft,rgba(7,26,60,.045));
   border:1px solid var(--border);
   font-size:.78rem;
   line-height:1.4;
@@ -133,13 +177,20 @@ html[data-admin-product="moments"] .moments-flow-steps li span{
 }
 
 html[data-admin-product="moments"] .welcome-chip-primary{
-  background:var(--moments-accent);
-  border-color:var(--moments-accent);
+  background:var(--brand-gradient);
+  border-color:transparent;
   color:white;
 }
 
+html[data-admin-product="moments"] .welcome-chip:hover,
+html[data-admin-product="moments"] .welcome-chip:focus-visible{
+  border-color:var(--rosa-ricordo);
+  background:var(--rosa-cipria);
+  color:var(--blu-notte);
+}
+
 html[data-admin-product="moments"] .metric-grid.moments-metrics article{
-  border-color:rgba(76,175,39,0.2);
+  border-color:rgba(170,98,108,.22);
 }
 
 html[data-admin-product="moments"] .metric-grid.moments-metrics strong{
@@ -147,8 +198,8 @@ html[data-admin-product="moments"] .metric-grid.moments-metrics strong{
 }
 
 html[data-admin-product="moments"] .panel-guide{
-  border-color:rgba(76,175,39,0.25);
-  background:linear-gradient(180deg,#fff 0%,#F9FCF7 100%);
+  border-color:rgba(170,98,108,.28);
+  background:linear-gradient(180deg,#fff 0%,#FFF9F5 100%);
 }
 
 html[data-admin-product="moments"] .panel-guide-head strong{
@@ -165,8 +216,37 @@ html[data-admin-product="moments"] .system-note{
 }
 
 html[data-admin-product="moments"] .ghost-link.moments-link{
-  border-color:rgba(76,175,39,0.35);
-  color:var(--green-dark,#246517);
+  border-color:rgba(170,98,108,.4);
+  color:var(--rosa-ricordo);
+}
+
+html[data-admin-product="moments"] .small-action:hover,
+html[data-admin-product="moments"] .ghost-button:hover{
+  border-color:var(--rosa-ricordo);
+  color:var(--rosa-ricordo);
+}
+
+html[data-admin-product="moments"] .primary-action{
+  background:var(--brand-gradient);
+}
+
+html[data-admin-product="moments"] .primary-action:hover{
+  filter:brightness(1.05);
+}
+
+html[data-admin-product="moments"] .dashboard-bar-fill{
+  background:linear-gradient(180deg,var(--rosa-luce),var(--rosa-ricordo));
+  box-shadow:0 6px 12px rgba(170,98,108,.2);
+}
+
+html[data-admin-product="moments"] .dashboard-status-fill,
+html[data-admin-product="moments"] .inventory-progress span{
+  background:linear-gradient(90deg,var(--blu-notte),var(--rosa-ricordo));
+}
+
+html[data-admin-product="moments"] .form-status.ok,
+html[data-admin-product="moments"] .guide-steps li::marker{
+  color:var(--rosa-ricordo);
 }
 
 html[data-admin-product="moments"] .admin-user .console-switch{
@@ -174,12 +254,12 @@ html[data-admin-product="moments"] .admin-user .console-switch{
   opacity:.85;
 }
 
-/* Schermata login — solo accesso, zero anteprima pannello */
+/* Schermata login — palette Moments */
 html[data-admin-product="moments"] .admin-shell.locked{
   background:
-    radial-gradient(circle at 12% 8%, rgba(76,175,39,0.08) 0%, transparent 42%),
-    radial-gradient(circle at 88% 92%, rgba(77,184,232,0.06) 0%, transparent 40%),
-    var(--bg,#F5F7FA);
+    radial-gradient(circle at 12% 8%, rgba(217,140,149,.18) 0%, transparent 42%),
+    radial-gradient(circle at 88% 92%, rgba(170,98,108,.12) 0%, transparent 40%),
+    var(--avorio);
 }
 
 html[data-admin-product="moments"] .admin-shell.locked .admin-main{
@@ -188,13 +268,25 @@ html[data-admin-product="moments"] .admin-shell.locked .admin-main{
 }
 
 html[data-admin-product="moments"] .admin-shell.locked #adminGate{
-  box-shadow:0 28px 80px -20px rgba(27,42,94,0.18);
-  border:1px solid rgba(76,175,39,0.18);
+  box-shadow:0 28px 80px -20px rgba(7,26,60,.16);
+  border:1px solid rgba(170,98,108,.22);
+  background:#fff;
+}
+
+html[data-admin-product="moments"] .admin-shell.locked #adminGate img{
+  width:min(220px,78%);
+  height:auto;
+  display:block;
+  margin:0 auto 12px;
 }
 
 html[data-admin-product="moments"] .admin-shell.locked #adminGate h2{
   font-family:"Syne",sans-serif;
   color:var(--navy);
+}
+
+html[data-admin-product="moments"] .gate-actions a{
+  background:var(--brand-gradient);
 }
 
 html[data-admin-product="moments"] .nav-group-desc{
@@ -206,9 +298,9 @@ html[data-admin-product="moments"] .nav-group-desc{
 }
 
 html[data-admin-product="moments"] .nav-highlight{
-  background:rgba(76,175,39,0.22)!important;
-  border-color:rgba(159,232,112,0.35)!important;
-  color:#D4FFB8!important;
+  background:rgba(170,98,108,.28)!important;
+  border-color:rgba(217,140,149,.4)!important;
+  color:#FFF9F5!important;
   font-weight:900;
 }
 
@@ -260,7 +352,7 @@ html[data-admin-product="moments"] .input-with-action input{
 html[data-admin-product="moments"] .product-lines-reference{
   padding:16px 18px;
   border-radius:14px;
-  background:var(--soft,#F8FAFC);
+  background:var(--soft,rgba(7,26,60,.045));
   border:1px solid var(--border);
 }
 
@@ -316,7 +408,7 @@ html[data-admin-product="moments"] .sidebar-external-note{
 }
 
 html[data-admin-product="moments"] .sidebar-external-note a{
-  color:#B8F090;
+  color:#D98C95;
   font-weight:700;
 }
 

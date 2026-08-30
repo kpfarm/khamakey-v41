@@ -97,7 +97,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v193** | Etichette: codice ×2 (solo codice), ZIP PDF+SVG+PNG. |
+| **Admin / Officina Moments** | **v194** | Brand Moments (palette rosa/blu + favicon K Moments). |
 | **Worker NFC** | **v214-pin-brand** | Schermo PIN allineato palette Moments (rosa/blu + wordmark); multi-pet + guard Supabase. |
 | **Moments editor** | **v248** | IT/EN solo nel menu account (tolto dalla topbar). |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |

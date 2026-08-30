@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v195 — SVG/PNG etichette leggibili (2026-08-30, Cursor)** — Pages
+  - Bug: SVG usava `font-size` in pt su viewBox in mm → testo enorme/illeggibile; PNG ereditava l’errore.
+  - Fix: font in mm (pt→mm), fit codice nel riquadro; PNG ridisegnato a canvas 300 dpi.
 - **Admin v194 — brand Officina Moments (2026-08-30, Cursor)** — Pages
   - Favicon Moments (`khamakey-moments-favicon.png`), wordmark Moments, palette rosa/blu al posto del verde Business.
 - **Admin v193 — etichette codice ×2 + ZIP PDF/SVG/PNG (2026-08-30, Cursor)** — Pages

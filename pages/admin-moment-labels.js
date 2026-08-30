@@ -468,8 +468,25 @@ function escapeXml(value){
     .replace(/"/g, "&quot;");
 }
 
+/** jsPDF usa pt; SVG con viewBox in mm deve convertire pt → mm. */
+const PT_TO_MM = 25.4 / 72;
+
+function svgFontMm(pt){
+  return Number((Number(pt) * PT_TO_MM).toFixed(3));
+}
+
+/** Font size mm che fa stare il codice nel riquadro (stesso look del PDF). */
+function codeFontMmForDisplay(code){
+  const text = String(code || "");
+  const maxW = CODE_RECT.w - 2.4;
+  // Helvetica bold ≈ 0.62em per carattere
+  const raw = maxW / Math.max(1, text.length * 0.62);
+  return Math.max(2.2, Math.min(svgFontMm(10), Number(raw.toFixed(3))));
+}
+
 /**
  * Foglio SVG delle sole etichette codice (2 per pezzo) — utile Cricut / Illustrator.
+ * Unità = mm (allineate al PDF). Font in mm, non in pt.
  */
 function buildCodeLabelsSvg(rows){
   const doubled = duplicateCodeLabelRows(rows);
@@ -477,6 +494,8 @@ function buildCodeLabelsSvg(rows){
   const pageH = A4.h;
   const pageCount = Math.max(1, Math.ceil(doubled.length / grid.perPage));
   const pages = [];
+  const numFs = svgFontMm(7);
+  const titleFs = svgFontMm(8);
 
   for(let page = 0; page < pageCount; page += 1){
     const start = page * grid.perPage;
@@ -488,25 +507,28 @@ function buildCodeLabelsSvg(rows){
       const y = SHEET.marginY + SHEET.headerH + rowIdx * (grid.cellH + SHEET.gapY);
       const n = row.__labelIndex != null ? row.__labelIndex : start + i + 1;
       const boxY = y + CODE_NUM_H;
-      const code = escapeXml(activationCodeDisplay(row));
+      const codeRaw = activationCodeDisplay(row);
+      const code = escapeXml(codeRaw);
+      const codeFs = codeFontMmForDisplay(codeRaw);
+      const textW = CODE_RECT.w - 2.4;
+      const baseline = boxY + CODE_RECT.h / 2 + codeFs * 0.35;
       return `
         <g data-piece="${n}">
-          <text x="${x}" y="${y + 2.4}" font-family="Helvetica, Arial, sans-serif" font-size="7" font-weight="700" fill="#0f172a">${n}</text>
+          <text x="${x}" y="${y + numFs}" font-family="Helvetica, Arial, sans-serif" font-size="${numFs}" font-weight="700" fill="#0f172a">${n}</text>
           <rect x="${x}" y="${boxY}" width="${CODE_RECT.w}" height="${CODE_RECT.h}" rx="1" ry="1" fill="#fff" stroke="#000" stroke-width="0.35"/>
-          <text x="${x + CODE_RECT.w / 2}" y="${boxY + CODE_RECT.h / 2 + 1.2}" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#0f172a">${code}</text>
+          <text x="${x + CODE_RECT.w / 2}" y="${baseline}" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="${codeFs}" font-weight="700" fill="#0f172a" textLength="${textW}" lengthAdjust="spacingAndGlyphs">${code}</text>
         </g>`;
     }).join("");
 
     pages.push(`
       <svg xmlns="http://www.w3.org/2000/svg" width="${A4.w}mm" height="${pageH}mm" viewBox="0 0 ${A4.w} ${pageH}">
         <rect width="100%" height="100%" fill="#fff"/>
-        <text x="${A4.w / 2}" y="10" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="8" font-weight="700" fill="#0f172a">Etichette codice attivazione ×2 · foglio ${page + 1}/${pageCount}</text>
+        <text x="${A4.w / 2}" y="${8 + titleFs * 0.3}" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="${titleFs}" font-weight="700" fill="#0f172a">Etichette codice attivazione ×2 · foglio ${page + 1}/${pageCount}</text>
         ${labels}
       </svg>`);
   }
 
   if(pages.length === 1) return pages[0].trim();
-  // Multi-foglio: un SVG con più viewBox affiancate in altezza
   const totalH = pageH * pages.length;
   const stacked = pages.map((pageSvg, idx)=>{
     const inner = pageSvg.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
@@ -518,39 +540,93 @@ function buildCodeLabelsSvg(rows){
 </svg>`;
 }
 
-/** Raster PNG del foglio etichette codice (≈150 dpi). */
+/** Raster PNG del foglio etichette codice (300 dpi) — disegnato a canvas, non da SVG rotto. */
 async function buildCodeLabelsPngBlob(rows){
-  const svg = buildCodeLabelsSvg(rows);
-  const dpi = 150;
   const doubled = duplicateCodeLabelRows(rows);
   const grid = computeGrid(CODE_CELL.w, CODE_CELL.h);
   const pageCount = Math.max(1, Math.ceil(doubled.length / grid.perPage));
-  const pxW = Math.round((A4.w / 25.4) * dpi);
-  const pxH = Math.round((A4.h / 25.4) * dpi * pageCount);
+  const dpi = 300;
+  const scale = dpi / 25.4; // px per mm
+  const pxW = Math.round(A4.w * scale);
+  const pxH = Math.round(A4.h * scale * pageCount);
 
-  const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  try{
-    const img = await new Promise((resolve, reject)=>{
-      const image = new Image();
-      image.onload = ()=>resolve(image);
-      image.onerror = ()=>reject(new Error("Raster SVG etichette non riuscito."));
-      image.src = url;
+  const canvas = document.createElement("canvas");
+  canvas.width = pxW;
+  canvas.height = pxH;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, pxW, pxH);
+  ctx.textBaseline = "alphabetic";
+
+  const drawRoundRect = (rx, ry, rw, rh, radius)=>{
+    const r = Math.min(radius, rw / 2, rh / 2);
+    ctx.beginPath();
+    ctx.moveTo(rx + r, ry);
+    ctx.arcTo(rx + rw, ry, rx + rw, ry + rh, r);
+    ctx.arcTo(rx + rw, ry + rh, rx, ry + rh, r);
+    ctx.arcTo(rx, ry + rh, rx, ry, r);
+    ctx.arcTo(rx, ry, rx + rw, ry, r);
+    ctx.closePath();
+  };
+
+  for(let page = 0; page < pageCount; page += 1){
+    const pageOffsetY = page * A4.h * scale;
+    const titleFs = svgFontMm(8) * scale;
+    ctx.fillStyle = "#0f172a";
+    ctx.font = `700 ${titleFs}px Helvetica, Arial, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.fillText(
+      `Etichette codice attivazione ×2 · foglio ${page + 1}/${pageCount}`,
+      pxW / 2,
+      pageOffsetY + (8 + svgFontMm(8) * 0.3) * scale
+    );
+
+    const start = page * grid.perPage;
+    const slice = doubled.slice(start, start + grid.perPage);
+    slice.forEach((row, i)=>{
+      const col = i % grid.cols;
+      const rowIdx = Math.floor(i / grid.cols);
+      const xMm = grid.offsetX + col * (grid.cellW + SHEET.gapX);
+      const yMm = SHEET.marginY + SHEET.headerH + rowIdx * (grid.cellH + SHEET.gapY);
+      const n = row.__labelIndex != null ? row.__labelIndex : start + i + 1;
+      const boxYMm = yMm + CODE_NUM_H;
+      const code = activationCodeDisplay(row);
+      const codeFsMm = codeFontMmForDisplay(code);
+
+      const x = xMm * scale;
+      const y = pageOffsetY + yMm * scale;
+      const boxY = pageOffsetY + boxYMm * scale;
+      const boxW = CODE_RECT.w * scale;
+      const boxH = CODE_RECT.h * scale;
+
+      ctx.fillStyle = "#0f172a";
+      ctx.textAlign = "left";
+      ctx.font = `700 ${svgFontMm(7) * scale}px Helvetica, Arial, sans-serif`;
+      ctx.fillText(String(n), x, y + svgFontMm(7) * scale);
+
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 0.35 * scale;
+      ctx.fillStyle = "#ffffff";
+      drawRoundRect(x, boxY, boxW, boxH, 1 * scale);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#0f172a";
+      ctx.textAlign = "center";
+      ctx.font = `700 ${codeFsMm * scale}px Helvetica, Arial, sans-serif`;
+      const maxTextW = (CODE_RECT.w - 2.4) * scale;
+      let drawFs = codeFsMm * scale;
+      while(drawFs > 8 && ctx.measureText(code).width > maxTextW){
+        drawFs -= 1;
+        ctx.font = `700 ${drawFs}px Helvetica, Arial, sans-serif`;
+      }
+      ctx.fillText(code, x + boxW / 2, boxY + boxH / 2 + drawFs * 0.35);
     });
-    const canvas = document.createElement("canvas");
-    canvas.width = pxW;
-    canvas.height = pxH;
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, pxW, pxH);
-    ctx.drawImage(img, 0, 0, pxW, pxH);
-    const pngBlob = await new Promise((resolve, reject)=>{
-      canvas.toBlob(b=>b ? resolve(b) : reject(new Error("PNG etichette non riuscito.")), "image/png");
-    });
-    return pngBlob;
-  }finally{
-    URL.revokeObjectURL(url);
   }
+
+  return new Promise((resolve, reject)=>{
+    canvas.toBlob(b=>b ? resolve(b) : reject(new Error("PNG etichette non riuscito.")), "image/png");
+  });
 }
 
 function downloadBlob(blob, filename){

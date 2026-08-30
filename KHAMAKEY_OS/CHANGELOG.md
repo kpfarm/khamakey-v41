@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v215 — niente placeholder sotto hero (2026-08-30, Cursor)** — Worker
+  - Se ci sono solo copertina/titolo (nessuna sezione), non mostra più «Pagina in preparazione».
 - **Admin v195 — SVG/PNG etichette leggibili (2026-08-30, Cursor)** — Pages
   - Bug: SVG usava `font-size` in pt su viewBox in mm → testo enorme/illeggibile; PNG ereditava l’errore.
   - Fix: font in mm (pt→mm), fit codice nel riquadro; PNG ridisegnato a canvas 300 dpi.

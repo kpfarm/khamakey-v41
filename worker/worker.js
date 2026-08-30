@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v214-pin-brand";
+const WORKER_VERSION = "v215-no-empty-placeholder";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1664,9 +1664,12 @@ async function renderMomentPage(page, origin, env = {}, locale = "it") {
     ? await withTimeout(loadHoroscopeReadingsForSections(sections, env, locale), 900, {})
     : {};
   const live = { horoscopeReadings, locale };
+  // Se non ci sono sezioni con contenuto: non mostrare «Pagina in preparazione»
+  // sotto una copertina/titolo già pronti (caso tipico cliente che ha messo solo hero).
+  const hasHeroContent = Boolean(title || coverUrl || profileUrl || heroLead);
   const sectionHtml = ordered.length
     ? ordered.map(({ key, section }) => `<div class="moment-section-anchor" id="moment-section-${escapeHtml(key)}">${renderMomentSection(key, section, colors, momentType, fonts, page.slug || "", live)}</div>`).join("")
-    : `<div class="moment-card moment-card-empty rv"><strong>${escapeHtml(mt(locale, "empty.title"))}</strong><p>${escapeHtml(mt(locale, "empty.body"))}</p></div>`;
+    : (hasHeroContent ? "" : `<div class="moment-card moment-card-empty rv"><strong>${escapeHtml(mt(locale, "empty.title"))}</strong><p>${escapeHtml(mt(locale, "empty.body"))}</p></div>`);
   const navHtml = renderMomentNav(title, ordered, hasCounter, locale);
   const decorHtml = renderMomentDecor(state);
   const coverFocusX = clampNumber(state.cover_focus_x, 0, 100, 50);

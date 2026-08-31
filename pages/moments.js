@@ -18,7 +18,7 @@ import {
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=246";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=236";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=216";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=217";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=243";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
@@ -1530,9 +1530,26 @@ function renderPlanStorageCard(entitlements = currentEntitlements){
   </div>`;
 }
 
+const HOW_IT_WORKS_KEYS = ["overview.how.1", "overview.how.2", "overview.how.3", "overview.how.4"];
+
+function renderHowItWorksList(withActiveFirst = false){
+  return HOW_IT_WORKS_KEYS.map((key, index) =>
+    `<li class="${withActiveFirst && index === 0 ? "active" : ""}" data-i18n-html="${key}">${t(key)}</li>`
+  ).join("");
+}
+
+function renderHowItWorksCard(){
+  return `<div class="editor-card how-it-works" id="momentHowItWorks">
+    <p class="ecard-title" data-i18n="overview.how.title">${esc(t("overview.how.title"))}</p>
+    <ol class="how-it-works-list">${renderHowItWorksList()}</ol>
+    <button type="button" class="ghost" id="showOnboardingGuide" data-i18n="overview.how.show_guide">${esc(t("overview.how.show_guide"))}</button>
+  </div>`;
+}
+
 function renderOverviewPanel(row, state, publicUrl){
   return `<div class="editor-panel ${activeEditorPanel === "overview" ? "active" : ""}" data-editor-panel="overview">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.overview),editorPanelSubtitle(EDITOR_PANELS.overview))}
+    ${renderHowItWorksCard()}
     ${renderPlanStorageCard(currentEntitlements)}
     ${renderMomentDashboardShell({ publicUrl, published:row.public_visible, slug:row.slug })}
   </div>`;
@@ -2159,7 +2176,11 @@ function onboardingKey(eventId){
   return `moments_onboarding_${eventId}`;
 }
 
+const forceOnboardingIds = new Set();
+
 function needsOnboarding(row){
+  if(!row?.id) return false;
+  if(forceOnboardingIds.has(row.id)) return true;
   if(localStorage.getItem(onboardingKey(row.id)) === "done") return false;
   const state = mergedState(row);
   const hasContent = Boolean(state.subtitle || state.description || state.cover_url);
@@ -2668,29 +2689,50 @@ function renderPrivacyPanel(row, state = {}){
 }
 
 function renderOnboardingWizard(row){
-  const eyebrow = "5 minuti";
-  const title = "La tua pagina in 4 passi";
-  const closeAria = "Chiudi guida";
-  const start = "Inizia → Copertina";
-  const steps = [
-    { strong:"1. Copertina", span:"Titolo, tipo pagina e foto." },
-    { strong:"2. Modello prodotto", span:"Colori e sezioni del tuo prodotto (es. Amore) sono già pronti e salvati — personalizzali pure." },
-    { strong:"3. Contenuti", span:"Modifica testi e media. In «Altre sezioni» aggiungi solo ciò che ti serve." },
-    { strong:"4. Pubblica", span:"Salva e condividi il link NFC." }
-  ];
   void row;
-  const stepsHtml = steps.map((step, index)=>`
-      <li class="${index === 0 ? "active" : ""}"><strong data-lf="${esc(step.strong)}">${esc(localizeFieldPhrase(step.strong))}</strong><span data-lf="${esc(step.span)}">${esc(localizeFieldPhrase(step.span))}</span></li>`).join("");
   return `<div class="onboarding-wizard" id="onboardingWizard" data-onboarding-wizard>
     <div class="onboarding-head">
-      <p class="eyebrow" data-lf="${esc(eyebrow)}">${esc(localizeFieldPhrase(eyebrow))}</p>
-      <h3 data-lf="${esc(title)}">${esc(localizeFieldPhrase(title))}</h3>
-      <button type="button" class="onboarding-close" id="dismissOnboarding" aria-label="${esc(localizeFieldPhrase(closeAria))}" data-lf-aria="${esc(closeAria)}">×</button>
+      <p class="eyebrow" data-i18n="onboarding.eyebrow">${esc(t("onboarding.eyebrow"))}</p>
+      <h3 data-i18n="onboarding.title">${esc(t("onboarding.title"))}</h3>
+      <button type="button" class="onboarding-close" id="dismissOnboarding" aria-label="${esc(t("onboarding.close"))}" data-i18n-aria="onboarding.close">×</button>
     </div>
-    <ol class="onboarding-steps">${stepsHtml}
-    </ol>
-    <button type="button" class="primary" id="onboardingStart" data-lf="${esc(start)}">${esc(localizeFieldPhrase(start))}</button>
+    <ol class="onboarding-steps how-it-works-list">${renderHowItWorksList(true)}</ol>
+    <button type="button" class="primary" id="onboardingStart" data-i18n="onboarding.start">${esc(t("onboarding.start"))}</button>
   </div>`;
+}
+
+function bindOnboardingWizard(row){
+  const wizard = document.getElementById("onboardingWizard");
+  if(!wizard || wizard.dataset.bound === "1") return;
+  wizard.dataset.bound = "1";
+  document.getElementById("dismissOnboarding")?.addEventListener("click",()=>{
+    forceOnboardingIds.delete(row.id);
+    localStorage.setItem(onboardingKey(row.id),"done");
+    wizard.remove();
+  });
+  document.getElementById("onboardingStart")?.addEventListener("click",()=>{
+    setNavGroup("design");
+    setEditorPanel("cover");
+    wizard.scrollIntoView({behavior:"smooth",block:"nearest"});
+  });
+}
+
+function bindHowItWorks(row){
+  const btn = document.getElementById("showOnboardingGuide");
+  if(!btn || btn.dataset.bound === "1") return;
+  btn.dataset.bound = "1";
+  btn.addEventListener("click",()=>{
+    forceOnboardingIds.add(row.id);
+    if(!document.getElementById("onboardingWizard")){
+      const head = detail.querySelector(".detail-head");
+      if(!head) return;
+      head.insertAdjacentHTML("afterend", renderOnboardingWizard(row));
+      const wizard = document.getElementById("onboardingWizard");
+      if(wizard) applyChromeI18n(wizard);
+    }
+    bindOnboardingWizard(row);
+    document.getElementById("onboardingWizard")?.scrollIntoView({behavior:"smooth",block:"start"});
+  });
 }
 
 function editorProgressStep(){
@@ -3291,15 +3333,8 @@ function renderDetail(id){
   detail.querySelectorAll("[data-copy]").forEach(button=>{
     button.addEventListener("click",()=>copyText(button.dataset.copy,button));
   });
-  document.getElementById("dismissOnboarding")?.addEventListener("click",()=>{
-    localStorage.setItem(onboardingKey(row.id),"done");
-    document.getElementById("onboardingWizard")?.remove();
-  });
-  document.getElementById("onboardingStart")?.addEventListener("click",()=>{
-    setNavGroup("design");
-    setEditorPanel("cover");
-    document.getElementById("onboardingWizard")?.scrollIntoView({behavior:"smooth",block:"nearest"});
-  });
+  bindOnboardingWizard(row);
+  bindHowItWorks(row);
   editorForm.querySelector('[name="show_together_counter"]')?.addEventListener("change",event=>{
     const wrap = editorForm.querySelector('[data-editor-panel="counter"] .section-editor-stack');
     if(wrap) wrap.classList.toggle("is-muted",!event.target.checked);

@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v249 — guida Come funziona IT/EN (2026-08-31, Cursor)** — Pages
+  - Scheda permanente in Riepilogo: 4 frasi (chip = salvato, Copertina, vuoto = nascosto, modello facoltativo).
+  - Wizard allineato alle stesse chiavi i18n; chi chiude × può rivederlo da Riepilogo.
 - **Admin v196 — SVG/PNG Cricut puliti (2026-08-30, Cursor)** — Pages
   - Export codici: niente titolo, sfondo trasparente, casella bianca senza contorno nero (taglio Explore 4 più semplice).
 - **Worker v216 — liste incomplete nascoste (2026-08-30, Cursor)** — Worker

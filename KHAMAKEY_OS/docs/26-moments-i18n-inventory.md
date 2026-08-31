@@ -109,7 +109,7 @@
 
 ## 7. Wizard onboarding
 
-- `5 minuti` · `La tua pagina in 4 passi` · step Copertina / Template / Contenuti / Pubblica · `Inizia → Copertina`
+- Chiavi `overview.how.*` + `onboarding.*` (IT/EN in `moments-i18n-nav.js`): 4 frasi identiche in Riepilogo e wizard · `Inizia → Copertina` · `Rivedi la guida in alto`
 
 ---
 

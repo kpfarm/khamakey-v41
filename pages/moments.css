@@ -371,7 +371,19 @@ textarea{min-height:86px;resize:vertical}
 .onboarding-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--muted);font-size:1.2rem;line-height:1}
 .onboarding-steps{margin:0 0 12px;padding-left:18px;display:grid;gap:8px}
 .onboarding-steps li{color:var(--muted);font-size:.82rem;line-height:1.45}
-.onboarding-steps li strong{display:block;color:var(--navy);font-size:.86rem}
+.onboarding-steps li strong{color:var(--navy);font-weight:800}
+.how-it-works{
+  margin:0 0 16px;
+  padding:16px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:linear-gradient(135deg,var(--soft-strong),#fff);
+  box-shadow:inset 3px 0 0 var(--rosa-ricordo);
+}
+.how-it-works-list{margin:0;padding-left:18px;display:grid;gap:8px}
+.how-it-works-list li{color:var(--antracite);font-size:.86rem;line-height:1.5}
+.how-it-works-list li strong{color:var(--navy);font-weight:800}
+.how-it-works #showOnboardingGuide{justify-self:start}
 .pin-success-banner,.pin-reminder-card{margin-bottom:12px;padding:14px;border:1px solid #BFDBFE;border-radius:12px;background:#EFF6FF;position:relative}
 .pin-success-banner h3{margin:4px 0 8px;font-size:1.05rem;color:var(--navy)}
 .pin-success-close,.pin-success-banner .pin-success-close{position:absolute;top:10px;right:10px;width:30px;height:30px;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--muted);font-size:1.1rem;line-height:1}

@@ -18,7 +18,17 @@ export const NAV_MESSAGES_IT = {
   "nav.sidebar.content": "Contenuti",
   "nav.aria.sidebar": "Sezioni editor",
   "nav.aria.progress": "Passi rapidi",
-  "nav.help_html": "4 passi · tocca la barra sopra per saltare · <strong>Salva</strong> quando hai finito"
+  "nav.help_html": "4 passi · tocca la barra sopra per saltare · <strong>Salva</strong> quando hai finito",
+  "overview.how.title": "Come funziona",
+  "overview.how.1": "Questa pagina è quella del <strong>chip</strong>. Chi tocca l’oggetto vede solo quello che hai <strong>salvato</strong>.",
+  "overview.how.2": "Parti da <strong>Copertina</strong>: titolo e foto.",
+  "overview.how.3": "Aggiungi sezioni dal menu. Se una sezione è <strong>vuota, in pubblico non si vede</strong>.",
+  "overview.how.4": "«Prepara tutto per me» è <strong>facoltativo</strong>: riempie i testi del modello e sostituisce quello che c’è.",
+  "overview.how.show_guide": "Rivedi la guida in alto",
+  "onboarding.eyebrow": "4 cose da sapere",
+  "onboarding.title": "Come funziona",
+  "onboarding.close": "Chiudi guida",
+  "onboarding.start": "Inizia → Copertina"
 };
 
 export const NAV_MESSAGES_EN = {
@@ -39,5 +49,15 @@ export const NAV_MESSAGES_EN = {
   "nav.sidebar.content": "Content",
   "nav.aria.sidebar": "Editor sections",
   "nav.aria.progress": "Quick steps",
-  "nav.help_html": "4 steps · tap the bar above to jump · <strong>Save</strong> when you’re done"
+  "nav.help_html": "4 steps · tap the bar above to jump · <strong>Save</strong> when you’re done",
+  "overview.how.title": "How this page works",
+  "overview.how.1": "This page is what the <strong>chip</strong> opens. Guests only see what you <strong>saved</strong>.",
+  "overview.how.2": "Start with <strong>Cover</strong>: title and photo.",
+  "overview.how.3": "Add sections from the menu. If a section is <strong>empty, it stays hidden</strong> on the public page.",
+  "overview.how.4": "“Set everything up for me” is <strong>optional</strong>: it fills in the template and replaces what’s there.",
+  "overview.how.show_guide": "Show the guide at the top",
+  "onboarding.eyebrow": "4 things to know",
+  "onboarding.title": "How this page works",
+  "onboarding.close": "Close guide",
+  "onboarding.start": "Start → Cover"
 };

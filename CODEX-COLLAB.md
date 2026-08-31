@@ -240,9 +240,9 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Shopify Moments** | Operativo — libero | webhook ordini, catalogo vendita, sync bozze |
 | **Editor Business — contratto pubblico** | Condiviso | `publicStateFromEditor`, renderer `/p/` nel Worker |
 | **Admin / Officina Moments** | **Libero** (live **v196** — SVG/PNG Cricut) | `admin.html`, `moments-admin.html`, `admin.js`, `admin.css`, `admin-guide.js`, `admin-moment-labels.js`, `moments-admin.css` — coordinarsi se stesso pannello |
-| **Moments editor** | **Libero** (live **v248** — lingua nel menu) | `moments.html`, `moments.js`, `media-upload.js`, `moments-i18n*.js`, `moment-rsvp-*.js`, `moment-horoscope.js`, `moment-pets.js`, `moments.css`, `moment-editor-dashboard.js` |
+| **Moments editor** | **Libero** (live **v249** — guida Come funziona) | `moments.html`, `moments.js`, `media-upload.js`, `moments-i18n*.js`, `moment-rsvp-*.js`, `moment-horoscope.js`, `moment-pets.js`, `moments.css`, `moment-editor-dashboard.js` |
 | **Security hardening (audit 2026-07-11)** | Completato e deployato (vedi `PROJECT_STATE.md`) | Regole assolute CSP/RLS/dati restano vincolanti |
-| **`worker/worker.js`** | **Libero** (live **v213-multi-pet**) | Chi tocca `worker.js` prende lock esplicito e non parallelizza |
+| **`worker/worker.js`** | **Libero** (live **v216-list-sections-no-hints**) | Chi tocca `worker.js` prende lock esplicito e non parallelizza |
 | **Editor Business — upload media** | Completato v124 — libero | PDF catalogo / docs base64→R2 ancora pendenti (`docs/03-editor.md`) |
 | **Business WIP locale (working tree)** | **Non toccare** senza owner | `editor.html`, `editor-*.js`, SQL v147/v148 untracked, demo landing — commit separati |
 | **Business progetto parallelo** | **Attivo** (scaffold 2026-08-04) | Solo `business/**` + Supabase `qsieubbdkvtlvdsucmye` — **mai** deploy/SQL su Moments |

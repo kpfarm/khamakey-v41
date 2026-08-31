@@ -98,7 +98,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v196** | SVG/PNG codici: no titolo, sfondo trasparente, casella bianca senza bordo. |
-| **Worker NFC** | **v216-list-sections-no-hints** | Liste incomplete (promesse/sogni/…) non mostrano più hint «Aggiungi…». |
+| **Worker NFC** | **v217-activation-no-sku** | Pre-attivazione: niente badge linea/lotto/categoria. |
 | **Moments editor** | **v250** | Attivazione: struttura prodotto senza testi stock; guida Come funziona IT/EN. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |

@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v216-list-sections-no-hints";
+const WORKER_VERSION = "v217-activation-no-sku";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -5188,32 +5188,10 @@ function migrateMusicSectionMedia(section = {}) {
 }
 
 function renderMomentActivationPage(product, origin, env = {}) {
+  void product;
+  void origin;
   const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
   const logoSrc = `${pagesBase}/khamakey-moments-wordmark-on-light.png`;
-  const typeLabel = {
-    free: "Evento generale",
-    love: "Amore",
-    mom: "Mamma",
-    dad: "Papà",
-    child: "Figlio / Figlia",
-    kids: "Bambini",
-    memory: "Ricordi",
-    photo: "Album foto",
-    pet: "Animali",
-    communion: "Comunione",
-    baptism: "Battesimo",
-    friendship: "Amicizia",
-    family: "Famiglia",
-    valentine: "San Valentino",
-    christmas: "Natale",
-    birthday: "Compleanno",
-    wedding: "Matrimonio",
-    party: "Festa",
-    travel: "Viaggio",
-    memorial: "Memoriale",
-    portfolio: "Portfolio"
-  }[product.product_type] || "KhamaKey Moments";
-  const lineLabel = String(product.product_label || product.product_line || "").trim();
   return `<!doctype html>
 <html lang="it">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -5228,7 +5206,6 @@ background:radial-gradient(circle at 12% 8%,rgba(217,140,149,.18) 0%,transparent
 .logo{display:block;width:min(240px,78%);height:auto;margin:0 auto 18px}
 h1{color:#071A3C;font-size:clamp(1.45rem,5vw,1.85rem);line-height:1.2;margin:0 0 12px;font-weight:700}
 p{color:#6B6470;line-height:1.55;margin:0 0 12px}
-.badge{display:inline-block;margin:8px 0 16px;padding:8px 14px;border-radius:999px;background:#F3E3DE;color:#071A3C;font-size:13px;font-weight:650;border:1px solid #E0B8B6}
 .button{display:inline-flex;justify-content:center;align-items:center;width:100%;border-radius:12px;background:linear-gradient(135deg,#AA626C 0%,#071A3C 100%);color:#fff;padding:14px 16px;text-decoration:none;font-weight:700;margin-top:8px}
 .hint{font-size:13px;color:#6B6470;margin-top:14px}
 .steps{text-align:left;margin:16px 0 8px;padding:14px 16px 12px;padding-inline-start:2.1rem;border-radius:14px;background:#FFF9F5;border:1px solid #E8D4CE;list-style-position:outside}
@@ -5243,8 +5220,6 @@ p{color:#6B6470;line-height:1.55;margin:0 0 12px}
 <img class="logo" src="${attr(logoSrc)}" alt="KhamaKey Moments">
 <h1>Pronto da attivare</h1>
 <p>Per creare la tua pagina ti serve il <strong>codice</strong> che trovi nella confezione.</p>
-${lineLabel ? `<span class="badge">${escapeHtml(lineLabel)}</span>` : ""}
-<span class="badge">${escapeHtml(typeLabel)}</span>
 <ol class="steps">
 <li><strong>Apri la confezione</strong> e prendi il codice.</li>
 <li><strong>Entra in Area Moments</strong> e inserisci il codice.</li>

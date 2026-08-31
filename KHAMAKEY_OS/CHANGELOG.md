@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v217 — pre-attivazione senza SKU/categoria (2026-08-31, Cursor)** — Worker
+  - Pagina «Pronto da attivare»: tolti i badge linea/lotto e tipo (es. portachiavi · MOM-KEY-…, Amore). Resta solo dove trovare il codice.
 - **Moments v250 — attivazione senza testi stock (2026-08-31, Cursor)** — Pages
   - All’apertura di una pagina nuova: sezioni, titoli, ordine e look del prodotto; niente body/citazioni/tappe/liste.
   - «Prepara tutto per me» resta l’unico opt-in che riempie i testi del modello.

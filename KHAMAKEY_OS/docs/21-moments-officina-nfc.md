@@ -24,7 +24,7 @@ Officina NFC
 
 Cliente
   apre confezione → codice sull’inserto → moments.html → editor → pagina /m/ live
-  (pagina pre-attivazione: messaggio semplice «codice in confezione», senza dettagli chip/scaffale)
+  (pagina pre-attivazione: solo «codice in confezione»; niente linea, SKU, lotto o categoria)
 ```
 
 ## Fabbricazione (`build_stage`) — Admin v180 + SQL v170
@@ -51,7 +51,7 @@ Cliente
 
 Prima il codice compariva sulla pagina pre-attivazione e spesso coincideva con `/k/codice` o `/m/codice`: in negozio bastava scansionare per rubare l’attivazione. Ora:
 
-1. la pagina `/m/` pre-attivazione **non mostra** il codice (brand Moments)
+1. la pagina `/m/` pre-attivazione **non mostra** il codice, né linea, SKU, lotto o categoria
 2. lo slug è **opaco** e diverso dal codice
 3. `/k/<codice>` non risolve pezzi `available` (solo dopo claim)
 4. CSV/PDF restano la fonte del codice per stampa inserto

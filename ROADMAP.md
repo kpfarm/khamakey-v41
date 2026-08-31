@@ -434,6 +434,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v215**: niente «Pagina in preparazione» se c’è già copertina/titolo |
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
+| 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
 | 2026-08-31 | Cursor | **Moments v250**: attivazione senza testi stock (struttura sì, body no); «Prepara tutto» resta opt-in |
 | 2026-08-31 | Cursor | **Moments v249**: scheda Come funziona in Riepilogo + wizard, stesse 4 frasi IT/EN |
 | 2026-08-30 | Cursor | **GitHub sync**: push 34 commit locali su `main` (auth kpfarm OK) |

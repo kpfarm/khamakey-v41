@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v250 — attivazione senza testi stock (2026-08-31, Cursor)** — Pages
+  - All’apertura di una pagina nuova: sezioni, titoli, ordine e look del prodotto; niente body/citazioni/tappe/liste.
+  - «Prepara tutto per me» resta l’unico opt-in che riempie i testi del modello.
 - **Moments v249 — guida Come funziona IT/EN (2026-08-31, Cursor)** — Pages
   - Scheda permanente in Riepilogo: 4 frasi (chip = salvato, Copertina, vuoto = nascosto, modello facoltativo).
   - Wizard allineato alle stesse chiavi i18n; chi chiude × può rivederlo da Riepilogo.

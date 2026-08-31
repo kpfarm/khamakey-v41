@@ -17,7 +17,7 @@ import {
 } from "./moments-i18n.js?v=236";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=246";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=236";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=237";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=217";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=243";
@@ -2066,10 +2066,17 @@ function confirmApplyMomentTemplate(type){
   );
 }
 
-function applyTemplateToForm(formNode,type, { skipReminder = false } = {}){
+const TEMPLATE_STOCK_FIELDS = ["recipient","signature","event_label","target_date","spotify_url","youtube_url","author","sign_name","sign_subtitle","whatsapp_number","event_name"];
+
+function applyTemplateToForm(formNode,type, { skipReminder = false, structureOnly = false } = {}){
   const template = localizeMomentTemplate(templateForType(type), getUiLocale());
-  if(template.subtitle) formNode.elements.subtitle.value = template.subtitle;
-  if(template.pill && formNode.elements.pill) formNode.elements.pill.value = template.pill;
+  if(structureOnly){
+    if(formNode.elements.subtitle) formNode.elements.subtitle.value = "";
+    if(formNode.elements.pill) formNode.elements.pill.value = "";
+  }else{
+    if(template.subtitle) formNode.elements.subtitle.value = template.subtitle;
+    if(template.pill && formNode.elements.pill) formNode.elements.pill.value = template.pill;
+  }
   for(const [key,section] of Object.entries(template.sections)){
     const enabled = formNode.querySelector(`[name="section_${key}_enabled"]`);
     const title = formNode.querySelector(`[name="section_${key}_title"]`);
@@ -2078,17 +2085,17 @@ function applyTemplateToForm(formNode,type, { skipReminder = false } = {}){
     const panel = formNode.querySelector(`details[data-section-key="${key}"]`);
     if(enabled) enabled.checked = Boolean(section.enabled);
     if(title) title.value = section.title || "";
-    if(body) body.value = section.body || "";
-    if(images) images.value = formatImageLines(section.images);
+    if(body) body.value = structureOnly ? "" : (section.body || "");
+    if(images) images.value = structureOnly ? "" : formatImageLines(section.images);
     if(key === "rsvp"){
       const askGuests = formNode.querySelector('[name="section_rsvp_field_guests"]');
       const askNotes = formNode.querySelector('[name="section_rsvp_field_notes"]');
       if(askGuests) askGuests.checked = section.field_keys ? section.field_keys.includes("guests") : section.ask_guests !== false;
       if(askNotes) askNotes.checked = section.field_keys ? section.field_keys.includes("notes") : section.ask_notes !== false;
     }
-    ["recipient","signature","event_label","target_date","spotify_url","youtube_url","author","sign_name","sign_subtitle","whatsapp_number","event_name"].forEach(field=>{
+    TEMPLATE_STOCK_FIELDS.forEach(field=>{
       const input = formNode.querySelector(`[name="section_${key}_${field}"]`);
-      if(input) input.value = section[field] || "";
+      if(input) input.value = structureOnly ? "" : (section[field] || "");
     });
     if(panel) panel.open = Boolean(section.enabled);
   }
@@ -2103,9 +2110,21 @@ function applyTemplateToForm(formNode,type, { skipReminder = false } = {}){
   pinnedExtraSections = [];
   syncPinnedSectionsInput(formNode);
   syncEditorKitUi(formNode);
-  const mergedSteps = resolveJourneySteps(template.sections.timeline || {}, template.sections.places || {});
-  writeJourneySteps(formNode,"timeline",mergedSteps);
-  renderJourneySteps(formNode,"timeline");
+  if(structureOnly){
+    writeJourneySteps(formNode,"timeline",[]);
+    try{ renderJourneySteps(formNode,"timeline"); }catch{ /* panel assente */ }
+    for(const key of LIST_SECTION_KEYS){
+      writeListItems(formNode, key, []);
+      try{ renderListItems(formNode, key); }catch{ /* panel assente */ }
+    }
+    const petsInput = formNode.querySelector('[name="section_pet_pets"]');
+    if(petsInput) petsInput.value = "[]";
+    try{ refreshPetsEditor(formNode); }catch{ /* panel assente */ }
+  }else{
+    const mergedSteps = resolveJourneySteps(template.sections.timeline || {}, template.sections.places || {});
+    writeJourneySteps(formNode,"timeline",mergedSteps);
+    renderJourneySteps(formNode,"timeline");
+  }
   const timelineEnabled = formNode.querySelector('[name="section_timeline_enabled"]');
   if(timelineEnabled && (template.sections.timeline?.enabled || template.sections.places?.enabled)){
     timelineEnabled.checked = true;
@@ -2119,7 +2138,7 @@ function applyTemplateToForm(formNode,type, { skipReminder = false } = {}){
   if(!skipReminder) promptSaveReminder(t("save.reminder_template"));
 }
 
-/** Pagina appena attivata: quasi vuota → applica modello categoria e salva. */
+/** Pagina appena attivata: quasi vuota → struttura categoria (sezioni/look), senza testi stock. */
 function needsFreshTemplateBootstrap(row){
   if(!row?.id) return false;
   // Solo dopo un bootstrap riuscito (salvato in DB). Ignora sessionStorage "done" della v225
@@ -2141,31 +2160,29 @@ async function bootstrapFreshMomentPage(row, formNode){
   suppressDirtyUi = true;
   bootstrapInFlight = true;
   try{
-    applyTemplateToForm(formNode, type, { skipReminder:true });
+    applyTemplateToForm(formNode, type, { skipReminder:true, structureOnly:true });
     if(activeId !== eventId){
       sessionStorage.removeItem(templateSeedKey(eventId));
       return;
     }
-    const saved = await saveMoment({ preventDefault(){}, currentTarget:formNode }, row, { quietOk:true });
+    const saved = await saveMoment({ preventDefault(){}, currentTarget:formNode }, row, { quietOk:true, keepOnboarding:true });
     if(activeId !== eventId){
       sessionStorage.removeItem(templateSeedKey(eventId));
       return;
     }
     if(!saved){
       sessionStorage.removeItem(templateSeedKey(eventId));
-      showEditorSaveFeedback(t("save.reminder_model", { type: TYPE_LABELS[type] || type }), "error");
+      showEditorSaveFeedback(t("save.fail"), "error");
       return;
     }
     sessionStorage.setItem(templateSeedKey(eventId), "done");
     localStorage.setItem(`moments_bootstrapped_${eventId}`, "1");
-    localStorage.setItem(onboardingKey(eventId), "done");
     clearEditorDraft(eventId);
-    document.getElementById("onboardingWizard")?.remove();
     clearTimeout(markEditorDirty.timer);
     try{ savedEditorSnapshot = formSnapshotForDirty(formNode); }catch{ /* ignore */ }
     editorDirty = false;
     updateSaveStatus(true);
-    showEditorSaveFeedback(t("save.reminder_model", { type: TYPE_LABELS[type] || type }), "ok");
+    showEditorSaveFeedback(t("save.reminder_structure", { type: TYPE_LABELS[type] || type }), "ok");
   }finally{
     suppressDirtyUi = false;
     bootstrapInFlight = false;
@@ -2178,14 +2195,17 @@ function onboardingKey(eventId){
 
 const forceOnboardingIds = new Set();
 
+function pageHasGuestFacingContent(row){
+  const state = mergedState(row);
+  if(Boolean(state.subtitle || state.description || state.cover_url)) return true;
+  return Object.entries(state.sections || {}).some(([key, section]) => sectionHasContent(key, section));
+}
+
 function needsOnboarding(row){
   if(!row?.id) return false;
   if(forceOnboardingIds.has(row.id)) return true;
   if(localStorage.getItem(onboardingKey(row.id)) === "done") return false;
-  const state = mergedState(row);
-  const hasContent = Boolean(state.subtitle || state.description || state.cover_url);
-  const enabledSections = Object.values(state.sections || {}).filter(section=>section?.enabled).length;
-  return !hasContent && enabledSections <= 2;
+  return !pageHasGuestFacingContent(row);
 }
 
 function setEditorChromeVisible(visible){
@@ -3422,7 +3442,7 @@ function renderDetail(id){
     }
   });
   if(needsFreshTemplateBootstrap(row)){
-    // Applica look+sezioni categoria e salva subito: niente verde di default, niente perdita al cambio prodotto
+    // Struttura categoria (sezioni/look/titoli) senza testi stock; «Prepara tutto per me» resta opt-in
     bootstrapFreshMomentPage(row, editorForm);
   }else if(restoredDraft){
     editorDirty = true;
@@ -4855,7 +4875,9 @@ async function saveMoment(event,row, options = {}){
       barMsg.setAttribute("data-i18n-html", "shell.save_bar");
       barMsg.innerHTML = t("shell.save_bar");
     }
-    localStorage.setItem(onboardingKey(row.id),"done");
+    if(!options.keepOnboarding){
+      localStorage.setItem(onboardingKey(row.id),"done");
+    }
     if(!options.quietOk){
       const emptyEnabled = Object.entries(state.sections || {})
         .filter(([key, section]) => section?.enabled && !sectionHasContent(key, section))

@@ -746,6 +746,107 @@ async function buildSummaryCardsPngBlobs(rows, meta, qrCache){
   return blobs;
 }
 
+function zipPngPages(zip, baseName, stem, blobs){
+  blobs.forEach((blob, i)=>{
+    const name = blobs.length === 1
+      ? `${baseName}-${stem}.png`
+      : `${baseName}-${stem}-${String(i + 1).padStart(2, "0")}.png`;
+    zip.file(name, blob);
+  });
+}
+
+/**
+ * Pagina PNG A4: solo QR (stesso URL del chip /m/slug), N° pezzo sopra.
+ * Un PNG = un A4; lotti grandi → più fogli.
+ */
+async function buildQrLabelsPngBlobs(rows, meta, qrCache){
+  const qrImages = new Map();
+  await Promise.all([...qrCache.entries()].map(async ([url, dataUrl])=>{
+    qrImages.set(url, await loadQrImage(dataUrl));
+  }));
+
+  const grid = computeGrid(QR_CELL.w, QR_CELL.h);
+  const pageCount = Math.max(1, Math.ceil(rows.length / grid.perPage));
+  const dpi = 300;
+  const scale = dpi / 25.4;
+  const pxW = Math.round(A4.w * scale);
+  const pxH = Math.round(A4.h * scale);
+  const pad = 2.2;
+  const blobs = [];
+
+  for(let page = 0; page < pageCount; page += 1){
+    const canvas = document.createElement("canvas");
+    canvas.width = pxW;
+    canvas.height = pxH;
+    const ctx = canvas.getContext("2d");
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, pxW, pxH);
+
+    ctx.fillStyle = "#0f172a";
+    ctx.textAlign = "center";
+    ctx.font = `700 ${svgFontMm(11) * scale}px Helvetica, Arial, sans-serif`;
+    ctx.fillText("QR pagina — stesso URL del chip NFC", (A4.w / 2) * scale, 9 * scale);
+    ctx.fillStyle = "#475569";
+    ctx.font = `500 ${svgFontMm(7.5) * scale}px Helvetica, Arial, sans-serif`;
+    ctx.fillText(
+      `${meta.lotTitle} · ${meta.qty} pezzi · foglio ${page + 1}/${pageCount} · stampa A4 100%`,
+      (A4.w / 2) * scale,
+      15 * scale
+    );
+
+    const start = page * grid.perPage;
+    const slice = rows.slice(start, start + grid.perPage);
+    slice.forEach((row, i)=>{
+      const n = start + i + 1;
+      const col = i % grid.cols;
+      const rowIdx = Math.floor(i / grid.cols);
+      const xMm = grid.offsetX + col * (grid.cellW + SHEET.gapX);
+      const yMm = SHEET.marginY + SHEET.headerH + rowIdx * (grid.cellH + SHEET.gapY);
+      const x = xMm * scale;
+      const y = yMm * scale;
+      const boxY = (yMm + QR_NUM_H) * scale;
+      const boxW = QR_SQUARE.w * scale;
+      const boxH = QR_SQUARE.h * scale;
+
+      ctx.fillStyle = "#0f172a";
+      ctx.textAlign = "left";
+      ctx.font = `700 ${svgFontMm(7) * scale}px Helvetica, Arial, sans-serif`;
+      ctx.fillText(String(n), x, y + svgFontMm(7) * scale);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(x, boxY, boxW, boxH);
+
+      const url = nfcUrlForRow(row);
+      const qrImg = qrImages.get(url);
+      const imgPad = pad * scale;
+      if(qrImg){
+        ctx.drawImage(qrImg, x + imgPad, boxY + imgPad, boxW - imgPad * 2, boxH - imgPad * 2);
+      }else{
+        ctx.fillStyle = "#94a3b8";
+        ctx.textAlign = "center";
+        ctx.font = `500 ${svgFontMm(6) * scale}px Helvetica, Arial, sans-serif`;
+        ctx.fillText("QR n/d", x + boxW / 2, boxY + boxH / 2);
+      }
+    });
+
+    ctx.fillStyle = "#64748b";
+    ctx.textAlign = "center";
+    ctx.font = `500 ${svgFontMm(7) * scale}px Helvetica, Arial, sans-serif`;
+    ctx.fillText(
+      "Stesso N° delle schede e degli adesivi. QR = /m/slug · mai il codice di attivazione.",
+      (A4.w / 2) * scale,
+      287 * scale
+    );
+
+    blobs.push(await new Promise((resolve, reject)=>{
+      canvas.toBlob(b=>b ? resolve(b) : reject(new Error("PNG QR non riuscito.")), "image/png");
+    }));
+  }
+
+  return blobs;
+}
+
 function downloadBlob(blob, filename){
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -756,8 +857,8 @@ function downloadBlob(blob, filename){
 }
 
 /**
- * Pacchetto: PDF Cricut 5 sezioni + PNG adesivi codice (2 misure) + PNG schede A4 (codice+link+QR).
- * Niente SVG. QR = stesso URL del chip (/m/slug), mai il codice attivazione.
+ * Pacchetto: PDF Cricut + PNG adesivi codice + PNG schede A4 + PNG QR A4.
+ * QR = stesso URL del chip (/m/slug), mai il codice attivazione.
  */
 export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etichette"){
   if(!rows.length){
@@ -800,6 +901,7 @@ export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etich
   const pdfBlob = doc.output("blob");
   let pngBlob = null;
   let schedeBlobs = [];
+  let qrBlobs = [];
   try{
     pngBlob = await buildCodeLabelsPngBlob(rows);
   }catch(error){
@@ -810,16 +912,17 @@ export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etich
   }catch(error){
     console.warn("PNG schede:", error);
   }
+  try{
+    qrBlobs = await buildQrLabelsPngBlobs(rows, meta, qrCache);
+  }catch(error){
+    console.warn("PNG QR:", error);
+  }
 
   const zip = new JSZip();
   zip.file(`${baseName}-cricut5.pdf`, pdfBlob);
   if(pngBlob) zip.file(`${baseName}-codici.png`, pngBlob);
-  schedeBlobs.forEach((blob, i)=>{
-    const name = schedeBlobs.length === 1
-      ? `${baseName}-schede.png`
-      : `${baseName}-schede-${String(i + 1).padStart(2, "0")}.png`;
-    zip.file(name, blob);
-  });
+  zipPngPages(zip, baseName, "schede", schedeBlobs);
+  zipPngPages(zip, baseName, "qr", qrBlobs);
 
   const zipBlob = await zip.generateAsync({ type: "blob" });
   downloadBlob(zipBlob, `${baseName}-etichette.zip`);

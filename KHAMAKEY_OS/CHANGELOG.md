@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v202 — PNG QR A4 (2026-09-02, Cursor)** — Pages
+  - ZIP: nuovo `*-qr.png` (foglio A4, griglia QR = URL chip /m/slug, stesso N°). Schede e adesivi invariati.
 - **Admin v201 — schede A4 (2026-09-02, Cursor)** — Pages
   - PNG schede: un foglio A4 con griglia 2×3 (codice + link NFC + QR). Lotti più grandi → più PNG A4, non uno striscia alta.
 - **Admin v200 — angoli smussati riquadri codice (2026-09-02, Cursor)** — Pages

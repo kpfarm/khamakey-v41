@@ -582,66 +582,54 @@ async function buildCodeLabelsPngBlob(rows){
   });
 }
 
-/**
- * Una card per pezzo: N° + codice attivazione + link NFC + QR.
- * Da stampare e tenere in banco — non sono etichette da tagliare.
- */
-function drawSummaryCard(doc, x, y, w, h, n, row, qrImg){
-  doc.setDrawColor(15, 23, 42);
-  doc.setFillColor(255, 255, 255);
-  doc.setLineWidth(0.45);
-  doc.roundedRect(x, y, w, h, 3.2, 3.2, "S");
-
-  const pad = 8;
-  const qr = 36;
-  const qrX = x + w - pad - qr;
-  const textW = w - pad * 2 - qr - 8;
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(100, 116, 139);
-  doc.text("PEZZO", x + pad, y + pad + 4);
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.setTextColor(15, 23, 42);
-  doc.text(String(n), x + pad, y + pad + 14);
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(100, 116, 139);
-  doc.text("CODICE DI ATTIVAZIONE (inserto)", x + pad, y + 36);
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.setTextColor(15, 23, 42);
-  const code = activationCodeDisplay(row);
-  const codeLines = doc.splitTextToSize(code, textW);
-  doc.text(codeLines.slice(0, 2), x + pad, y + 46);
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(100, 116, 139);
-  doc.text("LINK NFC (stesso URL del chip)", x + pad, y + 68);
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(15, 23, 42);
-  const url = nfcUrlForRow(row) || "Link NFC non ancora assegnato";
-  const urlLines = doc.splitTextToSize(url, textW);
-  doc.text(urlLines.slice(0, 4), x + pad, y + 78);
-
-  if(qrImg){
-    doc.addImage(qrImg, "PNG", qrX, y + pad + 10, qr, qr);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.5);
-    doc.setTextColor(100, 116, 139);
-    doc.text("QR pagina", qrX + qr / 2, y + pad + 10 + qr + 5, { align: "center" });
+function wrapCanvasChars(ctx, text, maxW, maxLines){
+  const raw = String(text || "");
+  const lines = [];
+  let line = "";
+  for(const ch of raw){
+    const test = line + ch;
+    if(!line || ctx.measureText(test).width <= maxW) line = test;
+    else {
+      lines.push(line);
+      line = ch;
+      if(lines.length >= maxLines) return lines.slice(0, maxLines);
+    }
   }
+  if(line && lines.length < maxLines) lines.push(line);
+  return lines;
 }
 
-function buildSummaryCardsPdf(rows, meta, qrCache){
-  const doc = new jsPDF({ unit: "mm", format: "a4", compress: true, orientation: "portrait" });
+function loadQrImage(dataUrl){
+  if(!dataUrl) return Promise.resolve(null);
+  return new Promise(resolve=>{
+    const img = new Image();
+    img.onload = ()=>resolve(img);
+    img.onerror = ()=>resolve(null);
+    img.src = dataUrl;
+  });
+}
+
+function drawRoundRectPath(ctx, rx, ry, rw, rh, radius){
+  const r = Math.min(radius, rw / 2, rh / 2);
+  ctx.beginPath();
+  ctx.moveTo(rx + r, ry);
+  ctx.arcTo(rx + rw, ry, rx + rw, ry + rh, r);
+  ctx.arcTo(rx + rw, ry + rh, rx, ry + rh, r);
+  ctx.arcTo(rx, ry + rh, rx, ry, r);
+  ctx.arcTo(rx, ry, rx + rw, ry, r);
+  ctx.closePath();
+}
+
+/**
+ * Schede tecniche in PNG a parte: N° + codice + link NFC + QR.
+ * Fogli A4 bianchi, 2 card, stesso N° del PNG adesivi — non tagliare.
+ */
+async function buildSummaryCardsPngBlob(rows, meta, qrCache){
+  const qrImages = new Map();
+  await Promise.all([...qrCache.entries()].map(async ([url, dataUrl])=>{
+    qrImages.set(url, await loadQrImage(dataUrl));
+  }));
+
   const marginX = 12;
   const topY = 22;
   const gapY = 8;
@@ -649,45 +637,100 @@ function buildSummaryCardsPdf(rows, meta, qrCache){
   const cardH = 118;
   const perPage = 2;
   const pageCount = Math.max(1, Math.ceil(rows.length / perPage));
+  const dpi = 300;
+  const scale = dpi / 25.4;
+  const pxW = Math.round(A4.w * scale);
+  const pxH = Math.round(A4.h * scale * pageCount);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = pxW;
+  canvas.height = pxH;
+  const ctx = canvas.getContext("2d");
+  ctx.textBaseline = "alphabetic";
+
+  const fillText = (text, x, y, { sizePt, color, align = "left", weight = "700" } = {})=>{
+    ctx.fillStyle = color;
+    ctx.textAlign = align;
+    ctx.font = `${weight} ${svgFontMm(sizePt) * scale}px Helvetica, Arial, sans-serif`;
+    ctx.fillText(text, x, y);
+  };
 
   for(let page = 0; page < pageCount; page += 1){
-    if(page > 0) doc.addPage();
+    const pageOffsetY = page * A4.h * scale;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, pageOffsetY, pxW, A4.h * scale);
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.setTextColor(15, 23, 42);
-    doc.text("Schede pezzo — codice e link", A4.w / 2, 10, { align: "center" });
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(71, 85, 105);
-    const lot = doc.splitTextToSize(
+    fillText("Schede pezzo — codice e link", (A4.w / 2) * scale, pageOffsetY + 10 * scale, {
+      sizePt: 12, color: "#0f172a", align: "center"
+    });
+    fillText(
       `${meta.lotTitle} · ${meta.qty} pezzi · foglio ${page + 1}/${pageCount} · non tagliare`,
-      A4.w - 24
+      (A4.w / 2) * scale,
+      pageOffsetY + 16 * scale,
+      { sizePt: 8, color: "#475569", align: "center", weight: "500" }
     );
-    doc.text(lot.slice(0, 1), A4.w / 2, 16, { align: "center" });
 
     const start = page * perPage;
     const slice = rows.slice(start, start + perPage);
     slice.forEach((row, i)=>{
       const n = start + i + 1;
-      const y = topY + i * (cardH + gapY);
-      const url = nfcUrlForRow(row);
-      drawSummaryCard(doc, marginX, y, cardW, cardH, n, row, qrCache.get(url));
+      const x = marginX * scale;
+      const y = pageOffsetY + (topY + i * (cardH + gapY)) * scale;
+      const w = cardW * scale;
+      const h = cardH * scale;
+      const pad = 8 * scale;
+      const qr = 36 * scale;
+      const qrX = x + w - pad - qr;
+      const textW = w - pad * 2 - qr - 8 * scale;
+
+      ctx.strokeStyle = "#0f172a";
+      ctx.lineWidth = 0.45 * scale;
+      ctx.fillStyle = "#ffffff";
+      drawRoundRectPath(ctx, x, y, w, h, 3.2 * scale);
+      ctx.fill();
+      ctx.stroke();
+
+      fillText("PEZZO", x + pad, y + pad + 4 * scale, { sizePt: 8, color: "#64748b" });
+      fillText(String(n), x + pad, y + pad + 16 * scale, { sizePt: 22, color: "#0f172a" });
+      fillText("CODICE DI ATTIVAZIONE (inserto)", x + pad, y + 36 * scale, { sizePt: 8, color: "#64748b" });
+
+      const code = activationCodeDisplay(row);
+      ctx.fillStyle = "#0f172a";
+      ctx.textAlign = "left";
+      ctx.font = `700 ${svgFontMm(18) * scale}px Helvetica, Arial, sans-serif`;
+      wrapCanvasChars(ctx, code, textW, 2).forEach((line, li)=>{
+        ctx.fillText(line, x + pad, y + (46 + li * 8) * scale);
+      });
+
+      fillText("LINK NFC (stesso URL del chip)", x + pad, y + 68 * scale, { sizePt: 8, color: "#64748b" });
+      const url = nfcUrlForRow(row) || "Link NFC non ancora assegnato";
+      ctx.fillStyle = "#0f172a";
+      ctx.textAlign = "left";
+      ctx.font = `700 ${svgFontMm(9) * scale}px Helvetica, Arial, sans-serif`;
+      wrapCanvasChars(ctx, url, textW, 4).forEach((line, li)=>{
+        ctx.fillText(line, x + pad, y + (78 + li * 5) * scale);
+      });
+
+      const qrImg = qrImages.get(nfcUrlForRow(row));
+      if(qrImg){
+        ctx.drawImage(qrImg, qrX, y + pad + 10 * scale, qr, qr);
+        fillText("QR pagina", qrX + qr / 2, y + pad + 10 * scale + qr + 5 * scale, {
+          sizePt: 6.5, color: "#64748b", align: "center", weight: "500"
+        });
+      }
     });
 
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
-    doc.setTextColor(100, 116, 139);
-    doc.text(
-      "Stesso N° del PNG. Codice = inserto in confezione · Link/QR = chip NFC (/m/slug).",
-      A4.w / 2,
-      287,
-      { align: "center" }
+    fillText(
+      "Stesso N° del PNG adesivi. Codice = inserto in confezione · Link/QR = chip NFC (/m/slug).",
+      (A4.w / 2) * scale,
+      pageOffsetY + 287 * scale,
+      { sizePt: 7, color: "#64748b", align: "center", weight: "500" }
     );
   }
 
-  return doc.output("blob");
+  return new Promise((resolve, reject)=>{
+    canvas.toBlob(b=>b ? resolve(b) : reject(new Error("PNG schede non riuscito.")), "image/png");
+  });
 }
 
 function downloadBlob(blob, filename){
@@ -700,7 +743,7 @@ function downloadBlob(blob, filename){
 }
 
 /**
- * Pacchetto: PDF Cricut 5 sezioni + schede pezzo (codice/link) + PNG adesivi (2 misure).
+ * Pacchetto: PDF Cricut 5 sezioni + PNG adesivi codice (2 misure) + PNG schede (codice/link).
  * Niente SVG. QR = stesso URL del chip (/m/slug), mai il codice attivazione.
  */
 export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etichette"){
@@ -742,18 +785,23 @@ export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etich
   const baseName = `${safeStem}-${stamp}-${rows.length}pz`;
 
   const pdfBlob = doc.output("blob");
-  const schedeBlob = buildSummaryCardsPdf(rows, meta, qrCache);
   let pngBlob = null;
+  let schedeBlob = null;
   try{
     pngBlob = await buildCodeLabelsPngBlob(rows);
   }catch(error){
     console.warn("PNG etichette:", error);
   }
+  try{
+    schedeBlob = await buildSummaryCardsPngBlob(rows, meta, qrCache);
+  }catch(error){
+    console.warn("PNG schede:", error);
+  }
 
   const zip = new JSZip();
   zip.file(`${baseName}-cricut5.pdf`, pdfBlob);
-  zip.file(`${baseName}-schede.pdf`, schedeBlob);
   if(pngBlob) zip.file(`${baseName}-codici.png`, pngBlob);
+  if(schedeBlob) zip.file(`${baseName}-schede.png`, schedeBlob);
 
   const zipBlob = await zip.generateAsync({ type: "blob" });
   downloadBlob(zipBlob, `${baseName}-etichette.zip`);

@@ -15,6 +15,8 @@ const CODE_RECT = { w: 36, h: 9 };
 const CODE_RECT_LARGE = { w: 45, h: 12 };
 const CODE_FONT_PT = 10;
 const CODE_FONT_PT_LARGE = 13;
+/** Angoli smussati del riquadro codice (mm) — visibili in stampa, non a pillola */
+const CODE_CORNER_R = 2.6;
 /** Spazio sopra il contorno per il N° pezzo (fuori dal taglio) */
 const CODE_NUM_H = 3.4;
 const CODE_CELL = { w: CODE_RECT.w, h: CODE_RECT.h + CODE_NUM_H };
@@ -199,7 +201,7 @@ function drawCodeRectLabel(doc, x, y, index1, row, layout = codeLabelLayout("std
   }
 
   setCutStroke(doc);
-  doc.roundedRect(x, boxY, rect.w, rect.h, 1.0, 1.0, "S");
+  doc.roundedRect(x, boxY, rect.w, rect.h, CODE_CORNER_R, CODE_CORNER_R, "S");
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(layout.fontPt);
@@ -560,7 +562,7 @@ async function buildCodeLabelsPngBlob(rows){
         ctx.fillText(String(n), x, y + svgFontMm(7) * scale);
 
         ctx.fillStyle = "#ffffff";
-        drawRoundRect(x, boxY, boxW, boxH, 1 * scale);
+        drawRoundRect(x, boxY, boxW, boxH, CODE_CORNER_R * scale);
         ctx.fill();
 
         ctx.fillStyle = "#0f172a";

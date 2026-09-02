@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v200 — angoli smussati riquadri codice (2026-09-02, Cursor)** — Pages
+  - PNG adesivi e PDF Cricut codice: raggio 2,6 mm (prima 1 mm, in stampa sembrava spigoloso).
 - **Admin v199 — schede tecniche in PNG (2026-09-02, Cursor)** — Pages
   - ZIP: `*-schede.png` al posto del PDF schede. PNG adesivi codice e PDF Cricut invariati.
 - **Admin v198 — schede pezzo + PNG due misure, niente SVG (2026-09-02, Cursor)** — Pages

@@ -435,6 +435,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-09-02 | Cursor | **Admin v200**: riquadri codice con angoli smussati (raggio 2,6 mm) |
 | 2026-09-02 | Cursor | **Admin v199**: schede tecniche in PNG a parte (`*-schede.png`), non più PDF |
 | 2026-09-02 | Cursor | **Admin v198**: ZIP — PNG 2 misure, schede PDF codice+link, niente SVG |
 | 2026-09-02 | Cursor | **Admin v197**: ZIP etichette — per pezzo codice normale + grande sullo stesso foglio (stesso N°) |

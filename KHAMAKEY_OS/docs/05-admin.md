@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v172** (supporto operativo v170; PDF Cricut v169; mobile UX v167; magazzino NFC Moments/Business).
+Versione attuale: **v197** (ZIP etichette: per pezzo codice 36×9 mm + 45×12 mm / 13 pt sullo stesso foglio).
 
 ---
 
@@ -94,7 +94,7 @@ Flusso stock-first:
 2. Assegna codici all'ordine al momento della vendita
 3. Traccia `sold_channel` e `assigned_agent_id`
 
-Admin: ricerca, filtri, modifica singola, bulk, drawer ordine/codice, export CSV/PDF etichette.
+Admin: ricerca, filtri, modifica singola, bulk, drawer ordine/codice, export CSV + ZIP etichette (PDF Cricut, SVG, PNG: per pezzo misura normale + grande, stesso N°).
 
 ---
 
@@ -136,7 +136,7 @@ SQL: `sql/khamakey-business-inventory-v148.sql` · Dettaglio: [`20-business-acti
 | `admin.js` | Logica CRUD, filtri, sync |
 | `admin.css` | Stili admin |
 | `admin-guide.js` | Guide contestuali per sezione |
-| `admin-moment-labels.js` | Etichette categorie Moments |
+| `admin-moment-labels.js` | ZIP etichette Moments: PDF Cricut 5 sezioni + SVG + PNG (codice normale + grande per pezzo) |
 
 ---
 

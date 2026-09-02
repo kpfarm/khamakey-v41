@@ -9,13 +9,23 @@ import JSZip from "https://esm.sh/jszip@3.10.1";
 const A4 = { w: 210, h: 297 };
 
 /** Forme etichette Cricut (contorno = percorso di taglio) */
-/** Inserto confezione: solo codice attivazione (riquadro stretto, 2 copie per pezzo) */
+/** Inserto confezione: codice attivazione, misura attuale + misura grande affiancate */
 const CODE_RECT = { w: 36, h: 9 };
+/** Misura grande (~+25% riquadro, carattere 13 pt invece di 10) */
+const CODE_RECT_LARGE = { w: 45, h: 12 };
+const CODE_FONT_PT = 10;
+const CODE_FONT_PT_LARGE = 13;
 /** Spazio sopra il contorno per il N° pezzo (fuori dal taglio) */
 const CODE_NUM_H = 3.4;
 const CODE_CELL = { w: CODE_RECT.w, h: CODE_RECT.h + CODE_NUM_H };
-/** Gap tra le 2 etichette codice affiancate (panoramica) */
+const CODE_CELL_LARGE = { w: CODE_RECT_LARGE.w, h: CODE_RECT_LARGE.h + CODE_NUM_H };
+/** Gap tra etichetta normale e grande (stesso pezzo, affiancate) */
 const CODE_PAIR_GAP = 2.5;
+/** Una cella = misura attuale + misura grande, stesso N° */
+const CODE_PAIR_CELL = {
+  w: CODE_RECT.w + CODE_PAIR_GAP + CODE_RECT_LARGE.w,
+  h: CODE_NUM_H + CODE_RECT_LARGE.h
+};
 /** @deprecated alias — stesso rettangolo codice */
 const OVAL = CODE_RECT;
 /**
@@ -79,14 +89,6 @@ function batchMeta(rows){
   const type = String(first.product_type || first.product_label || "").trim();
   const category = [sku, label, type].filter(Boolean).join(" · ") || "Lotto KhamaKey Moments";
   return { category, qty: rows.length, lotTitle: label || sku || "Lotto KhamaKey Moments" };
-}
-
-/** Ogni pezzo → 2 etichette adesive identiche (stesso N° pezzo). */
-function duplicateCodeLabelRows(rows){
-  return rows.flatMap((row, i)=>[
-    { ...row, __labelIndex: i + 1 },
-    { ...row, __labelIndex: i + 1 }
-  ]);
 }
 
 function barcodeDataUrl(value, { height = 36, width = 1.2 } = {}){
@@ -175,10 +177,11 @@ function drawNumberBadge(doc, x, y, n, size = NUM_BOX){
  * Inserto in confezione: rettangolo stretto + solo codice (niente frasi guida).
  * Il N° pezzo sta FUORI dal contorno di taglio (sopra a sinistra).
  */
-function drawCodeRectLabel(doc, x, y, index1, row){
+function drawCodeRectLabel(doc, x, y, index1, row, layout = codeLabelLayout("std")){
+  const rect = layout.rect;
   const showNum = index1 != null && index1 !== "" && Number(index1) > 0;
   const boxY = showNum ? y + CODE_NUM_H : y;
-  const cx = x + CODE_RECT.w / 2;
+  const cx = x + rect.w / 2;
 
   if(showNum){
     doc.setFont("helvetica", "bold");
@@ -188,20 +191,20 @@ function drawCodeRectLabel(doc, x, y, index1, row){
   }
 
   setCutStroke(doc);
-  doc.roundedRect(x, boxY, CODE_RECT.w, CODE_RECT.h, 1.0, 1.0, "S");
+  doc.roundedRect(x, boxY, rect.w, rect.h, 1.0, 1.0, "S");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
+  doc.setFontSize(layout.fontPt);
   doc.setTextColor(15, 23, 42);
   const code = activationCodeDisplay(row);
-  const lines = doc.splitTextToSize(code, CODE_RECT.w - 2.4);
-  doc.text(lines.slice(0, 1), cx, boxY + CODE_RECT.h / 2 + 1.2, { align: "center" });
+  const lines = doc.splitTextToSize(code, rect.w - 2.4);
+  doc.text(lines.slice(0, 1), cx, boxY + rect.h / 2 + 1.2, { align: "center" });
 }
 
-/** Due etichette codice affiancate (stesso pezzo). */
+/** Stesso pezzo: etichetta misura attuale + etichetta un po’ più grande. */
 function drawCodeRectPair(doc, x, y, index1, row){
-  drawCodeRectLabel(doc, x, y, index1, row);
-  drawCodeRectLabel(doc, x + CODE_RECT.w + CODE_PAIR_GAP, y, index1, row);
+  drawCodeRectLabel(doc, x, y, index1, row, codeLabelLayout("std"));
+  drawCodeRectLabel(doc, x + CODE_RECT.w + CODE_PAIR_GAP, y, index1, row, codeLabelLayout("large"));
 }
 
 /** @deprecated nome storico — ora rettangolo */
@@ -334,11 +337,11 @@ function drawGridSection(doc, rows, meta, {
  */
 function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
   const colNumW = 10;
-  const colCodeW = CODE_RECT.w * 2 + CODE_PAIR_GAP;
+  const colCodeW = CODE_RECT.w + CODE_PAIR_GAP + CODE_RECT_LARGE.w;
   const colBarW = BAR_RECT.w;
   const colQrW = QR_SQUARE.w;
-  const colLinkW = Math.min(LINK_RECT.w, 52);
-  const rowH = Math.max(CODE_RECT.h, BAR_RECT.h, LINK_RECT.h, QR_SQUARE.h, NUM_BOX.h) + 2;
+  const colLinkW = Math.min(LINK_RECT.w, 40);
+  const rowH = Math.max(CODE_RECT_LARGE.h, BAR_RECT.h, LINK_RECT.h, QR_SQUARE.h, NUM_BOX.h) + 2;
   const gap = 2;
   const tableW = colNumW + gap + colCodeW + gap + colBarW + gap + colLinkW + gap + colQrW;
   const startX = Math.max(4, (A4.w - tableW) / 2);
@@ -356,7 +359,7 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
       meta.category,
       meta.qty,
       "1 · Panoramica lotto (controllo)",
-      `foglio ${page + 1}/${pageCount} · 2 etichette codice per pezzo`
+      `foglio ${page + 1}/${pageCount} · codice: misura normale + grande`
     );
 
     const headY = topY - 2;
@@ -366,7 +369,7 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
     let hx = startX;
     doc.text("N°", hx, headY);
     hx += colNumW + gap;
-    doc.text("CODICE ×2", hx, headY);
+    doc.text("CODICE 2 MISURE", hx, headY);
     hx += colCodeW + gap;
     doc.text("BARCODE", hx, headY);
     hx += colBarW + gap;
@@ -384,7 +387,7 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
       drawNumberBadge(doc, x, y + (rowH - NUM_BOX.h) / 2, n);
       x += colNumW + gap;
 
-      drawCodeRectPair(doc, x, y + (rowH - CODE_RECT.h) / 2, null, row);
+      drawCodeRectPair(doc, x, y + (rowH - CODE_RECT_LARGE.h) / 2, null, row);
       x += colCodeW + gap;
 
       const pkg = packagingBarcode(row);
@@ -413,14 +416,13 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
 }
 
 function drawOvalCutSection(doc, rows, meta){
-  const doubled = duplicateCodeLabelRows(rows);
-  drawGridSection(doc, doubled, meta, {
-    sectionTitle: "2 · Etichette codice (rettangoli ×2) · Cricut",
-    cellW: CODE_CELL.w,
-    cellH: CODE_CELL.h,
+  drawGridSection(doc, rows, meta, {
+    sectionTitle: "2 · Etichette codice (normale + grande) · Cricut",
+    cellW: CODE_PAIR_CELL.w,
+    cellH: CODE_PAIR_CELL.h,
     cutSheet: true,
-    qtyOverride: `${meta.qty} pezzi · ${doubled.length} etichette`,
-    drawCell: (d, x, y, n, row)=>drawCodeRectLabel(d, x, y, n, row)
+    qtyOverride: `${meta.qty} pezzi · 1 normale + 1 grande`,
+    drawCell: (d, x, y, n, row)=>drawCodeRectPair(d, x, y, n, row)
   });
 }
 
@@ -475,48 +477,69 @@ function svgFontMm(pt){
   return Number((Number(pt) * PT_TO_MM).toFixed(3));
 }
 
+function codeLabelLayout(size = "std"){
+  const large = size === "large";
+  const rect = large ? CODE_RECT_LARGE : CODE_RECT;
+  return {
+    size,
+    rect,
+    cell: large ? CODE_CELL_LARGE : CODE_CELL,
+    fontPt: large ? CODE_FONT_PT_LARGE : CODE_FONT_PT
+  };
+}
+
 /** Font size mm che fa stare il codice nel riquadro (stesso look del PDF). */
-function codeFontMmForDisplay(code){
+function codeFontMmForDisplay(code, layout = codeLabelLayout()){
   const text = String(code || "");
-  const maxW = CODE_RECT.w - 2.4;
+  const maxW = layout.rect.w - 2.4;
   // Helvetica bold ≈ 0.62em per carattere
   const raw = maxW / Math.max(1, text.length * 0.62);
-  return Math.max(2.2, Math.min(svgFontMm(10), Number(raw.toFixed(3))));
+  return Math.max(2.2, Math.min(svgFontMm(layout.fontPt), Number(raw.toFixed(3))));
+}
+
+function codePairSlots(x, y){
+  return [
+    { layout: codeLabelLayout("std"), x, y },
+    { layout: codeLabelLayout("large"), x: x + CODE_RECT.w + CODE_PAIR_GAP, y }
+  ];
+}
+
+function svgCodeSticker(x, y, n, codeRaw, layout, numFs){
+  const boxY = y + CODE_NUM_H;
+  const code = escapeXml(codeRaw);
+  const codeFs = codeFontMmForDisplay(codeRaw, layout);
+  const textW = layout.rect.w - 2.4;
+  const baseline = boxY + layout.rect.h / 2 + codeFs * 0.35;
+  return `
+        <g data-piece="${n}" data-size="${layout.size}">
+          <text x="${x}" y="${y + numFs}" font-family="Helvetica, Arial, sans-serif" font-size="${numFs}" font-weight="700" fill="#0f172a">${n}</text>
+          <rect x="${x}" y="${boxY}" width="${layout.rect.w}" height="${layout.rect.h}" rx="1" ry="1" fill="#ffffff" stroke="none"/>
+          <text x="${x + layout.rect.w / 2}" y="${baseline}" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="${codeFs}" font-weight="700" fill="#0f172a" textLength="${textW}" lengthAdjust="spacingAndGlyphs">${code}</text>
+        </g>`;
 }
 
 /**
- * Foglio SVG etichette codice (2 per pezzo) — Cricut Print Then Cut.
+ * Foglio SVG: per ogni pezzo misura attuale + misura grande, stesso N°.
  * Nessun titolo, sfondo trasparente, casella bianca senza bordo nero.
  */
 function buildCodeLabelsSvg(rows){
-  const doubled = duplicateCodeLabelRows(rows);
-  const grid = computeGrid(CODE_CELL.w, CODE_CELL.h);
+  const grid = computeGrid(CODE_PAIR_CELL.w, CODE_PAIR_CELL.h);
   const pageH = A4.h;
-  const pageCount = Math.max(1, Math.ceil(doubled.length / grid.perPage));
+  const pageCount = Math.max(1, Math.ceil(rows.length / grid.perPage));
   const pages = [];
   const numFs = svgFontMm(7);
 
   for(let page = 0; page < pageCount; page += 1){
     const start = page * grid.perPage;
-    const slice = doubled.slice(start, start + grid.perPage);
+    const slice = rows.slice(start, start + grid.perPage);
     const labels = slice.map((row, i)=>{
       const col = i % grid.cols;
       const rowIdx = Math.floor(i / grid.cols);
       const x = grid.offsetX + col * (grid.cellW + SHEET.gapX);
       const y = SHEET.marginY + SHEET.headerH + rowIdx * (grid.cellH + SHEET.gapY);
-      const n = row.__labelIndex != null ? row.__labelIndex : start + i + 1;
-      const boxY = y + CODE_NUM_H;
+      const n = start + i + 1;
       const codeRaw = activationCodeDisplay(row);
-      const code = escapeXml(codeRaw);
-      const codeFs = codeFontMmForDisplay(codeRaw);
-      const textW = CODE_RECT.w - 2.4;
-      const baseline = boxY + CODE_RECT.h / 2 + codeFs * 0.35;
-      return `
-        <g data-piece="${n}">
-          <text x="${x}" y="${y + numFs}" font-family="Helvetica, Arial, sans-serif" font-size="${numFs}" font-weight="700" fill="#0f172a">${n}</text>
-          <rect x="${x}" y="${boxY}" width="${CODE_RECT.w}" height="${CODE_RECT.h}" rx="1" ry="1" fill="#ffffff" stroke="none"/>
-          <text x="${x + CODE_RECT.w / 2}" y="${baseline}" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="${codeFs}" font-weight="700" fill="#0f172a" textLength="${textW}" lengthAdjust="spacingAndGlyphs">${code}</text>
-        </g>`;
+      return codePairSlots(x, y).map(slot=>svgCodeSticker(slot.x, slot.y, n, codeRaw, slot.layout, numFs)).join("");
     }).join("");
 
     pages.push(`
@@ -536,11 +559,10 @@ function buildCodeLabelsSvg(rows){
 </svg>`;
 }
 
-/** Raster PNG etichette codice (300 dpi, alpha) — solo caselle bianche + testo, no titolo/bordo. */
+/** Raster PNG: per ogni pezzo misura attuale + grande (300 dpi, alpha). */
 async function buildCodeLabelsPngBlob(rows){
-  const doubled = duplicateCodeLabelRows(rows);
-  const grid = computeGrid(CODE_CELL.w, CODE_CELL.h);
-  const pageCount = Math.max(1, Math.ceil(doubled.length / grid.perPage));
+  const grid = computeGrid(CODE_PAIR_CELL.w, CODE_PAIR_CELL.h);
+  const pageCount = Math.max(1, Math.ceil(rows.length / grid.perPage));
   const dpi = 300;
   const scale = dpi / 25.4; // px per mm
   const pxW = Math.round(A4.w * scale);
@@ -567,44 +589,45 @@ async function buildCodeLabelsPngBlob(rows){
   for(let page = 0; page < pageCount; page += 1){
     const pageOffsetY = page * A4.h * scale;
     const start = page * grid.perPage;
-    const slice = doubled.slice(start, start + grid.perPage);
+    const slice = rows.slice(start, start + grid.perPage);
     slice.forEach((row, i)=>{
       const col = i % grid.cols;
       const rowIdx = Math.floor(i / grid.cols);
       const xMm = grid.offsetX + col * (grid.cellW + SHEET.gapX);
       const yMm = SHEET.marginY + SHEET.headerH + rowIdx * (grid.cellH + SHEET.gapY);
-      const n = row.__labelIndex != null ? row.__labelIndex : start + i + 1;
-      const boxYMm = yMm + CODE_NUM_H;
+      const n = start + i + 1;
       const code = activationCodeDisplay(row);
-      const codeFsMm = codeFontMmForDisplay(code);
+      codePairSlots(xMm, yMm).forEach(slot=>{
+        const layout = slot.layout;
+        const boxYMm = slot.y + CODE_NUM_H;
+        const codeFsMm = codeFontMmForDisplay(code, layout);
 
-      const x = xMm * scale;
-      const y = pageOffsetY + yMm * scale;
-      const boxY = pageOffsetY + boxYMm * scale;
-      const boxW = CODE_RECT.w * scale;
-      const boxH = CODE_RECT.h * scale;
+        const x = slot.x * scale;
+        const y = pageOffsetY + slot.y * scale;
+        const boxY = pageOffsetY + boxYMm * scale;
+        const boxW = layout.rect.w * scale;
+        const boxH = layout.rect.h * scale;
 
-      // N° pezzo fuori dalla casella (guida magazzino, non nel taglio bianco)
-      ctx.fillStyle = "#0f172a";
-      ctx.textAlign = "left";
-      ctx.font = `700 ${svgFontMm(7) * scale}px Helvetica, Arial, sans-serif`;
-      ctx.fillText(String(n), x, y + svgFontMm(7) * scale);
+        ctx.fillStyle = "#0f172a";
+        ctx.textAlign = "left";
+        ctx.font = `700 ${svgFontMm(7) * scale}px Helvetica, Arial, sans-serif`;
+        ctx.fillText(String(n), x, y + svgFontMm(7) * scale);
 
-      // Casella bianca senza contorno
-      ctx.fillStyle = "#ffffff";
-      drawRoundRect(x, boxY, boxW, boxH, 1 * scale);
-      ctx.fill();
+        ctx.fillStyle = "#ffffff";
+        drawRoundRect(x, boxY, boxW, boxH, 1 * scale);
+        ctx.fill();
 
-      ctx.fillStyle = "#0f172a";
-      ctx.textAlign = "center";
-      ctx.font = `700 ${codeFsMm * scale}px Helvetica, Arial, sans-serif`;
-      const maxTextW = (CODE_RECT.w - 2.4) * scale;
-      let drawFs = codeFsMm * scale;
-      while(drawFs > 8 && ctx.measureText(code).width > maxTextW){
-        drawFs -= 1;
-        ctx.font = `700 ${drawFs}px Helvetica, Arial, sans-serif`;
-      }
-      ctx.fillText(code, x + boxW / 2, boxY + boxH / 2 + drawFs * 0.35);
+        ctx.fillStyle = "#0f172a";
+        ctx.textAlign = "center";
+        ctx.font = `700 ${codeFsMm * scale}px Helvetica, Arial, sans-serif`;
+        const maxTextW = (layout.rect.w - 2.4) * scale;
+        let drawFs = codeFsMm * scale;
+        while(drawFs > 8 && ctx.measureText(code).width > maxTextW){
+          drawFs -= 1;
+          ctx.font = `700 ${drawFs}px Helvetica, Arial, sans-serif`;
+        }
+        ctx.fillText(code, x + boxW / 2, boxY + boxH / 2 + drawFs * 0.35);
+      });
     });
   }
 
@@ -623,8 +646,9 @@ function downloadBlob(blob, filename){
 }
 
 /**
- * Pacchetto etichette: PDF (5 sezioni) + SVG + PNG delle etichette codice ×2.
- * Numerazione continua da 1. QR = stesso URL del chip (/m/slug), mai il codice attivazione.
+ * Pacchetto etichette: PDF (5 sezioni) + SVG + PNG.
+ * Codice: per ogni pezzo misura attuale + misura grande, stesso N° (un solo foglio).
+ * QR = stesso URL del chip (/m/slug), mai il codice attivazione.
  */
 export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etichette"){
   if(!rows.length){
@@ -686,7 +710,10 @@ export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etich
 export const LABEL_SIZE_MM = {
   oval: { ...CODE_RECT },
   code: { ...CODE_RECT },
+  codeLarge: { ...CODE_RECT_LARGE },
   codeCell: { ...CODE_CELL },
+  codeLargeCell: { ...CODE_CELL_LARGE },
+  codePairCell: { ...CODE_PAIR_CELL },
   barcode: { ...BAR_RECT },
   link: { ...LINK_RECT },
   qr: { ...QR_SQUARE },
@@ -694,8 +721,9 @@ export const LABEL_SIZE_MM = {
 };
 export function labelGridInfo(){
   return {
-    oval: computeGrid(CODE_CELL.w, CODE_CELL.h),
-    code: computeGrid(CODE_CELL.w, CODE_CELL.h),
+    oval: computeGrid(CODE_PAIR_CELL.w, CODE_PAIR_CELL.h),
+    code: computeGrid(CODE_PAIR_CELL.w, CODE_PAIR_CELL.h),
+    codeLarge: computeGrid(CODE_CELL_LARGE.w, CODE_CELL_LARGE.h),
     barcode: computeGrid(BAR_RECT.w, BAR_RECT.h),
     link: computeGrid(LINK_RECT.w, LINK_RECT.h),
     qr: computeGrid(QR_CELL.w, QR_CELL.h)

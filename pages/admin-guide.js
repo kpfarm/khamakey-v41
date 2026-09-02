@@ -53,9 +53,10 @@ export const MOMENTS_CONSOLE_GUIDES = {
     tip: "Qui tieni solo il riferimento produzione NFC — non è il catalogo e-commerce."
   },
   momentInventory: {
-    subtitle: "Genera pezzi fisici, ZIP etichette (PDF+SVG+PNG, codice ×2), export CSV.",
+    subtitle: "Genera pezzi fisici, ZIP etichette (PDF+SVG+PNG: 2 misure per pezzo), export CSV.",
     steps: [
       "Quantità default 1 — anche un solo regalo o prova.",
+      "ZIP: PDF 5 sezioni Cricut + SVG + PNG. Per ogni pezzo, sullo stesso foglio: etichetta 36×9 mm e etichetta 45×12 mm (carattere più grande), stesso N° — niente fogli doppi da mescolare.",
       "PDF lotto 5 sezioni Cricut: panoramica · rettangoli codice · barcode · URL NFC · QR pagina (quadretti 28×28 mm, stessa numerazione da 1).",
       "Il QR punta allo stesso /m/slug del chip — mai al codice di attivazione.",
       "Canale: Regalo, Vendita locale, Agente…",

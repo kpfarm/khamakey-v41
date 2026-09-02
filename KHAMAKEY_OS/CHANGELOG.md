@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v197 — codice in due misure sullo stesso foglio (2026-09-02, Cursor)** — Pages
+  - Per ogni pezzo: etichetta 36×9 mm (10 pt) + etichetta 45×12 mm (13 pt), stesso N°, affiancate.
+  - Un solo PNG/SVG; PDF sezione codice allineata. Niente secondo foglio da stampare e mescolare.
 - **Worker v217 — pre-attivazione senza SKU/categoria (2026-08-31, Cursor)** — Worker
   - Pagina «Pronto da attivare»: tolti i badge linea/lotto e tipo (es. portachiavi · MOM-KEY-…, Amore). Resta solo dove trovare il codice.
 - **Moments v250 — attivazione senza testi stock (2026-08-31, Cursor)** — Pages

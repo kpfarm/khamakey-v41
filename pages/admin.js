@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=196";
-import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=177";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=197";
+import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=197";
 import {
   generateMomentSku,
   generateMomentProductName,
@@ -5735,8 +5735,8 @@ async function createMomentUnitsAndExport({
     setFormStatus(
       statusNode,
       qty === 1
-        ? `1 pezzo creato · codice ${formatMomentCodeDisplay(exportRows[0].code)} · ZIP etichette (PDF+SVG+PNG) scaricato.`
-        : `Creati ${rows.length} codici · lotto «${batchLabel}» · CSV + ZIP etichette (PDF+SVG+PNG).`,
+        ? `1 pezzo creato · codice ${formatMomentCodeDisplay(exportRows[0].code)} · ZIP etichette (PDF+SVG+PNG, 2 misure per pezzo) scaricato.`
+        : `Creati ${rows.length} codici · lotto «${batchLabel}» · CSV + ZIP etichette (PDF+SVG+PNG, 2 misure per pezzo).`,
       "ok"
     );
   }

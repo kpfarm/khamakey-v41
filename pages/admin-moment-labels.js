@@ -9,7 +9,7 @@ import JSZip from "https://esm.sh/jszip@3.10.1";
 const A4 = { w: 210, h: 297 };
 
 /** Forme etichette Cricut (contorno = percorso di taglio) */
-/** Inserto confezione: codice attivazione, misura attuale + misura grande affiancate */
+/** Inserto confezione: codice attivazione (PNG: misura attuale + grande affiancate) */
 const CODE_RECT = { w: 36, h: 9 };
 /** Misura grande (~+25% riquadro, carattere 13 pt invece di 10) */
 const CODE_RECT_LARGE = { w: 45, h: 12 };
@@ -89,6 +89,14 @@ function batchMeta(rows){
   const type = String(first.product_type || first.product_label || "").trim();
   const category = [sku, label, type].filter(Boolean).join(" · ") || "Lotto KhamaKey Moments";
   return { category, qty: rows.length, lotTitle: label || sku || "Lotto KhamaKey Moments" };
+}
+
+/** PDF Cricut: 2 etichette codice identiche per pezzo (misura standard). */
+function duplicateCodeLabelRows(rows){
+  return rows.flatMap((row, i)=>[
+    { ...row, __labelIndex: i + 1 },
+    { ...row, __labelIndex: i + 1 }
+  ]);
 }
 
 function barcodeDataUrl(value, { height = 36, width = 1.2 } = {}){
@@ -201,10 +209,10 @@ function drawCodeRectLabel(doc, x, y, index1, row, layout = codeLabelLayout("std
   doc.text(lines.slice(0, 1), cx, boxY + rect.h / 2 + 1.2, { align: "center" });
 }
 
-/** Stesso pezzo: etichetta misura attuale + etichetta un po’ più grande. */
+/** Due etichette codice identiche (PDF Cricut). Le due misure stanno solo nel PNG. */
 function drawCodeRectPair(doc, x, y, index1, row){
   drawCodeRectLabel(doc, x, y, index1, row, codeLabelLayout("std"));
-  drawCodeRectLabel(doc, x + CODE_RECT.w + CODE_PAIR_GAP, y, index1, row, codeLabelLayout("large"));
+  drawCodeRectLabel(doc, x + CODE_RECT.w + CODE_PAIR_GAP, y, index1, row, codeLabelLayout("std"));
 }
 
 /** @deprecated nome storico — ora rettangolo */
@@ -337,11 +345,11 @@ function drawGridSection(doc, rows, meta, {
  */
 function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
   const colNumW = 10;
-  const colCodeW = CODE_RECT.w + CODE_PAIR_GAP + CODE_RECT_LARGE.w;
+  const colCodeW = CODE_RECT.w * 2 + CODE_PAIR_GAP;
   const colBarW = BAR_RECT.w;
   const colQrW = QR_SQUARE.w;
-  const colLinkW = Math.min(LINK_RECT.w, 40);
-  const rowH = Math.max(CODE_RECT_LARGE.h, BAR_RECT.h, LINK_RECT.h, QR_SQUARE.h, NUM_BOX.h) + 2;
+  const colLinkW = Math.min(LINK_RECT.w, 52);
+  const rowH = Math.max(CODE_RECT.h, BAR_RECT.h, LINK_RECT.h, QR_SQUARE.h, NUM_BOX.h) + 2;
   const gap = 2;
   const tableW = colNumW + gap + colCodeW + gap + colBarW + gap + colLinkW + gap + colQrW;
   const startX = Math.max(4, (A4.w - tableW) / 2);
@@ -359,7 +367,7 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
       meta.category,
       meta.qty,
       "1 · Panoramica lotto (controllo)",
-      `foglio ${page + 1}/${pageCount} · codice: misura normale + grande`
+      `foglio ${page + 1}/${pageCount} · 2 etichette codice per pezzo`
     );
 
     const headY = topY - 2;
@@ -369,7 +377,7 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
     let hx = startX;
     doc.text("N°", hx, headY);
     hx += colNumW + gap;
-    doc.text("CODICE 2 MISURE", hx, headY);
+    doc.text("CODICE ×2", hx, headY);
     hx += colCodeW + gap;
     doc.text("BARCODE", hx, headY);
     hx += colBarW + gap;
@@ -387,7 +395,7 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
       drawNumberBadge(doc, x, y + (rowH - NUM_BOX.h) / 2, n);
       x += colNumW + gap;
 
-      drawCodeRectPair(doc, x, y + (rowH - CODE_RECT_LARGE.h) / 2, null, row);
+      drawCodeRectPair(doc, x, y + (rowH - CODE_RECT.h) / 2, null, row);
       x += colCodeW + gap;
 
       const pkg = packagingBarcode(row);
@@ -416,13 +424,14 @@ function drawOverviewSection(doc, rows, meta, barcodeCache, qrCache){
 }
 
 function drawOvalCutSection(doc, rows, meta){
-  drawGridSection(doc, rows, meta, {
-    sectionTitle: "2 · Etichette codice (normale + grande) · Cricut",
-    cellW: CODE_PAIR_CELL.w,
-    cellH: CODE_PAIR_CELL.h,
+  const doubled = duplicateCodeLabelRows(rows);
+  drawGridSection(doc, doubled, meta, {
+    sectionTitle: "2 · Etichette codice (rettangoli ×2) · Cricut",
+    cellW: CODE_CELL.w,
+    cellH: CODE_CELL.h,
     cutSheet: true,
-    qtyOverride: `${meta.qty} pezzi · 1 normale + 1 grande`,
-    drawCell: (d, x, y, n, row)=>drawCodeRectPair(d, x, y, n, row)
+    qtyOverride: `${meta.qty} pezzi · ${doubled.length} etichette`,
+    drawCell: (d, x, y, n, row)=>drawCodeRectLabel(d, x, y, n, row)
   });
 }
 
@@ -462,15 +471,7 @@ function drawQrCutSection(doc, rows, meta, qrCache){
   });
 }
 
-function escapeXml(value){
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-/** jsPDF usa pt; SVG con viewBox in mm deve convertire pt → mm. */
+/** jsPDF usa pt; canvas/PNG converte pt → mm. */
 const PT_TO_MM = 25.4 / 72;
 
 function svgFontMm(pt){
@@ -502,61 +503,6 @@ function codePairSlots(x, y){
     { layout: codeLabelLayout("std"), x, y },
     { layout: codeLabelLayout("large"), x: x + CODE_RECT.w + CODE_PAIR_GAP, y }
   ];
-}
-
-function svgCodeSticker(x, y, n, codeRaw, layout, numFs){
-  const boxY = y + CODE_NUM_H;
-  const code = escapeXml(codeRaw);
-  const codeFs = codeFontMmForDisplay(codeRaw, layout);
-  const textW = layout.rect.w - 2.4;
-  const baseline = boxY + layout.rect.h / 2 + codeFs * 0.35;
-  return `
-        <g data-piece="${n}" data-size="${layout.size}">
-          <text x="${x}" y="${y + numFs}" font-family="Helvetica, Arial, sans-serif" font-size="${numFs}" font-weight="700" fill="#0f172a">${n}</text>
-          <rect x="${x}" y="${boxY}" width="${layout.rect.w}" height="${layout.rect.h}" rx="1" ry="1" fill="#ffffff" stroke="none"/>
-          <text x="${x + layout.rect.w / 2}" y="${baseline}" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="${codeFs}" font-weight="700" fill="#0f172a" textLength="${textW}" lengthAdjust="spacingAndGlyphs">${code}</text>
-        </g>`;
-}
-
-/**
- * Foglio SVG: per ogni pezzo misura attuale + misura grande, stesso N°.
- * Nessun titolo, sfondo trasparente, casella bianca senza bordo nero.
- */
-function buildCodeLabelsSvg(rows){
-  const grid = computeGrid(CODE_PAIR_CELL.w, CODE_PAIR_CELL.h);
-  const pageH = A4.h;
-  const pageCount = Math.max(1, Math.ceil(rows.length / grid.perPage));
-  const pages = [];
-  const numFs = svgFontMm(7);
-
-  for(let page = 0; page < pageCount; page += 1){
-    const start = page * grid.perPage;
-    const slice = rows.slice(start, start + grid.perPage);
-    const labels = slice.map((row, i)=>{
-      const col = i % grid.cols;
-      const rowIdx = Math.floor(i / grid.cols);
-      const x = grid.offsetX + col * (grid.cellW + SHEET.gapX);
-      const y = SHEET.marginY + SHEET.headerH + rowIdx * (grid.cellH + SHEET.gapY);
-      const n = start + i + 1;
-      const codeRaw = activationCodeDisplay(row);
-      return codePairSlots(x, y).map(slot=>svgCodeSticker(slot.x, slot.y, n, codeRaw, slot.layout, numFs)).join("");
-    }).join("");
-
-    pages.push(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="${A4.w}mm" height="${pageH}mm" viewBox="0 0 ${A4.w} ${pageH}">
-        ${labels}
-      </svg>`);
-  }
-
-  if(pages.length === 1) return pages[0].trim();
-  const totalH = pageH * pages.length;
-  const stacked = pages.map((pageSvg, idx)=>{
-    const inner = pageSvg.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
-    return `<g transform="translate(0, ${idx * pageH})">${inner}</g>`;
-  }).join("\n");
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${A4.w}mm" height="${totalH}mm" viewBox="0 0 ${A4.w} ${totalH}">
-  ${stacked}
-</svg>`;
 }
 
 /** Raster PNG: per ogni pezzo misura attuale + grande (300 dpi, alpha). */
@@ -636,6 +582,114 @@ async function buildCodeLabelsPngBlob(rows){
   });
 }
 
+/**
+ * Una card per pezzo: N° + codice attivazione + link NFC + QR.
+ * Da stampare e tenere in banco — non sono etichette da tagliare.
+ */
+function drawSummaryCard(doc, x, y, w, h, n, row, qrImg){
+  doc.setDrawColor(15, 23, 42);
+  doc.setFillColor(255, 255, 255);
+  doc.setLineWidth(0.45);
+  doc.roundedRect(x, y, w, h, 3.2, 3.2, "S");
+
+  const pad = 8;
+  const qr = 36;
+  const qrX = x + w - pad - qr;
+  const textW = w - pad * 2 - qr - 8;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(100, 116, 139);
+  doc.text("PEZZO", x + pad, y + pad + 4);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(15, 23, 42);
+  doc.text(String(n), x + pad, y + pad + 14);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(100, 116, 139);
+  doc.text("CODICE DI ATTIVAZIONE (inserto)", x + pad, y + 36);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.setTextColor(15, 23, 42);
+  const code = activationCodeDisplay(row);
+  const codeLines = doc.splitTextToSize(code, textW);
+  doc.text(codeLines.slice(0, 2), x + pad, y + 46);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(100, 116, 139);
+  doc.text("LINK NFC (stesso URL del chip)", x + pad, y + 68);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(15, 23, 42);
+  const url = nfcUrlForRow(row) || "Link NFC non ancora assegnato";
+  const urlLines = doc.splitTextToSize(url, textW);
+  doc.text(urlLines.slice(0, 4), x + pad, y + 78);
+
+  if(qrImg){
+    doc.addImage(qrImg, "PNG", qrX, y + pad + 10, qr, qr);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6.5);
+    doc.setTextColor(100, 116, 139);
+    doc.text("QR pagina", qrX + qr / 2, y + pad + 10 + qr + 5, { align: "center" });
+  }
+}
+
+function buildSummaryCardsPdf(rows, meta, qrCache){
+  const doc = new jsPDF({ unit: "mm", format: "a4", compress: true, orientation: "portrait" });
+  const marginX = 12;
+  const topY = 22;
+  const gapY = 8;
+  const cardW = A4.w - marginX * 2;
+  const cardH = 118;
+  const perPage = 2;
+  const pageCount = Math.max(1, Math.ceil(rows.length / perPage));
+
+  for(let page = 0; page < pageCount; page += 1){
+    if(page > 0) doc.addPage();
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Schede pezzo — codice e link", A4.w / 2, 10, { align: "center" });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(71, 85, 105);
+    const lot = doc.splitTextToSize(
+      `${meta.lotTitle} · ${meta.qty} pezzi · foglio ${page + 1}/${pageCount} · non tagliare`,
+      A4.w - 24
+    );
+    doc.text(lot.slice(0, 1), A4.w / 2, 16, { align: "center" });
+
+    const start = page * perPage;
+    const slice = rows.slice(start, start + perPage);
+    slice.forEach((row, i)=>{
+      const n = start + i + 1;
+      const y = topY + i * (cardH + gapY);
+      const url = nfcUrlForRow(row);
+      drawSummaryCard(doc, marginX, y, cardW, cardH, n, row, qrCache.get(url));
+    });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(100, 116, 139);
+    doc.text(
+      "Stesso N° del PNG. Codice = inserto in confezione · Link/QR = chip NFC (/m/slug).",
+      A4.w / 2,
+      287,
+      { align: "center" }
+    );
+  }
+
+  return doc.output("blob");
+}
+
 function downloadBlob(blob, filename){
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -646,9 +700,8 @@ function downloadBlob(blob, filename){
 }
 
 /**
- * Pacchetto etichette: PDF (5 sezioni) + SVG + PNG.
- * Codice: per ogni pezzo misura attuale + misura grande, stesso N° (un solo foglio).
- * QR = stesso URL del chip (/m/slug), mai il codice attivazione.
+ * Pacchetto: PDF Cricut 5 sezioni + schede pezzo (codice/link) + PNG adesivi (2 misure).
+ * Niente SVG. QR = stesso URL del chip (/m/slug), mai il codice attivazione.
  */
 export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etichette"){
   if(!rows.length){
@@ -689,7 +742,7 @@ export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etich
   const baseName = `${safeStem}-${stamp}-${rows.length}pz`;
 
   const pdfBlob = doc.output("blob");
-  const svgText = buildCodeLabelsSvg(rows);
+  const schedeBlob = buildSummaryCardsPdf(rows, meta, qrCache);
   let pngBlob = null;
   try{
     pngBlob = await buildCodeLabelsPngBlob(rows);
@@ -699,7 +752,7 @@ export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etich
 
   const zip = new JSZip();
   zip.file(`${baseName}-cricut5.pdf`, pdfBlob);
-  zip.file(`${baseName}-codici.svg`, svgText);
+  zip.file(`${baseName}-schede.pdf`, schedeBlob);
   if(pngBlob) zip.file(`${baseName}-codici.png`, pngBlob);
 
   const zipBlob = await zip.generateAsync({ type: "blob" });

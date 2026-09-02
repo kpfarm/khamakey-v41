@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v198 — schede pezzo + PNG due misure, niente SVG (2026-09-02, Cursor)** — Pages
+  - ZIP: `*-codici.png` (36×9 + 45×12 mm, stesso N°) · `*-schede.pdf` (card codice + link NFC, non tagliare) · PDF Cricut 5 sezioni.
+  - SVG rimosso. Le due misure restano solo sul PNG.
 - **Admin v197 — codice in due misure sullo stesso foglio (2026-09-02, Cursor)** — Pages
   - Per ogni pezzo: etichetta 36×9 mm (10 pt) + etichetta 45×12 mm (13 pt), stesso N°, affiancate.
   - Un solo PNG/SVG; PDF sezione codice allineata. Niente secondo foglio da stampare e mescolare.

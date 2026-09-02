@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=197";
-import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=197";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=198";
+import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=198";
 import {
   generateMomentSku,
   generateMomentProductName,
@@ -1972,8 +1972,8 @@ async function runLabelExport(rows, filenameStem, triggerButton){
     alert(error.message || "Generazione etichette non riuscita.");
   }finally{
     buttons.forEach(btn=>{ btn.disabled = false; });
-    if(momentLabelsFiltered) momentLabelsFiltered.textContent = "Etichette PDF+SVG+PNG (filtri)";
-    if(momentLabelsSelected) momentLabelsSelected.textContent = "Etichette PDF+SVG+PNG (selezione)";
+    if(momentLabelsFiltered) momentLabelsFiltered.textContent = "Etichette ZIP (filtri)";
+    if(momentLabelsSelected) momentLabelsSelected.textContent = "Etichette ZIP (selezione)";
   }
 }
 
@@ -5735,8 +5735,8 @@ async function createMomentUnitsAndExport({
     setFormStatus(
       statusNode,
       qty === 1
-        ? `1 pezzo creato · codice ${formatMomentCodeDisplay(exportRows[0].code)} · ZIP etichette (PDF+SVG+PNG, 2 misure per pezzo) scaricato.`
-        : `Creati ${rows.length} codici · lotto «${batchLabel}» · CSV + ZIP etichette (PDF+SVG+PNG, 2 misure per pezzo).`,
+        ? `1 pezzo creato · codice ${formatMomentCodeDisplay(exportRows[0].code)} · ZIP etichette (PDF Cricut + schede + PNG) scaricato.`
+        : `Creati ${rows.length} codici · lotto «${batchLabel}» · CSV + ZIP etichette (PDF Cricut + schede + PNG).`,
       "ok"
     );
   }

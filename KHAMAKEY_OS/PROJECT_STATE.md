@@ -97,7 +97,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v197** | ZIP etichette: per pezzo codice 36×9 mm + 45×12 mm (13 pt) sullo stesso foglio. |
+| **Admin / Officina Moments** | **v198** | ZIP: PNG codice 2 misure · schede PDF codice+link · Cricut PDF. Niente SVG. |
 | **Worker NFC** | **v217-activation-no-sku** | Pre-attivazione: niente badge linea/lotto/categoria. |
 | **Moments editor** | **v250** | Attivazione: struttura prodotto senza testi stock; guida Come funziona IT/EN. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |

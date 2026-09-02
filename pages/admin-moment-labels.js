@@ -623,116 +623,127 @@ function drawRoundRectPath(ctx, rx, ry, rw, rh, radius){
 }
 
 /**
- * Schede tecniche in PNG a parte: N° + codice + link NFC + QR.
- * Fogli A4 bianchi, 2 card, stesso N° del PNG adesivi — non tagliare.
+ * Schede tecniche: codice + link NFC + QR su foglio A4 (griglia 2×3).
+ * Un PNG = un A4 stampabile; lotti > 6 pezzi → più fogli A4.
  */
-async function buildSummaryCardsPngBlob(rows, meta, qrCache){
+async function buildSummaryCardsPngBlobs(rows, meta, qrCache){
   const qrImages = new Map();
   await Promise.all([...qrCache.entries()].map(async ([url, dataUrl])=>{
     qrImages.set(url, await loadQrImage(dataUrl));
   }));
 
-  const marginX = 12;
-  const topY = 22;
-  const gapY = 8;
-  const cardW = A4.w - marginX * 2;
-  const cardH = 118;
-  const perPage = 2;
+  const marginX = 10;
+  const headerH = 20;
+  const footerY = 288;
+  const gapX = 5;
+  const gapY = 5;
+  const cols = 2;
+  const rowsPerPage = 3;
+  const perPage = cols * rowsPerPage;
+  const usableW = A4.w - marginX * 2;
+  const usableH = footerY - headerH - 8;
+  const cardW = (usableW - gapX) / cols;
+  const cardH = (usableH - gapY * (rowsPerPage - 1)) / rowsPerPage;
   const pageCount = Math.max(1, Math.ceil(rows.length / perPage));
   const dpi = 300;
   const scale = dpi / 25.4;
   const pxW = Math.round(A4.w * scale);
-  const pxH = Math.round(A4.h * scale * pageCount);
+  const pxH = Math.round(A4.h * scale);
 
-  const canvas = document.createElement("canvas");
-  canvas.width = pxW;
-  canvas.height = pxH;
-  const ctx = canvas.getContext("2d");
-  ctx.textBaseline = "alphabetic";
-
-  const fillText = (text, x, y, { sizePt, color, align = "left", weight = "700" } = {})=>{
-    ctx.fillStyle = color;
-    ctx.textAlign = align;
-    ctx.font = `${weight} ${svgFontMm(sizePt) * scale}px Helvetica, Arial, sans-serif`;
-    ctx.fillText(text, x, y);
-  };
+  const blobs = [];
 
   for(let page = 0; page < pageCount; page += 1){
-    const pageOffsetY = page * A4.h * scale;
+    const canvas = document.createElement("canvas");
+    canvas.width = pxW;
+    canvas.height = pxH;
+    const ctx = canvas.getContext("2d");
+    ctx.textBaseline = "alphabetic";
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, pageOffsetY, pxW, A4.h * scale);
+    ctx.fillRect(0, 0, pxW, pxH);
 
-    fillText("Schede pezzo — codice e link", (A4.w / 2) * scale, pageOffsetY + 10 * scale, {
-      sizePt: 12, color: "#0f172a", align: "center"
+    const fillText = (text, x, y, { sizePt, color, align = "left", weight = "700" } = {})=>{
+      ctx.fillStyle = color;
+      ctx.textAlign = align;
+      ctx.font = `${weight} ${svgFontMm(sizePt) * scale}px Helvetica, Arial, sans-serif`;
+      ctx.fillText(text, x, y);
+    };
+
+    fillText("Schede pezzo — codice, link e QR", (A4.w / 2) * scale, 9 * scale, {
+      sizePt: 11, color: "#0f172a", align: "center"
     });
     fillText(
-      `${meta.lotTitle} · ${meta.qty} pezzi · foglio ${page + 1}/${pageCount} · non tagliare`,
+      `${meta.lotTitle} · ${meta.qty} pezzi · foglio ${page + 1}/${pageCount} · stampa A4 100% · non tagliare`,
       (A4.w / 2) * scale,
-      pageOffsetY + 16 * scale,
-      { sizePt: 8, color: "#475569", align: "center", weight: "500" }
+      15 * scale,
+      { sizePt: 7.5, color: "#475569", align: "center", weight: "500" }
     );
 
     const start = page * perPage;
     const slice = rows.slice(start, start + perPage);
     slice.forEach((row, i)=>{
       const n = start + i + 1;
-      const x = marginX * scale;
-      const y = pageOffsetY + (topY + i * (cardH + gapY)) * scale;
+      const col = i % cols;
+      const rowIdx = Math.floor(i / cols);
+      const x = (marginX + col * (cardW + gapX)) * scale;
+      const y = (headerH + rowIdx * (cardH + gapY)) * scale;
       const w = cardW * scale;
       const h = cardH * scale;
-      const pad = 8 * scale;
-      const qr = 36 * scale;
+      const pad = 5 * scale;
+      const qr = 30 * scale;
       const qrX = x + w - pad - qr;
-      const textW = w - pad * 2 - qr - 8 * scale;
+      const qrY = y + pad + 2 * scale;
+      const textW = w - pad * 2 - qr - 4 * scale;
 
       ctx.strokeStyle = "#0f172a";
-      ctx.lineWidth = 0.45 * scale;
+      ctx.lineWidth = 0.4 * scale;
       ctx.fillStyle = "#ffffff";
-      drawRoundRectPath(ctx, x, y, w, h, 3.2 * scale);
+      drawRoundRectPath(ctx, x, y, w, h, 2.8 * scale);
       ctx.fill();
       ctx.stroke();
 
-      fillText("PEZZO", x + pad, y + pad + 4 * scale, { sizePt: 8, color: "#64748b" });
-      fillText(String(n), x + pad, y + pad + 16 * scale, { sizePt: 22, color: "#0f172a" });
-      fillText("CODICE DI ATTIVAZIONE (inserto)", x + pad, y + 36 * scale, { sizePt: 8, color: "#64748b" });
+      fillText("PEZZO", x + pad, y + pad + 3.5 * scale, { sizePt: 7, color: "#64748b" });
+      fillText(String(n), x + pad, y + pad + 14 * scale, { sizePt: 18, color: "#0f172a" });
+      fillText("CODICE ATTIVAZIONE", x + pad, y + 28 * scale, { sizePt: 6.5, color: "#64748b" });
 
       const code = activationCodeDisplay(row);
       ctx.fillStyle = "#0f172a";
       ctx.textAlign = "left";
-      ctx.font = `700 ${svgFontMm(18) * scale}px Helvetica, Arial, sans-serif`;
+      ctx.font = `700 ${svgFontMm(12) * scale}px Helvetica, Arial, sans-serif`;
       wrapCanvasChars(ctx, code, textW, 2).forEach((line, li)=>{
-        ctx.fillText(line, x + pad, y + (46 + li * 8) * scale);
+        ctx.fillText(line, x + pad, y + (36 + li * 6) * scale);
       });
 
-      fillText("LINK NFC (stesso URL del chip)", x + pad, y + 68 * scale, { sizePt: 8, color: "#64748b" });
+      fillText("LINK NFC", x + pad, y + 52 * scale, { sizePt: 6.5, color: "#64748b" });
       const url = nfcUrlForRow(row) || "Link NFC non ancora assegnato";
       ctx.fillStyle = "#0f172a";
       ctx.textAlign = "left";
-      ctx.font = `700 ${svgFontMm(9) * scale}px Helvetica, Arial, sans-serif`;
+      ctx.font = `700 ${svgFontMm(7) * scale}px Helvetica, Arial, sans-serif`;
       wrapCanvasChars(ctx, url, textW, 4).forEach((line, li)=>{
-        ctx.fillText(line, x + pad, y + (78 + li * 5) * scale);
+        ctx.fillText(line, x + pad, y + (59 + li * 4.2) * scale);
       });
 
       const qrImg = qrImages.get(nfcUrlForRow(row));
       if(qrImg){
-        ctx.drawImage(qrImg, qrX, y + pad + 10 * scale, qr, qr);
-        fillText("QR pagina", qrX + qr / 2, y + pad + 10 * scale + qr + 5 * scale, {
-          sizePt: 6.5, color: "#64748b", align: "center", weight: "500"
+        ctx.drawImage(qrImg, qrX, qrY, qr, qr);
+        fillText("QR pagina", qrX + qr / 2, qrY + qr + 4.5 * scale, {
+          sizePt: 6, color: "#64748b", align: "center", weight: "500"
         });
       }
     });
 
     fillText(
-      "Stesso N° del PNG adesivi. Codice = inserto in confezione · Link/QR = chip NFC (/m/slug).",
+      "Stesso N° del PNG adesivi. Codice = inserto · Link/QR = chip NFC (/m/slug).",
       (A4.w / 2) * scale,
-      pageOffsetY + 287 * scale,
+      footerY * scale,
       { sizePt: 7, color: "#64748b", align: "center", weight: "500" }
     );
+
+    blobs.push(await new Promise((resolve, reject)=>{
+      canvas.toBlob(b=>b ? resolve(b) : reject(new Error("PNG schede non riuscito.")), "image/png");
+    }));
   }
 
-  return new Promise((resolve, reject)=>{
-    canvas.toBlob(b=>b ? resolve(b) : reject(new Error("PNG schede non riuscito.")), "image/png");
-  });
+  return blobs;
 }
 
 function downloadBlob(blob, filename){
@@ -745,7 +756,7 @@ function downloadBlob(blob, filename){
 }
 
 /**
- * Pacchetto: PDF Cricut 5 sezioni + PNG adesivi codice (2 misure) + PNG schede (codice/link).
+ * Pacchetto: PDF Cricut 5 sezioni + PNG adesivi codice (2 misure) + PNG schede A4 (codice+link+QR).
  * Niente SVG. QR = stesso URL del chip (/m/slug), mai il codice attivazione.
  */
 export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etichette"){
@@ -788,14 +799,14 @@ export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etich
 
   const pdfBlob = doc.output("blob");
   let pngBlob = null;
-  let schedeBlob = null;
+  let schedeBlobs = [];
   try{
     pngBlob = await buildCodeLabelsPngBlob(rows);
   }catch(error){
     console.warn("PNG etichette:", error);
   }
   try{
-    schedeBlob = await buildSummaryCardsPngBlob(rows, meta, qrCache);
+    schedeBlobs = await buildSummaryCardsPngBlobs(rows, meta, qrCache);
   }catch(error){
     console.warn("PNG schede:", error);
   }
@@ -803,7 +814,12 @@ export async function exportMomentLabelsPdf(rows, filenameStem = "khamakey-etich
   const zip = new JSZip();
   zip.file(`${baseName}-cricut5.pdf`, pdfBlob);
   if(pngBlob) zip.file(`${baseName}-codici.png`, pngBlob);
-  if(schedeBlob) zip.file(`${baseName}-schede.png`, schedeBlob);
+  schedeBlobs.forEach((blob, i)=>{
+    const name = schedeBlobs.length === 1
+      ? `${baseName}-schede.png`
+      : `${baseName}-schede-${String(i + 1).padStart(2, "0")}.png`;
+    zip.file(name, blob);
+  });
 
   const zipBlob = await zip.generateAsync({ type: "blob" });
   downloadBlob(zipBlob, `${baseName}-etichette.zip`);

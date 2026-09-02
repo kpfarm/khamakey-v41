@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, authRedirectTo } from "./config.js";
-import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=200";
-import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=199";
+import { exportMomentLabelsPdf } from "./admin-moment-labels.js?v=201";
+import { renderPanelGuide, setGuideCollapsed, isGuideCollapsed } from "./admin-guide.js?v=201";
 import {
   generateMomentSku,
   generateMomentProductName,

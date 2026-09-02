@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v200** (ZIP: PNG codice 2 misure con angoli smussati · PNG schede · PDF Cricut).
+Versione attuale: **v201** (ZIP: PNG codice 2 misure · PNG schede A4 2×3 codice+link+QR · PDF Cricut).
 
 ---
 
@@ -94,7 +94,7 @@ Flusso stock-first:
 2. Assegna codici all'ordine al momento della vendita
 3. Traccia `sold_channel` e `assigned_agent_id`
 
-Admin: ricerca, filtri, modifica singola, bulk, drawer ordine/codice, export CSV + ZIP etichette (PNG 2 misure, PNG schede codice+link, PDF Cricut).
+Admin: ricerca, filtri, modifica singola, bulk, drawer ordine/codice, export CSV + ZIP etichette (PNG 2 misure, PNG schede A4 2×3, PDF Cricut).
 
 ---
 
@@ -136,7 +136,7 @@ SQL: `sql/khamakey-business-inventory-v148.sql` · Dettaglio: [`20-business-acti
 | `admin.js` | Logica CRUD, filtri, sync |
 | `admin.css` | Stili admin |
 | `admin-guide.js` | Guide contestuali per sezione |
-| `admin-moment-labels.js` | ZIP etichette Moments: PNG codice 2 misure + PNG schede (codice/link) + PDF Cricut 5 sezioni |
+| `admin-moment-labels.js` | ZIP etichette Moments: PNG codice 2 misure + PNG schede A4 (codice/link/QR) + PDF Cricut 5 sezioni |
 
 ---
 

@@ -77,9 +77,11 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 - Oroscopo giornaliero (AstroWay): fino a 5 persone/segni fissati in editor; testo live su `/m/` via Worker + cache giorno
 - Privacy (PIN opzionale)
 - Lettera / messaggio speciale
-- Contatore con etichetta personalizzabile (es. «Insieme da», «Ti sopporto da»)
+- Contatore con etichetta personalizzabile (es. «Insieme da», «Ti sopporto da»). Vuoto = solo numeri in pagina (v240).
+- **Titoli/etichette in pagina** (titolo sezione, pill copertina, etichetta firma, voci RSVP): testo cliente. Il chrome («Titolo sezione», hint) è già IT/EN. Non ritradurre i valori.
+- «Prepara tutto per me»: testi modello **nella lingua UI** (`localizeMomentTemplate` + `getUiLocale()`). Dopo Salva restano com’è.
 - Supporto operativo: menu account `Assistenza` e form ticket nella scheda Account, con `source='moments_editor'`.
-- Legale Moments (v175 / EN v252): `moments-privacy.html` / `moments-terms.html` (IT, URL invariati) + `moments-privacy-en.html` / `moments-terms-en.html`. Signup/account/footer `/m/` puntano alla lingua UI o del visitatore. Testo IT vince se le versioni divergono. Checkbox consenso in signup. Su `/m/` footer + notice tecnica (no cookie marketing; `visitorId` solo server-side per PIN/rate-limit).
+- Legale Moments (v175 / EN v252): `moments-privacy.html` / `moments-terms.html` (IT, URL invariati) + `moments-privacy-en.html` / `moments-terms-en.html`. Signup/account/footer `/m/` puntano alla lingua UI o del visitatore. Testo IT vince se le versioni divergono. **P.IVA / ragione sociale / sede: ancora da inserire** quando ci saranno dati reali — non inventare. Checkbox consenso in signup. Su `/m/` footer + notice tecnica (no cookie marketing; `visitorId` solo server-side per PIN/rate-limit).
 
 ### Categorie evento
 21 categorie con template bilanciati (v89–v90):

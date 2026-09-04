@@ -52,12 +52,16 @@
 - [x] Email ordine codici NFC
 - [x] Stripe webhook predisposto
 - [ ] Stripe secrets in produzione
-- [ ] Template email multilingua
+- [x] Template email Auth conferma + reset IT/EN (dashboard, `docs/32`)
+- [ ] Altri template Auth (magic link, change email, invite)
 
 ## Sprint G — i18n
 
-- [ ] Traduzioni catalogo per SKU
-- [ ] Selettore lingua pagina Moments
+- [ ] Traduzioni catalogo per SKU (Business)
+- [x] Selettore lingua editor Moments IT/EN (v198+)
+- [x] Chrome campi editor IT/EN (11a–B)
+- [x] Privacy/Termini EN (v252 / Worker v218) — P.IVA ancora da inserire
+- [x] «Prepara tutto per me» IT/EN in base alla lingua UI
 
 ---
 
@@ -93,7 +97,17 @@
 | 2026-07-15 | Codex | **Business Editor v123**: corretto handshake editor/app dopo reload per caricare stato cloud e link pagina finale |
 | 2026-07-15 | Codex | **Admin v133**: trasformata Spedizioni NFC in console operativa con pipeline ordini/codici e azioni evasione |
 | 2026-07-15 | Claude Code | **Business Editor v124**: audit upload + fix — video su R2 (prima blob perso al reload), limite 25 MB allineato al server, pulizia file orfani R2 su sostituzione/rimozione media. Pendenti PDF/documenti base64 (lock worker.js) |
+| 2026-07-16 → 2026-08-29 | — | Log in [`../../ROADMAP.md`](../../ROADMAP.md) — questo mirror Obsidian era fermo |
+| 2026-08-31 | Cursor | **Moments v250**: attivazione senza testi stock; «Prepara tutto» opt-in |
+| 2026-09-02 | Cursor | **Admin v197–v202**: ZIP etichette PNG (2 misure, schede A4, QR A4) |
+| 2026-09-04 | Cursor | **Admin v203**: PNG codice più basso |
+| 2026-09-04 | Cursor | **Moments v251**: lingua software in registrazione |
+| 2026-09-04 | Cursor | **Email Auth**: conferma + reset IT/EN da `ui_locale` (`docs/32`) |
+| 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
+| 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
+| 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
+| 2026-09-04 | Cursor | **Vault OS**: riallineato `13-roadmap` + stato + ADR-007 + inventario (questo file non era più aggiornato) |
 
 ---
 
-*Aggiungi una riga qui a ogni sessione significativa.*
+*Aggiungi una riga qui a ogni sessione significativa. Aggiornare anche `../../ROADMAP.md`.*

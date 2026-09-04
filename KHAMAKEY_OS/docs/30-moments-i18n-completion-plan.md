@@ -262,7 +262,7 @@ Una release ciascuna. Dopo B1: smoke EN→IT obbligatorio (segni spesso sticky).
 | **D1** | `TYPE_LABELS` / nomi tipo evento in menu meta | Solo dove è chrome UI, non seed |
 | **D2** | Guestbook moderation editor EN | Solo se prodotto torna on |
 | **D3** | Smoke doc 28 aggiornato (C7 RSVP + toggle + account locale) | Solo docs |
-| **D4** | Seed template EN + legale EN | **Progetti separati**, non in questo piano |
+| **D4** | Seed template EN + legale EN | **Fatto fuori piano:** seed segue UI (`localizeMomentTemplate`); legale EN v252 / Worker v218. Resta P.IVA. |
 
 ---
 

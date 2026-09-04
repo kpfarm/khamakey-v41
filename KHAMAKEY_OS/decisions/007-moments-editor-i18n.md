@@ -1,7 +1,7 @@
 # ADR-007: Moments editor i18n (IT / EN)
 
 **Data:** 2026-07-23  
-**Stato:** Accettata · Steps 1–9 fatti (editor v198 + Worker v183 Moments `/m/` chrome)  
+**Stato:** Accettata · Steps 1–9 fatti · campi chrome 11a–B fatti · legale EN **v252 / Worker v218** · seed «Prepara tutto» **segue UI** (`moments-i18n-templates.js`)  
 **Inventario:** [`docs/26-moments-i18n-inventory.md`](../docs/26-moments-i18n-inventory.md)  
 **Smoke:** [`docs/28-moments-i18n-smoke.md`](../docs/28-moments-i18n-smoke.md)
 
@@ -23,10 +23,11 @@ Esiste già i18n **Business** basato su snapshot + `Accept-Language` nel Worker.
 
 | Si | No |
 |----|-----|
-| Chrome editor (menu, bottoni, label, errori, wizard) | Testi scritti dal cliente nella pagina |
-| Nomi categoria / tema / piano / segno (taxonomy UI) | Seed/template “Prepara tutto per me” (passo opzionale dopo) |
+| Chrome editor (menu, bottoni, **label UI**, errori, wizard) | **Valori** scritti dal cliente (titolo sezione, pill, `counter_label`, etichetta firma, voci RSVP) |
+| Nomi categoria / tema / piano / segno (taxonomy UI) | Non ritradurre quei valori al toggle lingua |
 | (Fase 9) Frasi fisse Worker su `/m/` (PIN, privacy notice, RSVP chrome) | Admin / Business |
-| | Privacy/Termini legali (progetto separato) |
+| Seed «Prepara tutto per me»: **IT o EN in base a `getUiLocale()`** (v226+) | Frase non in `TEMPLATE_PHRASE_EN` → resta IT |
+| Privacy/Termini EN (`moments-privacy-en.html` / `moments-terms-en.html`, v252) | P.IVA / ragione sociale finché non ci sono dati reali |
 
 ### Scelta lingua editor (cliente)
 

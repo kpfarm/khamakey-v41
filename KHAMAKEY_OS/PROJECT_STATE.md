@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-08-04** (Business progetto distaccato — scaffold + Supabase nuovo)
+> Ultimo aggiornamento: **2026-09-04** (legale EN live · P.IVA in attesa · i18n seed segue UI)
 
 ### Fonte di verità versioni
 
@@ -107,7 +107,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v218-legal-en** | Footer/PIN `/m/`: Privacy/Termini EN se locale visitatore `en`. Pre-attivazione resta IT. |
-| **Moments editor** | **v252** | Signup: campo lingua software. Legale EN: `moments-privacy-en` / `moments-terms-en`. |
+| **Moments editor** | **v252** | Signup lingua software. Legale EN. Chrome campi già IT/EN. «Prepara tutto» segue lingua UI (`moments-i18n-templates.js`). |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v172 (prod)** | v172 salva ottimistico applicata 2026-08-06; v171 video 50MB; v170 build_stage. |
@@ -206,10 +206,11 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-07-29:** eseguire go-live smoke [`docs/31-go-live-smoke-moments.md`](docs/31-go-live-smoke-moments.md) (critici NFC + upload + QR).  
-> Storico: [`docs/23-smoke-moments.md`](docs/23-smoke-moments.md). Basi 10k: [`docs/24-pronti-per-10k-moments.md`](docs/24-pronti-per-10k-moments.md).  
-> Dopo smoke verde: Moments pronto; prossimo prodotto tipico = Stripe Plus/Pro.  
-> Live 2026-07-22: Moments **v186** · Worker **v182-hero-description**.  
+> **Oggi 2026-09-04 (vault):** live Moments **v252** · Worker **v218-legal-en** · Admin **v203**.  
+> Chrome editor IT/EN chiuso (non rifare etichette campi: i valori sono testo cliente).  
+> «Prepara tutto per me» **non** è sempre italiano: segue `getUiLocale()`.  
+> **P.IVA / dati societari** — fermo finché non ci sono dati reali (Privacy+Termini IT e EN).  
+> Prossimo prodotto tipico: Stripe Plus/Pro. Smoke NFC/upload: [`docs/31-go-live-smoke-moments.md`](docs/31-go-live-smoke-moments.md).  
 > Nessun cambio a `renderMomentPage` / RPC Moments senza smoke su slug reale.
 
 ---

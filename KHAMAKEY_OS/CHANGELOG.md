@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Vault OS riallineato (2026-09-04)** — nessun deploy. `docs/13-roadmap.md` (mirror Obsidian) era fermo a luglio; aggiornati stato, ADR-007, inventario i18n, FAQ.
+- **i18n — etichette campi (2026-09-04)** — nessun deploy. Titolo sezione / pill / contatore / firma / RSVP custom = contenuto cliente. Chrome form già IT/EN (`moments-i18n-fields.js`). Non ritradurre i valori.
+- **i18n — «Prepara tutto per me» (2026-09-04)** — già in codice (`localizeMomentTemplate` + `getUiLocale()`). UI EN → testi modello EN; UI IT → IT. Frase assente in mappa resta IT. Dopo Salva non si ritraduce.
 - **Promemoria P.IVA (2026-09-04)** — nessun deploy. Quando c’è partita IVA: completare titolare/sede/P.IVA su Privacy e Termini IT+EN. Non inventare dati.
 - **Moments v252 + Worker v218 — legale EN (2026-09-04, Cursor)** — Pages + Worker
   - Nuove pagine `moments-privacy-en.html` / `moments-terms-en.html` (traduzione; in conflitto vince l’italiano).

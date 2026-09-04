@@ -1,7 +1,7 @@
 # 26 — Moments i18n: inventario stringhe (Step 1)
 
-> **Data:** 2026-07-23 · **Stato:** inventario completato · **Nessun cambio runtime**  
-> Scope: chrome editor Moments IT→EN. Contenuti cliente e Admin = fuori.  
+> **Data:** 2026-07-23 · **Aggiornato:** 2026-09-04 (legale EN + seed segue UI) · inventario Step 1  
+> Scope originale: chrome editor. Contenuti cliente e Admin = fuori. P.IVA ancora fuori.  
 > **Step 2 (regole):** [`27-moments-i18n-rules.md`](27-moments-i18n-rules.md) · ADR [`007-moments-editor-i18n.md`](../decisions/007-moments-editor-i18n.md)
 
 ## Decisioni scope (da Step 0)
@@ -11,8 +11,8 @@
 | Login, attivazione, shell editor, etichette sezioni, errori/toast | Admin / Officina |
 | Categorie, temi, piani, segni zodiacali (nomi prodotto) | Business editor |
 | Worker `/m/` chrome (PIN, privacy notice, RSVP fisse) — **fase 9** | Traduzione automatica testi scritti dal cliente |
-| | Privacy/Termini legali EN (dopo) |
-| | Template kit / seed testi pagina (opzionale dopo chrome) |
+| Privacy/Termini EN (`moments-privacy-en.html` / `moments-terms-en.html`, v252) | P.IVA / dati societari (quando ci sarà partita IVA) |
+| Seed «Prepara tutto» EN se UI EN (`moments-i18n-templates.js`) | Non tradurre titoli/etichette già scritti dal cliente |
 
 **Regola:** il selettore EN cambia l’interfaccia. I testi che il cliente scrive restano com’è. La pagina `/m/` mostra i contenuti del cliente; le frasi fisse Worker si traducono in fase 9.
 
@@ -145,7 +145,7 @@ Guestbook form (se attivo) · unità contatore `anni/mesi/giorni/…` · errori 
 | → taxonomy / temi / piani / zodiaco | ~80–100 |
 | Content defaults (dopo) | ~150–250 |
 | Worker `/m/` (fase 9) | ~60–100 |
-| Legale (differito) | pagine lunghe |
+| Legale EN | fatto v252 (resta P.IVA) |
 
 ---
 
@@ -162,7 +162,7 @@ Guestbook form (se attivo) · unità contatore `anni/mesi/giorni/…` · errori 
 | **8** | Smoke IT/EN editor | QA |
 | **9** | Worker `/m/` chrome | Worker |
 | **10** | Docs + bump `?v=` + deploy | release |
-| Dopo | Template EN opzionale · Privacy/Terms EN | — |
+| Dopo | Seed EN = fatto (segue UI). Legale EN = fatto (v252). Resta P.IVA. | — |
 
 ---
 

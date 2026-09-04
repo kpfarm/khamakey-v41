@@ -14,6 +14,7 @@
 | ADR-004 | KhamaKey OS come cervello condiviso | 2026-07-09 | [`../decisions/004-khamakey-os.md`](../decisions/004-khamakey-os.md) |
 | ADR-005 | Shopify prima, Etsy/marketplace dopo | 2026-07-09 | [`../decisions/005-shopify-first.md`](../decisions/005-shopify-first.md) |
 | ADR-006 | Secrets solo su Cloudflare Worker | 2026-07-09 | [`../decisions/006-secrets-worker.md`](../decisions/006-secrets-worker.md) |
+| ADR-007 | Moments editor i18n IT/EN (chrome vs contenuto; seed segue UI; legale EN v252) | 2026-07-23 · agg. 2026-09-04 | [`../decisions/007-moments-editor-i18n.md`](../decisions/007-moments-editor-i18n.md) |
 
 ---
 

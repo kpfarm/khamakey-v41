@@ -69,7 +69,10 @@ Verifica `RESEND_API_KEY` in Worker + `activation_email_sent_at` dedup.
 Il sistema operativo del progetto: documentazione + regole AI + stato live in `KHAMAKEY_OS/`.
 
 ### Posso aprirlo in Obsidian?
-Sì — apri `KHAMAKEY_OS/` (o l'intera root) come vault.
+Sì — apri `KHAMAKEY_OS/` (o l'intera root) come vault. Home: `MASTER_INDEX.md`.
+
+### Cosa deve aggiornare l’agente nel vault dopo un fatto?
+Non basta `ROADMAP.md` in root. Insieme: `PROJECT_STATE.md`, `CHANGELOG.md`, il doc in `docs/` dell’area, **`docs/13-roadmap.md`** (mirror Obsidian). Se il vault e la chat divergono, vince il vault.
 
 ### I file legacy (ROADMAP.md, CODEX-COLLAB.md) sono ancora validi?
 Sì, durante la transizione. Verranno migrati gradualmente in `docs/`.

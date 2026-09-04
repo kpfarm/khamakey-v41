@@ -24,7 +24,7 @@ Default italiano; inglese solo se l’utente clicca EN; si salva nel browser; i 
 | 5 | Cloud lingua UI = solo `user_metadata.ui_locale` (signup + sync login). Non è i18n Business (`state.i18n`) |
 | 6 | Chiave EN mancante → fallback testo IT |
 | 7 | Si traduce il **chrome** editor; non i contenuti scritti dal cliente |
-| 8 | Template seed EN = ancora fuori. **Legale EN (v252 / Worker v218):** `moments-privacy-en.html` / `moments-terms-en.html`; IT originale invariato. In caso di conflitto vince l’italiano. **P.IVA / dati societari:** da inserire su tutte e 4 le pagine quando ci sarà partita IVA — non inventare. **Titoli/etichette in pagina** = testo cliente, non chrome |
+| 8 | **«Prepara tutto per me»** usa `localizeMomentTemplate(..., getUiLocale())`: UI IT → testi modello IT; UI EN → testi modello EN (`moments-i18n-templates.js`). Frase non in mappa → resta IT. Dopo il Salva è contenuto cliente (non si ritraduce al cambio lingua). **Legale EN (v252 / Worker v218).** **P.IVA** da inserire quando ci sarà. **Titoli/etichette già scritti dal cliente** = non chrome |
 | 9 | Worker `/m/` chrome = Step 9 (regole visitatore separate; non usare `uiLocale` del proprietario) |
 | 10 | Non riusare i18n Business (`state.i18n` + snapshot OpenAI) |
 
@@ -64,9 +64,9 @@ Crea account (step 2)
 
 ## Prossimo passo (i18n, ordine proposto)
 
-**Non rifare le etichette campi.** Chrome form già coperto (slice 11a–11e / A–B, `moments-i18n-fields.js`). I **valori** (titolo sezione, etichetta copertina, testo contatore, etichetta firma, voci RSVP) sono contenuti cliente: restano com’è scritto, anche con UI EN. Non tradurli.
+**Non rifare le etichette campi.** Chrome form già coperto. I **valori già scritti dal cliente** restano com’è.
 
-1. **Seed «Prepara tutto per me» EN** — contenuto, non chrome; solo se richiesto.
-2. **Altri template Auth** (magic link, change email, invite) — basso: Moments usa soprattutto conferma + reset.
-3. **P.IVA / dati societari** — non è i18n: aspettare partita IVA reale, poi le 4 pagine legale.
-4. Opzionale lucido: `TYPE_LABELS` (nomi categoria in meta) — piano D1, non urgente.
+1. **«Prepara tutto per me»** — già IT o EN in base alla lingua UI (non è «sempre italiano»). Completare mappa solo se saltano frasi IT in EN.
+2. **Altri template Auth** (magic link, change email, invite) — basso.
+3. **P.IVA / dati societari** — aspettare partita IVA reale.
+4. Opzionale: `TYPE_LABELS` (nomi categoria in meta) — piano D1.

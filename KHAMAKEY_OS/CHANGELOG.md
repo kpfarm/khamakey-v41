@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Email Auth — conferma IT/EN (2026-09-04, Cursor)** — dashboard Supabase (no deploy)
+  - Confirm signup + reset password: lingua da `ui_locale` della registrazione. File in `KHAMAKEY_OS/docs/email/`. Da incollare nel dashboard.
 - **Moments v251 — lingua in registrazione (2026-09-04, Cursor)** — Pages
   - Step 2 Crea account: campo «Lingua del software» (Italiano / English, default italiano).
   - Scelta scritta in `user_metadata.ui_locale` al `signUp` (vale dopo conferma email). Toggle IT/EN e menu account restano.

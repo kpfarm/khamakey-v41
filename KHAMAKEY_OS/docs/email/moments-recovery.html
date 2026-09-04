@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<body style="margin:0;padding:0;background:#F3E3DE;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;padding:28px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#FFF9F5;border-radius:22px;overflow:hidden;">
+          <tr>
+            <td style="background:#071A3C;padding:28px 32px 22px;text-align:center;">
+              <img src="https://app.khamakeymoments.com/khamakey-moments-wordmark.png" width="200" alt="KhamaKey Moments" style="display:block;margin:0 auto;width:200px;height:auto;border:0;">
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px 36px 0;font-family:Georgia,'Times New Roman',serif;color:#071A3C;text-align:left;">
+              {{ if eq .Data.ui_locale "en" }}
+              <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C;">Account</p>
+              <h1 style="margin:12px 0 0;font-size:28px;line-height:1.28;font-weight:normal;">Reset your password</h1>
+              <p style="margin:18px 0 0;font-size:16px;line-height:1.65;color:#18202F;">Hi,</p>
+              <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F;">choose a new password to get back into your space.</p>
+              {{ else }}
+              <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C;">Account</p>
+              <h1 style="margin:12px 0 0;font-size:28px;line-height:1.28;font-weight:normal;">Reimposta la password</h1>
+              <p style="margin:18px 0 0;font-size:16px;line-height:1.65;color:#18202F;">Ciao,</p>
+              <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F;">scegli una nuova password per tornare nel tuo spazio.</p>
+              {{ end }}
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:28px 36px 8px;">
+              <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#AA626C;color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:999px;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif;">{{ if eq .Data.ui_locale "en" }}Choose a new password{{ else }}Scegli nuova password{{ end }}</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 36px 32px;font-family:Georgia,'Times New Roman',serif;text-align:center;">
+              {{ if eq .Data.ui_locale "en" }}
+              <p style="margin:16px 0 0;font-size:15px;line-height:1.6;color:#071A3C;">See you soon,<br>The KhamaKey Moments team</p>
+              <p style="margin:22px 0 0;font-size:11px;line-height:1.5;color:#8a6a70;">If the button doesn’t open, copy this address:<br>
+                <a href="{{ .ConfirmationURL }}" style="color:#AA626C;word-break:break-all;">{{ .ConfirmationURL }}</a>
+              </p>
+              <p style="margin:18px 0 0;font-size:11px;line-height:1.5;color:#8a6a70;">This is an automatic email. Please don’t reply to this address.</p>
+              {{ else }}
+              <p style="margin:16px 0 0;font-size:15px;line-height:1.6;color:#071A3C;">A presto,<br>Il team KhamaKey Moments</p>
+              <p style="margin:22px 0 0;font-size:11px;line-height:1.5;color:#8a6a70;">Se il pulsante non si apre, copia questo indirizzo:<br>
+                <a href="{{ .ConfirmationURL }}" style="color:#AA626C;word-break:break-all;">{{ .ConfirmationURL }}</a>
+              </p>
+              <p style="margin:18px 0 0;font-size:11px;line-height:1.5;color:#8a6a70;">Questa è una mail automatica. Non rispondere a questo indirizzo.</p>
+              {{ end }}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

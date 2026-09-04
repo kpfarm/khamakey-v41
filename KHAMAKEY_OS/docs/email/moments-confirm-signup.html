@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<body style="margin:0;padding:0;background:#F3E3DE;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;padding:28px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#FFF9F5;border-radius:22px;overflow:hidden;">
+          <tr>
+            <td style="background:#071A3C;padding:28px 32px 22px;text-align:center;">
+              <img src="https://app.khamakeymoments.com/khamakey-moments-wordmark.png" width="200" alt="KhamaKey Moments" style="display:block;margin:0 auto;width:200px;height:auto;border:0;">
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px 36px 0;font-family:Georgia,'Times New Roman',serif;color:#071A3C;text-align:left;">
+              {{ if eq .Data.ui_locale "en" }}
+              <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C;">Your invitation</p>
+              <h1 style="margin:12px 0 0;font-size:28px;line-height:1.28;font-weight:normal;">Welcome to KhamaKey Moments.</h1>
+              <p style="margin:18px 0 0;font-size:16px;line-height:1.65;color:#18202F;">Hi,</p>
+              <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F;">thank you for choosing us. You’ve entered a private world, where every Moment opens a memory — not just any page.</p>
+              <p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F;">The Moment in your hands is the key. Keep it for yourself or give it as a gift: it holds a private space — photos, words, dates, a story. You prepare it in Moments. Whoever has the Moment can enter. The PIN is optional: add it or remove it whenever you want.</p>
+              {{ else }}
+              <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C;">Il tuo invito</p>
+              <h1 style="margin:12px 0 0;font-size:28px;line-height:1.28;font-weight:normal;">Benvenuto nel mondo KhamaKey Moments.</h1>
+              <p style="margin:18px 0 0;font-size:16px;line-height:1.65;color:#18202F;">Ciao,</p>
+              <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F;">grazie per averci scelto. Sei entrato in un mondo riservato, dove ogni Moment apre un ricordo — non una pagina qualsiasi.</p>
+              <p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F;">Il Moment che hai tra le mani è la chiave. Che tu lo tenga per te o lo doni, custodisce uno spazio privato: foto, parole, date, una storia. Tu la prepari da Moments. Chi ha il Moment può entrarvi. Il PIN è una scelta tua: lo aggiungi o lo togli quando vuoi.</p>
+              {{ end }}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 36px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;border-radius:16px;">
+                <tr>
+                  <td style="padding:20px 22px;font-family:Georgia,'Times New Roman',serif;color:#071A3C;">
+                    {{ if eq .Data.ui_locale "en" }}
+                    <p style="margin:0 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#AA626C;">Your next steps</p>
+                    <p style="margin:0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">1.</strong> Activate your account — that’s the button below.</p>
+                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">2.</strong> Sign in to Moments: it’s the private area where you create and update your Moment’s page.</p>
+                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">3.</strong> Fill in the page. When you save, the Moment is ready.</p>
+                    {{ else }}
+                    <p style="margin:0 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#AA626C;">I tuoi prossimi passi</p>
+                    <p style="margin:0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">1.</strong> Attiva l’account — è il bottone qui sotto.</p>
+                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">2.</strong> Accedi a Moments: è l’area privata dove crei e aggiorni la pagina del tuo Moment.</p>
+                    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F;"><strong style="color:#071A3C;">3.</strong> Riempi la pagina. Quando salvi, il Moment è pronto.</p>
+                    {{ end }}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:28px 36px 8px;">
+              <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#AA626C;color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:999px;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif;">{{ if eq .Data.ui_locale "en" }}Enter your space{{ else }}Entra nel tuo spazio{{ end }}</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 36px 32px;font-family:Georgia,'Times New Roman',serif;text-align:center;">
+              {{ if eq .Data.ui_locale "en" }}
+              <p style="margin:0;font-size:16px;line-height:1.6;color:#071A3C;">We’re glad you’re with us.</p>
+              <p style="margin:16px 0 0;font-size:15px;line-height:1.6;color:#071A3C;">See you soon,<br>The KhamaKey Moments team</p>
+              <p style="margin:22px 0 0;font-size:11px;line-height:1.5;color:#8a6a70;">If the button doesn’t open, copy this address:<br>
+                <a href="{{ .ConfirmationURL }}" style="color:#AA626C;word-break:break-all;">{{ .ConfirmationURL }}</a>
+              </p>
+              <p style="margin:18px 0 0;font-size:11px;line-height:1.5;color:#8a6a70;">This is an automatic email. Please don’t reply to this address.</p>
+              {{ else }}
+              <p style="margin:0;font-size:16px;line-height:1.6;color:#071A3C;">Siamo felici che tu sia dei nostri.</p>
+              <p style="margin:16px 0 0;font-size:15px;line-height:1.6;color:#071A3C;">A presto,<br>Il team KhamaKey Moments</p>
+              <p style="margin:22px 0 0;font-size:11px;line-height:1.5;color:#8a6a70;">Se il pulsante non si apre, copia questo indirizzo:<br>
+                <a href="{{ .ConfirmationURL }}" style="color:#AA626C;word-break:break-all;">{{ .ConfirmationURL }}</a>
+              </p>
+              <p style="margin:18px 0 0;font-size:11px;line-height:1.5;color:#8a6a70;">Questa è una mail automatica. Non rispondere a questo indirizzo.</p>
+              {{ end }}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

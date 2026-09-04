@@ -1,0 +1,1 @@
+{{ if eq .Data.ui_locale "en" }}Welcome to KhamaKey Moments{{ else }}Benvenuto nel mondo KhamaKey Moments{{ end }}

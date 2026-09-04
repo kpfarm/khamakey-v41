@@ -18,6 +18,7 @@ Default italiano; inglese solo se l’utente clicca EN; si salva nel browser; i 
 | 3 | Preferenza in `localStorage` → chiave `khamakey.moments.uiLocale` (`it` \| `en`) |
 | 3b | Se loggato: sync anche su Auth `user_metadata.ui_locale` (segue l’account su altri device) |
 | 3c | **Signup (v251):** campo «Lingua del software» (it\|en, default it) → `signUp` scrive `user_metadata.ui_locale` prima della conferma email |
+| 3d | **Email Auth (ops):** conferma/recovery IT o EN da `{{ .Data.ui_locale }}` nei template dashboard (`docs/32`). Default IT. Non è chrome editor né `/m/` |
 | 4 | Solo scelta **esplicita** (toggle IT/EN o campo signup) — niente auto-detect aggressivo |
 | 4b | **Bloccare traduzione Safari/Chrome** (`translate="no"` / `notranslate`) — altrimenti `IT`→`esso`, `Pubblica`→`Pubblicità`, `Anteprima`→`Aprile` |
 | 5 | Cloud lingua UI = solo `user_metadata.ui_locale` (signup + sync login). Non è i18n Business (`state.i18n`) |

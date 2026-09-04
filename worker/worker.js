@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v217-activation-no-sku";
+const WORKER_VERSION = "v218-legal-en";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -270,6 +270,14 @@ function mtFill(locale, key, vars = {}) {
   }
   return out;
 }
+
+function momentsLegalUrl(pagesBase, locale, kind) {
+  const base = String(pagesBase || "").replace(/\/$/, "");
+  const en = String(locale || "").toLowerCase().slice(0, 2) === "en";
+  if (kind === "terms") return `${base}/moments-terms${en ? "-en" : ""}.html`;
+  return `${base}/moments-privacy${en ? "-en" : ""}.html`;
+}
+
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
 const HOROSCOPE_CACHE_HOST = "https://horoscope-cache.khamakey.internal";
@@ -1598,6 +1606,8 @@ document.addEventListener("click",event=>{
 function renderMomentPinGate(page, origin, failed = false, env = {}, locale = "it") {
   const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
   const logoSrc = `${pagesBase}/khamakey-moments-wordmark-on-light.png`;
+  const privacyUrl = momentsLegalUrl(pagesBase, locale, "privacy");
+  const termsUrl = momentsLegalUrl(pagesBase, locale, "terms");
   return `<!doctype html>
 <html lang="${attr(locale)}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -1626,7 +1636,7 @@ button{width:100%;border:0;border-radius:12px;background:linear-gradient(135deg,
 ${failed ? `<p class="error">${escapeHtml(mt(locale, "pin.wrong"))}</p>` : ""}
 <input id="pinGateInput" name="pin" inputmode="numeric" enterkeyhint="go" autocomplete="one-time-code" placeholder="PIN" required>
 <button type="submit" id="pinGateSubmit">${escapeHtml(mt(locale, "pin.submit"))}</button>
-<p class="legal"><a href="${attr(pagesBase)}/moments-privacy.html" target="_blank" rel="noopener">${escapeHtml(mt(locale, "legal.privacy"))}</a><a href="${attr(pagesBase)}/moments-terms.html" target="_blank" rel="noopener">${escapeHtml(mt(locale, "legal.terms"))}</a></p>
+<p class="legal"><a href="${attr(privacyUrl)}" target="_blank" rel="noopener">${escapeHtml(mt(locale, "legal.privacy"))}</a><a href="${attr(termsUrl)}" target="_blank" rel="noopener">${escapeHtml(mt(locale, "legal.terms"))}</a></p>
 </form>
 <script>(function(){var form=document.getElementById("pinGateForm");var btn=document.getElementById("pinGateSubmit");if(!form||!btn)return;var busy=false;function go(){if(busy)return;if(typeof form.checkValidity==="function"&&!form.checkValidity()){if(form.reportValidity)form.reportValidity();return}busy=true;if(typeof form.requestSubmit==="function")form.requestSubmit(btn);else form.submit()}btn.addEventListener("touchend",function(e){if(e.cancelable)e.preventDefault();go()},{passive:false});btn.addEventListener("click",function(e){e.preventDefault();go()});})();</script>
 </body></html>`;
@@ -1723,8 +1733,8 @@ async function renderMomentPage(page, origin, env = {}, locale = "it") {
 
   const extraTypeClass = momentType === "valentine" ? " moment-type-love" : "";
   const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
-  const privacyUrl = `${pagesBase}/moments-privacy.html`;
-  const termsUrl = `${pagesBase}/moments-terms.html`;
+  const privacyUrl = momentsLegalUrl(pagesBase, locale, "privacy");
+  const termsUrl = momentsLegalUrl(pagesBase, locale, "terms");
 
   return `<!doctype html>
 <html lang="${attr(locale)}">

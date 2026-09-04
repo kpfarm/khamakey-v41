@@ -24,7 +24,7 @@ Default italiano; inglese solo se l’utente clicca EN; si salva nel browser; i 
 | 5 | Cloud lingua UI = solo `user_metadata.ui_locale` (signup + sync login). Non è i18n Business (`state.i18n`) |
 | 6 | Chiave EN mancante → fallback testo IT |
 | 7 | Si traduce il **chrome** editor; non i contenuti scritti dal cliente |
-| 8 | Template seed / legale EN = fuori da Step 3–8 |
+| 8 | Template seed EN = fuori da questa slice. **Legale EN (v252 / Worker v218):** `moments-privacy-en.html` / `moments-terms-en.html`; IT originale invariato. In caso di conflitto vince l’italiano |
 | 9 | Worker `/m/` chrome = Step 9 (regole visitatore separate; non usare `uiLocale` del proprietario) |
 | 10 | Non riusare i18n Business (`state.i18n` + snapshot OpenAI) |
 

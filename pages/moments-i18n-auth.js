@@ -226,7 +226,7 @@ export const AUTH_MESSAGES_EN = {
   "auth.signup.pin": "Page PIN (to open the link)",
   "auth.signup.pin.ph": "e.g. 1234",
   "auth.signup.pin.hint": "Choose a PIN of 4+ characters. You’ll use it to open the NFC-linked page.",
-  "auth.signup.consent": "I accept the <a href=\"./moments-terms.html\" target=\"_blank\" rel=\"noopener\">Terms of service</a> and have read the <a href=\"./moments-privacy.html\" target=\"_blank\" rel=\"noopener\">Privacy Policy</a>.",
+  "auth.signup.consent": "I accept the <a href=\"./moments-terms-en.html\" target=\"_blank\" rel=\"noopener\">Terms of service</a> and have read the <a href=\"./moments-privacy-en.html\" target=\"_blank\" rel=\"noopener\">Privacy Policy</a>.",
   "auth.signup.submit": "Create account and activate",
   "auth.signup.confirm.title": "Check your email",
   "auth.signup.confirm.lead": "We’ve sent a link to confirm your account. Open the email, then come back here and sign in.",

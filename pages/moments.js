@@ -16,7 +16,7 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=247";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=248";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=237";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=217";
@@ -631,6 +631,19 @@ function showRecoveryForm(){
   setStatus(statusNode,"");
 }
 
+function legalPageHref(kind){
+  const en = getUiLocale() === "en";
+  if(kind === "terms") return en ? "./moments-terms-en.html" : "./moments-terms.html";
+  return en ? "./moments-privacy-en.html" : "./moments-privacy.html";
+}
+
+function syncLegalHrefs(){
+  document.querySelectorAll("[data-legal-page]").forEach(node=>{
+    const kind = node.getAttribute("data-legal-page");
+    if(kind === "privacy" || kind === "terms") node.setAttribute("href", legalPageHref(kind));
+  });
+}
+
 function readSignupUiLocale(){
   return normalizeUiLocale(document.getElementById("momentsSignupLocale")?.value || getUiLocale());
 }
@@ -963,8 +976,8 @@ function renderAccountPanels(){
           <button type="button" class="ghost" id="accountHubLogout">${esc(t("account.profile.logout"))}</button>
         </div>
         <nav class="account-legal-links" aria-label="${esc(t("auth.legal.nav"))}">
-          <a href="./moments-privacy.html" target="_blank" rel="noopener">${esc(t("account.profile.privacy"))}</a>
-          <a href="./moments-terms.html" target="_blank" rel="noopener">${esc(t("account.profile.terms"))}</a>
+          <a href="${esc(legalPageHref("privacy"))}" target="_blank" rel="noopener">${esc(t("account.profile.privacy"))}</a>
+          <a href="${esc(legalPageHref("terms"))}" target="_blank" rel="noopener">${esc(t("account.profile.terms"))}</a>
         </nav>
       </div>`;
     document.getElementById("accountHubLogout")?.addEventListener("click",()=>{
@@ -5133,6 +5146,7 @@ applyDocumentLang(getUiLocale());
 
 function syncLangSwitchers(locale = getUiLocale()){
   syncSignupLocaleField(locale);
+  syncLegalHrefs();
   document.querySelectorAll("[data-lang-switch]").forEach(root=>{
     root.setAttribute("aria-label", t("lang.switch"));
     root.querySelectorAll("[data-set-locale]").forEach(btn=>{

@@ -79,7 +79,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 - Lettera / messaggio speciale
 - Contatore con etichetta personalizzabile (es. «Insieme da», «Ti sopporto da»)
 - Supporto operativo: menu account `Assistenza` e form ticket nella scheda Account, con `source='moments_editor'`.
-- Legale Moments (v175): `moments-privacy.html` / `moments-terms.html`; link in auth + account; checkbox consenso in signup. Su `/m/` footer + notice tecnica (no cookie marketing; `visitorId` solo server-side per PIN/rate-limit).
+- Legale Moments (v175 / EN v252): `moments-privacy.html` / `moments-terms.html` (IT, URL invariati) + `moments-privacy-en.html` / `moments-terms-en.html`. Signup/account/footer `/m/` puntano alla lingua UI o del visitatore. Testo IT vince se le versioni divergono. Checkbox consenso in signup. Su `/m/` footer + notice tecnica (no cookie marketing; `visitorId` solo server-side per PIN/rate-limit).
 
 ### Categorie evento
 21 categorie con template bilanciati (v89–v90):

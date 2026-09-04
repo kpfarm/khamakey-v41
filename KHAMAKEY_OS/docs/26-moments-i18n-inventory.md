@@ -39,7 +39,7 @@
 | `pages/moment-media.js` | Bassa |
 | `pages/moment-codes.js` / `moment-list-items.js` / `moment-journey.js` | Trascurabile |
 | `worker/worker.js` (`renderMoment*`) | Fase 9 |
-| `moments-privacy.html` / `moments-terms.html` | Differito (legale) |
+| `moments-privacy.html` / `moments-terms.html` | IT originale (invariato nel merito). EN: `moments-privacy-en.html` / `moments-terms-en.html` (v252) |
 
 ---
 

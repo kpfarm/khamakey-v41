@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v252 + Worker v218 — legale EN (2026-09-04, Cursor)** — Pages + Worker
+  - Nuove pagine `moments-privacy-en.html` / `moments-terms-en.html` (traduzione; in conflitto vince l’italiano).
+  - URL IT invariati. Signup EN, account e footer/PIN `/m/` puntano alla versione giusta. Pre-attivazione resta IT.
 - **Email Auth — conferma IT/EN (2026-09-04, Cursor)** — dashboard Supabase (no deploy)
   - Confirm signup + reset password: lingua da `ui_locale` della registrazione. File in `KHAMAKEY_OS/docs/email/`. Da incollare nel dashboard.
 - **Moments v251 — lingua in registrazione (2026-09-04, Cursor)** — Pages

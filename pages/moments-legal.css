@@ -18,7 +18,10 @@ a:hover{text-decoration:underline}
 .legal-shell{width:min(720px,100%);margin:0 auto;padding:28px 18px 48px}
 .legal-brand{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
 .legal-brand img{display:block;width:min(200px,58%);height:auto}
+.legal-brand-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px 16px}
 .legal-brand a.back{font-size:.82rem;font-weight:700;color:var(--navy);white-space:nowrap}
+.legal-lang{display:inline-flex;gap:8px;font-size:.75rem;font-weight:800}
+.legal-lang a[aria-current="page"]{color:var(--navy);text-decoration:none}
 .legal-card{
   background:var(--surface);
   border:1px solid var(--line);

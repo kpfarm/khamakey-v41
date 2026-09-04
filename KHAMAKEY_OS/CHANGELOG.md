@@ -8,6 +8,7 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Promemoria P.IVA (2026-09-04)** — nessun deploy. Quando c’è partita IVA: completare titolare/sede/P.IVA su Privacy e Termini IT+EN. Non inventare dati.
 - **Moments v252 + Worker v218 — legale EN (2026-09-04, Cursor)** — Pages + Worker
   - Nuove pagine `moments-privacy-en.html` / `moments-terms-en.html` (traduzione; in conflitto vince l’italiano).
   - URL IT invariati. Signup EN, account e footer/PIN `/m/` puntano alla versione giusta. Pre-attivazione resta IT.

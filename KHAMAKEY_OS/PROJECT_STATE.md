@@ -93,6 +93,14 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 ---
 
+## Promemoria aperti (non inventare, non sbloccare da soli)
+
+| Cosa | Quando | Dove | Cosa non fare |
+|------|--------|------|----------------|
+| **Dati societari + P.IVA** su Privacy e Termini | Quando esiste partita IVA (e sede / ragione sociale confermati) | `pages/moments-privacy.html`, `moments-terms.html`, `moments-privacy-en.html`, `moments-terms-en.html` — titolare, indirizzo, P.IVA/CF. Poi bump `?v=` legale se serve | Non inventare numeri o ragione sociale. Non togliere il disclaimer «da completare / revisione legale». In conflitto vince l’italiano. |
+
+---
+
 ## Versioni attuali (allineate al codice 2026-07-22)
 
 | Componente | Versione | Note |
@@ -163,6 +171,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Catalogo multilingua completo | Admin predisposto, sync Shopify parziale | Media |
 | Smoke test wizard 5 settori Business | Checklist aperta | Bassa |
 | Hardening ops (rate-limit fail-open PIN, drop overload `get_public_moment` 2-arg) | Documentato audit SE — **non toccare runtime** finché Moments è stabile | Media |
+| **Dati societari / P.IVA** su Privacy + Termini (IT e EN) | In attesa P.IVA reale — testo legale già online con disclaimer | Alta (ops, non runtime) |
 | **KhamaKey OS** | Fase 1 — SSOT versioni riallineato 2026-07-20 | Alta |
 
 ---
@@ -179,6 +188,7 @@ Health live 2026-07-20 (`link.khamakeymoments.com/health`): Worker **v144**, Res
 | 3 | Auth «Leaked Password Protection» OFF (advisor WARN) | Password violate accettate a signup/cambio | `docs/22` §A — toggle Dashboard Email provider |
 | 4 | Working tree spesso sporco (Business WIP + demo) | Rischio commit accidentali | Non mescolare con fix Moments; commit mirati |
 | 5 | IDOR Business fix non E2E dual-account | Confidenza media | Test manuale due utenti quando possibile |
+| 6 | Privacy/Termini senza P.IVA / sede / ragione sociale | Testo legale incompleto (IT+EN) | Attendere dati reali; poi aggiornare le 4 pagine. Non inventare |
 
 RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments).
 

@@ -435,6 +435,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-09-04 | Cursor | **Promemoria**: P.IVA + dati societari su Privacy/Termini (IT+EN) quando ci sarà partita IVA — non inventare |
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL italiani invariati |
 | 2026-09-04 | Cursor | **Email Auth**: conferma + reset IT/EN da `ui_locale` (template dashboard, `docs/email/`) |
 | 2026-09-04 | Cursor | **Moments v251**: lingua del software in registrazione (`ui_locale` al signUp) |

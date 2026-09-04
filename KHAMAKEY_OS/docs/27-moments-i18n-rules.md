@@ -24,7 +24,7 @@ Default italiano; inglese solo se l’utente clicca EN; si salva nel browser; i 
 | 5 | Cloud lingua UI = solo `user_metadata.ui_locale` (signup + sync login). Non è i18n Business (`state.i18n`) |
 | 6 | Chiave EN mancante → fallback testo IT |
 | 7 | Si traduce il **chrome** editor; non i contenuti scritti dal cliente |
-| 8 | Template seed EN = fuori da questa slice. **Legale EN (v252 / Worker v218):** `moments-privacy-en.html` / `moments-terms-en.html`; IT originale invariato. In caso di conflitto vince l’italiano |
+| 8 | Template seed EN = ancora fuori. **Legale EN (v252 / Worker v218):** `moments-privacy-en.html` / `moments-terms-en.html`; IT originale invariato. In caso di conflitto vince l’italiano. **P.IVA / dati societari:** da inserire su tutte e 4 le pagine quando ci sarà partita IVA — non inventare |
 | 9 | Worker `/m/` chrome = Step 9 (regole visitatore separate; non usare `uiLocale` del proprietario) |
 | 10 | Non riusare i18n Business (`state.i18n` + snapshot OpenAI) |
 
@@ -62,6 +62,9 @@ Crea account (step 2)
 - Login, signup, recupero password, hub account, menu, attivazione pezzo: EN quando selezioni EN.
 - Shell editor / sezioni = ancora Step 6–7.
 
-## Prossimo passo
+## Prossimo passo (i18n, ordine proposto)
 
-**Step 10** — chiudere release (docs già aggiornati). Opzionale dopo: campi form editor EN, template seed EN, Privacy/Terms EN.
+1. **Campi form editor EN** (`moments-i18n-fields.js` / C5) — solo etichette chrome, niente save/upload/NFC.
+2. **Seed «Prepara tutto per me» EN** — contenuto, non chrome; solo se richiesto.
+3. **Altri template Auth** (magic link, change email, invite) — basso: Moments usa soprattutto conferma + reset.
+4. **P.IVA / dati societari** — non è i18n: aspettare partita IVA reale, poi le 4 pagine legale.

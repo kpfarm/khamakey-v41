@@ -13,6 +13,9 @@ const A4 = { w: 210, h: 297 };
 const CODE_RECT = { w: 36, h: 9 };
 /** Misura grande (~+25% riquadro, carattere 13 pt invece di 10) */
 const CODE_RECT_LARGE = { w: 45, h: 12 };
+/** PNG adesivi: stesso larghezza, altezza più bassa (meno bianco sopra/sotto il codice) */
+const CODE_RECT_PNG = { w: CODE_RECT.w, h: 6 };
+const CODE_RECT_PNG_LARGE = { w: CODE_RECT_LARGE.w, h: 7.4 };
 const CODE_FONT_PT = 10;
 const CODE_FONT_PT_LARGE = 13;
 /** Angoli smussati del riquadro codice (mm) — visibili in stampa, non a pillola */
@@ -25,8 +28,8 @@ const CODE_CELL_LARGE = { w: CODE_RECT_LARGE.w, h: CODE_RECT_LARGE.h + CODE_NUM_
 const CODE_PAIR_GAP = 2.5;
 /** Una cella = misura attuale + misura grande, stesso N° */
 const CODE_PAIR_CELL = {
-  w: CODE_RECT.w + CODE_PAIR_GAP + CODE_RECT_LARGE.w,
-  h: CODE_NUM_H + CODE_RECT_LARGE.h
+  w: CODE_RECT_PNG.w + CODE_PAIR_GAP + CODE_RECT_PNG_LARGE.w,
+  h: CODE_NUM_H + CODE_RECT_PNG_LARGE.h
 };
 /** @deprecated alias — stesso rettangolo codice */
 const OVAL = CODE_RECT;
@@ -480,13 +483,15 @@ function svgFontMm(pt){
   return Number((Number(pt) * PT_TO_MM).toFixed(3));
 }
 
-function codeLabelLayout(size = "std"){
+function codeLabelLayout(size = "std", compact = false){
   const large = size === "large";
-  const rect = large ? CODE_RECT_LARGE : CODE_RECT;
+  const rect = large
+    ? (compact ? CODE_RECT_PNG_LARGE : CODE_RECT_LARGE)
+    : (compact ? CODE_RECT_PNG : CODE_RECT);
   return {
     size,
     rect,
-    cell: large ? CODE_CELL_LARGE : CODE_CELL,
+    cell: { w: rect.w, h: rect.h + CODE_NUM_H },
     fontPt: large ? CODE_FONT_PT_LARGE : CODE_FONT_PT
   };
 }
@@ -502,8 +507,8 @@ function codeFontMmForDisplay(code, layout = codeLabelLayout()){
 
 function codePairSlots(x, y){
   return [
-    { layout: codeLabelLayout("std"), x, y },
-    { layout: codeLabelLayout("large"), x: x + CODE_RECT.w + CODE_PAIR_GAP, y }
+    { layout: codeLabelLayout("std", true), x, y },
+    { layout: codeLabelLayout("large", true), x: x + CODE_RECT.w + CODE_PAIR_GAP, y }
   ];
 }
 

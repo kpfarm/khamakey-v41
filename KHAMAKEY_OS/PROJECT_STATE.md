@@ -97,7 +97,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 
 | Componente | Versione | Note |
 |------------|----------|------|
-| **Admin / Officina Moments** | **v202** | PNG QR A4 + schede A4 + codice 2 misure + Cricut PDF. |
+| **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v217-activation-no-sku** | Pre-attivazione: niente badge linea/lotto/categoria. |
 | **Moments editor** | **v250** | Attivazione: struttura prodotto senza testi stock; guida Come funziona IT/EN. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |

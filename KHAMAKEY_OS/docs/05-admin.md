@@ -4,7 +4,7 @@
 
 Pannello interno KhamaKey: `pages/admin.html` + `admin.js` + `admin.css` + `admin-guide.js`.
 
-Versione attuale: **v202** (ZIP: PNG codice · PNG schede A4 · PNG QR A4 · PDF Cricut).
+Versione attuale: **v203** (ZIP: PNG codice più basso · PNG schede A4 · PNG QR A4 · PDF Cricut).
 
 ---
 

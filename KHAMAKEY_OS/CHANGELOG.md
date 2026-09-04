@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Admin v203 — PNG codice più basso (2026-09-04, Cursor)** — Pages
+  - Adesivi PNG: riquadro 6 mm / 7,4 mm (prima 9 / 12) per meno bianco sopra e sotto il codice. PDF Cricut invariato.
 - **Admin v202 — PNG QR A4 (2026-09-02, Cursor)** — Pages
   - ZIP: nuovo `*-qr.png` (foglio A4, griglia QR = URL chip /m/slug, stesso N°). Schede e adesivi invariati.
 - **Admin v201 — schede A4 (2026-09-02, Cursor)** — Pages

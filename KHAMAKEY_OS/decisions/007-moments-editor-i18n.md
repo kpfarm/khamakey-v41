@@ -35,6 +35,7 @@ Esiste già i18n **Business** basato su snapshot + `Accept-Language` nel Worker.
    `khamakey.moments.uiLocale`  
    valori ammessi: `"it"` | `"en"`.
 3. **Dal v216**: se l’utente è loggato, sync anche su Auth `user_metadata.ui_locale` (stessa preferenza su altri device al login). Senza login resta solo browser.
+3b. **Dal v251**: in registrazione il campo «Lingua del software» (default italiano) viene scritto in `user_metadata.ui_locale` già nel `signUp`, così vale dopo la conferma email su qualsiasi device.
 4. **Nessun** auto-detect aggressivo:
    - non forzare EN da `Accept-Language` del browser
    - non cambiare lingua al login in base al paese Amazon

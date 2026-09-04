@@ -1,6 +1,6 @@
 # 27 — Moments i18n: regole (Step 2)
 
-> **Data:** 2026-07-23 · **Stato:** regole ok · **Step 9 Worker `/m/` (v183)** · editor v198 · translate=no  
+> **Data:** 2026-07-23 · **Stato:** regole ok · **Step 9 Worker `/m/` (v183)** · editor v251 · translate=no · lingua in signup
 > Decisione formale: [`decisions/007-moments-editor-i18n.md`](../decisions/007-moments-editor-i18n.md)  
 > Inventario: [`26-moments-i18n-inventory.md`](26-moments-i18n-inventory.md) · Smoke: [`28-moments-i18n-smoke.md`](28-moments-i18n-smoke.md)  
 > Moduli: `moments-i18n.js` · `moments-i18n-auth.js` · `moments-i18n-shell.js` · `moments-i18n-sections.js` · Worker `MOMENTS_PUBLIC_I18N`
@@ -17,9 +17,10 @@ Default italiano; inglese solo se l’utente clicca EN; si salva nel browser; i 
 | 2 | Senza preferenza salvata → **sempre IT** |
 | 3 | Preferenza in `localStorage` → chiave `khamakey.moments.uiLocale` (`it` \| `en`) |
 | 3b | Se loggato: sync anche su Auth `user_metadata.ui_locale` (segue l’account su altri device) |
-| 4 | Solo scelta **esplicita** (toggle IT/EN) — niente auto-detect aggressivo |
+| 3c | **Signup (v251):** campo «Lingua del software» (it\|en, default it) → `signUp` scrive `user_metadata.ui_locale` prima della conferma email |
+| 4 | Solo scelta **esplicita** (toggle IT/EN o campo signup) — niente auto-detect aggressivo |
 | 4b | **Bloccare traduzione Safari/Chrome** (`translate="no"` / `notranslate`) — altrimenti `IT`→`esso`, `Pubblica`→`Pubblicità`, `Anteprima`→`Aprile` |
-| 5 | Niente sync cloud della lingua UI in v1 |
+| 5 | Cloud lingua UI = solo `user_metadata.ui_locale` (signup + sync login). Non è i18n Business (`state.i18n`) |
 | 6 | Chiave EN mancante → fallback testo IT |
 | 7 | Si traduce il **chrome** editor; non i contenuti scritti dal cliente |
 | 8 | Template seed / legale EN = fuori da Step 3–8 |
@@ -41,6 +42,12 @@ Clicca EN
 Clicca IT
   → salva "it"
   → ridisegna etichette UI
+
+Crea account (step 2)
+  → campo Lingua (Italiano / English), default it
+  → allineato al toggle IT/EN della card
+  → signUp options.data.ui_locale
+  → primo login: syncUiLocaleWithAccount applica i metadati
 ```
 
 ## Cosa vede il visitatore della pagina `/m/`

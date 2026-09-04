@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v251 — lingua in registrazione (2026-09-04, Cursor)** — Pages
+  - Step 2 Crea account: campo «Lingua del software» (Italiano / English, default italiano).
+  - Scelta scritta in `user_metadata.ui_locale` al `signUp` (vale dopo conferma email). Toggle IT/EN e menu account restano.
 - **Admin v203 — PNG codice più basso (2026-09-04, Cursor)** — Pages
   - Adesivi PNG: riquadro 6 mm / 7,4 mm (prima 9 / 12) per meno bianco sopra e sotto il codice. PDF Cricut invariato.
 - **Admin v202 — PNG QR A4 (2026-09-02, Cursor)** — Pages

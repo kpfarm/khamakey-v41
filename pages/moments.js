@@ -7,6 +7,7 @@ import {
   appendUiLangToPublicUrl,
   getUiLocale,
   hasStoredUiLocale,
+  normalizeUiLocale,
   onUiLocaleChange,
   readUiLocaleFromUser,
   registerMessages,
@@ -15,7 +16,7 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=246";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=247";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=237";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=217";
@@ -630,9 +631,19 @@ function showRecoveryForm(){
   setStatus(statusNode,"");
 }
 
+function readSignupUiLocale(){
+  return normalizeUiLocale(document.getElementById("momentsSignupLocale")?.value || getUiLocale());
+}
+
+function syncSignupLocaleField(locale = getUiLocale()){
+  const select = document.getElementById("momentsSignupLocale");
+  if(select) select.value = normalizeUiLocale(locale);
+}
+
 function resetSignupForm(){
   signupForm?.reset();
   setSignupStep(1);
+  syncSignupLocaleField();
   const hint = document.getElementById("momentsSignupTypeHint");
   if(hint){
     hint.hidden = true;
@@ -5038,6 +5049,8 @@ signupForm?.addEventListener("submit",async event=>{
   if(!legalOk) return setStatus(statusNode,t("auth.msg.legal_required"),"error");
   try{ validatePin(pin); }catch(error){ return setStatus(statusNode,error.message,"error"); }
   storePendingMomentActivation({ code, title, pin });
+  const uiLocale = readSignupUiLocale();
+  setUiLocale(uiLocale);
   setStatus(statusNode,t("auth.msg.signup_busy"));
   const { data,error } = await supabase.auth.signUp({
     email,
@@ -5048,7 +5061,8 @@ signupForm?.addEventListener("submit",async event=>{
         full_name:document.getElementById("momentsSignupName").value.trim(),
         product_area:"moments",
         pending_moment_code:code,
-        pending_moment_title:title
+        pending_moment_title:title,
+        [UI_LOCALE_USER_META_KEY]: uiLocale
       }
     }
   });
@@ -5118,6 +5132,7 @@ registerMessages("en", SECTION_MESSAGES_EN);
 applyDocumentLang(getUiLocale());
 
 function syncLangSwitchers(locale = getUiLocale()){
+  syncSignupLocaleField(locale);
   document.querySelectorAll("[data-lang-switch]").forEach(root=>{
     root.setAttribute("aria-label", t("lang.switch"));
     root.querySelectorAll("[data-set-locale]").forEach(btn=>{
@@ -5164,6 +5179,16 @@ function syncLangSwitchers(locale = getUiLocale()){
 }
 
 function bindLangSwitchers(){
+  const signupLocale = document.getElementById("momentsSignupLocale");
+  if(signupLocale && signupLocale.dataset.langBound !== "1"){
+    signupLocale.dataset.langBound = "1";
+    signupLocale.addEventListener("change",()=>{
+      const code = readSignupUiLocale();
+      if(code === getUiLocale()) return;
+      setUiLocale(code);
+      persistUiLocaleToAccount(code);
+    });
+  }
   document.querySelectorAll("[data-set-locale]").forEach(btn=>{
     if(btn.dataset.langBound === "1") return;
     btn.dataset.langBound = "1";

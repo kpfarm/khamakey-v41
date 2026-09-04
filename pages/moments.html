@@ -108,6 +108,14 @@
             <button type="button" class="primary" id="signupNextStep" data-i18n="auth.signup.continue">Continua</button>
           </div>
           <div class="signup-panel" data-signup-panel="2" hidden>
+            <label>
+              <span data-i18n="auth.signup.locale">Lingua del software</span>
+              <select id="momentsSignupLocale" autocomplete="language" translate="no">
+                <option value="it" selected data-i18n="lang.it">Italiano</option>
+                <option value="en" data-i18n="lang.en">English</option>
+              </select>
+              <span class="field-hint" data-i18n="auth.signup.locale.hint">Potrai cambiarla dopo dal menu account.</span>
+            </label>
             <label><span data-i18n="auth.signup.name">Nome e cognome</span><input id="momentsSignupName" type="text" autocomplete="name" required></label>
             <label><span data-i18n="auth.email">Email</span><input id="momentsSignupEmail" type="email" autocomplete="email" required></label>
             <label><span data-i18n="auth.signup.password">Password account</span>
@@ -239,6 +247,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=250"></script>
+  <script type="module" src="moments.js?v=251"></script>
 </body>
 </html>

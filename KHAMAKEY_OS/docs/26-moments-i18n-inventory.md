@@ -52,7 +52,7 @@
 - Tab: `Accedi` · `Crea account`
 - Login: `Accesso Moments` · `Email` · `Password` · `Mostra/Nascondi password` · `Password dimenticata?` · `Privacy` · `Termini`
 - Recovery: `Recupera password` · `Invia link di recupero` · `Torna all’accesso` · `Nuova password` · `Aggiorna password`
-- Signup: `Nuovo account Moments` · `1. Codice` · `2. Account` · `Codice Moments (inserto confezione)` · `Continua` · `Indietro` · `Nome e cognome` · `Password account` · `Nome pagina` · `PIN pagina…` · consenso Termini/Privacy · `Crea account e attiva`
+- Signup: `Nuovo account Moments` · `1. Codice` · `2. Account` · `Codice Moments (inserto confezione)` · `Continua` · `Indietro` · **`Lingua del software` (v251, select it/en, default it)** · `Nome e cognome` · `Password account` · `Nome pagina` · `PIN pagina…` · consenso Termini/Privacy · `Crea account e attiva`
 - Attivazione: `Codice NFC` · `Attiva oggetto` · empty `Attiva il tuo primo oggetto Moments`
 
 ### Runtime (`moments.js`) — pattern principali

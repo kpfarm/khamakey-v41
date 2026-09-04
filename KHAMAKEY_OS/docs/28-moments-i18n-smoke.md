@@ -27,6 +27,7 @@ Confermare che IT resta stabile (default) e EN traduce solo il chrome già coper
 | B3 | Persistenza | Reload → resta EN (`uiLocale=en`, `lang=en`) | ✅ |
 | B4 | Torna IT | Clic IT → Accedi di nuovo | ✅ |
 | B5 | Anti Chrome-nonsense | `translate="no"` sul root; niente esso/Pubblicità | ✅ |
+| B6 | Signup lingua (v251) | Crea account → step 2: campo Lingua default Italiano; EN aggiorna chrome e resta allineato al toggle IT/EN | ✅ 2026-09-04 locale |
 
 ## C — Editor (serve account Moments)
 

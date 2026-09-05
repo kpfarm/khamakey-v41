@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-04** (legale EN live · P.IVA in attesa · i18n seed segue UI)
+> Ultimo aggiornamento: **2026-09-05** (controllo lacune; ticket clienti in coda)
 
 ### Fonte di verità versioni
 
@@ -98,6 +98,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Cosa | Quando | Dove | Cosa non fare |
 |------|--------|------|----------------|
 | **Dati societari + P.IVA** su Privacy e Termini | Quando esiste partita IVA (e sede / ragione sociale confermati) | `pages/moments-privacy.html`, `moments-terms.html`, `moments-privacy-en.html`, `moments-terms-en.html` — titolare, indirizzo, P.IVA/CF. Poi bump `?v=` legale se serve | Non inventare numeri o ragione sociale. Non togliere il disclaimer «da completare / revisione legale». In conflitto vince l’italiano. |
+| **Ticket clienti (piccoli bug)** | In coda — testo ticket + reproduce prima di toccare codice | `docs/33` | Non mescolare con i18n/P.IVA. NFC/upload restano sacri |
 
 ---
 
@@ -206,12 +207,9 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-04 (vault):** live Moments **v252** · Worker **v218-legal-en** · Admin **v203**.  
-> Chrome editor IT/EN chiuso (non rifare etichette campi: i valori sono testo cliente).  
-> «Prepara tutto per me» **non** è sempre italiano: segue `getUiLocale()`.  
-> **P.IVA / dati societari** — fermo finché non ci sono dati reali (Privacy+Termini IT e EN).  
-> Prossimo prodotto tipico: Stripe Plus/Pro. Smoke NFC/upload: [`docs/31-go-live-smoke-moments.md`](docs/31-go-live-smoke-moments.md).  
-> Nessun cambio a `renderMomentPage` / RPC Moments senza smoke su slug reale.
+> **Oggi 2026-09-05 (vault):** live Worker **v218-legal-en** (health ok). Controllo lacune: [`docs/33-controllo-software-lacune.md`](docs/33-controllo-software-lacune.md).  
+> Ticket clienti: **in coda**. Chrome editor IT/EN chiuso. «Prepara tutto» segue UI. **P.IVA** in attesa.  
+> Prossimo prodotto tipico: Stripe Plus/Pro. Smoke NFC/upload su pezzo reale prima di ogni fix.
 
 ---
 

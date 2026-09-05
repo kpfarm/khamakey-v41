@@ -14,7 +14,8 @@ Se l'utente scrive **cose da fare** (anche con varianti tipo «che cose da fare�
 3. **Smoke test Moments** — in corso (2026-07-21): auto A✅; manca login utente B1–B10
 4. **Supporto** — *rimandato con smoke*: assegnazione + risposta Resend (Admin v172 / Worker v158)
 5. **Dati societari / P.IVA** — Privacy + Termini (IT e EN) ancora senza ragione sociale, sede, partita IVA. Inserire **solo** quando c’è P.IVA reale. Non inventare. Revisione legale resta.
-6. Prossimo backlog prodotto solo se ops sopra ok (es. report rivenditori, hub spedizioni)
+6. **Ticket clienti** — in coda (`docs/33`); non aprire insieme al controllo lacune.
+7. Prossimo backlog prodotto solo se ops sopra ok (es. report rivenditori, hub spedizioni)
 
 ## Stile
 

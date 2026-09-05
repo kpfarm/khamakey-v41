@@ -7,11 +7,11 @@
 
 | # | Check | Come | Esito |
 |---|-------|------|-------|
-| A1 | Worker health | `GET https://link.khamakeymoments.com/health` → `version` = `v161-legal`, Resend/Shopify active | ✅ 2026-07-21 |
+| A1 | Worker health | `GET https://link.khamakeymoments.com/health` → versione live, Resend/Shopify active | ✅ 2026-09-05 `v218-legal-en` (prima 2026-07-21) |
 | A2 | Privacy live | `https://app.khamakeymoments.com/moments-privacy` → 200 (`.html` fa 308) | ✅ Pages deploy 2026-07-21 |
-| A2b | Privacy EN | `https://app.khamakeymoments.com/moments-privacy-en` → 200 | ⬜ v252 |
+| A2b | Privacy EN | `https://app.khamakeymoments.com/moments-privacy-en` → 200 | ✅ 2026-09-05 |
 | A3 | Termini live | `https://app.khamakeymoments.com/moments-terms` → 200 | ✅ |
-| A3b | Termini EN | `https://app.khamakeymoments.com/moments-terms-en` → 200 | ⬜ v252 |
+| A3b | Termini EN | `https://app.khamakeymoments.com/moments-terms-en` → 200 | ✅ 2026-09-05 |
 | A4 | CSS legale | `moments-legal.css?v=175` → 200 | ✅ |
 | A5 | App Moments | `moments` / `moments.html` con `?v=175` + consenso signup + auth-legal | ✅ |
 | A6 | `/m/` 404 | slug inesistente → 404 HTML | ✅ |

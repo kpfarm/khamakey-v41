@@ -435,6 +435,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-09-05 | Cursor | **Controllo lacune**: lista in `KHAMAKEY_OS/docs/33`; health live ok; ticket clienti in coda |
 | 2026-09-04 | Cursor | **Vault OS riallineato**: `KHAMAKEY_OS/docs/13-roadmap.md` era fermo a luglio; stato, ADR-007, inventario i18n |
 | 2026-09-04 | Cursor | **i18n**: «Prepara tutto» segue lingua UI (non sempre IT); etichette campi = testo cliente |
 | 2026-09-04 | Cursor | **Promemoria**: P.IVA + dati societari su Privacy/Termini (IT+EN) quando ci sarà partita IVA — non inventare |

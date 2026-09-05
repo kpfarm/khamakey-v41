@@ -106,6 +106,7 @@
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
+| 2026-09-05 | Cursor | **Controllo lacune**: `docs/33` — health v218 ok; ticket clienti in coda; Privacy/Termini EN 200 |
 | 2026-09-04 | Cursor | **Vault OS**: riallineato `13-roadmap` + stato + ADR-007 + inventario (questo file non era più aggiornato) |
 
 ---

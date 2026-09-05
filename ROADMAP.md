@@ -435,6 +435,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-09-05 | Cursor | **Moments v256 / Worker v221**: contatore leggibile + anteprima mobile senza scroll bloccato |
 | 2026-09-05 | Cursor | **Moments v255 / Worker v220**: copertina «Tutta la foto» con sfondo sfuocato |
 | 2026-09-05 | Cursor | **Moments v254 / Worker v219**: copertina tutta la foto vs riempi; drag; ticket selfie |
 | 2026-09-05 | Cursor | **Moments v253**: confirm Prepara tutto / categoria + nomi tipo chrome IT/EN |

@@ -8,14 +8,14 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v255** | Copertina: tutta la foto con sfondo sfuocato / riempi + trascina |
-| Worker | **v220-cover-blur** | `cover_fit` contain: blur fill su `/m/` |
+| Editor Moments | **v256** | Anteprima mobile: iframe a tutta altezza; contatore + Worker v221 |
+| Worker | **v221-counter-preview** | Etichette contatore scure sulla card; griglia 3/4 col; galleria non mangia lo scroll verticale |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]
 - Titoli/etichette in pagina = testo cliente. «Prepara tutto per me» segue la lingua UI. → [[docs/27-moments-i18n-rules]]
 - Email conferma/reset IT/EN: template in [[docs/32-moments-auth-email]] (dashboard, già incollati)
-- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — ticket copertina chiuso; altri ticket in coda
+- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — copertina e contatore/scroll anteprima chiusi; altri ticket in coda
 
 ---
 

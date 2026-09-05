@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v256 + Worker v221 — contatore e scroll anteprima (2026-09-05)** — Pages + Worker
+  - Ticket: contatore storto/incompleto in anteprima; scroll che si blocca.
+  - Etichette GIORNI/ORE su card bianca in slate (non più tinta chiara sul bianco). Griglia 3 o 4 colonne; numeri a 4 cifre non tagliati.
+  - Anteprima mobile: un solo scroll (documento nell’iframe), come `/m/`. Galleria orizzontale non mangia il gesto verticale.
 - **Moments v255 + Worker v220 — copertina sfondo sfuocato (2026-09-05)** — Pages + Worker
   - In «Tutta la foto» la stessa immagine riempie il riquadro sfuocata (niente bande nere). «Riempi» invariato.
 - **Moments v254 + Worker v219 — copertina tutta la foto (2026-09-05)** — Pages + Worker

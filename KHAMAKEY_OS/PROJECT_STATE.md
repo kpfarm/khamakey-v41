@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-05** (copertina v255 / Worker v220 — sfondo sfuocato)
+> Ultimo aggiornamento: **2026-09-05** (anteprima v256 / Worker v221 — contatore + scroll)
 
 ### Fonte di verità versioni
 
@@ -98,7 +98,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Cosa | Quando | Dove | Cosa non fare |
 |------|--------|------|----------------|
 | **Dati societari + P.IVA** su Privacy e Termini | Quando esiste partita IVA (e sede / ragione sociale confermati) | `pages/moments-privacy.html`, `moments-terms.html`, `moments-privacy-en.html`, `moments-terms-en.html` — titolare, indirizzo, P.IVA/CF. Poi bump `?v=` legale se serve | Non inventare numeri o ragione sociale. Non togliere il disclaimer «da completare / revisione legale». In conflitto vince l’italiano. |
-| **Ticket clienti (piccoli bug)** | Uno alla volta, con reproduce | `docs/33` | Copertina selfie ✅ v254. NFC/upload restano sacri |
+| **Ticket clienti (piccoli bug)** | Uno alla volta, con reproduce | `docs/33` | Copertina selfie ✅ v254–v255. Contatore/scroll anteprima ✅ v256/v221. NFC/upload restano sacri |
 
 ---
 
@@ -107,8 +107,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v220-cover-blur** | Contain: stessa foto sfuocata a riempire. Pagine senza `cover_fit` restano cover. |
-| **Moments editor** | **v255** | Copertina tutta la foto con blur fill; Riempi + drag. |
+| **Worker NFC** | **v221-counter-preview** | Contatore su card bianca: etichette scure, griglia 3/4 col; anteprima mobile: un solo scroll (iframe). Cover blur invariato. |
+| **Moments editor** | **v256** | Anteprima mobile: iframe a tutta altezza, niente scroll innestato. CSS `moments.css?v=252`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v172 (prod)** | v172 salva ottimistico applicata 2026-08-06; v171 video 50MB; v170 build_stage. |
@@ -207,7 +207,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-05:** Worker **v220-cover-blur** + editor **v255** (copertina: tutta la foto + sfondo sfuocato).  
+> **Oggi 2026-09-05:** Worker **v221-counter-preview** + editor **v256** (contatore leggibile + anteprima mobile senza scroll bloccato).  
 > Altri ticket clienti: uno alla volta. **P.IVA** in attesa.  
 > Prossimo prodotto tipico: Stripe Plus/Pro. Smoke NFC/upload su pezzo reale prima di ogni fix.
 

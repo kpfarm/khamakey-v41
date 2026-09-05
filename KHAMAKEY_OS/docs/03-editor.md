@@ -77,7 +77,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 - Oroscopo giornaliero (AstroWay): fino a 5 persone/segni fissati in editor; testo live su `/m/` via Worker + cache giorno
 - Privacy (PIN opzionale)
 - Lettera / messaggio speciale
-- Contatore con etichetta personalizzabile (es. «Insieme da», «Ti sopporto da»). Vuoto = solo numeri in pagina (v240).
+- Contatore con etichetta personalizzabile (es. «Insieme da», «Ti sopporto da»). Vuoto = solo numeri in pagina (v240). **v256 / Worker v221:** etichette unità in contrasto sulla card bianca; griglia 3/4 colonne (HMS). Anteprima mobile: iframe a tutta altezza, scroll unico (niente wrap + pagina che si contendono il gesto).
 - **Titoli/etichette in pagina** (titolo sezione, pill copertina, etichetta firma, voci RSVP): testo cliente. Il chrome («Titolo sezione», hint) è già IT/EN. Non ritradurre i valori.
 - «Prepara tutto per me»: testi modello **nella lingua UI** (`localizeMomentTemplate` + `getUiLocale()`). Dopo Salva restano com’è.
 - Supporto operativo: menu account `Assistenza` e form ticket nella scheda Account, con `source='moments_editor'`.

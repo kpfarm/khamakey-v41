@@ -1,7 +1,7 @@
 # 33 — Controllo software e lacune (Moments)
 
-> **Data:** 2026-09-05 · **Stato:** in corso · **Ticket copertina:** chiuso (v254–v255 / Worker v219–v220)  
-> Live previsto dopo deploy: Worker **v220-cover-blur** · Privacy/Termini IT+EN **200**  
+> **Data:** 2026-09-05 · **Stato:** in corso · **Ticket copertina:** chiuso (v254–v255 / Worker v219–v220) · **Ticket contatore/scroll:** chiuso (v256 / Worker v221)  
+> Live previsto dopo deploy: Worker **v221-counter-preview** · Privacy/Termini IT+EN **200**  
 > Smoke storico: [[23-smoke-moments]] · Go-live: [[31-go-live-smoke-moments]] · i18n: [[27-moments-i18n-rules]]
 
 ## Come usiamo questo file
@@ -17,6 +17,7 @@
 | Data | Segnalazione | Esito |
 |------|----------------|-------|
 | 2026-09-05 | Selfie copertina ritagliato subito; Alto/Centro/Basso + zoom 100–200% giudicati inutili | ✅ **v254/v219** tutta la foto vs riempi; **v255/v220** sfondo sfuocato in «Tutta la foto». |
+| 2026-09-05 | Contatore storto/incompleto in anteprima; scroll che si blocca | ✅ **v256/v221** etichette scure su card, griglia 3/4 col; iframe anteprima = unico scroll. |
 
 Altri ticket restano in coda, uno alla volta.
 

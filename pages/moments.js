@@ -21,7 +21,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=217";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=246";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=247";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -79,7 +79,7 @@ import {
   migrateMusicSectionMedia,
   setActivePlanLimits,
   normalizeCoverFit
-} from "./moment-media.js?v=243";
+} from "./moment-media.js?v=244";
 import {
   canFitBytes,
   emptyEntitlements,
@@ -91,7 +91,7 @@ import {
   PLAN_LABELS,
   storageBytesLimit,
   storageUsagePercent
-} from "./moment-plans.js?v=237";
+} from "./moment-plans.js?v=238";
 import { LIST_SECTION_MODES, itemsFromSection } from "./moment-list-items.js";
 import {
   renderListItemsPanel,
@@ -138,7 +138,7 @@ import {
   sectionHasContent,
   isSectionExcluded,
   youtubeVideoId
-} from "./moment-sections.js?v=243";
+} from "./moment-sections.js?v=244";
 import {
   renderCategorySelect,
   templateForType,

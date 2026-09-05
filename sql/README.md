@@ -57,12 +57,13 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 51 | `khamakey-moments-product-lines-v171.sql` | Anagrafica linee oggetto fisico + RPC rename/delete (Officina Magazzino) |
 | 51 | `khamakey-moments-video-limit-v171.sql` | Moments: `max_video_mb` → 50 su piani Free/Plus/Pro (resta 1 clip sul Free) |
 | 52 | `khamakey-moments-save-optimistic-v172.sql` | Salva ottimistico: `p_expected_updated_at` → CONFLICT_STALE_SAVE se altra sessione ha salvato |
+| 53 | `khamakey-moments-video-limit-v173.sql` | Moments: `max_video_mb` → 90 su Free/Plus/Pro (resta 1 clip sul Free; tetto CF request 100 MB) |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 
 **`khamakey-integrations-i18n-v66-production.sql` non è nella sequenza.** È una patch storica applicata a mano nel SQL Editor di Supabase quando su produzione `platform_integrations`/`platform_payment_transactions` risultavano già create fuori sequenza. `khamakey-integrations-i18n-v66.sql` è già completo e idempotente (crea quelle tabelle solo se assenti) e la copre interamente: non serve applicare entrambe. Il file `-production` resta nel repo solo come traccia storica — non eseguirlo di nuovo.
 
-**Stato produzione (2026-08-06):** v171 + **v172 applicata** su Moments `cuxlwaocjqwzluycznyp` (MCP `apply_migration`). Moments **v236** può andare in deploy.
+**Stato produzione (2026-09-05):** **v173 applicata** su Moments `cuxlwaocjqwzluycznyp` (MCP `apply_migration`) — `max_video_mb` 90. v172 salva ottimistico già in prod.
 
 ## Supabase SQL Editor
 

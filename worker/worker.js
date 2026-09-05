@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v222-upload-limit";
+const WORKER_VERSION = "v223-video-90";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -869,7 +869,7 @@ const DEFAULT_MOMENTS_PLAN_LIMITS = {
   letter_audio: 1,
   letter_pdfs: 1,
   max_image_mb: 8,
-  max_video_mb: 50,
+  max_video_mb: 90,
   max_audio_mb: 12,
   max_pdf_mb: 15
 };

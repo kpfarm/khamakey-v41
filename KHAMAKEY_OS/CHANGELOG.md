@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v258 + Worker v223 + SQL v173 — video fino a 90 MB (2026-09-05)** — Pages + Worker + SQL
+  - Tetto file video Moments: **90 MB** (Free/Plus/Pro). Cloudflare Free/Pro accetta request fino a 100 MB; 90 lascia margine al multipart.
+  - Free resta **1 clip**. Storage e clip Plus/Pro invariati. Business resta 50 MB (`MEDIA_LIMITS`).
+  - Banner oltre il limite invariato (peso reale + massimo).
 - **Moments v257 + Worker v222 — upload video con limite visibile (2026-09-05)** — Pages + Worker
   - Ticket: caricare un video non faceva nulla (solo un clip da 7 s funzionava), nessuna notifica.
   - Limite resta **50 MB** a video (non 90). Controllo prima dell’invio; banner «Limite caricamento superato (N MB). Massimo 50 MB per video».

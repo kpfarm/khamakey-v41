@@ -1,4 +1,4 @@
-/** Limiti piani Moments — allineati a platform_plans.limits (SQL v161). */
+/** Limiti piani Moments — allineati a platform_plans.limits (SQL v161 + v173 video 90 MB). */
 
 export const MOMENTS_PLAN_KEYS = Object.freeze(["moments_free", "moments_plus", "moments_pro"]);
 
@@ -14,7 +14,7 @@ export const DEFAULT_MOMENTS_LIMITS = Object.freeze({
   letter_pdfs: 1,
   journey_steps: 24,
   max_image_mb: 8,
-  max_video_mb: 50,
+  max_video_mb: 90,
   max_audio_mb: 12,
   max_pdf_mb: 15
 });

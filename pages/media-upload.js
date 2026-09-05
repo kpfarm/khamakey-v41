@@ -3,6 +3,7 @@ import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL } from "./confi
 
 export const MEDIA_BUCKET = "khamakey-media";
 export const MAX_IMAGE_MB = 8;
+/** Business fallback. Moments usa platform_plans.max_video_mb (90; tetto CF request 100 MB). */
 export const MAX_VIDEO_MB = 50;
 export const MAX_AUDIO_MB = 12;
 export const MAX_PDF_MB = 15;

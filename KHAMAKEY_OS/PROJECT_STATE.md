@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-05** (upload video v257 / Worker v222 — limite visibile)
+> Ultimo aggiornamento: **2026-09-05** (video 90 MB — v258 / Worker v223 / SQL v173)
 
 ### Fonte di verità versioni
 
@@ -98,7 +98,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Cosa | Quando | Dove | Cosa non fare |
 |------|--------|------|----------------|
 | **Dati societari + P.IVA** su Privacy e Termini | Quando esiste partita IVA (e sede / ragione sociale confermati) | `pages/moments-privacy.html`, `moments-terms.html`, `moments-privacy-en.html`, `moments-terms-en.html` — titolare, indirizzo, P.IVA/CF. Poi bump `?v=` legale se serve | Non inventare numeri o ragione sociale. Non togliere il disclaimer «da completare / revisione legale». In conflitto vince l’italiano. |
-| **Ticket clienti (piccoli bug)** | Uno alla volta, con reproduce | `docs/33` | Copertina selfie ✅ v254–v255. Contatore/scroll ✅ v256/v221. Video upload silenzioso ✅ v257/v222. NFC/upload restano sacri |
+| **Ticket clienti (piccoli bug)** | Uno alla volta, con reproduce | `docs/33` | Copertina selfie ✅ v254–v255. Contatore/scroll ✅ v256/v221. Video upload silenzioso ✅ v257/v222. Limite video **90 MB** ✅ v258/v223/SQL v173. NFC/upload restano sacri |
 
 ---
 
@@ -107,11 +107,11 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v222-upload-limit** | 413 upload con MB espliciti (`file_too_large`). Cover blur e contatore invariati. |
-| **Moments editor** | **v257** | Video oltre 50 MB: banner visibile, niente silenzio / reload iOS da clone File. CSS `moments.css?v=253`. |
+| **Worker NFC** | **v223-video-90** | Moments `max_video_mb` 90; Business `MEDIA_LIMITS.video` resta 50. Cover/contatore/NFC invariati. |
+| **Moments editor** | **v258** | Video fino a 90 MB (copy + default piano). Banner oltre il limite. CSS `moments.css?v=253`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
-| **SQL Supabase Moments** | **≥ v172 (prod)** | v172 salva ottimistico applicata 2026-08-06; v171 video 50MB; v170 build_stage. |
+| **SQL Supabase Moments** | **≥ v173 (prod)** | v173 `max_video_mb` 90 applicata 2026-09-05; v172 salva ottimistico; v171 video 50MB (superseded). |
 | **Prossima release piattaforma** | **collegare Stripe** sui `moments_plus` / `moments_pro` | Prezzi già in seed (€4,90/€39 Plus · €9,90/€79 Pro). |
 
 ---
@@ -207,7 +207,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-05:** Worker **v222-upload-limit** + editor **v257** (limite video 50 MB visibile).  
+> **Oggi 2026-09-05:** Worker **v223-video-90** + editor **v258** + SQL **v173** (video Moments 90 MB).  
 > Altri ticket clienti: uno alla volta. **P.IVA** in attesa.  
 > Prossimo prodotto tipico: Stripe Plus/Pro. Smoke NFC/upload su pezzo reale prima di ogni fix.
 

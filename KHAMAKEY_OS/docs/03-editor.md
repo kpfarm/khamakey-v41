@@ -70,7 +70,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 ## Editor Moments
 
 ### Sezioni principali
-- Copertina (v254 / Worker v219): `cover_fit` `cover` (riempi, default pagine già salvate) o `contain` (tutta la foto). Nuovo upload parte da tutta la foto. In «Riempi» si trascina per inquadrare; zoom 100–200% solo lì. Scorciatoie Alto/Centro/Basso rimosse.
+- Copertina (v255 / Worker v220): `cover_fit` `cover` (riempi, default pagine già salvate) o `contain` (tutta la foto, **stessa foto sfuocata** a riempire il riquadro). Nuovo upload parte da tutta la foto. In «Riempi» si trascina; zoom 100–200% solo lì.
 - Sezioni evento (programma, storia, messaggi…)
 - Galleria media (foto, video, audio) — ogni riga ha **Cambia foto** e **Rimuovi** (v144)
 - RSVP configurabile per tipo evento

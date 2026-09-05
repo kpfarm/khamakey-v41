@@ -420,7 +420,9 @@ textarea{min-height:86px;resize:vertical}
 .cover-framer-phone.is-dragging{cursor:grabbing}
 .cover-framer-top-hint{margin:0 0 8px;text-align:center}
 .cover-framer-phone img{width:100%;height:100%;object-fit:cover;pointer-events:none;will-change:transform;-webkit-user-drag:none}
-.cover-framer-phone.is-contain img{object-fit:contain}
+.cover-framer-blur{position:absolute;inset:0;z-index:0;object-fit:cover;filter:blur(20px);-webkit-filter:blur(20px);transform:scale(1.16);transform-origin:center center}
+.cover-framer-blur[hidden]{display:none!important}
+.cover-framer-phone.is-contain #coverFramerImg{position:relative;z-index:1;object-fit:contain}
 .cover-focus-marker{position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;border:2px solid #fff;border-radius:999px;box-shadow:0 0 0 2px rgba(15,23,42,.35);pointer-events:none;z-index:2}
 .cover-focus-marker::after{content:"";position:absolute;inset:4px;border-radius:999px;background:rgba(107,168,90,.85)}
 .cover-focus-marker[hidden]{display:none!important}

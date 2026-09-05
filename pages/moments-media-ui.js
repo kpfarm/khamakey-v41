@@ -19,7 +19,7 @@ import {
 } from "./moment-media.js?v=243";
 import { canFitBytes, formatBytes, storageBytesLimit } from "./moment-plans.js?v=237";
 import { getUiLocale } from "./moments-i18n.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=244";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=245";
 
 let mediaEditContext = null;
 
@@ -575,6 +575,12 @@ export function syncCoverFramer(formNode){
   img.style.cssText = css;
   const phone = formNode.querySelector("[data-cover-tap]");
   phone?.classList.toggle("is-contain", fit === "contain");
+  const blur = document.getElementById("coverFramerBlur");
+  if(blur){
+    blur.hidden = fit !== "contain";
+    const src = img.currentSrc || img.src;
+    if(src) blur.src = src;
+  }
   const topHint = formNode.querySelector(".cover-framer-top-hint");
   if(topHint){
     const topHintIt = fit === "contain"
@@ -628,7 +634,7 @@ export function renderCoverFramer(state){
   const topHintIt = containActive
     ? "Tutta la foto, senza taglio. Se vuoi coprire il riquadro, scegli Riempi e trascina."
     : "Trascina la foto per inquadrare. Tocca per il fuoco.";
-  const fitHintIt = "Tutta la foto: niente taglio (bande se serve). Riempi: copre il riquadro; trascina per inquadrare.";
+  const fitHintIt = "Tutta la foto: niente taglio, sfondo sfuocato. Riempi: copre il riquadro; trascina per inquadrare.";
   const zoomHintIt = "Da 100% a 200%. Trascina la foto per inquadrare volti o dettagli.";
   const fitContainIt = "Tutta la foto";
   const fitCoverIt = "Riempi lo spazio";
@@ -636,6 +642,7 @@ export function renderCoverFramer(state){
   return `<div class="cover-framer" id="coverFramer" aria-label="${esc(lf("Anteprima copertina"))}">
     <p class="cover-picker-hint cover-framer-top-hint" data-lf="${esc(topHintIt)}">${esc(lf(topHintIt))}</p>
     <div class="cover-framer-phone${containActive ? " is-contain" : ""}" data-cover-tap>
+      <img class="cover-framer-blur" id="coverFramerBlur" src="${esc(url)}" alt="" aria-hidden="true" ${containActive ? "" : "hidden"}>
       <img id="coverFramerImg" src="${esc(url)}" alt="" style="${esc(css)}" loading="lazy" decoding="async" draggable="false">
       <span class="cover-focus-marker" id="coverFocusMarker" style="left:${x}%;top:${y}%" ${containActive ? "hidden" : ""}></span>
     </div>

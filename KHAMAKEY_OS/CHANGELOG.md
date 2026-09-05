@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v255 + Worker v220 — copertina sfondo sfuocato (2026-09-05)** — Pages + Worker
+  - In «Tutta la foto» la stessa immagine riempie il riquadro sfuocata (niente bande nere). «Riempi» invariato.
 - **Moments v254 + Worker v219 — copertina tutta la foto (2026-09-05)** — Pages + Worker
   - Ticket: selfie ritagliato subito; Alto/Centro/Basso + zoom giudicati inutili.
   - Nuovo campo `cover_fit`: `contain` (tutta la foto) / `cover` (riempi). Pagine già salvate restano `cover`.

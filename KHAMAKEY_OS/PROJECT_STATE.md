@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-05** (copertina v254 / Worker v219; ticket selfie ritagliato)
+> Ultimo aggiornamento: **2026-09-05** (copertina v255 / Worker v220 — sfondo sfuocato)
 
 ### Fonte di verità versioni
 
@@ -107,8 +107,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v219-cover-fit** | Copertina `cover_fit` contain/cover. Pagine senza campo restano cover. Footer/PIN legale EN invariato. |
-| **Moments editor** | **v254** | Copertina: Tutta la foto / Riempi + drag. Confirm Prepara tutto / categoria + nomi tipo chrome IT/EN. |
+| **Worker NFC** | **v220-cover-blur** | Contain: stessa foto sfuocata a riempire. Pagine senza `cover_fit` restano cover. |
+| **Moments editor** | **v255** | Copertina tutta la foto con blur fill; Riempi + drag. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v172 (prod)** | v172 salva ottimistico applicata 2026-08-06; v171 video 50MB; v170 build_stage. |
@@ -207,7 +207,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-05:** live previsto Worker **v219-cover-fit** + editor **v254** (ticket copertina).  
+> **Oggi 2026-09-05:** Worker **v220-cover-blur** + editor **v255** (copertina: tutta la foto + sfondo sfuocato).  
 > Altri ticket clienti: uno alla volta. **P.IVA** in attesa.  
 > Prossimo prodotto tipico: Stripe Plus/Pro. Smoke NFC/upload su pezzo reale prima di ogni fix.
 

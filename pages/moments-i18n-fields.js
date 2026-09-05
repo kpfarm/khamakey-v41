@@ -18,7 +18,7 @@ export const FIELD_PHRASE_EN = {
   "Come si vede": "How it looks",
   "Tutta la foto": "Whole photo",
   "Riempi lo spazio": "Fill the frame",
-  "Tutta la foto: niente taglio (bande se serve). Riempi: copre il riquadro; trascina per inquadrare.": "Whole photo: no crop (bands if needed). Fill: covers the frame; drag to reframe.",
+  "Tutta la foto: niente taglio, sfondo sfuocato. Riempi: copre il riquadro; trascina per inquadrare.": "Whole photo: no crop, blurred background. Fill: covers the frame; drag to reframe.",
   "Zoom": "Zoom",
   "Riduci zoom": "Reduce zoom",
   "Aumenta zoom": "Increase zoom",

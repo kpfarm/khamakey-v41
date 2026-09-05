@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v254** | Copertina: tutta la foto / riempi + trascina. Confirm + nomi tipo IT/EN |
-| Worker | **v219-cover-fit** | `cover_fit` contain/cover su `/m/` (pagine vecchie restano cover) |
+| Editor Moments | **v255** | Copertina: tutta la foto con sfondo sfuocato / riempi + trascina |
+| Worker | **v220-cover-blur** | `cover_fit` contain: blur fill su `/m/` |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

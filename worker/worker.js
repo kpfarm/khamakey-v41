@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v219-cover-fit";
+const WORKER_VERSION = "v220-cover-blur";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1691,7 +1691,7 @@ async function renderMomentPage(page, origin, env = {}, locale = "it") {
     coverFit === "contain" ? "is-contain" : ""
   ].filter(Boolean).join(" ");
   const heroCover = coverUrl
-    ? `<div class="moment-cover-wrap${coverWrapClass ? " " + coverWrapClass : ""}" style="transform:scale(${coverZoom / 100});transform-origin:${coverFocusX}% ${coverFocusY}%"><img class="moment-cover" src="${attr(coverUrl)}" alt="" style="object-fit:${coverFit};object-position:${coverFocusX}% ${coverFocusY}%"></div>`
+    ? `<div class="moment-cover-wrap${coverWrapClass ? " " + coverWrapClass : ""}" style="transform:scale(${coverZoom / 100});transform-origin:${coverFocusX}% ${coverFocusY}%">${coverFit === "contain" ? `<img class="moment-cover-blur" src="${attr(coverUrl)}" alt="" aria-hidden="true">` : ""}<img class="moment-cover" src="${attr(coverUrl)}" alt="" style="object-fit:${coverFit};object-position:${coverFocusX}% ${coverFocusY}%"></div>`
     : "";
   const profileBlock = profileUrl && heroStyle === "profilo"
     ? `<img class="moment-profile" src="${attr(profileUrl)}" alt="">` : "";
@@ -3335,7 +3335,9 @@ body.nav-open{overflow:hidden}
 .moment-cover-wrap{position:absolute;inset:0;transform-origin:center center;will-change:transform;z-index:0}
 .moment-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:kenBurns 22s ease-in-out infinite alternate}
 .moment-cover-wrap.is-zoomed .moment-cover{animation-name:kenBurnsSoft}
-.moment-cover-wrap.is-contain .moment-cover{object-fit:contain;animation:none;background:transparent}
+.moment-cover-wrap.is-contain{overflow:hidden}
+.moment-cover-blur{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;filter:blur(28px);-webkit-filter:blur(28px);transform:scale(1.16);transform-origin:center center}
+.moment-cover-wrap.is-contain .moment-cover{object-fit:contain;animation:none;background:transparent;z-index:1}
 @keyframes kenBurns{0%{transform:scale(1)}100%{transform:scale(1.09)}}
 @keyframes kenBurnsSoft{0%{transform:scale(1)}100%{transform:scale(1.03)}}
 .moment-hero-overlay{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.06) 0%,rgba(0,0,0,.26) 50%,color-mix(in srgb, ${c.bl} 55%, transparent) 78%,${c.bl} 100%)}

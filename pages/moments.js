@@ -21,7 +21,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=238";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=217";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=244";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=245";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -61,7 +61,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=243";
+} from "./moments-media-ui.js?v=244";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -4637,11 +4637,14 @@ function updateCoverPreview(formNode){
   const url = String(new FormData(formNode).get("cover_url") || "").trim();
   const img = document.getElementById("coverFramerImg");
   if(!img) return;
+  const blur = document.getElementById("coverFramerBlur");
   if(/^https?:\/\//i.test(url)){
     img.src = url;
     img.hidden = false;
+    if(blur) blur.src = url;
   }else{
     img.removeAttribute("src");
+    if(blur) blur.removeAttribute("src");
   }
   syncCoverFramer(formNode);
 }

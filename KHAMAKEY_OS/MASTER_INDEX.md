@@ -4,18 +4,18 @@
 > Ogni sessione AI inizia da qui.  
 > Vault Obsidian: apri **questa cartella** `KHAMAKEY_OS/` (o la root del repo). Dopo ogni fatto prodotto: [[PROJECT_STATE]] + [[CHANGELOG]] + [[docs/13-roadmap]].
 
-## Stato oggi (2026-09-05)
+## Stato oggi (2026-09-06)
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v258** | Video fino a 90 MB (Free resta 1 clip) |
-| Worker | **v223-video-90** | Moments max video 90 MB; Business resta 50 |
+| Editor Moments | **v259** | Sogni/obiettivi: cerchi flaggabili + contrasto |
+| Worker | **v224-dream-check** | Testo scuro sulle card; anteprima tocca il cerchio |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]
 - Titoli/etichette in pagina = testo cliente. «Prepara tutto per me» segue la lingua UI. → [[docs/27-moments-i18n-rules]]
 - Email conferma/reset IT/EN: template in [[docs/32-moments-auth-email]] (dashboard, già incollati)
-- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — copertina, contatore/scroll, upload video e tetto 90 MB chiusi; altri ticket in coda
+- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — copertina, contatore/scroll, upload video, tetto 90 MB e sogni/obiettivi chiusi; altri ticket in coda
 
 ---
 

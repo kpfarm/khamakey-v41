@@ -543,7 +543,7 @@ export function sectionFieldHints(){
   return {
     timeline:"Ogni tappa: data, luogo, descrizione, foto e link mappa.",
     promises:"Aggiungi promesse con il pulsante — emoji e testo in ogni card.",
-    dreams:"Aggiungi sogni uno per uno. Spunta «Realizzato» se già avete fatto il passo.",
+    dreams:"Tocca il cerchio per segnare un obiettivo come raggiunto. Poi Salva.",
     rituals:"Aggiungi rituali quotidiani — una card per abitudine.",
     numbers:"Aggiungi numeri simbolo — valore ed etichetta in ogni card."
   };
@@ -558,7 +558,7 @@ export function sectionFillGuide(key){
     gallery:"Carica le foto con Aggiungi foto. Titolo e descrizione per ogni immagine — in pagina si aprono ingrandite al tocco.",
     video:"Carica video MP4/MOV (max 90 MB) con titolo e descrizione. Quanti ne puoi aggiungere dipende dal piano Free/Plus/Pro.",
     promises:"Tocca «Aggiungi promessa» per ogni voce — niente più righe manuali.",
-    dreams:"Tocca «Aggiungi sogno» — puoi segnare quelli già realizzati.",
+    dreams:"Tocca il cerchio accanto a ogni voce (anche in anteprima) per segnarla come raggiunta — poi Salva.",
     countdown:"Scegli data e ora — compare il timer live. Puoi aggiungere anche una foto.",
     music:"Spotify, YouTube, audio caricato o foto copertina — combina come preferite.",
     horoscope:"Aggiungi fino a 5 persone (nome facoltativo + segno). In pagina compare l’oroscopo del giorno per ciascuno, aggiornato automaticamente.",

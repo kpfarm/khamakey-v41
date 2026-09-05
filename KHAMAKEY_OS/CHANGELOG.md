@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v259 + Worker v224 — sogni/obiettivi: cerchi flaggabili + contrasto (2026-09-06)** — Pages + Worker
+  - Ticket: sezione rinominata «Obbiettivi», cerchi non spuntabili, testo bianco sul rosa.
+  - In editor e anteprima si tocca il cerchio (stato «Raggiunto»); serve Salva. Pagina pubblica `/m/` mostra lo stato, senza toggle visitatore.
+  - Testo lista/intro su card: inchiostro scuro anche con palette calda (fix `-webkit-text-fill-color`).
 - **Moments v258 + Worker v223 + SQL v173 — video fino a 90 MB (2026-09-05)** — Pages + Worker + SQL
   - Tetto file video Moments: **90 MB** (Free/Plus/Pro). Cloudflare Free/Pro accetta request fino a 100 MB; 90 lascia margine al multipart.
   - Free resta **1 clip**. Storage e clip Plus/Pro invariati. Business resta 50 MB (`MEDIA_LIMITS`).

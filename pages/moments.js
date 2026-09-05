@@ -21,7 +21,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=217";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=247";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=248";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -99,7 +99,7 @@ import {
   writeListItems,
   readListItems,
   bindListItemsEditor
-} from "./moments-list-ui.js?v=216";
+} from "./moments-list-ui.js?v=217";
 import { journeyStepId, MAX_JOURNEY_STEPS, normalizeJourneyStep, resolveJourneySteps, compactJourneySteps } from "./moment-journey.js";
 import {
   COLOR_PALETTES,
@@ -138,7 +138,7 @@ import {
   sectionHasContent,
   isSectionExcluded,
   youtubeVideoId
-} from "./moment-sections.js?v=244";
+} from "./moment-sections.js?v=245";
 import {
   renderCategorySelect,
   templateForType,
@@ -3472,6 +3472,7 @@ function renderDetail(id){
     renderListItems(editorForm,key);
   }
   bindListItemsEditor(editorForm);
+  bindPreviewDreamChecks();
   bindHoroscopePeopleEditor(editorForm);
   refreshHoroscopePeopleEditor(editorForm);
   bindPetsEditor(editorForm);
@@ -4684,6 +4685,23 @@ function shouldLivePreview(){
     return Boolean(document.getElementById("momentEditorShell")?.classList.contains("show-preview"));
   }
   return Boolean(document.getElementById("momentPreview"));
+}
+
+function bindPreviewDreamChecks(){
+  if(window.__momentsDreamPreviewBound === "1") return;
+  window.__momentsDreamPreviewBound = "1";
+  window.addEventListener("message", event => {
+    const data = event.data;
+    if(!data || data.source !== "khamakey-moments-preview" || data.type !== "toggle-dream") return;
+    const form = document.getElementById("momentEditorForm");
+    if(!form) return;
+    const boxes = form.querySelectorAll('[data-list-key="dreams"] input[data-list-field="done"]');
+    const box = boxes[Number(data.index)];
+    if(!box) return;
+    box.checked = !box.checked;
+    box.dispatchEvent(new Event("input", { bubbles:true }));
+    schedulePreviewUpdate(form, { immediate:true, force:true });
+  });
 }
 
 function schedulePreviewUpdate(formNode,options = {}){

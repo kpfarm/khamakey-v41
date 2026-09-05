@@ -78,6 +78,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 - Privacy (PIN opzionale)
 - Lettera / messaggio speciale
 - Contatore con etichetta personalizzabile (es. «Insieme da», «Ti sopporto da»). Vuoto = solo numeri in pagina (v240). **v256 / Worker v221:** etichette unità in contrasto sulla card bianca; griglia 3/4 colonne (HMS). Anteprima mobile: iframe a tutta altezza, scroll unico (niente wrap + pagina che si contendono il gesto).
+- **Sogni / obiettivi (v259 / Worker v224):** cerchio visibile e flaggabile in editor e in anteprima (persiste al Salva). Testo lista e intro usano inchiostro card (contrasto su palette calde/rosa). In `/m/` i cerchi mostrano lo stato, non si spuntano da visitatore.
 - **Titoli/etichette in pagina** (titolo sezione, pill copertina, etichetta firma, voci RSVP): testo cliente. Il chrome («Titolo sezione», hint) è già IT/EN. Non ritradurre i valori.
 - «Prepara tutto per me»: testi modello **nella lingua UI** (`localizeMomentTemplate` + `getUiLocale()`). Dopo Salva restano com’è.
 - Supporto operativo: menu account `Assistenza` e form ticket nella scheda Account, con `source='moments_editor'`.

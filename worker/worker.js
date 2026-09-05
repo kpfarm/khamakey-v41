@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v223-video-90";
+const WORKER_VERSION = "v224-dream-check";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1450,11 +1450,30 @@ async function handleMomentPreview(request, env) {
   };
   const locale = resolveMomentPreviewLocale(body);
   const origin = new URL(request.url).origin;
-  const pageHtml = await renderMomentPage(page, origin, env, locale);
+  const pageHtml = await renderMomentPage(page, origin, env, locale, { editorPreview: true });
   return cors(new Response(pageHtml, {
     status: 200,
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }
   }));
+}
+
+function momentEditorPreviewScript() {
+  return `(function(){
+    if(!window.parent||window.parent===window)return;
+    document.querySelectorAll(".moment-dream").forEach(function(row,i){
+      row.classList.add("is-preview-checkable");
+      row.setAttribute("role","button");
+      row.setAttribute("tabindex","0");
+      row.setAttribute("aria-pressed", row.classList.contains("done") ? "true" : "false");
+      function send(){
+        window.parent.postMessage({source:"khamakey-moments-preview",type:"toggle-dream",index:i}, "*");
+      }
+      row.addEventListener("click", function(e){ e.preventDefault(); send(); });
+      row.addEventListener("keydown", function(e){
+        if(e.key==="Enter"||e.key===" "){ e.preventDefault(); send(); }
+      });
+    });
+  })();`;
 }
 
 async function handleMediaServe(request, env, keyPath) {
@@ -1657,7 +1676,7 @@ ${failed ? `<p class="error">${escapeHtml(mt(locale, "pin.wrong"))}</p>` : ""}
 </body></html>`;
 }
 
-async function renderMomentPage(page, origin, env = {}, locale = "it") {
+async function renderMomentPage(page, origin, env = {}, locale = "it", options = {}) {
   const state = page.state || {};
   const title = String(state.title || page.title || "KhamaKey Moments").trim();
   const subtitle = String(state.subtitle || "").trim();
@@ -1799,6 +1818,7 @@ ${dividerHtml}
 <button type="button" class="moment-lightbox-close" id="momentLightboxClose" aria-label="${attr(mt(locale, "lightbox.close"))}">×</button>
 <div class="moment-lightbox-card"><div id="momentLightboxMedia"></div><p class="moment-lightbox-counter" id="momentLightboxCounter"></p><h3 class="moment-lightbox-title" id="momentLightboxTitle"></h3><p class="moment-lightbox-desc" id="momentLightboxDesc"></p></div></div>
 <script>${momentPageScript(state, ordered, hasCounter, page.slug || "", String(env.WORKER_PUBLIC_BASE || "https://link.khamakeymoments.com").replace(/\/$/, ""), locale)}</script>
+${options.editorPreview ? `<script>${momentEditorPreviewScript()}</script>` : ""}
 </body></html>`;
 }
 
@@ -3394,6 +3414,7 @@ body.nav-open{overflow:hidden}
 .moment-card p, .moment-journey-text, .moment-rsvp-intro, .moment-guestbook-intro, .moment-letter p {
   opacity: 0.96 !important;
   color: ${cardInk} !important;
+  -webkit-text-fill-color: ${cardInk};
   line-height: 1.62;
 }
 
@@ -3413,7 +3434,7 @@ body.nav-open{overflow:hidden}
 .moment-counter-unit b{display:block;font-size:clamp(1.05rem,4.6vw,2.1rem);font-weight:700;font-style:normal;line-height:1.1;color:${c.go}!important;font-family:${f.ui};font-variant-numeric:tabular-nums;text-align:center}
 .moment-counter[data-hms="1"] .moment-counter-unit b{font-size:clamp(.88rem,3.4vw,1.65rem)}
 .moment-counter-unit small{display:block;font-family:${f.ui};font-size:.52rem;letter-spacing:.06em;text-transform:uppercase;color:${c.cardMuted || "#475569"};margin-top:8px;line-height:1.2;white-space:nowrap}
-.moment-card{position:relative;overflow:hidden;padding:32px 20px 28px;margin:0;max-width:100%;min-width:0;width:100%}
+.moment-card{position:relative;overflow:hidden;padding:32px 20px 28px;margin:0;max-width:100%;min-width:0;width:100%;color:${cardInk};-webkit-text-fill-color:${cardInk}}
 .moment-card-gallery{overflow-x:hidden;overflow-y:visible;max-width:100%;min-width:0;padding-bottom:8px}
 .moment-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,rgba(15,23,42,.03),rgba(15,23,42,.01))}
 .moment-card-head{display:grid;justify-items:center;text-align:center;margin-bottom:20px;padding-top:4px}
@@ -3559,15 +3580,18 @@ body.nav-open{overflow:hidden}
 .moment-place{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;background:${c.surface}!important;border:1px solid ${c.lineStrong}!important;text-decoration:none;color:${c.ink}!important}
 .moment-place-icon{font-size:1.15rem;color:${c.go}}
 .moment-dreams{display:grid;gap:10px;margin-top:10px}
-.moment-dream{display:flex;gap:10px;align-items:center;font-size:1.02rem;padding:8px 0;border-bottom:1px solid ${c.line}}
+.moment-dream{display:flex;gap:12px;align-items:center;font-size:1.02rem;padding:10px 0;border-bottom:1px solid ${c.cardLine || "rgba(15,23,42,.12)"};color:${cardInk};-webkit-text-fill-color:${cardInk}}
 .moment-dream:last-child{border-bottom:0}
-.moment-dream-mark{width:24px;height:24px;border-radius:999px;border:2px solid ${c.lineStrong};display:grid;place-items:center;font-size:.72rem;color:${cardInk};flex-shrink:0;background:#FFFFFF}
-.moment-dream.done .moment-dream-mark{background:${c.go}!important;color:#FFFFFF!important;border-color:${c.go}!important}
-.moment-dream.done .moment-dream-text{opacity:.55;text-decoration:line-through;color:${c.muted}}
+.moment-dream.is-preview-checkable{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.moment-dream.is-preview-checkable:hover .moment-dream-mark,.moment-dream.is-preview-checkable:focus-visible .moment-dream-mark{border-color:${c.go};box-shadow:0 0 0 3px ${c.go}33}
+.moment-dream-mark{width:26px;height:26px;border-radius:999px;border:2.5px solid #475569;display:grid;place-items:center;font-size:.78rem;font-weight:800;color:#FFFFFF;flex-shrink:0;background:#FFFFFF;-webkit-text-fill-color:#FFFFFF}
+.moment-dream.done .moment-dream-mark{background:${c.go}!important;color:#FFFFFF!important;border-color:${c.go}!important;-webkit-text-fill-color:#FFFFFF}
+.moment-dream-text{color:${cardInk}!important;-webkit-text-fill-color:${cardInk};font-weight:600;line-height:1.4}
+.moment-dream.done .moment-dream-text{opacity:.72;text-decoration:line-through;color:${c.cardMuted || "#475569"}!important;-webkit-text-fill-color:${c.cardMuted || "#475569"}}
+.moment-list-intro{font-size:14px;color:${c.cardMuted || "#475569"}!important;-webkit-text-fill-color:${c.cardMuted || "#475569"};margin:0 0 14px;line-height:1.5}
 .moment-countdown{text-align:center;padding:36px 20px}
 .moment-countdown-photo{width:min(100%,280px);height:160px;object-fit:cover;border-radius:16px;margin:0 auto 16px;display:block;border:1px solid ${c.line};box-shadow:0 10px 28px rgba(0,0,0,.08)}
 .moment-music-photo{width:min(100%,320px);height:180px;object-fit:cover;border-radius:16px;margin:0 auto 16px;display:block;border:1px solid ${c.line};box-shadow:0 10px 28px rgba(0,0,0,.08)}
-.moment-list-intro{font-size:14px;color:${c.muted};margin:0 0 14px;line-height:1.5}
 .moment-countdown-label{font-family:${f.ui};font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:${c.go};margin-bottom:14px}
 .moment-countdown-event{font-size:1.15rem;font-style:italic;margin:0 0 18px;color:${cardInk}}
 .moment-countdown-note{margin:0 0 16px;color:${cardInk};opacity:.82;line-height:1.6;font-size:.98rem}
@@ -3867,6 +3891,42 @@ main.moment-type-anniversary {
   flex-grow: 1 !important;
   height: 1px !important;
   background: linear-gradient(90deg, color-mix(in srgb, ${colors.go} 25%, transparent), transparent) !important;
+}
+
+.moment-type-love .moment-list-intro,
+.moment-type-wedding .moment-list-intro,
+.moment-type-anniversary .moment-list-intro {
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+}
+
+.moment-type-love .moment-dream,
+.moment-type-wedding .moment-dream,
+.moment-type-anniversary .moment-dream,
+.moment-type-love .moment-dream-text,
+.moment-type-wedding .moment-dream-text,
+.moment-type-anniversary .moment-dream-text,
+.moment-type-love .moment-promise,
+.moment-type-wedding .moment-promise,
+.moment-type-anniversary .moment-promise {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+.moment-type-love .moment-dream.done .moment-dream-text,
+.moment-type-wedding .moment-dream.done .moment-dream-text,
+.moment-type-anniversary .moment-dream.done .moment-dream-text {
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+}
+
+.moment-type-love .moment-dream-mark,
+.moment-type-wedding .moment-dream-mark,
+.moment-type-anniversary .moment-dream-mark {
+  border: 2.5px solid #475569 !important;
+  background: #ffffff !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 /* Elegant Postcard Stamp for Love Icons */
@@ -4376,11 +4436,13 @@ main.moment-type-travel {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
   font-size: 1rem !important;
   color: #1e293b !important;
+  -webkit-text-fill-color: #1e293b !important;
   font-weight: 600 !important;
 }
 
 .moment-type-travel .moment-dream.done .moment-dream-text {
-  color: #94a3b8 !important;
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
   text-decoration: line-through !important;
 }
 
@@ -4388,7 +4450,7 @@ main.moment-type-travel {
   width: 24px !important;
   height: 24px !important;
   border-radius: 6px !important;
-  border: 2px solid #cbd5e1 !important;
+  border: 2px solid #475569 !important;
   display: grid !important;
   place-items: center !important;
   font-size: 0.78rem !important;

@@ -9,7 +9,7 @@ import {
   serializeListItems
 } from "./moment-list-items.js";
 import { getUiLocale } from "./moments-i18n.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=216";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=248";
 
 const LIST_LABELS = {
   promises:{
@@ -23,8 +23,8 @@ const LIST_LABELS = {
     singular:"Sogno",
     plural:"sogni",
     add:"+ Aggiungi sogno",
-    empty:"Scrivi i sogni da realizzare insieme. Spunta «Realizzato» se già avete fatto il passo.",
-    hint:"Tocca «Aggiungi sogno» per ogni voce — niente più «una riga per elemento»."
+    empty:"Scrivi gli obiettivi. Tocca il cerchio per segnare quelli già raggiunti.",
+    hint:"Tocca il cerchio accanto a ogni voce (o in anteprima) per segnarla come raggiunta — poi Salva."
   },
   rituals:{
     singular:"Rituale",
@@ -100,8 +100,12 @@ function rowHtml(key,item,index){
         <span class="journey-step-badge" data-lf-list-badge="${esc(labels.singular)}" data-lf-list-num="${num}">${esc(badge)}</span>
         <button type="button" class="journey-step-remove" data-list-remove="${esc(safe.id)}" aria-label="${esc(removeAria)}">${lfSpan("Elimina")}</button>
       </header>
-      <div class="list-item-fields journey-step-fields">
-        <label class="list-item-check"><input class="list-item-field" data-list-field="done" type="checkbox" ${safe.done ? "checked" : ""}> ${lfSpan("Realizzato")}</label>
+      <div class="list-item-fields journey-step-fields list-dream-fields">
+        <label class="list-dream-check">
+          <input class="list-item-field" data-list-field="done" type="checkbox" ${safe.done ? "checked" : ""}>
+          <span class="list-dream-mark" aria-hidden="true"></span>
+          <span class="list-dream-check-copy">${lfSpan("Raggiunto")}</span>
+        </label>
         <label>${lfSpan("Testo")}<textarea class="list-item-field" data-list-field="text" rows="2" placeholder="${esc(lf("Es. Viaggiare in Giappone"))}" data-lf-placeholder="Es. Viaggiare in Giappone">${esc(safe.text)}</textarea></label>
       </div>
     </article>`;

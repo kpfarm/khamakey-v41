@@ -417,6 +417,11 @@ export const FIELD_PHRASE_EN = {
   "Upload audio non riuscito.": "Audio upload failed.",
   "Upload foto non riuscito.": "Photo upload failed.",
   "Sostituzione non riuscita.": "Replace failed.",
+  "Limite caricamento superato: il {noun} pesa {size} MB, massimo {max} MB.": "Upload limit exceeded: this {noun} is {size} MB, maximum {max} MB.",
+  "Limite caricamento superato: file troppo grande.": "Upload limit exceeded: file too large.",
+  "Caricamento troppo lento o file troppo pesante. Riprova con un file più piccolo.": "Upload too slow or file too heavy. Try a smaller file.",
+  "Errore di caricamento ({status}).": "Upload error ({status}).",
+  "Connessione al server di upload non riuscita. Controlla la rete e riprova.": "Could not reach the upload server. Check your network and try again.",
 
   // A1a — RSVP standard field toggles (label + hint only; no custom rows / handlers)
   "Quanti siete?": "How many of you?",

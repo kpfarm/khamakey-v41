@@ -12,6 +12,7 @@ const UPLOAD_URL = `${WORKER_BASE_URL}/api/media/upload`;
 const DELETE_URL = `${WORKER_BASE_URL}/api/media/delete`;
 const USAGE_SYNC_URL = `${WORKER_BASE_URL}/api/media/usage-sync`;
 const UPLOAD_CONCURRENCY = 3;
+const UPLOAD_TIMEOUT_MS = 180_000;
 /** Sotto questa soglia non comprimiamo: meno lavoro sul telefono, meno rischio qualità. */
 const SKIP_COMPRESS_MAX_BYTES = 2 * 1024 * 1024;
 /** Accettiamo il file compresso solo se risparmia almeno il 10%. */
@@ -98,6 +99,8 @@ export function mimeForUpload(file, kind = inferMediaKind(file)){
 export function fileWithMime(file, kind = inferMediaKind(file)){
   const mime = mimeForUpload(file, kind);
   if(!file || file.type === mime) return file;
+  // Non duplicare in RAM file grandi: su iOS `new File([blob])` fa ricaricare la pagina senza errore.
+  if(Number(file.size || 0) > 4 * 1024 * 1024) return file;
   return new File([file], file.name || "upload", { type:mime, lastModified:file.lastModified });
 }
 
@@ -240,12 +243,45 @@ export async function prepareImageFileForUpload(file){
   }
 }
 
+export function fileSizeMb(bytes){
+  const n = Number(bytes) || 0;
+  if(n <= 0) return 0;
+  return Math.max(1, Math.ceil(n / (1024 * 1024)));
+}
+
+export function maxMbForKind(kind, limits = {}){
+  const src = limits && typeof limits === "object" ? limits : {};
+  const num = (key, fallback)=>{
+    const n = Number(src[key]);
+    return Number.isFinite(n) && n > 0 ? n : fallback;
+  };
+  if(kind === "image") return num("max_image_mb", MAX_IMAGE_MB);
+  if(kind === "video") return num("max_video_mb", MAX_VIDEO_MB);
+  if(kind === "audio") return num("max_audio_mb", MAX_AUDIO_MB);
+  if(kind === "pdf") return num("max_pdf_mb", MAX_PDF_MB);
+  return MAX_IMAGE_MB;
+}
+
+function tooLargeError(kind, file, maxMb){
+  const sizeMb = fileSizeMb(file?.size);
+  const noun = kind === "video" ? "video"
+    : kind === "audio" ? "audio"
+      : kind === "pdf" ? "PDF"
+        : "immagine";
+  const err = new Error(`Limite caricamento superato: il ${noun} pesa ${sizeMb} MB, massimo ${maxMb} MB.`);
+  err.code = "file_too_large";
+  err.kind = kind;
+  err.sizeMb = sizeMb;
+  err.maxMb = maxMb;
+  return err;
+}
+
 export function validateImageFile(file,maxMb = MAX_IMAGE_MB){
   if(!file || inferMediaKind(file) !== "image"){
     throw new Error("Seleziona un file immagine valido (JPG, PNG, WebP, HEIC).");
   }
   if(file.size > maxMb * 1024 * 1024){
-    throw new Error(`Immagine troppo grande: massimo ${maxMb} MB.`);
+    throw tooLargeError("image", file, maxMb);
   }
   return true;
 }
@@ -255,7 +291,7 @@ export function validateVideoFile(file,maxMb = MAX_VIDEO_MB){
     throw new Error("Seleziona un video valido (MP4, WebM, MOV).");
   }
   if(file.size > maxMb * 1024 * 1024){
-    throw new Error(`Video troppo grande: massimo ${maxMb} MB.`);
+    throw tooLargeError("video", file, maxMb);
   }
   return true;
 }
@@ -265,7 +301,7 @@ export function validateAudioFile(file,maxMb = MAX_AUDIO_MB){
     throw new Error("Seleziona un file audio valido (MP3, M4A, WAV).");
   }
   if(file.size > maxMb * 1024 * 1024){
-    throw new Error(`Audio troppo grande: massimo ${maxMb} MB.`);
+    throw tooLargeError("audio", file, maxMb);
   }
   return true;
 }
@@ -275,9 +311,18 @@ export function validatePdfFile(file,maxMb = MAX_PDF_MB){
     throw new Error("Seleziona un file PDF valido.");
   }
   if(file.size > maxMb * 1024 * 1024){
-    throw new Error(`PDF troppo grande: massimo ${maxMb} MB.`);
+    throw tooLargeError("pdf", file, maxMb);
   }
   return true;
+}
+
+export function validateMediaFile(file, limits = {}){
+  const kind = inferMediaKind(file);
+  if(kind === "video") return validateVideoFile(file, maxMbForKind("video", limits));
+  if(kind === "audio") return validateAudioFile(file, maxMbForKind("audio", limits));
+  if(kind === "pdf") return validatePdfFile(file, maxMbForKind("pdf", limits));
+  if(kind === "image") return validateImageFile(file, maxMbForKind("image", limits));
+  throw new Error("Formato file non riconosciuto. Usa JPG, PNG, MP4, MOV o PDF.");
 }
 
 export function compressImage(file,{maxSide = DEFAULT_IMAGE_MAX_SIDE,quality = DEFAULT_IMAGE_QUALITY,mime = "image/webp"} = {}){
@@ -367,15 +412,24 @@ async function uploadViaCloudflare(supabase,{scope,scopeId,file,session},retry =
   form.append("file",uploadFile);
   form.append("scope",scope);
   form.append("scopeId",scopeId);
+  form.append("clientMime", mimeForUpload(uploadFile, kind));
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), UPLOAD_TIMEOUT_MS);
   let response;
   try{
     response = await fetch(UPLOAD_URL,{
       method:"POST",
       headers:{Authorization:`Bearer ${activeSession.access_token}`},
-      body:form
+      body:form,
+      signal:controller.signal
     });
   }catch(error){
+    if(error?.name === "AbortError"){
+      throw new Error("Caricamento troppo lento o file troppo pesante. Riprova con un file più piccolo.");
+    }
     throw new Error("Connessione al server di upload non riuscita. Controlla la rete e riprova.");
+  }finally{
+    clearTimeout(timer);
   }
   const payload = await response.json().catch(()=>({}));
   if(response.status === 401 && retry){
@@ -395,12 +449,12 @@ async function uploadViaCloudflare(supabase,{scope,scopeId,file,session},retry =
       throw new Error(detail || "Non hai permesso di caricare file su questa pagina. Ricarica l'editor e riprova.");
     }
     if(response.status === 413){
-      throw new Error(detail || "File troppo grande per il limite consentito.");
+      throw new Error(detail || "Limite caricamento superato: file troppo grande.");
     }
     if(response.status === 503){
       throw new Error(detail || "Archivio media temporaneamente non disponibile. Riprova tra qualche minuto.");
     }
-    throw new Error(detail || `Upload non riuscito (${response.status}).`);
+    throw new Error(detail || `Errore di caricamento (${response.status}).`);
   }
   return payload.url;
 }
@@ -460,9 +514,12 @@ export async function uploadImages(supabase,options,files){
   }));
 }
 
-export async function uploadMediaBatch(supabase,options,files,{onProgress,imageMaxSide,imageQuality} = {}){
+export async function uploadMediaBatch(supabase,options,files,{onProgress,imageMaxSide,imageQuality,limits} = {}){
   const list = [...files].filter(Boolean);
   if(!list.length) return [];
+  for(const file of list){
+    validateMediaFile(file, limits);
+  }
   onProgress?.({phase:"prepare",done:0,total:list.length});
   const prepared = await prepareUploadBatch(supabase,list,{imageMaxSide,imageQuality});
   const session = await ensureAuthSession(supabase);

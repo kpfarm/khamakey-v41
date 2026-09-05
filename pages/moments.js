@@ -18,10 +18,10 @@ import {
 } from "./moments-i18n.js?v=236";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=248";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=238";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=217";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=245";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=246";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -30,16 +30,18 @@ import {
   bindUploadClient,
   validateImageFile,
   validateVideoFile,
+  validateMediaFile,
   deleteStorageObject,
   syncMomentMediaUsage,
   isCloudflareMediaUrl,
   inferMediaKind,
   fileMatchesGalleryType,
+  maxMbForKind,
   IMAGE_ACCEPT,
   warmUploadPipeline,
   warmUploadAuth,
   MAX_GALLERY_IMAGES
-} from "./media-upload.js?v=244";
+} from "./media-upload.js?v=245";
 import {
   readGalleryMedia,
   writeGalleryMedia,
@@ -61,7 +63,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=244";
+} from "./moments-media-ui.js?v=245";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -413,6 +415,55 @@ function showEditorSaveFeedback(message, type = "error"){
   if(type === "error"){
     editorStatus?.scrollIntoView({ behavior:"smooth", block:"nearest" });
   }
+}
+
+function mediaNounForKind(kind){
+  if(kind === "video") return t("save.noun_video");
+  if(kind === "audio") return t("save.noun_audio");
+  if(kind === "pdf") return t("save.noun_pdf");
+  return t("save.noun_image");
+}
+
+function localizeUploadError(error){
+  if(error?.code === "file_too_large"){
+    return t("save.upload_too_large", {
+      noun: mediaNounForKind(error.kind),
+      size: error.sizeMb,
+      max: error.maxMb
+    });
+  }
+  const raw = String(error?.message || "").trim();
+  const sized = raw.match(/^Limite caricamento superato: il (\w+) pesa (\d+) MB, massimo (\d+) MB\.$/);
+  if(sized){
+    const kind = sized[1] === "video" ? "video" : sized[1] === "audio" ? "audio" : sized[1] === "PDF" ? "pdf" : "image";
+    return t("save.upload_too_large", { noun: mediaNounForKind(kind), size: sized[2], max: sized[3] });
+  }
+  return localizeFieldPhrase(raw || t("save.upload_fail"));
+}
+
+let mediaNoticeTimer = 0;
+function showMediaUploadNotice(message, type = "error", statusNode = null){
+  const text = String(message || "").trim();
+  if(!text) return;
+  if(statusNode) setUploadStatus(statusNode, text, type);
+  showEditorSaveFeedback(text, type);
+  let box = document.getElementById("mediaUploadNotice");
+  if(!box){
+    box = document.createElement("div");
+    box.id = "mediaUploadNotice";
+    box.setAttribute("role", "status");
+    box.innerHTML = `<p></p><button type="button" class="media-upload-notice-close" aria-label="${esc(t("common.close"))}">×</button>`;
+    document.body.appendChild(box);
+    box.querySelector("button")?.addEventListener("click",()=>{ box.hidden = true; });
+  }
+  box.className = `media-upload-notice ${type}`;
+  const line = box.querySelector("p");
+  if(line) line.textContent = text;
+  box.hidden = false;
+  const bar = document.getElementById("momentsSaveBar");
+  if(bar && type === "error") bar.classList.add("visible");
+  clearTimeout(mediaNoticeTimer);
+  mediaNoticeTimer = setTimeout(()=>{ if(box) box.hidden = true; }, type === "error" ? 14000 : 5000);
 }
 
 function esc(value){
@@ -3533,6 +3584,7 @@ async function uploadCoverImage(file,row,formNode){
     setUploadStatus(status,t("save.reminder_cover"),"ok");
   }catch(error){
     setUploadStatus(status,error.message || localizeFieldPhrase("Upload non riuscito."),"error");
+    showMediaUploadNotice(localizeUploadError(error), "error", status);
   }finally{
     uploadBusy = false;
   }
@@ -3579,16 +3631,15 @@ async function uploadGalleryImages(files,row,formNode,key){
           : t("save.label_gallery");
     promptSaveReminder(t("save.reminder_upload", { count, label }));
   }catch(error){
-    const message = error.message || localizeFieldPhrase("Upload non riuscito.");
-    setUploadStatus(status,message,"error");
-    alert(message);
+    const message = localizeUploadError(error);
+    showMediaUploadNotice(message, "error", status);
   }
 }
 
 async function uploadSectionVideo(file,row,formNode){
   uploadBusy = true;
   try{
-    validateVideoFile(file);
+    validateVideoFile(file, maxMbForKind("video", currentEntitlements?.limits));
     assertCanFitUploadBytes(file);
     const url = await uploadVideo(supabase,{scope:"moments",scopeId:row.id,file});
     const urlInput = formNode.querySelector('[name="section_video_video_url"]');
@@ -3603,7 +3654,7 @@ async function uploadSectionVideo(file,row,formNode){
     }
     refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
   }catch(error){
-    alert(error.message || localizeFieldPhrase("Upload video non riuscito."));
+    showMediaUploadNotice(localizeUploadError(error) || localizeFieldPhrase("Upload video non riuscito."), "error");
   }finally{
     uploadBusy = false;
   }
@@ -3635,6 +3686,7 @@ async function uploadMusicAudio(file,row,formNode){
   const panel = document.getElementById("musicAudioPanel");
   uploadBusy = true;
   try{
+    validateMediaFile(file, currentEntitlements?.limits || {});
     assertCanFitUploadBytes(file);
     const url = await uploadAudio(supabase,{scope:"moments",scopeId:row.id,file});
     const urlInput = formNode.querySelector('[name="section_music_audio_url"]');
@@ -3653,7 +3705,7 @@ async function uploadMusicAudio(file,row,formNode){
     }
     refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
   }catch(error){
-    alert(error.message || localizeFieldPhrase("Upload audio non riuscito."));
+    showMediaUploadNotice(localizeUploadError(error) || localizeFieldPhrase("Upload audio non riuscito."), "error");
   }finally{
     uploadBusy = false;
   }
@@ -3679,7 +3731,7 @@ async function uploadSectionPhoto(key,file,row,formNode){
     }
     refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
   }catch(error){
-    alert(error.message || localizeFieldPhrase("Upload foto non riuscito."));
+    showMediaUploadNotice(localizeUploadError(error) || localizeFieldPhrase("Upload foto non riuscito."), "error");
   }finally{
     uploadBusy = false;
   }
@@ -3701,7 +3753,7 @@ async function uploadPetPhoto(petId,file,row,formNode){
     }
     refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
   }catch(error){
-    alert(error.message || localizeFieldPhrase("Upload foto non riuscito."));
+    showMediaUploadNotice(localizeUploadError(error) || localizeFieldPhrase("Upload foto non riuscito."), "error");
   }finally{
     uploadBusy = false;
   }
@@ -3790,8 +3842,14 @@ function bindCounterSwitch(formNode){
 }
 
 async function handleGalleryFileInputChange(input,row,formNode){
-  if(!input?.files?.length || uploadBusy) return;
+  if(!input?.files?.length) return;
   const key = String(input.id || "").replace("galleryFile_","");
+  const status = key ? document.getElementById(`galleryUploadStatus_${key}`) : null;
+  if(uploadBusy){
+    input.value = "";
+    showMediaUploadNotice(t("save.upload_busy"), "error", status);
+    return;
+  }
   if(!key) return;
   const pendingType = input.dataset.pendingType || "";
   const replaceId = input.dataset.pendingReplaceId || "";
@@ -3804,19 +3862,26 @@ async function handleGalleryFileInputChange(input,row,formNode){
     ? files.filter(file=>fileMatchesGalleryType(file,pendingType))
     : files;
   if(!filtered.length){
-    const status = document.getElementById(`galleryUploadStatus_${key}`);
     const label = localizeFieldPhrase(pendingType === "video" ? "video" : pendingType === "audio" ? "audio" : "foto");
     const formats = localizeFieldPhrase(pendingType === "video"
       ? "MP4, WebM o MOV"
       : pendingType === "audio"
         ? "MP3, M4A o WAV"
         : "JPG, PNG, WebP o HEIC");
-    setUploadStatus(status,lfFill("Formato non riconosciuto. Seleziona un {label} valido ({formats}).", { label, formats }),"error");
+    showMediaUploadNotice(lfFill("Formato non riconosciuto. Seleziona un {label} valido ({formats}).", { label, formats }), "error", status);
+    return;
+  }
+  try{
+    for(const file of filtered){
+      validateMediaFile(file, currentEntitlements?.limits || {});
+    }
+  }catch(error){
+    showMediaUploadNotice(localizeUploadError(error), "error", status);
     return;
   }
   const liveRow = rows.find(item=>item.id === activeId) || row;
   if(!liveRow?.id){
-    alert(localizeFieldPhrase("Pagina non selezionata. Ricarica l'editor e riprova."));
+    showMediaUploadNotice(localizeFieldPhrase("Pagina non selezionata. Ricarica l'editor e riprova."), "error", status);
     return;
   }
   if(replaceId){
@@ -3850,10 +3915,19 @@ async function replaceGalleryImage(file,row,formNode,key,mediaId){
     refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
     promptSaveReminder(t("save.reminder_photo"));
   }catch(error){
-    const message = error.message || localizeFieldPhrase("Sostituzione non riuscita.");
-    setUploadStatus(status,message,"error");
-    alert(message);
+    const message = localizeUploadError(error);
+    showMediaUploadNotice(message, "error", status);
   }
+}
+
+function takePickedFile(event){
+  const file = event.target.files?.[0];
+  event.target.value = "";
+  if(uploadBusy){
+    showMediaUploadNotice(t("save.upload_busy"), "error");
+    return null;
+  }
+  return file || null;
 }
 
 function bindMediaUploads(root,row){
@@ -3864,9 +3938,8 @@ function bindMediaUploads(root,row){
     document.getElementById("coverFileInput")?.click();
   });
   document.getElementById("coverFileInput")?.addEventListener("change",async event=>{
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if(!file || uploadBusy) return;
+    const file = takePickedFile(event);
+    if(!file) return;
     await uploadCoverImage(file,row,formNode);
   });
   formNode.querySelectorAll("input[id^='galleryFile_']").forEach(input=>{
@@ -3875,44 +3948,38 @@ function bindMediaUploads(root,row){
     });
   });
   document.getElementById("journeyStepFile")?.addEventListener("change",async event=>{
-    const file = event.target.files?.[0];
     const stepId = journeyUploadStepId;
     journeyUploadStepId = null;
-    event.target.value = "";
-    if(!file || uploadBusy || !stepId) return;
+    const file = takePickedFile(event);
+    if(!file || !stepId) return;
     await uploadJourneyStepImage(file,row,formNode,stepId);
   });
   document.getElementById("musicAudioFile")?.addEventListener("change",async event=>{
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if(!file || uploadBusy) return;
+    const file = takePickedFile(event);
+    if(!file) return;
     await uploadMusicAudio(file,row,formNode);
   });
   document.getElementById("sectionVideoFile")?.addEventListener("change",async event=>{
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if(!file || uploadBusy) return;
+    const file = takePickedFile(event);
+    if(!file) return;
     await uploadSectionVideo(file,row,formNode);
   });
   document.getElementById("petPhotoFile")?.addEventListener("change",async event=>{
-    const file = event.target.files?.[0];
     const petId = pendingPetPhotoId || event.target.dataset.pendingPetId || "";
     pendingPetPhotoId = null;
     event.target.dataset.pendingPetId = "";
-    event.target.value = "";
-    if(!file || uploadBusy || !petId) return;
+    const file = takePickedFile(event);
+    if(!file || !petId) return;
     await uploadPetPhoto(petId,file,row,formNode);
   });
   document.getElementById("countdownPhotoFile")?.addEventListener("change",async event=>{
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if(!file || uploadBusy) return;
+    const file = takePickedFile(event);
+    if(!file) return;
     await uploadSectionPhoto("countdown",file,row,formNode);
   });
   document.getElementById("musicPhotoFile")?.addEventListener("change",async event=>{
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if(!file || uploadBusy) return;
+    const file = takePickedFile(event);
+    if(!file) return;
     await uploadSectionPhoto("music",file,row,formNode);
   });
 }
@@ -3947,7 +4014,7 @@ async function uploadJourneyStepImage(file,row,formNode,stepId){
       deleteStorageObject(supabase,oldUrl).catch(()=>{});
     }
   }catch(error){
-    alert(error.message || localizeFieldPhrase("Upload foto tappa non riuscito."));
+    showMediaUploadNotice(localizeUploadError(error) || localizeFieldPhrase("Upload foto tappa non riuscito."), "error");
   }
 }
 
@@ -3981,7 +4048,7 @@ function bindMediaUploadDelegation(){
       const row = rows.find(item=>item.id === activeId);
     if(!formNode || !row){
       if(event.target.closest("[data-gallery-add],[data-gallery-remove],[data-gallery-replace]")){
-        alert(localizeFieldPhrase("Editor non pronto. Ricarica la pagina e riprova."));
+        showMediaUploadNotice(localizeFieldPhrase("Editor non pronto. Ricarica la pagina e riprova."), "error");
       }
       return;
     }

@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v257 + Worker v222 — upload video con limite visibile (2026-09-05)** — Pages + Worker
+  - Ticket: caricare un video non faceva nulla (solo un clip da 7 s funzionava), nessuna notifica.
+  - Limite resta **50 MB** a video (non 90). Controllo prima dell’invio; banner «Limite caricamento superato (N MB). Massimo 50 MB per video».
+  - Su iOS non si duplica più il File in RAM (evita il reload silenzioso). Se un upload è già in corso, lo dice.
 - **Moments v256 + Worker v221 — contatore e scroll anteprima (2026-09-05)** — Pages + Worker
   - Ticket: contatore storto/incompleto in anteprima; scroll che si blocca.
   - Etichette GIORNI/ORE su card bianca in slate (non più tinta chiara sul bianco). Griglia 3 o 4 colonne; numeri a 4 cifre non tagliati.

@@ -1,4 +1,4 @@
-import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=244";
+import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT, validateMediaFile } from "./media-upload.js?v=245";
 import {
   normalizeMediaItem,
   normalizeMediaList,
@@ -19,7 +19,7 @@ import {
 } from "./moment-media.js?v=243";
 import { canFitBytes, formatBytes, storageBytesLimit } from "./moment-plans.js?v=237";
 import { getUiLocale } from "./moments-i18n.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=245";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=246";
 
 let mediaEditContext = null;
 
@@ -210,6 +210,9 @@ export async function uploadGalleryMedia({supabase,row,formNode,key,files,onStat
   const current = readGalleryMedia(formNode,key);
   const batch = canAddFiles(current,[...files].slice(0,limits.maxItems - current.length),key);
   if(!batch.length) throw new Error(lf("Nessun file selezionato."));
+  for(const file of batch){
+    validateMediaFile(file, entitlements?.limits || {});
+  }
   if(entitlements){
     const batchBytes = batch.reduce((sum, file) => sum + (Number(file?.size) || 0), 0);
     if(!canFitBytes(entitlements, batchBytes)){
@@ -224,6 +227,7 @@ export async function uploadGalleryMedia({supabase,row,formNode,key,files,onStat
   const errors = [];
   try{
     const results = await uploadMediaBatch(supabase,{scope:"moments",scopeId:row.id},batch,{
+      limits: entitlements?.limits,
       onProgress:({phase,done,total,success,file,error})=>{
         if(phase === "prepare"){
           onStatus?.(lfFill("Ottimizzazione {n} file...", { n: total }));
@@ -281,11 +285,13 @@ export async function replaceGalleryMediaItem({supabase,row,formNode,key,mediaId
           : "foto";
     throw new Error(lfFill("Seleziona un file dello stesso tipo ({want}) oppure rimuovi l'elemento e aggiungine uno nuovo.", { want: lf(wantIt) }));
   }
+  validateMediaFile(file, getActivePlanLimits());
   onStatus?.(lf("Sostituzione in corso..."));
   onBusy?.(true);
   try{
     let uploadError = null;
     const results = await uploadMediaBatch(supabase,{scope:"moments",scopeId:row.id},[file],{
+      limits: getActivePlanLimits(),
       onProgress:({phase,done,total,success,file:progressFile,error})=>{
         if(phase === "prepare"){
           onStatus?.(lf("Ottimizzazione file..."));

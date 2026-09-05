@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v221-counter-preview";
+const WORKER_VERSION = "v222-upload-limit";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1155,8 +1155,11 @@ async function handleMediaUpload(request, env) {
       return cors(json({ error: "Non puoi caricare media su questa pagina." }, 403));
     }
 
-    const kind = mediaKindFromMime(resolveUploadMime(file));
-    const mime = resolveUploadMime(file);
+    const hintedMime = String(form.get("clientMime") || "").toLowerCase();
+    const mime = (hintedMime && mediaKindFromMime(hintedMime) && MEDIA_MIME[mediaKindFromMime(hintedMime)]?.has(hintedMime))
+      ? hintedMime
+      : resolveUploadMime(file);
+    const kind = mediaKindFromMime(mime);
     if (!kind || !MEDIA_MIME[kind]?.has(mime)) {
       return cors(json({ error: "Formato file non supportato." }, 400));
     }
@@ -1234,7 +1237,19 @@ async function handleMediaUpload(request, env) {
       ? momentsPlanFileLimitBytes(planLimits, kind)
       : MEDIA_LIMITS[kind];
     if (file.size > kindLimit) {
-      return cors(json({ error: `File troppo grande per ${kind}.` }, 413));
+      const maxMb = Math.max(1, Math.round(kindLimit / (1024 * 1024)));
+      const sizeMb = Math.max(1, Math.ceil(file.size / (1024 * 1024)));
+      const noun = kind === "video" ? "video"
+        : kind === "audio" ? "audio"
+          : kind === "pdf" ? "PDF"
+            : "immagine";
+      return cors(json({
+        error: `Limite caricamento superato: il ${noun} pesa ${sizeMb} MB, massimo ${maxMb} MB.`,
+        code: "file_too_large",
+        kind,
+        max_mb: maxMb,
+        size_mb: sizeMb
+      }, 413));
     }
 
     const folder = momentsKindFolder(kind) || "documents";

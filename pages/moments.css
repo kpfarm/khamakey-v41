@@ -283,7 +283,38 @@ textarea{min-height:86px;resize:vertical}
 .upload-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
 .upload-trigger{white-space:nowrap}
 .field-hint.ok{color:var(--green-dark)}
-.field-hint.error{color:var(--red)}
+.field-hint.error{color:var(--red);font-weight:800}
+.media-upload-notice{
+  position:fixed;
+  left:12px;
+  right:12px;
+  top:calc(var(--topbar-h) + 10px);
+  z-index:420;
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:12px 12px 12px 14px;
+  border-radius:14px;
+  font-size:.88rem;
+  font-weight:700;
+  line-height:1.35;
+  box-shadow:0 12px 32px rgba(7,26,60,.22);
+}
+.media-upload-notice[hidden]{display:none!important}
+.media-upload-notice p{margin:0;flex:1}
+.media-upload-notice.error{background:#B42318;color:#fff}
+.media-upload-notice.ok{background:var(--green-dark);color:#fff}
+.media-upload-notice-close{
+  flex-shrink:0;
+  width:32px;
+  height:32px;
+  border:0;
+  border-radius:999px;
+  background:rgba(255,255,255,.18);
+  color:inherit;
+  font-size:1.2rem;
+  line-height:1;
+}
 .journey-panel{display:grid;gap:14px}
 .journey-lead{margin:0;font-size:.84rem;line-height:1.5;color:var(--muted)}
 .journey-steps-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}

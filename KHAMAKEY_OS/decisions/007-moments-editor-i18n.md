@@ -24,7 +24,7 @@ Esiste già i18n **Business** basato su snapshot + `Accept-Language` nel Worker.
 | Si | No |
 |----|-----|
 | Chrome editor (menu, bottoni, **label UI**, errori, wizard) | **Valori** scritti dal cliente (titolo sezione, pill, `counter_label`, etichetta firma, voci RSVP) |
-| Nomi categoria / tema / piano / segno (taxonomy UI) | Non ritradurre quei valori al toggle lingua |
+| Nomi categoria / tema / piano / segno (taxonomy UI); **nomi tipo editor v253** IT/EN | Non ritradurre valori cliente. Officina resta IT |
 | (Fase 9) Frasi fisse Worker su `/m/` (PIN, privacy notice, RSVP chrome) | Admin / Business |
 | Seed «Prepara tutto per me»: **IT o EN in base a `getUiLocale()`** (v226+) | Frase non in `TEMPLATE_PHRASE_EN` → resta IT |
 | Privacy/Termini EN (`moments-privacy-en.html` / `moments-terms-en.html`, v252) | P.IVA / ragione sociale finché non ci sono dati reali |

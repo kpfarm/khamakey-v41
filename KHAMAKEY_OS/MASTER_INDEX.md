@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v252** | Lingua in signup · legale EN · chrome campi IT/EN |
+| Editor Moments | **v253** | Confirm «Prepara tutto» / categoria + nomi tipo in chrome IT/EN |
 | Worker | **v218-legal-en** | Footer/PIN `/m/` Privacy/Termini nella lingua del visitatore |
 | Officina | **v203** | PNG codice più basso |
 

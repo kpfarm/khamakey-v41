@@ -57,6 +57,31 @@ export const TYPE_LABELS = {
 /** Tipi accettati da Supabase (deve coincidere con sql/khamakey-moments-categories-v59.sql). */
 export const ALLOWED_MOMENT_TYPES = Object.keys(TYPE_LABELS);
 
+/** Chrome UI only — never write these into page_state / seeds. */
+export const TYPE_LABELS_EN = {
+  free:"General event",
+  love:"Love",
+  mom:"Mum",
+  dad:"Dad",
+  child:"Son / Daughter",
+  kids:"Kids",
+  memory:"Memories",
+  photo:"Photo album",
+  pet:"Pets",
+  communion:"Communion",
+  baptism:"Baptism",
+  friendship:"Friendship",
+  family:"Family",
+  valentine:"Valentine’s",
+  christmas:"Christmas",
+  birthday:"Birthday",
+  wedding:"Wedding",
+  party:"Party",
+  travel:"Travel",
+  memorial:"Memorial",
+  portfolio:"Portfolio"
+};
+
 const base = (subtitle, sections, extra = {}) => ({
   subtitle,
   pill: extra.pill || "",
@@ -309,6 +334,14 @@ export const MOMENT_TEMPLATES = {
 export function normalizeMomentType(value){
   const key = String(value || "free").trim().toLowerCase();
   return ALLOWED_MOMENT_TYPES.includes(key) ? key : "free";
+}
+
+export function typeLabelForLocale(type, locale = "it"){
+  const key = normalizeMomentType(type);
+  if(String(locale || "").toLowerCase().slice(0, 2) === "en"){
+    return TYPE_LABELS_EN[key] || TYPE_LABELS[key] || key;
+  }
+  return TYPE_LABELS[key] || key;
 }
 
 export function renderCategorySelect(current){

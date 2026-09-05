@@ -69,4 +69,4 @@ Crea account (step 2)
 1. **«Prepara tutto per me»** — già IT o EN in base alla lingua UI (non è «sempre italiano»). Completare mappa solo se saltano frasi IT in EN.
 2. **Altri template Auth** (magic link, change email, invite) — basso.
 3. **P.IVA / dati societari** — aspettare partita IVA reale.
-4. Opzionale: `TYPE_LABELS` (nomi categoria in meta) — piano D1.
+4. Nomi tipo in chrome editor — **fatto v253**. Officina resta IT.

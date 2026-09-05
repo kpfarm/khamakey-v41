@@ -31,7 +31,9 @@ export const SAVE_MESSAGES_IT = {
   "save.label_gallery": "galleria",
   "save.label_video": "sezione video",
   "save.label_music": "sezione musica",
-  "save.label_letter": "lettera al futuro"
+  "save.label_letter": "lettera al futuro",
+  "save.confirm_template": "«Prepara tutto per me» sostituirà testi, sezioni attive, ordine e colori con il modello «{type}».\n\nPoi salveremo subito la pagina, così non perdi il lavoro se cambi prodotto.\n\nContinuare?",
+  "save.confirm_type_change": "Stai passando da «{prev}» a «{next}».\n\nCambiare categoria aggiorna il design suggerito. I testi che hai già scritto restano finché non tocchi «Prepara tutto per me».\n\nSe usi quel pulsante, testi, sezioni e impostazioni verranno sostituiti in modo irreversibile.\n\nVuoi cambiare categoria?"
 };
 
 export const SAVE_MESSAGES_EN = {
@@ -65,5 +67,7 @@ export const SAVE_MESSAGES_EN = {
   "save.label_gallery": "the gallery",
   "save.label_video": "the video section",
   "save.label_music": "the music section",
-  "save.label_letter": "the letter to the future"
+  "save.label_letter": "the letter to the future",
+  "save.confirm_template": "“Set everything up for me” will replace texts, active sections, order and colours with the “{type}” template.\n\nThen we’ll save the page right away, so you don’t lose the work if you switch product.\n\nContinue?",
+  "save.confirm_type_change": "You’re switching from “{prev}” to “{next}”.\n\nChanging category updates the suggested look. Texts you’ve already written stay until you tap “Set everything up for me”.\n\nIf you use that button, texts, sections and settings will be replaced and can’t be undone.\n\nChange category?"
 };

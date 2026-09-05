@@ -108,7 +108,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v218-legal-en** | Footer/PIN `/m/`: Privacy/Termini EN se locale visitatore `en`. Pre-attivazione resta IT. |
-| **Moments editor** | **v252** | Signup lingua software. Legale EN. Chrome campi già IT/EN. «Prepara tutto» segue lingua UI (`moments-i18n-templates.js`). |
+| **Moments editor** | **v253** | Confirm Prepara tutto / categoria + nomi tipo chrome IT/EN. Seed segue UI. Legale EN. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v172 (prod)** | v172 salva ottimistico applicata 2026-08-06; v171 video 50MB; v170 build_stage. |

@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v253 — confirm + nomi categoria EN (2026-09-05)** — Pages
+  - Dialoghi «Prepara tutto per me» e cambio categoria seguono la lingua UI.
+  - Nomi tipo in meta/menu/Colori IT/EN (`TYPE_LABELS_EN`, `data-lf-type`). Officina e seed invariati.
 - **Controllo lacune (2026-09-05)** — nessun deploy. Lista in `docs/33-controllo-software-lacune.md`. Health live v218-legal-en; Privacy/Termini EN 200. Ticket clienti in coda.
 - **i18n — etichette campi (2026-09-04)** — nessun deploy. Titolo sezione / pill / contatore / firma / RSVP custom = contenuto cliente. Chrome form già IT/EN (`moments-i18n-fields.js`). Non ritradurre i valori.
 - **i18n — «Prepara tutto per me» (2026-09-04)** — già in codice (`localizeMomentTemplate` + `getUiLocale()`). UI EN → testi modello EN; UI IT → IT. Frase assente in mappa resta IT. Dopo Salva non si ritraduce.

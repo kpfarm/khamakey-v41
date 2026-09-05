@@ -18,7 +18,7 @@ import {
 } from "./moments-i18n.js?v=236";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=248";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=237";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=238";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=217";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=243";
@@ -137,11 +137,11 @@ import {
   youtubeVideoId
 } from "./moment-sections.js?v=243";
 import {
-  TYPE_LABELS,
   renderCategorySelect,
   templateForType,
-  normalizeMomentType
-} from "./moment-categories.js?v=180";
+  normalizeMomentType,
+  typeLabelForLocale
+} from "./moment-categories.js?v=181";
 import {
   navSectionsForEditor,
   kitSectionKeys,
@@ -233,6 +233,15 @@ function localizeFieldPhrase(text){
   return FIELD_PHRASE_EN[raw] || raw;
 }
 
+function localizedTypeLabel(type){
+  return typeLabelForLocale(type, getUiLocale());
+}
+
+function typeLabelChrome(type){
+  const key = normalizeMomentType(type);
+  return `<span data-lf-type="${esc(key)}">${esc(localizedTypeLabel(key))}</span>`;
+}
+
 function lfFill(it, vars = {}){
   let out = localizeFieldPhrase(it);
   for(const [k, v] of Object.entries(vars)){
@@ -291,6 +300,11 @@ function syncFieldChromeI18n(root = document){
     const label = el.getAttribute("data-lf-journey-badge") || "";
     const num = el.getAttribute("data-lf-journey-num") || "";
     el.textContent = `${localizeFieldPhrase(label)} ${num}`.trim();
+  });
+  root.querySelectorAll("[data-lf-type]").forEach(el=>{
+    const type = el.getAttribute("data-lf-type");
+    if(!type) return;
+    el.textContent = localizedTypeLabel(type);
   });
 }
 
@@ -494,7 +508,7 @@ async function refreshActivationCodeTypeHint(code, hintEl){
       hintEl.className = "field-hint activation-code-type warn";
       return;
     }
-    const typeLabel = TYPE_LABELS[normalizeMomentType(row.product_type)] || row.product_type;
+    const typeLabel = localizedTypeLabel(row.product_type);
     const productLabel = String(row.product_label || "").trim();
     hintEl.textContent = productLabel
       ? t("auth.msg.model_page_product", { type: typeLabel, product: productLabel })
@@ -1056,9 +1070,9 @@ function refreshAccountMenu(){
     try{
       const state = mergedState(row);
       title = state.title || title;
-      typeLabel = TYPE_LABELS[state.type] || state.type || "";
+      typeLabel = localizedTypeLabel(state.type);
     }catch(_error){
-      typeLabel = TYPE_LABELS[normalizeMomentType(row?.moment_type || row?.event_type || "free")] || "";
+      typeLabel = localizedTypeLabel(row?.moment_type || row?.event_type || "free");
     }
     const status = row.public_visible ? t("menu.status.published") : t("menu.status.draft");
     const code = row.nfc_code ? formatMomentCodeDisplay(row.nfc_code) : "NFC";
@@ -1490,11 +1504,10 @@ function renderObjectsListHtml(){
       console.warn("mergedState fallito per pagina", row?.id, error);
       state = { title:row?.title || row?.slug || "Pagina", type:normalizeMomentType(row?.moment_type || row?.event_type || "free") };
     }
-    const type = TYPE_LABELS[state.type] || state.type;
     return `<button class="object-pick ${row.id === activeId ? "active" : ""}" type="button" data-object-id="${esc(row.id)}">
       ${esc(state.title || row.slug)}
       <span>${esc(row.nfc_code || "NFC")} · ${row.public_visible ? t("menu.status.published") : t("menu.status.draft")}</span>
-      <span class="type-pill">${esc(type)}</span>
+      <span class="type-pill">${typeLabelChrome(state.type)}</span>
     </button>`;
   }).join("");
 }
@@ -2071,23 +2084,14 @@ function formHasMeaningfulContent(formNode){
 }
 
 function confirmMomentTypeChange(nextType, previousType){
-  const nextLabel = TYPE_LABELS[nextType] || nextType;
-  const prevLabel = TYPE_LABELS[previousType] || previousType;
-  return window.confirm(
-    `Stai passando da «${prevLabel}» a «${nextLabel}».\n\n` +
-    "Cambiare categoria aggiorna il design suggerito. I testi che hai già scritto restano finché non tocchi «Prepara tutto per me».\n\n" +
-    "Se usi quel pulsante, testi, sezioni e impostazioni verranno sostituiti in modo irreversibile.\n\n" +
-    "Vuoi cambiare categoria?"
-  );
+  return window.confirm(t("save.confirm_type_change", {
+    prev: localizedTypeLabel(previousType),
+    next: localizedTypeLabel(nextType)
+  }));
 }
 
 function confirmApplyMomentTemplate(type){
-  const label = TYPE_LABELS[type] || type;
-  return window.confirm(
-    `«Prepara tutto per me» sostituirà testi, sezioni attive, ordine e colori con il modello «${label}».\n\n` +
-    "Poi salveremo subito la pagina, così non perdi il lavoro se cambi prodotto.\n\n" +
-    "Continuare?"
-  );
+  return window.confirm(t("save.confirm_template", { type: localizedTypeLabel(type) }));
 }
 
 const TEMPLATE_STOCK_FIELDS = ["recipient","signature","event_label","target_date","spotify_url","youtube_url","author","sign_name","sign_subtitle","whatsapp_number","event_name"];
@@ -2206,7 +2210,7 @@ async function bootstrapFreshMomentPage(row, formNode){
     try{ savedEditorSnapshot = formSnapshotForDirty(formNode); }catch{ /* ignore */ }
     editorDirty = false;
     updateSaveStatus(true);
-    showEditorSaveFeedback(t("save.reminder_structure", { type: TYPE_LABELS[type] || type }), "ok");
+    showEditorSaveFeedback(t("save.reminder_structure", { type: localizedTypeLabel(type) }), "ok");
   }finally{
     suppressDirtyUi = false;
     bootstrapInFlight = false;
@@ -2461,8 +2465,7 @@ function renderDesignSuggestBanner(momentType, currentLook){
   if(!suggested || suggested === currentLook) return "";
   const look = PAGE_LOOKS[suggested];
   if(!look) return "";
-  const typeLabel = TYPE_LABELS[momentType] || localizeFieldPhrase("questa pagina");
-  return `<p class="design-suggest">💡 ${lfSpan("Per")} <strong>${esc(typeLabel)}</strong> ${lfSpan("prova")} ${look.emoji} <button type="button" class="design-suggest-btn" data-suggest-look="${esc(suggested)}" data-lf="${esc(look.label)}">${esc(localizeFieldPhrase(look.label))}</button></p>`;
+  return `<p class="design-suggest">💡 ${lfSpan("Per")} <strong>${typeLabelChrome(momentType)}</strong> ${lfSpan("prova")} ${look.emoji} <button type="button" class="design-suggest-btn" data-suggest-look="${esc(suggested)}" data-lf="${esc(look.label)}">${esc(localizeFieldPhrase(look.label))}</button></p>`;
 }
 
 function renderDesignPanel(state){
@@ -2476,12 +2479,11 @@ function renderDesignPanel(state){
     fontPair,
     heroStyle: state.heroStyle || "classico"
   });
-  const typeLabel = TYPE_LABELS[state.type] || localizeFieldPhrase("questa categoria");
   return `<div class="editor-panel ${activeEditorPanel === "styling" ? "active" : ""}" data-editor-panel="styling">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.styling),editorPanelSubtitle(EDITOR_PANELS.styling))}
     <div class="editor-card">
       <p class="ecard-title">${lfSpan("Scegli lo stile")}</p>
-      <p class="design-intro">${lfSpan("Stili per")} <strong>${esc(typeLabel)}</strong>. ${lfSpan("Il colore scelto è lo sfondo della pagina; i riquadri restano bianchi con testo nero.")}</p>
+      <p class="design-intro">${lfSpan("Stili per")} <strong>${typeLabelChrome(state.type)}</strong>. ${lfSpan("Il colore scelto è lo sfondo della pagina; i riquadri restano bianchi con testo nero.")}</p>
       ${renderDesignSuggestBanner(state.type, currentLook)}
       <div class="look-picker-host">${renderLookPicker(currentLook, state.type)}</div>
     </div>
@@ -3233,7 +3235,7 @@ function renderDetail(id){
       <div>
         <p class="eyebrow" data-i18n="shell.editor_page">${esc(t("shell.editor_page"))}</p>
         <h2>${esc(state.title || row.slug)}</h2>
-        <p class="detail-meta">${esc(row.nfc_code || "")} · ${esc(TYPE_LABELS[state.type] || state.type)}</p>
+        <p class="detail-meta">${esc(row.nfc_code || "")} · ${typeLabelChrome(state.type)}</p>
         <div class="status-row">
           <span class="status-pill ${row.public_visible ? "live" : "draft"}">${esc(row.public_visible ? t("shell.published") : t("shell.draft"))}</span>
           <span class="status-pill pin">${esc(row.pin_enabled ? t("shell.pin_on") : t("shell.pin_off"))}</span>

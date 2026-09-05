@@ -39,7 +39,7 @@
 | 1 | Catena NFC | Smoke 1–3 di [[31-go-live-smoke-moments]]: login, Salva, `/m/`, chip = stesso slug, 1 foto | Alto se “fix” a caso | ⬜ da rifare su pezzo reale (ultime B 2026-07-22) |
 | 2 | RSVP WhatsApp | Invio da `/m/` → compare in editor (smoke B8 mai fatto) | Medio (non toccare `wa.me` / numero) | ⬜ |
 | 3 | Assistenza | Ticket da Account → email staff + riga in Officina (B10) | Basso | ⬜ — utile prima di lavorare i ticket clienti |
-| 4 | i18n chrome residuo | `confirm()` «Prepara tutto» / cambio categoria restano IT anche con UI EN; `TYPE_LABELS` in meta | Basso se solo stringhe | ⬜ lucido, non bloccante |
+| 4 | i18n chrome residuo | `confirm()` «Prepara tutto» / cambio categoria + `TYPE_LABELS` in meta | Basso se solo stringhe | ✅ 2026-09-05 Moments **v253** — Officina resta IT |
 | 5 | Seed EN | Con UI EN, «Prepara tutto» → testi EN; frase non in mappa resta IT | Basso (solo mappa) | ⬜ spot su 1 categoria |
 | 6 | `/m/` fallback IT | Titoli sezione vuoti / empty hint Worker ancora italiani (non chrome visitatore) | Alto (Worker) | ⬜ annotare, **non** sistemare senza lock Worker |
 | 7 | P.IVA | Privacy/Termini senza ragione sociale / sede / partita IVA | Nessuno finché non ci sono dati | ⏸ attesa dati reali |

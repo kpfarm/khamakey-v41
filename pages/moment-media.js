@@ -164,13 +164,19 @@ export function countMediaByType(media,type){
   return normalizeMediaList({media}).filter(item=>item.type === type).length;
 }
 
+export function normalizeCoverFit(value){
+  return String(value || "").trim().toLowerCase() === "contain" ? "contain" : "cover";
+}
+
 export function coverFocusStyle(state = {}){
   const x = clampNumber(state.cover_focus_x,0,100,50);
   const y = clampNumber(state.cover_focus_y,0,100,50);
-  const zoom = clampNumber(state.cover_zoom,100,200,100);
+  const fit = normalizeCoverFit(state.cover_fit);
+  const storedZoom = clampNumber(state.cover_zoom,100,200,100);
+  const zoom = fit === "contain" ? 100 : storedZoom;
   return {
-    x,y,zoom,
-    css:`object-position:${x}% ${y}%;transform-origin:${x}% ${y}%;transform:scale(${zoom/100})`
+    x,y,zoom,fit,storedZoom,
+    css:`object-fit:${fit};object-position:${x}% ${y}%;transform-origin:${x}% ${y}%;transform:scale(${zoom/100})`
   };
 }
 

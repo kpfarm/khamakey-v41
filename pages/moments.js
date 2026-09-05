@@ -21,7 +21,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=238";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=217";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=243";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=244";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -61,7 +61,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=242";
+} from "./moments-media-ui.js?v=243";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -75,8 +75,9 @@ import {
   migrateLetterMediaSection,
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
-  setActivePlanLimits
-} from "./moment-media.js?v=242";
+  setActivePlanLimits,
+  normalizeCoverFit
+} from "./moment-media.js?v=243";
 import {
   canFitBytes,
   emptyEntitlements,
@@ -825,6 +826,7 @@ function mergedState(row){
     cover_focus_x:state.cover_focus_x ?? 50,
     cover_focus_y:state.cover_focus_y ?? 50,
     cover_zoom:state.cover_zoom ?? 100,
+    cover_fit:normalizeCoverFit(state.cover_fit),
     profile_photo:state.profile_photo || "",
     pill:state.pill || "",
     theme:state.theme || "classic",
@@ -3326,7 +3328,7 @@ function renderDetail(id){
   syncRsvpWhatsappWarn(editorForm);
   editorForm.addEventListener("input",event=>{
     markEditorDirty(editorForm);
-    const coverField = event.target?.name === "cover_url" || event.target?.name?.startsWith("cover_focus") || event.target?.name === "cover_zoom";
+    const coverField = event.target?.name === "cover_url" || event.target?.name?.startsWith("cover_focus") || event.target?.name === "cover_zoom" || event.target?.name === "cover_fit";
     if(coverField) updateCoverPreview(editorForm);
     if(/^section_.+_title$/.test(event.target?.name || "")) syncEditorKitUi(editorForm);
     schedulePreviewUpdate(editorForm);
@@ -3514,9 +3516,10 @@ async function uploadCoverImage(file,row,formNode){
     if(slot){
       slot.innerHTML = renderCoverFramer({
         cover_url:url,
-        cover_focus_x:formNode.elements.cover_focus_x?.value ?? 50,
-        cover_focus_y:formNode.elements.cover_focus_y?.value ?? 50,
-        cover_zoom:formNode.elements.cover_zoom?.value ?? 100
+        cover_focus_x:50,
+        cover_focus_y:50,
+        cover_zoom:100,
+        cover_fit:"contain"
       });
     }
     bindCoverFramer(formNode);
@@ -4549,6 +4552,7 @@ function readFormState(formNode){
     cover_focus_x:Number(live("cover_focus_x") || 50),
     cover_focus_y:Number(live("cover_focus_y") || 50),
     cover_zoom:Math.min(200, Math.max(100, Number(live("cover_zoom") || 100))),
+    cover_fit:normalizeCoverFit(live("cover_fit")),
     profile_photo:"",
     colorPalette:canonicalizePalette(live("color_palette") || "verde"),
     themeVariant:live("theme_variant") || "chiaro",

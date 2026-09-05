@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-05** (controllo lacune; ticket clienti in coda)
+> Ultimo aggiornamento: **2026-09-05** (copertina v254 / Worker v219; ticket selfie ritagliato)
 
 ### Fonte di verità versioni
 
@@ -98,7 +98,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Cosa | Quando | Dove | Cosa non fare |
 |------|--------|------|----------------|
 | **Dati societari + P.IVA** su Privacy e Termini | Quando esiste partita IVA (e sede / ragione sociale confermati) | `pages/moments-privacy.html`, `moments-terms.html`, `moments-privacy-en.html`, `moments-terms-en.html` — titolare, indirizzo, P.IVA/CF. Poi bump `?v=` legale se serve | Non inventare numeri o ragione sociale. Non togliere il disclaimer «da completare / revisione legale». In conflitto vince l’italiano. |
-| **Ticket clienti (piccoli bug)** | In coda — testo ticket + reproduce prima di toccare codice | `docs/33` | Non mescolare con i18n/P.IVA. NFC/upload restano sacri |
+| **Ticket clienti (piccoli bug)** | Uno alla volta, con reproduce | `docs/33` | Copertina selfie ✅ v254. NFC/upload restano sacri |
 
 ---
 
@@ -107,8 +107,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v218-legal-en** | Footer/PIN `/m/`: Privacy/Termini EN se locale visitatore `en`. Pre-attivazione resta IT. |
-| **Moments editor** | **v253** | Confirm Prepara tutto / categoria + nomi tipo chrome IT/EN. Seed segue UI. Legale EN. |
+| **Worker NFC** | **v219-cover-fit** | Copertina `cover_fit` contain/cover. Pagine senza campo restano cover. Footer/PIN legale EN invariato. |
+| **Moments editor** | **v254** | Copertina: Tutta la foto / Riempi + drag. Confirm Prepara tutto / categoria + nomi tipo chrome IT/EN. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v172 (prod)** | v172 salva ottimistico applicata 2026-08-06; v171 video 50MB; v170 build_stage. |
@@ -207,8 +207,8 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-05 (vault):** live Worker **v218-legal-en** (health ok). Controllo lacune: [`docs/33-controllo-software-lacune.md`](docs/33-controllo-software-lacune.md).  
-> Ticket clienti: **in coda**. Chrome editor IT/EN chiuso. «Prepara tutto» segue UI. **P.IVA** in attesa.  
+> **Oggi 2026-09-05:** live previsto Worker **v219-cover-fit** + editor **v254** (ticket copertina).  
+> Altri ticket clienti: uno alla volta. **P.IVA** in attesa.  
 > Prossimo prodotto tipico: Stripe Plus/Pro. Smoke NFC/upload su pezzo reale prima di ogni fix.
 
 ---

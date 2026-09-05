@@ -1,22 +1,24 @@
 # 33 — Controllo software e lacune (Moments)
 
-> **Data:** 2026-09-05 · **Stato:** in corso · **Ticket clienti:** in coda, non in questo file  
-> Live al check automatico: Worker **v218-legal-en** · Privacy/Termini IT+EN **200**  
+> **Data:** 2026-09-05 · **Stato:** in corso · **Ticket copertina:** chiuso in v254 / Worker v219  
+> Live previsto dopo deploy: Worker **v219-cover-fit** · Privacy/Termini IT+EN **200**  
 > Smoke storico: [[23-smoke-moments]] · Go-live: [[31-go-live-smoke-moments]] · i18n: [[27-moments-i18n-rules]]
 
 ## Come usiamo questo file
 
-1. Ticket / piccoli bug segnalati dai clienti → **dopo**, uno alla volta, con reproduce.
+1. Ticket / piccoli bug segnalati dai clienti → uno alla volta, con reproduce; esito sotto.
 2. Qui restano **lacune di prodotto/ops** da controllare senza toccare la catena NFC/upload.
 3. Ogni check chiuso: data + esito in tabella. Aggiornare anche [[PROJECT_STATE]] e [[13-roadmap]].
 
 ---
 
-## In coda (non aprire ora)
+## Ticket clienti
 
-| Cosa | Perché dopo |
-|------|-------------|
-| Ticket clienti (piccoli bug) | Arrivano da persone reali; serve il testo del ticket e un pezzo di prova. Non mescolare con i18n/ops. |
+| Data | Segnalazione | Esito |
+|------|----------------|-------|
+| 2026-09-05 | Selfie copertina ritagliato subito; Alto/Centro/Basso + zoom 100–200% giudicati inutili | ✅ Moments **v254** / Worker **v219-cover-fit**: «Tutta la foto» vs «Riempi lo spazio»; nuovo upload senza taglio; trascina per inquadrare. Pagine già salvate restano `cover`. |
+
+Altri ticket restano in coda, uno alla volta.
 
 ---
 
@@ -60,6 +62,6 @@
 
 ## Prossimo check consigliato
 
-**3 — Assistenza (B10)** su un account di prova: conferma che i ticket arrivano. Poi si aprono i ticket clienti senza dubitare del canale.
+**3 — Assistenza (B10)** su un account di prova: conferma che i ticket arrivano. Poi si aprono gli altri ticket clienti.
 
 In alternativa, se vuoi solo “il software si apre”: **1 — catena NFC** su un pezzo già attivato (Salva + `/m/` + 1 foto).

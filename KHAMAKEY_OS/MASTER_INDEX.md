@@ -8,14 +8,14 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v253** | Confirm «Prepara tutto» / categoria + nomi tipo in chrome IT/EN |
-| Worker | **v218-legal-en** | Footer/PIN `/m/` Privacy/Termini nella lingua del visitatore |
+| Editor Moments | **v254** | Copertina: tutta la foto / riempi + trascina. Confirm + nomi tipo IT/EN |
+| Worker | **v219-cover-fit** | `cover_fit` contain/cover su `/m/` (pagine vecchie restano cover) |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]
 - Titoli/etichette in pagina = testo cliente. «Prepara tutto per me» segue la lingua UI. → [[docs/27-moments-i18n-rules]]
 - Email conferma/reset IT/EN: template in [[docs/32-moments-auth-email]] (dashboard, già incollati)
-- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — ticket clienti in coda
+- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — ticket copertina chiuso; altri ticket in coda
 
 ---
 

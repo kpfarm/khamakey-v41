@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v254 + Worker v219 — copertina tutta la foto (2026-09-05)** — Pages + Worker
+  - Ticket: selfie ritagliato subito; Alto/Centro/Basso + zoom giudicati inutili.
+  - Nuovo campo `cover_fit`: `contain` (tutta la foto) / `cover` (riempi). Pagine già salvate restano `cover`.
+  - Nuovo upload parte da tutta la foto. In Riempi si trascina per inquadrare; zoom 100–200% solo lì.
 - **Moments v253 — confirm + nomi categoria EN (2026-09-05)** — Pages
   - Dialoghi «Prepara tutto per me» e cambio categoria seguono la lingua UI.
   - Nomi tipo in meta/menu/Colori IT/EN (`TYPE_LABELS_EN`, `data-lf-type`). Officina e seed invariati.

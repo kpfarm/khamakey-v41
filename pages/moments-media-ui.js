@@ -9,16 +9,17 @@ import {
   mediaEditorRowHtml,
   galleryEditorGroups,
   coverFocusStyle,
+  normalizeCoverFit,
   mediaId,
   mediaLimitsForKey,
   getActivePlanLimits,
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
   migrateLetterMediaSection
-} from "./moment-media.js?v=242";
+} from "./moment-media.js?v=243";
 import { canFitBytes, formatBytes, storageBytesLimit } from "./moment-plans.js?v=237";
 import { getUiLocale } from "./moments-i18n.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=243";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=244";
 
 let mediaEditContext = null;
 
@@ -431,15 +432,10 @@ export function bindGalleryMediaInteractions(root,formNode){
   bindGalleryInlineEdit(formNode);
 }
 
-const COVER_QUICK = [
-  { id:"top", x:50, y:12, label:"Alto" },
-  { id:"center", x:50, y:50, label:"Centro" },
-  { id:"bottom", x:50, y:88, label:"Basso" }
-];
-
 const COVER_ZOOM_MIN = 100;
 const COVER_ZOOM_MAX = 200;
 const COVER_ZOOM_STEP = 5;
+const COVER_DRAG_THRESHOLD = 8;
 
 function nearestZoomStep(zoom){
   const value = Number(zoom);
@@ -448,24 +444,20 @@ function nearestZoomStep(zoom){
   return Math.round(clamped / COVER_ZOOM_STEP) * COVER_ZOOM_STEP;
 }
 
-function activeQuickPositionId(x,y){
-  let best = COVER_QUICK[1];
-  let bestDist = Infinity;
-  for(const pos of COVER_QUICK){
-    const dist = (pos.x - x) ** 2 + (pos.y - y) ** 2;
-    if(dist < bestDist){
-      bestDist = dist;
-      best = pos;
-    }
-  }
-  return best.id;
+function readCoverFramerState(formNode){
+  return {
+    cover_focus_x:formNode.elements.cover_focus_x?.value,
+    cover_focus_y:formNode.elements.cover_focus_y?.value,
+    cover_zoom:formNode.elements.cover_zoom?.value,
+    cover_fit:formNode.elements.cover_fit?.value
+  };
 }
 
-function setCoverFocus(formNode,x,y){
+function setCoverFocus(formNode,x,y, {silent = false} = {}){
   if(formNode.elements.cover_focus_x) formNode.elements.cover_focus_x.value = String(x);
   if(formNode.elements.cover_focus_y) formNode.elements.cover_focus_y.value = String(y);
   syncCoverFramer(formNode);
-  formNode.dispatchEvent(new Event("input",{bubbles:true}));
+  if(!silent) formNode.dispatchEvent(new Event("input",{bubbles:true}));
 }
 
 function setCoverZoom(formNode,zoom){
@@ -475,9 +467,20 @@ function setCoverZoom(formNode,zoom){
   formNode.dispatchEvent(new Event("input",{bubbles:true}));
 }
 
+function setCoverFit(formNode,fit){
+  const value = normalizeCoverFit(fit);
+  if(formNode.elements.cover_fit) formNode.elements.cover_fit.value = value;
+  syncCoverFramer(formNode);
+  formNode.dispatchEvent(new Event("input",{bubbles:true}));
+}
+
 function stepCoverZoom(formNode,direction){
   const current = nearestZoomStep(formNode.elements.cover_zoom?.value || 100);
   setCoverZoom(formNode, current + (direction * COVER_ZOOM_STEP));
+}
+
+function clampFocusPercent(value){
+  return Math.round(Math.min(100, Math.max(0, value)));
 }
 
 export function bindCoverFramer(formNode){
@@ -485,19 +488,70 @@ export function bindCoverFramer(formNode){
   if(!slot) return;
   if(slot.dataset.bound !== "1"){
     slot.dataset.bound = "1";
-    slot.addEventListener("click",event=>{
+    let drag = null;
+    let skipClick = false;
+    slot.addEventListener("pointerdown",event=>{
       const phone = event.target.closest("[data-cover-tap]");
-      if(phone){
-        const rect = phone.getBoundingClientRect();
-        const x = Math.round(Math.min(100, Math.max(0, ((event.clientX - rect.left) / rect.width) * 100)));
-        const y = Math.round(Math.min(100, Math.max(0, ((event.clientY - rect.top) / rect.height) * 100)));
-        setCoverFocus(formNode, x, y);
+      if(!phone) return;
+      if(event.pointerType === "mouse" && event.button !== 0) return;
+      drag = {
+        id:event.pointerId,
+        startX:event.clientX,
+        startY:event.clientY,
+        focusX:Number(formNode.elements.cover_focus_x?.value || 50),
+        focusY:Number(formNode.elements.cover_focus_y?.value || 50),
+        zoom:coverFocusStyle(readCoverFramerState(formNode)).zoom,
+        moved:false,
+        phone
+      };
+      phone.classList.add("is-dragging");
+      phone.setPointerCapture?.(event.pointerId);
+    });
+    slot.addEventListener("pointermove",event=>{
+      if(!drag || event.pointerId !== drag.id) return;
+      const dx = event.clientX - drag.startX;
+      const dy = event.clientY - drag.startY;
+      if(!drag.moved && (Math.abs(dx) + Math.abs(dy)) < COVER_DRAG_THRESHOLD) return;
+      drag.moved = true;
+      const rect = drag.phone.getBoundingClientRect();
+      const factor = Math.max(1, drag.zoom / 100);
+      const x = clampFocusPercent(drag.focusX - (dx / Math.max(rect.width, 1)) * 100 * factor);
+      const y = clampFocusPercent(drag.focusY - (dy / Math.max(rect.height, 1)) * 100 * factor);
+      setCoverFocus(formNode, x, y, {silent:true});
+    });
+    const endDrag = event=>{
+      if(!drag || event.pointerId !== drag.id) return;
+      const finished = drag;
+      drag = null;
+      finished.phone.classList.remove("is-dragging");
+      if(finished.moved){
+        skipClick = true;
+        formNode.dispatchEvent(new Event("input",{bubbles:true}));
         return;
       }
-      const posBtn = event.target.closest("[data-cover-x]");
-      if(posBtn){
+      const rect = finished.phone.getBoundingClientRect();
+      const x = clampFocusPercent(((event.clientX - rect.left) / Math.max(rect.width, 1)) * 100);
+      const y = clampFocusPercent(((event.clientY - rect.top) / Math.max(rect.height, 1)) * 100);
+      setCoverFocus(formNode, x, y);
+    };
+    slot.addEventListener("pointerup",endDrag);
+    slot.addEventListener("pointercancel",event=>{
+      if(!drag || event.pointerId !== drag.id) return;
+      const moved = drag.moved;
+      drag.phone.classList.remove("is-dragging");
+      drag = null;
+      if(moved) formNode.dispatchEvent(new Event("input",{bubbles:true}));
+    });
+    slot.addEventListener("click",event=>{
+      if(skipClick){
+        skipClick = false;
         event.preventDefault();
-        setCoverFocus(formNode,Number(posBtn.dataset.coverX),Number(posBtn.dataset.coverY));
+        return;
+      }
+      const fitBtn = event.target.closest("[data-cover-fit]");
+      if(fitBtn){
+        event.preventDefault();
+        setCoverFit(formNode, fitBtn.dataset.coverFit);
         return;
       }
       const zoomStep = event.target.closest("[data-cover-zoom-step]");
@@ -517,30 +571,41 @@ export function bindCoverFramer(formNode){
 export function syncCoverFramer(formNode){
   const img = document.getElementById("coverFramerImg");
   if(!img) return;
-  const state = {
-    cover_focus_x:formNode.elements.cover_focus_x?.value,
-    cover_focus_y:formNode.elements.cover_focus_y?.value,
-    cover_zoom:formNode.elements.cover_zoom?.value
-  };
-  const {x,y,zoom,css} = coverFocusStyle(state);
+  const {x,y,fit,storedZoom,css} = coverFocusStyle(readCoverFramerState(formNode));
   img.style.cssText = css;
+  const phone = formNode.querySelector("[data-cover-tap]");
+  phone?.classList.toggle("is-contain", fit === "contain");
+  const topHint = formNode.querySelector(".cover-framer-top-hint");
+  if(topHint){
+    const topHintIt = fit === "contain"
+      ? "Tutta la foto, senza taglio. Se vuoi coprire il riquadro, scegli Riempi e trascina."
+      : "Trascina la foto per inquadrare. Tocca per il fuoco.";
+    topHint.textContent = lf(topHintIt);
+    topHint.setAttribute("data-lf", topHintIt);
+  }
   const marker = document.getElementById("coverFocusMarker");
   if(marker){
+    marker.hidden = fit === "contain";
     marker.style.left = `${x}%`;
     marker.style.top = `${y}%`;
   }
-  const quickId = activeQuickPositionId(x,y);
-  formNode.querySelectorAll("[data-cover-x]").forEach(btn=>{
-    const active = btn.dataset.coverQuick === quickId;
+  formNode.querySelectorAll("[data-cover-fit]").forEach(btn=>{
+    const active = btn.dataset.coverFit === fit;
     btn.classList.toggle("active",active);
     btn.setAttribute("aria-pressed",active ? "true" : "false");
   });
-  const normalizedZoom = nearestZoomStep(zoom);
+  const zoomWrap = formNode.querySelector(".cover-picker-zoom");
+  if(zoomWrap) zoomWrap.hidden = fit === "contain";
+  const normalizedZoom = nearestZoomStep(storedZoom);
   const zoomLabel = document.getElementById("coverZoomLabel");
   if(zoomLabel) zoomLabel.textContent = `${normalizedZoom}%`;
   const range = formNode.querySelector("#coverZoomRange") || formNode.elements.cover_zoom;
-  if(range && range.type === "range") range.value = String(normalizedZoom);
-  else if(formNode.elements.cover_zoom) formNode.elements.cover_zoom.value = String(normalizedZoom);
+  if(range && range.type === "range"){
+    range.value = String(normalizedZoom);
+    range.setAttribute("aria-valuenow", String(normalizedZoom));
+  }else if(formNode.elements.cover_zoom){
+    formNode.elements.cover_zoom.value = String(normalizedZoom);
+  }
   const minus = formNode.querySelector("[data-cover-zoom-step='-1']");
   const plus = formNode.querySelector("[data-cover-zoom-step='1']");
   if(minus) minus.disabled = normalizedZoom <= COVER_ZOOM_MIN;
@@ -549,34 +614,51 @@ export function syncCoverFramer(formNode){
 
 export function renderCoverFramer(state){
   const url = state.cover_url || "";
-  const {x,y,zoom,css} = coverFocusStyle(state);
+  const {x,y,fit,storedZoom,css} = coverFocusStyle(state);
+  const emptyHintIt = "Carica una foto. Subito dopo la vedi intera; puoi riempire il riquadro se preferisci.";
   if(!url){
-    return `<div class="cover-framer cover-framer-empty"><p class="field-hint">Carica una copertina, poi tocca l'anteprima per inquadrarla.</p></div>`;
+    return `<div class="cover-framer cover-framer-empty"><p class="field-hint" data-lf="${esc(emptyHintIt)}">${esc(lf(emptyHintIt))}</p></div>
+  <input type="hidden" name="cover_fit" value="contain">
+  <input type="hidden" name="cover_focus_x" value="50">
+  <input type="hidden" name="cover_focus_y" value="50">
+  <input type="hidden" name="cover_zoom" value="100">`;
   }
-  const quickId = activeQuickPositionId(x,y);
-  const normalizedZoom = nearestZoomStep(zoom);
-  const quick = COVER_QUICK.map(pos=>`<button type="button" class="cover-quick-btn ${pos.id === quickId ? "active" : ""}" data-cover-quick="${pos.id}" data-cover-x="${pos.x}" data-cover-y="${pos.y}" aria-pressed="${pos.id === quickId ? "true" : "false"}">${esc(pos.label)}</button>`).join("");
-  return `<div class="cover-framer" id="coverFramer" aria-label="Anteprima copertina">
-    <p class="cover-picker-hint cover-framer-top-hint">Tocca la foto dove vuoi il fuoco</p>
-    <div class="cover-framer-phone" data-cover-tap>
-      <img id="coverFramerImg" src="${esc(url)}" alt="" style="${esc(css)}" loading="lazy" decoding="async">
-      <span class="cover-focus-marker" id="coverFocusMarker" style="left:${x}%;top:${y}%"></span>
+  const normalizedZoom = nearestZoomStep(storedZoom);
+  const containActive = fit === "contain";
+  const topHintIt = containActive
+    ? "Tutta la foto, senza taglio. Se vuoi coprire il riquadro, scegli Riempi e trascina."
+    : "Trascina la foto per inquadrare. Tocca per il fuoco.";
+  const fitHintIt = "Tutta la foto: niente taglio (bande se serve). Riempi: copre il riquadro; trascina per inquadrare.";
+  const zoomHintIt = "Da 100% a 200%. Trascina la foto per inquadrare volti o dettagli.";
+  const fitContainIt = "Tutta la foto";
+  const fitCoverIt = "Riempi lo spazio";
+  const howItLooksIt = "Come si vede";
+  return `<div class="cover-framer" id="coverFramer" aria-label="${esc(lf("Anteprima copertina"))}">
+    <p class="cover-picker-hint cover-framer-top-hint" data-lf="${esc(topHintIt)}">${esc(lf(topHintIt))}</p>
+    <div class="cover-framer-phone${containActive ? " is-contain" : ""}" data-cover-tap>
+      <img id="coverFramerImg" src="${esc(url)}" alt="" style="${esc(css)}" loading="lazy" decoding="async" draggable="false">
+      <span class="cover-focus-marker" id="coverFocusMarker" style="left:${x}%;top:${y}%" ${containActive ? "hidden" : ""}></span>
     </div>
   </div>
+  <input type="hidden" name="cover_fit" value="${esc(fit)}">
   <input type="hidden" name="cover_focus_x" value="${x}">
   <input type="hidden" name="cover_focus_y" value="${y}">
   <div class="cover-picker">
-    <p class="cover-picker-label">Scorciatoie</p>
-    <div class="cover-quick-row" role="group" aria-label="Posizione rapida">${quick}</div>
-  </div>
-  <div class="cover-picker cover-picker-zoom">
-    <p class="cover-picker-label">Zoom <span class="cover-zoom-label" id="coverZoomLabel">${normalizedZoom}%</span></p>
-    <div class="cover-zoom-stepper" role="group" aria-label="Zoom copertina">
-      <button type="button" class="cover-zoom-step-btn" data-cover-zoom-step="-1" aria-label="Riduci zoom" ${normalizedZoom <= COVER_ZOOM_MIN ? "disabled" : ""}>−</button>
-      <input id="coverZoomRange" class="cover-zoom-range" type="range" name="cover_zoom" min="${COVER_ZOOM_MIN}" max="${COVER_ZOOM_MAX}" step="${COVER_ZOOM_STEP}" value="${normalizedZoom}" aria-valuemin="${COVER_ZOOM_MIN}" aria-valuemax="${COVER_ZOOM_MAX}" aria-valuenow="${normalizedZoom}" aria-label="Livello zoom copertina">
-      <button type="button" class="cover-zoom-step-btn" data-cover-zoom-step="1" aria-label="Aumenta zoom" ${normalizedZoom >= COVER_ZOOM_MAX ? "disabled" : ""}>+</button>
+    <p class="cover-picker-label" data-lf="${esc(howItLooksIt)}">${esc(lf(howItLooksIt))}</p>
+    <div class="cover-fit-row" role="group" aria-label="${esc(lf(howItLooksIt))}">
+      <button type="button" class="cover-fit-btn${containActive ? " active" : ""}" data-cover-fit="contain" aria-pressed="${containActive ? "true" : "false"}"><span data-lf="${esc(fitContainIt)}">${esc(lf(fitContainIt))}</span></button>
+      <button type="button" class="cover-fit-btn${!containActive ? " active" : ""}" data-cover-fit="cover" aria-pressed="${!containActive ? "true" : "false"}"><span data-lf="${esc(fitCoverIt)}">${esc(lf(fitCoverIt))}</span></button>
     </div>
-    <p class="cover-picker-hint">Da 100% a 200%. Tocca la foto per il fuoco, poi avvicina volti o dettagli.</p>
+    <p class="cover-picker-hint" data-lf="${esc(fitHintIt)}">${esc(lf(fitHintIt))}</p>
+  </div>
+  <div class="cover-picker cover-picker-zoom" ${containActive ? "hidden" : ""}>
+    <p class="cover-picker-label"><span data-lf="Zoom">${esc(lf("Zoom"))}</span> <span class="cover-zoom-label" id="coverZoomLabel">${normalizedZoom}%</span></p>
+    <div class="cover-zoom-stepper" role="group" aria-label="${esc(lf("Zoom"))}">
+      <button type="button" class="cover-zoom-step-btn" data-cover-zoom-step="-1" aria-label="${esc(lf("Riduci zoom"))}" ${normalizedZoom <= COVER_ZOOM_MIN ? "disabled" : ""}>−</button>
+      <input id="coverZoomRange" class="cover-zoom-range" type="range" name="cover_zoom" min="${COVER_ZOOM_MIN}" max="${COVER_ZOOM_MAX}" step="${COVER_ZOOM_STEP}" value="${normalizedZoom}" aria-valuemin="${COVER_ZOOM_MIN}" aria-valuemax="${COVER_ZOOM_MAX}" aria-valuenow="${normalizedZoom}" aria-label="${esc(lf("Livello zoom copertina"))}">
+      <button type="button" class="cover-zoom-step-btn" data-cover-zoom-step="1" aria-label="${esc(lf("Aumenta zoom"))}" ${normalizedZoom >= COVER_ZOOM_MAX ? "disabled" : ""}>+</button>
+    </div>
+    <p class="cover-picker-hint" data-lf="${esc(zoomHintIt)}">${esc(lf(zoomHintIt))}</p>
   </div>`;
 }
 
@@ -662,4 +744,4 @@ function esc(value){
   return String(value ?? "").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 }
 
-export { coverFocusStyle, normalizeMediaList, mediaLimitsForKey };
+export { coverFocusStyle, normalizeCoverFit, normalizeMediaList, mediaLimitsForKey };

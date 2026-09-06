@@ -8,7 +8,7 @@
 | Sidebar | Sezioni a card con icone | Sezioni a card con icone |
 | Anteprima | Live, sticky, toggle mobile | Live, sticky, toggle mobile |
 | Topbar | Stato salvataggio, Pubblica/Bozza | Stato salvataggio, Pubblica/Bozza |
-| Wizard | Setup guidato per settore (5 template) | Wizard post-attivazione (3 step) |
+| Wizard | Setup guidato per settore (5 template) | Ingresso su **Pagina / Riepilogo** (Come funziona); wizard rivedibile da lì |
 | Media | Upload R2 via Worker | Upload R2 via Worker |
 | Temi | Palette colore Business | `moment-themes.js` (4 temi base) |
 | Supporto | Ticket dalla tab Account | Ticket da menu Account + scheda Account |
@@ -70,6 +70,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 ## Editor Moments
 
 ### Sezioni principali
+- **Ingresso editor (v260):** all’apertura, dopo attivazione e al cambio pezzo si atterra su **Pagina → Riepilogo** (scheda «Come funziona» + QR + stato). Barra bassa: Pagina · Design · Contenuti. Il QR/NFC pubblico `/m/` `/k/` resta la pagina ospite — non l’editor.
 - Copertina (v255 / Worker v220): `cover_fit` `cover` (riempi, default pagine già salvate) o `contain` (tutta la foto, **stessa foto sfuocata** a riempire il riquadro). Nuovo upload parte da tutta la foto. In «Riempi» si trascina; zoom 100–200% solo lì.
 - Sezioni evento (programma, storia, messaggi…)
 - Galleria media (foto, video, audio) — ogni riga ha **Cambia foto** e **Rimuovi** (v144)

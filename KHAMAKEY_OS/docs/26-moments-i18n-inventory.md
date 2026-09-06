@@ -109,7 +109,7 @@
 
 ## 7. Wizard onboarding
 
-- Chiavi `overview.how.*` + `onboarding.*` (IT/EN in `moments-i18n-nav.js`): 4 frasi identiche in Riepilogo e wizard · `Inizia → Copertina` · `Rivedi la guida in alto`
+- Chiavi `overview.how.*` + `onboarding.*` (IT/EN in `moments-i18n-nav.js`): 4 frasi identiche in Riepilogo e wizard · `Inizia da Copertina` · `Rivedi la guida in alto`
 
 ---
 

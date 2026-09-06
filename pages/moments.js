@@ -19,7 +19,7 @@ import {
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=248";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=217";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=218";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=248";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
@@ -138,7 +138,7 @@ import {
   sectionHasContent,
   isSectionExcluded,
   youtubeVideoId
-} from "./moment-sections.js?v=245";
+} from "./moment-sections.js?v=246";
 import {
   renderCategorySelect,
   templateForType,
@@ -159,7 +159,7 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js?v=186";
+} from "./moment-editor-kit.js?v=187";
 import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=221";
 import { bindRsvpResponsesPanel, refreshRsvpResponsesLocale } from "./moment-rsvp-responses.js?v=221";
 import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=224";
@@ -332,9 +332,9 @@ function editorPanelSubtitle(panel){
   return localizeSectionSubtitle(panel.subtitle || "");
 }
 
-let activeEditorPanel = "cover";
+let activeEditorPanel = "overview";
 let mobilePreviewMode = false;
-let activeNavGroup = "content";
+let activeNavGroup = "page";
 let currentMomentType = "free";
 let lastSavedMomentType = "free";
 let pinnedExtraSections = [];
@@ -1634,7 +1634,10 @@ function renderHowItWorksCard(){
   return `<div class="editor-card how-it-works" id="momentHowItWorks">
     <p class="ecard-title" data-i18n="overview.how.title">${esc(t("overview.how.title"))}</p>
     <ol class="how-it-works-list">${renderHowItWorksList()}</ol>
-    <button type="button" class="ghost" id="showOnboardingGuide" data-i18n="overview.how.show_guide">${esc(t("overview.how.show_guide"))}</button>
+    <div class="how-it-works-actions">
+      <button type="button" class="primary" id="startFromCoverBtn" data-i18n="overview.how.start_cover">${esc(t("overview.how.start_cover"))}</button>
+      <button type="button" class="ghost" id="showOnboardingGuide" data-i18n="overview.how.show_guide">${esc(t("overview.how.show_guide"))}</button>
+    </div>
   </div>`;
 }
 
@@ -1806,7 +1809,10 @@ async function openMomentProduct(nextId, { resetPanel = false } = {}){
   }
   switchInFlight = true;
   try{
-    if(resetPanel) activeEditorPanel = "cover";
+    if(resetPanel){
+      activeEditorPanel = "overview";
+      activeNavGroup = "page";
+    }
     await ensureEventPageState(nextId, { force:true });
     showEditorView();
     renderDetail(nextId);
@@ -1905,7 +1911,8 @@ function bindActivationForm(form,statusEl){
       rememberPin(activeId,pin);
       form.reset();
       setStatus(statusEl,t("auth.msg.linked_ok"),"ok");
-      activeEditorPanel = "cover";
+      activeEditorPanel = "overview";
+      activeNavGroup = "page";
       await loadObjects();
       if(activeId) showPinSuccessBanner(activeId,pin,title);
     }catch(error){
@@ -2802,6 +2809,12 @@ function renderOnboardingWizard(row){
   </div>`;
 }
 
+function goToCoverEditor(){
+  setNavGroup("design");
+  setEditorPanel("cover");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 function bindOnboardingWizard(row){
   const wizard = document.getElementById("onboardingWizard");
   if(!wizard || wizard.dataset.bound === "1") return;
@@ -2812,17 +2825,24 @@ function bindOnboardingWizard(row){
     wizard.remove();
   });
   document.getElementById("onboardingStart")?.addEventListener("click",()=>{
-    setNavGroup("design");
-    setEditorPanel("cover");
-    wizard.scrollIntoView({behavior:"smooth",block:"nearest"});
+    if(row?.id) localStorage.setItem(onboardingKey(row.id),"done");
+    goToCoverEditor();
   });
 }
 
 function bindHowItWorks(row){
-  const btn = document.getElementById("showOnboardingGuide");
-  if(!btn || btn.dataset.bound === "1") return;
-  btn.dataset.bound = "1";
-  btn.addEventListener("click",()=>{
+  const card = document.getElementById("momentHowItWorks");
+  if(!card || card.dataset.bound === "1") return;
+  card.dataset.bound = "1";
+  card.querySelector("#startFromCoverBtn")?.addEventListener("click",()=>{
+    if(row?.id){
+      forceOnboardingIds.delete(row.id);
+      localStorage.setItem(onboardingKey(row.id),"done");
+    }
+    document.getElementById("onboardingWizard")?.remove();
+    goToCoverEditor();
+  });
+  card.querySelector("#showOnboardingGuide")?.addEventListener("click",()=>{
     forceOnboardingIds.add(row.id);
     if(!document.getElementById("onboardingWizard")){
       const head = detail.querySelector(".detail-head");
@@ -2837,18 +2857,19 @@ function bindHowItWorks(row){
 }
 
 function editorProgressStep(){
-  if(activeNavGroup === "page" || activeEditorPanel === "privacy" || activeEditorPanel === "overview") return 4;
+  if(activeEditorPanel === "overview") return 0;
+  if(activeNavGroup === "page" || activeEditorPanel === "privacy") return 4;
   if(activeNavGroup === "content") return 3;
   if(activeEditorPanel === "styling" || activeEditorPanel === "order") return 2;
   return 1;
 }
 
 function syncEditorProgress(){
+  const current = editorProgressStep();
   document.querySelectorAll(".editor-progress-step").forEach(node=>{
     const step = Number(node.dataset.progressStep);
-    const current = editorProgressStep();
-    node.classList.toggle("active", step === current);
-    node.classList.toggle("done", step < current);
+    node.classList.toggle("active", current > 0 && step === current);
+    node.classList.toggle("done", current > 0 && step < current);
   });
 }
 
@@ -3253,7 +3274,7 @@ function renderDetail(id){
     return;
   }
   showEditorView();
-  if(activeEditorPanel === "objects") activeEditorPanel = "cover";
+  if(activeEditorPanel === "objects") activeEditorPanel = "overview";
   let restoredDraft = false;
   if(!needsFreshTemplateBootstrap(row)){
     const draftState = peekEditorDraft(id);
@@ -3283,7 +3304,7 @@ function renderDetail(id){
   editorDirty = false;
   const publicUrl = `${PUBLIC_BASE_URL}/m/${encodeURIComponent(row.slug)}`;
   const nfcUrl = row.nfc_code ? `${PUBLIC_BASE_URL}/k/${encodeURIComponent(row.nfc_code)}` : "";
-  const showWizard = needsOnboarding(row);
+  const showWizard = needsOnboarding(row) && activeEditorPanel !== "overview";
   let editorHtml;
   try{
     editorHtml = `

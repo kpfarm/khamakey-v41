@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v260 — ingresso su Pagina / Riepilogo (2026-09-06)** — Pages
+  - Ticket: le spiegazioni («Come funziona») erano nel tab Pagina, ma l’editor apriva su Copertina.
+  - Apertura editor, attivazione codice e cambio pezzo atterrano su **Pagina → Riepilogo**. Barra bassa: Pagina · Design · Contenuti.
+  - CTA «Inizia da Copertina» sulla scheda. QR/NFC `/m/` `/k/` resta la pagina ospite.
 - **Moments v259 + Worker v224 — sogni/obiettivi: cerchi flaggabili + contrasto (2026-09-06)** — Pages + Worker
   - Ticket: sezione rinominata «Obbiettivi», cerchi non spuntabili, testo bianco sul rosa.
   - In editor e anteprima si tocca il cerchio (stato «Raggiunto»); serve Salva. Pagina pubblica `/m/` mostra lo stato, senza toggle visitatore.

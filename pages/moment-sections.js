@@ -146,9 +146,9 @@ export const LEGACY_SECTION_MAP = {
 };
 
 export const NAV_GROUPS = [
+  { id:"page", label:"Pagina", icon:"◎" },
   { id:"design", label:"Design", icon:"✦" },
-  { id:"content", label:"Contenuti", icon:"✎" },
-  { id:"page", label:"Pagina", icon:"◎" }
+  { id:"content", label:"Contenuti", icon:"✎" }
 ];
 
 export function designNavItems(){

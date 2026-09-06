@@ -100,8 +100,8 @@
 
 | # | Check | Passo | Esito | Nota |
 |---|-------|------|-------|------|
-| 7.1 | Ticket Moments | Account → Assistenza → invio | ⬜ | |
-| 7.2 | Ticket in Officina | Compare in Supporto Admin | ⬜ | |
+| 7.1 | Assistenza Moments | Account → Assistenza → invio form | ⬜ | Arriva email in Gmail |
+| 7.2 | Risposta da email | Reply dalla mail ricevuta → arriva al cliente | ⬜ | Non Officina |
 
 ---
 

@@ -76,7 +76,7 @@ Tracciabilità: `sold_channel`, `assigned_agent_id` su `moment_activation_codes`
 ### Supporto cliente
 
 - Business: nel modal Account dell'editor e' presente la tab `Assistenza`. Il form invia il ticket tramite `pages/app.js`, collegandolo a `business_id` e profilo autenticato.
-- Moments: menu account `Assistenza` porta alla scheda Account dell'editor, dove l'utente puo' aprire un ticket collegato al proprio profilo.
+- Moments: menu account `Assistenza` — form in scheda Account. Il Worker invia l’email allo staff con Reply-To = email del cliente; si risponde da Gmail. Non crea ticket in Officina.
 - SQL v89 consente agli utenti autenticati di creare/leggere solo ticket con `profile_id = auth.uid()`; lo staff continua a usare `support.read`/`support.write`.
 
 ---

@@ -29,17 +29,16 @@ Il supporto deve essere attivo sia per Business sia per Moments.
 Stato attuale dopo v128/v89:
 
 - **Business**: nell'Account dell'editor esiste `Assistenza`; `pages/app.js` salva ticket con `business_id`, `profile_id`, `source='business_editor'`.
-- **Moments**: menu account `Assistenza` e form nella scheda Account; `pages/moments.js` salva ticket con `profile_id`, `source='moments_editor'`.
-- **Admin**: tab `Supporto` mostra ticket globali, filtri, ricerca, cambio stato/priorita' e nota interna.
+- **Moments (v262 / Worker v226):** Account → Assistenza = form. Email allo staff con Reply-To cliente; si risolve da Gmail. Officina non è il canale.
+- **Admin**: tab `Supporto` resta per ticket storici / Business.
 - **Supabase**: `platform_support_tickets` ha policy cliente `profile_id = auth.uid()` e policy staff `support.read/write`.
 
-Gap ancora aperti:
+Gap ancora aperti (Business / Officina; Moments è email-only):
 
-- assegnazione responsabile ticket;
-- risposta cliente/email;
-- cronologia conversazione completa;
+- assegnazione responsabile ticket Business;
+- cronologia conversazione completa in Officina;
 - SLA/priorita' con alert dashboard;
-- test con ticket reale Business e ticket reale Moments.
+- test con ticket reale Business.
 
 ---
 

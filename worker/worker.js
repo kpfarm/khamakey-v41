@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v225-card-ink";
+const WORKER_VERSION = "v226-support-mail";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -759,19 +759,22 @@ function guestbookErrorMessage(error) {
   return "Invio messaggio non riuscito. Riprova tra poco.";
 }
 
-/** Avvisa lo staff per email quando un cliente Moments apre un ticket assistenza. */
+/** Invio richiesta assistenza Moments: email allo staff, Reply-To = cliente. Niente riga Officina. */
 async function handleMomentSupportNotify(request, env) {
   const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
   if (!jwt) return cors(json({ error: "Accesso richiesto" }, 401));
   const user = await supabaseUser(env, jwt);
   if (!user?.email) return cors(json({ error: "Sessione non valida" }, 401));
+  const customerEmail = String(user.email).trim().toLowerCase();
+  if (!validEmail(customerEmail)) return cors(json({ error: "Email account non valida" }, 400));
 
   const body = await request.json().catch(() => null);
   if (!body || typeof body !== "object") return cors(json({ error: "Richiesta non valida" }, 400));
 
   const subject = String(body.subject || "").trim().slice(0, 180);
   const description = String(body.description || "").trim().slice(0, 4000);
-  const priority = String(body.priority || "normal").trim().slice(0, 40);
+  const slug = String(body.slug || "").trim().slice(0, 80);
+  const page = String(body.page || "").trim().slice(0, 180);
   if (!subject || !description) return cors(json({ error: "Oggetto e dettagli obbligatori" }, 400));
 
   const visitor = await visitorId(request, env.VISITOR_SALT || "khamakey");
@@ -786,35 +789,41 @@ async function handleMomentSupportNotify(request, env) {
   const recipients = supportNotifyRecipients(env);
   if (!recipients.length) return cors(json({ ok: false, skipped: true, reason: "no_recipients" }));
 
-  const adminBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
-  const consoleUrl = `${adminBase}/moments-admin.html#support`;
   const safeSubject = subject.replace(/[\r\n]+/g, " ");
+  const metaLines = [
+    `Cliente: ${customerEmail}`,
+    page ? `Pagina: ${page}` : "",
+    slug ? `Slug: ${slug}` : ""
+  ].filter(Boolean);
   const text = [
-    "Nuovo ticket assistenza Moments",
+    "Richiesta assistenza Moments",
     "",
-    `Cliente: ${user.email}`,
-    `Priorità: ${priority}`,
+    ...metaLines,
     `Oggetto: ${safeSubject}`,
     "",
     description,
     "",
-    `Apri consolle: ${consoleUrl}`
+    "Rispondi a questa email: il messaggio arriva al cliente. Non serve Officina."
   ].join("\n");
   const html = `<div style="font-family:Arial,sans-serif;line-height:1.5;color:#172036">
-    <h2 style="margin:0 0 12px">Nuovo ticket Moments</h2>
-    <p><strong>Cliente:</strong> ${escapeHtml(user.email)}<br>
-    <strong>Priorità:</strong> ${escapeHtml(priority)}<br>
+    <h2 style="margin:0 0 12px">Richiesta assistenza Moments</h2>
+    <p style="margin:0 0 12px;padding:10px 12px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px">
+      <strong>Rispondi a questa email</strong> per scrivere al cliente (${escapeHtml(customerEmail)}). Non serve Officina.
+    </p>
+    <p><strong>Cliente:</strong> ${escapeHtml(customerEmail)}<br>
+    ${page ? `<strong>Pagina:</strong> ${escapeHtml(page)}<br>` : ""}
+    ${slug ? `<strong>Slug:</strong> ${escapeHtml(slug)}<br>` : ""}
     <strong>Oggetto:</strong> ${escapeHtml(safeSubject)}</p>
     <pre style="white-space:pre-wrap;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:14px;font:inherit">${escapeHtml(description)}</pre>
-    <p><a href="${escapeHtml(consoleUrl)}">Apri Supporto in Officina NFC</a></p>
   </div>`;
 
   try {
     await sendResendEmail(env, {
       to: recipients,
-      subject: `[Moments ${priority}] ${safeSubject}`,
+      subject: `[Moments] ${safeSubject}`,
       html,
       text,
+      replyTo: customerEmail,
       tags: [{ name: "type", value: "moments_support_ticket" }]
     });
     return cors(json({ ok: true }));

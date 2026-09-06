@@ -1,7 +1,7 @@
 # 33 — Controllo software e lacune (Moments)
 
-> **Data:** 2026-09-06 · **Stato:** in corso · **Ticket copertina:** chiuso (v254–v255 / Worker v219–v220) · **Ticket contatore/scroll:** chiuso (v256 / Worker v221) · **Ticket video upload:** chiuso (v257/v222 + tetto **90 MB** v258/v223/SQL v173) · **Ticket obiettivi/sogni:** chiuso (v259 / Worker v224) · **Ticket ingresso spiegazioni:** chiuso (v260) · **Preventivo contrasto/PIN/liste:** chiuso (v261 / Worker v225)  
-> Live previsto dopo deploy: Worker **v225-card-ink** · Privacy/Termini IT+EN **200**  
+> **Data:** 2026-09-06 · **Stato:** in corso · **Ticket copertina:** chiuso (v254–v255 / Worker v219–v220) · **Ticket contatore/scroll:** chiuso (v256 / Worker v221) · **Ticket video upload:** chiuso (v257/v222 + tetto **90 MB** v258/v223/SQL v173) · **Ticket obiettivi/sogni:** chiuso (v259 / Worker v224) · **Ticket ingresso spiegazioni:** chiuso (v260) · **Preventivo contrasto/PIN/liste:** chiuso (v261 / Worker v225) · **Assistenza:** email-only (v262 / Worker v226)  
+> Live previsto dopo deploy: Worker **v226-support-mail** · Privacy/Termini IT+EN **200**  
 > Smoke storico: [[23-smoke-moments]] · Go-live: [[31-go-live-smoke-moments]] · i18n: [[27-moments-i18n-rules]]
 
 ## Come usiamo questo file
@@ -22,6 +22,7 @@
 | 2026-09-06 | Sezione rinominata «Obbiettivi»: cerchi non flaggabili; testo illeggibile sul rosa | ✅ **v259/v224** cerchio spuntabile in editor + anteprima (Salva); contrasto inchiostro scuro sulle card. `/m/` mostra lo stato, senza toggle visitatore. |
 | 2026-09-06 | Pagina con spiegazioni (Riepilogo) come primo schermo all’ingresso editor / dopo attivazione | ✅ **v260** atterra su Pagina → Riepilogo. QR/NFC pubblico `/m/` invariato (pagina ospite). |
 | 2026-09-06 | Controllo preventivo (nessun ticket ancora): contrasto card rosa, PIN primo tap, liste intro-only | ✅ **v261/v225** inchiostro scuro su firma/numeri/lettera/RSVP; PIN senza hijack touchend; intro lista senza voci = vuota in pubblico. |
+| 2026-09-06 | Assistenza: ricevere i ticket via email e risolverli da lì | ✅ **v262/v226** form Account → email staff; Reply-To = cliente. Niente Officina. |
 
 Altri ticket restano in coda, uno alla volta.
 
@@ -45,7 +46,7 @@ Altri ticket restano in coda, uno alla volta.
 |---|------|-----------------|----------------------------|--------|
 | 1 | Catena NFC | Smoke 1–3 di [[31-go-live-smoke-moments]]: login, Salva, `/m/`, chip = stesso slug, 1 foto | Alto se “fix” a caso | ⬜ da rifare su pezzo reale (ultime B 2026-07-22) |
 | 2 | RSVP WhatsApp | Invio da `/m/` → compare in editor (smoke B8 mai fatto) | Medio (non toccare `wa.me` / numero) | ⬜ |
-| 3 | Assistenza | Ticket da Account → email staff + riga in Officina (B10) | Basso | ⬜ — utile prima di lavorare i ticket clienti |
+| 3 | Assistenza | Form Account → email staff; Reply da Gmail (non Officina) | Basso | ✅ by design 2026-09-06 v262/v226 |
 | 4 | i18n chrome residuo | `confirm()` «Prepara tutto» / cambio categoria + `TYPE_LABELS` in meta | Basso se solo stringhe | ✅ 2026-09-05 Moments **v253** — Officina resta IT |
 | 5 | Seed EN | Con UI EN, «Prepara tutto» → testi EN; frase non in mappa resta IT | Basso (solo mappa) | ⬜ spot su 1 categoria |
 | 6 | `/m/` fallback IT | Titoli sezione vuoti / empty hint Worker ancora italiani (non chrome visitatore) | Alto (Worker) | ⬜ annotare, **non** sistemare senza lock Worker |
@@ -67,6 +68,6 @@ Altri ticket restano in coda, uno alla volta.
 
 ## Prossimo check consigliato
 
-**3 — Assistenza (B10)** su un account di prova: conferma che i ticket arrivano. Poi si aprono gli altri ticket clienti.
+**1 — Catena NFC** su un pezzo già attivato (Salva + `/m/` + 1 foto), oppure **2 — RSVP WhatsApp**.
 
-In alternativa, se vuoi solo “il software si apre”: **1 — catena NFC** su un pezzo già attivato (Salva + `/m/` + 1 foto).
+Assistenza: canale = **email** (form in Account). Non aspettare ticket in Officina.

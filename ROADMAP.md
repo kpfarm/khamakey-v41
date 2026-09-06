@@ -435,6 +435,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-09-06 | Cursor | **Moments v262 / Worker v226**: assistenza form → email; Reply da Gmail (niente Officina) |
 | 2026-09-06 | Cursor | **Moments v261 / Worker v225**: contrasto card, PIN primo tap, liste intro-only |
 | 2026-09-06 | Cursor | **Moments v260**: ingresso editor su Pagina/Riepilogo (Come funziona); QR pubblico invariato |
 | 2026-09-06 | Cursor | **Moments v259 / Worker v224**: sogni/obiettivi — cerchi flaggabili + contrasto testo |

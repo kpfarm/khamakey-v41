@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v262 + Worker v226 — assistenza via email (2026-09-06)** — Pages + Worker
+  - Account → Assistenza: form oggetto + messaggio. Il Worker manda l’email allo staff con Reply-To = cliente.
+  - Si risponde da Gmail. Niente riga in Officina. `mailto` resta come riserva.
 - **Moments v261 + Worker v225 — contrasto card + PIN + liste (2026-09-06)** — Pages + Worker
   - Controllo preventivo: su palette rosa/calda il testo secondario sulle card bianche (numeri, firma, citazione, pet, oroscopo, placeholder RSVP, titolo lettera/PDF) restava chiaro — stesso tipo del ticket sogni.
   - Liste: intro senza voci non è più “piena” in editor; hint che in pubblico serve almeno una voce. Salva avvisa se la sezione è vuota.

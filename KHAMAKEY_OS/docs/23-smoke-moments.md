@@ -34,7 +34,7 @@ Usa un account di prova o il tuo. Preferisci un prodotto **già attivato** se no
 | B7 | Footer legale | Su `/m/`: Privacy + Termini; notice «Ho capito» dismissibile | ✅ |
 | B8 | RSVP | Sezione attiva + WhatsApp → invio da `/m/` → ok in editor | ⬜ non eseguito |
 | B9 | Guestbook | Messaggio da `/m/` → appare dopo approvazione (o conferma API ok) | ⬜ escluso dal prodotto |
-| B10 | Ticket | Account → Assistenza → invia ticket → email staff / ticket in Admin | ⬜ non eseguito |
+| B10 | Assistenza | Account → Assistenza → invia richiesta → email in Gmail (Reply = cliente). Non Officina | ⬜ da rifare dopo v262 |
 
 Nota 2026-07-22: in hero pubblico `subtitle` aveva priorità su `description` → la «Descrizione breve» non si vedeva se c’era la «Frase sotto il titolo». Fix Worker **v182** + Moments **v186** (`page_description`).
 

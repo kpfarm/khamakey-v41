@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-06** (contrasto card v261 / Worker v225)
+> Ultimo aggiornamento: **2026-09-06** (assistenza via email v262 / Worker v226)
 
 ### Fonte di verità versioni
 
@@ -98,7 +98,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Cosa | Quando | Dove | Cosa non fare |
 |------|--------|------|----------------|
 | **Dati societari + P.IVA** su Privacy e Termini | Quando esiste partita IVA (e sede / ragione sociale confermati) | `pages/moments-privacy.html`, `moments-terms.html`, `moments-privacy-en.html`, `moments-terms-en.html` — titolare, indirizzo, P.IVA/CF. Poi bump `?v=` legale se serve | Non inventare numeri o ragione sociale. Non togliere il disclaimer «da completare / revisione legale». In conflitto vince l’italiano. |
-| **Ticket clienti (piccoli bug)** | Uno alla volta, con reproduce | `docs/33` | Copertina selfie ✅ v254–v255. Contatore/scroll ✅ v256/v221. Video upload silenzioso ✅ v257/v222. Limite video **90 MB** ✅ v258/v223/SQL v173. Sogni/obiettivi cerchi+contrasto ✅ v259/v224. Ingresso spiegazioni ✅ v260. Contrasto card/PIN/liste ✅ v261/v225. NFC/upload restano sacri |
+| **Ticket clienti (piccoli bug)** | Uno alla volta, con reproduce | `docs/33` | Copertina selfie ✅ v254–v255. Contatore/scroll ✅ v256/v221. Video upload silenzioso ✅ v257/v222. Limite video **90 MB** ✅ v258/v223/SQL v173. Sogni/obiettivi cerchi+contrasto ✅ v259/v224. Ingresso spiegazioni ✅ v260. Contrasto card/PIN/liste ✅ v261/v225. Assistenza email-only ✅ v262/v226. NFC/upload restano sacri |
 
 ---
 
@@ -107,8 +107,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v225-card-ink** | Testo scuro su card bianche (firma, numeri, lettera, RSVP). PIN primo tap. Video fallback 90 MB. |
-| **Moments editor** | **v261** | Hint liste; Salva avvisa se lista senza voci. CSS `moments.css?v=255`. |
+| **Worker NFC** | **v226-support-mail** | Assistenza: email staff + Reply-To cliente. Testo scuro su card. PIN primo tap. Video 90 MB. |
+| **Moments editor** | **v262** | Form Assistenza → email. CSS `moments.css?v=256`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v173 (prod)** | v173 `max_video_mb` 90 applicata 2026-09-05; v172 salva ottimistico; v171 video 50MB (superseded). |
@@ -141,7 +141,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 - [x] Attivazione codici NFC + PIN opzionale
 - [x] **Categoria bloccata al codice NFC (v135 / SQL v157)** — tipo da magazzino, badge editor, peek signup, save lock
 - [x] Guestbook + RSVP API Worker operative
-- [x] Ticket assistenza Moments → email staff (`support-notify` Worker v144)
+- [x] Assistenza Moments → email staff con Reply-To cliente (v262 / Worker v226); Officina non è il canale
 
 ### Admin
 - [x] Pannelli Business e Moments separati (`moments-admin.html` su dominio Moments)
@@ -207,7 +207,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-06:** Worker **v224-dream-check** + editor **v259** (sogni/obiettivi: cerchi + contrasto). Video 90 MB resta.  
+> **Oggi 2026-09-06:** Worker **v226-support-mail** + editor **v262** (assistenza: form → Gmail, Reply al cliente).  
 > Altri ticket clienti: uno alla volta. **P.IVA** in attesa.  
 > Prossimo prodotto tipico: Stripe Plus/Pro. Smoke NFC/upload su pezzo reale prima di ogni fix.
 

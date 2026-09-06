@@ -8,14 +8,14 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v261** | Contrasto card, liste, PIN; ingresso Riepilogo |
-| Worker | **v225-card-ink** | Inchiostro scuro sulle card; PIN primo tap |
+| Editor Moments | **v262** | Assistenza: form → email staff |
+| Worker | **v226-support-mail** | Reply-To cliente; niente Officina |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]
 - Titoli/etichette in pagina = testo cliente. «Prepara tutto per me» segue la lingua UI. → [[docs/27-moments-i18n-rules]]
 - Email conferma/reset IT/EN: template in [[docs/32-moments-auth-email]] (dashboard, già incollati)
-- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — copertina, contatore/scroll, upload video, tetto 90 MB, sogni/obiettivi, ingresso spiegazioni e contrasto card chiusi; altri ticket in coda
+- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — copertina, contatore/scroll, upload video, tetto 90 MB, sogni/obiettivi, ingresso spiegazioni, contrasto card e assistenza email chiusi; altri ticket in coda
 
 ---
 

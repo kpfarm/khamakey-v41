@@ -11,7 +11,7 @@
 | Wizard | Setup guidato per settore (5 template) | Ingresso su **Pagina / Riepilogo** (Come funziona); wizard rivedibile da lì |
 | Media | Upload R2 via Worker | Upload R2 via Worker |
 | Temi | Palette colore Business | `moment-themes.js` (4 temi base) |
-| Supporto | Ticket dalla tab Account | Ticket da menu Account + scheda Account |
+| Supporto | Ticket dalla tab Account | Form in Account → email staff; risposta da Gmail |
 
 ---
 
@@ -83,7 +83,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 - **Contrasto card (v261 / Worker v225):** firme, numeri, citazioni, pet, oroscopo, RSVP placeholder e titoli lettera usano inchiostro scuro sulle card bianche (stesso problema dei sogni sul rosa). Liste: intro senza voci non conta come contenuto pubblico.
 - **Titoli/etichette in pagina** (titolo sezione, pill copertina, etichetta firma, voci RSVP): testo cliente. Il chrome («Titolo sezione», hint) è già IT/EN. Non ritradurre i valori.
 - «Prepara tutto per me»: testi modello **nella lingua UI** (`localizeMomentTemplate` + `getUiLocale()`). Dopo Salva restano com’è.
-- Supporto operativo: menu account `Assistenza` e form ticket nella scheda Account, con `source='moments_editor'`.
+- Supporto operativo: menu account `Assistenza` — form che invia email allo staff (`POST /api/moment/support-notify`, Reply-To = cliente). Si risponde da Gmail. Niente riga Officina.
 - Legale Moments (v175 / EN v252): `moments-privacy.html` / `moments-terms.html` (IT, URL invariati) + `moments-privacy-en.html` / `moments-terms-en.html`. Signup/account/footer `/m/` puntano alla lingua UI o del visitatore. Testo IT vince se le versioni divergono. **P.IVA / ragione sociale / sede: ancora da inserire** quando ci saranno dati reali — non inventare. Checkbox consenso in signup. Su `/m/` footer + notice tecnica (no cookie marketing; `visitorId` solo server-side per PIN/rate-limit).
 
 ### Categorie evento

@@ -1,7 +1,7 @@
 # 33 — Controllo software e lacune (Moments)
 
-> **Data:** 2026-09-06 · **Stato:** in corso · **Ticket copertina:** chiuso (v254–v255 / Worker v219–v220) · **Ticket contatore/scroll:** chiuso (v256 / Worker v221) · **Ticket video upload:** chiuso (v257/v222 + tetto **90 MB** v258/v223/SQL v173) · **Ticket obiettivi/sogni:** chiuso (v259 / Worker v224) · **Ticket ingresso spiegazioni:** chiuso (v260)  
-> Live previsto dopo deploy: Worker **v224-dream-check** · Privacy/Termini IT+EN **200**  
+> **Data:** 2026-09-06 · **Stato:** in corso · **Ticket copertina:** chiuso (v254–v255 / Worker v219–v220) · **Ticket contatore/scroll:** chiuso (v256 / Worker v221) · **Ticket video upload:** chiuso (v257/v222 + tetto **90 MB** v258/v223/SQL v173) · **Ticket obiettivi/sogni:** chiuso (v259 / Worker v224) · **Ticket ingresso spiegazioni:** chiuso (v260) · **Preventivo contrasto/PIN/liste:** chiuso (v261 / Worker v225)  
+> Live previsto dopo deploy: Worker **v225-card-ink** · Privacy/Termini IT+EN **200**  
 > Smoke storico: [[23-smoke-moments]] · Go-live: [[31-go-live-smoke-moments]] · i18n: [[27-moments-i18n-rules]]
 
 ## Come usiamo questo file
@@ -21,6 +21,7 @@
 | 2026-09-05 | Caricamento video: niente succede (salvo clip ~7 s); nessuna notifica | ✅ **v257/v222** banner visibile; **v258/v223/SQL v173** tetto **90 MB**/video (Free resta 1 clip). |
 | 2026-09-06 | Sezione rinominata «Obbiettivi»: cerchi non flaggabili; testo illeggibile sul rosa | ✅ **v259/v224** cerchio spuntabile in editor + anteprima (Salva); contrasto inchiostro scuro sulle card. `/m/` mostra lo stato, senza toggle visitatore. |
 | 2026-09-06 | Pagina con spiegazioni (Riepilogo) come primo schermo all’ingresso editor / dopo attivazione | ✅ **v260** atterra su Pagina → Riepilogo. QR/NFC pubblico `/m/` invariato (pagina ospite). |
+| 2026-09-06 | Controllo preventivo (nessun ticket ancora): contrasto card rosa, PIN primo tap, liste intro-only | ✅ **v261/v225** inchiostro scuro su firma/numeri/lettera/RSVP; PIN senza hijack touchend; intro lista senza voci = vuota in pubblico. |
 
 Altri ticket restano in coda, uno alla volta.
 

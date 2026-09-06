@@ -343,7 +343,7 @@ export function sectionHasContent(key, section){
     case "dreams":
     case "rituals":
     case "numbers":
-      return itemsFromSection(section, LIST_SECTION_MODES[key]).length > 0 || Boolean(String(section.body || "").trim());
+      return itemsFromSection(section, LIST_SECTION_MODES[key]).length > 0;
     case "countdown":
       return Boolean(section.target_date || section.image_url || section.images?.length);
     case "music":

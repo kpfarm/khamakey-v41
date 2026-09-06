@@ -466,7 +466,7 @@ export async function uploadImage(supabase,{scope,scopeId,file,maxSide = DEFAULT
 }
 
 export async function uploadVideo(supabase,options){
-  validateVideoFile(options.file);
+  validateVideoFile(options.file, maxMbForKind("video", options.limits));
   return uploadViaCloudflare(supabase,options);
 }
 

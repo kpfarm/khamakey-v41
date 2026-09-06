@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-06** (ingresso editor v260 su Pagina/Riepilogo)
+> Ultimo aggiornamento: **2026-09-06** (contrasto card v261 / Worker v225)
 
 ### Fonte di verità versioni
 
@@ -98,7 +98,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Cosa | Quando | Dove | Cosa non fare |
 |------|--------|------|----------------|
 | **Dati societari + P.IVA** su Privacy e Termini | Quando esiste partita IVA (e sede / ragione sociale confermati) | `pages/moments-privacy.html`, `moments-terms.html`, `moments-privacy-en.html`, `moments-terms-en.html` — titolare, indirizzo, P.IVA/CF. Poi bump `?v=` legale se serve | Non inventare numeri o ragione sociale. Non togliere il disclaimer «da completare / revisione legale». In conflitto vince l’italiano. |
-| **Ticket clienti (piccoli bug)** | Uno alla volta, con reproduce | `docs/33` | Copertina selfie ✅ v254–v255. Contatore/scroll ✅ v256/v221. Video upload silenzioso ✅ v257/v222. Limite video **90 MB** ✅ v258/v223/SQL v173. Sogni/obiettivi cerchi+contrasto ✅ v259/v224. Ingresso spiegazioni ✅ v260. NFC/upload restano sacri |
+| **Ticket clienti (piccoli bug)** | Uno alla volta, con reproduce | `docs/33` | Copertina selfie ✅ v254–v255. Contatore/scroll ✅ v256/v221. Video upload silenzioso ✅ v257/v222. Limite video **90 MB** ✅ v258/v223/SQL v173. Sogni/obiettivi cerchi+contrasto ✅ v259/v224. Ingresso spiegazioni ✅ v260. Contrasto card/PIN/liste ✅ v261/v225. NFC/upload restano sacri |
 
 ---
 
@@ -107,8 +107,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v224-dream-check** | Sogni/obiettivi: contrasto card + cerchi flaggabili in anteprima. Video 90 MB invariato. |
-| **Moments editor** | **v260** | Ingresso su Pagina/Riepilogo (Come funziona). CSS `moments.css?v=255`. |
+| **Worker NFC** | **v225-card-ink** | Testo scuro su card bianche (firma, numeri, lettera, RSVP). PIN primo tap. Video fallback 90 MB. |
+| **Moments editor** | **v261** | Hint liste; Salva avvisa se lista senza voci. CSS `moments.css?v=255`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v173 (prod)** | v173 `max_video_mb` 90 applicata 2026-09-05; v172 salva ottimistico; v171 video 50MB (superseded). |

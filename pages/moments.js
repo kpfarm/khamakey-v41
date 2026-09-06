@@ -21,7 +21,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=218";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=248";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=249";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -41,7 +41,7 @@ import {
   warmUploadPipeline,
   warmUploadAuth,
   MAX_GALLERY_IMAGES
-} from "./media-upload.js?v=245";
+} from "./media-upload.js?v=246";
 import {
   readGalleryMedia,
   writeGalleryMedia,
@@ -63,7 +63,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=245";
+} from "./moments-media-ui.js?v=246";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -99,7 +99,7 @@ import {
   writeListItems,
   readListItems,
   bindListItemsEditor
-} from "./moments-list-ui.js?v=217";
+} from "./moments-list-ui.js?v=218";
 import { journeyStepId, MAX_JOURNEY_STEPS, normalizeJourneyStep, resolveJourneySteps, compactJourneySteps } from "./moment-journey.js";
 import {
   COLOR_PALETTES,
@@ -138,7 +138,7 @@ import {
   sectionHasContent,
   isSectionExcluded,
   youtubeVideoId
-} from "./moment-sections.js?v=246";
+} from "./moment-sections.js?v=247";
 import {
   renderCategorySelect,
   templateForType,
@@ -2825,7 +2825,11 @@ function bindOnboardingWizard(row){
     wizard.remove();
   });
   document.getElementById("onboardingStart")?.addEventListener("click",()=>{
-    if(row?.id) localStorage.setItem(onboardingKey(row.id),"done");
+    if(row?.id){
+      forceOnboardingIds.delete(row.id);
+      localStorage.setItem(onboardingKey(row.id),"done");
+    }
+    wizard.remove();
     goToCoverEditor();
   });
 }
@@ -3663,7 +3667,7 @@ async function uploadSectionVideo(file,row,formNode){
   try{
     validateVideoFile(file, maxMbForKind("video", currentEntitlements?.limits));
     assertCanFitUploadBytes(file);
-    const url = await uploadVideo(supabase,{scope:"moments",scopeId:row.id,file});
+    const url = await uploadVideo(supabase,{scope:"moments",scopeId:row.id,file,limits:currentEntitlements?.limits});
     const urlInput = formNode.querySelector('[name="section_video_video_url"]');
     const oldUrl = urlInput?.value || "";
     if(urlInput) urlInput.value = url;
@@ -5048,6 +5052,7 @@ async function saveMoment(event,row, options = {}){
       barMsg.innerHTML = t("shell.save_bar");
     }
     if(!options.keepOnboarding){
+      forceOnboardingIds.delete(row.id);
       localStorage.setItem(onboardingKey(row.id),"done");
     }
     if(!options.quietOk){

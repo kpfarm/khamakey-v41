@@ -9,7 +9,7 @@ import {
   serializeListItems
 } from "./moment-list-items.js";
 import { getUiLocale } from "./moments-i18n.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=248";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=249";
 
 const LIST_LABELS = {
   promises:{
@@ -177,7 +177,7 @@ export function renderListItemsPanel(key,section){
     </div>
     <div class="list-items-list journey-steps-list" id="listItems_${esc(key)}"></div>
     <input type="hidden" name="section_${esc(key)}_items" value="${esc(serializeListItems(items))}">
-    <label class="list-intro-label">${lfSpan("Testo introduttivo (facoltativo)")}<textarea name="section_${esc(key)}_body" rows="2" placeholder="${esc(lf("Una frase sopra l'elenco…"))}" data-lf-placeholder="Una frase sopra l'elenco…">${esc(section.body || "")}</textarea></label>
+    <label class="list-intro-label">${lfSpan("Testo introduttivo (facoltativo)")}<textarea name="section_${esc(key)}_body" rows="2" placeholder="${esc(lf("Una frase sopra l'elenco…"))}" data-lf-placeholder="Una frase sopra l'elenco…">${esc(section.body || "")}</textarea><span class="field-hint" data-lf="Compare in pagina solo se aggiungi almeno una voce.">${esc(lf("Compare in pagina solo se aggiungi almeno una voce."))}</span></label>
   </div>`;
 }
 

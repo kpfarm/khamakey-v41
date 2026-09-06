@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v261 + Worker v225 — contrasto card + PIN + liste (2026-09-06)** — Pages + Worker
+  - Controllo preventivo: su palette rosa/calda il testo secondario sulle card bianche (numeri, firma, citazione, pet, oroscopo, placeholder RSVP, titolo lettera/PDF) restava chiaro — stesso tipo del ticket sogni.
+  - Liste: intro senza voci non è più “piena” in editor; hint che in pubblico serve almeno una voce. Salva avvisa se la sezione è vuota.
+  - PIN: primo tocco su «Apri pagina» non mangia più il tap iOS. Video: `uploadVideo` rispetta il tetto piano (90 MB), non 50.
 - **Moments v260 — ingresso su Pagina / Riepilogo (2026-09-06)** — Pages
   - Ticket: le spiegazioni («Come funziona») erano nel tab Pagina, ma l’editor apriva su Copertina.
   - Apertura editor, attivazione codice e cambio pezzo atterrano su **Pagina → Riepilogo**. Barra bassa: Pagina · Design · Contenuti.

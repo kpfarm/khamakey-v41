@@ -294,6 +294,7 @@ export const FIELD_PHRASE_EN = {
   "Etichetta": "Label",
   "Nessuna voce ancora": "No items yet",
   "Testo introduttivo (facoltativo)": "Intro text (optional)",
+  "Compare in pagina solo se aggiungi almeno una voce.": "It appears on the page only if you add at least one item.",
   "Una frase sopra l'elenco…": "A line above the list…",
   "Es. Esserci sempre": "e.g. Always be there",
   "Es. Viaggiare in Giappone": "e.g. Travel to Japan",

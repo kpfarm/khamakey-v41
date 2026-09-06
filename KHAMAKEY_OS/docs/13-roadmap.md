@@ -106,6 +106,7 @@
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
+| 2026-09-06 | Cursor | **Moments v261 / Worker v225**: contrasto card, PIN primo tap, liste intro-only |
 | 2026-09-06 | Cursor | **Moments v260**: ingresso editor su Pagina/Riepilogo (Come funziona); QR pubblico invariato |
 | 2026-09-06 | Cursor | **Moments v259 / Worker v224**: sogni/obiettivi — cerchi flaggabili + contrasto testo |
 | 2026-09-05 | Cursor | **Moments v258 / Worker v223 / SQL v173**: video fino a 90 MB (Free resta 1 clip) |

@@ -4,12 +4,12 @@
 > Ogni sessione AI inizia da qui.  
 > Vault Obsidian: apri **questa cartella** `KHAMAKEY_OS/` (o la root del repo). Dopo ogni fatto prodotto: [[PROJECT_STATE]] + [[CHANGELOG]] + [[docs/13-roadmap]].
 
-## Stato oggi (2026-09-06)
+## Stato oggi (2026-09-07)
 
 | Live | Versione | Nota |
 |------|----------|------|
 | Editor Moments | **v262** | Assistenza: form → email staff |
-| Worker | **v226-support-mail** | Reply-To cliente; niente Officina |
+| Worker | **v227-emoji-visible** | Emoji/icone sulle card visibili |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

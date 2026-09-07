@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v227 — emoji/icone visibili sulle card (2026-09-07)** — Worker
+  - Ticket: icona inserita (emoji promesse/rituali/animale, icone sezione) non si vedeva in `/m/`.
+  - Causa: il fill contrasto v225 (`-webkit-text-fill-color` su tutta la card) su iPhone nasconde le emoji. Fill rimosso solo sulle icone; il testo resta scuro.
 - **Moments v262 + Worker v226 — assistenza via email (2026-09-06)** — Pages + Worker
   - Account → Assistenza: form oggetto + messaggio. Il Worker manda l’email allo staff con Reply-To = cliente.
   - Si risponde da Gmail. Niente riga in Officina. `mailto` resta come riserva.

@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v226-support-mail";
+const WORKER_VERSION = "v227-emoji-visible";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -3465,6 +3465,7 @@ body.nav-open{overflow:hidden}
   border: 1.5px solid ${c.go}24 !important;
   font-size:1.2rem !important;
   color:${c.go} !important;
+  -webkit-text-fill-color: unset;
   margin-bottom:12px !important;
   box-shadow: 0 8px 20px -4px rgba(17,32,65,0.08), inset 0 1px 0 rgba(255,255,255,0.8) !important;
   transition: transform 0.4s cubic-bezier(.21,1.02,.43,1.01), box-shadow 0.4s ease;
@@ -3536,7 +3537,7 @@ body.nav-open{overflow:hidden}
 .moment-audio-title{font-family:${f.body};font-size:1.1rem;margin:0 0 6px;color:${cardInk}}
 .moment-audio-desc{font-size:.92rem;opacity:.82;margin:0 0 10px;line-height:1.5;color:${cardMuted};-webkit-text-fill-color:${cardMuted}}
 .moment-sealed{text-align:center;padding:32px 20px;margin-top:8px}
-.moment-sealed-icon{font-size:2rem;margin-bottom:10px;color:${c.go};opacity:.85;animation:scrollPulse 3s ease-in-out infinite}
+.moment-sealed-icon{font-size:2rem;margin-bottom:10px;color:${c.go};-webkit-text-fill-color:unset;opacity:.85;animation:scrollPulse 3s ease-in-out infinite}
 .moment-sealed-date{font-family:${f.ui};font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:${cardMuted};-webkit-text-fill-color:${cardMuted};margin-top:8px}
 .moment-rituals{display:grid;gap:12px;margin-top:10px}
 .moment-ritual{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:${c.cardSoft};border:1px solid ${c.line};border-left:3px solid ${c.go};box-shadow:none}
@@ -3562,7 +3563,7 @@ body.nav-open{overflow:hidden}
 .moment-letter-pdf-icon{display:inline-flex;align-items:center;justify-content:center;min-width:52px;height:36px;padding:0 10px;border-radius:10px;background:${cardInk};color:#fff;-webkit-text-fill-color:#fff;font-family:${f.ui};font-size:.72rem;font-weight:800;letter-spacing:.06em}
 .moment-letter-pdf-label{font-family:${f.ui};font-size:.85rem;font-weight:650;text-align:center;padding:0 12px;line-height:1.3}
 .moment-letter-audio-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:min(72vw,240px);aspect-ratio:4/3;border-radius:16px;background:${c.bl2};padding:14px;scroll-snap-align:center;box-shadow:0 8px 22px rgba(0,0,0,.08)}
-.moment-letter-audio-icon{font-size:1.4rem}
+.moment-letter-audio-icon{font-size:1.4rem;-webkit-text-fill-color:unset}
 .moment-letter-audio-wrap audio{width:100%}
 .moment-audio-list{display:grid;gap:12px;margin-top:10px}
 .moment-gallery-track{display:flex;flex-wrap:nowrap;gap:12px;width:max-content;max-width:none;align-items:flex-start}
@@ -3584,17 +3585,17 @@ body.nav-open{overflow:hidden}
 .moment-letter{padding:26px 20px;margin-top:8px;border-left:3px solid ${c.go}!important;position:relative;box-shadow:none}
 .moment-letter-to{font-style:italic;color:${cardMuted};-webkit-text-fill-color:${cardMuted};font-weight:600;margin:0 0 12px}
 .moment-letter-sign{display:block;margin-top:18px;font-family:${f.display};font-size:1.6rem;color:${c.go}}
-.moment-letter-heart{position:absolute;right:18px;bottom:14px;opacity:.15;color:${c.go};font-size:1.4rem}
+.moment-letter-heart{position:absolute;right:18px;bottom:14px;opacity:.15;color:${c.go};-webkit-text-fill-color:unset;font-size:1.4rem}
 .moment-letter-media{margin-top:18px;display:grid;gap:10px;justify-items:center}
 .moment-letter-media img{width:100%;max-width:420px;border-radius:14px;border:1px solid ${c.ro};object-fit:cover}
 .moment-letter-media video{width:100%;max-width:420px;border-radius:14px;border:1px solid ${c.ro};background:#111}
 .moment-letter-media-title{font-family:${f.body};font-size:1.05rem;margin:0;color:${cardInk};-webkit-text-fill-color:${cardInk}}
 .moment-promises{display:grid;gap:12px;margin-top:10px}
 .moment-promise{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:${c.cardSoft};border:1px solid ${c.line};border-left:3px solid ${c.go};box-shadow:none}
-.moment-promise-emoji{font-size:1.2rem;line-height:1.2}
+.moment-promise-emoji,.moment-pet-emoji{font-size:1.2rem;line-height:1.2;-webkit-text-fill-color:unset;background:none}
 .moment-places{display:grid;gap:12px;margin-top:10px}
 .moment-place{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;background:${c.surface}!important;border:1px solid ${c.lineStrong}!important;text-decoration:none;color:${c.ink}!important}
-.moment-place-icon{font-size:1.15rem;color:${c.go}}
+.moment-place-icon{font-size:1.15rem;color:${c.go};-webkit-text-fill-color:unset}
 .moment-dreams{display:grid;gap:10px;margin-top:10px}
 .moment-dream{display:flex;gap:12px;align-items:center;font-size:1.02rem;padding:10px 0;border-bottom:1px solid ${c.cardLine || "rgba(15,23,42,.12)"};color:${cardInk};-webkit-text-fill-color:${cardInk}}
 .moment-dream:last-child{border-bottom:0}
@@ -5150,9 +5151,12 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
         const photo = safeUrl(pet.photo || "") !== "#"
           ? `<img class="moment-pet-photo" src="${attr(pet.photo)}" alt="${attr(pet.name || "Pet")}">`
           : "";
+        const emojiHtml = pet.emoji
+          ? `<span class="moment-pet-emoji">${escapeHtml(pet.emoji)}</span>`
+          : "";
         const name = pet.name
-          ? `<p class="moment-pet-name">${escapeHtml(pet.emoji || "🐾")} ${escapeHtml(pet.name)}</p>`
-          : (pet.emoji ? `<p class="moment-pet-name">${escapeHtml(pet.emoji)}</p>` : "");
+          ? `<p class="moment-pet-name">${emojiHtml}${emojiHtml ? " " : ""}${escapeHtml(pet.name)}</p>`
+          : (emojiHtml ? `<p class="moment-pet-name">${emojiHtml}</p>` : "");
         const story = pet.body ? `<p class="moment-pet-story">${escapeHtml(pet.body)}</p>` : "";
         return `<div class="moment-pet-card">${photo}${name}${story}</div>`;
       }).join("");

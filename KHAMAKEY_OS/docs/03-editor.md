@@ -93,7 +93,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 
 ### Temi visivi
 Definiti in `moment-themes.js` e `worker.js`:
-- Tipografia serif, scroll reveal, galleria swipe
+- Tipografia serif, scroll reveal, galleria swipe (foto intera nel riquadro, sfondo sfuocato; Worker v228)
 - 11 palette + 3 varianti atmosfera
 - Raccordo fondo copertina (heroCut) configurabile dall'editor: Dritto classico, Divisore con icona, Taglio ad arco, Taglio diagonale
 - Sfumatura sotto la foto (heroFade, default on): fonde la copertina con il colore sfondo pagina (`bl`); off = taglio netto

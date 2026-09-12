@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v227-emoji-visible";
+const WORKER_VERSION = "v228-gallery-full";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -2865,10 +2865,7 @@ function renderLetterFutureMedia(section, locale = "it") {
       </figure>`;
     }
     return `<figure class="moment-gallery-figure">
-      <div class="moment-gallery-frame" data-media-open="${idx}">
-        <img src="${attr(item.url)}" alt="${attr(item.title || "")}" loading="lazy" decoding="async" draggable="false">
-        <button type="button" class="moment-gallery-zoom-hint" data-media-open="${idx}" aria-label="${attr(item.title || mt(locale, "gallery.open_photo"))}">＋</button>
-      </div>
+      ${renderGalleryImageFrame(item.url, idx, item.title || mt(locale, "gallery.open_photo"), item.title || "")}
       ${meta}
     </figure>`;
   }).join("");
@@ -3573,8 +3570,8 @@ body.nav-open{overflow:hidden}
 .moment-gallery-figure{margin:0;display:grid;gap:8px;flex:0 0 220px;width:220px;max-width:70vw;scroll-snap-align:start;outline:none;border:0;background:transparent;padding:0;text-align:left;touch-action:pan-x pan-y}
 .moment-gallery-frame{position:relative;overflow:hidden;border-radius:18px;width:100%;aspect-ratio:4/5;background:#0f172a;box-shadow:0 10px 28px rgba(15,23,42,.12);touch-action:pan-x pan-y;cursor:pointer}
 .moment-gallery-frame[data-media-open]:focus-visible{box-shadow:0 0 0 3px ${c.go}66}
-.moment-gallery-frame img,.moment-gallery-frame video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none;background:#0f172a;border:0;border-radius:0;box-shadow:none;aspect-ratio:auto;max-width:none}
-.moment-gallery-frame video{object-position:center center}
+.moment-gallery-blur{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none;user-select:none;filter:blur(22px);-webkit-filter:blur(22px);transform:scale(1.16);transform-origin:center center;z-index:0;border:0;border-radius:0;box-shadow:none;aspect-ratio:auto;max-width:none}
+.moment-gallery-photo,.moment-gallery-frame video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none;background:transparent;border:0;border-radius:0;box-shadow:none;aspect-ratio:auto;max-width:none;z-index:1}
 .moment-gallery-video-badge{position:absolute;left:10px;top:10px;z-index:2;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(15,23,42,.72);color:#fff;font-family:${f.ui};font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;pointer-events:none;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .moment-gallery-zoom-hint{position:absolute;right:10px;bottom:10px;width:44px;height:44px;border:0;border-radius:999px;background:rgba(255,255,255,.96);color:#111;display:grid;place-items:center;font-size:1.15rem;font-weight:800;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.22);cursor:pointer;touch-action:manipulation;z-index:2;padding:0}
 .moment-gallery-zoom-hint:focus-visible{outline:2px solid ${c.go};outline-offset:2px}
@@ -5178,10 +5175,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
       const meta = (title || desc) ? `<figcaption class="moment-gallery-meta">${title}${desc}</figcaption>` : "";
       const label = item.title || mt(locale, "gallery.open_photo_full");
       return `<figure class="moment-gallery-figure">
-        <div class="moment-gallery-frame" data-media-open="${idx}">
-          <img src="${attr(item.url)}" alt="${attr(item.title || "")}" loading="lazy" decoding="async" draggable="false">
-          <button type="button" class="moment-gallery-zoom-hint" data-media-open="${idx}" aria-label="${attr(label)}">＋</button>
-        </div>
+        ${renderGalleryImageFrame(item.url, idx, label, item.title || "")}
         ${meta}
       </figure>`;
     }).join("");
@@ -5272,6 +5266,16 @@ function videoPreviewSrc(url) {
   const base = clean.split("#")[0];
   // Safari/iOS: #t= forza il primo fotogramma come anteprima
   return `${base}#t=0.15`;
+}
+
+function renderGalleryImageFrame(url, openIndex, label = "Apri foto", title = "") {
+  const src = String(url || "").trim();
+  if (!src || safeUrl(src) === "#") return "";
+  return `<div class="moment-gallery-frame" data-media-open="${openIndex}">
+          <img class="moment-gallery-blur" src="${attr(src)}" alt="" aria-hidden="true" loading="lazy" decoding="async" draggable="false">
+          <img class="moment-gallery-photo" src="${attr(src)}" alt="${attr(title)}" loading="lazy" decoding="async" draggable="false">
+          <button type="button" class="moment-gallery-zoom-hint" data-media-open="${openIndex}" aria-label="${attr(label)}">＋</button>
+        </div>`;
 }
 
 function renderGalleryVideoFrame(url, openIndex, label = "Apri video") {

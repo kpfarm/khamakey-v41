@@ -1,7 +1,7 @@
 # 33 — Controllo software e lacune (Moments)
 
-> **Data:** 2026-09-07 · **Stato:** in corso · **Ticket copertina:** chiuso (v254–v255 / Worker v219–v220) · **Ticket contatore/scroll:** chiuso (v256 / Worker v221) · **Ticket video upload:** chiuso (v257/v222 + tetto **90 MB** v258/v223/SQL v173) · **Ticket obiettivi/sogni:** chiuso (v259 / Worker v224) · **Ticket ingresso spiegazioni:** chiuso (v260) · **Preventivo contrasto/PIN/liste:** chiuso (v261 / Worker v225) · **Assistenza:** email-only (v262 / Worker v226) · **Icone/emoji nascoste:** chiuso (Worker v227)  
-> Live previsto dopo deploy: Worker **v227-emoji-visible** · Privacy/Termini IT+EN **200**  
+> **Data:** 2026-09-12 · **Stato:** in corso · **Ticket copertina:** chiuso (v254–v255 / Worker v219–v220) · **Ticket contatore/scroll:** chiuso (v256 / Worker v221) · **Ticket video upload:** chiuso (v257/v222 + tetto **90 MB** v258/v223/SQL v173) · **Ticket obiettivi/sogni:** chiuso (v259 / Worker v224) · **Ticket ingresso spiegazioni:** chiuso (v260) · **Preventivo contrasto/PIN/liste:** chiuso (v261 / Worker v225) · **Assistenza:** email-only (v262 / Worker v226) · **Icone/emoji nascoste:** chiuso (Worker v227) · **Galleria ritagliata:** chiuso (Worker v228)  
+> Live previsto dopo deploy: Worker **v228-gallery-full** · Privacy/Termini IT+EN **200**  
 > Smoke storico: [[23-smoke-moments]] · Go-live: [[31-go-live-smoke-moments]] · i18n: [[27-moments-i18n-rules]]
 
 ## Come usiamo questo file
@@ -24,6 +24,7 @@
 | 2026-09-06 | Controllo preventivo (nessun ticket ancora): contrasto card rosa, PIN primo tap, liste intro-only | ✅ **v261/v225** inchiostro scuro su firma/numeri/lettera/RSVP; PIN senza hijack touchend; intro lista senza voci = vuota in pubblico. |
 | 2026-09-06 | Assistenza: ricevere i ticket via email e risolverli da lì | ✅ **v262/v226** form Account → email staff; Reply-To = cliente. Niente Officina. |
 | 2026-09-07 | Icona inserita (emoji) non visibile in pagina | ✅ **Worker v227** fill contrasto non si applica più alle emoji/icone. |
+| 2026-09-07 | Foto galleria ritagliate nel riquadro (es. Parigi); niente regolazione inquadratura | ✅ **Worker v228** tutta la foto + sfondo sfuocato (come copertina). Niente pulsanti per foto. **＋** resta per lo zoom. |
 
 Altri ticket restano in coda, uno alla volta.
 

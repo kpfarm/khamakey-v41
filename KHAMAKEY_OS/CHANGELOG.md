@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v231 — menu pubblico non salva la sezione nell’URL (2026-09-13)** — Worker
+  - Click sul menu: scorri, ma l’indirizzo resta `/m/slug`. Dopo aggiornamento pagina + PIN si riapre la copertina, non l’ultima sezione.
+  - I link email con hash (RSVP, lettera) continuano a portare alla sezione.
 - **Worker v230 — mail invito co-editor brand Moments (2026-09-13)** — Worker
   - Solo template email (oggetto, HTML, testo). JWT, RPC, rate limit, revoke se Resend fallisce, token e upload **invariati**.
 - **Moments v264 — etichetta «invitato» in menu (2026-09-13)** — Pages

@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v230-invite-mail";
+const WORKER_VERSION = "v231-nav-hash";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -3113,7 +3113,6 @@ function momentPageScript(state, ordered = [], hasCounter = false, slug = "", ap
     var navH=nav.offsetHeight||56;
     var y=el.getBoundingClientRect().top+(window.pageYOffset||window.scrollY||0)-navH-12;
     window.scrollTo({top:Math.max(0,y),behavior:reduced?"auto":"smooth"});
-    if(history.replaceState){try{history.replaceState(null,"", "#"+id);}catch(e){}}
     return true;
   }
   document.body.addEventListener("click",function(e){
@@ -3123,6 +3122,7 @@ function momentPageScript(state, ordered = [], hasCounter = false, slug = "", ap
     if(!id||!document.getElementById(id))return;
     e.preventDefault();
     scrollToSection(id);
+    if(history.replaceState){try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}}
     closeNavDrawer();
   }, true);
   function syncNavState(){

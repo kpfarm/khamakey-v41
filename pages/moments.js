@@ -16,7 +16,7 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=250";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=251";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=218";
@@ -1320,9 +1320,10 @@ function refreshAccountMenu(){
     }
     const status = row.public_visible ? t("menu.status.published") : t("menu.status.draft");
     const code = row.nfc_code ? formatMomentCodeDisplay(row.nfc_code) : "NFC";
+    const roleBit = isOwnedMoment(row) ? "" : ` · ${t("account.products.role.editor")}`;
     return `<button type="button" class="user-menu-product ${row.id === activeId ? "active" : ""}" data-menu-object-id="${esc(row.id)}">
       ${esc(title)}
-      <span>${esc(code)} · ${esc(typeLabel)} · ${status}</span>
+      <span>${esc(code)} · ${esc(typeLabel)} · ${status}${esc(roleBit)}</span>
     </button>`;
   }).join("");
   userMenuProducts.querySelectorAll("[data-menu-object-id]").forEach(button=>{
@@ -3692,7 +3693,7 @@ function renderDetail(id){
       <div>
         <p class="eyebrow" data-i18n="shell.editor_page">${esc(t("shell.editor_page"))}</p>
         <h2>${esc(state.title || row.slug)}</h2>
-        <p class="detail-meta">${esc(row.nfc_code || "")} · ${typeLabelChrome(state.type)}</p>
+        <p class="detail-meta">${esc(row.nfc_code || "")} · ${typeLabelChrome(state.type)}${isOwnedMoment(row) ? "" : ` · ${esc(t("account.products.role.editor"))}`}</p>
         <div class="status-row">
           <span class="status-pill ${row.public_visible ? "live" : "draft"}">${esc(row.public_visible ? t("shell.published") : t("shell.draft"))}</span>
           <span class="status-pill pin">${esc(row.pin_enabled ? t("shell.pin_on") : t("shell.pin_off"))}</span>

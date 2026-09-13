@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v264 — etichetta «invitato» in menu (2026-09-13)** — Pages
+  - Nel menu account e in testa all’editor la pagina invitata si legge come invitato, non come titolare.
 - **Moments v263 + Worker v229 + SQL v174 — invito 1 editor (2026-09-13)** — Pages + Worker + SQL
   - Il titolare (chi ha attivato il codice) può invitare **una** persona sulla stessa pagina. Tetto alzabile dopo (`moment_page_editor_cap()`).
   - L’invitato ha account proprio, vede la pagina in elenco, usa lo stesso Salva e lo stesso upload. Non invita altri, non cancella la pagina, non diventa titolare.

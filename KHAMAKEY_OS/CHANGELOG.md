@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v266 — guida: dove si invita (2026-09-13)** — Pages
+  - «Come funziona» indica Account → Prodotti → Chi modifica. Pulsante **Invita a modificare** apre quella scheda.
 - **Moments v265 + Worker v232 — assistenza solo email (2026-09-13)** — Pages + Worker
   - Account → Assistenza: «Invia email», risposta sull’indirizzo dell’account. Niente ticket, niente Officina in UI.
   - Mail allo staff: look Moments; Reply-To = cliente. Fallback `info@khamakeymoments.com`.

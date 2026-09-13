@@ -435,6 +435,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-09-13 | Cursor | **Moments v266**: guida Riepilogo dice dove si invita; CTA apre Prodotti → Chi modifica. |
 | 2026-09-13 | Cursor | **Moments v265 / Worker v232**: Assistenza = email (form + Reply-To). UI senza ticket/Officina. |
 | 2026-09-13 | Cursor | **Worker v231**: menu `/m/` non salva `#sezione`; dopo PIN si torna in copertina. Hash email RSVP/lettera invariati. |
 | 2026-09-13 | Cursor | **Worker v230**: mail invito co-editor (logo + copy Moment). Solo template; RPC/upload invariati. |

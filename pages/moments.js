@@ -16,10 +16,10 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=252";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=253";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=218";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=219";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=249";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
@@ -1941,13 +1941,14 @@ function renderHowItWorksList(withActiveFirst = false){
   ).join("");
 }
 
-function renderHowItWorksCard(){
+function renderHowItWorksCard(row){
+  const canInvite = Boolean(row && isOwnedMoment(row) && !adminMode);
   return `<div class="editor-card how-it-works" id="momentHowItWorks">
     <p class="ecard-title" data-i18n="overview.how.title">${esc(t("overview.how.title"))}</p>
     <ol class="how-it-works-list">${renderHowItWorksList()}</ol>
     <div class="how-it-works-actions">
       <button type="button" class="primary" id="startFromCoverBtn" data-i18n="overview.how.start_cover">${esc(t("overview.how.start_cover"))}</button>
-      <button type="button" class="ghost" id="showOnboardingGuide" data-i18n="overview.how.show_guide">${esc(t("overview.how.show_guide"))}</button>
+      ${canInvite ? `<button type="button" class="ghost" id="inviteFromGuideBtn" data-i18n="overview.how.invite">${esc(t("overview.how.invite"))}</button>` : ""}
     </div>
   </div>`;
 }
@@ -1955,7 +1956,7 @@ function renderHowItWorksCard(){
 function renderOverviewPanel(row, state, publicUrl){
   return `<div class="editor-panel ${activeEditorPanel === "overview" ? "active" : ""}" data-editor-panel="overview">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.overview),editorPanelSubtitle(EDITOR_PANELS.overview))}
-    ${renderHowItWorksCard()}
+    ${renderHowItWorksCard(row)}
     ${renderPlanStorageCard(currentEntitlements)}
     ${renderMomentDashboardShell({ publicUrl, published:row.public_visible, slug:row.slug })}
   </div>`;
@@ -3206,17 +3207,9 @@ function bindHowItWorks(row){
     document.getElementById("onboardingWizard")?.remove();
     goToCoverEditor();
   });
-  card.querySelector("#showOnboardingGuide")?.addEventListener("click",()=>{
-    forceOnboardingIds.add(row.id);
-    if(!document.getElementById("onboardingWizard")){
-      const head = detail.querySelector(".detail-head");
-      if(!head) return;
-      head.insertAdjacentHTML("afterend", renderOnboardingWizard(row));
-      const wizard = document.getElementById("onboardingWizard");
-      if(wizard) applyChromeI18n(wizard);
-    }
-    bindOnboardingWizard(row);
-    document.getElementById("onboardingWizard")?.scrollIntoView({behavior:"smooth",block:"start"});
+  card.querySelector("#inviteFromGuideBtn")?.addEventListener("click", async ()=>{
+    await showAccountHub("products");
+    document.getElementById("momentEditorsCard")?.scrollIntoView({ behavior:"smooth", block:"start" });
   });
 }
 

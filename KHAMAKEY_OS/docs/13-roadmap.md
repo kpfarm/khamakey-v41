@@ -106,6 +106,7 @@
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
+| 2026-09-13 | Cursor | **Worker v230**: mail invito co-editor (logo + copy Moment). Solo template; RPC/upload invariati. |
 | 2026-09-13 | Cursor | **Moments v264**: menu/editor mostrano «invitato». **v263 / Worker v229 / SQL v174**: invito 1 co-editor. Guide cliente dopo. |
 | 2026-09-07 | Cursor | **Worker v227**: emoji/icone sulle card visibili (fill contrasto non le nasconde più) |
 | 2026-09-06 | Cursor | **Moments v262 / Worker v226**: assistenza form → email; Reply da Gmail (niente Officina) |

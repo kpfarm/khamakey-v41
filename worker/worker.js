@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v229-page-invite";
+const WORKER_VERSION = "v230-invite-mail";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -836,6 +836,87 @@ async function handleMomentSupportNotify(request, env) {
   }
 }
 
+function buildMomentPageInviteMail({ inviteUrl, pageTitle, inviter, inviteeEmail, expiresAt, wordmarkUrl }) {
+  const title = String(pageTitle || "").trim() || "una pagina KhamaKey Moments";
+  const from = String(inviter || "").trim();
+  const to = String(inviteeEmail || "").trim();
+  const url = String(inviteUrl || "").trim();
+  const logo = String(wordmarkUrl || "https://app.khamakeymoments.com/khamakey-moments-wordmark.png").trim();
+  const expiresLabel = formatUnlockDate(expiresAt);
+  const subject = `KhamaKey Moments: sei invitato a «${title.slice(0, 80)}»`;
+  const textParts = [
+    "Ti invitano nel mondo KhamaKey Moments.",
+    "Uno spazio privato da scrivere insieme.",
+    "",
+    "Ciao,",
+    "",
+    `${from} ti invita a modificare il Moment «${title}».`,
+    `È la pagina del ricordo: foto, parole, date. Entri con questa email (${to}), insieme al titolare. Non ti serve il codice della confezione.`,
+    "",
+    "1. Apri l'invito:",
+    url,
+    "2. Crea l'account, o accedi se ce l'hai già, con questa email.",
+    "3. Salva e carica file sulla stessa pagina, insieme al titolare."
+  ];
+  if (expiresLabel) {
+    textParts.push("", `Il link scade il ${expiresLabel}.`);
+  }
+  textParts.push("", "A presto,", "Il team KhamaKey Moments");
+  const html = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;margin:0;padding:0">
+  <tr>
+    <td align="center" style="padding:28px 12px">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#FFF9F5;border-radius:22px;overflow:hidden">
+        <tr>
+          <td style="background:#071A3C;padding:28px 32px 22px;text-align:center">
+            <img src="${escapeHtml(logo)}" width="200" alt="KhamaKey Moments" style="display:block;margin:0 auto;width:200px;height:auto;border:0">
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px 36px 0;font-family:Georgia,'Times New Roman',serif;color:#071A3C;text-align:left">
+            <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C">Invito a scrivere insieme</p>
+            <h1 style="margin:12px 0 0;font-size:28px;line-height:1.28;font-weight:normal">Ti invitano nel mondo KhamaKey Moments.</h1>
+            <p style="margin:10px 0 0;font-size:16px;line-height:1.5;color:#AA626C">Uno spazio privato da scrivere insieme.</p>
+            <p style="margin:18px 0 0;font-size:16px;line-height:1.65;color:#18202F">Ciao,</p>
+            <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F"><strong>${escapeHtml(from)}</strong> ti invita a modificare il Moment «<strong>${escapeHtml(title)}</strong>».</p>
+            <p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F">È la pagina del ricordo: foto, parole, date. Entri con questa email (<strong>${escapeHtml(to)}</strong>), insieme al titolare. Non ti serve il codice della confezione.</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 36px 0">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;border-radius:16px">
+              <tr>
+                <td style="padding:20px 22px;font-family:Georgia,'Times New Roman',serif;color:#071A3C">
+                  <p style="margin:0 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#AA626C">I tuoi prossimi passi</p>
+                  <p style="margin:0;font-size:15px;line-height:1.7;color:#18202F"><strong style="color:#071A3C">1.</strong> Apri l’invito — è il bottone qui sotto.</p>
+                  <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F"><strong style="color:#071A3C">2.</strong> Crea l’account, o accedi se ce l’hai già, con questa email.</p>
+                  <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F"><strong style="color:#071A3C">3.</strong> Salva e carica file sulla stessa pagina, insieme al titolare.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:28px 36px 8px">
+            <a href="${escapeHtml(url)}" style="display:inline-block;background:#AA626C;color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:999px;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif">Apri l’invito</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 36px 32px;font-family:Georgia,'Times New Roman',serif;text-align:center">
+            ${expiresLabel ? `<p style="margin:0;font-size:13px;line-height:1.6;color:#8a6a70">Il link scade il ${escapeHtml(expiresLabel)}.</p>` : ""}
+            <p style="margin:${expiresLabel ? "16px" : "0"} 0 0;font-size:15px;line-height:1.6;color:#071A3C">A presto,<br>Il team KhamaKey Moments</p>
+            <p style="margin:22px 0 0;font-size:11px;line-height:1.5;color:#8a6a70">Se il pulsante non si apre, copia questo indirizzo:<br>
+              <a href="${escapeHtml(url)}" style="color:#AA626C;word-break:break-all">${escapeHtml(url)}</a>
+            </p>
+            <p style="margin:18px 0 0;font-size:11px;line-height:1.5;color:#8a6a70">Questa è una mail automatica. Non rispondere a questo indirizzo.</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`;
+  return { subject, text: textParts.join("\n"), html };
+}
+
 async function handleMomentPageInvite(request, env) {
   const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
   if (!jwt) return cors(json({ error: "Accesso richiesto" }, 401));
@@ -879,29 +960,14 @@ async function handleMomentPageInvite(request, env) {
   const pageTitle = String(invited?.page_title || "").trim() || "una pagina KhamaKey Moments";
   const inviter = String(invited?.invited_by_email || user.email).trim();
   const expiresAt = invited?.expires_at ? String(invited.expires_at) : "";
-  const subject = `Sei stato invitato a modificare «${pageTitle.slice(0, 80)}»`;
-  const text = [
-    `Ciao,`,
-    ``,
-    `${inviter} ti invita a modificare «${pageTitle}» su KhamaKey Moments.`,
-    `Questa email è per ${inviteeEmail}.`,
-    ``,
-    `Apri l'invito:`,
+  const { subject, text, html } = buildMomentPageInviteMail({
     inviteUrl,
-    ``,
-    expiresAt ? `Il link scade il ${expiresAt}.` : "",
-    `Non serve un codice NFC: crea (o usa) l'account con questa email, poi potrai salvare e caricare file sulla stessa pagina.`,
-    ``,
-    `— Team KhamaKey Moments`
-  ].filter(line => line !== undefined).join("\n");
-  const html = `<div style="font-family:Arial,sans-serif;line-height:1.55;color:#172036;max-width:560px">
-    <h2 style="margin:0 0 12px;color:#1b2a5e">Invito a modificare una pagina</h2>
-    <p style="margin:0 0 12px">${escapeHtml(inviter)} ti invita a modificare «${escapeHtml(pageTitle)}» su KhamaKey Moments.</p>
-    <p style="margin:0 0 16px">Questa email è per <strong>${escapeHtml(inviteeEmail)}</strong>. Non serve un codice NFC.</p>
-    <p style="margin:0 0 18px"><a href="${escapeHtml(inviteUrl)}" style="background:#1b2a5e;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;display:inline-block">Apri l'invito</a></p>
-    ${expiresAt ? `<p style="margin:0 0 12px;color:#64748B;font-size:13px">Il link scade il ${escapeHtml(expiresAt)}.</p>` : ""}
-    <p style="margin:0;color:#64748B;font-size:13px">— Team KhamaKey Moments</p>
-  </div>`;
+    pageTitle,
+    inviter,
+    inviteeEmail,
+    expiresAt,
+    wordmarkUrl: `${pagesBase}/khamakey-moments-wordmark.png`
+  });
 
   try {
     await sendResendEmail(env, {

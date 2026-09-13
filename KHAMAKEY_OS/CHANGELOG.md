@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v230 — mail invito co-editor brand Moments (2026-09-13)** — Worker
+  - Solo template email (oggetto, HTML, testo). JWT, RPC, rate limit, revoke se Resend fallisce, token e upload **invariati**.
 - **Moments v264 — etichetta «invitato» in menu (2026-09-13)** — Pages
   - Nel menu account e in testa all’editor la pagina invitata si legge come invitato, non come titolare.
 - **Moments v263 + Worker v229 + SQL v174 — invito 1 editor (2026-09-13)** — Pages + Worker + SQL

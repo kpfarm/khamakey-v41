@@ -435,6 +435,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-09-13 | Cursor | **Worker v230**: mail invito co-editor (logo + copy Moment). Solo template; RPC/upload invariati. |
 | 2026-09-13 | Cursor | **Moments v264**: menu/editor mostrano «invitato» (non titolare). **v263 / Worker v229 / SQL v174**: invito 1 co-editor. Guide cliente dopo. |
 | 2026-09-07 | Cursor | **Worker v227**: emoji/icone sulle card visibili (fill contrasto non le nasconde più) |
 | 2026-09-06 | Cursor | **Moments v262 / Worker v226**: assistenza form → email; Reply da Gmail (niente Officina) |

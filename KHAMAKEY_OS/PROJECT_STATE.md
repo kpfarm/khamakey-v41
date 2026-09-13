@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-13** (invito 1 editor; menu «invitato» v264)
+> Ultimo aggiornamento: **2026-09-13** (Worker v230 mail invito brand; invito 1 editor; menu «invitato» v264)
 
 ### Fonte di verità versioni
 
@@ -107,7 +107,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v229-page-invite** | Invito 1 co-editor (email). Upload: titolare o invitato accettato. Galleria foto intera resta. |
+| **Worker NFC** | **v230-invite-mail** | Mail invito co-editor allineata al brand Moments. Logica invito/upload invariata (v229). Galleria foto intera resta. |
 | **Moments editor** | **v264** | Invito 1 persona. Nel menu l’invitato vede «invitato», non titolare. CSS `moments.css?v=257`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |

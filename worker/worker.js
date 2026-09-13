@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v231-nav-hash";
+const WORKER_VERSION = "v232-support-mail";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -762,7 +762,7 @@ function guestbookErrorMessage(error) {
   return "Invio messaggio non riuscito. Riprova tra poco.";
 }
 
-/** Invio richiesta assistenza Moments: email allo staff, Reply-To = cliente. Niente riga Officina. */
+/** Invio richiesta assistenza Moments: email allo staff, Reply-To = cliente. Nessun ticket Officina. */
 async function handleMomentSupportNotify(request, env) {
   const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
   if (!jwt) return cors(json({ error: "Accesso richiesto" }, 401));
@@ -799,26 +799,51 @@ async function handleMomentSupportNotify(request, env) {
     slug ? `Slug: ${slug}` : ""
   ].filter(Boolean);
   const text = [
-    "Richiesta assistenza Moments",
+    "Email di assistenza KhamaKey Moments",
     "",
     ...metaLines,
     `Oggetto: ${safeSubject}`,
     "",
     description,
     "",
-    "Rispondi a questa email: il messaggio arriva al cliente. Non serve Officina."
+    "Rispondi a questa email: il messaggio arriva al cliente."
   ].join("\n");
-  const html = `<div style="font-family:Arial,sans-serif;line-height:1.5;color:#172036">
-    <h2 style="margin:0 0 12px">Richiesta assistenza Moments</h2>
-    <p style="margin:0 0 12px;padding:10px 12px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px">
-      <strong>Rispondi a questa email</strong> per scrivere al cliente (${escapeHtml(customerEmail)}). Non serve Officina.
-    </p>
-    <p><strong>Cliente:</strong> ${escapeHtml(customerEmail)}<br>
-    ${page ? `<strong>Pagina:</strong> ${escapeHtml(page)}<br>` : ""}
-    ${slug ? `<strong>Slug:</strong> ${escapeHtml(slug)}<br>` : ""}
-    <strong>Oggetto:</strong> ${escapeHtml(safeSubject)}</p>
-    <pre style="white-space:pre-wrap;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:14px;font:inherit">${escapeHtml(description)}</pre>
-  </div>`;
+  const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
+  const wordmarkUrl = `${pagesBase}/khamakey-moments-wordmark.png`;
+  const html = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;margin:0;padding:0">
+  <tr>
+    <td align="center" style="padding:24px 12px">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#FFF9F5;border-radius:22px;overflow:hidden">
+        <tr>
+          <td style="background:#071A3C;padding:22px 28px;text-align:center">
+            <img src="${escapeHtml(wordmarkUrl)}" width="180" alt="KhamaKey Moments" style="display:block;margin:0 auto;width:180px;height:auto;border:0">
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:28px 32px 8px;font-family:Georgia,'Times New Roman',serif;color:#071A3C">
+            <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C">Assistenza</p>
+            <h1 style="margin:10px 0 0;font-size:24px;line-height:1.3;font-weight:normal">Nuova email da un cliente.</h1>
+            <p style="margin:16px 0 0;padding:12px 14px;background:#F3E3DE;border-radius:12px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#18202F">
+              Rispondi a questa email per scrivere a <strong>${escapeHtml(customerEmail)}</strong>.
+            </p>
+            <p style="margin:18px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#18202F">
+              <strong>Cliente:</strong> ${escapeHtml(customerEmail)}<br>
+              ${page ? `<strong>Pagina:</strong> ${escapeHtml(page)}<br>` : ""}
+              ${slug ? `<strong>Slug:</strong> ${escapeHtml(slug)}<br>` : ""}
+              <strong>Oggetto:</strong> ${escapeHtml(safeSubject)}
+            </p>
+            <p style="margin:18px 0 0;white-space:pre-wrap;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.65;color:#18202F">${escapeHtml(description)}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 32px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#8a6a70">
+            KhamaKey Moments · assistenza via email
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`;
 
   try {
     await sendResendEmail(env, {

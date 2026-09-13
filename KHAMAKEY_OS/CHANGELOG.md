@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v265 + Worker v232 — assistenza solo email (2026-09-13)** — Pages + Worker
+  - Account → Assistenza: «Invia email», risposta sull’indirizzo dell’account. Niente ticket, niente Officina in UI.
+  - Mail allo staff: look Moments; Reply-To = cliente. Fallback `info@khamakeymoments.com`.
 - **Worker v231 — menu pubblico non salva la sezione nell’URL (2026-09-13)** — Worker
   - Click sul menu: scorri, ma l’indirizzo resta `/m/slug`. Dopo aggiornamento pagina + PIN si riapre la copertina, non l’ultima sezione.
   - I link email con hash (RSVP, lettera) continuano a portare alla sezione.

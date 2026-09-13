@@ -16,7 +16,7 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=251";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=252";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=218";
@@ -1264,11 +1264,7 @@ function renderAccountPanels(){
           <button type="submit" class="primary" id="momentSupportSendBtn">${esc(t("account.support.send"))}</button>
         </form>
         <p class="status" id="momentSupportStatus" aria-live="polite"></p>
-        <p class="support-fallback">${esc(t("account.support.fallback"))} <a href="mailto:${esc(inbox)}">${esc(inbox)}</a></p>
-        <div class="support-mail-actions">
-          <a class="ghost" id="momentSupportMailBtn" href="#">${esc(t("account.support.mail_cta"))}</a>
-          <button type="button" class="ghost" id="momentSupportCopyBtn">${esc(t("account.support.copy"))}</button>
-        </div>
+        <p class="support-fallback">${esc(t("account.support.fallback"))} <a href="${esc(momentSupportMailtoHref(row))}">${esc(inbox)}</a></p>
       </div>`;
     bindMomentSupportMailActions(row);
     return;
@@ -2017,19 +2013,6 @@ function bindMomentSupportMailActions(row){
   const status = document.getElementById("momentSupportStatus");
   const form = document.getElementById("momentSupportForm");
   const sendBtn = document.getElementById("momentSupportSendBtn");
-  const mailBtn = document.getElementById("momentSupportMailBtn");
-  const copyBtn = document.getElementById("momentSupportCopyBtn");
-  if(mailBtn){
-    mailBtn.setAttribute("href", momentSupportMailtoHref(row));
-  }
-  copyBtn?.addEventListener("click", async ()=>{
-    try{
-      await navigator.clipboard.writeText(MOMENT_SUPPORT_INBOX);
-      setStatus(status, t("account.support.copied"), "ok");
-    }catch{
-      setStatus(status, t("account.support.copy_fail"), "error");
-    }
-  });
   form?.addEventListener("submit", async (event)=>{
     event.preventDefault();
     const subject = String(new FormData(form).get("subject") || "").trim();
@@ -2064,7 +2047,8 @@ function bindMomentSupportMailActions(row){
       form.reset();
       const subjectInput = form.querySelector("[name=subject]");
       if(subjectInput) subjectInput.value = t("account.support.mail_subject", { slug: slug ? ` · ${slug}` : "" });
-      setStatus(status, t("account.support.sent"), "ok");
+      const replyTo = String(currentUser?.email || "").trim();
+      setStatus(status, t("account.support.sent", { email: replyTo || MOMENT_SUPPORT_INBOX }), "ok");
     }catch(err){
       setStatus(status, err?.message || t("account.support.send_fail"), "error");
     }finally{

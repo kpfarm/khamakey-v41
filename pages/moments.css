@@ -96,6 +96,36 @@ body.session-pending #momentsApp{display:none}
 .auth-tabs button:hover{color:var(--navy);border-color:var(--navy)}
 .auth-tabs button.active{background:var(--navy);color:#fff;border-color:var(--navy);box-shadow:0 4px 12px rgba(27,42,94,0.15)}
 .auth-form{display:grid;gap:12px}
+.invite-banner{
+  margin:0 0 14px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:#ECFDF5;
+  border:1px solid #A7F3D0;
+  color:#14532D;
+  font-size:.86rem;
+  line-height:1.45;
+  font-weight:650;
+}
+body.invite-join .auth-steps{display:none}
+.auth-form.is-invite-signup .signup-steps,
+.auth-form.is-invite-signup [data-signup-panel="1"],
+.auth-form.is-invite-signup .signup-invite-hide,
+.auth-form.is-invite-signup #signupPrevStep{display:none!important}
+.editors-invite-form{display:grid;gap:12px;margin:4px 0 8px}
+.editors-invite-form .primary{justify-self:start}
+.editors-slot{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 14px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--soft);
+}
+.editors-slot strong{display:block;color:var(--navy);word-break:break-word}
+.editors-slot .field-hint{margin:2px 0 0}
 .form-intro h2{font-size:1.35rem;margin-bottom:4px}
 .form-intro p{margin:0;color:var(--muted);font-size:.84rem}
 .signup-confirm-email{margin:10px 0 0;font-size:.95rem;font-weight:800;color:var(--navy);word-break:break-all}

@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-12** (galleria foto intera Worker v228)
+> Ultimo aggiornamento: **2026-09-13** (invito 1 editor, SQL v174 / Moments v263 / Worker v229)
 
 ### Fonte di verità versioni
 
@@ -98,7 +98,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Cosa | Quando | Dove | Cosa non fare |
 |------|--------|------|----------------|
 | **Dati societari + P.IVA** su Privacy e Termini | Quando esiste partita IVA (e sede / ragione sociale confermati) | `pages/moments-privacy.html`, `moments-terms.html`, `moments-privacy-en.html`, `moments-terms-en.html` — titolare, indirizzo, P.IVA/CF. Poi bump `?v=` legale se serve | Non inventare numeri o ragione sociale. Non togliere il disclaimer «da completare / revisione legale». In conflitto vince l’italiano. |
-| **Ticket clienti (piccoli bug)** | Uno alla volta, con reproduce | `docs/33` | Copertina selfie ✅ v254–v255. Contatore/scroll ✅ v256/v221. Video upload silenzioso ✅ v257/v222. Limite video **90 MB** ✅ v258/v223/SQL v173. Sogni/obiettivi cerchi+contrasto ✅ v259/v224. Ingresso spiegazioni ✅ v260. Contrasto card/PIN/liste ✅ v261/v225. Assistenza email-only ✅ v262/v226. Emoji/icone nascoste dal fill ✅ v227. Galleria senza ritaglio ✅ v228. NFC/upload restano sacri |
+| **Ticket clienti (piccoli bug)** | Uno alla volta, con reproduce | `docs/33` | Copertina selfie ✅ v254–v255. Contatore/scroll ✅ v256/v221. Video upload silenzioso ✅ v257/v222. Limite video **90 MB** ✅ v258/v223/SQL v173. Sogni/obiettivi cerchi+contrasto ✅ v259/v224. Ingresso spiegazioni ✅ v260. Contrasto card/PIN/liste ✅ v261/v225. Assistenza email-only ✅ v262/v226. Emoji/icone nascoste dal fill ✅ v227. Galleria senza ritaglio ✅ v228. Invito 1 editor ✅ v263/v229/SQL v174. NFC/upload restano sacri. Guide cliente da aggiornare dopo. |
 
 ---
 
@@ -107,11 +107,11 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v228-gallery-full** | Galleria: foto intera + sfondo sfuocato (niente ritaglio). Emoji/icone visibili. Assistenza email. |
-| **Moments editor** | **v262** | Form Assistenza → email. CSS `moments.css?v=256`. |
+| **Worker NFC** | **v229-page-invite** | Invito 1 co-editor (email). Upload: titolare o invitato accettato. Galleria foto intera resta. |
+| **Moments editor** | **v263** | Account → Prodotti: invito 1 persona. Signup da `?invite=` senza NFC. CSS `moments.css?v=257`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
-| **SQL Supabase Moments** | **≥ v173 (prod)** | v173 `max_video_mb` 90 applicata 2026-09-05; v172 salva ottimistico; v171 video 50MB (superseded). |
+| **SQL Supabase Moments** | **≥ v174 (prod)** | v174 invito editor (cap 1) applicata 2026-09-13; v173 `max_video_mb` 90; v172 salva ottimistico. |
 | **Prossima release piattaforma** | **collegare Stripe** sui `moments_plus` / `moments_pro` | Prezzi già in seed (€4,90/€39 Plus · €9,90/€79 Pro). |
 
 ---

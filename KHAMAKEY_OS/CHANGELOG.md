@@ -8,6 +8,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v263 + Worker v229 + SQL v174 — invito 1 editor (2026-09-13)** — Pages + Worker + SQL
+  - Il titolare (chi ha attivato il codice) può invitare **una** persona sulla stessa pagina. Tetto alzabile dopo (`moment_page_editor_cap()`).
+  - L’invitato ha account proprio, vede la pagina in elenco, usa lo stesso Salva e lo stesso upload. Non invita altri, non cancella la pagina, non diventa titolare.
+  - Signup da link email **senza codice NFC**, solo con token valido. Quote/NFC/`/m/` restano sull’evento.
+  - Guide e info cliente: da aggiornare in un passo successivo.
 - **Worker v228 — galleria foto intera (2026-09-12)** — Worker
   - Ticket: le foto in galleria (es. Parigi) venivano ritagliate nel riquadro fisso.
   - Card galleria e lettera: tutta la foto visibile, sfondo sfuocato come copertina. Niente ritaglio automatico. **＋** resta per lo zoom. Video nel frame: `contain` (niente taglio). Tappe/journey invariate.

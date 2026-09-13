@@ -8,7 +8,7 @@
   <link rel="icon" href="khamakey-favicon.png">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="moments.css?v=256">
+  <link rel="stylesheet" href="moments.css?v=257">
 </head>
 <body class="session-pending">
   <main class="moments-boot" id="momentsBoot" aria-live="polite">
@@ -40,6 +40,7 @@
             <button type="button" data-set-locale="en" aria-pressed="false" translate="no">EN</button>
           </div>
         </div>
+        <div id="momentInviteBanner" class="invite-banner" hidden></div>
         <div class="auth-tabs" id="authTabs" role="tablist">
           <button class="active" type="button" data-auth-tab="login" data-i18n="auth.tab.login">Accedi</button>
           <button type="button" data-auth-tab="signup" data-i18n="auth.tab.signup">Crea account</button>
@@ -127,9 +128,9 @@
                 </button>
               </span>
             </label>
-            <label><span data-i18n="auth.signup.page">Nome pagina</span><input id="momentsSignupTitle" type="text" data-i18n-placeholder="auth.signup.page.ph" placeholder="Esempio Il nostro ricordo" required></label>
-            <p class="field-hint activation-code-type" id="momentsSignupTypeHint" hidden></p>
-            <label><span data-i18n="auth.signup.pin">PIN pagina (per aprire il link)</span>
+            <label class="signup-invite-hide"><span data-i18n="auth.signup.page">Nome pagina</span><input id="momentsSignupTitle" type="text" data-i18n-placeholder="auth.signup.page.ph" placeholder="Esempio Il nostro ricordo" required></label>
+            <p class="field-hint activation-code-type signup-invite-hide" id="momentsSignupTypeHint" hidden></p>
+            <label class="signup-invite-hide"><span data-i18n="auth.signup.pin">PIN pagina (per aprire il link)</span>
               <input id="momentsSignupPin" type="text" inputmode="numeric" autocomplete="new-password" data-i18n-placeholder="auth.signup.pin.ph" placeholder="Esempio 1234" minlength="4" required>
               <span class="field-hint" data-i18n="auth.signup.pin.hint">Scegli un PIN da 4 cifre o più. Lo userai per aprire la pagina collegata all’NFC.</span>
             </label>
@@ -139,7 +140,7 @@
             </label>
             <div class="signup-actions">
               <button type="button" class="ghost" id="signupPrevStep" data-i18n="auth.signup.back">Indietro</button>
-              <button type="submit" class="primary" data-i18n="auth.signup.submit">Crea account e attiva</button>
+              <button type="submit" class="primary" id="momentsSignupSubmit" data-i18n="auth.signup.submit">Crea account e attiva</button>
             </div>
           </div>
         </form>
@@ -247,6 +248,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=262"></script>
+  <script type="module" src="moments.js?v=263"></script>
 </body>
 </html>

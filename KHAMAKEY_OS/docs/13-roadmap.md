@@ -106,7 +106,7 @@
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
-| 2026-09-12 | Cursor | **Worker v228**: galleria mostra la foto intera (sfondo sfuocato, niente ritaglio) |
+| 2026-09-13 | Cursor | **Moments v263 / Worker v229 / SQL v174**: invito 1 co-editor (stesso editor/upload; tetto alzabile). Guide cliente dopo. |
 | 2026-09-07 | Cursor | **Worker v227**: emoji/icone sulle card visibili (fill contrasto non le nasconde più) |
 | 2026-09-06 | Cursor | **Moments v262 / Worker v226**: assistenza form → email; Reply da Gmail (niente Officina) |
 | 2026-09-06 | Cursor | **Moments v261 / Worker v225**: contrasto card, PIN primo tap, liste intro-only |

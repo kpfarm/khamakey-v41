@@ -16,7 +16,7 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=249";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=250";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=218";
@@ -374,6 +374,177 @@ function readPendingMomentActivation(){
 function clearPendingMomentActivation(){
   try{ sessionStorage.removeItem(PENDING_MOMENT_KEY); }catch{ /* ignore */ }
 }
+
+const PENDING_INVITE_KEY = "khamakey_pending_moment_invite";
+let pendingInviteToken = "";
+let invitePeek = null;
+let inviteSignupMode = false;
+
+function normalizeInviteToken(value){
+  const token = String(value || "").trim().toLowerCase();
+  return /^[a-f0-9]{32,128}$/.test(token) ? token : "";
+}
+
+function readInviteTokenFromSearch(){
+  return normalizeInviteToken(new URLSearchParams(location.search).get("invite") || "");
+}
+
+function storePendingInvite(token){
+  const clean = normalizeInviteToken(token);
+  if(!clean) return;
+  pendingInviteToken = clean;
+  try{ sessionStorage.setItem(PENDING_INVITE_KEY, clean); }catch{ /* ignore */ }
+}
+
+function readPendingInvite(){
+  try{ return normalizeInviteToken(sessionStorage.getItem(PENDING_INVITE_KEY) || ""); }
+  catch{ return ""; }
+}
+
+function clearPendingInvite(){
+  pendingInviteToken = "";
+  invitePeek = null;
+  try{ sessionStorage.removeItem(PENDING_INVITE_KEY); }catch{ /* ignore */ }
+}
+
+function momentsInviteRedirectTo(token){
+  const base = momentsAuthRedirectTo();
+  try{
+    const url = new URL(base);
+    url.searchParams.set("invite", token);
+    return url.toString();
+  }catch{
+    const join = String(base).includes("?") ? "&" : "?";
+    return `${base}${join}invite=${encodeURIComponent(token)}`;
+  }
+}
+
+function isOwnedMoment(row){
+  if(!row) return false;
+  if(adminMode) return true;
+  if(row.my_role === "editor") return false;
+  if(row.my_role === "owner") return true;
+  return String(row.owner_email || "").trim().toLowerCase() === String(currentUser?.email || "").trim().toLowerCase();
+}
+
+async function peekMomentInvite(token){
+  const clean = normalizeInviteToken(token);
+  if(!clean) return { ok:false, status:"invalid" };
+  const { data, error } = await supabase.rpc("peek_moment_page_invite", { p_token: clean });
+  if(error) throw error;
+  return data && typeof data === "object" ? data : { ok:false, status:"invalid" };
+}
+
+async function acceptMomentInvite(token){
+  const { data, error } = await supabase.rpc("accept_moment_page_invite", { p_token: normalizeInviteToken(token) });
+  if(error) throw error;
+  return data;
+}
+
+function inviteBannerCopy(peek){
+  const status = String(peek?.status || "invalid");
+  const title = String(peek?.page_title || "").trim() || t("menu.page_fallback");
+  const inviter = String(peek?.invited_by_email || "").trim();
+  const email = String(peek?.invited_email || "").trim();
+  if(status === "pending"){
+    return `${t("auth.invite.banner.pending", { inviter, title })} ${email ? t("auth.invite.banner.email", { email }) : ""}`.trim();
+  }
+  if(status === "accepted") return t("auth.invite.banner.accepted", { email });
+  if(status === "expired") return t("auth.invite.banner.expired");
+  if(status === "revoked") return t("auth.invite.banner.revoked");
+  if(status === "mismatch") return t("auth.invite.mismatch", { email });
+  return t("auth.invite.banner.invalid");
+}
+
+function renderInviteBanner(peek, extraStatus){
+  const node = document.getElementById("momentInviteBanner");
+  if(!node) return;
+  const view = extraStatus ? { ...(peek || {}), status: extraStatus } : peek;
+  if(!view){
+    node.hidden = true;
+    node.textContent = "";
+    document.body.classList.remove("invite-join");
+    return;
+  }
+  node.hidden = false;
+  node.textContent = inviteBannerCopy(view);
+  document.body.classList.toggle("invite-join", view.status === "pending" || view.status === "accepted");
+}
+
+function setInviteSignupMode(on, peek){
+  inviteSignupMode = Boolean(on);
+  signupForm?.classList.toggle("is-invite-signup", inviteSignupMode);
+  const email = document.getElementById("momentsSignupEmail");
+  const code = document.getElementById("momentsSignupCode");
+  const title = document.getElementById("momentsSignupTitle");
+  const pin = document.getElementById("momentsSignupPin");
+  const submit = document.getElementById("momentsSignupSubmit");
+  const introTitle = signupForm?.querySelector(".form-intro h2");
+  const introLead = signupForm?.querySelector(".form-intro p");
+  if(inviteSignupMode){
+    setSignupStep(2);
+    if(email){
+      email.value = String(peek?.invited_email || "").trim();
+      email.readOnly = true;
+    }
+    [code, title, pin].forEach(el => { if(el) el.required = false; });
+    if(introTitle) introTitle.textContent = t("auth.invite.signup.title");
+    if(introLead) introLead.textContent = t("auth.invite.signup.lead");
+    if(submit) submit.textContent = t("auth.invite.signup.submit");
+  }else{
+    if(email) email.readOnly = false;
+    [code, title, pin].forEach(el => { if(el) el.required = true; });
+    if(signupForm) applyChromeI18n(signupForm);
+  }
+}
+
+async function bootstrapInviteFromUrl(){
+  const token = readInviteTokenFromSearch() || readPendingInvite();
+  if(!token) return;
+  storePendingInvite(token);
+  try{
+    invitePeek = await peekMomentInvite(token);
+  }catch(error){
+    console.error(error);
+    invitePeek = { ok:false, status:"invalid" };
+  }
+  renderInviteBanner(invitePeek);
+  if(invitePeek?.status === "pending"){
+    const loginEmail = document.getElementById("momentsEmail");
+    if(loginEmail && invitePeek.invited_email) loginEmail.value = invitePeek.invited_email;
+    setInviteSignupMode(true, invitePeek);
+  }
+}
+
+async function tryAcceptPendingInvite(user){
+    const token = pendingInviteToken || readPendingInvite() || readInviteTokenFromSearch()
+      || normalizeInviteToken(user?.user_metadata?.pending_invite_token || "");
+  if(!token || adminMode) return;
+  const userEmail = String(user?.email || "").trim().toLowerCase();
+  try{
+    const peek = invitePeek?.status ? invitePeek : await peekMomentInvite(token);
+    invitePeek = peek;
+    const invited = String(peek?.invited_email || "").trim().toLowerCase();
+    if(invited && invited !== userEmail){
+      renderInviteBanner(peek, "mismatch");
+      return;
+    }
+    if(peek?.status !== "pending" && peek?.status !== "accepted"){
+      renderInviteBanner(peek);
+      return;
+    }
+    const result = await acceptMomentInvite(token);
+    if(result?.ok){
+      clearPendingInvite();
+      setInviteSignupMode(false);
+      renderInviteBanner(null);
+      if(result.event_id) activeId = result.event_id;
+      await loadObjects({ render:true });
+    }
+  }catch(error){
+    console.error(error);
+  }
+}
 let editorDirty = false;
 let savedEditorSnapshot = "";
 let lastPreviewHash = "";
@@ -728,6 +899,11 @@ function resetSignupForm(){
     hint.hidden = true;
     hint.textContent = "";
   }
+  if(inviteSignupMode && invitePeek?.status === "pending"){
+    setInviteSignupMode(true, invitePeek);
+  }else{
+    setInviteSignupMode(false);
+  }
 }
 
 function refreshSignupConfirmEmail(){
@@ -781,6 +957,8 @@ function applyUrlParams(){
     setSignupStep(1);
   }
   if(params.get("tab") === "signup") showAuthTab("signup");
+  const invite = readInviteTokenFromSearch();
+  if(invite) storePendingInvite(invite);
 }
 
 async function activateCode({ code, title, pin }){
@@ -1105,6 +1283,7 @@ function renderAccountPanels(){
       </div>
       <div class="objects-switcher" id="objectsSwitcher">${renderObjectsListHtml()}</div>
     </div>
+    ${renderEditorsCardHtml()}
     <div class="account-panel-card">
       <h3>${esc(rows.length ? t("account.activate.another") : t("account.activate.first"))}</h3>
       <p>${esc(t("account.activate.lead"))}</p>
@@ -1112,6 +1291,7 @@ function renderAccountPanels(){
     </div>`;
   bindObjectSwitcher(accountPanels);
   bindActivationForm(document.getElementById("accountActivationForm"), document.getElementById("accountActivationStatus"));
+  bindMomentEditorsCard();
 }
 
 function refreshAccountMenu(){
@@ -1193,6 +1373,7 @@ async function showApp(user){
   try{
     await loadObjects();
     if(!adminMode) await tryPendingActivation(user);
+    if(!adminMode) await tryAcceptPendingInvite(user);
     warmUploadAuth(supabase);
     // Prefetch HEIC in idle: non blocca lista/editor
     if(typeof requestIdleCallback === "function"){
@@ -1572,10 +1753,132 @@ function renderObjectsListHtml(){
     }
     return `<button class="object-pick ${row.id === activeId ? "active" : ""}" type="button" data-object-id="${esc(row.id)}">
       ${esc(state.title || row.slug)}
-      <span>${esc(row.nfc_code || "NFC")} · ${row.public_visible ? t("menu.status.published") : t("menu.status.draft")}</span>
+      <span>${esc(row.nfc_code || "NFC")} · ${row.public_visible ? t("menu.status.published") : t("menu.status.draft")}${isOwnedMoment(row) ? "" : ` · ${t("account.products.role.editor")}`}</span>
       <span class="type-pill">${typeLabelChrome(state.type)}</span>
     </button>`;
   }).join("");
+}
+
+function editorsTargetRow(){
+  const active = rows.find(row=>row.id === activeId);
+  if(active) return active;
+  return rows.find(isOwnedMoment) || rows[0] || null;
+}
+
+function renderEditorsCardHtml(){
+  if(adminMode) return "";
+  const row = editorsTargetRow();
+  if(!row) return "";
+  if(!isOwnedMoment(row)){
+    return `<div class="account-panel-card" id="momentEditorsCard">
+      <h3>${esc(t("account.editors.title"))}</h3>
+      <p>${esc(t("account.editors.guest_lead", {
+        title: row.title || row.slug || t("menu.page_fallback"),
+        owner: row.owner_email || "—"
+      }))}</p>
+    </div>`;
+  }
+  return `<div class="account-panel-card" id="momentEditorsCard">
+    <h3>${esc(t("account.editors.title"))}</h3>
+    <p>${esc(t("account.editors.lead"))}</p>
+    <div id="momentEditorsList"><p class="field-hint">${esc(t("account.editors.loading"))}</p></div>
+    <p class="status" id="momentEditorsStatus" aria-live="polite"></p>
+  </div>`;
+}
+
+function bindMomentEditorsCard(){
+  const card = document.getElementById("momentEditorsCard");
+  const list = document.getElementById("momentEditorsList");
+  if(!card || !list) return;
+  const row = editorsTargetRow();
+  if(!row || !isOwnedMoment(row)) return;
+  refreshMomentEditorsList(row);
+}
+
+async function refreshMomentEditorsList(row){
+  const list = document.getElementById("momentEditorsList");
+  const status = document.getElementById("momentEditorsStatus");
+  if(!list) return;
+  try{
+    const { data, error } = await supabase.rpc("list_moment_page_editors", { p_event_id: row.id });
+    if(error) throw error;
+    const members = Array.isArray(data) ? data : [];
+    const occupant = members.find(item=>item.status === "accepted" || item.status === "pending");
+    if(occupant){
+      const label = occupant.status === "accepted" ? t("account.editors.accepted") : t("account.editors.pending");
+      list.innerHTML = `<div class="editors-slot">
+        <div>
+          <strong>${esc(occupant.email || "")}</strong>
+          <span class="field-hint">${esc(label)}</span>
+        </div>
+        <button type="button" class="ghost" id="momentEditorRevokeBtn">${esc(t("account.editors.revoke"))}</button>
+      </div>`;
+      document.getElementById("momentEditorRevokeBtn")?.addEventListener("click", async()=>{
+        if(status) setStatus(status, t("account.editors.sending"));
+        try{
+          const { error: revokeError } = await supabase.rpc("revoke_moment_page_editor", {
+            p_event_id: row.id,
+            p_email: occupant.email
+          });
+          if(revokeError) throw revokeError;
+          if(status) setStatus(status, t("account.editors.revoke_ok"), "ok");
+          await refreshMomentEditorsList(row);
+        }catch(err){
+          if(status) setStatus(status, err?.message || t("account.editors.fail"), "error");
+        }
+      });
+      return;
+    }
+    list.innerHTML = `<form id="momentInviteForm" class="editors-invite-form">
+      <label><span>${esc(t("account.editors.email"))}</span>
+        <input type="email" name="email" autocomplete="email" required placeholder="nome@email.com">
+      </label>
+      <button type="submit" class="primary" id="momentInviteSendBtn">${esc(t("account.editors.send"))}</button>
+    </form>
+    <p class="field-hint">${esc(t("account.editors.empty"))}</p>`;
+    document.getElementById("momentInviteForm")?.addEventListener("submit", async event=>{
+      event.preventDefault();
+      const email = String(new FormData(event.currentTarget).get("email") || "").trim().toLowerCase();
+      const sendBtn = document.getElementById("momentInviteSendBtn");
+      if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        if(status) setStatus(status, t("account.editors.need_email"), "error");
+        return;
+      }
+      if(sendBtn){
+        sendBtn.disabled = true;
+        sendBtn.textContent = t("account.editors.sending");
+      }
+      if(status) setStatus(status, t("account.editors.sending"));
+      try{
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        const token = sessionData?.session?.access_token;
+        if(sessionError || !token) throw new Error(t("account.editors.session_fail"));
+        const response = await fetch(`${WORKER_BASE_URL}/api/moment/invite`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ event_id: row.id, email })
+        });
+        const payload = await response.json().catch(()=>({}));
+        if(response.status === 429) throw new Error(t("account.editors.rate"));
+        if(!response.ok) throw new Error(payload.error || t("account.editors.fail"));
+        if(status) setStatus(status, t("account.editors.sent", { email }), "ok");
+        await refreshMomentEditorsList(row);
+      }catch(err){
+        if(status) setStatus(status, err?.message || t("account.editors.fail"), "error");
+      }finally{
+        if(sendBtn){
+          sendBtn.disabled = false;
+          sendBtn.textContent = t("account.editors.send");
+        }
+      }
+    });
+  }catch(error){
+    console.error(error);
+    list.innerHTML = `<p class="field-hint">${esc(error?.message || t("account.editors.fail"))}</p>`;
+  }
 }
 
 function renderActivationFormHtml(formId = "editorActivationForm",statusId = "editorActivationStatus",prefillCode = ""){
@@ -1882,16 +2185,31 @@ async function openMomentProduct(nextId, { resetPanel = false } = {}){
 }
 
 async function loadObjects({ render = true } = {}){
-  let query = supabase
-    .from("moment_events")
-    .select("id,title,slug,event_type,moment_type,status,description,nfc_code,pin_enabled,public_visible,owner_email,created_at,updated_at")
-    .order("created_at",{ascending:false});
+  let data = [];
+  let error = null;
   if(adminMode && adminEventId){
-    query = query.eq("id",adminEventId);
-  }else if(!adminMode){
-    query = query.eq("owner_email",(currentUser?.email || "").toLowerCase());
+    const result = await supabase
+      .from("moment_events")
+      .select("id,title,slug,event_type,moment_type,status,description,nfc_code,pin_enabled,public_visible,owner_email,created_at,updated_at")
+      .eq("id",adminEventId)
+      .order("created_at",{ascending:false});
+    data = (result.data || []).map(row=>({ ...row, my_role:"owner" }));
+    error = result.error;
+  }else{
+    const result = await supabase.rpc("list_my_moment_events");
+    data = result.data;
+    error = result.error;
+    if(error){
+      console.warn("list_my_moment_events", error);
+      const fallback = await supabase
+        .from("moment_events")
+        .select("id,title,slug,event_type,moment_type,status,description,nfc_code,pin_enabled,public_visible,owner_email,created_at,updated_at")
+        .eq("owner_email",(currentUser?.email || "").toLowerCase())
+        .order("created_at",{ascending:false});
+      data = (fallback.data || []).map(row=>({ ...row, my_role:"owner" }));
+      error = fallback.error;
+    }
   }
-  const { data,error } = await query;
   if(error){
     console.error(error);
     renderEmptyState(adminMode ? "Oggetto non trovato o permessi admin insufficienti." : "Oggetti non disponibili. Verifica account e codice prodotto.");
@@ -5233,6 +5551,10 @@ loginForm?.addEventListener("submit",async event=>{
 });
 
 document.getElementById("signupNextStep")?.addEventListener("click",async()=>{
+  if(inviteSignupMode){
+    setSignupStep(2);
+    return;
+  }
   const code = normalizeCode(document.getElementById("momentsSignupCode").value);
   if(!isValidMomentCode(code)) return setStatus(statusNode,t("auth.msg.code_invalid_example"),"error");
   setStatus(statusNode,t("auth.msg.code_checking"));
@@ -5258,18 +5580,52 @@ document.getElementById("signupNextStep")?.addEventListener("click",async()=>{
   }
 });
 
-document.getElementById("signupPrevStep")?.addEventListener("click",()=>setSignupStep(1));
+document.getElementById("signupPrevStep")?.addEventListener("click",()=>{
+  if(inviteSignupMode) return;
+  setSignupStep(1);
+});
 
 signupForm?.addEventListener("submit",async event=>{
   event.preventDefault();
   const email = document.getElementById("momentsSignupEmail").value.trim().toLowerCase();
+  const legalOk = Boolean(document.getElementById("momentsSignupLegal")?.checked);
+  if(!legalOk) return setStatus(statusNode,t("auth.msg.legal_required"),"error");
+  const inviteToken = inviteSignupMode ? (pendingInviteToken || readPendingInvite()) : "";
+  if(inviteSignupMode){
+    const expected = String(invitePeek?.invited_email || "").trim().toLowerCase();
+    if(expected && expected !== email) return setStatus(statusNode,t("auth.invite.mismatch", { email: expected }),"error");
+    if(!inviteToken) return setStatus(statusNode,t("auth.invite.banner.invalid"),"error");
+    storePendingInvite(inviteToken);
+    const uiLocale = readSignupUiLocale();
+    setUiLocale(uiLocale);
+    setStatus(statusNode,t("auth.msg.signup_busy"));
+    const { data,error } = await supabase.auth.signUp({
+      email,
+      password:document.getElementById("momentsSignupPassword").value,
+      options:{
+        emailRedirectTo:momentsInviteRedirectTo(inviteToken),
+        data:{
+          full_name:document.getElementById("momentsSignupName").value.trim(),
+          product_area:"moments",
+          pending_invite_token:inviteToken,
+          [UI_LOCALE_USER_META_KEY]: uiLocale
+        }
+      }
+    });
+    if(error) return setStatus(statusNode,error.message || t("auth.msg.signup_fail"),"error");
+    if(data.session?.user){
+      await showApp(data.session.user);
+      setStatus(statusNode,t("auth.invite.accept_ok"),"ok");
+    }else{
+      showSignupConfirm(email);
+    }
+    return;
+  }
   const code = normalizeCode(document.getElementById("momentsSignupCode").value);
   const title = document.getElementById("momentsSignupTitle").value.trim();
   const pin = document.getElementById("momentsSignupPin").value.trim();
-  const legalOk = Boolean(document.getElementById("momentsSignupLegal")?.checked);
   if(!isValidMomentCode(code)) return setStatus(statusNode,t("auth.msg.code_invalid"),"error");
   if(!title) return setStatus(statusNode,t("auth.msg.page_title_required"),"error");
-  if(!legalOk) return setStatus(statusNode,t("auth.msg.legal_required"),"error");
   try{ validatePin(pin); }catch(error){ return setStatus(statusNode,error.message,"error"); }
   storePendingMomentActivation({ code, title, pin });
   const uiLocale = readSignupUiLocale();
@@ -5399,6 +5755,10 @@ function syncLangSwitchers(locale = getUiLocale()){
   }
   run("accountMenu", ()=>{ if(currentUser) refreshAccountMenu(); });
   run("accountPanels", ()=>{ if(appView === "account") renderAccountPanels(); });
+  run("invite", ()=>{
+    if(invitePeek) renderInviteBanner(invitePeek);
+    if(inviteSignupMode) setInviteSignupMode(true, invitePeek);
+  });
   run("empty", ()=>{ if(document.getElementById("emptyActivationForm")) renderEmptyState(); });
 }
 
@@ -5442,6 +5802,7 @@ function bindLangSwitchers(){
 bindLangSwitchers();
 
 try{
+  await bootstrapInviteFromUrl();
   const { data,error } = await supabase.auth.getSession();
   if(error) throw error;
   if(data.session?.user){
@@ -5449,7 +5810,9 @@ try{
   }else{
     showAuth();
     const params = new URLSearchParams(location.search);
-    if(!params.get("code") && params.get("tab") !== "signup"){
+    if(pendingInviteToken){
+      showAuthTab("login");
+    }else if(!params.get("code") && params.get("tab") !== "signup"){
       showAuthTab("login");
     }
   }

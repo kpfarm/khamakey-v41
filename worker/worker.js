@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v228-gallery-full";
+const WORKER_VERSION = "v229-page-invite";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -343,6 +343,9 @@ export default {
       }
       if (url.pathname === "/api/moment/support-notify" && request.method === "POST") {
         return handleMomentSupportNotify(request, env);
+      }
+      if (url.pathname === "/api/moment/invite" && request.method === "POST") {
+        return handleMomentPageInvite(request, env);
       }
       if (url.pathname === "/api/support/reply" && request.method === "POST") {
         return handleSupportReply(request, env);
@@ -833,6 +836,102 @@ async function handleMomentSupportNotify(request, env) {
   }
 }
 
+async function handleMomentPageInvite(request, env) {
+  const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  if (!jwt) return cors(json({ error: "Accesso richiesto" }, 401));
+  const user = await supabaseUser(env, jwt);
+  if (!user?.email) return cors(json({ error: "Sessione non valida" }, 401));
+
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object") return cors(json({ error: "Richiesta non valida" }, 400));
+  const eventId = String(body.event_id || "").trim();
+  const inviteeEmail = String(body.email || "").trim().toLowerCase();
+  if (!eventId) return cors(json({ error: "Pagina obbligatoria." }, 400));
+  if (!validEmail(inviteeEmail)) return cors(json({ error: "Email non valida." }, 400));
+
+  if (!await checkRateLimit(env, `moment-invite:${user.id || user.email}`, 5, 60, null, { failClosed: true })) {
+    return tooManyRequests();
+  }
+  if (!env.RESEND_API_KEY) {
+    return cors(json({ error: "Invio email non configurato. Riprova più tardi." }, 503));
+  }
+
+  let invited;
+  try {
+    invited = await rpcAsUser(env, jwt, "invite_moment_page_editor", {
+      p_event_id: eventId,
+      p_email: inviteeEmail
+    });
+  } catch (error) {
+    console.error("invite_moment_page_editor", error);
+    const detail = String(error?.message || "Invito non riuscito.").slice(0, 280);
+    const status = Number(error?.status) === 401 ? 401 : 400;
+    return cors(json({ error: detail }, status));
+  }
+
+  const token = String(invited?.invite_token || "").trim();
+  if (!token) {
+    return cors(json({ error: "Invito creato senza link. Revoca e riprova." }, 500));
+  }
+
+  const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
+  const inviteUrl = `${pagesBase}/moments.html?invite=${encodeURIComponent(token)}`;
+  const pageTitle = String(invited?.page_title || "").trim() || "una pagina KhamaKey Moments";
+  const inviter = String(invited?.invited_by_email || user.email).trim();
+  const expiresAt = invited?.expires_at ? String(invited.expires_at) : "";
+  const subject = `Sei stato invitato a modificare «${pageTitle.slice(0, 80)}»`;
+  const text = [
+    `Ciao,`,
+    ``,
+    `${inviter} ti invita a modificare «${pageTitle}» su KhamaKey Moments.`,
+    `Questa email è per ${inviteeEmail}.`,
+    ``,
+    `Apri l'invito:`,
+    inviteUrl,
+    ``,
+    expiresAt ? `Il link scade il ${expiresAt}.` : "",
+    `Non serve un codice NFC: crea (o usa) l'account con questa email, poi potrai salvare e caricare file sulla stessa pagina.`,
+    ``,
+    `— Team KhamaKey Moments`
+  ].filter(line => line !== undefined).join("\n");
+  const html = `<div style="font-family:Arial,sans-serif;line-height:1.55;color:#172036;max-width:560px">
+    <h2 style="margin:0 0 12px;color:#1b2a5e">Invito a modificare una pagina</h2>
+    <p style="margin:0 0 12px">${escapeHtml(inviter)} ti invita a modificare «${escapeHtml(pageTitle)}» su KhamaKey Moments.</p>
+    <p style="margin:0 0 16px">Questa email è per <strong>${escapeHtml(inviteeEmail)}</strong>. Non serve un codice NFC.</p>
+    <p style="margin:0 0 18px"><a href="${escapeHtml(inviteUrl)}" style="background:#1b2a5e;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;display:inline-block">Apri l'invito</a></p>
+    ${expiresAt ? `<p style="margin:0 0 12px;color:#64748B;font-size:13px">Il link scade il ${escapeHtml(expiresAt)}.</p>` : ""}
+    <p style="margin:0;color:#64748B;font-size:13px">— Team KhamaKey Moments</p>
+  </div>`;
+
+  try {
+    await sendResendEmail(env, {
+      to: inviteeEmail,
+      subject,
+      html,
+      text,
+      tags: [{ name: "type", value: "moments_page_invite" }]
+    });
+  } catch (error) {
+    console.error("moment-invite-email", error);
+    try {
+      await rpcAsUser(env, jwt, "revoke_moment_page_editor", {
+        p_event_id: eventId,
+        p_email: inviteeEmail
+      });
+    } catch (revokeError) {
+      console.error("moment-invite-revoke-after-mail-fail", revokeError);
+    }
+    return cors(json({ error: "Invio email non riuscito. L'invito non è stato tenuto." }, 500));
+  }
+
+  return cors(json({
+    ok: true,
+    email: inviteeEmail,
+    status: "pending",
+    expires_at: invited?.expires_at || null
+  }));
+}
+
 // Rate limiting su Postgres (check_rate_limit, sql/khamakey-rate-limit-v76.sql): niente infra nuova.
 // Default fail-open: se il limiter non risponde, non blocchiamo RSVP/PIN/guestbook.
 // Upload media usa failClosed:true — meglio rifiutare che accettare flood senza tetto.
@@ -1104,15 +1203,21 @@ async function verifyMediaScope(env, jwt, scope, scopeId) {
     Authorization: `Bearer ${jwt}`
   };
   if (cleanScope === "moments") {
-    const accessResponse = await fetch(
-      `${env.SUPABASE_URL}/rest/v1/moment_events?id=eq.${encodeURIComponent(cleanId)}&select=id,owner_email`,
-      { headers }
-    );
-    if (!accessResponse.ok) return false;
-    const accessRows = await accessResponse.json();
-    if (!Array.isArray(accessRows) || !accessRows.length) return false;
-    const ownerEmail = String(accessRows[0].owner_email || "").trim().toLowerCase();
-    if (ownerEmail && ownerEmail === email) return true;
+    try {
+      const allowed = await rpcAsUser(env, jwt, "moment_can_edit_event", { p_event_id: cleanId });
+      if (allowed === true) return true;
+    } catch (error) {
+      console.error("moment_can_edit_event", error);
+      const accessResponse = await fetch(
+        `${env.SUPABASE_URL}/rest/v1/moment_events?id=eq.${encodeURIComponent(cleanId)}&select=id,owner_email`,
+        { headers }
+      );
+      if (accessResponse.ok) {
+        const accessRows = await accessResponse.json();
+        const ownerEmail = String(accessRows?.[0]?.owner_email || "").trim().toLowerCase();
+        if (ownerEmail && ownerEmail === email) return true;
+      }
+    }
     if (await verifyPlatformAdmin(env, jwt)) return true;
     return false;
   }

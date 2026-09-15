@@ -13,7 +13,7 @@
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]
-- **GDPR Moments** da fare: opt-in marketing assente; inventario [[docs/34-gdpr-moments]]
+- **GDPR Moments** da fare a fasi, **senza toccare la web app** finché non si apre la Fase 2: [[docs/34-gdpr-moments]] (Fase 0 attiva).
 - Titoli/etichette in pagina = testo cliente. «Prepara tutto per me» segue la lingua UI. → [[docs/27-moments-i18n-rules]]
 - Email conferma/reset IT/EN: template in [[docs/32-moments-auth-email]] (dashboard, già incollati)
 - **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — ticket editor chiusi in tabella; guida/GDPR in backlog
@@ -95,7 +95,7 @@ KHAMAKEY_OS/
 | **i18n Moments — completamento sicurezza-first** | [`docs/30-moments-i18n-completion-plan.md`](docs/30-moments-i18n-completion-plan.md) |
 | **i18n Moments IT/EN — regole** | [`docs/27-moments-i18n-rules.md`](docs/27-moments-i18n-rules.md) · ADR [`decisions/007-moments-editor-i18n.md`](decisions/007-moments-editor-i18n.md) |
 | **Controllo software / lacune** | [`docs/33-controllo-software-lacune.md`](docs/33-controllo-software-lacune.md) |
-| **GDPR Moments (inventario)** | [`docs/34-gdpr-moments.md`](docs/34-gdpr-moments.md) |
+| **GDPR Moments (inventario + ops)** | [`docs/34-gdpr-moments.md`](docs/34-gdpr-moments.md) · registro richieste [`docs/34-gdpr-richieste.md`](docs/34-gdpr-richieste.md) |
 
 ## Prompt operativi
 

@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-15** (backlog: guida cliente dopo; GDPR Moments `docs/34` — no marketing opt-in)
+> Ultimo aggiornamento: **2026-09-15** (GDPR Fase 0: ops senza toccare la web app; guida cliente dopo)
 
 ### Fonte di verità versioni
 
@@ -174,7 +174,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Smoke test wizard 5 settori Business | Checklist aperta | Bassa |
 | Hardening ops (rate-limit fail-open PIN, drop overload `get_public_moment` 2-arg) | Documentato audit SE — **non toccare runtime** finché Moments è stabile | Media |
 | **Dati societari / P.IVA** su Privacy + Termini (IT e EN) | In attesa P.IVA reale — testo legale già online con disclaimer | Alta (ops, non runtime) |
-| **GDPR Moments** (marketing + registro consensi) | Inventario `docs/34` — **non implementato**. Signup ha solo Termini/Privacy (gate UI). Niente opt-in newsletter. | Alta (ops/legal, non runtime finché non si decide) |
+| **GDPR Moments** (marketing + registro consensi) | Fase 0 ops (`docs/34`) — **web app intatta**. Niente newsletter. Opt-in = Fase 2 solo con via. | Alta (ops/legal, non runtime) |
 | **Guida cliente / dove si invita** | v266 insufficiente per i clienti — **fare dopo**, non ora | Bassa (UX, dopo GDPR/ops) |
 | **KhamaKey OS** | Fase 1 — SSOT versioni riallineato 2026-07-20 | Alta |
 
@@ -193,7 +193,7 @@ Health live 2026-07-20 (`link.khamakeymoments.com/health`): Worker **v144**, Res
 | 4 | Working tree spesso sporco (Business WIP + demo) | Rischio commit accidentali | Non mescolare con fix Moments; commit mirati |
 | 5 | IDOR Business fix non E2E dual-account | Confidenza media | Test manuale due utenti quando possibile |
 | 6 | Privacy/Termini senza P.IVA / sede / ragione sociale | Testo legale incompleto (IT+EN) | Attendere dati reali; poi aggiornare le 4 pagine. Non inventare |
-| 7 | GDPR Moments incompleto | Niente opt-in marketing; consenso Termini/Privacy non registrato (solo checkbox) | `docs/34` — implementare solo con via esplicito; non mandare newsletter |
+| 7 | GDPR Moments incompleto | Niente opt-in marketing; consenso Termini/Privacy non registrato (solo checkbox) | Fase 0: `docs/34` + registro richieste. **Non** toccare editor/NFC. Fase 1 = Privacy HTML con via. |
 | 8 | Guida «Come funziona» / invito poco chiara ai clienti | I clienti non capiscono dove si invita | Fare **dopo**; non restyling ora |
 
 RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments).
@@ -206,7 +206,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 2. **Basi per ~10k pezzi** — checklist ops [`docs/24-pronti-per-10k-moments.md`](docs/24-pronti-per-10k-moments.md) (smoke, monitoraggio, supporto, media/NFC)
 3. **Ops secrets / Auth** — Stripe, Resend webhook, leaked-password
 4. **Igiene multi-agente** — lock aggiornati, commit solo file del task
-5. **GDPR Moments** — inventario `docs/34`; marketing opt-in solo con via esplicito
+5. **GDPR Moments** — Fase 0 (`docs/34`): niente mail promo; web app non toccata
 6. Business — in stand-by / progetto separato; non mescolare con Moments
 7. Guida cliente / dove si invita — **dopo**, non ora
 
@@ -214,9 +214,9 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-15:** Editor **v266** · Worker **v232-support-mail**.  
-> Segnato: guida invito **dopo** (non intuitiva per i clienti). GDPR Moments: `docs/34` (manca marketing opt-in). **P.IVA** in attesa.  
-> Altri ticket clienti: uno alla volta. Smoke NFC/upload su pezzo reale prima di ogni fix.
+> **Oggi 2026-09-15:** Editor **v266** · Worker **v232-support-mail** — **invariati**.  
+> GDPR: Fase 0 (niente promo; procedura Gmail; registro trattamenti). Web app non toccata.  
+> Segnato: guida invito **dopo**. **P.IVA** in attesa.
 
 ---
 

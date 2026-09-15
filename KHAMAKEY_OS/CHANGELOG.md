@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Backlog 2026-09-15 — GDPR Fase 0 senza toccare la web app** — solo vault
+  - Niente newsletter/broadcast. Registro trattamenti + procedura diritti via Gmail. Diario richieste `docs/34-gdpr-richieste.md`.
+  - Editor, Worker, SQL, signup **invariati**. Fase 1 = due frasi Privacy (via esplicito). Fase 2 = opt-in (via esplicito).
 - **Backlog 2026-09-15 — guida cliente dopo + GDPR Moments** — solo vault
   - Guida «Come funziona» / dove si invita: v266 non basta per i clienti → **fare dopo**, non ora.
   - GDPR: checkbox Termini+Privacy al signup già c’è (non registrata). **Manca** opt-in email marketing. Inventario `docs/34-gdpr-moments.md`. Nessun cambio runtime.

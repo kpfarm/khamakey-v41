@@ -8,7 +8,7 @@
   <link rel="icon" href="khamakey-favicon.png">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="moments.css?v=258">
+  <link rel="stylesheet" href="moments.css?v=259">
 </head>
 <body class="session-pending">
   <main class="moments-boot" id="momentsBoot" aria-live="polite">
@@ -134,10 +134,19 @@
               <input id="momentsSignupPin" type="text" inputmode="numeric" autocomplete="new-password" data-i18n-placeholder="auth.signup.pin.ph" placeholder="Esempio 1234" minlength="4" required>
               <span class="field-hint" data-i18n="auth.signup.pin.hint">Scegli un PIN da 4 cifre o più. Lo userai per aprire la pagina collegata all’NFC.</span>
             </label>
+            <div class="consent-stack">
             <label class="consent-check">
               <input id="momentsSignupLegal" type="checkbox" required>
               <span data-i18n-html="auth.signup.consent">Accetto i <a href="./moments-terms.html" target="_blank" rel="noopener">Termini di servizio</a> e ho letto la <a href="./moments-privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span>
             </label>
+            <label class="consent-check optional">
+              <input id="momentsSignupMarketing" type="checkbox">
+              <span>
+                <span data-i18n-html="auth.signup.marketing">Acconsento a ricevere <strong>novità e offerte</strong> KhamaKey Moments via email (facoltativo). <a href="./moments-privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+                <span class="consent-note" data-i18n="auth.signup.marketing.note">Oggi non inviamo campagne promozionali. Se acconsenti, conserviamo il sì per quando lo faremo. Puoi ritirarlo in qualsiasi momento da Account.</span>
+              </span>
+            </label>
+            </div>
             <div class="signup-actions">
               <button type="button" class="ghost" id="signupPrevStep" data-i18n="auth.signup.back">Indietro</button>
               <button type="submit" class="primary" id="momentsSignupSubmit" data-i18n="auth.signup.submit">Crea account e attiva</button>
@@ -248,6 +257,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=266"></script>
+  <script type="module" src="moments.js?v=267"></script>
 </body>
 </html>

@@ -162,8 +162,17 @@ textarea{min-height:86px;resize:vertical}
 .signup-actions{display:flex;gap:8px;align-items:center}
 .signup-actions .primary{margin-left:auto}
 .consent-check{display:flex;align-items:flex-start;gap:10px;margin:12px 0 4px;font-size:.78rem;line-height:1.45;color:var(--muted);font-weight:600}
+.consent-stack{display:flex;flex-direction:column;gap:10px;margin:12px 0 4px}
+.consent-stack .consent-check{margin:0}
+.consent-check.optional{font-weight:500}
+.consent-check .consent-note{display:block;margin-top:4px;font-weight:500;opacity:.92}
 .consent-check input{width:18px;height:18px;margin-top:2px;flex:0 0 auto}
 .consent-check a{color:var(--navy);font-weight:800}
+.account-consent-box{margin-top:18px;padding-top:16px;border-top:1px solid rgba(20,32,67,.1)}
+.account-consent-box h4{margin:0 0 6px;font-size:.92rem}
+.account-consent-box p{margin:0 0 10px;font-size:.8rem;line-height:1.45;color:var(--muted)}
+.account-consent-box .consent-check{margin:0}
+.account-consent-status{margin:8px 0 0;font-size:.76rem;font-weight:600;color:var(--muted)}
 .auth-legal{display:flex;justify-content:center;gap:16px;margin:14px 0 0;padding-top:12px;border-top:1px solid var(--border);font-size:.78rem;font-weight:700}
 .auth-legal a{color:var(--navy);text-decoration:none}
 .auth-legal a:hover{text-decoration:underline}

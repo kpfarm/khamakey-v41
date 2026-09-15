@@ -57,7 +57,7 @@ Altri ticket restano in coda, uno alla volta.
 | 9 | Stripe Plus/Pro | Secrets non in Worker | Pagamenti | ⏸ prodotto, non bug editor |
 | 10 | Leaked password | Piano Auth Free — non disponibile | Ops | ⏸ documentato |
 | 11 | Guida cliente / dove si invita | v266 non è intuitiva per i clienti (ok per chi ha fatto l’app) | Basso se solo copy | ⏸ **dopo**, non ora |
-| 12 | GDPR Moments | Opt-in marketing assente; consenso legale solo gate UI. P.IVA a parte (#7) | Medio (signup + Privacy IT/EN) | ⏸ Fase 0 [[34-gdpr-moments]] attiva, **web app non toccata**. Fase 1–2 solo con via |
+| 12 | GDPR Moments | Opt-in marketing assente; consenso legale solo gate UI. P.IVA a parte (#7) | Medio (signup + Privacy IT/EN) | ✅ 2026-09-15 v267 / SQL v175 — resta P.IVA e niente campagne |
 
 ---
 

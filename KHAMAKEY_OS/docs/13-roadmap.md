@@ -106,6 +106,7 @@
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
+| 2026-09-15 | Cursor | **Moments v267 / SQL v175**: consenso marketing facoltativo, registro, revoca in Profilo. Worker/NFC/Salva invariati. Niente newsletter. |
 | 2026-09-15 | Cursor | Vincolo: prodotti in vendita/uso — tocchi web app additivi, smoke live, revert se si rompe (`CODEX-COLLAB` regola 6). |
 | 2026-09-15 | Cursor | GDPR Fase 0: ops senza toccare la web app (`docs/34` + registro richieste). Niente promo. Signup/editor/Worker invariati. |
 | 2026-09-15 | Cursor | Segnato: guida invito **dopo** (v266 non intuitiva per i clienti). GDPR Moments: inventario `docs/34` — manca marketing opt-in; Termini/Privacy al signup già c’è. Nessun runtime. |

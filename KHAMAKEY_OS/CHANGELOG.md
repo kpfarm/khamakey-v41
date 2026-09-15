@@ -8,6 +8,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v267 + SQL v175 — consenso marketing (2026-09-15)** — Pages + SQL
+  - Signup: spunta **facoltativa** novità/offerte (non pre-spuntata, distinta da Termini/Privacy).
+  - Registro append-only `moment_user_consents` (RLS own). Sync al login se la conferma email arriva dopo. Se il registro fallisce, l’account parte lo stesso.
+  - Account → Profilo: vedere, dare, ritirare. Account già esistenti: nessun sì assunto.
+  - Privacy/Termini IT+EN aggiornati. Worker, NFC, Salva, upload **invariati**. Niente newsletter.
 - **Regola 2026-09-15 — web app in vendita** — vault
   - Qualunque tocco futuro (anche GDPR Fase 2): additivo, fail-safe, smoke login/signup/Salva/`/m/`, revert immediato. `CODEX-COLLAB` regola 6.
 - **Backlog 2026-09-15 — GDPR Fase 0 senza toccare la web app** — solo vault

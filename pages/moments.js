@@ -16,7 +16,7 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=253";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=254";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=219";
@@ -881,6 +881,183 @@ function syncLegalHrefs(){
   });
 }
 
+const MOMENTS_PRIVACY_VERSION = "2026-09-15";
+const CONSENT_META = {
+  legal: "kk_legal",
+  legalAt: "kk_legal_at",
+  marketing: "kk_mkt",
+  marketingAt: "kk_mkt_at",
+  policy: "kk_policy",
+  source: "kk_consent_src"
+};
+const CONSENT_SOURCES = new Set(["signup_nfc", "signup_invite", "account"]);
+
+function readSignupMarketingOptIn(){
+  return Boolean(document.getElementById("momentsSignupMarketing")?.checked);
+}
+
+function signupConsentMeta({ marketing, source }){
+  const now = new Date().toISOString();
+  const origin = CONSENT_SOURCES.has(source) ? source : "signup_nfc";
+  return {
+    [CONSENT_META.legal]: "1",
+    [CONSENT_META.legalAt]: now,
+    [CONSENT_META.marketing]: marketing ? "1" : "0",
+    [CONSENT_META.marketingAt]: now,
+    [CONSENT_META.policy]: MOMENTS_PRIVACY_VERSION,
+    [CONSENT_META.source]: origin
+  };
+}
+
+function parseConsentMeta(user){
+  const meta = user?.user_metadata || {};
+  const marketingFlag = String(meta[CONSENT_META.marketing] || "");
+  const hasSignup = String(meta[CONSENT_META.legal] || "") === "1" || marketingFlag === "1" || marketingFlag === "0";
+  const source = CONSENT_SOURCES.has(meta[CONSENT_META.source]) ? meta[CONSENT_META.source] : "signup_nfc";
+  return {
+    hasSignup,
+    legal: String(meta[CONSENT_META.legal] || "") === "1",
+    marketing: marketingFlag === "1",
+    at: String(meta[CONSENT_META.marketingAt] || meta[CONSENT_META.legalAt] || "").trim(),
+    policy: String(meta[CONSENT_META.policy] || MOMENTS_PRIVACY_VERSION),
+    source
+  };
+}
+
+function formatConsentDate(iso){
+  if(!iso) return "";
+  const date = new Date(iso);
+  if(Number.isNaN(date.getTime())) return "";
+  const dateLocale = getUiLocale() === "en" ? "en-GB" : "it-IT";
+  return date.toLocaleDateString(dateLocale);
+}
+
+async function latestMomentConsent(type){
+  const { data, error } = await supabase
+    .from("moment_user_consents")
+    .select("granted, created_at, source, policy_version")
+    .eq("consent_type", type)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if(error) throw error;
+  return data || null;
+}
+
+async function insertMomentConsentRows(rows){
+  if(!rows.length) return;
+  const { error } = await supabase.from("moment_user_consents").insert(rows);
+  if(error) throw error;
+}
+
+async function syncMomentConsentsFromMetadata(user){
+  try{
+    const parsed = parseConsentMeta(user);
+    if(!parsed.hasSignup) return;
+    const { data, error } = await supabase
+      .from("moment_user_consents")
+      .select("consent_type")
+      .limit(20);
+    if(error) throw error;
+    const types = new Set((data || []).map(row => row.consent_type));
+    const rows = [];
+    if(!types.has("legal") && parsed.legal){
+      rows.push({
+        consent_type: "legal",
+        granted: true,
+        source: parsed.source,
+        policy_version: parsed.policy
+      });
+    }
+    if(!types.has("marketing")){
+      rows.push({
+        consent_type: "marketing",
+        granted: parsed.marketing,
+        source: parsed.source,
+        policy_version: parsed.policy
+      });
+    }
+    if(rows.length) await insertMomentConsentRows(rows);
+  }catch(error){
+    console.warn("moment consents sync skipped", error);
+  }
+}
+
+async function loadMarketingConsentState(){
+  try{
+    const row = await latestMomentConsent("marketing");
+    if(row){
+      return { known: true, granted: Boolean(row.granted), at: row.created_at };
+    }
+  }catch(_error){}
+  const parsed = parseConsentMeta(currentUser);
+  if(parsed.hasSignup){
+    return { known: true, granted: parsed.marketing, at: parsed.at };
+  }
+  return { known: false, granted: false, at: "" };
+}
+
+function marketingConsentStatusCopy(state){
+  if(!state?.known) return t("account.profile.marketing.none");
+  const date = formatConsentDate(state.at) || "—";
+  if(state.granted) return t("account.profile.marketing.on", { date });
+  return t("account.profile.marketing.off", { date });
+}
+
+async function recordMarketingConsent(granted){
+  await insertMomentConsentRows([{
+    consent_type: "marketing",
+    granted: Boolean(granted),
+    source: "account",
+    policy_version: MOMENTS_PRIVACY_VERSION
+  }]);
+  try{
+    const { data } = await supabase.auth.updateUser({
+      data: {
+        [CONSENT_META.marketing]: granted ? "1" : "0",
+        [CONSENT_META.marketingAt]: new Date().toISOString(),
+        [CONSENT_META.policy]: MOMENTS_PRIVACY_VERSION
+      }
+    });
+    if(data?.user) currentUser = data.user;
+  }catch(_error){}
+}
+
+function bindAccountMarketingConsent(){
+  const input = document.getElementById("accountMarketingOptIn");
+  const status = document.getElementById("accountMarketingStatus");
+  if(!input) return;
+  input.disabled = true;
+  loadMarketingConsentState().then(state=>{
+    input.checked = Boolean(state.granted);
+    if(status) status.textContent = marketingConsentStatusCopy(state);
+    input.disabled = false;
+  }).catch(()=>{
+    input.disabled = false;
+    if(status) status.textContent = t("account.profile.marketing.none");
+  });
+  if(input.dataset.bound === "1") return;
+  input.dataset.bound = "1";
+  input.addEventListener("change", async()=>{
+    const next = input.checked;
+    input.disabled = true;
+    try{
+      await recordMarketingConsent(next);
+      if(status) status.textContent = marketingConsentStatusCopy({
+        known: true,
+        granted: next,
+        at: new Date().toISOString()
+      });
+    }catch(error){
+      console.warn(error);
+      input.checked = !next;
+      if(status) status.textContent = t("account.profile.marketing.save_fail");
+    }finally{
+      input.disabled = false;
+    }
+  });
+}
+
 function readSignupUiLocale(){
   return normalizeUiLocale(document.getElementById("momentsSignupLocale")?.value || getUiLocale());
 }
@@ -1224,10 +1401,20 @@ function renderAccountPanels(){
           <a href="${esc(legalPageHref("privacy"))}" target="_blank" rel="noopener">${esc(t("account.profile.privacy"))}</a>
           <a href="${esc(legalPageHref("terms"))}" target="_blank" rel="noopener">${esc(t("account.profile.terms"))}</a>
         </nav>
+        <div class="account-consent-box">
+          <h4>${esc(t("account.profile.marketing.title"))}</h4>
+          <p>${esc(t("account.profile.marketing.lead"))}</p>
+          <label class="consent-check optional">
+            <input id="accountMarketingOptIn" type="checkbox">
+            <span>${esc(t("account.profile.marketing.label"))}</span>
+          </label>
+          <p class="account-consent-status" id="accountMarketingStatus" aria-live="polite"></p>
+        </div>
       </div>`;
     document.getElementById("accountHubLogout")?.addEventListener("click",()=>{
       document.getElementById("momentsLogout")?.click();
     });
+    bindAccountMarketingConsent();
     return;
   }
   if(activeAccountTab === "plan"){
@@ -1362,6 +1549,7 @@ async function showApp(user){
   finishSessionBoot();
   currentUser = user;
   await syncUiLocaleWithAccount(user);
+  void syncMomentConsentsFromMetadata(user);
   auth.hidden = true;
   app.hidden = false;
   refreshAccountMenu();
@@ -5568,6 +5756,7 @@ signupForm?.addEventListener("submit",async event=>{
   const email = document.getElementById("momentsSignupEmail").value.trim().toLowerCase();
   const legalOk = Boolean(document.getElementById("momentsSignupLegal")?.checked);
   if(!legalOk) return setStatus(statusNode,t("auth.msg.legal_required"),"error");
+  const marketingOptIn = readSignupMarketingOptIn();
   const inviteToken = inviteSignupMode ? (pendingInviteToken || readPendingInvite()) : "";
   if(inviteSignupMode){
     const expected = String(invitePeek?.invited_email || "").trim().toLowerCase();
@@ -5586,7 +5775,8 @@ signupForm?.addEventListener("submit",async event=>{
           full_name:document.getElementById("momentsSignupName").value.trim(),
           product_area:"moments",
           pending_invite_token:inviteToken,
-          [UI_LOCALE_USER_META_KEY]: uiLocale
+          [UI_LOCALE_USER_META_KEY]: uiLocale,
+          ...signupConsentMeta({ marketing: marketingOptIn, source: "signup_invite" })
         }
       }
     });
@@ -5619,7 +5809,8 @@ signupForm?.addEventListener("submit",async event=>{
         product_area:"moments",
         pending_moment_code:code,
         pending_moment_title:title,
-        [UI_LOCALE_USER_META_KEY]: uiLocale
+        [UI_LOCALE_USER_META_KEY]: uiLocale,
+        ...signupConsentMeta({ marketing: marketingOptIn, source: "signup_nfc" })
       }
     }
   });

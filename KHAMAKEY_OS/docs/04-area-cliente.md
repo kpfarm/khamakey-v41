@@ -53,7 +53,7 @@ moments.html?code=XXX → attivazione
         │
         ▼
 Signup / login Supabase
-        │     (checkbox Termini+Privacy obbligatoria; **niente** opt-in marketing — `docs/34`)
+        │     (Termini+Privacy obbligatori; novità/offerte facoltative — `docs/34`)
         ▼
 Wizard onboarding (3 step)
         │

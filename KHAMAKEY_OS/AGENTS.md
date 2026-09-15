@@ -10,6 +10,7 @@ Ogni agente deve leggere [`00-START-HERE.md`](00-START-HERE.md) e completare l'h
 
 1. **Mai cancellare o perdere dati utente** — nessuna migrazione, refactor o pulizia tocca dati reali (pagine, eventi, ordini, messaggi, media, clienti) senza conferma esplicita dell'utente umano.
 2. **Mai indebolire un controllo di sicurezza esistente** (CSP, RLS, rate limit, verifica firma webhook) come effetto collaterale di un altro task. Ogni cambiamento deve dare un beneficio reale o risolvere un bug — mai il contrario, nemmeno "temporaneamente per far funzionare qualcos'altro".
+3. **Il prodotto è in vendita e in uso** — non crashare, non introdurre bug di passaggio. Tocchi alla web app additivi, fail-safe, smoke sul percorso live, revert immediato se qualcosa si rompe.
 
 Dettaglio completo, esempi ed eccezioni dichiarate: [`../CODEX-COLLAB.md`](../CODEX-COLLAB.md) → sezione "Regole assolute".
 

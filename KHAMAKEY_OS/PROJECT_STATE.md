@@ -202,7 +202,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Priorità correnti (Moments-first)
 
-1. **Non rompere Moments** — zero refactor runtime senza smoke
+1. **Non rompere Moments** — prodotto in vendita e in uso; tocchi additivi, smoke sul percorso live, revert se si rompe
 2. **Basi per ~10k pezzi** — checklist ops [`docs/24-pronti-per-10k-moments.md`](docs/24-pronti-per-10k-moments.md) (smoke, monitoraggio, supporto, media/NFC)
 3. **Ops secrets / Auth** — Stripe, Resend webhook, leaked-password
 4. **Igiene multi-agente** — lock aggiornati, commit solo file del task

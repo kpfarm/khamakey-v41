@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Regola 2026-09-15 — web app in vendita** — vault
+  - Qualunque tocco futuro (anche GDPR Fase 2): additivo, fail-safe, smoke login/signup/Salva/`/m/`, revert immediato. `CODEX-COLLAB` regola 6.
 - **Backlog 2026-09-15 — GDPR Fase 0 senza toccare la web app** — solo vault
   - Niente newsletter/broadcast. Registro trattamenti + procedura diritti via Gmail. Diario richieste `docs/34-gdpr-richieste.md`.
   - Editor, Worker, SQL, signup **invariati**. Fase 1 = due frasi Privacy (via esplicito). Fase 2 = opt-in (via esplicito).

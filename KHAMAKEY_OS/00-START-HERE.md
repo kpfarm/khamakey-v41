@@ -75,6 +75,7 @@ Le leggi complete sono in `CODEX-COLLAB.md`. In breve:
 4. Mai chiudere una sessione con modifiche non committate senza segnalarlo.
 5. Se tocchi `/p/`, `/m/` o `/k/`, rispetta il contratto 4 punti: editor, anteprima, whitelist app, renderer Worker.
 6. Ogni agente deve lasciare agli altri una traccia leggibile: cosa ha cambiato, cosa non ha toccato, cosa resta in sospeso.
+7. Il prodotto è in vendita e in uso: tocchi alla web app additivi e fail-safe; smoke sul percorso live; se si rompe, revert immediato.
 
 ## Se trovi documenti in conflitto
 

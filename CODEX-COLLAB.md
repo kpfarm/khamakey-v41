@@ -41,6 +41,15 @@ Il prodotto Moments è: **chip NFC in oggetto → attivazione → editor pagina 
 
 Foto, video, audio, allegati e copertine sono il contenuto vivo delle pagine NFC. **Tutti** i percorsi di upload devono restare intatti: Moments e Business, editor e Worker (`POST /api/media/upload` → R2), replace, delete, DnD, compressione, limiti piano, MIME Safari/iOS. Vietato cambiare handler, endpoint, bucket, form-data, progress o cleanup “di passaggio” per i18n/UI/refactor. Consentito solo testo UI (label, status, errori) senza toccare la logica. Smoke obbligatorio dopo ogni slice che tocca un pannello media: carica un file reale, ricarica l’editor, verifica che resti in pagina pubblica. Fallisce → revert immediato.
 
+### 6. Prodotti in vendita e in uso — non crashare, non introdurre bug di passaggio
+
+KhamaKey Moments è **live**: pezzi già venduti, clienti che attivano, editano e aprono `/m/` ogni giorno. Qualunque tocco alla web app (anche GDPR, copy, signup) deve essere:
+
+- **Additivo** — si aggiunge; non si riscrive login, attivazione, Salva, NFC, upload, renderer
+- **Fail-safe** — se il pezzo nuovo manca o è spento, il percorso già in vendita continua a funzionare
+- **Minimo** — un intento per volta; niente refactor “già che ci siamo”
+- **Verificato** prima di chiudere: login, signup esistente (codice + invito se si tocca auth), Salva, una pagina `/m/` o `/k/` reale. Fallisce → **revert immediato**, non “sistemiamo dopo”
+
 ---
 
 ## Ingresso di un nuovo agente nel progetto (onboarding)

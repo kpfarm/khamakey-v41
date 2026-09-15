@@ -91,8 +91,22 @@ Niente altre riscritture. P.IVA resta in attesa. File: solo `moments-privacy.htm
 
 ## Fase 2 (prima volta che si tocca la web app — solo con via)
 
+I pezzi Moments sono **già venduti e usati**. Qui si tocca il signup: un errore blocca attivazioni vere. Vale la regola 6 di `CODEX-COLLAB.md`.
+
 Checkbox marketing **separata**, non obbligatoria, non pre-spuntata. Salvataggio additivo (metadata o tabella nuova). Account: off.  
-Fuori scope: NFC, Salva, upload, `/m/`, PIN, inviti RPC.
+Se il salvataggio consenso fallisce, **signup e attivazione devono comunque andare** (Termini+Privacy restano il gate).
+
+Fuori scope: NFC, Salva, upload, `/m/`, PIN, inviti RPC, Worker renderer.
+
+Smoke obbligatorio prima di chiudere (percorso reale, non solo locale):
+
+1. Login account esistente  
+2. Signup con codice NFC (senza spuntare marketing)  
+3. Signup da invito (stesso)  
+4. Salva editor  
+5. Apertura `/m/` o `/k/` di una pagina già in uso  
+
+Qualsiasi regressione → revert, non “aggiustiamo dopo”.
 
 ---
 

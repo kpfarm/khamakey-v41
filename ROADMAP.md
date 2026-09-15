@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-09-15 | Cursor | Vincolo: prodotti in vendita/uso — tocchi web app additivi, smoke live, revert se si rompe (`CODEX-COLLAB` regola 6). GDPR Fase 2 userà lo stesso criterio. |
 | 2026-09-15 | Cursor | GDPR Fase 0: ops senza toccare la web app (`docs/34` + registro richieste). Niente promo. Signup/editor/Worker invariati. |
 | 2026-09-15 | Cursor | Segnato: guida invito **dopo** (v266 non intuitiva per i clienti). GDPR Moments: inventario `docs/34` — manca marketing opt-in; Termini/Privacy al signup già c’è. Nessun runtime. |
 | 2026-09-13 | Cursor | **Moments v266**: guida Riepilogo dice dove si invita; CTA apre Prodotti → Chi modifica. |

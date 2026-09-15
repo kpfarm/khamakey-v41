@@ -120,6 +120,13 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 - [ ] Report analytics Moments vs Business
 - [ ] Export CSV prodotti / ordini
 
+## Promemoria prodotto (non ora)
+
+- [ ] **Guida cliente Moments** — dove si invita / Come funziona. v266 non è intuitiva per i clienti (ok per chi ha fatto l’app). Fare **dopo**.
+- [ ] **GDPR Moments** — consenso email marketing (opt-in, non pre-spuntato) + registro consensi. Inventario: `KHAMAKEY_OS/docs/34-gdpr-moments.md`. Checkbox Termini+Privacy al signup **già c’è**. Non mandare newsletter finché manca l’opt-in. Non inventare P.IVA.
+
+---
+
 ## Fase 5 — Produzione
 
 - [ ] Domini custom (`app.khamakey.com`, `nfc.khamakey.com`)
@@ -435,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-09-15 | Cursor | Segnato: guida invito **dopo** (v266 non intuitiva per i clienti). GDPR Moments: inventario `docs/34` — manca marketing opt-in; Termini/Privacy al signup già c’è. Nessun runtime. |
 | 2026-09-13 | Cursor | **Moments v266**: guida Riepilogo dice dove si invita; CTA apre Prodotti → Chi modifica. |
 | 2026-09-13 | Cursor | **Moments v265 / Worker v232**: Assistenza = email (form + Reply-To). UI senza ticket/Officina. |
 | 2026-09-13 | Cursor | **Worker v231**: menu `/m/` non salva `#sezione`; dopo PIN si torna in copertina. Hash email RSVP/lettera invariati. |

@@ -4,18 +4,19 @@
 > Ogni sessione AI inizia da qui.  
 > Vault Obsidian: apri **questa cartella** `KHAMAKEY_OS/` (o la root del repo). Dopo ogni fatto prodotto: [[PROJECT_STATE]] + [[CHANGELOG]] + [[docs/13-roadmap]].
 
-## Stato oggi (2026-09-12)
+## Stato oggi (2026-09-15)
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v262** | Assistenza: form → email staff |
-| Worker | **v228-gallery-full** | Galleria: foto intera + sfondo sfuocato |
+| Editor Moments | **v266** | Guida invito (ancora poco chiara ai clienti — fare dopo) |
+| Worker | **v232-support-mail** | Assistenza email; menu `/m/` senza hash sezione |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]
+- **GDPR Moments** da fare: opt-in marketing assente; inventario [[docs/34-gdpr-moments]]
 - Titoli/etichette in pagina = testo cliente. «Prepara tutto per me» segue la lingua UI. → [[docs/27-moments-i18n-rules]]
 - Email conferma/reset IT/EN: template in [[docs/32-moments-auth-email]] (dashboard, già incollati)
-- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — copertina, contatore/scroll, upload video, tetto 90 MB, sogni/obiettivi, ingresso spiegazioni, contrasto card, assistenza email, icone e galleria ritagliata chiusi; altri ticket in coda
+- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — ticket editor chiusi in tabella; guida/GDPR in backlog
 
 ---
 
@@ -94,6 +95,7 @@ KHAMAKEY_OS/
 | **i18n Moments — completamento sicurezza-first** | [`docs/30-moments-i18n-completion-plan.md`](docs/30-moments-i18n-completion-plan.md) |
 | **i18n Moments IT/EN — regole** | [`docs/27-moments-i18n-rules.md`](docs/27-moments-i18n-rules.md) · ADR [`decisions/007-moments-editor-i18n.md`](decisions/007-moments-editor-i18n.md) |
 | **Controllo software / lacune** | [`docs/33-controllo-software-lacune.md`](docs/33-controllo-software-lacune.md) |
+| **GDPR Moments (inventario)** | [`docs/34-gdpr-moments.md`](docs/34-gdpr-moments.md) |
 
 ## Prompt operativi
 

@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Backlog 2026-09-15 — guida cliente dopo + GDPR Moments** — solo vault
+  - Guida «Come funziona» / dove si invita: v266 non basta per i clienti → **fare dopo**, non ora.
+  - GDPR: checkbox Termini+Privacy al signup già c’è (non registrata). **Manca** opt-in email marketing. Inventario `docs/34-gdpr-moments.md`. Nessun cambio runtime.
 - **Moments v266 — guida: dove si invita (2026-09-13)** — Pages
   - «Come funziona» indica Account → Prodotti → Chi modifica. Pulsante **Invita a modificare** apre quella scheda.
 - **Moments v265 + Worker v232 — assistenza solo email (2026-09-13)** — Pages + Worker

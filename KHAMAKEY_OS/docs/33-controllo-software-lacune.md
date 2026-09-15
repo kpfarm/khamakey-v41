@@ -56,6 +56,8 @@ Altri ticket restano in coda, uno alla volta.
 | 8 | Auth email minori | Magic link, change email, invite (Moments usa conferma + reset) | Ops dashboard | ⏸ basso |
 | 9 | Stripe Plus/Pro | Secrets non in Worker | Pagamenti | ⏸ prodotto, non bug editor |
 | 10 | Leaked password | Piano Auth Free — non disponibile | Ops | ⏸ documentato |
+| 11 | Guida cliente / dove si invita | v266 non è intuitiva per i clienti (ok per chi ha fatto l’app) | Basso se solo copy | ⏸ **dopo**, non ora |
+| 12 | GDPR Moments | Opt-in marketing assente; consenso legale solo gate UI. P.IVA a parte (#7) | Medio (signup + Privacy IT/EN) | ⏸ inventario [[34-gdpr-moments]] — via esplicito prima di codice |
 
 ---
 

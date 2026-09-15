@@ -106,6 +106,7 @@
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
+| 2026-09-15 | Cursor | Segnato: guida invito **dopo** (v266 non intuitiva per i clienti). GDPR Moments: inventario `docs/34` — manca marketing opt-in; Termini/Privacy al signup già c’è. Nessun runtime. |
 | 2026-09-13 | Cursor | **Moments v266**: guida Riepilogo dice dove si invita; CTA apre Prodotti → Chi modifica. |
 | 2026-09-13 | Cursor | **Moments v265 / Worker v232**: Assistenza = email (form + Reply-To). UI senza ticket/Officina. |
 | 2026-09-13 | Cursor | **Worker v231**: menu `/m/` non salva `#sezione`; dopo PIN si torna in copertina. Hash email RSVP/lettera invariati. |

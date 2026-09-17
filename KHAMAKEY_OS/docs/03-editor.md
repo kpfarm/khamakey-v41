@@ -70,7 +70,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 ## Editor Moments
 
 ### Sezioni principali
-- **Ingresso editor (v278 preview / v276 / v275):** live clienti **v276**. Pack **v278** (preview): stessa logica, grafica Dopo; registrazione senza lead Business. Il blocco in Riepilogo è la **guida ad attivare e creare** (**Come si crea**). Schede = 4 passi: Copertina, Colori, Contenuti, Pubblica. **v271:** sezioni vuote = tre passi + Non succede. **v272–v273 Officina:** anteprima desktop visibile. QR/NFC `/m/` `/k/` = pagina ospite.
+- **Ingresso editor (v279 preview / v276 / v275):** live clienti **v276**. Pack **v279** (preview): stessa logica, grafica Dopo; registrazione con lead sul codice (niente Business) e senza hint vicino a Continua. Il blocco in Riepilogo è la **guida ad attivare e creare** (**Come si crea**). Schede = 4 passi: Copertina, Colori, Contenuti, Pubblica. **v271:** sezioni vuote = tre passi + Non succede. **v272–v273 Officina:** anteprima desktop visibile. QR/NFC `/m/` `/k/` = pagina ospite.
 - Copertina (v255 / Worker v220): `cover_fit` `cover` (riempi, default pagine già salvate) o `contain` (tutta la foto, **stessa foto sfuocata** a riempire il riquadro). Nuovo upload parte da tutta la foto. In «Riempi» si trascina; zoom 100–200% solo lì.
 - Sezioni evento (programma, storia, messaggi…)
 - Galleria media (foto, video, audio) — ogni riga ha **Cambia foto** e **Rimuovi** (v144)

@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v280 — registrazione mobile (2026-09-17)** — **preview Pages, non produzione**
+  - Lead: codice **all’interno** della confezione. Continua resta visibile sullo smartphone; niente blocco sui campi nascosti del passo 2.
+  - Worker, NFC, Salva, upload, SQL **invariati**. Live clienti resta v276.
 - **Moments v279 — registrazione: lead sì, hint Continua no (2026-09-17)** — **preview Pages, non produzione**
   - Sotto il titolo resta «Serve il codice Moments sulla confezione NFC» (niente Business). Tolto l’hint dei trattini vicino a Continua. CSS `?v=269`.
   - Worker, NFC, Salva, upload, SQL **invariati**. Live clienti resta v276.

@@ -442,7 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
-| 2026-09-17 | Cursor | **Moments v279 preview** (non produzione): lead codice senza Business; tolto hint vicino a Continua. Live clienti v276. |
+| 2026-09-17 | Cursor | **Moments v280 preview** (non produzione): codice dentro la confezione; Continua visibile su mobile. Live clienti v276. |
 | 2026-09-17 | Cursor | **Moments v277 preview** (non produzione): pack grafico Dopo — icone linea, copertina/colori/pubblica/accesso. Live clienti v276. Worker/NFC/Salva invariati. |
 | 2026-09-17 | Cursor | **Moments v276**: chrome editor (tipografia, 4 passi a linea, icone). Worker/NFC/Salva invariati. |
 | 2026-09-17 | Cursor | **Moments v275**: guida Come si crea = 4 passi (attivare + creare). Niente scheda Insieme. Worker/NFC/Salva invariati. |

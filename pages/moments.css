@@ -873,9 +873,42 @@ body.media-modal-open{overflow:hidden}
   .moments-app.account-mode > .account-hub{
     padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));
   }
-  .moments-auth{grid-template-columns:1fr}
-  .auth-brand{padding:24px 20px}
+  html:has(#momentsAuth:not([hidden])),
+  body:has(#momentsAuth:not([hidden])){
+    height:100%;
+    overflow:hidden;
+  }
+  .moments-auth{
+    grid-template-columns:1fr;
+    grid-template-rows:auto minmax(0,1fr);
+    height:100dvh;
+    max-height:100dvh;
+    overflow:hidden;
+  }
+  .auth-brand{
+    padding:14px 18px 10px;
+    justify-content:flex-start;
+    min-height:0;
+  }
+  .auth-brand .brand-logo{width:min(200px,72%);margin:0 0 8px}
+  .auth-brand h1{font-size:1.22rem;margin:0}
+  .auth-brand > p{display:none}
   .auth-steps{display:none}
+  .auth-panel{
+    display:block;
+    place-items:unset;
+    padding:12px 12px calc(16px + env(safe-area-inset-bottom,0px));
+    min-height:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .auth-card{width:100%;padding:22px 18px 16px}
+  #signupNextStep{
+    position:sticky;
+    bottom:0;
+    z-index:2;
+    width:100%;
+  }
   .section-title{font-size:1.15rem}
   .section-sub{font-size:.78rem}
   .detail-head{display:none}

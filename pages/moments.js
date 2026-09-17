@@ -16,7 +16,7 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=254";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=255";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=219";
@@ -881,7 +881,7 @@ function syncLegalHrefs(){
   });
 }
 
-const MOMENTS_PRIVACY_VERSION = "2026-09-15";
+const MOMENTS_PRIVACY_VERSION = "2026-09-17";
 const CONSENT_META = {
   legal: "kk_legal",
   legalAt: "kk_legal_at",
@@ -1054,6 +1054,89 @@ function bindAccountMarketingConsent(){
       if(status) status.textContent = t("account.profile.marketing.save_fail");
     }finally{
       input.disabled = false;
+    }
+  });
+}
+
+function eraseRpcMessage(error){
+  const raw = String(error?.message || error || "");
+  if(raw.includes("MOMENT_ERASE_EMAIL")) return t("account.profile.erase.email_mismatch");
+  if(raw.includes("MOMENT_ERASE_STAFF")) return t("account.profile.erase.staff");
+  if(raw.includes("MOMENT_ERASE_BUSINESS")) return t("account.profile.erase.business");
+  if(raw.includes("MOMENT_ERASE_AUTH")) return t("account.profile.erase.fail");
+  return t("account.profile.erase.fail");
+}
+
+async function downloadMomentAccountExport(){
+  const { data, error } = await supabase.rpc("export_my_moment_account");
+  if(error) throw error;
+  const payload = data && typeof data === "object" ? data : { exported_at: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const stamp = new Date().toISOString().slice(0, 10);
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `khamakey-moments-dati-${stamp}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
+}
+
+async function eraseMomentAccount(confirmEmail){
+  const { data, error } = await supabase.rpc("erase_my_moment_account", {
+    p_confirm_email: confirmEmail
+  });
+  if(error) throw error;
+  return data;
+}
+
+function bindAccountDataRights(){
+  const exportBtn = document.getElementById("accountDataExport");
+  const exportStatus = document.getElementById("accountDataStatus");
+  const eraseForm = document.getElementById("accountEraseForm");
+  const eraseStatus = document.getElementById("accountEraseStatus");
+  const eraseBtn = document.getElementById("accountEraseSubmit");
+  exportBtn?.addEventListener("click", async()=>{
+    exportBtn.disabled = true;
+    if(exportStatus) exportStatus.textContent = t("account.profile.data.exporting");
+    try{
+      await downloadMomentAccountExport();
+      if(exportStatus) exportStatus.textContent = t("account.profile.data.export_ok");
+    }catch(error){
+      console.warn(error);
+      if(exportStatus) exportStatus.textContent = t("account.profile.data.export_fail");
+    }finally{
+      exportBtn.disabled = false;
+    }
+  });
+  eraseForm?.addEventListener("submit", async event=>{
+    event.preventDefault();
+    const email = String(currentUser?.email || "").trim().toLowerCase();
+    const typed = String(document.getElementById("accountEraseEmail")?.value || "").trim().toLowerCase();
+    const checked = Boolean(document.getElementById("accountEraseConfirm")?.checked);
+    if(!checked || !typed){
+      if(eraseStatus) eraseStatus.textContent = t("account.profile.erase.need_confirm");
+      return;
+    }
+    if(typed !== email){
+      if(eraseStatus) eraseStatus.textContent = t("account.profile.erase.email_mismatch");
+      return;
+    }
+    if(eraseBtn) eraseBtn.disabled = true;
+    if(eraseStatus) eraseStatus.textContent = t("account.profile.erase.busy");
+    try{
+      await eraseMomentAccount(typed);
+      await supabase.auth.signOut();
+      activeId = "";
+      rows = [];
+      currentUser = null;
+      showAuthTab("login");
+      showAuth(t("account.profile.erase.done"));
+      setStatus(statusNode, t("account.profile.erase.done"), "ok");
+    }catch(error){
+      console.warn(error);
+      if(eraseStatus) eraseStatus.textContent = eraseRpcMessage(error);
+      if(eraseBtn) eraseBtn.disabled = false;
     }
   });
 }
@@ -1410,11 +1493,35 @@ function renderAccountPanels(){
           </label>
           <p class="account-consent-status" id="accountMarketingStatus" aria-live="polite"></p>
         </div>
+        <div class="account-consent-box account-data-box">
+          <h4>${esc(t("account.profile.data.title"))}</h4>
+          <p>${esc(t("account.profile.data.lead"))}</p>
+          <button type="button" class="ghost" id="accountDataExport">${esc(t("account.profile.data.export"))}</button>
+          <p class="account-consent-status" id="accountDataStatus" aria-live="polite"></p>
+        </div>
+        <div class="account-consent-box account-erase-box">
+          <h4>${esc(t("account.profile.erase.title"))}</h4>
+          <p>${esc(t("account.profile.erase.lead"))}</p>
+          <p class="account-erase-warn">${esc(t("account.profile.erase.warn"))}</p>
+          <form id="accountEraseForm" class="account-erase-form">
+            <label class="consent-check">
+              <input id="accountEraseConfirm" type="checkbox" required>
+              <span>${esc(t("account.profile.erase.confirm"))}</span>
+            </label>
+            <label>
+              <span>${esc(t("account.profile.erase.email"))}</span>
+              <input id="accountEraseEmail" type="email" autocomplete="off" inputmode="email" required>
+            </label>
+            <button type="submit" class="danger-action" id="accountEraseSubmit">${esc(t("account.profile.erase.submit"))}</button>
+          </form>
+          <p class="account-consent-status" id="accountEraseStatus" aria-live="polite"></p>
+        </div>
       </div>`;
     document.getElementById("accountHubLogout")?.addEventListener("click",()=>{
       document.getElementById("momentsLogout")?.click();
     });
     bindAccountMarketingConsent();
+    bindAccountDataRights();
     return;
   }
   if(activeAccountTab === "plan"){

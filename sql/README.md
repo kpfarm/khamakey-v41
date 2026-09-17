@@ -60,12 +60,13 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 53 | `khamakey-moments-video-limit-v173.sql` | Moments: `max_video_mb` → 90 su Free/Plus/Pro (resta 1 clip sul Free; tetto CF request 100 MB) |
 | 54 | `khamakey-moments-page-editors-v174.sql` | Un invitato (tetto 1, alzabile) può modificare la stessa pagina: `moment_page_members`, invite/accept/revoke, `list_my_moment_events`, stesso Salva/upload |
 | 55 | `khamakey-moments-consents-v175.sql` | Registro append-only `moment_user_consents` (legal + marketing). RLS own select/insert. Non tocca NFC/Salva. |
+| 56 | `khamakey-moments-erase-account-v176.sql` | RPC `export_my_moment_account` + `erase_my_moment_account` (solo authenticated, solo i Moments del chiamante). Staff/business bloccati. |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 
 **`khamakey-integrations-i18n-v66-production.sql` non è nella sequenza.** È una patch storica applicata a mano nel SQL Editor di Supabase quando su produzione `platform_integrations`/`platform_payment_transactions` risultavano già create fuori sequenza. `khamakey-integrations-i18n-v66.sql` è già completo e idempotente (crea quelle tabelle solo se assenti) e la copre interamente: non serve applicare entrambe. Il file `-production` resta nel repo solo come traccia storica — non eseguirlo di nuovo.
 
-**Stato produzione (2026-09-15):** **v175 applicata** su Moments `cuxlwaocjqwzluycznyp` (MCP `apply_migration`) — registro consensi. v174 invito 1 editor. v173 `max_video_mb` 90. v172 salva ottimistico già in prod.
+**Stato produzione (2026-09-17):** **v176 applicata** su Moments `cuxlwaocjqwzluycznyp` (MCP `apply_migration`) — export/erase account. v175 registro consensi. v174 invito 1 editor. v173 `max_video_mb` 90. v172 salva ottimistico già in prod.
 
 ## Supabase SQL Editor
 

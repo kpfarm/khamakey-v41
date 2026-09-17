@@ -16,7 +16,7 @@ Se l'utente scrive **cose da fare** (anche con varianti tipo «che cose da fare�
 5. **Dati societari / P.IVA** — Privacy + Termini (IT e EN) ancora senza ragione sociale, sede, partita IVA. Inserire **solo** quando c’è P.IVA reale. Non inventare. Revisione legale resta.
 6. **Ticket clienti** — in coda (`docs/33`); non aprire insieme al controllo lacune.
 7. **Guida cliente / dove si invita** — *dopo, non ora*: v266 non è intuitiva per i clienti (solo per chi ha fatto l’app).
-8. **GDPR Moments** — Fase 2 fatta (v267 / SQL v175): opt-in marketing facoltativo + registro + revoca in Profilo. **Niente newsletter** finché non si decide. P.IVA ancora in attesa. Inventario: `KHAMAKEY_OS/docs/34-gdpr-moments.md`.
+8. **GDPR Moments** — Fase 2+4 fatte (v268 / SQL v176): opt-in marketing, registro, revoca, export JSON e cancella account in Profilo. **Niente newsletter** finché non si decide. P.IVA ancora in attesa. Inventario: `KHAMAKEY_OS/docs/34-gdpr-moments.md`.
 9. Prossimo backlog prodotto solo se ops sopra ok (es. report rivenditori, hub spedizioni)
 
 ## Stile

@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-15** (Moments v267 / SQL v175 consenso marketing; Worker invariato)
+> Ultimo aggiornamento: **2026-09-17** (Moments v268 / SQL v176 export+cancella account; Worker invariato)
 
 ### Fonte di verità versioni
 
@@ -108,10 +108,10 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v232-support-mail** | Assistenza: mail staff brand Moments, Reply-To cliente. Menu pubblico senza hash (v231). |
-| **Moments editor** | **v266** | Guida: dove invitare + pulsante. Assistenza email v265. CSS `moments.css?v=258`. |
+| **Moments editor** | **v268** | GDPR: download dati + elimina account in Profilo. CSS `moments.css?v=260`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
-| **SQL Supabase Moments** | **≥ v174 (prod)** | v174 invito editor (cap 1) applicata 2026-09-13; v173 `max_video_mb` 90; v172 salva ottimistico. |
+| **SQL Supabase Moments** | **≥ v176 (prod)** | v176 export/erase account (2026-09-17); v175 consensi; v174 invito editor; v173 `max_video_mb` 90; v172 salva ottimistico. |
 | **Prossima release piattaforma** | **collegare Stripe** sui `moments_plus` / `moments_pro` | Prezzi già in seed (€4,90/€39 Plus · €9,90/€79 Pro). |
 
 ---
@@ -174,7 +174,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Smoke test wizard 5 settori Business | Checklist aperta | Bassa |
 | Hardening ops (rate-limit fail-open PIN, drop overload `get_public_moment` 2-arg) | Documentato audit SE — **non toccare runtime** finché Moments è stabile | Media |
 | **Dati societari / P.IVA** su Privacy + Termini (IT e EN) | In attesa P.IVA reale — testo legale già online con disclaimer | Alta (ops, non runtime) |
-| **GDPR Moments** (marketing + registro consensi) | Fase 2 **v267 / SQL v175**: opt-in facoltativo, registro, revoca Profilo. Niente newsletter. P.IVA a parte. | Ops/legal |
+| **GDPR Moments** (marketing + diritti in-app) | Fase 2 **v267 / SQL v175** + Fase 4 **v268 / SQL v176**: opt-in, registro, revoca, export JSON, cancella account (solo i propri Moments). Niente newsletter. P.IVA a parte. | Ops/legal |
 | **Guida cliente / dove si invita** | v266 insufficiente per i clienti — **fare dopo**, non ora | Bassa (UX, dopo GDPR/ops) |
 | **KhamaKey OS** | Fase 1 — SSOT versioni riallineato 2026-07-20 | Alta |
 
@@ -193,7 +193,7 @@ Health live 2026-07-20 (`link.khamakeymoments.com/health`): Worker **v144**, Res
 | 4 | Working tree spesso sporco (Business WIP + demo) | Rischio commit accidentali | Non mescolare con fix Moments; commit mirati |
 | 5 | IDOR Business fix non E2E dual-account | Confidenza media | Test manuale due utenti quando possibile |
 | 6 | Privacy/Termini senza P.IVA / sede / ragione sociale | Testo legale incompleto (IT+EN) | Attendere dati reali; poi aggiornare le 4 pagine. Non inventare |
-| 7 | GDPR Moments incompleto | Niente opt-in marketing; consenso Termini/Privacy non registrato (solo checkbox) | **v267 / SQL v175**: opt-in + registro. Resta P.IVA (#6) e niente campagne finché non si decide. |
+| 7 | GDPR Moments | Opt-in + registro fatti; restano P.IVA e niente campagne | **v268 / SQL v176**: export/cancella in Profilo. Resta P.IVA (#6) e niente campagne finché non si decide. |
 | 8 | Guida «Come funziona» / invito poco chiara ai clienti | I clienti non capiscono dove si invita | Fare **dopo**; non restyling ora |
 
 RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments).
@@ -206,7 +206,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 2. **Basi per ~10k pezzi** — checklist ops [`docs/24-pronti-per-10k-moments.md`](docs/24-pronti-per-10k-moments.md) (smoke, monitoraggio, supporto, media/NFC)
 3. **Ops secrets / Auth** — Stripe, Resend webhook, leaked-password
 4. **Igiene multi-agente** — lock aggiornati, commit solo file del task
-5. **GDPR Moments** — v267/v175 fatto; niente campagne promo finché non si decide
+5. **GDPR Moments** — v268/v176 fatto (export/cancella); niente campagne promo finché non si decide
 6. Business — in stand-by / progetto separato; non mescolare con Moments
 7. Guida cliente / dove si invita — **dopo**, non ora
 
@@ -214,8 +214,8 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-15:** Editor **v267** (consenso marketing) · Worker **v232-support-mail** invariato · SQL **v175**.  
-> GDPR: opt-in facoltativo al signup, registro, revoca in Profilo. **Niente newsletter**.  
+> **Oggi 2026-09-17:** Editor **v268** (export/cancella account) · Worker **v232-support-mail** invariato · SQL **v176**.  
+> GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > Segnato: guida invito **dopo**. **P.IVA** in attesa.
 
 ---

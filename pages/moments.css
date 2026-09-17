@@ -173,6 +173,12 @@ textarea{min-height:86px;resize:vertical}
 .account-consent-box p{margin:0 0 10px;font-size:.8rem;line-height:1.45;color:var(--muted)}
 .account-consent-box .consent-check{margin:0}
 .account-consent-status{margin:8px 0 0;font-size:.76rem;font-weight:600;color:var(--muted)}
+.account-data-box,.account-erase-box{display:grid}
+.account-data-box .ghost,.danger-action{justify-self:start}
+.account-erase-warn{margin:0 0 10px;font-size:.8rem;line-height:1.45;color:var(--red);font-weight:600}
+.account-erase-form{display:grid;gap:12px;margin:4px 0 0}
+.danger-action{border:0;border-radius:10px;background:var(--red);color:#fff;padding:11px 14px;font-weight:900}
+.danger-action:disabled{opacity:.55;cursor:not-allowed}
 .auth-legal{display:flex;justify-content:center;gap:16px;margin:14px 0 0;padding-top:12px;border-top:1px solid var(--border);font-size:.78rem;font-weight:700}
 .auth-legal a{color:var(--navy);text-decoration:none}
 .auth-legal a:hover{text-decoration:underline}

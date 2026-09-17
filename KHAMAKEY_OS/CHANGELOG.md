@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v268 + SQL v176 — export/cancella account (2026-09-17)** — Pages + SQL
+  - Account → Profilo: scarica JSON dei propri dati; elimina account solo con email + spunta.
+  - RPC `export_my_moment_account` / `erase_my_moment_account`: solo autenticato, solo i Moments del chiamante. Pagine altrui e staff/business intatti. Codici claimed non si riciclano.
+  - Privacy/Termini IT+EN: diritti esercitabili in Profilo. Worker, NFC, Salva, upload **invariati**.
 - **Moments v267 + SQL v175 — consenso marketing (2026-09-15)** — Pages + SQL
   - Signup: spunta **facoltativa** novità/offerte (non pre-spuntata, distinta da Termini/Privacy).
   - Registro append-only `moment_user_consents` (RLS own). Sync al login se la conferma email arriva dopo. Se il registro fallisce, l’account parte lo stesso.

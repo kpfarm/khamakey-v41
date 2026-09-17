@@ -13,7 +13,7 @@ import {
   normalizePets,
   parsePets,
   syncLegacyPetFields
-} from "./moment-pets.js?v=243";
+} from "./moment-pets.js?v=244";
 
 /**
  * Sezioni escluse dal prodotto (non in menu editor, non in anteprima/pubblico).

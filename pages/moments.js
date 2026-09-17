@@ -21,7 +21,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=226";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=249";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=250";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -124,7 +124,6 @@ import {
   DEFAULT_SECTIONS,
   SECTION_LABELS,
   SECTION_SUBTITLES,
-  SECTION_ICONS,
   NAV_GROUPS,
   designNavItems,
   pageNavItems,
@@ -138,7 +137,7 @@ import {
   sectionHasContent,
   isSectionExcluded,
   youtubeVideoId
-} from "./moment-sections.js?v=247";
+} from "./moment-sections.js?v=248";
 import {
   renderCategorySelect,
   templateForType,
@@ -159,7 +158,7 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js?v=187";
+} from "./moment-editor-kit.js?v=188";
 import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=221";
 import { bindRsvpResponsesPanel, refreshRsvpResponsesLocale } from "./moment-rsvp-responses.js?v=221";
 import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=224";
@@ -175,7 +174,7 @@ import {
   refreshPetsEditor,
   setPetPhoto,
   getPetPhoto
-} from "./moment-pets.js?v=243";
+} from "./moment-pets.js?v=244";
 
 const auth = document.getElementById("momentsAuth");
 const app = document.getElementById("momentsApp");
@@ -216,18 +215,65 @@ function editorPanelTitle(panel){
   return panel.title || "";
 }
 
-function chromeNavIcon(name){
+function strokeSvg(inner, wrapClass = "editor-nav-icon"){
+  const svg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+  if(!wrapClass) return svg;
+  return `<span class="${wrapClass}" aria-hidden="true">${svg}</span>`;
+}
+
+function chromeNavIcon(name, wrapClass = "editor-nav-icon"){
   const inner = {
     overview: '<rect x="4" y="4" width="7" height="7" rx="1.2"/><rect x="13" y="4" width="7" height="16" rx="1.2"/><rect x="4" y="13" width="7" height="7" rx="1.2"/>',
+    page: '<rect x="4" y="4" width="7" height="7" rx="1.2"/><rect x="13" y="4" width="7" height="16" rx="1.2"/><rect x="4" y="13" width="7" height="7" rx="1.2"/>',
     publish: '<rect x="7" y="3.5" width="10" height="17" rx="1.6"/><path d="M10 8h4M10 12h4M10 16h2.5"/>',
     cover: '<rect x="3.5" y="6" width="17" height="12" rx="1.6"/><circle cx="8.5" cy="11" r="1.4"/><path d="m7.5 16.2 3.2-3.4 2.6 2.2 4.2-4.5"/>',
     colors: '<circle cx="12" cy="12" r="7.5"/><path d="M12 4.5v15M4.5 12h15"/>',
+    design: '<circle cx="12" cy="12" r="7.5"/><path d="M12 4.5v15M4.5 12h15"/>',
     order: '<path d="M5 8h14M5 12h14M5 16h10"/>',
     extras: '<path d="M12 6v12M6 12h12"/>',
-    counter: '<circle cx="12" cy="12" r="7.5"/><path d="M12 8v4.2l2.6 1.6"/>'
+    counter: '<circle cx="12" cy="12" r="7.5"/><path d="M12 8v4.2l2.6 1.6"/>',
+    content: '<rect x="4" y="6" width="16" height="12" rx="1.2"/>',
+    pin: '<rect x="7" y="11" width="10" height="9" rx="1.4"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/>'
   }[name];
-  if(!inner) return `<span class="editor-nav-icon" aria-hidden="true"></span>`;
-  return `<span class="editor-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${inner}</svg></span>`;
+  if(!inner) return strokeSvg("", wrapClass);
+  return strokeSvg(inner, wrapClass);
+}
+
+const SECTION_CHROME_PATHS = {
+  intro: '<path d="M5 5h14v14H5zM8 9h8M8 12h8M8 15h5"/>',
+  dedication: '<rect x="4" y="6" width="16" height="12" rx="1.2"/><path d="m4 8 8 6 8-6"/>',
+  timeline: '<path d="M5 6v12M5 8h6l2 3h6"/><circle cx="5" cy="8" r="1.5"/>',
+  rsvp: '<rect x="5" y="4" width="14" height="16" rx="1.6"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  guestbook: '<path d="M5 5h14v14H5zM8 9h8M8 12h8M8 15h5"/>',
+  gallery: '<rect x="4" y="6" width="16" height="12" rx="1.5"/><circle cx="8.5" cy="11" r="1.3"/><path d="m7.5 16 3.2-3.4 2.6 2.2 4.2-4.5"/>',
+  video: '<rect x="4" y="6" width="16" height="12" rx="1.5"/><path d="m10 9 6 3-6 3z"/>',
+  promises: '<path d="M12 4.5 14.2 9l4.8.6-3.5 3.4.9 4.8L12 15.6 7.6 17.8l.9-4.8L5 9.6 9.8 9z"/>',
+  places: '<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2"/>',
+  dreams: '<path d="M12 4v3M12 17v3M4 12h3M17 12h3M7 7l2 2M15 15l2 2M17 7l-2 2M9 15l-2 2"/>',
+  countdown: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+  music: '<path d="M9 18V6l10-2v12"/><circle cx="7" cy="18" r="2.2"/><circle cx="17" cy="16" r="2.2"/>',
+  horoscope: '<circle cx="12" cy="12" r="8"/><path d="M12 4.5v15M4.5 12h15"/>',
+  letter_future: '<path d="M7 4h10v16H7z"/>',
+  rituals: '<path d="M8 20c0-4 1.5-7 4-9 2.5 2 4 5 4 9H8z"/><path d="M12 7V4"/>',
+  pet: '<circle cx="8" cy="14" r="3"/><circle cx="16" cy="14" r="3"/>',
+  numbers: '<path d="M8 7h8M8 12h8M8 17h5"/>',
+  quote: '<path d="M8 8h3v5H8zm5 0h3v5h-3z"/>',
+  signature: '<path d="M4 16c2-4 4-6 7-6 4 0 3 6 7 6 2 0 3-1 4-2"/>'
+};
+
+function sectionChromeIcon(key, wrapClass = "editor-nav-icon"){
+  return strokeSvg(SECTION_CHROME_PATHS[key] || '<circle cx="12" cy="12" r="3.5"/>', wrapClass);
+}
+
+function panelChromeIcon(panelId, wrapClass = "editor-nav-icon"){
+  const id = String(panelId || "");
+  if(id.startsWith("section-")) return sectionChromeIcon(id.slice(8), wrapClass);
+  const map = { overview:"overview", privacy:"publish", cover:"cover", styling:"colors", order:"order", counter:"counter", extras:"extras" };
+  return chromeNavIcon(map[id] || "overview", wrapClass);
+}
+
+function groupChromeIcon(groupId){
+  return chromeNavIcon({ page:"overview", design:"colors", content:"content" }[groupId] || "overview", "grp-icon");
 }
 
 /** Step 7b: translate taxonomy labels only (nav / sidebar / order). Keep custom user titles. */
@@ -1877,7 +1923,7 @@ function syncEditorKitUi(formNode){
     const visible = navKeys.has(key);
     button.hidden = !visible;
     if(visible){
-      button.innerHTML = `<span class="editor-nav-icon">${esc(SECTION_ICONS[key] || "•")}</span>${esc(sectionEditorNavLabel(formNode, type, key))}`;
+      button.innerHTML = `${sectionChromeIcon(key)}${esc(sectionEditorNavLabel(formNode, type, key))}`;
     }
   });
 
@@ -1956,14 +2002,14 @@ function ensureMobileNav(){
       button.type = "button";
       button.className = `grp-btn ${group.id === activeNavGroup ? "active" : ""}`;
       button.dataset.navGroup = group.id;
-      button.innerHTML = `<span class="grp-icon">${group.icon}</span>${esc(t(`nav.group.${group.id}`))}`;
+      button.innerHTML = `${groupChromeIcon(group.id)}${esc(t(`nav.group.${group.id}`))}`;
       button.addEventListener("click",()=>setNavGroup(group.id));
       grpNav.appendChild(button);
     });
   }else{
     NAV_GROUPS.forEach(group=>{
       const button = grpNav.querySelector(`[data-nav-group="${group.id}"]`);
-      if(button) button.innerHTML = `<span class="grp-icon">${group.icon}</span>${esc(t(`nav.group.${group.id}`))}`;
+      if(button) button.innerHTML = `${groupChromeIcon(group.id)}${esc(t(`nav.group.${group.id}`))}`;
     });
   }
   renderSubNav(activeNavGroup);
@@ -1986,7 +2032,7 @@ function renderSubNav(groupId, formNode){
   if(!subNav) return;
   const form = formNode || document.getElementById("momentEditorForm");
   const items = navItemsForGroup(groupId, form);
-  subNav.innerHTML = items.map(item=>`<button type="button" class="snav-btn ${activeEditorPanel === item.id ? "active" : ""}" data-editor-panel="${esc(item.id)}"><span class="snav-icon">${item.icon}</span>${esc(item.label)}</button>`).join("");
+  subNav.innerHTML = items.map(item=>`<button type="button" class="snav-btn ${activeEditorPanel === item.id ? "active" : ""}" data-editor-panel="${esc(item.id)}">${esc(item.label)}</button>`).join("");
   subNav.classList.add("open");
   subNav.querySelectorAll(".snav-btn").forEach(button=>{
     button.addEventListener("click",()=>{
@@ -2889,13 +2935,12 @@ function localizedSectionFillGuide(type, key){
 }
 
 function renderSectionPanelToggle(key,enabled){
-  const icon = SECTION_ICONS[key] || "•";
   const titleIt = enabled ? "Visibile in pagina" : "Non visibile";
   const hintIt = enabled ? "I visitatori la vedono" : "Tocca per mostrarla";
   return `<div class="section-switch ${enabled ? "is-on" : ""}" data-section-toggle="${esc(key)}" role="switch" aria-checked="${enabled ? "true" : "false"}" tabindex="0">
     ${renderSectionEnabledInput(key,enabled)}
     <span class="section-switch-label">
-      <span class="section-switch-icon">${icon}</span>
+      ${sectionChromeIcon(key, "section-switch-icon")}
       <span class="section-switch-copy">
         <strong data-lf="${esc(titleIt)}">${esc(localizeFieldPhrase(titleIt))}</strong>
         <small data-lf="${esc(hintIt)}">${esc(localizeFieldPhrase(hintIt))}</small>
@@ -3190,7 +3235,7 @@ function renderEditorSidebar(activePanel, momentType = currentMomentType, pinned
   const contentItems = `${counterBtn}
     ${navKeys.map(key=>`
     <button type="button" class="editor-nav-item ${activePanel === `section-${key}` ? "active" : ""}" data-editor-panel="section-${esc(key)}" data-section-nav-key="${esc(key)}">
-      <span class="editor-nav-icon">${esc(SECTION_ICONS[key] || "•")}</span>${esc(localizedSectionLabel(momentType, key))}
+      <span class="editor-nav-icon">${sectionChromeIcon(key, "")}</span>${esc(localizedSectionLabel(momentType, key))}
     </button>`).join("")}${extrasBtn}`;
   return `<nav class="editor-sidebar" aria-label="${esc(t("nav.aria.sidebar"))}">
     <div class="editor-sidebar-group">${esc(t("nav.sidebar.page"))}</div>
@@ -3314,7 +3359,6 @@ function renderLookPicker(currentLook, momentType = "free"){
     const hint = localizeFieldPhrase(look.hint);
     return `<button type="button" class="look-card ${currentLook === id ? "active" : ""} ${isSuggested ? "look-suggested" : ""}" data-look="${esc(id)}" aria-pressed="${currentLook === id ? "true" : "false"}">
       <span class="look-card-preview" style="--lk-go:${esc(colors.go)};--lk-g2:${esc(colors.g2)};--lk-hero:${esc(colors.hero)};--lk-ro:${esc(colors.ro)};--lk-bl:${esc(colors.bl)};--lk-card:${esc(colors.card || colors.bl2)};--lk-in:${esc(colors.in)}"></span>
-      <span class="look-card-emoji" aria-hidden="true">${look.emoji}</span>
       <strong><span data-lf="${esc(look.label)}">${esc(label)}</span>${isSuggested ? ` · <span data-lf="consigliato">${esc(localizeFieldPhrase("consigliato"))}</span>` : ""}</strong>
       <small data-lf="${esc(look.hint)}">${esc(hint)}</small>
     </button>`;
@@ -3399,7 +3443,7 @@ function renderDesignSuggestBanner(momentType, currentLook){
   if(!suggested || suggested === currentLook) return "";
   const look = PAGE_LOOKS[suggested];
   if(!look) return "";
-  return `<p class="design-suggest">💡 ${lfSpan("Per")} <strong>${typeLabelChrome(momentType)}</strong> ${lfSpan("prova")} ${look.emoji} <button type="button" class="design-suggest-btn" data-suggest-look="${esc(suggested)}" data-lf="${esc(look.label)}">${esc(localizeFieldPhrase(look.label))}</button></p>`;
+  return `<p class="design-suggest">${lfSpan("Per")} <strong>${typeLabelChrome(momentType)}</strong> ${lfSpan("prova")} <button type="button" class="design-suggest-btn" data-suggest-look="${esc(suggested)}" data-lf="${esc(look.label)}">${esc(localizeFieldPhrase(look.label))}</button></p>`;
 }
 
 function renderDesignPanel(state){
@@ -3476,27 +3520,23 @@ function renderDesignPanel(state){
 function renderCoverPanel(state){
   return `<div class="editor-panel ${activeEditorPanel === "cover" ? "active" : ""}" data-editor-panel="cover">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.cover),editorPanelSubtitle(EDITOR_PANELS.cover))}
-    <div class="editor-card">
-      <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Di cosa parla?")}</p>
-      <label>${lfSpan("Titolo della pagina")}<input name="title" value="${esc(state.title)}" required placeholder="${esc(localizeFieldPhrase("Es. Il nostro anniversario"))}" data-lf-placeholder="Es. Il nostro anniversario"></label>
-      ${renderMomentTypeField(state)}
-      <p class="category-change-warning">⚠️ <strong>${lfSpan("Attenzione:")}</strong> ${lfSpan("«Prepara tutto per me» sostituisce testi, sezioni e colori — operazione irreversibile dopo il salvataggio.")}</p>
-      <button type="button" class="primary smart-action-btn" id="applyMomentTemplate">✨ ${lfSpan("Prepara tutto per me")}</button>
-      <p class="field-hint">${lfSpan("Ripristina il modello della tua categoria con testi e sezioni suggeriti. I contenuti attuali verranno sostituiti.")}</p>
-    </div>
-    <div class="editor-card">
-      <p class="ecard-title"><span class="step-badge">2</span> ${lfSpan("La foto di copertina")}</p>
-      ${renderHowEmptyHint("cover", { hidden: pageHasCoverPhoto(state) })}
+    <div class="cover-stage">
       <div class="cover-preview-wrap">
         <input type="hidden" name="cover_url" id="coverUrlInput" value="${esc(state.cover_url)}">
         <div class="cover-upload-actions">
           <input type="file" id="coverFileInput" accept="${IMAGE_ACCEPT}" hidden>
-          <button type="button" class="primary upload-trigger" data-upload-target="cover">📷 ${lfSpan("Carica foto copertina")}</button>
+          <button type="button" class="primary upload-trigger" data-upload-target="cover">${lfSpan("Carica foto copertina")}</button>
         </div>
         <p class="field-hint" id="coverUploadStatus"></p>
+        ${renderHowEmptyHint("cover", { hidden: pageHasCoverPhoto(state) })}
         <div id="coverFramerSlot">${renderCoverFramer(state)}</div>
       </div>
-        <details class="design-advanced cover-extra">
+      <label class="cover-line">${lfSpan("Titolo della pagina")}<input name="title" value="${esc(state.title)}" required placeholder="${esc(localizeFieldPhrase("Es. Il nostro anniversario"))}" data-lf-placeholder="Es. Il nostro anniversario"></label>
+      ${renderMomentTypeField(state)}
+      <p class="category-change-warning"><strong>${lfSpan("Attenzione:")}</strong> ${lfSpan("«Prepara tutto per me» sostituisce testi, sezioni e colori — operazione irreversibile dopo il salvataggio.")}</p>
+      <button type="button" class="primary smart-action-btn" id="applyMomentTemplate">${lfSpan("Prepara tutto per me")}</button>
+      <p class="field-hint">${lfSpan("Ripristina il modello della tua categoria con testi e sezioni suggeriti. I contenuti attuali verranno sostituiti.")}</p>
+      <details class="design-advanced cover-extra">
         <summary>${lfSpan("Altri testi sulla copertina (facoltativo)")}</summary>
         <label>${lfSpan("Etichetta sopra il titolo")}<input name="pill" value="${esc(state.pill)}" placeholder="${esc(localizeFieldPhrase("Es. Amore · Un mondo tutto nostro"))}" data-lf-placeholder="Es. Amore · Un mondo tutto nostro"></label>
         <label>${lfSpan("Frase sotto il titolo")}<input name="subtitle" value="${esc(state.subtitle)}" placeholder="${esc(localizeFieldPhrase("Es. Per sempre insieme"))}" data-lf-placeholder="Es. Per sempre insieme"></label>
@@ -3518,7 +3558,7 @@ function renderCounterPanel(state){
     ${renderSectionHeader(counterTitle,editorPanelSubtitle(EDITOR_PANELS.counter))}
     <div class="section-switch ${state.show_together_counter ? "is-on" : ""}" data-counter-switch="main" role="switch" aria-checked="${state.show_together_counter ? "true" : "false"}" tabindex="0">
       <span class="section-switch-label">
-        <span class="section-switch-icon">⏱</span>
+        <span class="section-switch-icon">${chromeNavIcon("counter", "")}</span>
         <span class="section-switch-copy">
           <strong data-lf="${state.show_together_counter ? onLabel : offLabel}">${esc(localizeFieldPhrase(state.show_together_counter ? onLabel : offLabel))}</strong>
           <small data-lf="${state.show_together_counter ? onHint : offHint}">${esc(localizeFieldPhrase(state.show_together_counter ? onHint : offHint))}</small>
@@ -3564,7 +3604,7 @@ function renderExtrasPanel(state){
     const isPrimary = primary.has(key);
     return `
     <button type="button" class="extras-card" data-pin-section="${esc(key)}">
-      <span class="extras-card-icon">${esc(SECTION_ICONS[key] || "•")}</span>
+      ${sectionChromeIcon(key, "extras-card-icon")}
       <span class="extras-card-copy">
         <strong>${esc(localizedSectionLabel(state.type, key))}</strong>
         <small>${esc(localizedSectionSubtitle(state.type, key))}</small>
@@ -3638,17 +3678,25 @@ function renderPrivacyPanel(row, state = {}){
   return `<div class="editor-panel ${activeEditorPanel === "privacy" ? "active" : ""}" data-editor-panel="privacy">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.privacy),editorPanelSubtitle(EDITOR_PANELS.privacy))}
     <div class="editor-card smart-card">
-      <p class="ecard-title">🌍 ${lfSpan("Chi può vedere la pagina?")}</p>
-      <label>${lfSpan("Stato pagina")}
+      <p class="ecard-title">${lfSpan("Chi può vedere la pagina?")}</p>
+      <div class="publish-choice" role="group" aria-label="${esc(localizeFieldPhrase("Stato pagina"))}">
+        <button type="button" class="publish-pick ${row.public_visible ? "on" : ""}" data-set-visible="true">
+          <b>${lfSpan("Pubblicata — chi ha il link la vede")}</b>
+        </button>
+        <button type="button" class="publish-pick ${row.public_visible ? "" : "on"}" data-set-visible="false">
+          <b>${lfSpan("Bozza — solo tu la modifichi")}</b>
+        </button>
+      </div>
+      <label class="visually-hidden">${lfSpan("Stato pagina")}
         <select name="public_visible" id="publicVisibleSelect">
           <option value="true" data-lf-option="✅ Pubblicata — chi ha il link la vede" ${row.public_visible ? "selected" : ""}>${esc(localizeFieldPhrase("✅ Pubblicata — chi ha il link la vede"))}</option>
           <option value="false" data-lf-option="🔒 Bozza — solo tu la modifichi" ${!row.public_visible ? "selected" : ""}>${esc(localizeFieldPhrase("🔒 Bozza — solo tu la modifichi"))}</option>
         </select>
       </label>
-      <p class="field-hint">${lfSpan("Dopo aver scelto, tocca il pulsante verde Salva in basso.")}</p>
+      <p class="field-hint">${lfSpan("Dopo aver scelto, tocca Salva.")}</p>
     </div>
     <div class="editor-card smart-card">
-      <p class="ecard-title">🔐 ${lfSpan("PIN di apertura")}</p>
+      <p class="ecard-title">${lfSpan("PIN di apertura")}</p>
       ${renderHowEmptyHint("pin", { hidden: Boolean(row.pin_enabled) })}
       ${pinHintBlock}
       <label>${lfSpan("Protezione")}
@@ -3661,7 +3709,7 @@ function renderPrivacyPanel(row, state = {}){
       <p class="field-hint">${lfSpan("Chi avvicina il tag NFC dovrà inserire questo PIN per aprire la pagina.")}</p>
     </div>
     <div class="editor-card smart-card">
-      <p class="ecard-title">💫 ${lfSpan("Ricordi nel tempo")}</p>
+      <p class="ecard-title">${lfSpan("Ricordi nel tempo")}</p>
       <label class="smart-toggle">
         <input type="checkbox" name="anniversary_emails" ${anniversaryEmails ? "checked" : ""}>
         <span><strong>${lfSpan("Email anniversario")}</strong><small>${lfSpan("Ogni anno, alla data dell'evento o del contatore «insieme da», ti inviamo un promemoria con il link alla pagina.")}</small></span>
@@ -4044,7 +4092,7 @@ function renderSectionOrderItem(key,idx,momentType = currentMomentType,formNode 
   const label = formNode ? sectionOrderDisplayLabel(formNode, momentType, key) : localizedSectionLabel(momentType, key);
   return `<div class="section-order-item" data-section-key="${esc(key)}">
     <button type="button" class="section-drag section-drag-handle" aria-label="${esc(localizeFieldPhrase("Trascina per riordinare"))}">☰</button>
-    <span class="section-order-icon">${esc(SECTION_ICONS[key] || "•")}</span>
+    ${sectionChromeIcon(key, "section-order-icon")}
     <span class="section-order-label">${esc(label)}</span>
     <div class="section-order-actions">
       <button type="button" class="section-move-btn" data-section-move-up="${esc(key)}" aria-label="${esc(localizeFieldPhrase("Sposta su"))}">↑</button>
@@ -4189,29 +4237,44 @@ function bindQuickPublish(root,row){
   const quickPublish = document.getElementById("quickPublishBtn");
   const select = document.getElementById("publicVisibleSelect");
   const hint = document.getElementById("editorActionHint");
-  if(!quickPublish || !select) return;
+  if(!select) return;
   const sync = ()=>{
     const published = select.value === "true";
-    quickPublish.textContent = published ? "Nascondi pagina" : "Pubblica pagina";
-    quickPublish.title = published
-      ? "La pagina non sarà più visibile pubblicamente finché non la ripubblichi"
-      : "Rende la pagina visibile a chi ha il link NFC";
-    quickPublish.classList.toggle("published",!published);
+    if(quickPublish){
+      quickPublish.textContent = published ? "Nascondi pagina" : "Pubblica pagina";
+      quickPublish.title = published
+        ? "La pagina non sarà più visibile pubblicamente finché non la ripubblichi"
+        : "Rende la pagina visibile a chi ha il link NFC";
+      quickPublish.classList.toggle("published",!published);
+    }
+    document.querySelectorAll(".publish-pick").forEach(btn=>{
+      btn.classList.toggle("on", btn.dataset.setVisible === String(published));
+    });
   };
   sync();
-  quickPublish.addEventListener("click",()=>{
-    select.value = select.value === "true" ? "false" : "true";
-    sync();
-    const form = document.getElementById("momentEditorForm");
-    if(form) markEditorDirty(form);
-    if(hint){
-      hint.textContent = select.value === "true"
-        ? t("save.visibility_live")
-        : t("save.visibility_draft");
-      hint.hidden = false;
-    }
-  });
+  if(quickPublish){
+    quickPublish.addEventListener("click",()=>{
+      select.value = select.value === "true" ? "false" : "true";
+      select.dispatchEvent(new Event("change", { bubbles:true }));
+      const form = document.getElementById("momentEditorForm");
+      if(form) markEditorDirty(form);
+      if(hint){
+        hint.textContent = select.value === "true"
+          ? t("save.visibility_live")
+          : t("save.visibility_draft");
+        hint.hidden = false;
+      }
+    });
+  }
   select.addEventListener("change",sync);
+  document.querySelectorAll(".publish-pick").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      select.value = btn.dataset.setVisible === "true" ? "true" : "false";
+      select.dispatchEvent(new Event("change", { bubbles:true }));
+      const form = document.getElementById("momentEditorForm");
+      if(form) markEditorDirty(form);
+    });
+  });
 }
 
 function promptSaveReminder(message = t("save.reminder_default")){
@@ -4760,7 +4823,7 @@ function sectionPhotoPreviewHtml(key,url){
   if(url){
     return `<img src="${esc(url)}" alt=""><button type="button" class="ghost" data-section-photo-remove="${esc(key)}" data-lf="Rimuovi">${esc(localizeFieldPhrase("Rimuovi"))}</button>`;
   }
-  return `<button type="button" class="primary section-photo-btn" data-section-photo-upload="${esc(key)}">📷 <span data-lf="${esc(labelIt)}">${esc(label)}</span></button>`;
+  return `<button type="button" class="primary section-photo-btn" data-section-photo-upload="${esc(key)}"><span data-lf="${esc(labelIt)}">${esc(label)}</span></button>`;
 }
 
 function refreshSectionPhotoPreview(key,url){
@@ -5213,7 +5276,7 @@ function sectionOrderDisplayLabel(formNode, momentType, key){
 function sectionEditor(key,section,standalone=false){
   const safe = section || DEFAULT_SECTIONS[key] || {};
   const hints = sectionFieldHints();
-  const icon = SECTION_ICONS[key] || "•";
+  const icon = sectionChromeIcon(key, "ecard-glyph");
   const guide = localizedSectionFillGuide(currentMomentType, key);
   const galleryField = key === "gallery" ? renderGalleryUpload(safe,key) : "";
   const journeyField = key === "timeline" ? renderJourneyPanel(safe) : "";

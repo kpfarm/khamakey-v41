@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v277 — pack grafico Dopo (2026-09-17)** — **preview Pages, non produzione**
+  - Stessi testi e tasti. Icone linea al posto delle emoji UI, Copertina senza card numerate, Colori a tessuti, Pubblica a due tasti, Accesso a linguette. CSS `?v=267`.
+  - Worker, NFC, Salva, upload, SQL **invariati**. Live clienti resta v276 finché la preview non è approvata.
 - **Moments v276 — chrome editor meno “template” (2026-09-17)** — Pages
   - Tipografia: Cormorant Garamond + DM Sans (non più system-ui). 4 passi come linea, non 4 card. Guida Come si crea a indice tipografico. Icone linea in sidebar (niente emoji su Riepilogo/Copertina/…).
   - Tolti residui verde Business su FAB, barra bassa, pulse Salva. Worker/NFC/Salva/upload **invariati**.

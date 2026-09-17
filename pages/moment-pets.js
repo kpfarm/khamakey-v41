@@ -136,7 +136,7 @@ function petPhotoPreviewHtml(pet){
   if(pet.photo){
     return `<img src="${esc(pet.photo)}" alt=""><button type="button" class="ghost" data-pet-photo-remove="${esc(pet.id)}" data-lf="Rimuovi">${esc(lf(removeIt))}</button>`;
   }
-  return `<button type="button" class="primary section-photo-btn" data-pet-photo-upload="${esc(pet.id)}">📷 <span data-lf="${esc(uploadIt)}">${esc(lf(uploadIt))}</span></button>`;
+  return `<button type="button" class="primary section-photo-btn" data-pet-photo-upload="${esc(pet.id)}"><span data-lf="${esc(uploadIt)}">${esc(lf(uploadIt))}</span></button>`;
 }
 
 function petRowHtml(pet, index){

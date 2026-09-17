@@ -8,12 +8,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
-- **Moments v282 — invitato galleria/video (2026-09-18)** — **preview Pages, non produzione**
-  - Dopo l’upload il file viene salvato da solo sulla pagina. Un doppio Salva non cancella più galleria/video. Se un altro dispositivo ha salvato, si ritenta senza ricaricare l’editor. Gli errori restano visibili finché non si chiudono.
-  - Worker, NFC, SQL, upload R2 **invariati**. Live clienti resta v276 (il ticket resta aperto in produzione finché non si pubblica il pack).
+- **Moments v282 live (2026-09-18)** — Pages produzione `app.khamakeymoments.com`
+  - Ticket invitato: dopo l’upload il file viene salvato da solo; un conflitto non ricarica più l’editor cancellando galleria/video; gli errori restano visibili.
+  - In produzione anche il pack grafico Dopo (v277–v281) e i testi di registrazione. Worker **v233** e SQL **invariati**.
 - **Worker v233-countdown-fit (2026-09-18)** — NFC `/m/` `/k/`
   - Foto del conto alla rovescia: tutta l’immagine, orizzontale o verticale, senza riquadro 280×160 con taglio. Nessun campo nuovo: le pagine già pubblicate si adattano da sole.
-  - Editor: anteprima nel pannello allineata (Moments preview v281; live editor v276 finché il pack grafico non va in produzione).
+  - Editor: anteprima nel pannello allineata (Moments **v282 live**).
 - **Moments v281 — hint foto countdown (2026-09-18)** — **preview Pages, non produzione**
   - Hint: tutta la foto senza tagli. CSS `?v=271`. Worker **v233** è in produzione.
 - **Moments v280 — registrazione mobile (2026-09-17)** — **preview Pages, non produzione**

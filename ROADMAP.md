@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-09-17 | Cursor | **Moments v274**: Cosa puoi fare — Pagina e Contenuti prima; Insieme = solo invito. Worker/NFC/Salva invariati. |
 | 2026-09-17 | Cursor | **Moments v273**: anteprima desktop di nuovo visibile; Riepilogo usa i 4 passi (niente card parallela Prima cosa). Worker/NFC/Salva invariati. |
 | 2026-09-17 | Cursor | **Moments v272**: Officina — cassetto più largo, anteprima non copre più il testo. Worker/NFC/Salva invariati. |
 | 2026-09-17 | Cursor | **Moments v271**: coaching tre passi + Non succede sulle sezioni vuote (Foto, RSVP, lettera…). Worker/NFC/Salva invariati. |

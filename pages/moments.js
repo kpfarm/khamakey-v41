@@ -19,7 +19,7 @@ import {
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=256";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=223";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=224";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=249";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
@@ -2260,28 +2260,28 @@ function renderPlanStorageCard(entitlements = currentEntitlements){
 
 const HOW_IT_WORKS_KEYS = ["overview.how.1", "overview.how.2", "overview.how.3", "overview.how.4"];
 const HOW_DISCOVER_GROUPS = [
-  { id: "together", items: [
-    { id: "together", action: "invite", ownerOnly: true },
+  { id: "page", items: [
+    { id: "cover", action: "cover", primary: true },
+    { id: "colors", action: "colors" },
+    { id: "order", action: "order" },
+    { id: "save" },
+    { id: "preview", action: "preview" },
     { id: "link", action: "link" },
     { id: "pin", action: "publish" }
   ]},
-  { id: "services", items: [
+  { id: "content", items: [
     { id: "gallery", action: "gallery" },
-    { id: "rsvp", action: "rsvp" },
-    { id: "letter", action: "letter" },
     { id: "video", action: "video" },
     { id: "music", action: "music" },
+    { id: "rsvp", action: "rsvp" },
+    { id: "letter", action: "letter" },
     { id: "counter", action: "counter" },
     { id: "horoscope", action: "horoscope" },
     { id: "pet", action: "pet" },
     { id: "texts", action: "texts" }
   ]},
-  { id: "page", items: [
-    { id: "cover", action: "cover", primary: true },
-    { id: "save" },
-    { id: "preview", action: "preview" },
-    { id: "colors", action: "colors" },
-    { id: "order", action: "order" }
+  { id: "together", items: [
+    { id: "together", action: "invite", ownerOnly: true }
   ]},
   { id: "account", items: [
     { id: "plan", action: "plan" },

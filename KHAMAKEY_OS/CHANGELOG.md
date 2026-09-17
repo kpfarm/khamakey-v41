@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v274 — Cosa puoi fare: Pagina e Contenuti prima (2026-09-17)** — Pages
+  - Ordine schede: **Pagina** → **Contenuti** (non «Servizi») → **Insieme** → Account. Insieme = solo invito a modificare (link/QR e PIN spostati in Pagina).
+  - Testi riscritti: niente tono da FAQ («non è una lista di problemi»), niente «servizi»/«accendere». Stesso schema tre passi + Non succede.
+  - Worker, NFC, Salva, upload, SQL **invariati**.
 - **Moments v273 — anteprima desktop + un solo percorso (2026-09-17)** — Pages
   - v272 nascondeva l’anteprima laterale sotto 1100px (Officina): su desktop spariva, su mobile il FAB restava. **v273** la mostra di nuovo; la colonna si restringe, il cassetto largo resta.
   - Riepilogo: tolta la card «Prima cosa / Quando sei pronto» (duplicava i 4 passi; i due testi dipendevano da `cover_url`, non da telefono/computer). Percorso = barra Copertina → Colori → Contenuti → Pubblica. Restano **Cosa puoi fare** e il coaching sulle sezioni vuote.

@@ -160,8 +160,8 @@ import {
   primarySectionsForType
 } from "./moment-editor-kit.js?v=188";
 import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=221";
-import { bindRsvpResponsesPanel, refreshRsvpResponsesLocale } from "./moment-rsvp-responses.js?v=221";
-import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=224";
+import { bindRsvpResponsesPanel, refreshRsvpResponsesLocale } from "./moment-rsvp-responses.js?v=222";
+import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=225";
 import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=221";
 import {
   renderHoroscopePeoplePanel,
@@ -612,6 +612,7 @@ let previewDebounceTimer = null;
 let previewFetchId = 0;
 let saveInFlight = false;
 let saveQueued = false;
+let saveQueuedEventId = "";
 let bootstrapInFlight = false;
 /** Durante bootstrap template: niente banner «non salvato» a metà salvataggio automatico. */
 let suppressDirtyUi = false;
@@ -625,15 +626,39 @@ const LIST_SECTION_KEYS = new Set(Object.keys(LIST_SECTION_MODES));
 let uploadBusy = false;
 let currentEntitlements = emptyEntitlements();
 
+function liveEditorForm(){
+  return document.getElementById("momentEditorForm");
+}
+
+function formEventId(formNode){
+  return String(formNode?.getAttribute?.("data-event-id") || "").trim();
+}
+
+function queueMomentSave(eventId){
+  saveQueued = true;
+  saveQueuedEventId = eventId || formEventId(liveEditorForm()) || activeId || "";
+}
+
 function flushQueuedMomentSave(){
   if(saveInFlight || uploadBusy || !saveQueued) return;
+  const eventId = saveQueuedEventId || activeId;
   saveQueued = false;
-  const liveForm = document.getElementById("momentEditorForm");
+  saveQueuedEventId = "";
+  if(!eventId || eventId !== activeId) return;
+  const liveForm = liveEditorForm();
   const liveRow = rows.find(item => item.id === activeId);
-  if(!liveForm || !liveRow) return;
+  if(!liveForm || !liveRow || formEventId(liveForm) !== activeId) return;
   queueMicrotask(()=>{
-    void saveMoment({ preventDefault(){}, currentTarget: liveForm }, liveRow);
+    if(activeId !== eventId) return;
+    void saveMoment({ preventDefault(){}, currentTarget: liveForm }, liveRow, { eventId });
   });
+}
+
+function invalidateLivePreview(){
+  clearTimeout(previewDebounceTimer);
+  previewDebounceTimer = 0;
+  previewFetchId += 1;
+  lastPreviewHash = "";
 }
 
 function setUploadBusy(busy){
@@ -2740,6 +2765,7 @@ async function openMomentProduct(nextId, { resetPanel = false } = {}){
     }
   }
   switchInFlight = true;
+  invalidateLivePreview();
   try{
     if(resetPanel){
       activeEditorPanel = "overview";
@@ -4010,7 +4036,7 @@ function ensureMomentsSaveDelegation(){
       showEditorSaveFeedback(t("save.fail"), "error");
       return;
     }
-    void saveMoment({ preventDefault(){}, currentTarget:formNode }, currentRow);
+    void saveMoment({ preventDefault(){}, currentTarget:formNode }, currentRow, { eventId: currentRow.id });
   }, true);
 }
 
@@ -4318,6 +4344,7 @@ function promptSaveReminder(message = t("save.reminder_default")){
 }
 
 function renderDetail(id){
+  invalidateLivePreview();
   activeId = id;
   let row = rows.find(item=>item.id === id);
   if(!row){
@@ -4397,7 +4424,7 @@ function renderDetail(id){
         ${renderEditorSidebar(activeEditorPanel, state.type, state.pinned_sections || [], Object.fromEntries(Object.entries(state.sections || {}).map(([k,v])=>[k, Boolean(v?.enabled)])))}
         <div class="editor-main">
           ${renderOverviewPanel(row, state, publicUrl)}
-          <form id="momentEditorForm" class="editor-form-inner" novalidate>
+          <form id="momentEditorForm" class="editor-form-inner" novalidate data-event-id="${esc(row.id)}">
             <input type="hidden" name="pinned_sections" id="pinnedSectionsInput" value="${esc((state.pinned_sections || []).join(","))}">
             ${renderCoverPanel(state)}
             ${renderDesignPanel(state)}
@@ -4452,11 +4479,11 @@ function renderDetail(id){
   editorForm.addEventListener("submit",event=>{
     event.preventDefault();
     if(saveInFlight){
-      saveQueued = true;
+      queueMomentSave(formEventId(editorForm) || row.id);
       return;
     }
-    const liveRow = rows.find(item => item.id === activeId) || row;
-    void saveMoment(event, liveRow);
+    const liveRow = rows.find(item => item.id === (formEventId(editorForm) || activeId)) || row;
+    void saveMoment(event, liveRow, { eventId: liveRow.id });
   });
   // Salva top/bottom: delega una sola volta → sempre form + pezzo correnti (no closure stale)
   ensureMomentsSaveDelegation();
@@ -4570,6 +4597,7 @@ function renderDetail(id){
   // Anteprima Worker dopo il paint dell'editor (apertura più reattiva)
   setTimeout(()=>{
     if(document.getElementById("momentEditorForm") !== editorForm) return;
+    if(formEventId(editorForm) !== id) return;
     schedulePreviewUpdate(editorForm,{immediate:true,force:true});
   },320);
   ensureMobileNav();
@@ -5619,8 +5647,8 @@ function clearEditorDraft(eventId){
 
 function stashEditorDraft(){
   if(!editorDirty || !activeId || saveInFlight || bootstrapInFlight) return;
-  const formNode = document.getElementById("momentEditorForm");
-  if(!formNode) return;
+  const formNode = liveEditorForm();
+  if(!formNode || formEventId(formNode) !== activeId) return;
   try{
     flushGalleryInlineFields(formNode);
     const state = sanitizeStateForSave(readFormState(formNode));
@@ -5813,19 +5841,29 @@ function bindPreviewDreamChecks(){
 
 function schedulePreviewUpdate(formNode,options = {}){
   if(!options.force && !shouldLivePreview()) return;
+  const liveForm = liveEditorForm();
+  if(liveForm && formNode && formNode !== liveForm) return;
+  formNode = liveForm || formNode;
+  if(!formNode) return;
+  const eventId = formEventId(formNode) || activeId;
+  if(eventId && activeId && eventId !== activeId) return;
   clearTimeout(previewDebounceTimer);
   const delay = options.immediate ? 100 : 700;
   previewDebounceTimer = setTimeout(()=>{
+    if(eventId && eventId !== activeId) return;
+    const current = liveEditorForm();
+    if(!current || current !== formNode) return;
+    if(formEventId(current) && formEventId(current) !== eventId) return;
     let state;
     try{
       state = readFormState(formNode);
     }catch{
       return;
     }
-    const hash = JSON.stringify({ state, lang: uiLocaleForPublicPage() });
+    const hash = JSON.stringify({ eventId, state, lang: uiLocaleForPublicPage() });
     if(!options.force && hash === lastPreviewHash) return;
     lastPreviewHash = hash;
-    renderPreview(state,{ force:options.force });
+    renderPreview(state,{ force:options.force, eventId });
   },delay);
 }
 
@@ -5925,43 +5963,52 @@ async function renderPreview(state,options = {}){
   const preview = document.getElementById("momentPreview");
   if(!preview) return;
   if(!options.force && !shouldLivePreview()) return;
-    const requestId = ++previewFetchId;
-    const { iframe, status } = ensurePreviewShell(preview);
-    if(!iframe) return;
-    if(status) status.textContent = "Aggiornamento…";
-    try{
-      const response = await fetch(`${WORKER_BASE_URL}/api/moment/preview`,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          title:state.title,
+  const eventId = options.eventId || formEventId(liveEditorForm()) || activeId;
+  if(eventId && activeId && eventId !== activeId) return;
+  const requestId = ++previewFetchId;
+  const previewRoot = document.getElementById("momentPreview");
+  const { iframe, status } = ensurePreviewShell(previewRoot || preview);
+  if(!iframe) return;
+  if(status) status.textContent = "Aggiornamento…";
+  const slug = rows.find(item=>item.id === eventId)?.slug || "";
+  try{
+    const response = await fetch(`${WORKER_BASE_URL}/api/moment/preview`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        title:state.title,
         description:state.description || state.subtitle,
-        slug:rows.find(item=>item.id === activeId)?.slug || "",
+        slug,
         page_state:state,
         lang: uiLocaleForPublicPage()
-        })
-      });
-      if(requestId !== previewFetchId) return;
+      })
+    });
+    if(requestId !== previewFetchId) return;
+    if(eventId && eventId !== activeId) return;
+    if(document.getElementById("momentPreview") !== previewRoot) return;
     if(response.status === 429) throw new Error("Troppe anteprime — attendi un attimo.");
-      if(!response.ok) throw new Error("Anteprima non disponibile");
-      const html = await response.text();
-      iframe.onload = ()=>{
-        if(requestId !== previewFetchId) return;
-        fitPreviewStage();
-        watchPreviewImages(iframe);
-        if(status) status.textContent = "";
-      };
-      iframe.srcdoc = html;
-      setTimeout(()=>{
-        if(requestId === previewFetchId) fitPreviewStage();
-      },120);
-    }catch(error){
+    if(!response.ok) throw new Error("Anteprima non disponibile");
+    const html = await response.text();
+    if(requestId !== previewFetchId || (eventId && eventId !== activeId)) return;
+    iframe.onload = ()=>{
       if(requestId !== previewFetchId) return;
-      iframe.onload = null;
-      iframe.srcdoc = `<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#64748b"><p><strong>Anteprima non disponibile</strong></p><p>${esc(error.message || "Riprova tra poco.")}</p></body></html>`;
-      iframe.style.height = "240px";
+      if(eventId && eventId !== activeId) return;
+      fitPreviewStage();
+      watchPreviewImages(iframe);
       if(status) status.textContent = "";
-    }
+    };
+    iframe.srcdoc = html;
+    setTimeout(()=>{
+      if(requestId === previewFetchId && (!eventId || eventId === activeId)) fitPreviewStage();
+    },120);
+  }catch(error){
+    if(requestId !== previewFetchId) return;
+    if(eventId && eventId !== activeId) return;
+    iframe.onload = null;
+    iframe.srcdoc = `<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#64748b"><p><strong>Anteprima non disponibile</strong></p><p>${esc(error.message || "Riprova tra poco.")}</p></body></html>`;
+    iframe.style.height = "240px";
+    if(status) status.textContent = "";
+  }
 }
 
 async function refreshEventUpdatedAt(row){
@@ -5978,38 +6025,53 @@ async function refreshEventUpdatedAt(row){
 }
 
 async function persistMediaToPage(formNode, row){
-  const liveForm = document.getElementById("momentEditorForm") || formNode;
-  const liveRow = rows.find(item => item.id === (row?.id || activeId)) || row;
-  if(!liveForm || !liveRow?.id) return false;
-  const ok = await saveMoment({ preventDefault(){}, currentTarget: liveForm }, liveRow, { quietOk: true, fromMedia: true });
-  if(ok) showMediaUploadNotice(t("save.upload_saved"), "ok");
+  const eventId = row?.id || formEventId(formNode) || activeId;
+  if(!eventId || !formNode) return false;
+  const liveForm = liveEditorForm();
+  const stillOnProduct = Boolean(liveForm && formEventId(liveForm) === eventId && activeId === eventId);
+  const targetForm = stillOnProduct ? liveForm : formNode;
+  const targetRow = rows.find(item => item.id === eventId) || row;
+  if(!targetRow?.id) return false;
+  const ok = await saveMoment(
+    { preventDefault(){}, currentTarget: targetForm },
+    targetRow,
+    { quietOk: true, fromMedia: true, eventId }
+  );
+  if(ok && stillOnProduct) showMediaUploadNotice(t("save.upload_saved"), "ok");
   return ok;
 }
 
 async function saveMoment(event,row, options = {}){
   event.preventDefault();
+  const formNode = event.currentTarget || liveEditorForm();
+  if(!formNode) return false;
+  const eventId = options.eventId || formEventId(formNode) || row?.id || activeId;
   if(uploadBusy){
-    saveQueued = true;
+    queueMomentSave(eventId);
     if(!options.fromMedia){
       showEditorSaveFeedback(t("save.wait_upload"), "error");
     }
     return false;
   }
   if(saveInFlight){
-    saveQueued = true;
+    queueMomentSave(eventId);
     return false;
   }
-  const formNode = event.currentTarget || document.getElementById("momentEditorForm");
-  if(!formNode) return false;
-  // Evita salvataggio sul form staccato dopo cambio pezzo
-  const liveForm = document.getElementById("momentEditorForm");
-  if(liveForm && formNode !== liveForm){
-    return saveMoment({ preventDefault(){}, currentTarget:liveForm }, rows.find(item => item.id === activeId) || row, options);
-  }
-  if(row?.id && activeId && row.id !== activeId){
+  const liveForm = liveEditorForm();
+  const formId = formEventId(formNode);
+  // Salva sempre il pezzo del form, mai copiare un editor sull'altro.
+  if(!options.eventId && liveForm && formNode === liveForm && formId && formId === activeId && row?.id !== activeId){
     const liveRow = rows.find(item => item.id === activeId);
-    if(liveRow) return saveMoment({ preventDefault(){}, currentTarget:formNode }, liveRow, options);
+    if(liveRow) row = liveRow;
+  }else if(eventId && row?.id !== eventId){
+    const intended = rows.find(item => item.id === eventId);
+    if(intended) row = intended;
   }
+  if(formId && row?.id && formId !== row.id){
+    const formRow = rows.find(item => item.id === formId);
+    if(formRow) row = formRow;
+  }
+  if(!row?.id) return false;
   saveInFlight = true;
   let state;
   try{

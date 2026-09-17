@@ -130,6 +130,8 @@ export async function paintMomentDashboard({
         sections.rsvp?.enabled ? fetchMomentRsvpResponses(supabase, eventId).catch(()=>[]) : Promise.resolve([]),
         sections.guestbook?.enabled ? fetchMomentGuestbookMessages(supabase, eventId).catch(()=>[]) : Promise.resolve([])
       ]);
+      if(lastDashboardCtx?.eventId !== eventId) return;
+      if(document.getElementById("momentDashboard") !== panel) return;
       rsvpSummary = summarizeRsvpResponses(rsvpRows);
       guestSummary = summarizeGuestbookMessages(guestRows);
     }catch{

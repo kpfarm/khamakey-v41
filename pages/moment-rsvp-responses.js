@@ -154,15 +154,19 @@ export function refreshRsvpResponsesLocale(){
 export function bindRsvpResponsesPanel({ supabase, eventId } = {}){
   const panel = document.getElementById("rsvpResponsesPanel");
   if(!panel || !supabase || !eventId) return;
+  panel.dataset.rsvpEventId = eventId;
 
   const load = async()=>{
+    if(panel.dataset.rsvpEventId !== eventId) return;
     paintRsvpResponsesPanel([],{});
     const chips = panel.querySelector("#rsvpSummaryChips");
     if(chips) chips.innerHTML = `<span class="rsvp-chip" data-lf="Caricamento…">${esc(lf("Caricamento…"))}</span>`;
     try{
       const rows = await fetchMomentRsvpResponses(supabase, eventId);
+      if(panel.dataset.rsvpEventId !== eventId) return;
       paintRsvpResponsesPanel(rows);
     }catch(error){
+      if(panel.dataset.rsvpEventId !== eventId) return;
       paintRsvpResponsesPanel([],{ error:error.message || lf("Impossibile caricare le risposte.") });
     }
   };

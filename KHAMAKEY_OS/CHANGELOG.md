@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v283 live (2026-09-18)** — Pages produzione
+  - Cambio pezzo (titolare o invitato): l’anteprima non resta più sul prodotto precedente; un salvataggio non copia più un editor sull’altro.
+  - Worker, NFC, SQL, upload R2 **invariati**.
 - **Moments v282 live (2026-09-18)** — Pages produzione `app.khamakeymoments.com`
   - Ticket invitato: dopo l’upload il file viene salvato da solo; un conflitto non ricarica più l’editor cancellando galleria/video; gli errori restano visibili.
   - In produzione anche il pack grafico Dopo (v277–v281) e i testi di registrazione. Worker **v233** e SQL **invariati**.

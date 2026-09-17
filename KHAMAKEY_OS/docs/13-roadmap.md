@@ -106,6 +106,7 @@
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
+| 2026-09-17 | Cursor | **Moments v273**: anteprima desktop di nuovo visibile; Riepilogo usa i 4 passi (niente card parallela Prima cosa). Worker/NFC/Salva invariati. |
 | 2026-09-17 | Cursor | **Moments v272**: Officina — cassetto più largo, anteprima non copre più il testo. Worker/NFC/Salva invariati. |
 | 2026-09-17 | Cursor | **Moments v271**: coaching tre passi + Non succede sulle sezioni vuote (Foto, RSVP, lettera…). Worker/NFC/Salva invariati. |
 | 2026-09-17 | Cursor | **Moments v270**: Riepilogo con un passo (copertina/Salva) e «Cosa puoi fare» (insieme, RSVP…) una voce alla volta. Worker/NFC/Salva invariati. |

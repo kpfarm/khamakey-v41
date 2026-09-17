@@ -936,11 +936,6 @@ body.media-modal-open{overflow:hidden}
   .bottom-nav,.preview-fab{display:none!important}
   .save-bar{display:none!important}
 }
-/* Cassetto Officina / finestre medie: 3 colonne non ci stanno e l’anteprima copriva il testo */
-@media(max-width:1100px) and (min-width:769px){
-  .editor-layout{grid-template-columns:200px minmax(0,1fr)}
-  .editor-shell .preview-card{display:none}
-}
 
 .music-audio-panel,.pet-photo-panel,.letter-media-panel{display:grid;gap:10px;margin-top:8px}
 .letter-media-preview{display:grid;gap:10px;justify-items:start}

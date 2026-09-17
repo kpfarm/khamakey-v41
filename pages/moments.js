@@ -19,7 +19,7 @@ import {
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=256";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=222";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=223";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=249";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
@@ -2410,21 +2410,6 @@ function renderHowGuideItem(item){
   </article>`;
 }
 
-function renderHowNextCard(state){
-  const hasCover = pageHasCoverPhoto(state);
-  const titleKey = hasCover ? "overview.how.next.try.title" : "overview.how.next.cover.title";
-  const bodyKey = hasCover ? "overview.how.next.try.body" : "overview.how.next.cover.body";
-  const go = hasCover ? "preview" : "cover";
-  const goKey = hasCover ? "overview.how.preview.go" : "overview.how.cover.go";
-  return `<div class="how-next${hasCover ? " how-next-ready" : ""}">
-    <p class="ecard-title" data-i18n="${titleKey}">${esc(t(titleKey))}</p>
-    <p class="how-it-works-lead" data-i18n-html="${bodyKey}">${t(bodyKey)}</p>
-    <div class="how-it-works-actions">
-      <button type="button" class="primary" data-how-go="${go}" data-i18n="${goKey}">${esc(t(goKey))}</button>
-    </div>
-  </div>`;
-}
-
 function renderHowDiscoverRow(item){
   const titleKey = `overview.how.${item.id}.title`;
   const blurbKey = `overview.how.${item.id}.blurb`;
@@ -2461,8 +2446,8 @@ function renderHowDiscover(row){
 }
 
 function renderHowItWorksCard(row, state){
+  void state;
   return `<div class="editor-card how-it-works" id="momentHowItWorks">
-    ${renderHowNextCard(state)}
     ${renderHowDiscover(row)}
   </div>`;
 }
@@ -3819,7 +3804,7 @@ function selectHowDiscoverTopic(card, topicId){
 }
 
 function editorProgressStep(){
-  if(activeEditorPanel === "overview") return 0;
+  if(activeEditorPanel === "overview") return 1;
   if(activeNavGroup === "page" || activeEditorPanel === "privacy") return 4;
   if(activeNavGroup === "content") return 3;
   if(activeEditorPanel === "styling" || activeEditorPanel === "order") return 2;

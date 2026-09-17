@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-17** (Moments v280 preview signup mobile; live clienti v276; Worker invariato)
+> Ultimo aggiornamento: **2026-09-18** (Worker v233 foto countdown; Moments v281 preview; live clienti v276)
 
 ### Fonte di verità versioni
 
@@ -107,8 +107,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v232-support-mail** | Assistenza: mail staff brand Moments, Reply-To cliente. Menu pubblico senza hash (v231). |
-| **Moments editor** | **v280 preview** (live clienti ancora **v276**) | Pack grafico Dopo. CSS `?v=270`. Registrazione: codice dentro la confezione; Continua visibile su mobile. **Non** su `app.khamakeymoments.com` finché preview ok. |
+| **Worker NFC** | **v233-countdown-fit** | Foto conto alla rovescia intera (orizzontale/verticale, niente crop 160px). |
+| **Moments editor** | **v281 preview** (live clienti ancora **v276**) | Pack grafico Dopo. CSS `?v=271`. Foto countdown senza taglio in pannello. **Non** su `app.khamakeymoments.com` finché preview ok. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v176 (prod)** | v176 export/erase account (2026-09-17); v175 consensi; v174 invito editor; v173 `max_video_mb` 90; v172 salva ottimistico. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-17:** Editor live clienti **v276**. Pack grafico **v280** in preview (non produzione). Worker **v232-support-mail** invariato · SQL **v176**.  
+> **Oggi 2026-09-18:** Editor live clienti **v276**. Pack grafico **v281** in preview (non produzione). Worker **v233-countdown-fit**. SQL **v176**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > Segnato: guida invito **dopo**. **P.IVA** in attesa.
 

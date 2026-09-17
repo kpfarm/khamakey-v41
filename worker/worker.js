@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v232-support-mail";
+const WORKER_VERSION = "v233-countdown-fit";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -3800,7 +3800,7 @@ body.nav-open{overflow:hidden}
 .moment-dream.done .moment-dream-text{opacity:.72;text-decoration:line-through;color:${c.cardMuted || "#475569"}!important;-webkit-text-fill-color:${c.cardMuted || "#475569"}}
 .moment-list-intro{font-size:14px;color:${c.cardMuted || "#475569"}!important;-webkit-text-fill-color:${c.cardMuted || "#475569"};margin:0 0 14px;line-height:1.5}
 .moment-countdown{text-align:center;padding:36px 20px}
-.moment-countdown-photo{width:min(100%,280px);height:160px;object-fit:cover;border-radius:16px;margin:0 auto 16px;display:block;border:1px solid ${c.line};box-shadow:0 10px 28px rgba(0,0,0,.08)}
+.moment-countdown-photo{width:auto;max-width:100%;height:auto;max-height:min(70vw,420px);object-fit:contain;object-position:center;border-radius:16px;margin:0 auto 16px;display:block;border:1px solid ${c.line};box-shadow:0 10px 28px rgba(0,0,0,.08);background:transparent}
 .moment-music-photo{width:min(100%,320px);height:180px;object-fit:cover;border-radius:16px;margin:0 auto 16px;display:block;border:1px solid ${c.line};box-shadow:0 10px 28px rgba(0,0,0,.08)}
 .moment-countdown-label{font-family:${f.ui};font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:${c.go};margin-bottom:14px}
 .moment-countdown-event{font-size:1.15rem;font-style:italic;margin:0 0 18px;color:${cardInk}}

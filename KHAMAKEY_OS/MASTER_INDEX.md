@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v276 live** / **v280 preview** | v280 pack grafico Dopo non è su app.khamakeymoments.com |
-| Worker | **v232-support-mail** | Assistenza email; menu `/m/` senza hash sezione |
+| Editor Moments | **v276 live** / **v281 preview** | v281 pack grafico Dopo non è su app.khamakeymoments.com |
+| Worker | **v233-countdown-fit** | Foto countdown intera; assistenza email; menu `/m/` senza hash |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

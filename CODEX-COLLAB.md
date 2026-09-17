@@ -251,7 +251,7 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 | **Admin / Officina Moments** | **Libero** (cassetto editor più largo, 2026-09-17) | `admin.html`, `moments-admin.html`, `admin.js`, `admin.css`, `admin-guide.js`, `admin-moment-labels.js`, `moments-admin.css` — coordinarsi se stesso pannello |
 | **Moments editor** | **Lock 2026-09-17** restyling grafico Dopo (pack unico, **non** produzione finché preview ok) — NFC/Salva/Worker no | `moments.html`, `moments.js`, `media-upload.js`, `moments-i18n*.js`, `moment-rsvp-*.js`, `moment-horoscope.js`, `moment-pets.js`, `moments.css`, `moment-editor-dashboard.js` |
 | **Security hardening (audit 2026-07-11)** | Completato e deployato (vedi `PROJECT_STATE.md`) | Regole assolute CSP/RLS/dati restano vincolanti |
-| **`worker/worker.js`** | **Libero** (live **v232-support-mail**) | Chi tocca `worker.js` prende lock esplicito e non parallelizza |
+| **`worker/worker.js`** | **Lock 2026-09-18** foto countdown senza taglio (v233) — poi libero | Chi tocca `worker.js` prende lock esplicito e non parallelizza |
 | **Editor Business — upload media** | Completato v124 — libero | PDF catalogo / docs base64→R2 ancora pendenti (`docs/03-editor.md`) |
 | **Business WIP locale (working tree)** | **Non toccare** senza owner | `editor.html`, `editor-*.js`, SQL v147/v148 untracked, demo landing — commit separati |
 | **Business progetto parallelo** | **Attivo** (scaffold 2026-08-04) | Solo `business/**` + Supabase `qsieubbdkvtlvdsucmye` — **mai** deploy/SQL su Moments |

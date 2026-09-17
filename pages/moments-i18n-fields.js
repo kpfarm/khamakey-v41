@@ -251,7 +251,7 @@ export const FIELD_PHRASE_EN = {
   "Es. Al nostro matrimonio": "e.g. Our wedding",
   "Data e ora": "Date and time",
   "Foto": "Photo",
-  "Facoltativa — appare sopra il timer nella pagina.": "Optional — shows above the timer on the page.",
+  "Facoltativa — compare sopra il timer. Tutta la foto, orizzontale o verticale, senza tagli.": "Optional — shows above the timer. The whole photo, landscape or portrait, without cropping.",
   "Collegamenti": "Links",
   "Link Spotify": "Spotify link",
   "Link YouTube": "YouTube link",

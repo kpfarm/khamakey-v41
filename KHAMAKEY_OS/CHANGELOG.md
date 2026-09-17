@@ -8,6 +8,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v233-countdown-fit (2026-09-18)** — NFC `/m/` `/k/`
+  - Foto del conto alla rovescia: tutta l’immagine, orizzontale o verticale, senza riquadro 280×160 con taglio. Nessun campo nuovo: le pagine già pubblicate si adattano da sole.
+  - Editor: anteprima nel pannello allineata (Moments preview v281; live editor v276 finché il pack grafico non va in produzione).
+- **Moments v281 — hint foto countdown (2026-09-18)** — **preview Pages, non produzione**
+  - Hint: tutta la foto senza tagli. CSS `?v=271`. Worker **v233** è in produzione.
 - **Moments v280 — registrazione mobile (2026-09-17)** — **preview Pages, non produzione**
   - Lead: codice **all’interno** della confezione. Continua resta visibile sullo smartphone; niente blocco sui campi nascosti del passo 2.
   - Worker, NFC, Salva, upload, SQL **invariati**. Live clienti resta v276.

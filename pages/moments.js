@@ -21,7 +21,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=226";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=250";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=251";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -5304,7 +5304,7 @@ function sectionEditor(key,section,standalone=false){
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">2</span> ${lfSpan("Foto")}</p>
       ${renderSectionPhotoPanel(key, safe, "image_url", SECTION_PHOTO_FIELDS.countdown)}
-      <p class="field-hint" data-lf="Facoltativa — appare sopra il timer nella pagina.">${esc(localizeFieldPhrase("Facoltativa — appare sopra il timer nella pagina."))}</p>
+      <p class="field-hint" data-lf="Facoltativa — compare sopra il timer. Tutta la foto, orizzontale o verticale, senza tagli.">${esc(localizeFieldPhrase("Facoltativa — compare sopra il timer. Tutta la foto, orizzontale o verticale, senza tagli."))}</p>
     </div>` : "";
   const musicFields = key === "music" ? `
     <div class="editor-card">

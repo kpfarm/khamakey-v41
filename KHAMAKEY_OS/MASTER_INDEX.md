@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v276 live** / **v277 preview** | v277 pack grafico Dopo non è su app.khamakeymoments.com |
+| Editor Moments | **v276 live** / **v278 preview** | v278 pack grafico Dopo non è su app.khamakeymoments.com |
 | Worker | **v232-support-mail** | Assistenza email; menu `/m/` senza hash sezione |
 | Officina | **v203** | PNG codice più basso |
 

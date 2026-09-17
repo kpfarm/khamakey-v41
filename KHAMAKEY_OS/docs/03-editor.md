@@ -70,7 +70,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 ## Editor Moments
 
 ### Sezioni principali
-- **Ingresso editor (v270 / v271):** all’apertura si atterra su **Pagina → Riepilogo**: un passo (copertina + Salva, poi NFC) e **Cosa puoi fare** (insieme, RSVP, foto…) una voce alla volta. **v271:** sezioni ancora vuote (Foto, RSVP, lettera…) mostrano tre passi + Non succede; spariscono quando c’è contenuto. Barra bassa: Pagina · Design · Contenuti. Il QR/NFC pubblico `/m/` `/k/` resta la pagina ospite — non l’editor.
+- **Ingresso editor (v270 / v271 / v272):** all’apertura si atterra su **Pagina → Riepilogo**: un passo (copertina + Salva, poi NFC) e **Cosa puoi fare** (insieme, RSVP, foto…) una voce alla volta. **v271:** sezioni ancora vuote (Foto, RSVP, lettera…) mostrano tre passi + Non succede; spariscono quando c’è contenuto. **v272:** in Officina il cassetto è più largo; sotto 1100px l’anteprima laterale non copre il testo. Barra bassa: Pagina · Design · Contenuti. Il QR/NFC pubblico `/m/` `/k/` resta la pagina ospite — non l’editor.
 - Copertina (v255 / Worker v220): `cover_fit` `cover` (riempi, default pagine già salvate) o `contain` (tutta la foto, **stessa foto sfuocata** a riempire il riquadro). Nuovo upload parte da tutta la foto. In «Riempi» si trascina; zoom 100–200% solo lì.
 - Sezioni evento (programma, storia, messaggi…)
 - Galleria media (foto, video, audio) — ogni riga ha **Cambia foto** e **Rimuovi** (v144)

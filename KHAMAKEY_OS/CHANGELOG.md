@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v272 — editor Officina senza sovrapposizione (2026-09-17)** — Pages
+  - Cassetto Officina più largo; sotto 1100px l’anteprima laterale non copre più il testo. Worker, NFC, Salva, upload, SQL **invariati**.
 - **Moments v271 — coaching sezioni vuote (2026-09-17)** — Pages
   - Foto, RSVP, lettera, video, musica, copertina, contatore, oroscopo, pet, testi, PIN: se la sezione è vuota mostra tre passi + **Non succede**. Si nasconde quando c’è contenuto. Worker, NFC, Salva, upload, SQL **invariati**.
 - **Moments v270 — guida Riepilogo (2026-09-17)** — Pages

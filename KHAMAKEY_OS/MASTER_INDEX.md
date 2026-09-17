@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v271** | Sezioni vuote: tre passi + Non succede; Riepilogo Cosa puoi fare |
+| Editor Moments | **v272** | Layout Officina senza sovrapposizione; sezioni vuote v271 |
 | Worker | **v232-support-mail** | Assistenza email; menu `/m/` senza hash sezione |
 | Officina | **v203** | PNG codice più basso |
 

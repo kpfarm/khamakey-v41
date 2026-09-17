@@ -1238,6 +1238,7 @@ function applyUrlParams(){
   const code = normalizeCode(params.get("code") || "");
   adminEventId = String(params.get("admin_event") || "").trim();
   adminMode = Boolean(adminEventId);
+  document.documentElement.classList.toggle("admin-embed", adminMode);
   if(code){
     showAuthTab("signup");
     document.getElementById("momentsSignupCode").value = formatMomentCodeInput(code);
@@ -5766,7 +5767,9 @@ function fitPreviewStage(){
     return;
   }
   wrap.style.overflow = "";
-  const available = Math.max(wrap.clientWidth - 16, 280);
+  const cardWidth = Math.max(preview.clientWidth || 0, 0);
+  const wrapWidth = Math.max((wrap.clientWidth || cardWidth) - 16, 0);
+  const available = Math.max(Math.min(wrapWidth || 280, cardWidth ? cardWidth - 16 : 280), 160);
   stage.style.width = `${available}px`;
   stage.style.height = "";
   stage.style.transform = "";

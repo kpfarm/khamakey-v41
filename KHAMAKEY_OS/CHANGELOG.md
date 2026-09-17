@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v275 — guida Come si crea (2026-09-17)** — Pages
+  - Il blocco in Riepilogo è la guida ad **attivare e creare**, non «Cosa puoi fare». Schede = 4 passi: Copertina, Colori, Contenuti, Pubblica.
+  - Niente «Insieme». Invito a modificare sta in Pubblica. Piano/Assistenza/Profilo solo nel menu Account.
+  - Worker, NFC, Salva, upload, SQL **invariati**.
 - **Moments v274 — Cosa puoi fare: Pagina e Contenuti prima (2026-09-17)** — Pages
   - Ordine schede: **Pagina** → **Contenuti** (non «Servizi») → **Insieme** → Account. Insieme = solo invito a modificare (link/QR e PIN spostati in Pagina).
   - Testi riscritti: niente tono da FAQ («non è una lista di problemi»), niente «servizi»/«accendere». Stesso schema tre passi + Non succede.

@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v276 — chrome editor meno “template” (2026-09-17)** — Pages
+  - Tipografia: Cormorant Garamond + DM Sans (non più system-ui). 4 passi come linea, non 4 card. Guida Come si crea a indice tipografico. Icone linea in sidebar (niente emoji su Riepilogo/Copertina/…).
+  - Tolti residui verde Business su FAB, barra bassa, pulse Salva. Worker/NFC/Salva/upload **invariati**.
 - **Moments v275 — guida Come si crea (2026-09-17)** — Pages
   - Il blocco in Riepilogo è la guida ad **attivare e creare**, non «Cosa puoi fare». Schede = 4 passi: Copertina, Colori, Contenuti, Pubblica.
   - Niente «Insieme». Invito a modificare sta in Pubblica. Piano/Assistenza/Profilo solo nel menu Account.

@@ -70,7 +70,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 ## Editor Moments
 
 ### Sezioni principali
-- **Ingresso editor (v275):** il blocco in Riepilogo è la **guida ad attivare e creare**, non un catalogo di funzioni. Titolo **Come si crea**. Le schede sono i **4 passi** già in cima: Copertina (codice/oggetto + foto), Colori, Contenuti, Pubblica (Salva, anteprima, link/QR, PIN; invito a modificare in fondo, solo titolare). Piano/Assistenza/Profilo restano nel menu Account — non in questa guida. Non usare «Insieme» né «Servizi». **Non** aggiungere un secondo first-win: la card «Prima cosa» è tolta da v273. **v271:** sezioni vuote = tre passi + Non succede. **v272–v273 Officina:** anteprima desktop visibile, si restringe. Barra bassa: Pagina · Design · Contenuti. QR/NFC `/m/` `/k/` = pagina ospite.
+- **Ingresso editor (v276 / v275):** chrome editor con tipografia Moments (Cormorant + DM Sans), 4 passi a linea, icone disegno — non card/emoji da dashboard generica. Il blocco in Riepilogo è la **guida ad attivare e creare** (**Come si crea**). Schede = 4 passi: Copertina (codice/oggetto + foto), Colori, Contenuti, Pubblica. Niente «Insieme» né catalogo Account. **v271:** sezioni vuote = tre passi + Non succede. **v272–v273 Officina:** anteprima desktop visibile. QR/NFC `/m/` `/k/` = pagina ospite.
 - Copertina (v255 / Worker v220): `cover_fit` `cover` (riempi, default pagine già salvate) o `contain` (tutta la foto, **stessa foto sfuocata** a riempire il riquadro). Nuovo upload parte da tutta la foto. In «Riempi» si trascina; zoom 100–200% solo lì.
 - Sezioni evento (programma, storia, messaggi…)
 - Galleria media (foto, video, audio) — ogni riga ha **Cambia foto** e **Rimuovi** (v144)

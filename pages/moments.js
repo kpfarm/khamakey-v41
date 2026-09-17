@@ -216,6 +216,20 @@ function editorPanelTitle(panel){
   return panel.title || "";
 }
 
+function chromeNavIcon(name){
+  const inner = {
+    overview: '<rect x="4" y="4" width="7" height="7" rx="1.2"/><rect x="13" y="4" width="7" height="16" rx="1.2"/><rect x="4" y="13" width="7" height="7" rx="1.2"/>',
+    publish: '<rect x="7" y="3.5" width="10" height="17" rx="1.6"/><path d="M10 8h4M10 12h4M10 16h2.5"/>',
+    cover: '<rect x="3.5" y="6" width="17" height="12" rx="1.6"/><circle cx="8.5" cy="11" r="1.4"/><path d="m7.5 16.2 3.2-3.4 2.6 2.2 4.2-4.5"/>',
+    colors: '<circle cx="12" cy="12" r="7.5"/><path d="M12 4.5v15M4.5 12h15"/>',
+    order: '<path d="M5 8h14M5 12h14M5 16h10"/>',
+    extras: '<path d="M12 6v12M6 12h12"/>',
+    counter: '<circle cx="12" cy="12" r="7.5"/><path d="M12 8v4.2l2.6 1.6"/>'
+  }[name];
+  if(!inner) return `<span class="editor-nav-icon" aria-hidden="true"></span>`;
+  return `<span class="editor-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${inner}</svg></span>`;
+}
+
 /** Step 7b: translate taxonomy labels only (nav / sidebar / order). Keep custom user titles. */
 function localizeSectionPhrase(text){
   const raw = String(text || "");
@@ -1850,7 +1864,7 @@ function syncEditorKitUi(formNode){
     if(panelId === "counter"){
       button.hidden = !showCounter;
       if(showCounter){
-        button.innerHTML = `<span class="editor-nav-icon">⏱</span>${esc(localizedCounterLabel(type))}`;
+        button.innerHTML = `${chromeNavIcon("counter")}${esc(localizedCounterLabel(type))}`;
       }
       return;
     }
@@ -3167,11 +3181,11 @@ function renderEditorSidebar(activePanel, momentType = currentMomentType, pinned
   const showExtras = hiddenOptionalSections(momentType, pinned, enabled).length > 0;
   const counterBtn = showCounterForType(momentType) ? `
     <button type="button" class="editor-nav-item ${activePanel === "counter" ? "active" : ""}" data-editor-panel="counter">
-      <span class="editor-nav-icon">⏱</span>${esc(localizedCounterLabel(momentType))}
+      ${chromeNavIcon("counter")}${esc(localizedCounterLabel(momentType))}
     </button>` : "";
   const extrasBtn = showExtras ? `
     <button type="button" class="editor-nav-item ${activePanel === "extras" ? "active" : ""}" data-editor-panel="extras">
-      <span class="editor-nav-icon">➕</span>${esc(t("nav.extras"))}
+      ${chromeNavIcon("extras")}${esc(t("nav.extras"))}
     </button>` : "";
   const contentItems = `${counterBtn}
     ${navKeys.map(key=>`
@@ -3181,20 +3195,20 @@ function renderEditorSidebar(activePanel, momentType = currentMomentType, pinned
   return `<nav class="editor-sidebar" aria-label="${esc(t("nav.aria.sidebar"))}">
     <div class="editor-sidebar-group">${esc(t("nav.sidebar.page"))}</div>
     <button type="button" class="editor-nav-item ${activePanel === "overview" ? "active" : ""}" data-editor-panel="overview">
-      <span class="editor-nav-icon">📊</span>${esc(t("nav.overview"))}
+      ${chromeNavIcon("overview")}${esc(t("nav.overview"))}
     </button>
     <button type="button" class="editor-nav-item ${activePanel === "privacy" ? "active" : ""}" data-editor-panel="privacy">
-      <span class="editor-nav-icon">🔒</span>${esc(t("nav.publish"))}
+      ${chromeNavIcon("publish")}${esc(t("nav.publish"))}
     </button>
     <div class="editor-sidebar-group">${esc(t("nav.sidebar.design"))}</div>
     <button type="button" class="editor-nav-item ${activePanel === "cover" ? "active" : ""}" data-editor-panel="cover">
-      <span class="editor-nav-icon">✦</span>${esc(t("nav.cover"))}
+      ${chromeNavIcon("cover")}${esc(t("nav.cover"))}
     </button>
     <button type="button" class="editor-nav-item ${activePanel === "styling" ? "active" : ""}" data-editor-panel="styling">
-      <span class="editor-nav-icon">◑</span>${esc(t("nav.colors"))}
+      ${chromeNavIcon("colors")}${esc(t("nav.colors"))}
     </button>
     <button type="button" class="editor-nav-item ${activePanel === "order" ? "active" : ""}" data-editor-panel="order">
-      <span class="editor-nav-icon">☰</span>${esc(t("nav.order_long"))}
+      ${chromeNavIcon("order")}${esc(t("nav.order_long"))}
     </button>
     <div class="editor-sidebar-group">${esc(t("nav.sidebar.content"))}</div>
     ${contentItems}

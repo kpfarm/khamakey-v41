@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v275** | Guida Come si crea = 4 passi; niente scheda Insieme |
+| Editor Moments | **v276** | Chrome: tipografia Moments, niente card-wizard; guida Come si crea |
 | Worker | **v232-support-mail** | Assistenza email; menu `/m/` senza hash sezione |
 | Officina | **v203** | PNG codice più basso |
 

@@ -469,7 +469,66 @@ textarea{min-height:86px;resize:vertical}
   border:1px solid var(--border);
   background:linear-gradient(135deg,var(--soft-strong),#fff);
   box-shadow:inset 3px 0 0 var(--rosa-ricordo);
+  display:grid;
+  gap:16px;
 }
+.how-it-works-lead{margin:6px 0 0;font-size:.86rem;line-height:1.5;color:var(--antracite)}
+.how-it-works-lead strong{color:var(--navy);font-weight:800}
+.how-next .ecard-title,.how-discover .ecard-title{margin:0}
+.how-discover-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+.how-discover-chip{
+  min-height:44px;
+  padding:8px 14px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--navy);
+  font-weight:800;
+  font-size:.82rem;
+}
+.how-discover-chip[aria-pressed="true"]{
+  background:var(--navy);
+  color:#fff;
+  border-color:var(--navy);
+}
+.how-discover-panel{margin-top:12px;display:grid;gap:10px}
+.how-discover-rows{display:grid;gap:8px}
+.how-discover-row{
+  display:grid;
+  gap:2px;
+  text-align:left;
+  width:100%;
+  min-height:44px;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--navy);
+}
+.how-discover-row[aria-expanded="true"]{
+  border-color:var(--navy);
+  background:var(--soft);
+}
+.how-discover-row-title{font-size:.9rem;font-weight:800}
+.how-discover-row-blurb{font-size:.78rem;font-weight:600;color:var(--muted);line-height:1.4}
+.how-guide-item{
+  display:grid;
+  gap:8px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--soft);
+}
+.how-guide-item h4{margin:0;font-size:.92rem;color:var(--navy)}
+.how-guide-item .how-it-works-list{margin:0}
+.how-guide-note{margin:0;font-size:.8rem;line-height:1.45;color:var(--muted)}
+.how-guide-note strong{color:var(--navy);font-weight:800}
+.how-guide-item .primary,.how-guide-item .ghost{justify-self:start}
 .how-it-works-list{margin:0;padding-left:18px;display:grid;gap:8px}
 .how-it-works-list li{color:var(--antracite);font-size:.86rem;line-height:1.5}
 .how-it-works-list li strong{color:var(--navy);font-weight:800}

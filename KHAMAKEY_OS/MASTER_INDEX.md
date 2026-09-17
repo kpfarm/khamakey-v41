@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v269** | Trattini codice in registrazione; export/cancella account resta da v268 |
+| Editor Moments | **v270** | Riepilogo: passo copertina + Cosa puoi fare (insieme, RSVP…) |
 | Worker | **v232-support-mail** | Assistenza email; menu `/m/` senza hash sezione |
 | Officina | **v203** | PNG codice più basso |
 
@@ -16,7 +16,7 @@
 - **GDPR Moments** Fase 2+4 fatte (v268 / SQL v176): [[docs/34-gdpr-moments]]. Niente newsletter. P.IVA in attesa.
 - Titoli/etichette in pagina = testo cliente. «Prepara tutto per me» segue la lingua UI. → [[docs/27-moments-i18n-rules]]
 - Email conferma/reset IT/EN: template in [[docs/32-moments-auth-email]] (dashboard, già incollati)
-- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — ticket editor chiusi in tabella; guida cliente ancora in backlog
+- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — ticket editor chiusi in tabella; guida cliente **v270** in Riepilogo
 
 ---
 

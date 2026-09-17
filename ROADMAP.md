@@ -122,7 +122,7 @@ Obiettivo: pagine NFC come **esperienze nel tempo**, non catalogo prodotti. Ispi
 
 ## Promemoria prodotto (non ora)
 
-- [ ] **Guida cliente Moments** — dove si invita / Come funziona. v266 non è intuitiva per i clienti (ok per chi ha fatto l’app). Fare **dopo**.
+- [x] **Guida cliente Moments** — v270: in Riepilogo un passo (copertina/Salva) e «Cosa puoi fare» una voce alla volta (insieme, RSVP, foto…).
 - [ ] **GDPR Moments** — Fase 2+4 fatte (v268 / SQL v176). Resta: niente campagne finché non si decide; P.IVA quando reale. Inventario `docs/34`.
 
 ---
@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-09-17 | Cursor | **Moments v270**: Riepilogo con un passo (copertina/Salva) e «Cosa puoi fare» (insieme, RSVP…) una voce alla volta. Worker/NFC/Salva invariati. |
 | 2026-09-17 | Cursor | **Moments v269**: in registrazione i trattini del codice compaiono da soli (`XXXX-XXXX-XXXX`), come in etichetta. Worker/NFC/Salva invariati. |
 | 2026-09-17 | Cursor | **Moments v268 / SQL v176**: export JSON + cancella account in Profilo (solo i propri Moments). Worker/NFC/Salva invariati. |
 | 2026-09-15 | Cursor | **Moments v267 / SQL v175**: consenso marketing facoltativo, registro, revoca in Profilo. Worker/NFC/Salva invariati. Niente newsletter. |

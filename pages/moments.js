@@ -19,7 +19,7 @@ import {
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=256";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=219";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=221";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=249";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
@@ -2258,6 +2258,36 @@ function renderPlanStorageCard(entitlements = currentEntitlements){
 }
 
 const HOW_IT_WORKS_KEYS = ["overview.how.1", "overview.how.2", "overview.how.3", "overview.how.4"];
+const HOW_DISCOVER_GROUPS = [
+  { id: "together", items: [
+    { id: "together", action: "invite", ownerOnly: true },
+    { id: "link", action: "link" },
+    { id: "pin", action: "publish" }
+  ]},
+  { id: "services", items: [
+    { id: "gallery", action: "gallery" },
+    { id: "rsvp", action: "rsvp" },
+    { id: "letter", action: "letter" },
+    { id: "video", action: "video" },
+    { id: "music", action: "music" },
+    { id: "counter", action: "counter" },
+    { id: "horoscope", action: "horoscope" },
+    { id: "pet", action: "pet" },
+    { id: "texts", action: "texts" }
+  ]},
+  { id: "page", items: [
+    { id: "cover", action: "cover", primary: true },
+    { id: "save" },
+    { id: "preview", action: "preview" },
+    { id: "colors", action: "colors" },
+    { id: "order", action: "order" }
+  ]},
+  { id: "account", items: [
+    { id: "plan", action: "plan" },
+    { id: "support", action: "support" },
+    { id: "data", action: "profile" }
+  ]}
+];
 
 function renderHowItWorksList(withActiveFirst = false){
   return HOW_IT_WORKS_KEYS.map((key, index) =>
@@ -2265,22 +2295,98 @@ function renderHowItWorksList(withActiveFirst = false){
   ).join("");
 }
 
-function renderHowItWorksCard(row){
-  const canInvite = Boolean(row && isOwnedMoment(row) && !adminMode);
-  return `<div class="editor-card how-it-works" id="momentHowItWorks">
-    <p class="ecard-title" data-i18n="overview.how.title">${esc(t("overview.how.title"))}</p>
-    <ol class="how-it-works-list">${renderHowItWorksList()}</ol>
+function pageHasCoverPhoto(state){
+  return Boolean(String(state?.cover_url || "").trim());
+}
+
+function howDiscoverGroups({ canInvite = false } = {}){
+  return HOW_DISCOVER_GROUPS
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => !item.ownerOnly || canInvite)
+    }))
+    .filter(group => group.items.length);
+}
+
+function renderHowGuideItem(item){
+  const steps = [1, 2, 3].map(n => {
+    const key = `overview.how.${item.id}.${n}`;
+    return `<li data-i18n-html="${key}">${t(key)}</li>`;
+  }).join("");
+  const noteKey = `overview.how.${item.id}.note`;
+  const goKey = `overview.how.${item.id}.go`;
+  const actionBtn = item.action
+    ? `<button type="button" class="${item.primary ? "primary" : "ghost"}" data-how-go="${esc(item.action)}" data-i18n="${goKey}">${esc(t(goKey))}</button>`
+    : "";
+  return `<article class="how-guide-item" data-how-article="${esc(item.id)}" hidden>
+    <h4 data-i18n="overview.how.${item.id}.title">${esc(t(`overview.how.${item.id}.title`))}</h4>
+    <ol class="how-it-works-list">${steps}</ol>
+    <p class="how-guide-note" data-i18n-html="${noteKey}">${t(noteKey)}</p>
+    ${actionBtn}
+  </article>`;
+}
+
+function renderHowNextCard(state){
+  const hasCover = pageHasCoverPhoto(state);
+  const titleKey = hasCover ? "overview.how.next.try.title" : "overview.how.next.cover.title";
+  const bodyKey = hasCover ? "overview.how.next.try.body" : "overview.how.next.cover.body";
+  const go = hasCover ? "preview" : "cover";
+  const goKey = hasCover ? "overview.how.preview.go" : "overview.how.cover.go";
+  return `<div class="how-next${hasCover ? " how-next-ready" : ""}">
+    <p class="ecard-title" data-i18n="${titleKey}">${esc(t(titleKey))}</p>
+    <p class="how-it-works-lead" data-i18n-html="${bodyKey}">${t(bodyKey)}</p>
     <div class="how-it-works-actions">
-      <button type="button" class="primary" id="startFromCoverBtn" data-i18n="overview.how.start_cover">${esc(t("overview.how.start_cover"))}</button>
-      ${canInvite ? `<button type="button" class="ghost" id="inviteFromGuideBtn" data-i18n="overview.how.invite">${esc(t("overview.how.invite"))}</button>` : ""}
+      <button type="button" class="primary" data-how-go="${go}" data-i18n="${goKey}">${esc(t(goKey))}</button>
     </div>
+  </div>`;
+}
+
+function renderHowDiscoverRow(item){
+  const titleKey = `overview.how.${item.id}.title`;
+  const blurbKey = `overview.how.${item.id}.blurb`;
+  return `<button type="button" class="how-discover-row" data-how-topic="${esc(item.id)}" aria-expanded="false">
+    <span class="how-discover-row-title" data-i18n="${titleKey}">${esc(t(titleKey))}</span>
+    <span class="how-discover-row-blurb" data-i18n="${blurbKey}">${esc(t(blurbKey))}</span>
+  </button>`;
+}
+
+function renderHowDiscover(row){
+  const canInvite = Boolean(row && isOwnedMoment(row) && !adminMode);
+  const groups = howDiscoverGroups({ canInvite });
+  if(!groups.length) return "";
+  const activeId = groups[0].id;
+  const chips = groups.map(group => {
+    const key = `overview.how.group.${group.id}`;
+    const on = group.id === activeId;
+    return `<button type="button" class="how-discover-chip" data-how-group="${esc(group.id)}" aria-pressed="${on ? "true" : "false"}" data-i18n="${key}">${esc(t(key))}</button>`;
+  }).join("");
+  const panels = groups.map(group => {
+    const rows = group.items.map(renderHowDiscoverRow).join("");
+    const articles = group.items.map(renderHowGuideItem).join("");
+    return `<div class="how-discover-panel" data-how-panel="${esc(group.id)}"${group.id === activeId ? "" : " hidden"}>
+      <div class="how-discover-rows">${rows}</div>
+      ${articles}
+    </div>`;
+  }).join("");
+  return `<div class="how-discover">
+    <p class="ecard-title" data-i18n="overview.how.title">${esc(t("overview.how.title"))}</p>
+    <p class="how-it-works-lead" data-i18n-html="overview.how.lead">${t("overview.how.lead")}</p>
+    <div class="how-discover-chips" role="tablist">${chips}</div>
+    ${panels}
+  </div>`;
+}
+
+function renderHowItWorksCard(row, state){
+  return `<div class="editor-card how-it-works" id="momentHowItWorks">
+    ${renderHowNextCard(state)}
+    ${renderHowDiscover(row)}
   </div>`;
 }
 
 function renderOverviewPanel(row, state, publicUrl){
   return `<div class="editor-panel ${activeEditorPanel === "overview" ? "active" : ""}" data-editor-panel="overview">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.overview),editorPanelSubtitle(EDITOR_PANELS.overview))}
-    ${renderHowItWorksCard(row)}
+    ${renderHowItWorksCard(row, state)}
     ${renderPlanStorageCard(currentEntitlements)}
     ${renderMomentDashboardShell({ publicUrl, published:row.public_visible, slug:row.slug })}
   </div>`;
@@ -3495,9 +3601,36 @@ function renderOnboardingWizard(row){
 }
 
 function goToCoverEditor(){
-  setNavGroup("design");
-  setEditorPanel("cover");
+  goToEditorPlace("design", "cover");
+}
+
+function goToEditorPlace(groupId, panelId){
+  if(groupId) setNavGroup(groupId);
+  if(panelId) setEditorPanel(panelId);
+  else if(groupId === "content"){
+    const first = document.querySelector("#momentsSubNav [data-editor-panel]");
+    if(first?.dataset.editorPanel) setEditorPanel(first.dataset.editorPanel);
+  }
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function goToContentEditor(){
+  goToEditorPlace("content");
+}
+
+function goToPublishEditor(){
+  goToEditorPlace("page", "privacy");
+}
+
+function goToPreview(){
+  document.getElementById("momentsPreviewFab")?.click();
+}
+
+function dismissHowItWorksOnboarding(row){
+  if(!row?.id) return;
+  forceOnboardingIds.delete(row.id);
+  localStorage.setItem(onboardingKey(row.id), "done");
+  document.getElementById("onboardingWizard")?.remove();
 }
 
 function bindOnboardingWizard(row){
@@ -3519,22 +3652,83 @@ function bindOnboardingWizard(row){
   });
 }
 
+async function followHowGuideAction(go, row){
+  const editorJumps = new Set(["cover","content","colors","order","gallery","video","music","rsvp","letter","counter","horoscope","pet","texts","publish"]);
+  if(editorJumps.has(go)) dismissHowItWorksOnboarding(row);
+  if(go === "cover") return goToEditorPlace("design", "cover");
+  if(go === "colors") return goToEditorPlace("design", "styling");
+  if(go === "order") return goToEditorPlace("design", "order");
+  if(go === "content") return goToContentEditor();
+  if(go === "gallery") return goToEditorPlace("content", "section-gallery");
+  if(go === "video") return goToEditorPlace("content", "section-video");
+  if(go === "music") return goToEditorPlace("content", "section-music");
+  if(go === "rsvp") return goToEditorPlace("content", "section-rsvp");
+  if(go === "letter") return goToEditorPlace("content", "section-letter_future");
+  if(go === "counter") return goToEditorPlace("content", "counter");
+  if(go === "horoscope") return goToEditorPlace("content", "section-horoscope");
+  if(go === "pet") return goToEditorPlace("content", "section-pet");
+  if(go === "texts") return goToEditorPlace("content", "section-intro");
+  if(go === "publish") return goToPublishEditor();
+  if(go === "preview") return goToPreview();
+  if(go === "link"){
+    document.getElementById("momentDashboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  if(go === "invite"){
+    await showAccountHub("products");
+    document.getElementById("momentEditorsCard")?.scrollIntoView({ behavior:"smooth", block:"start" });
+    return;
+  }
+  if(go === "plan") return showAccountHub("plan");
+  if(go === "support") return showAccountHub("support");
+  if(go === "profile") return showAccountHub("profile");
+}
+
 function bindHowItWorks(row){
   const card = document.getElementById("momentHowItWorks");
   if(!card || card.dataset.bound === "1") return;
   card.dataset.bound = "1";
-  card.querySelector("#startFromCoverBtn")?.addEventListener("click",()=>{
-    if(row?.id){
-      forceOnboardingIds.delete(row.id);
-      localStorage.setItem(onboardingKey(row.id),"done");
+  card.addEventListener("click", event=>{
+    const groupBtn = event.target.closest("[data-how-group]");
+    if(groupBtn && card.contains(groupBtn)){
+      selectHowDiscoverGroup(card, groupBtn.dataset.howGroup);
+      return;
     }
-    document.getElementById("onboardingWizard")?.remove();
-    goToCoverEditor();
+    const topicBtn = event.target.closest("[data-how-topic]");
+    if(topicBtn && card.contains(topicBtn)){
+      selectHowDiscoverTopic(card, topicBtn.dataset.howTopic);
+      return;
+    }
+    const goBtn = event.target.closest("[data-how-go]");
+    if(!goBtn || !card.contains(goBtn)) return;
+    followHowGuideAction(goBtn.dataset.howGo, row);
   });
-  card.querySelector("#inviteFromGuideBtn")?.addEventListener("click", async ()=>{
-    await showAccountHub("products");
-    document.getElementById("momentEditorsCard")?.scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+function selectHowDiscoverGroup(card, groupId){
+  if(!card || !groupId) return;
+  card.querySelectorAll("[data-how-group]").forEach(btn=>{
+    btn.setAttribute("aria-pressed", btn.dataset.howGroup === groupId ? "true" : "false");
   });
+  card.querySelectorAll("[data-how-panel]").forEach(panel=>{
+    panel.hidden = panel.dataset.howPanel !== groupId;
+  });
+  card.querySelectorAll("[data-how-article]").forEach(el=>{ el.hidden = true; });
+  card.querySelectorAll("[data-how-topic]").forEach(btn=>btn.setAttribute("aria-expanded","false"));
+}
+
+function selectHowDiscoverTopic(card, topicId){
+  if(!card || !topicId) return;
+  const already = card.querySelector(`[data-how-topic="${topicId}"][aria-expanded="true"]`);
+  card.querySelectorAll("[data-how-article]").forEach(el=>{
+    el.hidden = already ? true : el.dataset.howArticle !== topicId;
+  });
+  card.querySelectorAll("[data-how-topic]").forEach(btn=>{
+    const on = !already && btn.dataset.howTopic === topicId;
+    btn.setAttribute("aria-expanded", on ? "true" : "false");
+  });
+  if(already) return;
+  card.querySelector(`[data-how-article="${topicId}"]`)?.scrollIntoView({ behavior:"smooth", block:"nearest" });
 }
 
 function editorProgressStep(){

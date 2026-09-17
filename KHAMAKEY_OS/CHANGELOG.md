@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v270 — guida Riepilogo (2026-09-17)** — Pages
+  - Un passo: copertina + Salva, poi tocca l’oggetto. Sotto: **Cosa puoi fare** (Insieme, Servizi, Pagina, Account), una voce alla volta, non una FAQ.
+  - Worker, NFC, Salva, upload, SQL **invariati**.
 - **Moments v269 — trattini codice in registrazione (2026-09-17)** — Pages
   - Il campo codice mostra `XXXX-XXXX-XXXX` mentre si digita o si incolla, come l’etichetta. Lookup senza trattini invariato.
   - Worker, NFC, Salva, upload, SQL **invariati**.

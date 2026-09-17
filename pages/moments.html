@@ -8,7 +8,7 @@
   <link rel="icon" href="khamakey-favicon.png">
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="moments.css?v=260">
+  <link rel="stylesheet" href="moments.css?v=261">
 </head>
 <body class="session-pending">
   <main class="moments-boot" id="momentsBoot" aria-live="polite">
@@ -103,8 +103,8 @@
           </div>
           <div class="signup-panel" data-signup-panel="1">
             <label><span data-i18n="auth.signup.code">Codice Moments (inserto confezione)</span>
-              <input id="momentsSignupCode" type="text" autocomplete="off" data-i18n-placeholder="auth.signup.code.ph" placeholder="Es. M7K2-9XPL-H3WN" required>
-              <span class="field-hint" data-i18n="auth.signup.code.hint">Sul biglietto dentro la confezione — non è sul chip NFC. Senza codice non si apre lo step account.</span>
+              <input id="momentsSignupCode" class="activation-code-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="24" data-i18n-placeholder="auth.signup.code.ph" placeholder="Es. M7K2-9XPL-H3WN" required>
+              <span class="field-hint" data-i18n="auth.signup.code.hint">Come sull’etichetta: i trattini compaiono da soli. Puoi anche incollare il codice così com’è.</span>
             </label>
             <button type="button" class="primary" id="signupNextStep" data-i18n="auth.signup.continue">Continua</button>
           </div>
@@ -257,6 +257,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=268"></script>
+  <script type="module" src="moments.js?v=269"></script>
 </body>
 </html>

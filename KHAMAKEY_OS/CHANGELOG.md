@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v269 — trattini codice in registrazione (2026-09-17)** — Pages
+  - Il campo codice mostra `XXXX-XXXX-XXXX` mentre si digita o si incolla, come l’etichetta. Lookup senza trattini invariato.
+  - Worker, NFC, Salva, upload, SQL **invariati**.
 - **Moments v268 + SQL v176 — export/cancella account (2026-09-17)** — Pages + SQL
   - Account → Profilo: scarica JSON dei propri dati; elimina account solo con email + spunta.
   - RPC `export_my_moment_account` / `erase_my_moment_account`: solo autenticato, solo i Moments del chiamante. Pagine altrui e staff/business intatti. Codici claimed non si riciclano.

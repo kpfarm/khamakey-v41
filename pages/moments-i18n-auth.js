@@ -35,7 +35,7 @@ export const AUTH_MESSAGES_IT = {
   "auth.signup.step1": "1. Codice",
   "auth.signup.step2": "2. Account",
   "auth.signup.code": "Codice Moments (inserto confezione)",
-  "auth.signup.code.hint": "Sul biglietto dentro la confezione — non è sul chip NFC. Senza codice non si apre lo step account.",
+  "auth.signup.code.hint": "Come sull’etichetta: i trattini compaiono da soli. Puoi anche incollare il codice così com’è.",
   "auth.signup.code.ph": "Es. M7K2-9XPL-H3WN",
   "auth.signup.continue": "Continua",
   "auth.signup.back": "Indietro",
@@ -231,6 +231,7 @@ export const AUTH_MESSAGES_IT = {
   "activate.pin.ph": "Esempio 1234",
   "activate.submit": "Attiva oggetto",
   "activate.code.ph": "Es. M7K2-9XPL-H3WN",
+  "activate.code.hint": "I trattini compaiono da soli, come sull’etichetta.",
 
   "plan.menu_name": "Moments Free",
   "plan.eyebrow": "Piano Moments",
@@ -279,7 +280,7 @@ export const AUTH_MESSAGES_EN = {
   "auth.signup.step1": "1. Code",
   "auth.signup.step2": "2. Account",
   "auth.signup.code": "Moments code (pack insert)",
-  "auth.signup.code.hint": "On the card inside the pack — not on the NFC chip. Without a code you can’t open the account step.",
+  "auth.signup.code.hint": "As on the label: the dashes appear as you type. You can also paste the code as printed.",
   "auth.signup.code.ph": "e.g. M7K2-9XPL-H3WN",
   "auth.signup.continue": "Continue",
   "auth.signup.back": "Back",
@@ -475,6 +476,7 @@ export const AUTH_MESSAGES_EN = {
   "activate.pin.ph": "e.g. 1234",
   "activate.submit": "Activate piece",
   "activate.code.ph": "e.g. M7K2-9XPL-H3WN",
+  "activate.code.hint": "Dashes appear as you type, as on the label.",
 
   "plan.menu_name": "Moments Free",
   "plan.eyebrow": "Moments plan",

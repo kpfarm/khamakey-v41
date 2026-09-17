@@ -42,7 +42,7 @@ Cliente
 
 | Uso | Formato | Chi lo usa |
 |-----|---------|------------|
-| **Attivazione** | 12 caratteri alfanumerici, stampati `XXXX-XXXX-XXXX` | Cliente (digitazione su moments.html) — **solo inserto confezione** |
+| **Attivazione** | 12 caratteri alfanumerici, stampati `XXXX-XXXX-XXXX`. In registrazione i trattini compaiono da soli; lookup toglie i separatori. | Cliente (digitazione su moments.html) — **solo inserto confezione** |
 | **Barcode confezione** | 12 cifre numeriche | Solo magazzino (scan etichetta) |
 | **Chip NFC** | URL → `/m/{slug opaco}` | Programmazione chip — **mai** il codice attivazione |
 | **Slug pubblico** | 12 caratteri opachi ≠ codice (SQL v160) | Link pagina pre/post attivazione |

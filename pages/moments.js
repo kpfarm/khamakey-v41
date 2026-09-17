@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WORKER_BASE_URL, momentsAuthRedirectTo } from "./config.js";
-import { normalizeMomentCode, formatMomentCodeDisplay, isValidMomentCode } from "./moment-codes.js";
+import { normalizeMomentCode, formatMomentCodeDisplay, formatMomentCodeInput, caretIndexForMomentCode, isValidMomentCode, MOMENT_CODE_INPUT_MAX_LENGTH } from "./moment-codes.js";
 import {
   applyChromeI18n,
   applyDocumentLang,
@@ -16,7 +16,7 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=255";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=256";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=219";
@@ -744,25 +744,52 @@ async function refreshActivationCodeTypeHint(code, hintEl){
   }
 }
 
-function bindCodeInputs(root=document){
-  root.querySelectorAll("input[name='code'],#momentsSignupCode").forEach(input=>{
-    input.addEventListener("input",()=>{
-      const start = input.selectionStart;
-      const before = input.value;
-      const formatted = formatMomentCodeDisplay(before);
-      input.value = formatted;
-      if(start != null){
-        const delta = formatted.length - before.length;
-        const next = Math.max(0, Math.min(formatted.length, start + delta));
-        input.setSelectionRange(next, next);
-      }
-    });
-    input.addEventListener("blur",()=>{
-      input.value = formatMomentCodeDisplay(normalizeCode(input.value));
-      const hintId = activationTypeHintId(input);
-      if(hintId) refreshActivationCodeTypeHint(input.value, document.getElementById(hintId));
-    });
+function bindActivationCodeField(input){
+  if(!input || input.dataset.codeBound === "1") return;
+  input.dataset.codeBound = "1";
+  input.classList.add("activation-code-input");
+  input.setAttribute("spellcheck", "false");
+  input.setAttribute("autocorrect", "off");
+  input.setAttribute("autocapitalize", "characters");
+  input.setAttribute("autocomplete", "off");
+  input.setAttribute("inputmode", "text");
+  input.setAttribute("maxlength", String(MOMENT_CODE_INPUT_MAX_LENGTH));
+  if(input.value) input.value = formatMomentCodeInput(input.value);
+  input.addEventListener("keydown", event => {
+    if(event.key !== "Backspace" || event.metaKey || event.ctrlKey || event.altKey) return;
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    if(start == null || start !== end || start === 0) return;
+    if(input.value[start - 1] !== "-") return;
+    event.preventDefault();
+    const cutAt = start - 2;
+    const nextRaw = input.value.slice(0, Math.max(0, cutAt)) + input.value.slice(start);
+    const formatted = formatMomentCodeInput(nextRaw);
+    input.value = formatted;
+    const caret = caretIndexForMomentCode(nextRaw, Math.max(0, cutAt), formatted);
+    input.setSelectionRange(caret, caret);
   });
+  input.addEventListener("input", event => {
+    if(event.isComposing) return;
+    const start = input.selectionStart;
+    const before = input.value;
+    const formatted = formatMomentCodeInput(before);
+    if(before === formatted) return;
+    input.value = formatted;
+    if(start != null){
+      const caret = caretIndexForMomentCode(before, start, formatted);
+      input.setSelectionRange(caret, caret);
+    }
+  });
+  input.addEventListener("blur", () => {
+    input.value = formatMomentCodeInput(input.value);
+    const hintId = activationTypeHintId(input);
+    if(hintId) refreshActivationCodeTypeHint(input.value, document.getElementById(hintId));
+  });
+}
+
+function bindCodeInputs(root=document){
+  root.querySelectorAll("input[name='code'],#momentsSignupCode").forEach(bindActivationCodeField);
 }
 
 function lockedMomentType(row){
@@ -1213,7 +1240,7 @@ function applyUrlParams(){
   adminMode = Boolean(adminEventId);
   if(code){
     showAuthTab("signup");
-    document.getElementById("momentsSignupCode").value = formatMomentCodeDisplay(code);
+    document.getElementById("momentsSignupCode").value = formatMomentCodeInput(code);
     setSignupStep(1);
   }
   if(params.get("tab") === "signup") showAuthTab("signup");
@@ -2175,7 +2202,9 @@ async function refreshMomentEditorsList(row){
 
 function renderActivationFormHtml(formId = "editorActivationForm",statusId = "editorActivationStatus",prefillCode = ""){
   return `<form id="${formId}" class="activation-inline-form">
-    <label><span>${esc(t("activate.code"))}</span><input name="code" autocomplete="off" placeholder="${esc(t("activate.code.ph"))}" value="${esc(formatMomentCodeDisplay(prefillCode))}" required></label>
+    <label><span>${esc(t("activate.code"))}</span><input name="code" class="activation-code-input" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" maxlength="${MOMENT_CODE_INPUT_MAX_LENGTH}" placeholder="${esc(t("activate.code.ph"))}" value="${esc(formatMomentCodeInput(prefillCode))}" required>
+      <span class="field-hint">${esc(t("activate.code.hint"))}</span>
+    </label>
     <p class="field-hint activation-code-type" id="editorActivationTypeHint" data-activation-type-hint hidden></p>
     <label><span>${esc(t("activate.page"))}</span><input name="title" placeholder="${esc(t("activate.page.ph"))}" required></label>
     <label><span>${esc(t("activate.pin"))}</span><input name="access_pin" inputmode="numeric" autocomplete="new-password" placeholder="${esc(t("activate.pin.ph"))}" minlength="4" required></label>

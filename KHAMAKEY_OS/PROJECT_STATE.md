@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-17** (Moments v268 / SQL v176 export+cancella account; Worker invariato)
+> Ultimo aggiornamento: **2026-09-17** (Moments v269 trattini codice signup; Worker invariato)
 
 ### Fonte di verità versioni
 
@@ -108,7 +108,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v232-support-mail** | Assistenza: mail staff brand Moments, Reply-To cliente. Menu pubblico senza hash (v231). |
-| **Moments editor** | **v268** | GDPR: download dati + elimina account in Profilo. CSS `moments.css?v=260`. |
+| **Moments editor** | **v269** | Signup: trattini `XXXX-XXXX-XXXX` in automatico. CSS `moments.css?v=261`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v176 (prod)** | v176 export/erase account (2026-09-17); v175 consensi; v174 invito editor; v173 `max_video_mb` 90; v172 salva ottimistico. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-17:** Editor **v268** (export/cancella account) · Worker **v232-support-mail** invariato · SQL **v176**.  
+> **Oggi 2026-09-17:** Editor **v269** (trattini codice in registrazione) · Worker **v232-support-mail** invariato · SQL **v176**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > Segnato: guida invito **dopo**. **P.IVA** in attesa.
 

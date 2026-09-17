@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v268** | Export/cancella account in Profilo; consenso marketing già in v267 |
+| Editor Moments | **v269** | Trattini codice in registrazione; export/cancella account resta da v268 |
 | Worker | **v232-support-mail** | Assistenza email; menu `/m/` senza hash sezione |
 | Officina | **v203** | PNG codice più basso |
 

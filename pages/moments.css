@@ -143,6 +143,11 @@ input,textarea,select{
   color:var(--text);
   transition:border-color 0.22s ease,box-shadow 0.22s ease,background-color 0.22s ease;
 }
+input.activation-code-input{
+  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
 input:focus,textarea:focus,select:focus{outline:0;border-color:var(--rosa-luce);box-shadow:0 0 0 4px var(--accent-ring)}
 textarea{min-height:86px;resize:vertical}
 .password-field{position:relative;display:block}

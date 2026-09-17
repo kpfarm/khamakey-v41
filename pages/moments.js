@@ -18,7 +18,7 @@ import {
 } from "./moments-i18n.js?v=236";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=259";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=240";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=226";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=251";
@@ -611,6 +611,7 @@ let lastPreviewHash = "";
 let previewDebounceTimer = null;
 let previewFetchId = 0;
 let saveInFlight = false;
+let saveQueued = false;
 let bootstrapInFlight = false;
 /** Durante bootstrap template: niente banner «non salvato» a metà salvataggio automatico. */
 let suppressDirtyUi = false;
@@ -624,6 +625,22 @@ const LIST_SECTION_KEYS = new Set(Object.keys(LIST_SECTION_MODES));
 let uploadBusy = false;
 let currentEntitlements = emptyEntitlements();
 
+function flushQueuedMomentSave(){
+  if(saveInFlight || uploadBusy || !saveQueued) return;
+  saveQueued = false;
+  const liveForm = document.getElementById("momentEditorForm");
+  const liveRow = rows.find(item => item.id === activeId);
+  if(!liveForm || !liveRow) return;
+  queueMicrotask(()=>{
+    void saveMoment({ preventDefault(){}, currentTarget: liveForm }, liveRow);
+  });
+}
+
+function setUploadBusy(busy){
+  uploadBusy = Boolean(busy);
+  if(!uploadBusy) flushQueuedMomentSave();
+}
+
 function setStatus(node,message="",type=""){
   if(!node) return;
   node.textContent = message;
@@ -636,7 +653,7 @@ function showEditorSaveFeedback(message, type = "error"){
   setStatus(editorStatus, message, type);
   const saveStatus = document.getElementById("editorSaveStatus");
   if(saveStatus){
-    saveStatus.textContent = type === "ok" ? t("shell.saved") : (type === "error" ? t("shell.save_fail") : message);
+    saveStatus.textContent = type === "ok" ? t("shell.saved") : (message || t("shell.save_fail"));
     saveStatus.classList.toggle("dirty", type !== "ok");
   }
   const barMsg = document.querySelector("#momentsSaveBar .save-msg");
@@ -694,7 +711,9 @@ function showMediaUploadNotice(message, type = "error", statusNode = null){
   const bar = document.getElementById("momentsSaveBar");
   if(bar && type === "error") bar.classList.add("visible");
   clearTimeout(mediaNoticeTimer);
-  mediaNoticeTimer = setTimeout(()=>{ if(box) box.hidden = true; }, type === "error" ? 14000 : 5000);
+  mediaNoticeTimer = 0;
+  if(type === "error") return;
+  mediaNoticeTimer = setTimeout(()=>{ if(box) box.hidden = true; }, 10000);
 }
 
 function esc(value){
@@ -3991,8 +4010,8 @@ function ensureMomentsSaveDelegation(){
       showEditorSaveFeedback(t("save.fail"), "error");
       return;
     }
-    saveMoment({ preventDefault(){}, currentTarget:formNode }, currentRow);
-  });
+    void saveMoment({ preventDefault(){}, currentTarget:formNode }, currentRow);
+  }, true);
 }
 
 function updateSaveStatus(saved){
@@ -4430,7 +4449,15 @@ function renderDetail(id){
     document.body.dataset.momentsUndoBound = "1";
     document.getElementById("editorUndoBtnMobile")?.addEventListener("click",revertEditorChanges);
   }
-  editorForm.addEventListener("submit",event=>saveMoment(event,row));
+  editorForm.addEventListener("submit",event=>{
+    event.preventDefault();
+    if(saveInFlight){
+      saveQueued = true;
+      return;
+    }
+    const liveRow = rows.find(item => item.id === activeId) || row;
+    void saveMoment(event, liveRow);
+  });
   // Salva top/bottom: delega una sola volta → sempre form + pezzo correnti (no closure stale)
   ensureMomentsSaveDelegation();
   syncRsvpWhatsappWarn(editorForm);
@@ -4617,7 +4644,8 @@ function assertCanFitUploadBytes(fileOrFiles){
 async function uploadCoverImage(file,row,formNode){
   const status = document.getElementById("coverUploadStatus");
   setUploadStatus(status,localizeFieldPhrase("Caricamento in corso..."));
-  uploadBusy = true;
+  let uploaded = false;
+  setUploadBusy(true);
   try{
     assertCanFitUploadBytes(file);
     const url = await uploadImage(supabase,{scope:"moments",scopeId:row.id,file});
@@ -4638,12 +4666,14 @@ async function uploadCoverImage(file,row,formNode){
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
     refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
     setUploadStatus(status,t("save.reminder_cover"),"ok");
+    uploaded = true;
   }catch(error){
     setUploadStatus(status,error.message || localizeFieldPhrase("Upload non riuscito."),"error");
     showMediaUploadNotice(localizeUploadError(error), "error", status);
   }finally{
-    uploadBusy = false;
+    setUploadBusy(false);
   }
+  if(uploaded) await persistMediaToPage(formNode, row);
 }
 
 function readGalleryUrls(formNode,key){
@@ -4664,6 +4694,7 @@ async function uploadGalleryImages(files,row,formNode,key){
   const status = document.getElementById(`galleryUploadStatus_${key}`);
   const batchSize = [...files].filter(Boolean).length;
   enableSection(formNode,key);
+  let uploaded = false;
   try{
     assertCanFitUploadBytes([...files].filter(Boolean));
     const items = await uploadGalleryMedia({
@@ -4674,7 +4705,7 @@ async function uploadGalleryImages(files,row,formNode,key){
       files,
       entitlements: currentEntitlements,
       onStatus:(msg,type)=>setUploadStatus(status,msg,type),
-      onBusy:busy=>{ uploadBusy = busy; }
+      onBusy:busy=>setUploadBusy(busy)
     });
     enableSection(formNode,key);
     markEditorDirty(formNode);
@@ -4686,14 +4717,17 @@ async function uploadGalleryImages(files,row,formNode,key){
         : key === "music" ? t("save.label_music")
           : t("save.label_gallery");
     promptSaveReminder(t("save.reminder_upload", { count, label }));
+    uploaded = true;
   }catch(error){
     const message = localizeUploadError(error);
     showMediaUploadNotice(message, "error", status);
   }
+  if(uploaded) await persistMediaToPage(formNode, row);
 }
 
 async function uploadSectionVideo(file,row,formNode){
-  uploadBusy = true;
+  let uploaded = false;
+  setUploadBusy(true);
   try{
     validateVideoFile(file, maxMbForKind("video", currentEntitlements?.limits));
     assertCanFitUploadBytes(file);
@@ -4709,11 +4743,13 @@ async function uploadSectionVideo(file,row,formNode){
       await deleteStorageObject(supabase,oldUrl).catch(()=>{});
     }
     refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
+    uploaded = true;
   }catch(error){
     showMediaUploadNotice(localizeUploadError(error) || localizeFieldPhrase("Upload video non riuscito."), "error");
   }finally{
-    uploadBusy = false;
+    setUploadBusy(false);
   }
+  if(uploaded) await persistMediaToPage(formNode, row);
 }
 
 function refreshVideoSectionPreview(formNode,url){
@@ -4740,7 +4776,8 @@ function removeSectionVideo(formNode){
 
 async function uploadMusicAudio(file,row,formNode){
   const panel = document.getElementById("musicAudioPanel");
-  uploadBusy = true;
+  let uploaded = false;
+  setUploadBusy(true);
   try{
     validateMediaFile(file, currentEntitlements?.limits || {});
     assertCanFitUploadBytes(file);
@@ -4760,17 +4797,20 @@ async function uploadMusicAudio(file,row,formNode){
       await deleteStorageObject(supabase,oldUrl).catch(()=>{});
     }
     refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
+    uploaded = true;
   }catch(error){
     showMediaUploadNotice(localizeUploadError(error) || localizeFieldPhrase("Upload audio non riuscito."), "error");
   }finally{
-    uploadBusy = false;
+    setUploadBusy(false);
   }
+  if(uploaded) await persistMediaToPage(formNode, row);
 }
 
 async function uploadSectionPhoto(key,file,row,formNode){
   const config = SECTION_PHOTO_FIELDS[key];
   if(!config) return;
-  uploadBusy = true;
+  let uploaded = false;
+  setUploadBusy(true);
   try{
     validateImageFile(file);
     assertCanFitUploadBytes(file);
@@ -4786,16 +4826,19 @@ async function uploadSectionPhoto(key,file,row,formNode){
       await deleteStorageObject(supabase,oldUrl).catch(()=>{});
     }
     refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
+    uploaded = true;
   }catch(error){
     showMediaUploadNotice(localizeUploadError(error) || localizeFieldPhrase("Upload foto non riuscito."), "error");
   }finally{
-    uploadBusy = false;
+    setUploadBusy(false);
   }
+  if(uploaded) await persistMediaToPage(formNode, row);
 }
 
 async function uploadPetPhoto(petId,file,row,formNode){
   if(!petId) return;
-  uploadBusy = true;
+  let uploaded = false;
+  setUploadBusy(true);
   try{
     validateImageFile(file);
     assertCanFitUploadBytes(file);
@@ -4808,11 +4851,13 @@ async function uploadPetPhoto(petId,file,row,formNode){
       await deleteStorageObject(supabase,oldUrl).catch(()=>{});
     }
     refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
+    uploaded = true;
   }catch(error){
     showMediaUploadNotice(localizeUploadError(error) || localizeFieldPhrase("Upload foto non riuscito."), "error");
   }finally{
-    uploadBusy = false;
+    setUploadBusy(false);
   }
+  if(uploaded) await persistMediaToPage(formNode, row);
 }
 
 function removePetPhoto(petId,formNode){
@@ -4950,6 +4995,7 @@ async function handleGalleryFileInputChange(input,row,formNode){
 async function replaceGalleryImage(file,row,formNode,key,mediaId){
   const status = document.getElementById(`galleryUploadStatus_${key}`);
   enableSection(formNode,key);
+  let uploaded = false;
   try{
     // Replace: niente pre-check bytes stretto (il vecchio file viene rimosso dopo); server resta autorità.
     const result = await replaceGalleryMediaItem({
@@ -4960,7 +5006,7 @@ async function replaceGalleryImage(file,row,formNode,key,mediaId){
       mediaId,
       file,
       onStatus:(msg,type)=>setUploadStatus(status,msg,type),
-      onBusy:busy=>{ uploadBusy = busy; }
+      onBusy:busy=>setUploadBusy(busy)
     });
     enableSection(formNode,key);
     markEditorDirty(formNode);
@@ -4970,10 +5016,12 @@ async function replaceGalleryImage(file,row,formNode,key,mediaId){
     }
     refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
     promptSaveReminder(t("save.reminder_photo"));
+    uploaded = true;
   }catch(error){
     const message = localizeUploadError(error);
     showMediaUploadNotice(message, "error", status);
   }
+  if(uploaded) await persistMediaToPage(formNode, row);
 }
 
 function takePickedFile(event){
@@ -5052,6 +5100,7 @@ function openJourneyFilePicker(formNode,stepId){
 }
 
 async function uploadJourneyStepImage(file,row,formNode,stepId){
+  let uploaded = false;
   try{
     validateImageFile(file);
     assertCanFitUploadBytes(file);
@@ -5061,7 +5110,7 @@ async function uploadJourneyStepImage(file,row,formNode,stepId){
       formNode,
       stepId,
       file,
-      onBusy:busy=>{ uploadBusy = busy; }
+      onBusy:busy=>setUploadBusy(busy)
     });
     enableSection(formNode,"timeline");
     markEditorDirty(formNode);
@@ -5069,9 +5118,11 @@ async function uploadJourneyStepImage(file,row,formNode,stepId){
     if(oldUrl && isCloudflareMediaUrl(oldUrl)){
       deleteStorageObject(supabase,oldUrl).catch(()=>{});
     }
+    uploaded = true;
   }catch(error){
     showMediaUploadNotice(localizeUploadError(error) || localizeFieldPhrase("Upload foto tappa non riuscito."), "error");
   }
+  if(uploaded) await persistMediaToPage(formNode, row);
 }
 
 function openGalleryFilePicker(formNode,key,type = "",{ replaceId = "", multiple } = {}){
@@ -5913,14 +5964,39 @@ async function renderPreview(state,options = {}){
     }
 }
 
+async function refreshEventUpdatedAt(row){
+  if(!row?.id) return;
+  const { data, error } = await supabase
+    .from("moment_events")
+    .select("updated_at")
+    .eq("id", row.id)
+    .maybeSingle();
+  if(error || !data?.updated_at) return;
+  row.updated_at = data.updated_at;
+  const idx = rows.findIndex(item => item.id === row.id);
+  if(idx >= 0) rows[idx].updated_at = data.updated_at;
+}
+
+async function persistMediaToPage(formNode, row){
+  const liveForm = document.getElementById("momentEditorForm") || formNode;
+  const liveRow = rows.find(item => item.id === (row?.id || activeId)) || row;
+  if(!liveForm || !liveRow?.id) return false;
+  const ok = await saveMoment({ preventDefault(){}, currentTarget: liveForm }, liveRow, { quietOk: true, fromMedia: true });
+  if(ok) showMediaUploadNotice(t("save.upload_saved"), "ok");
+  return ok;
+}
+
 async function saveMoment(event,row, options = {}){
   event.preventDefault();
-  if(saveInFlight){
-    showEditorSaveFeedback(t("save.busy"), "error");
+  if(uploadBusy){
+    saveQueued = true;
+    if(!options.fromMedia){
+      showEditorSaveFeedback(t("save.wait_upload"), "error");
+    }
     return false;
   }
-  if(uploadBusy){
-    showEditorSaveFeedback(t("save.wait_upload"), "error");
+  if(saveInFlight){
+    saveQueued = true;
     return false;
   }
   const formNode = event.currentTarget || document.getElementById("momentEditorForm");
@@ -5955,6 +6031,7 @@ async function saveMoment(event,row, options = {}){
   }catch(error){
     saveInFlight = false;
     showEditorSaveFeedback(error.message || t("save.check_fields"),"error");
+    flushQueuedMomentSave();
     return false;
   }
   if(!adminMode){
@@ -5973,6 +6050,7 @@ async function saveMoment(event,row, options = {}){
   if(!state.title){
     saveInFlight = false;
     showEditorSaveFeedback(t("save.need_title"),"error");
+    flushQueuedMomentSave();
     return false;
   }
   if(state.sections?.letter_future?.enabled){
@@ -5981,11 +6059,13 @@ async function saveMoment(event,row, options = {}){
     if(!hasLetter){
       saveInFlight = false;
       showEditorSaveFeedback(t("save.letter_empty"),"error");
+      flushQueuedMomentSave();
       return false;
     }
     if(letter.media?.some(item=>String(item?.url || "").startsWith("blob:"))){
       saveInFlight = false;
       showEditorSaveFeedback(t("save.letter_blob"),"error");
+      flushQueuedMomentSave();
       return false;
     }
   }
@@ -6039,20 +6119,23 @@ async function saveMoment(event,row, options = {}){
       p_pin_hash:pinHash,
       p_expected_updated_at: row.updated_at || null
     };
-    const { data: saveData, error } = adminMode
-      ? await supabase.rpc("admin_save_moment_page", savePayload)
-      : await supabase.rpc("save_my_moment_page", savePayload);
+    const invokeSave = expectedAt => {
+      const payload = { ...savePayload, p_expected_updated_at: expectedAt || null };
+      return adminMode
+        ? supabase.rpc("admin_save_moment_page", payload)
+        : supabase.rpc("save_my_moment_page", payload);
+    };
+    let { data: saveData, error } = await invokeSave(row.updated_at || null);
+    if(error && String(error.message || "").includes("CONFLICT_STALE_SAVE")){
+      await refreshEventUpdatedAt(row);
+      ({ data: saveData, error } = await invokeSave(row.updated_at || null));
+    }
     if(error){
       console.error(error);
       const msg = String(error.message || "");
       if(msg.includes("CONFLICT_STALE_SAVE")){
-        showEditorSaveFeedback(t("save.conflict_stale"), "error");
-        try{
-          await ensureEventPageState(row.id, { force:true });
-          renderDetail(row.id);
-        }catch(reloadError){
-          console.error(reloadError);
-        }
+        showEditorSaveFeedback(t("save.conflict_keep_local"), "error");
+        showMediaUploadNotice(t("save.conflict_keep_local"), "error");
         return false;
       }
       showEditorSaveFeedback(error.message || t("save.fail"),"error");
@@ -6146,6 +6229,7 @@ async function saveMoment(event,row, options = {}){
     return false;
   }finally{
     saveInFlight = false;
+    flushQueuedMomentSave();
   }
 }
 

@@ -25,6 +25,8 @@
 | 2026-09-06 | Assistenza: ricevere i ticket via email e risolverli da lì | ✅ **v262/v226** form Account → email staff; Reply-To = cliente. Niente Officina. |
 | 2026-09-07 | Icona inserita (emoji) non visibile in pagina | ✅ **Worker v227** fill contrasto non si applica più alle emoji/icone. |
 | 2026-09-07 | Foto galleria ritagliate nel riquadro (es. Parigi); niente regolazione inquadratura | ✅ **Worker v228** tutta la foto + sfondo sfuocato (come copertina). Niente pulsanti per foto. **＋** resta per lo zoom. |
+| 2026-09-18 | Foto conto alla rovescia tagliata, niente adattamento orizzontale/verticale | ✅ **Worker v233** contain in `/m/` `/k/`. Editor pannello in preview v281+. |
+| 2026-09-18 | Invitato: upload galleria/video sembra ok, notifica illeggibile, file sparisce; 2°–3° tentativo funziona | ⏳ **v282 preview**: auto-salva dopo upload, retry conflitto senza cancellare il form, errori che restano. **Live v276 ancora rotto** finché non si pubblica Pages. |
 
 Altri ticket restano in coda, uno alla volta.
 

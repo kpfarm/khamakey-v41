@@ -19,7 +19,7 @@ import {
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=256";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=239";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=221";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=222";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=249";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
@@ -2289,6 +2289,89 @@ const HOW_DISCOVER_GROUPS = [
   ]}
 ];
 
+const HOW_EMPTY_BY_SECTION = {
+  gallery: "gallery",
+  video: "video",
+  music: "music",
+  rsvp: "rsvp",
+  letter_future: "letter",
+  horoscope: "horoscope",
+  pet: "pet",
+  countdown: "countdown",
+  intro: "texts",
+  dedication: "texts",
+  timeline: "texts",
+  promises: "texts",
+  dreams: "texts",
+  rituals: "texts",
+  numbers: "texts",
+  quote: "texts",
+  signature: "texts"
+};
+
+function howHereKey(howId, n){
+  const here = `overview.how.${howId}.here.${n}`;
+  return t(here) !== here ? here : `overview.how.${howId}.${n}`;
+}
+
+function renderHowEmptyHint(howId, { hidden = false } = {}){
+  const steps = [1, 2, 3].map(n => {
+    const key = howHereKey(howId, n);
+    return `<li data-i18n-html="${key}">${t(key)}</li>`;
+  }).join("");
+  const noteKey = `overview.how.${howId}.note`;
+  return `<aside class="how-empty" data-how-empty="${esc(howId)}" ${hidden ? "hidden" : ""}>
+    <p class="how-empty-title" data-i18n="overview.how.empty.title">${esc(t("overview.how.empty.title"))}</p>
+    <ol class="how-it-works-list">${steps}</ol>
+    <p class="how-guide-note" data-i18n-html="${noteKey}">${t(noteKey)}</p>
+  </aside>`;
+}
+
+function sectionHowChrome(key, section, guide){
+  const howId = HOW_EMPTY_BY_SECTION[key];
+  if(!howId){
+    return `<p class="field-hint" data-lf-section-guide="${esc(key)}">${esc(guide)}</p>`;
+  }
+  const empty = !sectionHasContent(key, section);
+  return `${renderHowEmptyHint(howId, { hidden: !empty })}
+    <p class="field-hint" data-how-filled="${esc(howId)}" data-lf-section-guide="${esc(key)}" ${empty ? "hidden" : ""}>${esc(guide)}</p>`;
+}
+
+function howEmptyShouldHide(el, formNode, state){
+  const howId = el?.dataset?.howEmpty;
+  if(!howId) return true;
+  if(howId === "cover") return pageHasCoverPhoto(state);
+  if(howId === "counter") return Boolean(String(state?.together_since || "").trim());
+  if(howId === "pin") return String(formNode?.querySelector?.('[name="pin_enabled"]')?.value || "") === "true";
+  const sectionKey = el.closest("[data-section-panel-key]")?.dataset.sectionPanelKey;
+  if(!sectionKey) return true;
+  return sectionHasContent(sectionKey, state?.sections?.[sectionKey]);
+}
+
+function refreshHowEmptyHints(formNode){
+  if(!formNode?.querySelector?.("[data-how-empty]")) return;
+  let state;
+  try{
+    state = readFormState(formNode);
+  }catch{
+    return;
+  }
+  formNode.querySelectorAll("[data-how-empty]").forEach(el => {
+    const hide = howEmptyShouldHide(el, formNode, state);
+    el.hidden = hide;
+    const filled = el.parentElement?.querySelector(`[data-how-filled="${el.dataset.howEmpty}"]`);
+    if(filled) filled.hidden = !hide;
+  });
+}
+
+function scheduleHowEmptyHintRefresh(formNode){
+  if(!formNode?.querySelector?.("[data-how-empty]")) return;
+  clearTimeout(scheduleHowEmptyHintRefresh.timer);
+  scheduleHowEmptyHintRefresh.timer = setTimeout(() => {
+    try{ refreshHowEmptyHints(formNode); }catch{ /* ignore */ }
+  }, 160);
+}
+
 function renderHowItWorksList(withActiveFirst = false){
   return HOW_IT_WORKS_KEYS.map((key, index) =>
     `<li class="${withActiveFirst && index === 0 ? "active" : ""}" data-i18n-html="${key}">${t(key)}</li>`
@@ -3405,6 +3488,7 @@ function renderCoverPanel(state){
     </div>
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">2</span> ${lfSpan("La foto di copertina")}</p>
+      ${renderHowEmptyHint("cover", { hidden: pageHasCoverPhoto(state) })}
       <div class="cover-preview-wrap">
         <input type="hidden" name="cover_url" id="coverUrlInput" value="${esc(state.cover_url)}">
         <div class="cover-upload-actions">
@@ -3446,6 +3530,7 @@ function renderCounterPanel(state){
     </div>
     <input type="checkbox" name="show_together_counter" ${state.show_together_counter ? "checked" : ""} hidden id="showTogetherCounterInput">
     <div class="section-editor-stack ${state.show_together_counter ? "" : "is-muted"}">
+      ${renderHowEmptyHint("counter", { hidden: Boolean(String(state.together_since || "").trim()) })}
       <div class="editor-card smart-card">
         <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Da quale giorno?")}</p>
         <label>${lfSpan("Testo sopra il contatore")}<input name="counter_label" value="${esc(state.counter_label || "")}" placeholder="${esc(localizeFieldPhrase("Es. Insieme da, Ti sopporto da"))}" data-lf-placeholder="Es. Insieme da, Ti sopporto da"><span class="field-hint" data-lf="Vuoto = in pagina restano solo i numeri, senza etichetta sopra.">${esc(localizeFieldPhrase("Vuoto = in pagina restano solo i numeri, senza etichetta sopra."))}</span></label>
@@ -3566,6 +3651,7 @@ function renderPrivacyPanel(row, state = {}){
     </div>
     <div class="editor-card smart-card">
       <p class="ecard-title">🔐 ${lfSpan("PIN di apertura")}</p>
+      ${renderHowEmptyHint("pin", { hidden: Boolean(row.pin_enabled) })}
       ${pinHintBlock}
       <label>${lfSpan("Protezione")}
         <select name="pin_enabled">
@@ -4382,6 +4468,7 @@ function renderDetail(id){
     onClearPhoto:clearJourneyStepPhoto,
     onRemoveStep:removeJourneyStep
   });
+  refreshHowEmptyHints(editorForm);
   // Anteprima Worker dopo il paint dell'editor (apertura più reattiva)
   setTimeout(()=>{
     if(document.getElementById("momentEditorForm") !== editorForm) return;
@@ -4476,6 +4563,7 @@ async function uploadCoverImage(file,row,formNode){
     }
     bindCoverFramer(formNode);
     markEditorDirty(formNode);
+    refreshHowEmptyHints(formNode);
     schedulePreviewUpdate(formNode,{immediate:true,force:true});
     refreshMomentEntitlements(row.id, { syncStorage:true }).catch(()=>{});
     setUploadStatus(status,t("save.reminder_cover"),"ok");
@@ -5206,7 +5294,7 @@ function sectionEditor(key,section,standalone=false){
     ? (key === "countdown" || key === "rsvp" || key === "guestbook" || key === "horoscope" || key === "pet" ? `<details class="design-advanced editor-card"><summary>${lfSpan(key === "pet" ? "Introduzione (facoltativa)" : "Testo extra (facoltativo)")}</summary><label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="${esc(writeHere)}" data-lf-placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label></details>` : "")
     : `<label>${bodyLabel}<textarea name="section_${esc(key)}_body" placeholder="${esc(writeHere)}" data-lf-placeholder="Scrivi qui...">${esc(safe.body || "")}</textarea></label>`;
   const titleField = renderSectionTitleField(key, safe);
-  const guideHint = `<p class="field-hint" data-lf-section-guide="${esc(key)}">${esc(guide)}</p>`;
+  const guideHint = sectionHowChrome(key, safe, guide);
   const fields = `
     ${titleField}
     ${bodyField}
@@ -5247,9 +5335,9 @@ function sectionEditor(key,section,standalone=false){
       return `<div class="editor-card"><p class="ecard-title">${icon} ${lfSpan("Animale")}</p>${guideHint}${titleField}${petFields}${bodyField}</div>`;
     }
     if(isSectionExcluded(key)) return "";
-    return `<div class="editor-card"><p class="ecard-title">${icon} <span data-lf-section-guide-title="${esc(key)}">${esc(guide.split(".")[0])}</span></p>${fields.replace(galleryField,"").replace(journeyField,"")}</div>`;
+    return `<div class="editor-card"><p class="ecard-title">${icon} <span data-lf-section-guide-title="${esc(key)}">${esc(guide.split(".")[0])}</span></p>${guideHint}${fields.replace(galleryField,"").replace(journeyField,"")}</div>`;
   }
-  const fillGuide = `<div class="section-fill-guide"><p data-lf-section-guide="${esc(key)}">${esc(guide)}</p></div>`;
+  const fillGuide = `<div class="section-fill-guide">${sectionHowChrome(key, safe, guide)}</div>`;
   return `<details class="section-box section-box-${esc(key)}" data-section-key="${esc(key)}" ${safe.enabled ? "open" : ""}>
     <summary><span class="section-icon">${esc(icon)}</span><label><input type="checkbox" name="section_${esc(key)}_enabled" ${safe.enabled ? "checked" : ""} onclick="event.stopPropagation()"> <span>${esc(SECTION_LABELS[key])}</span></label></summary>
     <div class="section-body">${fillGuide}${fields}</div>
@@ -5554,6 +5642,7 @@ function formSnapshotForDirty(formNode){
 
 function markEditorDirty(formNode){
   if(suppressDirtyUi) return;
+  scheduleHowEmptyHintRefresh(formNode);
   // Dirty immediato: evita JSON.stringify a ogni keystroke (costoso su form grandi)
   if(!editorDirty){
     editorDirty = true;

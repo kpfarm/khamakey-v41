@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-17** (Moments v270 guida Riepilogo; Worker invariato)
+> Ultimo aggiornamento: **2026-09-17** (Moments v271 coaching sezioni vuote; Worker invariato)
 
 ### Fonte di verità versioni
 
@@ -108,7 +108,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v232-support-mail** | Assistenza: mail staff brand Moments, Reply-To cliente. Menu pubblico senza hash (v231). |
-| **Moments editor** | **v270** | Riepilogo: un passo (copertina/Salva) + «Cosa puoi fare» una voce alla volta. CSS `moments.css?v=262`. |
+| **Moments editor** | **v271** | Sezioni vuote: tre passi + Non succede. Riepilogo v270 invariato. CSS `moments.css?v=263`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v176 (prod)** | v176 export/erase account (2026-09-17); v175 consensi; v174 invito editor; v173 `max_video_mb` 90; v172 salva ottimistico. |
@@ -194,7 +194,7 @@ Health live 2026-07-20 (`link.khamakeymoments.com/health`): Worker **v144**, Res
 | 5 | IDOR Business fix non E2E dual-account | Confidenza media | Test manuale due utenti quando possibile |
 | 6 | Privacy/Termini senza P.IVA / sede / ragione sociale | Testo legale incompleto (IT+EN) | Attendere dati reali; poi aggiornare le 4 pagine. Non inventare |
 | 7 | GDPR Moments | Opt-in + registro fatti; restano P.IVA e niente campagne | **v268 / SQL v176**: export/cancella in Profilo. Resta P.IVA (#6) e niente campagne finché non si decide. |
-| 8 | Guida cliente in Riepilogo | Copertina prima, poi indice «Cosa puoi fare» | **v270**: non è una FAQ; una voce alla volta (insieme, RSVP, foto…) |
+| 8 | Guida cliente in Riepilogo | Copertina prima, poi indice «Cosa puoi fare» + coaching in sezione vuota | **v271**: tre passi sulle sezioni vuote; v270 indice in Riepilogo |
 
 RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments).
 
@@ -208,13 +208,13 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 4. **Igiene multi-agente** — lock aggiornati, commit solo file del task
 5. **GDPR Moments** — v268/v176 fatto (export/cancella); niente campagne promo finché non si decide
 6. Business — in stand-by / progetto separato; non mescolare con Moments
-7. Guida cliente — **v270** in Riepilogo (un passo + Cosa puoi fare)
+7. Guida cliente — **v271** coaching sezioni vuote; **v270** in Riepilogo
 
 ---
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-17:** Editor **v270** (guida Riepilogo) · Worker **v232-support-mail** invariato · SQL **v176**.  
+> **Oggi 2026-09-17:** Editor **v271** (coaching sezioni vuote) · Worker **v232-support-mail** invariato · SQL **v176**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > Segnato: guida invito **dopo**. **P.IVA** in attesa.
 

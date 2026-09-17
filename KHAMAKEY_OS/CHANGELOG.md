@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v271 — coaching sezioni vuote (2026-09-17)** — Pages
+  - Foto, RSVP, lettera, video, musica, copertina, contatore, oroscopo, pet, testi, PIN: se la sezione è vuota mostra tre passi + **Non succede**. Si nasconde quando c’è contenuto. Worker, NFC, Salva, upload, SQL **invariati**.
 - **Moments v270 — guida Riepilogo (2026-09-17)** — Pages
   - Un passo: copertina + Salva, poi tocca l’oggetto. Sotto: **Cosa puoi fare** (Insieme, Servizi, Pagina, Account), una voce alla volta, non una FAQ.
   - Worker, NFC, Salva, upload, SQL **invariati**.

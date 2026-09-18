@@ -757,7 +757,7 @@ body.media-modal-open{overflow:hidden}
 .design-advanced summary::before{content:"▸";font-size:.75rem;transition:transform .15s}
 .design-advanced[open] summary{color:var(--ink);margin-bottom:4px}
 .design-advanced[open] summary::before{transform:rotate(90deg)}
-.design-advanced .palette-row{margin-top:8px}
+.editor-card .palette-row{margin-top:4px}
 .editor-progress{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:16px 8px 8px;background:transparent;border-bottom:1px solid var(--border);position:relative}
 .editor-progress::before{content:"";position:absolute;left:12%;right:12%;top:30px;height:1px;background:rgba(7,26,60,.12);pointer-events:none}
 .editor-progress-step{display:flex;flex-direction:column;align-items:center;gap:8px;border:0;border-radius:0;background:transparent;padding:0 4px 10px;cursor:pointer;font:inherit;color:var(--muted);min-height:0;position:relative;z-index:1;transition:color .15s}

@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-09-18 | Cursor | **Moments v284 live**: Colori — tutte le palette e gli stili visibili; categoria nascosta ai clienti. Worker/SQL invariati. |
 | 2026-09-18 | Cursor | **Moments v283 live**: niente scambi editor/anteprima tra pezzi (2 titolare + 1 invitato). Worker/SQL invariati. |
 | 2026-09-18 | Cursor | **Moments v282 live**: invitato — galleria/video restano al primo salvataggio; pack grafico Dopo in produzione. Worker v233 già live. SQL invariato. |
 | 2026-09-18 | Cursor | **Worker v233**: foto conto alla rovescia intera (orizzontale/verticale, niente crop). Editor live v276 invariato; pack grafico resta in preview. |

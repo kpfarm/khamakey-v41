@@ -21,7 +21,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=240";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=226";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=251";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=252";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -3498,7 +3498,7 @@ function renderDesignSuggestBanner(momentType, currentLook){
   if(!suggested || suggested === currentLook) return "";
   const look = PAGE_LOOKS[suggested];
   if(!look) return "";
-  return `<p class="design-suggest">${lfSpan("Per")} <strong>${typeLabelChrome(momentType)}</strong> ${lfSpan("prova")} <button type="button" class="design-suggest-btn" data-suggest-look="${esc(suggested)}" data-lf="${esc(look.label)}">${esc(localizeFieldPhrase(look.label))}</button></p>`;
+  return `<p class="design-suggest">${lfSpan("Prova")} <button type="button" class="design-suggest-btn" data-suggest-look="${esc(suggested)}" data-lf="${esc(look.label)}">${esc(localizeFieldPhrase(look.label))}</button></p>`;
 }
 
 function renderDesignPanel(state){
@@ -3516,7 +3516,7 @@ function renderDesignPanel(state){
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.styling),editorPanelSubtitle(EDITOR_PANELS.styling))}
     <div class="editor-card">
       <p class="ecard-title">${lfSpan("Scegli lo stile")}</p>
-      <p class="design-intro">${lfSpan("Stili per")} <strong>${typeLabelChrome(state.type)}</strong>. ${lfSpan("Il colore scelto è lo sfondo della pagina; i riquadri restano bianchi con testo nero.")}</p>
+      <p class="design-intro">${lfSpan("Il colore scelto è lo sfondo della pagina; i riquadri restano bianchi con testo nero.")}</p>
       ${renderDesignSuggestBanner(state.type, currentLook)}
       <div class="look-picker-host">${renderLookPicker(currentLook, state.type)}</div>
     </div>
@@ -3527,8 +3527,8 @@ function renderDesignPanel(state){
         <div class="design-swatch-body"><span>${lfSpan("Sfondo")}</span><span>${lfSpan("Accenti")}</span></div>
       </div>
     </div>
-    <details class="design-advanced editor-card">
-      <summary>${lfSpan("Vuoi cambiare qualcosa in più? (facoltativo)")}</summary>
+    <div class="editor-card">
+      <p class="ecard-title">${lfSpan("Colore e stile")}</p>
       <label>${lfSpan("Colore di sfondo")}
         ${renderPalettePicker(palette)}
       </label>
@@ -3568,7 +3568,7 @@ function renderDesignPanel(state){
         </select>
       </label>
       <p class="field-hint">${lfSpan("La sfumatura fonde la foto con lo sfondo della pagina. Puoi spegnerla per un distacco netto.")}</p>
-    </details>
+    </div>
   </div>`;
 }
 
@@ -3590,7 +3590,7 @@ function renderCoverPanel(state){
       ${renderMomentTypeField(state)}
       <p class="category-change-warning"><strong>${lfSpan("Attenzione:")}</strong> ${lfSpan("«Prepara tutto per me» sostituisce testi, sezioni e colori — operazione irreversibile dopo il salvataggio.")}</p>
       <button type="button" class="primary smart-action-btn" id="applyMomentTemplate">${lfSpan("Prepara tutto per me")}</button>
-      <p class="field-hint">${lfSpan("Ripristina il modello della tua categoria con testi e sezioni suggeriti. I contenuti attuali verranno sostituiti.")}</p>
+      <p class="field-hint">${lfSpan("Ripristina testi e sezioni suggeriti. I contenuti attuali verranno sostituiti.")}</p>
       <details class="design-advanced cover-extra">
         <summary>${lfSpan("Altri testi sulla copertina (facoltativo)")}</summary>
         <label>${lfSpan("Etichetta sopra il titolo")}<input name="pill" value="${esc(state.pill)}" placeholder="${esc(localizeFieldPhrase("Es. Amore · Un mondo tutto nostro"))}" data-lf-placeholder="Es. Amore · Un mondo tutto nostro"></label>
@@ -4391,7 +4391,7 @@ function renderDetail(id){
       <div>
         <p class="eyebrow" data-i18n="shell.editor_page">${esc(t("shell.editor_page"))}</p>
         <h2>${esc(state.title || row.slug)}</h2>
-        <p class="detail-meta">${esc(row.nfc_code || "")} · ${typeLabelChrome(state.type)}${isOwnedMoment(row) ? "" : ` · ${esc(t("account.products.role.editor"))}`}</p>
+        <p class="detail-meta">${esc(row.nfc_code || "")}${adminMode ? ` · ${typeLabelChrome(state.type)}` : ""}${isOwnedMoment(row) ? "" : ` · ${esc(t("account.products.role.editor"))}`}</p>
         <div class="status-row">
           <span class="status-pill ${row.public_visible ? "live" : "draft"}">${esc(row.public_visible ? t("shell.published") : t("shell.draft"))}</span>
           <span class="status-pill pin">${esc(row.pin_enabled ? t("shell.pin_on") : t("shell.pin_off"))}</span>

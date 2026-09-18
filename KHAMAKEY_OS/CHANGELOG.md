@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v284 live (2026-09-18)** — Pages produzione
+  - Pagina Colori: cerchi palette, atmosfera, font e taglio copertina visibili senza tap. Niente nome categoria per i clienti.
+  - Worker, NFC, SQL, upload **invariati**.
 - **Moments v283 live (2026-09-18)** — Pages produzione
   - Cambio pezzo (titolare o invitato): l’anteprima non resta più sul prodotto precedente; un salvataggio non copia più un editor sull’altro.
   - Worker, NFC, SQL, upload R2 **invariati**.

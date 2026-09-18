@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-18** (Moments **v285 live**; Worker v233)
+> Ultimo aggiornamento: **2026-09-18** (Moments **v286 live**; Worker v233)
 
 ### Fonte di verità versioni
 
@@ -108,7 +108,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v233-countdown-fit** | Foto conto alla rovescia intera (orizzontale/verticale, niente crop 160px). |
-| **Moments editor** | **v285 live** | Copy cliente senza Business/Officina/categoria. CSS `?v=272`. |
+| **Moments editor** | **v286 live** | Come si crea: quarto tasto **Condividi** (non Pubblica). CSS `?v=272`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v176 (prod)** | v176 export/erase account (2026-09-17); v175 consensi; v174 invito editor; v173 `max_video_mb` 90; v172 salva ottimistico. |
@@ -194,7 +194,7 @@ Health live 2026-07-20 (`link.khamakeymoments.com/health`): Worker **v144**, Res
 | 5 | IDOR Business fix non E2E dual-account | Confidenza media | Test manuale due utenti quando possibile |
 | 6 | Privacy/Termini senza P.IVA / sede / ragione sociale | Testo legale incompleto (IT+EN) | Attendere dati reali; poi aggiornare le 4 pagine. Non inventare |
 | 7 | GDPR Moments | Opt-in + registro fatti; restano P.IVA e niente campagne | **v268 / SQL v176**: export/cancella in Profilo. Resta P.IVA (#6) e niente campagne finché non si decide. |
-| 8 | Guida cliente in Riepilogo | Guida ad **attivare e creare**: schede = 4 passi (Copertina, Colori, Contenuti, Pubblica) | **v275** Come si crea; niente Insieme/Servizi/catalogo Account |
+| 8 | Guida cliente in Riepilogo | Guida ad **attivare e creare**: schede = 4 passi (Copertina, Colori, Contenuti, Condividi) | **v286** Condividi (invito in cima); niente Insieme/Servizi |
 
 RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments).
 
@@ -208,13 +208,13 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 4. **Igiene multi-agente** — lock aggiornati, commit solo file del task
 5. **GDPR Moments** — v268/v176 fatto (export/cancella); niente campagne promo finché non si decide
 6. Business — in stand-by / progetto separato; non mescolare con Moments
-7. Guida cliente — **v275** Come si crea (4 passi); **v271** sezioni vuote
+7. Guida cliente — **v286** Come si crea (Condividi, non Pubblica); **v271** sezioni vuote
 
 ---
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-18:** Editor live **v285** su `app.khamakeymoments.com`. Worker **v233-countdown-fit**. SQL **v176**.  
+> **Oggi 2026-09-18:** Editor live **v286** su `app.khamakeymoments.com`. Worker **v233-countdown-fit**. SQL **v176**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > Segnato: guida invito **dopo**. **P.IVA** in attesa.
 

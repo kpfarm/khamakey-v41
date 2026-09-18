@@ -19,7 +19,7 @@ import {
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=260";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=241";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=227";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=228";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=217";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=253";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
@@ -2391,11 +2391,11 @@ const HOW_DISCOVER_GROUPS = [
     { id: "texts", action: "texts" }
   ]},
   { id: "publish", items: [
-    { id: "save" },
-    { id: "preview", action: "preview" },
+    { id: "together", action: "invite", ownerOnly: true },
     { id: "link", action: "link" },
     { id: "pin", action: "publish" },
-    { id: "together", action: "invite", ownerOnly: true }
+    { id: "preview", action: "preview" },
+    { id: "save" }
   ]}
 ];
 

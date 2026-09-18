@@ -16,7 +16,7 @@
 - **GDPR Moments** Fase 2+4 fatte (v268 / SQL v176): [[docs/34-gdpr-moments]]. Niente newsletter. P.IVA in attesa.
 - Titoli/etichette in pagina = testo cliente. «Prepara tutto per me» segue la lingua UI. → [[docs/27-moments-i18n-rules]]
 - Email conferma/reset IT/EN: template in [[docs/32-moments-auth-email]] (dashboard, già incollati)
-- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — ticket editor chiusi in tabella; guida: **v275** Come si crea (4 passi), **v271** sezioni vuote
+- **Controllo lacune** in corso: [[docs/33-controllo-software-lacune]] — ticket editor chiusi in tabella; guida: **v286** Come si crea (Condividi), **v271** sezioni vuote
 
 ---
 

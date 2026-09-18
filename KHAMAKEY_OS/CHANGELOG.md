@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v286 live (2026-09-18)** — Pages produzione
+  - Come si crea: quarto tasto **Condividi** (non più Pubblica, che è il tasto bozza/live). In cima: invitare a modificare.
+  - Worker, NFC, SQL, upload **invariati**.
 - **Moments v285 live (2026-09-18)** — Pages produzione
   - Copy cliente: niente Business, Officina, magazzino, nome categoria. Codice valido senza «Modello pagina».
   - Worker, NFC, SQL, upload **invariati**.

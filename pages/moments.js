@@ -16,12 +16,12 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=259";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=260";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=240";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=226";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=252";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=241";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=227";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=217";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=253";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -835,11 +835,7 @@ async function refreshActivationCodeTypeHint(code, hintEl){
       hintEl.className = "field-hint activation-code-type warn";
       return;
     }
-    const typeLabel = localizedTypeLabel(row.product_type);
-    const productLabel = String(row.product_label || "").trim();
-    hintEl.textContent = productLabel
-      ? t("auth.msg.model_page_product", { type: typeLabel, product: productLabel })
-      : t("auth.msg.model_page", { type: typeLabel });
+    hintEl.textContent = t("auth.msg.code_ok");
     hintEl.className = "field-hint activation-code-type ok";
   }catch(error){
     console.warn("peek_moment_activation_code", error);
@@ -1753,9 +1749,10 @@ function refreshAccountMenu(){
     const status = row.public_visible ? t("menu.status.published") : t("menu.status.draft");
     const code = row.nfc_code ? formatMomentCodeDisplay(row.nfc_code) : "NFC";
     const roleBit = isOwnedMoment(row) ? "" : ` · ${t("account.products.role.editor")}`;
+    const typeBit = adminMode && typeLabel ? ` · ${esc(typeLabel)}` : "";
     return `<button type="button" class="user-menu-product ${row.id === activeId ? "active" : ""}" data-menu-object-id="${esc(row.id)}">
       ${esc(title)}
-      <span>${esc(code)} · ${esc(typeLabel)} · ${status}${esc(roleBit)}</span>
+      <span>${esc(code)}${typeBit} · ${status}${esc(roleBit)}</span>
     </button>`;
   }).join("");
   userMenuProducts.querySelectorAll("[data-menu-object-id]").forEach(button=>{
@@ -2188,7 +2185,7 @@ function renderObjectsListHtml(){
     return `<button class="object-pick ${row.id === activeId ? "active" : ""}" type="button" data-object-id="${esc(row.id)}">
       ${esc(state.title || row.slug)}
       <span>${esc(row.nfc_code || "NFC")} · ${row.public_visible ? t("menu.status.published") : t("menu.status.draft")}${isOwnedMoment(row) ? "" : ` · ${t("account.products.role.editor")}`}</span>
-      <span class="type-pill">${typeLabelChrome(state.type)}</span>
+      ${adminMode ? `<span class="type-pill">${typeLabelChrome(state.type)}</span>` : ""}
     </button>`;
   }).join("");
 }
@@ -3124,8 +3121,8 @@ function confirmMomentTypeChange(nextType, previousType){
   }));
 }
 
-function confirmApplyMomentTemplate(type){
-  return window.confirm(t("save.confirm_template", { type: localizedTypeLabel(type) }));
+function confirmApplyMomentTemplate(){
+  return window.confirm(t("save.confirm_template"));
 }
 
 const TEMPLATE_STOCK_FIELDS = ["recipient","signature","event_label","target_date","spotify_url","youtube_url","author","sign_name","sign_subtitle","whatsapp_number","event_name"];
@@ -3244,7 +3241,7 @@ async function bootstrapFreshMomentPage(row, formNode){
     try{ savedEditorSnapshot = formSnapshotForDirty(formNode); }catch{ /* ignore */ }
     editorDirty = false;
     updateSaveStatus(true);
-    showEditorSaveFeedback(t("save.reminder_structure", { type: localizedTypeLabel(type) }), "ok");
+    showEditorSaveFeedback(t("save.reminder_structure"), "ok");
   }finally{
     suppressDirtyUi = false;
     bootstrapInFlight = false;
@@ -4503,7 +4500,7 @@ function renderDetail(id){
   });
   document.getElementById("applyMomentTemplate")?.addEventListener("click",async()=>{
     const type = lockedMomentType(row);
-    if(!confirmApplyMomentTemplate(type)) return;
+    if(!confirmApplyMomentTemplate()) return;
     applyTemplateToForm(editorForm,type);
     // Salva subito: altrimenti al cambio prodotto si perde template/colori/copertina
     await saveMoment({ preventDefault(){}, currentTarget:editorForm }, row);

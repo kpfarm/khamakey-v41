@@ -29,9 +29,9 @@ export const SAVE_MESSAGES_IT = {
   "save.letter_blob": "Lettera al futuro: attendi il caricamento degli allegati o ricaricali prima di salvare.",
   "save.pin_invalid": "PIN non valido (minimo 4 caratteri), oppure lascia il campo vuoto.",
   "save.reminder_default": "Modifiche pronte — clicca Salva in alto a destra per aggiornare la tua pagina.",
-  "save.reminder_template": "Template applicato e salvato.",
-  "save.reminder_model": "Modello «{type}» applicato e salvato dal tuo prodotto NFC. Puoi personalizzare testi e foto.",
-  "save.reminder_structure": "Pronto: sezioni e stile «{type}». Scrivi i tuoi testi — vuoto non si vede in pubblico.",
+  "save.reminder_template": "Testi e sezioni suggeriti applicati e salvati.",
+  "save.reminder_model": "Impostazione applicata e salvata dal tuo prodotto NFC. Puoi personalizzare testi e foto.",
+  "save.reminder_structure": "Pronto: sezioni e stile impostati. Scrivi i tuoi testi — vuoto non si vede in pubblico.",
   "save.reminder_upload": "{count} file caricati nella {label}. Clicca Salva verde per vederli sulla tua pagina.",
   "save.reminder_cover": "Copertina caricata. Ricorda di toccare Salva.",
   "save.reminder_photo": "Foto sostituita. Clicca Salva verde per aggiornare la pagina.",
@@ -41,7 +41,7 @@ export const SAVE_MESSAGES_IT = {
   "save.label_video": "sezione video",
   "save.label_music": "sezione musica",
   "save.label_letter": "lettera al futuro",
-  "save.confirm_template": "«Prepara tutto per me» sostituirà testi, sezioni attive, ordine e colori con il modello «{type}».\n\nPoi salveremo subito la pagina, così non perdi il lavoro se cambi prodotto.\n\nContinuare?",
+  "save.confirm_template": "«Prepara tutto per me» sostituirà testi, sezioni attive, ordine e colori con quelli suggeriti per la tua pagina.\n\nPoi salveremo subito, così non perdi il lavoro se cambi prodotto.\n\nContinuare?",
   "save.confirm_type_change": "Stai passando da «{prev}» a «{next}».\n\nCambiare categoria aggiorna il design suggerito. I testi che hai già scritto restano finché non tocchi «Prepara tutto per me».\n\nSe usi quel pulsante, testi, sezioni e impostazioni verranno sostituiti in modo irreversibile.\n\nVuoi cambiare categoria?"
 };
 
@@ -74,9 +74,9 @@ export const SAVE_MESSAGES_EN = {
   "save.letter_blob": "Letter to the future: wait for attachments to finish uploading, or upload them again before saving.",
   "save.pin_invalid": "Invalid PIN (at least 4 characters), or leave the field empty.",
   "save.reminder_default": "Changes ready — tap Save (top right) to update your page.",
-  "save.reminder_template": "Template applied and saved.",
-  "save.reminder_model": "«{type}» template applied and saved from your NFC product. You can personalise text and photos.",
-  "save.reminder_structure": "Ready: «{type}» sections and look. Write your own texts — empty stays hidden.",
+  "save.reminder_template": "Suggested texts and sections applied and saved.",
+  "save.reminder_model": "Setup applied and saved from your NFC product. You can personalise text and photos.",
+  "save.reminder_structure": "Ready: sections and look are set. Write your own texts — empty stays hidden.",
   "save.reminder_upload": "{count} file(s) uploaded to {label}. Tap green Save to show them on your page.",
   "save.reminder_cover": "Cover uploaded. Remember to tap Save.",
   "save.reminder_photo": "Photo replaced. Tap green Save to update the page.",
@@ -86,6 +86,6 @@ export const SAVE_MESSAGES_EN = {
   "save.label_video": "the video section",
   "save.label_music": "the music section",
   "save.label_letter": "the letter to the future",
-  "save.confirm_template": "“Set everything up for me” will replace texts, active sections, order and colours with the “{type}” template.\n\nThen we’ll save the page right away, so you don’t lose the work if you switch product.\n\nContinue?",
+  "save.confirm_template": "“Set everything up for me” will replace texts, active sections, order and colours with the ones suggested for your page.\n\nThen we’ll save right away, so you don’t lose the work if you switch product.\n\nContinue?",
   "save.confirm_type_change": "You’re switching from “{prev}” to “{next}”.\n\nChanging category updates the suggested look. Texts you’ve already written stay until you tap “Set everything up for me”.\n\nIf you use that button, texts, sections and settings will be replaced and can’t be undone.\n\nChange category?"
 };

@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v285 live (2026-09-18)** — Pages produzione
+  - Copy cliente: niente Business, Officina, magazzino, nome categoria. Codice valido senza «Modello pagina».
+  - Worker, NFC, SQL, upload **invariati**.
 - **Moments v284 live (2026-09-18)** — Pages produzione
   - Pagina Colori: cerchi palette, atmosfera, font e taglio copertina visibili senza tap. Niente nome categoria per i clienti.
   - Worker, NFC, SQL, upload **invariati**.

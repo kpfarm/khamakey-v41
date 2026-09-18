@@ -320,7 +320,7 @@ export const SECTION_SUBTITLE_EN = {
   "Tradizioni e momenti speciali": "Traditions and special moments",
   "Trascina per cambiare l'ordine delle sezioni": "Drag to change the order of sections",
   "Tutte le foto dell'album": "All photos in the album",
-  "Tutte le sezioni extra per questo template — attiva solo quelle che ti servono.": "All extra sections for this template — turn on only what you need.",
+  "Tutte le sezioni extra per questa pagina — attiva solo quelle che ti servono.": "All extra sections for this page — turn on only those you need.",
   "Un messaggio da aprire in futuro": "A message to open in the future",
   "Un messaggio da conservare": "A message to keep",
   "Un messaggio da custodire": "A message to treasure",
@@ -345,10 +345,10 @@ export const SECTION_SUBTITLE_EN = {
 
 export const SECTION_MESSAGES_IT = {
   "sec.extras_title": "Altre sezioni",
-  "sec.extras_sub": "Tutte le sezioni extra per questo template — attiva solo quelle che ti servono."
+  "sec.extras_sub": "Tutte le sezioni extra per questa pagina — attiva solo quelle che ti servono."
 };
 
 export const SECTION_MESSAGES_EN = {
   "sec.extras_title": "More sections",
-  "sec.extras_sub": "All extra sections for this template — turn on only what you need."
+  "sec.extras_sub": "All extra sections for this page — turn on only those you need."
 };

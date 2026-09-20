@@ -36,6 +36,7 @@ Eseguire **in ordine** i file non ancora applicati. Vedi [`../../sql/README.md`]
 | v70 | `khamakey-moments-rsvp-v70.sql` | RSVP Moments strutturato |
 | v71 | `khamakey-moments-guestbook-v71.sql` | Guestbook Moments |
 | **v165** | `khamakey-webhook-ingest-store-v165.sql` | Store chiave ingest + guestbook/RSVP aggiornati |
+| **v177** | `khamakey-cron-ingest-key-v177.sql` | Stesso store per cron anniversari / lettera / pulizia rate-limit |
 | **v166** | `khamakey-restore-app-private-usage-v166.sql` | FIX USAGE schema app_private (magazzino) |
 | **v167** | `khamakey-moments-unit-reset-v167.sql` | Reset pezzo reso/refurb (`admin_reset_moment_unit_for_resale` + log) |
 | v72-v73 | anniversari + letter unlock | Automazioni Moments |

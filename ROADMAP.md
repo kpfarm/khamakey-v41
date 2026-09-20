@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-09-20 | Cursor | **Worker v234 + SQL v177**: cron anniversario/lettera/rate-limit sulla chiave ingest in store (non GUC vuota). Mail senza «Insieme da». Editor/NFC/Salva invariati. |
 | 2026-09-18 | Cursor | **Moments v286 live**: Come si crea — tasto Condividi al posto di Pubblica; invito in cima. Worker/SQL invariati. |
 | 2026-09-18 | Cursor | **Moments v285 live**: copy cliente senza Business, Officina, magazzino, nome categoria. Worker/SQL invariati. |
 | 2026-09-18 | Cursor | **Moments v284 live**: Colori — tutte le palette e gli stili visibili; categoria nascosta ai clienti. Worker/SQL invariati. |

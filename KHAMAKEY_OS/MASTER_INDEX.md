@@ -4,12 +4,12 @@
 > Ogni sessione AI inizia da qui.  
 > Vault Obsidian: apri **questa cartella** `KHAMAKEY_OS/` (o la root del repo). Dopo ogni fatto prodotto: [[PROJECT_STATE]] + [[CHANGELOG]] + [[docs/13-roadmap]].
 
-## Stato oggi (2026-09-17)
+## Stato oggi (2026-09-20)
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v276 live** / **v281 preview** | v281 pack grafico Dopo non è su app.khamakeymoments.com |
-| Worker | **v233-countdown-fit** | Foto countdown intera; assistenza email; menu `/m/` senza hash |
+| Editor Moments | **v286 live** | Come si crea: Condividi; pack grafico Dopo in produzione |
+| Worker | **v234-anniversary-mail** | Mail anniversario allineata alla chiave ingest (SQL v177) |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

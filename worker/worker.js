@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v233-countdown-fit";
+const WORKER_VERSION = "v234-anniversary-mail";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -940,6 +940,29 @@ function buildMomentPageInviteMail({ inviteUrl, pageTitle, inviter, inviteeEmail
   </tr>
 </table>`;
   return { subject, text: textParts.join("\n"), html };
+}
+
+function buildMomentAnniversaryMail({ title, years, pageUrl, wordmarkUrl }) {
+  const n = Number(years) || 1;
+  const yearLabel = n === 1 ? "un anno" : `${n} anni`;
+  const subject = n === 1 ? `Un anno fa — ${title}` : `${n} anni fa — ${title}`;
+  const safeTitle = escapeHtml(title);
+  const safeUrl = attr(pageUrl);
+  const logo = String(wordmarkUrl || "https://app.khamakeymoments.com/khamakey-moments-wordmark.png").trim();
+  const text = [
+    "Ciao,",
+    "",
+    `Oggi ricorre ${yearLabel} sulla tua pagina «${title}».`,
+    "",
+    "Rileggi il ricordo, o aggiungi qualcosa di nuovo:",
+    pageUrl,
+    "",
+    "Puoi spegnere questi promemoria da Pubblica → Email anniversario.",
+    "",
+    "— KhamaKey Moments"
+  ].join("\n");
+  const html = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;margin:0;padding:0"><tr><td align="center" style="padding:28px 12px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#FFF9F5;border-radius:22px;overflow:hidden"><tr><td style="background:#071A3C;padding:28px 32px 22px;text-align:center"><img src="${escapeHtml(logo)}" width="200" alt="KhamaKey Moments" style="display:block;margin:0 auto;width:200px;height:auto;border:0"></td></tr><tr><td style="padding:32px 36px 0;font-family:Georgia,'Times New Roman',serif;color:#071A3C;text-align:left"><p style="margin:0;font-size:16px;line-height:1.65;color:#18202F">Ciao,</p><p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F">Oggi ricorre <strong>${escapeHtml(yearLabel)}</strong> sulla tua pagina «<strong>${safeTitle}</strong>».</p><p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F">Rileggi il ricordo, o aggiungi qualcosa di nuovo.</p></td></tr><tr><td align="center" style="padding:28px 36px 8px"><a href="${safeUrl}" style="display:inline-block;background:#AA626C;color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:999px;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif">Apri il tuo Moment</a></td></tr><tr><td style="padding:8px 36px 32px;font-family:Georgia,'Times New Roman',serif;text-align:center"><p style="margin:0;font-size:13px;line-height:1.6;color:#8a6a70">Puoi spegnere questi promemoria da Pubblica → Email anniversario.</p></td></tr></table></td></tr></table>`;
+  return { subject, text, html };
 }
 
 async function handleMomentPageInvite(request, env) {
@@ -7237,6 +7260,8 @@ async function runMomentAnniversaryJob(env, dayOverride = null) {
   });
   const rows = Array.isArray(due) ? due : [];
   const origin = env.WORKER_PUBLIC_BASE || "https://link.khamakeymoments.com";
+  const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
+  const wordmarkUrl = `${pagesBase}/khamakey-moments-wordmark.png`;
   let sent = 0;
   let failed = 0;
 
@@ -7246,28 +7271,15 @@ async function runMomentAnniversaryJob(env, dayOverride = null) {
       const title = String(row.title || "Il tuo Moment").trim();
       const slug = String(row.slug || "").trim();
       const pageUrl = slug ? `${origin}/m/${encodeURIComponent(slug)}` : origin;
-      const yearLabel = years === 1 ? "1 anno" : `${years} anni`;
-      const anchor = String(row.anchor_label || "Questo giorno").trim();
       const email = String(row.owner_email || "").trim();
       if (!email) continue;
 
-      const subject = `💫 ${yearLabel} fa — ${title}`;
-      const text = [
-        `Ciao,`,
-        ``,
-        `Oggi ricorre ${yearLabel} da «${anchor}» per la tua pagina KhamaKey Moments «${title}».`,
-        ``,
-        `Rileggi il ricordo o aggiungi qualcosa di nuovo:`,
+      const { subject, text, html } = buildMomentAnniversaryMail({
+        title,
+        years,
         pageUrl,
-        ``,
-        `— KhamaKey Moments`
-      ].join("\n");
-      const html = `<div style="font-family:Georgia,serif;color:#172036;line-height:1.6;max-width:560px">
-        <p>Ciao,</p>
-        <p>Oggi ricorre <strong>${escapeHtml(yearLabel)}</strong> da «${escapeHtml(anchor)}» per la tua pagina <strong>${escapeHtml(title)}</strong>.</p>
-        <p><a href="${attr(pageUrl)}" style="display:inline-block;background:#1b2a5e;color:#fff;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:700">Apri il tuo Moment</a></p>
-        <p style="color:#64748b;font-size:14px">Puoi disattivare questi promemoria da editor → Pubblica → Email anniversario.</p>
-      </div>`;
+        wordmarkUrl
+      });
 
       const mail = await sendResendEmail(env, {
         to: email,
@@ -7335,12 +7347,7 @@ async function runMomentLetterUnlockJob(env, dayOverride = null) {
         ``,
         `— KhamaKey Moments`
       ].filter(Boolean).join("\n");
-      const html = `<div style="font-family:Georgia,serif;color:#172036;line-height:1.6;max-width:560px">
-        <p>Ciao,</p>
-        <p>Oggi <strong>${escapeHtml(when)}</strong> si apre la <strong>lettera al futuro</strong> di «${escapeHtml(title)}».</p>
-        ${recipient ? `<p>Destinatario: <em>${escapeHtml(recipient)}</em></p>` : ""}
-        <p><a href="${attr(pageUrl)}" style="display:inline-block;background:#1b2a5e;color:#fff;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:700">Apri la lettera</a></p>
-      </div>`;
+      const html = `<div style="font-family:Georgia,serif;color:#172036;line-height:1.6;max-width:560px"><p style="margin:0">Ciao,</p><p style="margin:12px 0 0">Oggi <strong>${escapeHtml(when)}</strong> si apre la <strong>lettera al futuro</strong> di «${escapeHtml(title)}».</p>${recipient ? `<p style="margin:12px 0 0">Destinatario: <em>${escapeHtml(recipient)}</em></p>` : ""}<p style="margin:18px 0 0"><a href="${attr(pageUrl)}" style="display:inline-block;background:#1b2a5e;color:#fff;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:700">Apri la lettera</a></p></div>`;
 
       const mail = await sendResendEmail(env, {
         to: email,

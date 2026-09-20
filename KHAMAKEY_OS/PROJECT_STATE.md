@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-18** (Moments **v286 live**; Worker v233)
+> Ultimo aggiornamento: **2026-09-20** (Worker **v234-anniversary-mail**; SQL **v177**; Moments **v286 live**)
 
 ### Fonte di verità versioni
 
@@ -107,11 +107,11 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v233-countdown-fit** | Foto conto alla rovescia intera (orizzontale/verticale, niente crop 160px). |
+| **Worker NFC** | **v234-anniversary-mail** | Cron anniversari/lettera/pulizia usa `app_private.webhook_ingest_key()` (SQL v177). Testo mail senza «Insieme da». Foto countdown intera resta da v233. |
 | **Moments editor** | **v286 live** | Come si crea: quarto tasto **Condividi** (non Pubblica). CSS `?v=272`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
-| **SQL Supabase Moments** | **≥ v176 (prod)** | v176 export/erase account (2026-09-17); v175 consensi; v174 invito editor; v173 `max_video_mb` 90; v172 salva ottimistico. |
+| **SQL Supabase Moments** | **≥ v177 (prod)** | v177 cron ingest store; v176 export/erase account; v175 consensi; v174 invito editor. |
 | **Prossima release piattaforma** | **collegare Stripe** sui `moments_plus` / `moments_pro` | Prezzi già in seed (€4,90/€39 Plus · €9,90/€79 Pro). |
 
 ---
@@ -214,9 +214,9 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-18:** Editor live **v286** su `app.khamakeymoments.com`. Worker **v233-countdown-fit**. SQL **v176**.  
+> **Oggi 2026-09-20:** Worker **v234-anniversary-mail** + SQL **v177** (stessa chiave ingest di RSVP). Editor live **v286**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
-> Segnato: guida invito **dopo**. **P.IVA** in attesa.
+> **P.IVA** in attesa.
 
 ---
 

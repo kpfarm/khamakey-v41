@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v234-anniversary-mail + SQL v177 (2026-09-20)** — live
+  - Cron anniversario, lettera al futuro e pulizia rate-limit usano `app_private.webhook_ingest_key()` (stesso store di RSVP/guestbook). La chiave GUC era vuota dopo v165: zero invii.
+  - Testo mail: «Oggi ricorre un anno sulla tua pagina «…»» — niente «Insieme da», HTML compatto come l’invito.
+  - Editor, NFC `/m/` `/k/`, Salva, upload **invariati**. Nessun invio di prova a clienti (0 scadenze oggi).
 - **Moments v286 live (2026-09-18)** — Pages produzione
   - Come si crea: quarto tasto **Condividi** (non più Pubblica, che è il tasto bozza/live). In cima: invitare a modificare.
   - Worker, NFC, SQL, upload **invariati**.

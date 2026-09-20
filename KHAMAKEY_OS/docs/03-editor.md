@@ -70,7 +70,7 @@ Ogni campo visibile su `/p/` richiede aggiornamento in:
 ## Editor Moments
 
 ### Sezioni principali
-- **Ingresso editor (v286 live):** il blocco in Riepilogo è la **guida ad attivare e creare** (**Come si crea**). Schede = 4 passi: Copertina, Colori, Contenuti, **Condividi** (invito, link, QR, PIN). **v271:** sezioni vuote = tre passi + Non succede. QR/NFC `/m/` `/k/` = pagina ospite.
+- **Ingresso editor (v286 live):** il blocco in Riepilogo è la **guida ad attivare e creare** (**Come si crea**). Schede = 4 passi: Copertina, Colori, Contenuti, **Condividi** (invito, link, QR, PIN). **v271:** sezioni vuote = tre passi + Non succede. **v287:** titoli di sezione più bassi, blocchi di nuovo in card (form a sinistra). QR/NFC `/m/` `/k/` = pagina ospite.
 - Copertina (v255 / Worker v220): `cover_fit` `cover` (riempi, default pagine già salvate) o `contain` (tutta la foto, **stessa foto sfuocata** a riempire il riquadro). Nuovo upload parte da tutta la foto. In «Riempi» si trascina; zoom 100–200% solo lì.
 - **Conto alla rovescia (Worker v233):** la foto non è più ritagliata in un riquadro fisso. Orizzontale o verticale, si vede tutta (`object-fit: contain`, altezza max ~420px).
 - Sezioni evento (programma, storia, messaggi…)

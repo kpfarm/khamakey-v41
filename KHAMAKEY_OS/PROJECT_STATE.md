@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-20** (Worker **v235-anniversary-card**; SQL **v178**; Moments **v286 live**)
+> Ultimo aggiornamento: **2026-09-20** (Moments **v287** chrome editor; Worker **v235**; SQL **v178**)
 
 ### Fonte di verità versioni
 
@@ -108,7 +108,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v235-anniversary-card** | Mail anniversario: copertina, numero anni, data, testo da lettera. SQL v178. Chiave ingest da v177. Foto countdown intera resta da v233. |
-| **Moments editor** | **v286 live** | Come si crea: quarto tasto **Condividi** (non Pubblica). CSS `?v=272`. |
+| **Moments editor** | **v287 live** | Chrome: titoli più bassi, sezioni di nuovo in card. Form a sinistra. CSS `?v=273`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v178 (prod)** | v178 mail anniversario (copertina/data); v177 cron ingest store; v176 export/erase. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-20:** Worker **v235-anniversary-card** + SQL **v178** (mail anniversario con copertina). Editor live **v286**.  
+> **Oggi 2026-09-20:** Editor live **v287** (titoli più bassi + card). Worker **v235**. SQL **v178**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

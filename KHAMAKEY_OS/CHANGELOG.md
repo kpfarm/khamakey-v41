@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v287 live (2026-09-20)** — Pages produzione
+  - Chrome editor: titoli di sezione più bassi; card di nuovo intorno ai blocchi. Form resta a sinistra. Icone e 4 passi invariati.
+  - Worker, NFC, SQL, Salva, upload **invariati**.
 - **Worker v235-anniversary-card + SQL v178 (2026-09-20)** — live
   - Mail anniversario: copertina della pagina, numero dell’anno, data, headline «Un anno fa.», CTA «Riapri il tuo Moment». Niente etichette interne («Insieme da»).
   - Editor, NFC `/m/` `/k/`, Salva, upload **invariati**. Nessun invio di prova a clienti.

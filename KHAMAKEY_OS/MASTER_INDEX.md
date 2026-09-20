@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v286 live** | Come si crea: Condividi; pack grafico Dopo in produzione |
+| Editor Moments | **v287 live** | Titoli più bassi, sezioni in card; Come si crea resta Condividi |
 | Worker | **v235-anniversary-card** | Mail anniversario con copertina e numero anni (SQL v178) |
 | Officina | **v203** | PNG codice più basso |
 

@@ -9,7 +9,7 @@
 | Live | Versione | Nota |
 |------|----------|------|
 | Editor Moments | **v286 live** | Come si crea: Condividi; pack grafico Dopo in produzione |
-| Worker | **v234-anniversary-mail** | Mail anniversario allineata alla chiave ingest (SQL v177) |
+| Worker | **v235-anniversary-card** | Mail anniversario con copertina e numero anni (SQL v178) |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

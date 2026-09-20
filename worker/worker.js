@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v234-anniversary-mail";
+const WORKER_VERSION = "v235-anniversary-card";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -942,27 +942,132 @@ function buildMomentPageInviteMail({ inviteUrl, pageTitle, inviter, inviteeEmail
   return { subject, text: textParts.join("\n"), html };
 }
 
-function buildMomentAnniversaryMail({ title, years, pageUrl, wordmarkUrl }) {
-  const n = Number(years) || 1;
+function anniversaryMailCopy({ title, years, anchorType, anchorLabel, anchorDate }) {
+  const n = Math.max(1, Number(years) || 1);
+  const yearWord = n === 1 ? "anno" : "anni";
   const yearLabel = n === 1 ? "un anno" : `${n} anni`;
-  const subject = n === 1 ? `Un anno fa — ${title}` : `${n} anni fa — ${title}`;
-  const safeTitle = escapeHtml(title);
-  const safeUrl = attr(pageUrl);
+  const headline = n === 1 ? "Un anno fa." : `${n} anni fa.`;
+  const subject = n === 1
+    ? `KhamaKey Moments: un anno fa — «${title}»`
+    : `KhamaKey Moments: ${n} anni fa — «${title}»`;
+  const dateLabel = formatUnlockDate(anchorDate);
+  const countdownName = String(anchorType || "") === "countdown"
+    ? String(anchorLabel || "").trim()
+    : "";
+  const namedDay = countdownName && countdownName !== "Il grande giorno" ? countdownName : "";
+  let occasion;
+  if (String(anchorType || "") === "together_since") {
+    occasion = `Oggi ricorre ${yearLabel} da quando avete iniziato a contare i giorni su «${title}».`;
+  } else if (namedDay) {
+    occasion = `Oggi ricorre ${yearLabel} da «${namedDay}».`;
+  } else {
+    occasion = `Oggi ricorre ${yearLabel} sulla tua pagina «${title}».`;
+  }
+  return {
+    n,
+    yearWord,
+    headline,
+    subject,
+    dateLabel,
+    occasion,
+    invite: "Riapri il Moment: ci sono le foto, le parole, il giorno. Puoi solo rileggere — o lasciare un segno di quest'anno.",
+    preheader: "Riapri il ricordo, o aggiungi qualcosa di quest'anno."
+  };
+}
+
+function publicHttpsUrl(value) {
+  const url = safeUrl(String(value || "").trim());
+  return url !== "#" && url.startsWith("https:") ? url : "";
+}
+
+function buildMomentAnniversaryMail({ title, years, pageUrl, wordmarkUrl, coverUrl, subtitle, anchorType, anchorLabel, anchorDate }) {
+  const pageTitle = String(title || "Il tuo Moment").trim() || "Il tuo Moment";
+  const copy = anniversaryMailCopy({
+    title: pageTitle,
+    years,
+    anchorType,
+    anchorLabel,
+    anchorDate
+  });
   const logo = String(wordmarkUrl || "https://app.khamakeymoments.com/khamakey-moments-wordmark.png").trim();
-  const text = [
+  const cover = publicHttpsUrl(coverUrl);
+  const lead = String(subtitle || "").trim().slice(0, 160);
+  const ctaHref = attr(pageUrl);
+  const occasionHtml = copy.occasion.includes(`«${pageTitle}»`)
+    ? escapeHtml(copy.occasion).replace(`«${escapeHtml(pageTitle)}»`, `«<strong>${escapeHtml(pageTitle)}</strong>»`)
+    : escapeHtml(copy.occasion);
+  const textParts = [
+    copy.headline,
+    "",
     "Ciao,",
     "",
-    `Oggi ricorre ${yearLabel} sulla tua pagina «${title}».`,
-    "",
-    "Rileggi il ricordo, o aggiungi qualcosa di nuovo:",
-    pageUrl,
-    "",
-    "Puoi spegnere questi promemoria da Pubblica → Email anniversario.",
-    "",
-    "— KhamaKey Moments"
-  ].join("\n");
-  const html = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;margin:0;padding:0"><tr><td align="center" style="padding:28px 12px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#FFF9F5;border-radius:22px;overflow:hidden"><tr><td style="background:#071A3C;padding:28px 32px 22px;text-align:center"><img src="${escapeHtml(logo)}" width="200" alt="KhamaKey Moments" style="display:block;margin:0 auto;width:200px;height:auto;border:0"></td></tr><tr><td style="padding:32px 36px 0;font-family:Georgia,'Times New Roman',serif;color:#071A3C;text-align:left"><p style="margin:0;font-size:16px;line-height:1.65;color:#18202F">Ciao,</p><p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F">Oggi ricorre <strong>${escapeHtml(yearLabel)}</strong> sulla tua pagina «<strong>${safeTitle}</strong>».</p><p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F">Rileggi il ricordo, o aggiungi qualcosa di nuovo.</p></td></tr><tr><td align="center" style="padding:28px 36px 8px"><a href="${safeUrl}" style="display:inline-block;background:#AA626C;color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:999px;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif">Apri il tuo Moment</a></td></tr><tr><td style="padding:8px 36px 32px;font-family:Georgia,'Times New Roman',serif;text-align:center"><p style="margin:0;font-size:13px;line-height:1.6;color:#8a6a70">Puoi spegnere questi promemoria da Pubblica → Email anniversario.</p></td></tr></table></td></tr></table>`;
-  return { subject, text, html };
+    copy.occasion
+  ];
+  if (lead) textParts.push(`«${lead}»`);
+  if (copy.dateLabel) textParts.push(`Il giorno: ${copy.dateLabel}.`);
+  textParts.push("", copy.invite, pageUrl, "", "Puoi spegnere questi promemoria da Pubblica → Email anniversario.", "", "A presto,", "Il team KhamaKey Moments");
+
+  const coverHtml = cover
+    ? `<tr><td style="padding:0;line-height:0;font-size:0"><img src="${attr(cover)}" width="540" alt="" style="display:block;width:100%;max-width:540px;height:auto;border:0"></td></tr>`
+    : "";
+  const leadHtml = lead
+    ? `<p style="margin:10px 0 0;font-size:16px;line-height:1.5;color:#AA626C">«${escapeHtml(lead)}»</p>`
+    : "";
+  const dateHtml = copy.dateLabel
+    ? `<p style="margin:8px 0 0;font-size:13px;line-height:1.5;color:#8a6a70">${escapeHtml(copy.dateLabel)}</p>`
+    : "";
+
+  const html = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;margin:0;padding:0">
+  <tr>
+    <td align="center" style="padding:28px 12px">
+      <div style="display:none;max-height:0;overflow:hidden">${escapeHtml(copy.preheader)}</div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#FFF9F5;border-radius:22px;overflow:hidden">
+        <tr>
+          <td style="background:#071A3C;padding:28px 32px 22px;text-align:center">
+            <img src="${escapeHtml(logo)}" width="200" alt="KhamaKey Moments" style="display:block;margin:0 auto;width:200px;height:auto;border:0">
+          </td>
+        </tr>
+        ${coverHtml}
+        <tr>
+          <td style="padding:32px 36px 0;font-family:Georgia,'Times New Roman',serif;color:#071A3C;text-align:left">
+            <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C">Un ricordo da riaprire</p>
+            <h1 style="margin:12px 0 0;font-size:32px;line-height:1.2;font-weight:normal">${escapeHtml(copy.headline)}</h1>
+            ${leadHtml}
+            <p style="margin:18px 0 0;font-size:16px;line-height:1.65;color:#18202F">Ciao,</p>
+            <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F">${occasionHtml}</p>
+            <p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F">${escapeHtml(copy.invite)}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 36px 0">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;border-radius:16px">
+              <tr>
+                <td style="padding:22px 22px;font-family:Georgia,'Times New Roman',serif;color:#071A3C;text-align:center">
+                  <p style="margin:0;font-size:42px;line-height:1;letter-spacing:-0.03em">${copy.n}</p>
+                  <p style="margin:6px 0 0;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#AA626C">${escapeHtml(copy.yearWord)}</p>
+                  ${dateHtml}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:28px 36px 8px">
+            <a href="${ctaHref}" style="display:inline-block;background:#AA626C;color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:999px;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif">Riapri il tuo Moment</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 36px 32px;font-family:Georgia,'Times New Roman',serif;text-align:center">
+            <p style="margin:0;font-size:15px;line-height:1.6;color:#071A3C">A presto,<br>Il team KhamaKey Moments</p>
+            <p style="margin:18px 0 0;font-size:13px;line-height:1.6;color:#8a6a70">Puoi spegnere questi promemoria da Pubblica → Email anniversario.</p>
+            <p style="margin:18px 0 0;font-size:11px;line-height:1.5;color:#8a6a70">Questa è una mail automatica. Non rispondere a questo indirizzo.</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`;
+  return { subject: copy.subject, text: textParts.join("\n"), html };
 }
 
 async function handleMomentPageInvite(request, env) {
@@ -7278,7 +7383,12 @@ async function runMomentAnniversaryJob(env, dayOverride = null) {
         title,
         years,
         pageUrl,
-        wordmarkUrl
+        wordmarkUrl,
+        coverUrl: row.cover_url,
+        subtitle: row.subtitle,
+        anchorType: row.anchor_type,
+        anchorLabel: row.anchor_label,
+        anchorDate: row.anchor_date
       });
 
       const mail = await sendResendEmail(env, {

@@ -174,7 +174,7 @@ export function contentNavItems(order = SECTION_ORDER_DEFAULT, momentType = "fre
 export function pageNavItems(){
   return [
     { id:"overview", label:"Riepilogo", icon:"📊" },
-    { id:"privacy", label:"Pubblica", icon:"🔒" }
+    { id:"privacy", label:"Condividi", icon:"🔒" }
   ];
 }
 

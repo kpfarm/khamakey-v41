@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v287 live** | Titoli più bassi, sezioni in card; Come si crea resta Condividi |
+| Editor Moments | **v288 live** | 4 passi Condividi / Share; titoli più bassi e card da v287 |
 | Worker | **v235-anniversary-card** | Mail anniversario con copertina e numero anni (SQL v178) |
 | Officina | **v203** | PNG codice più basso |
 

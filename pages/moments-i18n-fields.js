@@ -535,7 +535,7 @@ export const FIELD_PHRASE_EN = {
   "Colori e sezioni del tuo prodotto (es. Amore) sono già pronti e salvati — personalizzali pure.": "Colours and sections for your product (e.g. Love) are already ready and saved — feel free to personalise them.",
   "3. Contenuti": "3. Content",
   "Modifica testi e media. In «Altre sezioni» aggiungi solo ciò che ti serve.": "Edit texts and media. In “More sections” add only what you need.",
-  "4. Pubblica": "4. Publish",
+  "4. Condividi": "4. Share",
   "Salva e condividi il link NFC.": "Save and share the NFC link.",
   "Inizia → Copertina": "Start → Cover",
 

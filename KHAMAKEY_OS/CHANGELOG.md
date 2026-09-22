@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v288 live (2026-09-22)** — Pages produzione
+  - 4 passi e menu laterale: **Condividi** (EN **Share**). Bozza/live resta Pubblicata / Published.
+  - Worker, NFC, SQL, Salva, upload **invariati**.
 - **Moments v287 live (2026-09-20)** — Pages produzione
   - Chrome editor: titoli di sezione più bassi; card di nuovo intorno ai blocchi. Form resta a sinistra. Icone e 4 passi invariati.
   - Worker, NFC, SQL, Salva, upload **invariati**.

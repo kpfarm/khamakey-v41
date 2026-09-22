@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-20** (Moments **v287** chrome editor; Worker **v235**; SQL **v178**)
+> Ultimo aggiornamento: **2026-09-22** (Moments **v288** Condividi/Share; Worker **v235**; SQL **v178**)
 
 ### Fonte di verità versioni
 
@@ -108,7 +108,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v235-anniversary-card** | Mail anniversario: copertina, numero anni, data, testo da lettera. SQL v178. Chiave ingest da v177. Foto countdown intera resta da v233. |
-| **Moments editor** | **v287 live** | Chrome: titoli più bassi, sezioni di nuovo in card. Form a sinistra. CSS `?v=273`. |
+| **Moments editor** | **v288 live** | 4 passi e menu: **Condividi** / EN **Share**. Bozza/live resta Pubblicata. CSS `?v=273`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v178 (prod)** | v178 mail anniversario (copertina/data); v177 cron ingest store; v176 export/erase. |
@@ -208,13 +208,13 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 4. **Igiene multi-agente** — lock aggiornati, commit solo file del task
 5. **GDPR Moments** — v268/v176 fatto (export/cancella); niente campagne promo finché non si decide
 6. Business — in stand-by / progetto separato; non mescolare con Moments
-7. Guida cliente — **v286** Come si crea (Condividi, non Pubblica); **v271** sezioni vuote
+7. Guida cliente — **v288** 4 passi Condividi/Share; **v286** Come si crea; **v271** sezioni vuote
 
 ---
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-20:** Editor live **v287** (titoli più bassi + card). Worker **v235**. SQL **v178**.  
+> **Oggi 2026-09-22:** Editor live **v288** (4° passo Condividi / Share). Worker **v235**. SQL **v178**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

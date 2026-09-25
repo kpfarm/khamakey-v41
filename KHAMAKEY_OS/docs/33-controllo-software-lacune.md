@@ -57,7 +57,7 @@ Altri ticket restano in coda, uno alla volta.
 | 6 | `/m/` fallback IT | Titoli sezione vuoti / empty hint Worker ancora italiani (non chrome visitatore) | Alto (Worker) | ⬜ annotare, **non** sistemare senza lock Worker |
 | 7 | P.IVA | Privacy/Termini senza ragione sociale / sede / partita IVA | Nessuno finché non ci sono dati | ⏸ attesa dati reali |
 | 8 | Auth email minori | Magic link, change email, invite (Moments usa conferma + reset) | Ops dashboard | ⏸ basso |
-| 9 | Stripe Plus/Pro | Secrets non in Worker | Pagamenti | ⏸ prodotto, non bug editor |
+| 9 | Stripe Plus/Pro | Decisione 2026-09-25: un solo piano fino a nuova scelta. Seed Plus/Pro resta in Officina, senza checkout | Pagamenti | ⏸ non al lancio |
 | 10 | Leaked password | Piano Auth Free — non disponibile | Ops | ⏸ documentato |
 | 11 | Guida cliente / dove si invita | v266 non è intuitiva per i clienti (ok per chi ha fatto l’app) | Basso se solo copy | ⏸ **dopo**, non ora |
 | 12 | GDPR Moments | Opt-in marketing assente; consenso legale solo gate UI. P.IVA a parte (#7) | Medio (signup + Privacy IT/EN) | ✅ 2026-09-17 v268 / SQL v176 — export/cancella in Profilo. Resta P.IVA e niente campagne |

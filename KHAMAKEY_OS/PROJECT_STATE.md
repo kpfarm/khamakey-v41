@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-25** (Moments **v289**, CSS **v275** spazi email anniversario; Worker **v236**; SQL **v179**)
+> Ultimo aggiornamento: **2026-09-25** (Moments **v290**, un solo piano; Worker **v237**; SQL **v179**)
 
 ### Fonte di verità versioni
 
@@ -107,12 +107,12 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v236-mail-locale** | Mail invito e anniversario IT/EN da `ui_locale`. YouTube embed senza lazy, play immediato. SQL v179. |
-| **Moments editor** | **v289 live** | CSS `?v=275`: Email anniversario a due righe; suggerimenti 400; copertina senza finto 800. YouTube play dopo incolla. |
+| **Worker NFC** | **v237-single-plan** | Messaggio limite senza invito a Plus/Pro. Mail IT/EN e YouTube invariati. |
+| **Moments editor** | **v290 live** | Un solo piano, incluso con l’oggetto. CSS `?v=275`. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v179 (prod)** | v179 `owner_ui_locale` sulla due anniversari; v178 copertina/data; v177 cron ingest. |
-| **Prossima release piattaforma** | **collegare Stripe** sui `moments_plus` / `moments_pro` | Prezzi già in seed (€4,90/€39 Plus · €9,90/€79 Pro). |
+| **Prossima release piattaforma** | quando serve un cambio prodotto | Un solo piano Moments fino a nuova decisione. Plus/Pro restano in Officina, senza Stripe. |
 
 ---
 
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-25:** Editor live **v289**, CSS **v275** (spazi Email anniversario). Worker **v236**. SQL **v179**.  
+> **Oggi 2026-09-25:** Editor **v290**, Worker **v237**: un solo piano, niente promessa di upgrade. SQL **v179**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

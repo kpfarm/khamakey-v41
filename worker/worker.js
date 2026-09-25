@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v236-mail-locale";
+const WORKER_VERSION = "v237-single-plan";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1641,7 +1641,7 @@ async function handleMediaUpload(request, env) {
         if (kindCount >= kindCap) {
           const label = kind === "video" ? "video" : kind === "audio" ? "audio" : "PDF";
           return cors(json({
-            error: `Limite raggiunto: massimo ${kindCap} ${label} per questo Moment (piano attuale). Rimuovi un file o passa a Plus/Pro.`,
+            error: `Limite raggiunto: massimo ${kindCap} ${label} per questo Moment. Rimuovi un file per caricarne un altro.`,
             code: "plan_kind_limit",
             kind,
             kind_count: kindCount,
@@ -1737,7 +1737,7 @@ async function handleMediaUpload(request, env) {
           if (kindCount > kindCap) {
             const label = kind === "video" ? "video" : kind === "audio" ? "audio" : "PDF";
             return rollbackQuota({
-              error: `Limite raggiunto: massimo ${kindCap} ${label} per questo Moment (piano attuale). Rimuovi un file o passa a Plus/Pro.`,
+              error: `Limite raggiunto: massimo ${kindCap} ${label} per questo Moment. Rimuovi un file per caricarne un altro.`,
               code: "plan_kind_limit",
               kind,
               kind_count: kindCount,

@@ -129,7 +129,7 @@ Moments: quota totale per prodotto in `platform_plans.limits.storage_mb` + conta
 
 Layout tappe: **lista verticale di default** (invariata). Opzione editor `scroll_layout` → scroll laterale come galleria (utile con molte tappe).
 
-Piano su `moment_events.plan_key`. Admin può applicare con RPC `apply_moment_plan`. Stripe price ID ancora da collegare.
+Piano su `moment_events.plan_key`, default `moments_free`. È l’unico piano cliente fino a nuova decisione. Admin può ancora applicare Plus/Pro a mano. Stripe non è collegato e non va acceso per il lancio.
 
 | Area Business (invariato) | Limite |
 |------|----------------|

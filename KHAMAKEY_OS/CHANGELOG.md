@@ -8,7 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
-- **Moments CSS v275 (2026-09-25)** — live, editor resta **v289**
+- **Moments v290 + Worker v237-single-plan (2026-09-25)** — live
+  - Un solo piano, incluso con l’oggetto, anche dopo il lancio. Account, guida, Termini e messaggi di limite non promettono più Plus/Pro.
+  - Plus/Pro restano in Officina, senza pagamento. NFC, Salva, upload **invariati**.
+- **Moments CSS v275 (2026-09-25)** — live, editor era **v289**
   - Condividi → Email anniversario: titolo e frase su due righe, casella a misura. Stesso ritmo sulle altre opzioni con la stessa casella.
   - Suggerimenti sotto i campi più leggeri. Copertina: «Come si vede» e «Tutta la foto» senza finto grassetto.
   - Worker, NFC, SQL, Salva, upload **invariati**.

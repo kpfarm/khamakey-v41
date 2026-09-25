@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v289 live** | YouTube play dopo incolla; mail invito IT/EN |
-| Worker | **v236-mail-locale** | Invito/anniversario IT/EN; YouTube senza lazy |
+| Editor Moments | **v290 live** | Un solo piano incluso con l’oggetto |
+| Worker | **v237-single-plan** | Limite senza invito a Plus/Pro |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

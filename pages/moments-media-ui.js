@@ -19,7 +19,7 @@ import {
 } from "./moment-media.js?v=244";
 import { canFitBytes, formatBytes, storageBytesLimit } from "./moment-plans.js?v=238";
 import { getUiLocale } from "./moments-i18n.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=248";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=256";
 
 let mediaEditContext = null;
 
@@ -218,7 +218,7 @@ export async function uploadGalleryMedia({supabase,row,formNode,key,files,onStat
     if(!canFitBytes(entitlements, batchBytes)){
       const used = formatBytes(entitlements.bytes_used);
       const max = formatBytes(storageBytesLimit(entitlements.limits));
-      throw new Error(lfFill("Spazio insufficiente ({used} / {max}). Rimuovi file o passa a Plus/Pro.", { used, max }));
+      throw new Error(lfFill("Spazio insufficiente ({used} / {max}). Rimuovi un file per caricarne un altro.", { used, max }));
     }
   }
   onStatus?.(lfFill("Preparazione {n} file...", { n: batch.length }));

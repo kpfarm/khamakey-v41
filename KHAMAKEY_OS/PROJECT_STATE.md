@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-09-25** (Moments **v289** YouTube play; Worker **v236**; SQL **v179**)
+> Ultimo aggiornamento: **2026-09-25** (Moments **v289**, CSS **v275** spazi email anniversario; Worker **v236**; SQL **v179**)
 
 ### Fonte di verità versioni
 
@@ -108,7 +108,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v236-mail-locale** | Mail invito e anniversario IT/EN da `ui_locale`. YouTube embed senza lazy, play immediato. SQL v179. |
-| **Moments editor** | **v289 live** | YouTube: player dopo l’incolla (CSP `frame-src` YouTube/Spotify). Invito passa `locale`. CSS `?v=274`. |
+| **Moments editor** | **v289 live** | CSS `?v=275`: Email anniversario a due righe; suggerimenti 400; copertina senza finto 800. YouTube play dopo incolla. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v179 (prod)** | v179 `owner_ui_locale` sulla due anniversari; v178 copertina/data; v177 cron ingest. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-09-25:** Editor live **v289** (YouTube play dopo incolla). Worker **v236**. SQL **v179**.  
+> **Oggi 2026-09-25:** Editor live **v289**, CSS **v275** (spazi Email anniversario). Worker **v236**. SQL **v179**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

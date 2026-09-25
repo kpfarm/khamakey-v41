@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v275 (2026-09-25)** — live, editor resta **v289**
+  - Condividi → Email anniversario: titolo e frase su due righe, casella a misura. Stesso ritmo sulle altre opzioni con la stessa casella.
+  - Suggerimenti sotto i campi più leggeri. Copertina: «Come si vede» e «Tutta la foto» senza finto grassetto.
+  - Worker, NFC, SQL, Salva, upload **invariati**.
 - **Moments v289 + Worker v236-mail-locale + SQL v179 (2026-09-25)** — live
   - Mail invito e anniversario: inglese se `ui_locale=en` (stessa regola delle mail di conferma). Default italiano.
   - Editor: dopo l’incolla YouTube si può già fare play (CSP `frame-src` YouTube/Spotify). Salva resta per la pagina pubblica.

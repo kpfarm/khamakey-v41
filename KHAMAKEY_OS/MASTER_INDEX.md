@@ -4,12 +4,12 @@
 > Ogni sessione AI inizia da qui.  
 > Vault Obsidian: apri **questa cartella** `KHAMAKEY_OS/` (o la root del repo). Dopo ogni fatto prodotto: [[PROJECT_STATE]] + [[CHANGELOG]] + [[docs/13-roadmap]].
 
-## Stato oggi (2026-09-20)
+## Stato oggi (2026-09-25)
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v288 live** | 4 passi Condividi / Share; titoli più bassi e card da v287 |
-| Worker | **v235-anniversary-card** | Mail anniversario con copertina e numero anni (SQL v178) |
+| Editor Moments | **v289 live** | YouTube play dopo incolla; mail invito IT/EN |
+| Worker | **v236-mail-locale** | Invito/anniversario IT/EN; YouTube senza lazy |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

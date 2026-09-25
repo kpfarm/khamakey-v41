@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v235-anniversary-card";
+const WORKER_VERSION = "v236-mail-locale";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -861,32 +861,79 @@ async function handleMomentSupportNotify(request, env) {
   }
 }
 
-function buildMomentPageInviteMail({ inviteUrl, pageTitle, inviter, inviteeEmail, expiresAt, wordmarkUrl }) {
-  const title = String(pageTitle || "").trim() || "una pagina KhamaKey Moments";
+function mailLocale(...candidates) {
+  for (const raw of candidates) {
+    const value = String(raw || "").trim().toLowerCase();
+    if (value === "en") return "en";
+    if (value === "it") return "it";
+  }
+  return "it";
+}
+
+function buildMomentPageInviteMail({ inviteUrl, pageTitle, inviter, inviteeEmail, expiresAt, wordmarkUrl, locale }) {
+  const lang = mailLocale(locale);
+  const title = String(pageTitle || "").trim()
+    || (lang === "en" ? "a KhamaKey Moments page" : "una pagina KhamaKey Moments");
   const from = String(inviter || "").trim();
   const to = String(inviteeEmail || "").trim();
   const url = String(inviteUrl || "").trim();
   const logo = String(wordmarkUrl || "https://app.khamakeymoments.com/khamakey-moments-wordmark.png").trim();
-  const expiresLabel = formatUnlockDate(expiresAt);
-  const subject = `KhamaKey Moments: sei invitato a «${title.slice(0, 80)}»`;
+  const expiresLabel = formatUnlockDate(expiresAt, lang);
+  const copy = lang === "en" ? {
+    subject: `KhamaKey Moments: you're invited to «${title.slice(0, 80)}»`,
+    kicker: "Invitation to write together",
+    headline: "You're invited into KhamaKey Moments.",
+    sub: "A private space to write together.",
+    hello: "Hello,",
+    body1: `<strong>${escapeHtml(from)}</strong> invites you to edit the Moment «<strong>${escapeHtml(title)}</strong>».`,
+    body1Text: `${from} invites you to edit the Moment «${title}».`,
+    body2: `It's the memory page: photos, words, dates. You enter with this email (<strong>${escapeHtml(to)}</strong>), together with the owner. You don't need the code from the box.`,
+    body2Text: `It's the memory page: photos, words, dates. You enter with this email (${to}), together with the owner. You don't need the code from the box.`,
+    stepsKicker: "Your next steps",
+    step1: "Open the invite — it's the button below.",
+    step2: "Create an account, or sign in if you already have one, with this email.",
+    step3: "Save and upload files on the same page, together with the owner.",
+    cta: "Open the invite",
+    expires: expiresLabel ? `The link expires on ${expiresLabel}.` : "",
+    sign: "See you soon,",
+    copyLink: "If the button doesn't open, copy this address:",
+    auto: "This is an automatic email. Don't reply to this address."
+  } : {
+    subject: `KhamaKey Moments: sei invitato a «${title.slice(0, 80)}»`,
+    kicker: "Invito a scrivere insieme",
+    headline: "Ti invitano nel mondo KhamaKey Moments.",
+    sub: "Uno spazio privato da scrivere insieme.",
+    hello: "Ciao,",
+    body1: `<strong>${escapeHtml(from)}</strong> ti invita a modificare il Moment «<strong>${escapeHtml(title)}</strong>».`,
+    body1Text: `${from} ti invita a modificare il Moment «${title}».`,
+    body2: `È la pagina del ricordo: foto, parole, date. Entri con questa email (<strong>${escapeHtml(to)}</strong>), insieme al titolare. Non ti serve il codice della confezione.`,
+    body2Text: `È la pagina del ricordo: foto, parole, date. Entri con questa email (${to}), insieme al titolare. Non ti serve il codice della confezione.`,
+    stepsKicker: "I tuoi prossimi passi",
+    step1: "Apri l’invito — è il bottone qui sotto.",
+    step2: "Crea l’account, o accedi se ce l’hai già, con questa email.",
+    step3: "Salva e carica file sulla stessa pagina, insieme al titolare.",
+    cta: "Apri l’invito",
+    expires: expiresLabel ? `Il link scade il ${expiresLabel}.` : "",
+    sign: "A presto,",
+    copyLink: "Se il pulsante non si apre, copia questo indirizzo:",
+    auto: "Questa è una mail automatica. Non rispondere a questo indirizzo."
+  };
   const textParts = [
-    "Ti invitano nel mondo KhamaKey Moments.",
-    "Uno spazio privato da scrivere insieme.",
+    copy.headline,
+    copy.sub,
     "",
-    "Ciao,",
+    copy.hello,
     "",
-    `${from} ti invita a modificare il Moment «${title}».`,
-    `È la pagina del ricordo: foto, parole, date. Entri con questa email (${to}), insieme al titolare. Non ti serve il codice della confezione.`,
+    copy.body1Text,
+    copy.body2Text,
     "",
-    "1. Apri l'invito:",
+    "1. " + copy.step1.replace(" — it's the button below.", ":").replace(" — è il bottone qui sotto.", ":"),
     url,
-    "2. Crea l'account, o accedi se ce l'hai già, con questa email.",
-    "3. Salva e carica file sulla stessa pagina, insieme al titolare."
+    "2. " + copy.step2,
+    "3. " + copy.step3
   ];
-  if (expiresLabel) {
-    textParts.push("", `Il link scade il ${expiresLabel}.`);
-  }
-  textParts.push("", "A presto,", "Il team KhamaKey Moments");
+  if (copy.expires) textParts.push("", copy.expires);
+  textParts.push("", copy.sign, "Il team KhamaKey Moments");
   const html = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;margin:0;padding:0">
   <tr>
     <td align="center" style="padding:28px 12px">
@@ -898,12 +945,12 @@ function buildMomentPageInviteMail({ inviteUrl, pageTitle, inviter, inviteeEmail
         </tr>
         <tr>
           <td style="padding:32px 36px 0;font-family:Georgia,'Times New Roman',serif;color:#071A3C;text-align:left">
-            <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C">Invito a scrivere insieme</p>
-            <h1 style="margin:12px 0 0;font-size:28px;line-height:1.28;font-weight:normal">Ti invitano nel mondo KhamaKey Moments.</h1>
-            <p style="margin:10px 0 0;font-size:16px;line-height:1.5;color:#AA626C">Uno spazio privato da scrivere insieme.</p>
-            <p style="margin:18px 0 0;font-size:16px;line-height:1.65;color:#18202F">Ciao,</p>
-            <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F"><strong>${escapeHtml(from)}</strong> ti invita a modificare il Moment «<strong>${escapeHtml(title)}</strong>».</p>
-            <p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F">È la pagina del ricordo: foto, parole, date. Entri con questa email (<strong>${escapeHtml(to)}</strong>), insieme al titolare. Non ti serve il codice della confezione.</p>
+            <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C">${escapeHtml(copy.kicker)}</p>
+            <h1 style="margin:12px 0 0;font-size:28px;line-height:1.28;font-weight:normal">${escapeHtml(copy.headline)}</h1>
+            <p style="margin:10px 0 0;font-size:16px;line-height:1.5;color:#AA626C">${escapeHtml(copy.sub)}</p>
+            <p style="margin:18px 0 0;font-size:16px;line-height:1.65;color:#18202F">${escapeHtml(copy.hello)}</p>
+            <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F">${copy.body1}</p>
+            <p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F">${copy.body2}</p>
           </td>
         </tr>
         <tr>
@@ -911,10 +958,10 @@ function buildMomentPageInviteMail({ inviteUrl, pageTitle, inviter, inviteeEmail
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;border-radius:16px">
               <tr>
                 <td style="padding:20px 22px;font-family:Georgia,'Times New Roman',serif;color:#071A3C">
-                  <p style="margin:0 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#AA626C">I tuoi prossimi passi</p>
-                  <p style="margin:0;font-size:15px;line-height:1.7;color:#18202F"><strong style="color:#071A3C">1.</strong> Apri l’invito — è il bottone qui sotto.</p>
-                  <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F"><strong style="color:#071A3C">2.</strong> Crea l’account, o accedi se ce l’hai già, con questa email.</p>
-                  <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F"><strong style="color:#071A3C">3.</strong> Salva e carica file sulla stessa pagina, insieme al titolare.</p>
+                  <p style="margin:0 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#AA626C">${escapeHtml(copy.stepsKicker)}</p>
+                  <p style="margin:0;font-size:15px;line-height:1.7;color:#18202F"><strong style="color:#071A3C">1.</strong> ${escapeHtml(copy.step1)}</p>
+                  <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F"><strong style="color:#071A3C">2.</strong> ${escapeHtml(copy.step2)}</p>
+                  <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#18202F"><strong style="color:#071A3C">3.</strong> ${escapeHtml(copy.step3)}</p>
                 </td>
               </tr>
             </table>
@@ -922,46 +969,60 @@ function buildMomentPageInviteMail({ inviteUrl, pageTitle, inviter, inviteeEmail
         </tr>
         <tr>
           <td align="center" style="padding:28px 36px 8px">
-            <a href="${escapeHtml(url)}" style="display:inline-block;background:#AA626C;color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:999px;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif">Apri l’invito</a>
+            <a href="${escapeHtml(url)}" style="display:inline-block;background:#AA626C;color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:999px;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif">${escapeHtml(copy.cta)}</a>
           </td>
         </tr>
         <tr>
           <td style="padding:8px 36px 32px;font-family:Georgia,'Times New Roman',serif;text-align:center">
-            ${expiresLabel ? `<p style="margin:0;font-size:13px;line-height:1.6;color:#8a6a70">Il link scade il ${escapeHtml(expiresLabel)}.</p>` : ""}
-            <p style="margin:${expiresLabel ? "16px" : "0"} 0 0;font-size:15px;line-height:1.6;color:#071A3C">A presto,<br>Il team KhamaKey Moments</p>
-            <p style="margin:22px 0 0;font-size:11px;line-height:1.5;color:#8a6a70">Se il pulsante non si apre, copia questo indirizzo:<br>
+            ${copy.expires ? `<p style="margin:0;font-size:13px;line-height:1.6;color:#8a6a70">${escapeHtml(copy.expires)}</p>` : ""}
+            <p style="margin:${copy.expires ? "16px" : "0"} 0 0;font-size:15px;line-height:1.6;color:#071A3C">${escapeHtml(copy.sign)}<br>Il team KhamaKey Moments</p>
+            <p style="margin:22px 0 0;font-size:11px;line-height:1.5;color:#8a6a70">${escapeHtml(copy.copyLink)}<br>
               <a href="${escapeHtml(url)}" style="color:#AA626C;word-break:break-all">${escapeHtml(url)}</a>
             </p>
-            <p style="margin:18px 0 0;font-size:11px;line-height:1.5;color:#8a6a70">Questa è una mail automatica. Non rispondere a questo indirizzo.</p>
+            <p style="margin:18px 0 0;font-size:11px;line-height:1.5;color:#8a6a70">${escapeHtml(copy.auto)}</p>
           </td>
         </tr>
       </table>
     </td>
   </tr>
 </table>`;
-  return { subject, text: textParts.join("\n"), html };
+  return { subject: copy.subject, text: textParts.join("\n"), html };
 }
 
-function anniversaryMailCopy({ title, years, anchorType, anchorLabel, anchorDate }) {
+function anniversaryMailCopy({ title, years, anchorType, anchorLabel, anchorDate, locale }) {
+  const lang = mailLocale(locale);
   const n = Math.max(1, Number(years) || 1);
-  const yearWord = n === 1 ? "anno" : "anni";
-  const yearLabel = n === 1 ? "un anno" : `${n} anni`;
-  const headline = n === 1 ? "Un anno fa." : `${n} anni fa.`;
-  const subject = n === 1
-    ? `KhamaKey Moments: un anno fa — «${title}»`
-    : `KhamaKey Moments: ${n} anni fa — «${title}»`;
-  const dateLabel = formatUnlockDate(anchorDate);
+  const dateLabel = formatUnlockDate(anchorDate, lang);
   const countdownName = String(anchorType || "") === "countdown"
     ? String(anchorLabel || "").trim()
     : "";
   const namedDay = countdownName && countdownName !== "Il grande giorno" ? countdownName : "";
+  const en = lang === "en";
+  const yearWord = en ? (n === 1 ? "year" : "years") : (n === 1 ? "anno" : "anni");
+  const yearLabel = en ? (n === 1 ? "one year" : `${n} years`) : (n === 1 ? "un anno" : `${n} anni`);
+  const headline = en
+    ? (n === 1 ? "One year ago." : `${n} years ago.`)
+    : (n === 1 ? "Un anno fa." : `${n} anni fa.`);
+  const subject = en
+    ? (n === 1
+      ? `KhamaKey Moments: one year ago — «${title}»`
+      : `KhamaKey Moments: ${n} years ago — «${title}»`)
+    : (n === 1
+      ? `KhamaKey Moments: un anno fa — «${title}»`
+      : `KhamaKey Moments: ${n} anni fa — «${title}»`);
   let occasion;
   if (String(anchorType || "") === "together_since") {
-    occasion = `Oggi ricorre ${yearLabel} da quando avete iniziato a contare i giorni su «${title}».`;
+    occasion = en
+      ? `Today marks ${yearLabel} since you started counting the days on «${title}».`
+      : `Oggi ricorre ${yearLabel} da quando avete iniziato a contare i giorni su «${title}».`;
   } else if (namedDay) {
-    occasion = `Oggi ricorre ${yearLabel} da «${namedDay}».`;
+    occasion = en
+      ? `Today marks ${yearLabel} since «${namedDay}».`
+      : `Oggi ricorre ${yearLabel} da «${namedDay}».`;
   } else {
-    occasion = `Oggi ricorre ${yearLabel} sulla tua pagina «${title}».`;
+    occasion = en
+      ? `Today marks ${yearLabel} on your page «${title}».`
+      : `Oggi ricorre ${yearLabel} sulla tua pagina «${title}».`;
   }
   return {
     n,
@@ -970,8 +1031,23 @@ function anniversaryMailCopy({ title, years, anchorType, anchorLabel, anchorDate
     subject,
     dateLabel,
     occasion,
-    invite: "Riapri il Moment: ci sono le foto, le parole, il giorno. Puoi solo rileggere — o lasciare un segno di quest'anno.",
-    preheader: "Riapri il ricordo, o aggiungi qualcosa di quest'anno."
+    kicker: en ? "A memory to reopen" : "Un ricordo da riaprire",
+    hello: en ? "Hello," : "Ciao,",
+    invite: en
+      ? "Reopen the Moment: photos, words, the day are there. You can just reread — or leave a mark from this year."
+      : "Riapri il Moment: ci sono le foto, le parole, il giorno. Puoi solo rileggere — o lasciare un segno di quest'anno.",
+    preheader: en
+      ? "Reopen the memory, or add something from this year."
+      : "Riapri il ricordo, o aggiungi qualcosa di quest'anno.",
+    cta: en ? "Reopen your Moment" : "Riapri il tuo Moment",
+    sign: en ? "See you soon," : "A presto,",
+    optOut: en
+      ? "You can turn these reminders off in Share → Anniversary email."
+      : "Puoi spegnere questi promemoria da Condividi → Email anniversario.",
+    auto: en
+      ? "This is an automatic email. Don't reply to this address."
+      : "Questa è una mail automatica. Non rispondere a questo indirizzo.",
+    datePrefix: en ? "The day: " : "Il giorno: "
   };
 }
 
@@ -980,14 +1056,17 @@ function publicHttpsUrl(value) {
   return url !== "#" && url.startsWith("https:") ? url : "";
 }
 
-function buildMomentAnniversaryMail({ title, years, pageUrl, wordmarkUrl, coverUrl, subtitle, anchorType, anchorLabel, anchorDate }) {
-  const pageTitle = String(title || "Il tuo Moment").trim() || "Il tuo Moment";
+function buildMomentAnniversaryMail({ title, years, pageUrl, wordmarkUrl, coverUrl, subtitle, anchorType, anchorLabel, anchorDate, locale }) {
+  const lang = mailLocale(locale);
+  const pageTitle = String(title || "").trim()
+    || (lang === "en" ? "Your Moment" : "Il tuo Moment");
   const copy = anniversaryMailCopy({
     title: pageTitle,
     years,
     anchorType,
     anchorLabel,
-    anchorDate
+    anchorDate,
+    locale: lang
   });
   const logo = String(wordmarkUrl || "https://app.khamakeymoments.com/khamakey-moments-wordmark.png").trim();
   const cover = publicHttpsUrl(coverUrl);
@@ -999,13 +1078,13 @@ function buildMomentAnniversaryMail({ title, years, pageUrl, wordmarkUrl, coverU
   const textParts = [
     copy.headline,
     "",
-    "Ciao,",
+    copy.hello,
     "",
     copy.occasion
   ];
   if (lead) textParts.push(`«${lead}»`);
-  if (copy.dateLabel) textParts.push(`Il giorno: ${copy.dateLabel}.`);
-  textParts.push("", copy.invite, pageUrl, "", "Puoi spegnere questi promemoria da Pubblica → Email anniversario.", "", "A presto,", "Il team KhamaKey Moments");
+  if (copy.dateLabel) textParts.push(`${copy.datePrefix}${copy.dateLabel}.`);
+  textParts.push("", copy.invite, pageUrl, "", copy.optOut, "", copy.sign, "Il team KhamaKey Moments");
 
   const coverHtml = cover
     ? `<tr><td style="padding:0;line-height:0;font-size:0"><img src="${attr(cover)}" width="540" alt="" style="display:block;width:100%;max-width:540px;height:auto;border:0"></td></tr>`
@@ -1030,10 +1109,10 @@ function buildMomentAnniversaryMail({ title, years, pageUrl, wordmarkUrl, coverU
         ${coverHtml}
         <tr>
           <td style="padding:32px 36px 0;font-family:Georgia,'Times New Roman',serif;color:#071A3C;text-align:left">
-            <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C">Un ricordo da riaprire</p>
+            <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C">${escapeHtml(copy.kicker)}</p>
             <h1 style="margin:12px 0 0;font-size:32px;line-height:1.2;font-weight:normal">${escapeHtml(copy.headline)}</h1>
             ${leadHtml}
-            <p style="margin:18px 0 0;font-size:16px;line-height:1.65;color:#18202F">Ciao,</p>
+            <p style="margin:18px 0 0;font-size:16px;line-height:1.65;color:#18202F">${escapeHtml(copy.hello)}</p>
             <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F">${occasionHtml}</p>
             <p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F">${escapeHtml(copy.invite)}</p>
           </td>
@@ -1053,14 +1132,14 @@ function buildMomentAnniversaryMail({ title, years, pageUrl, wordmarkUrl, coverU
         </tr>
         <tr>
           <td align="center" style="padding:28px 36px 8px">
-            <a href="${ctaHref}" style="display:inline-block;background:#AA626C;color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:999px;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif">Riapri il tuo Moment</a>
+            <a href="${ctaHref}" style="display:inline-block;background:#AA626C;color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:999px;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif">${escapeHtml(copy.cta)}</a>
           </td>
         </tr>
         <tr>
           <td style="padding:8px 36px 32px;font-family:Georgia,'Times New Roman',serif;text-align:center">
-            <p style="margin:0;font-size:15px;line-height:1.6;color:#071A3C">A presto,<br>Il team KhamaKey Moments</p>
-            <p style="margin:18px 0 0;font-size:13px;line-height:1.6;color:#8a6a70">Puoi spegnere questi promemoria da Pubblica → Email anniversario.</p>
-            <p style="margin:18px 0 0;font-size:11px;line-height:1.5;color:#8a6a70">Questa è una mail automatica. Non rispondere a questo indirizzo.</p>
+            <p style="margin:0;font-size:15px;line-height:1.6;color:#071A3C">${escapeHtml(copy.sign)}<br>Il team KhamaKey Moments</p>
+            <p style="margin:18px 0 0;font-size:13px;line-height:1.6;color:#8a6a70">${escapeHtml(copy.optOut)}</p>
+            <p style="margin:18px 0 0;font-size:11px;line-height:1.5;color:#8a6a70">${escapeHtml(copy.auto)}</p>
           </td>
         </tr>
       </table>
@@ -1110,7 +1189,9 @@ async function handleMomentPageInvite(request, env) {
 
   const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
   const inviteUrl = `${pagesBase}/moments.html?invite=${encodeURIComponent(token)}`;
-  const pageTitle = String(invited?.page_title || "").trim() || "una pagina KhamaKey Moments";
+  const locale = mailLocale(body.locale, user?.user_metadata?.ui_locale);
+  const pageTitle = String(invited?.page_title || "").trim()
+    || (locale === "en" ? "a KhamaKey Moments page" : "una pagina KhamaKey Moments");
   const inviter = String(invited?.invited_by_email || user.email).trim();
   const expiresAt = invited?.expires_at ? String(invited.expires_at) : "";
   const { subject, text, html } = buildMomentPageInviteMail({
@@ -1119,7 +1200,8 @@ async function handleMomentPageInvite(request, env) {
     inviter,
     inviteeEmail,
     expiresAt,
-    wordmarkUrl: `${pagesBase}/khamakey-moments-wordmark.png`
+    wordmarkUrl: `${pagesBase}/khamakey-moments-wordmark.png`,
+    locale
   });
 
   try {
@@ -3109,15 +3191,22 @@ function youtubeVideoId(raw) {
 
 function youtubeEmbedFromUrl(raw) {
   const id = youtubeVideoId(raw);
-  return id ? `https://www.youtube.com/embed/${id}` : "";
+  return id ? `https://www.youtube.com/embed/${id}?playsinline=1&rel=0` : "";
 }
 
-function formatUnlockDate(raw) {
+function youtubeIframeBlock(raw) {
+  const youtube = youtubeEmbedFromUrl(raw);
+  if (!youtube) return "";
+  return `<div class="moment-youtube"><iframe src="${attr(youtube)}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen title="Video YouTube"></iframe></div>`;
+}
+
+function formatUnlockDate(raw, locale = "it") {
   const value = String(raw || "").trim();
   if (!value) return "";
   const date = new Date(value.length > 10 ? value : `${value}T12:00:00`);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" });
+  const dateLocale = mailLocale(locale) === "en" ? "en-GB" : "it-IT";
+  return date.toLocaleDateString(dateLocale, { day: "numeric", month: "long", year: "numeric" });
 }
 
 /** Destinatario così come scritto dal cliente — niente prefisso «Caro/a» forzato. */
@@ -5443,14 +5532,14 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
 
   if (key === "music" && (section.spotify_url || section.youtube_url || section.image_url || migrateMusicSectionMedia(section).length)) {
     const spotify = spotifyEmbedFromUrl(section.spotify_url);
-    const youtube = youtubeEmbedFromUrl(section.youtube_url);
+    const youtube = youtubeIframeBlock(section.youtube_url);
     const imageUrl = safeUrl(section.image_url || "") !== "#" ? safeUrl(section.image_url || "") : "";
     const photo = imageUrl ? `<img class="moment-music-photo" src="${attr(imageUrl)}" alt="" loading="lazy">` : "";
     const audioItems = migrateMusicSectionMedia(section);
     const audioBlock = audioItems.length
-      ? `<div class="moment-audio-list">${audioItems.map(item => `<div class="moment-audio">${item.title ? `<p class="moment-audio-title">${escapeHtml(item.title)}</p>` : ""}${item.description ? `<p class="moment-audio-desc">${escapeHtml(item.description)}</p>` : ""}<audio src="${attr(item.url)}" controls></audio></div>`).join("")}</div>`
+      ? `<div class="moment-audio-list">${audioItems.map(item => `<div class="moment-audio">${item.title ? `<p class="moment-audio-title">${escapeHtml(item.title)}</p>` : ""}${item.description ? `<p class="moment-audio-desc">${escapeHtml(item.description)}</p>` : ""}<audio src="${attr(item.url)}" controls preload="metadata" playsinline></audio></div>`).join("")}</div>`
       : "";
-    return `<article class="${rv}">${head(section.title || "La nostra canzone")}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${photo}${spotify ? `<div class="moment-spotify"><iframe src="${attr(spotify)}" loading="lazy" allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture"></iframe></div>` : ""}${youtube ? `<div class="moment-youtube"><iframe src="${attr(youtube)}" loading="lazy" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen title="Video YouTube"></iframe></div>` : ""}${audioBlock}</article>`;
+    return `<article class="${rv}">${head(section.title || "La nostra canzone")}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${photo}${spotify ? `<div class="moment-spotify"><iframe src="${attr(spotify)}" loading="lazy" allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture"></iframe></div>` : ""}${youtube}${audioBlock}</article>`;
   }
 
   if (key === "letter_future" && (section.body || section.unlock_date || letterMediaItems(section).length)) {
@@ -5511,15 +5600,13 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
 
   if (key === "video") {
     const media = migrateVideoSectionMedia(section);
-    const youtube = youtubeEmbedFromUrl(section.youtube_url || (youtubeVideoId(section.video_url) ? section.video_url : ""));
+    const youtube = youtubeIframeBlock(section.youtube_url || (youtubeVideoId(section.video_url) ? section.video_url : ""));
     const headBlock = head(section.title || "Video");
     const body = section.body ? `<p>${escapeHtml(section.body)}</p>` : "";
     if (!media.length && !youtube) {
       return `<article class="${rv} moment-card-gallery">${headBlock}${body}<p class="moment-empty-hint">Aggiungi un link YouTube o carica un video MP4/MOV nell'editor.</p></article>`;
     }
-    const ytBlock = youtube
-      ? `<div class="moment-youtube"><iframe src="${attr(youtube)}" loading="lazy" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen title="Video YouTube"></iframe></div>`
-      : "";
+    const ytBlock = youtube;
     if (!media.length) {
       return `<article class="${rv}">${headBlock}${body}${ytBlock}</article>`;
     }
@@ -5752,7 +5839,7 @@ const PUBLIC_PAGE_CSP = [
   "img-src 'self' data: blob: https://img.youtube.com https://cuxlwaocjqwzluycznyp.supabase.co https://link.khamakeymoments.com https://khamakey-nfc.khamakey-nfc.workers.dev https://app.khamakeymoments.com https://khamakey-app.pages.dev",
   "media-src 'self' blob: https://cuxlwaocjqwzluycznyp.supabase.co https://link.khamakeymoments.com https://khamakey-nfc.khamakey-nfc.workers.dev",
   "connect-src 'self'",
-  "frame-src https://www.youtube.com https://open.spotify.com",
+  "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com",
   "object-src 'none'",
   "base-uri 'self'",
   "frame-ancestors 'self'",
@@ -7373,7 +7460,8 @@ async function runMomentAnniversaryJob(env, dayOverride = null) {
   for (const row of rows) {
     try {
       const years = Number(row.years) || 1;
-      const title = String(row.title || "Il tuo Moment").trim();
+      const locale = mailLocale(row.owner_ui_locale);
+      const title = String(row.title || (locale === "en" ? "Your Moment" : "Il tuo Moment")).trim();
       const slug = String(row.slug || "").trim();
       const pageUrl = slug ? `${origin}/m/${encodeURIComponent(slug)}` : origin;
       const email = String(row.owner_email || "").trim();
@@ -7388,7 +7476,8 @@ async function runMomentAnniversaryJob(env, dayOverride = null) {
         subtitle: row.subtitle,
         anchorType: row.anchor_type,
         anchorLabel: row.anchor_label,
-        anchorDate: row.anchor_date
+        anchorDate: row.anchor_date,
+        locale
       });
 
       const mail = await sendResendEmail(env, {

@@ -442,7 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
-| 2026-09-22 | Cursor | **Moments v288 live**: 4 passi e menu = Condividi / Share (non Pubblica). Bozza/live invariata. Worker/NFC/SQL invariati. |
+| 2026-09-25 | Cursor | **Worker v236 + SQL v179 + Moments v289**: mail invito/anniversario IT/EN da `ui_locale`; YouTube play dopo incolla (CSP frame-src YouTube/Spotify). NFC/Salva/upload invariati. |
 | 2026-09-20 | Cursor | **Moments v287 live**: titoli editor più bassi e sezioni di nuovo in card. Form a sinistra. Worker/NFC/SQL invariati. |
 | 2026-09-20 | Cursor | **Worker v235 + SQL v178**: mail anniversario da lettera (copertina, anni, data). Editor/NFC/Salva invariati. |
 | 2026-09-20 | Cursor | **Worker v234 + SQL v177**: cron anniversario/lettera/rate-limit sulla chiave ingest in store (non GUC vuota). Mail senza «Insieme da». Editor/NFC/Salva invariati. |

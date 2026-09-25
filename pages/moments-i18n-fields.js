@@ -259,6 +259,12 @@ export const FIELD_PHRASE_EN = {
   "Link YouTube": "YouTube link",
   "Link pubblico — non file caricati.": "Public link — not uploaded files.",
   "Link pubblico del video.": "Public link to the video.",
+  "Link pubblico del video. Dopo l’incolla tocca Salva.": "Public video link. After paste you can play it here; Save puts it on the public page.",
+  "Link pubblico del video. Dopo l’incolla puoi già ascoltarlo qui; Salva lo mette in pagina pubblica.": "Public video link. After paste you can play it here; Save puts it on the public page.",
+  "Incolla il link del video. Dopo l’incolla tocca Salva — compare in pagina pubblica.": "Paste the video link. After paste you can play it here; Save puts it on the public page.",
+  "Incolla il link del video. Dopo l’incolla puoi già ascoltarlo qui; Salva lo mette in pagina pubblica.": "Paste the video link. After paste you can play it here; Save puts it on the public page.",
+  "Anteprima YouTube — tocca Salva per pubblicarlo": "YouTube preview — tap Save to publish it",
+  "Puoi già ascoltarlo qui. Tocca Salva per metterlo sulla pagina pubblica.": "You can play it here already. Tap Save to put it on the public page.",
   "Immagine": "Image",
   "Facoltativa — copertina del brano, locandina o foto simbolica.": "Optional — track cover, poster or symbolic photo.",
 

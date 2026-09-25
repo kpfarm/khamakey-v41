@@ -608,7 +608,7 @@ export function youtubeVideoId(raw){
 
 export function youtubeEmbedUrl(raw){
   const id = youtubeVideoId(raw);
-  return id ? `https://www.youtube.com/embed/${id}` : "";
+  return id ? `https://www.youtube.com/embed/${id}?playsinline=1&rel=0` : "";
 }
 
 export function formatUnlockDate(raw){

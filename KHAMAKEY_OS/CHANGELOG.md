@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v289 + Worker v236-mail-locale + SQL v179 (2026-09-25)** — live
+  - Mail invito e anniversario: inglese se `ui_locale=en` (stessa regola delle mail di conferma). Default italiano.
+  - Editor: dopo l’incolla YouTube si può già fare play (CSP `frame-src` YouTube/Spotify). Salva resta per la pagina pubblica.
+  - Worker: embed YouTube senza `loading=lazy`. NFC `/m/` `/k/`, Salva, upload **invariati**. Nessun invio di prova a clienti.
 - **Moments v288 live (2026-09-22)** — Pages produzione
   - 4 passi e menu laterale: **Condividi** (EN **Share**). Bozza/live resta Pubblicata / Published.
   - Worker, NFC, SQL, Salva, upload **invariati**.

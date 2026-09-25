@@ -116,3 +116,11 @@ Stesso involucro visivo. Lingua da `ui_locale` sull’account (anche se l’hann
 | href | `{{ .ConfirmationURL }}` | `{{ .ConfirmationURL }}` |
 
 *KhamaKey OS — 2026-09-04*
+
+## Mail invito e anniversario (Worker, non dashboard)
+
+Non sono template Auth. Le genera `worker/worker.js`. Stessa regola lingua: **EN solo se `ui_locale = en`**, altrimenti italiano.
+
+- **Invito co-editor:** lingua di chi invita (toggle software + metadato account).
+- **Anniversario:** lingua del titolare (`auth.users.raw_user_meta_data.ui_locale`, SQL v179).
+

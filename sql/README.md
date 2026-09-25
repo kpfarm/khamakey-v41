@@ -62,13 +62,13 @@ Applica gli script **in ordine** nel SQL Editor di Supabase (o via `psql` con `a
 | 55 | `khamakey-moments-consents-v175.sql` | Registro append-only `moment_user_consents` (legal + marketing). RLS own select/insert. Non tocca NFC/Salva. |
 | 56 | `khamakey-moments-erase-account-v176.sql` | RPC `export_my_moment_account` + `erase_my_moment_account` (solo authenticated, solo i Moments del chiamante). Staff/business bloccati. |
 | 57 | `khamakey-cron-ingest-key-v177.sql` | Cron: `due_moment_anniversaries` / letter unlock / `cleanup_rate_limit_tables` usano `app_private.webhook_ingest_key()` (stesso store RSVP). Non cambia il valore della chiave. |
-| 58 | `khamakey-anniversary-mail-v178.sql` | Mail anniversario: RPC aggiunge `cover_url`, `subtitle`, `anchor_date`. DROP+CREATE della sola due function. |
+| 59 | `khamakey-anniversary-mail-locale-v179.sql` | Mail anniversario: RPC aggiunge `owner_ui_locale` da Auth (`en` solo se esplicito). DROP+CREATE della sola due function. |
 
 Se hai già applicato versioni precedenti, esegui solo i file mancanti. Tutti gli script v37→v74 sono idempotenti (`if not exists` / `on conflict do nothing` / blocchi `DO` con controllo su `pg_constraint`): rieseguire `apply-all.psql` per intero su un database dove alcune versioni sono già applicate non duplica dati né rompe lo schema.
 
 **`khamakey-integrations-i18n-v66-production.sql` non è nella sequenza.** È una patch storica applicata a mano nel SQL Editor di Supabase quando su produzione `platform_integrations`/`platform_payment_transactions` risultavano già create fuori sequenza. `khamakey-integrations-i18n-v66.sql` è già completo e idempotente (crea quelle tabelle solo se assenti) e la copre interamente: non serve applicare entrambe. Il file `-production` resta nel repo solo come traccia storica — non eseguirlo di nuovo.
 
-**Stato produzione (2026-09-20):** **v178 applicata** su Moments `cuxlwaocjqwzluycznyp` — mail anniversario (copertina/data). v177 cron ingest store. v176 export/erase account. v175 registro consensi. v174 invito 1 editor.
+**Stato produzione (2026-09-25):** **v179 applicata** su Moments `cuxlwaocjqwzluycznyp` — `owner_ui_locale` sulla due anniversari. v178 copertina/data. v177 cron ingest store.
 
 ## Supabase SQL Editor
 

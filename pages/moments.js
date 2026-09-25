@@ -21,7 +21,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=241";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=229";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=217";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=254";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=255";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -136,8 +136,9 @@ import {
   sectionFillGuide,
   sectionHasContent,
   isSectionExcluded,
-  youtubeVideoId
-} from "./moment-sections.js?v=249";
+  youtubeVideoId,
+  youtubeEmbedUrl
+} from "./moment-sections.js?v=250";
 import {
   renderCategorySelect,
   templateForType,
@@ -2290,7 +2291,7 @@ async function refreshMomentEditorsList(row){
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
           },
-          body: JSON.stringify({ event_id: row.id, email })
+          body: JSON.stringify({ event_id: row.id, email, locale: getUiLocale() })
         });
         const payload = await response.json().catch(()=>({}));
         if(response.status === 429) throw new Error(t("account.editors.rate"));
@@ -5315,9 +5316,10 @@ function renderSectionTitleField(key, section){
 function renderYoutubeThumb(rawUrl){
   const id = youtubeVideoId(rawUrl);
   if(!id) return `<div class="youtube-thumb-preview" data-youtube-thumb hidden></div>`;
+  const embed = youtubeEmbedUrl(rawUrl);
   return `<div class="youtube-thumb-preview" data-youtube-thumb>
-    <img src="https://img.youtube.com/vi/${esc(id)}/hqdefault.jpg" alt="Anteprima YouTube" loading="lazy" decoding="async">
-    <span data-lf="Anteprima YouTube — tocca Salva per pubblicarlo">${esc(localizeFieldPhrase("Anteprima YouTube — tocca Salva per pubblicarlo"))}</span>
+    <iframe src="${esc(embed)}" title="YouTube" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen></iframe>
+    <span data-lf="Puoi già ascoltarlo qui. Tocca Salva per metterlo sulla pagina pubblica.">${esc(localizeFieldPhrase("Puoi già ascoltarlo qui. Tocca Salva per metterlo sulla pagina pubblica."))}</span>
   </div>`;
 }
 
@@ -5336,8 +5338,9 @@ function syncYoutubeThumbForInput(input){
     box.innerHTML = "";
     return;
   }
+  const embed = youtubeEmbedUrl(input.value);
   box.hidden = false;
-  box.innerHTML = `<img src="https://img.youtube.com/vi/${esc(id)}/hqdefault.jpg" alt="Anteprima YouTube" loading="lazy" decoding="async"><span data-lf="Anteprima YouTube — tocca Salva per pubblicarlo">${esc(localizeFieldPhrase("Anteprima YouTube — tocca Salva per pubblicarlo"))}</span>`;
+  box.innerHTML = `<iframe src="${esc(embed)}" title="YouTube" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen></iframe><span data-lf="Puoi già ascoltarlo qui. Tocca Salva per metterlo sulla pagina pubblica.">${esc(localizeFieldPhrase("Puoi già ascoltarlo qui. Tocca Salva per metterlo sulla pagina pubblica."))}</span>`;
 }
 
 function bindYoutubeInputs(formNode){
@@ -5347,6 +5350,15 @@ function bindYoutubeInputs(formNode){
     const input = event.target?.closest?.("[data-youtube-input]");
     if(!input) return;
     syncYoutubeThumbForInput(input);
+    const id = youtubeVideoId(input.value);
+    if(id && input.dataset.youtubeLastId !== id){
+      input.dataset.youtubeLastId = id;
+      const key = String(input.name || "").includes("music") ? "music" : "video";
+      enableSection(formNode, key);
+      schedulePreviewUpdate(formNode,{immediate:true,force:true});
+    }else if(!id){
+      input.dataset.youtubeLastId = "";
+    }
   };
   formNode.addEventListener("input", sync);
   formNode.addEventListener("change", sync);
@@ -5386,7 +5398,7 @@ function sectionEditor(key,section,standalone=false){
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Collegamenti")}</p>
       <label>${lfSpan("Link Spotify")}<input name="section_${esc(key)}_spotify_url" value="${esc(safe.spotify_url || "")}" placeholder="https://open.spotify.com/track/..." autocomplete="off" inputmode="url"><span class="field-hint" data-lf="Link pubblico — non file caricati.">${esc(localizeFieldPhrase("Link pubblico — non file caricati."))}</span></label>
-      <label>${lfSpan("Link YouTube")}<input name="section_${esc(key)}_youtube_url" data-youtube-input value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..." autocomplete="off" inputmode="url"><span class="field-hint" data-lf="Link pubblico del video. Dopo l’incolla tocca Salva.">${esc(localizeFieldPhrase("Link pubblico del video. Dopo l’incolla tocca Salva."))}</span></label>
+      <label>${lfSpan("Link YouTube")}<input name="section_${esc(key)}_youtube_url" data-youtube-input value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..." autocomplete="off" inputmode="url"><span class="field-hint" data-lf="Link pubblico del video. Dopo l’incolla puoi già ascoltarlo qui; Salva lo mette in pagina pubblica.">${esc(localizeFieldPhrase("Link pubblico del video. Dopo l’incolla puoi già ascoltarlo qui; Salva lo mette in pagina pubblica."))}</span></label>
       ${renderYoutubeThumb(safe.youtube_url)}
       ${renderMusicAudioPanel(safe)}
     </div>
@@ -5398,7 +5410,7 @@ function sectionEditor(key,section,standalone=false){
   const videoFields = key === "video" ? `
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Link YouTube")}</p>
-      <label>${lfSpan("Link YouTube")}<input name="section_${esc(key)}_youtube_url" data-youtube-input value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..." autocomplete="off" inputmode="url"><span class="field-hint" data-lf="Incolla il link del video. Dopo l’incolla tocca Salva — compare in pagina pubblica.">${esc(localizeFieldPhrase("Incolla il link del video. Dopo l’incolla tocca Salva — compare in pagina pubblica."))}</span></label>
+      <label>${lfSpan("Link YouTube")}<input name="section_${esc(key)}_youtube_url" data-youtube-input value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..." autocomplete="off" inputmode="url"><span class="field-hint" data-lf="Incolla il link del video. Dopo l’incolla puoi già ascoltarlo qui; Salva lo mette in pagina pubblica.">${esc(localizeFieldPhrase("Incolla il link del video. Dopo l’incolla puoi già ascoltarlo qui; Salva lo mette in pagina pubblica."))}</span></label>
       ${renderYoutubeThumb(safe.youtube_url)}
     </div>
     <div class="editor-card">

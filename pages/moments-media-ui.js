@@ -19,7 +19,7 @@ import {
 } from "./moment-media.js?v=244";
 import { canFitBytes, formatBytes, storageBytesLimit } from "./moment-plans.js?v=238";
 import { getUiLocale } from "./moments-i18n.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=259";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=261";
 
 let mediaEditContext = null;
 
@@ -497,6 +497,7 @@ export function bindCoverFramer(formNode){
     let drag = null;
     let skipClick = false;
     slot.addEventListener("pointerdown",event=>{
+      if(normalizeCoverFit(formNode.elements.cover_fit?.value) === "contain") return;
       const phone = event.target.closest("[data-cover-tap]");
       if(!phone) return;
       if(event.pointerType === "mouse" && event.button !== 0) return;
@@ -590,10 +591,24 @@ export function syncCoverFramer(formNode){
   const topHint = formNode.querySelector(".cover-framer-top-hint");
   if(topHint){
     const topHintIt = fit === "contain"
-      ? "Tutta la foto, senza taglio. Se vuoi coprire il riquadro, scegli Riempi e trascina."
+      ? "Tutta la foto, senza taglio, in verticale e in orizzontale. Per coprire il riquadro, scegli Riempi e trascina."
       : "Trascina la foto per inquadrare. Tocca per il fuoco.";
     topHint.textContent = lf(topHintIt);
     topHint.setAttribute("data-lf", topHintIt);
+  }
+  const orientRow = formNode.querySelector(".cover-orient-row");
+  if(orientRow) orientRow.classList.toggle("is-both", fit === "contain");
+  const land = document.getElementById("coverOrientLand");
+  if(land) land.hidden = fit !== "contain";
+  formNode.querySelectorAll(".cover-orient-caption").forEach(caption=>{
+    caption.hidden = fit !== "contain";
+  });
+  const wideImg = document.getElementById("coverOrientWideImg");
+  const wideBlur = document.getElementById("coverOrientWideBlur");
+  if(wideImg){
+    wideImg.style.cssText = "object-fit:contain;object-position:center center";
+    const src = img.currentSrc || img.src;
+    if(src && wideBlur) wideBlur.src = src;
   }
   const marker = document.getElementById("coverFocusMarker");
   if(marker){
@@ -638,19 +653,33 @@ export function renderCoverFramer(state){
   const normalizedZoom = nearestZoomStep(storedZoom);
   const containActive = fit === "contain";
   const topHintIt = containActive
-    ? "Tutta la foto, senza taglio. Se vuoi coprire il riquadro, scegli Riempi e trascina."
+    ? "Tutta la foto, senza taglio, in verticale e in orizzontale. Per coprire il riquadro, scegli Riempi e trascina."
     : "Trascina la foto per inquadrare. Tocca per il fuoco.";
   const fitHintIt = "Tutta la foto: niente taglio, sfondo sfuocato. Riempi: copre il riquadro; trascina per inquadrare.";
   const zoomHintIt = "Da 100% a 200%. Trascina la foto per inquadrare volti o dettagli.";
   const fitContainIt = "Tutta la foto";
   const fitCoverIt = "Riempi lo spazio";
   const howItLooksIt = "Come si vede";
+  const portraitIt = "In verticale";
+  const landscapeIt = "In orizzontale";
   return `<div class="cover-framer" id="coverFramer" aria-label="${esc(lf("Anteprima copertina"))}">
     <p class="cover-picker-hint cover-framer-top-hint" data-lf="${esc(topHintIt)}">${esc(lf(topHintIt))}</p>
-    <div class="cover-framer-phone${containActive ? " is-contain" : ""}" data-cover-tap>
-      <img class="cover-framer-blur" id="coverFramerBlur" src="${esc(url)}" alt="" aria-hidden="true" ${containActive ? "" : "hidden"}>
-      <img id="coverFramerImg" src="${esc(url)}" alt="" style="${esc(css)}" loading="lazy" decoding="async" draggable="false">
-      <span class="cover-focus-marker" id="coverFocusMarker" style="left:${x}%;top:${y}%" ${containActive ? "hidden" : ""}></span>
+    <div class="cover-orient-row${containActive ? " is-both" : ""}">
+      <div class="cover-orient-item">
+        <div class="cover-framer-phone${containActive ? " is-contain" : ""}" data-cover-tap>
+          <img class="cover-framer-blur" id="coverFramerBlur" src="${esc(url)}" alt="" aria-hidden="true" ${containActive ? "" : "hidden"}>
+          <img id="coverFramerImg" src="${esc(url)}" alt="" style="${esc(css)}" loading="lazy" decoding="async" draggable="false">
+          <span class="cover-focus-marker" id="coverFocusMarker" style="left:${x}%;top:${y}%" ${containActive ? "hidden" : ""}></span>
+        </div>
+        <p class="cover-orient-caption" data-lf="${esc(portraitIt)}" ${containActive ? "" : "hidden"}>${esc(lf(portraitIt))}</p>
+      </div>
+      <div class="cover-orient-item" id="coverOrientLand" ${containActive ? "" : "hidden"}>
+        <div class="cover-orient-wide is-contain">
+          <img class="cover-framer-blur" id="coverOrientWideBlur" src="${esc(url)}" alt="" aria-hidden="true">
+          <img id="coverOrientWideImg" class="cover-orient-photo" src="${esc(url)}" alt="" style="object-fit:contain;object-position:center center" loading="lazy" decoding="async" draggable="false">
+        </div>
+        <p class="cover-orient-caption" data-lf="${esc(landscapeIt)}">${esc(lf(landscapeIt))}</p>
+      </div>
     </div>
   </div>
   <input type="hidden" name="cover_fit" value="${esc(fit)}">

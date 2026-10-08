@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v297 + CSS v278 (2026-10-08)** — live
+  - Con «Tutta la foto» l’editor mostra la stessa copertina in verticale e in orizzontale, intera. «Riempi lo spazio» resta il riquadro unico, con trascinamento.
+  - NFC, Salva, upload **invariati**.
 - **Moments v296 + CSS v277 (2026-10-08)** — live
   - Nel Riepilogo una riga dice se la pagina è pronta da regalare: copertina, una frase e una foto. Se manca qualcosa, la riga lo nomina.
   - NFC, Salva, upload **invariati**.

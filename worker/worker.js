@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v240-plan-copy";
+const WORKER_VERSION = "v241-activation-alert";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -343,6 +343,9 @@ export default {
       }
       if (url.pathname === "/api/moment/support-notify" && request.method === "POST") {
         return handleMomentSupportNotify(request, env);
+      }
+      if (url.pathname === "/api/moment/activation-notify" && request.method === "POST") {
+        return handleMomentActivationNotify(request, env);
       }
       if (url.pathname === "/api/moment/invite" && request.method === "POST") {
         return handleMomentPageInvite(request, env);
@@ -857,6 +860,157 @@ async function handleMomentSupportNotify(request, env) {
     return cors(json({ ok: true }));
   } catch (error) {
     console.error("support-notify", error);
+    return cors(json({ error: "Invio avviso non riuscito" }, 500));
+  }
+}
+
+function formatActivationCode(code) {
+  const clean = String(code || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+  return clean.replace(/(.{4})(?=.)/g, "$1-");
+}
+
+function momentTypeLabelIt(type) {
+  const key = String(type || "").trim().toLowerCase();
+  const labels = {
+    free: "Evento generale",
+    love: "Amore",
+    valentine: "Amore",
+    wedding: "Matrimonio",
+    family: "Famiglia",
+    pet: "Animali",
+    travel: "Viaggio",
+    mom: "Mamma",
+    dad: "Papà",
+    child: "Bambino",
+    kids: "Bambini",
+    birthday: "Compleanno",
+    party: "Festa",
+    christmas: "Natale",
+    memory: "Ricordo",
+    photo: "Foto",
+    memorial: "Ricordo",
+    friendship: "Amicizia",
+    communion: "Comunione",
+    baptism: "Battesimo",
+    portfolio: "Portfolio"
+  };
+  return labels[key] || (key || "Evento generale");
+}
+
+/** Avviso staff a ogni nuova attivazione. Non blocca il cliente se l'email fallisce. */
+async function handleMomentActivationNotify(request, env) {
+  const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  if (!jwt) return cors(json({ error: "Accesso richiesto" }, 401));
+  const user = await supabaseUser(env, jwt);
+  const customerEmail = String(user?.email || "").trim().toLowerCase();
+  if (!validEmail(customerEmail)) return cors(json({ error: "Sessione non valida" }, 401));
+
+  const body = await request.json().catch(() => null);
+  const eventId = String(body?.event_id || "").trim();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(eventId)) {
+    return cors(json({ error: "Richiesta non valida" }, 400));
+  }
+
+  if (!await checkRateLimit(env, `act-notify-user:${user.id || customerEmail}`, 8, 60)) {
+    return tooManyRequests();
+  }
+
+  const lookup = await supabaseUserRest(
+    env,
+    jwt,
+    `moment_events?id=eq.${encodeURIComponent(eventId)}&select=id,title,slug,nfc_code,owner_email,moment_type,activated_at`,
+    { method: "GET", headers: { Accept: "application/json" } }
+  );
+  if (!lookup.ok) return cors(json({ ok: false, skipped: true, reason: "lookup_failed" }));
+  const rows = await lookup.json().catch(() => []);
+  const row = Array.isArray(rows) ? rows[0] : null;
+  const owner = String(row?.owner_email || "").trim().toLowerCase();
+  if (!row || owner !== customerEmail) return cors(json({ error: "Pagina non trovata" }, 404));
+
+  const activatedAt = Date.parse(row.activated_at || "");
+  if (!Number.isFinite(activatedAt) || Date.now() - activatedAt > 6 * 60 * 60 * 1000) {
+    return cors(json({ ok: true, skipped: true, reason: "not_new" }));
+  }
+
+  if (!env.RESEND_API_KEY) return cors(json({ ok: false, skipped: true, reason: "email_not_configured" }));
+  const recipients = supportNotifyRecipients(env);
+  if (!recipients.length) return cors(json({ ok: false, skipped: true, reason: "no_recipients" }));
+
+  const firstNotice = await checkRateLimit(env, `act-notify:${eventId}`, 1, 10080);
+  if (!firstNotice) return cors(json({ ok: true, skipped: true, reason: "already_sent" }));
+
+  const title = String(row.title || "Senza nome").replace(/[\r\n]+/g, " ").trim().slice(0, 180) || "Senza nome";
+  const slug = String(row.slug || "").trim();
+  const code = formatActivationCode(row.nfc_code);
+  const typeLabel = momentTypeLabelIt(row.moment_type);
+  const when = new Date(activatedAt).toLocaleString("it-IT", {
+    timeZone: "Europe/Rome",
+    dateStyle: "short",
+    timeStyle: "short"
+  });
+  const publicUrl = slug ? `https://link.khamakeymoments.com/m/${encodeURIComponent(slug)}` : "";
+  const text = [
+    "Nuovo oggetto KhamaKey Moments attivato",
+    "",
+    `Cliente: ${customerEmail}`,
+    `Pagina: ${title}`,
+    `Categoria: ${typeLabel}`,
+    code ? `Codice: ${code}` : "",
+    publicUrl ? `Link: ${publicUrl}` : "",
+    `Quando: ${when}`,
+    "",
+    "Rispondi a questa email per scrivere al cliente."
+  ].filter(Boolean).join("\n");
+  const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
+  const wordmarkUrl = `${pagesBase}/khamakey-moments-wordmark.png`;
+  const html = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;margin:0;padding:0">
+  <tr>
+    <td align="center" style="padding:24px 12px">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#FFF9F5;border-radius:22px;overflow:hidden">
+        <tr>
+          <td style="background:#071A3C;padding:22px 28px;text-align:center">
+            <img src="${escapeHtml(wordmarkUrl)}" width="180" alt="KhamaKey Moments" style="display:block;margin:0 auto;width:180px;height:auto;border:0">
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:28px 32px 8px;font-family:Georgia,'Times New Roman',serif;color:#071A3C">
+            <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C">Attivazione</p>
+            <h1 style="margin:10px 0 0;font-size:24px;line-height:1.3;font-weight:normal">Nuovo oggetto attivato.</h1>
+            <p style="margin:16px 0 0;padding:12px 14px;background:#F3E3DE;border-radius:12px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#18202F">
+              Rispondi a questa email per scrivere a <strong>${escapeHtml(customerEmail)}</strong>.
+            </p>
+            <p style="margin:18px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#18202F">
+              <strong>Cliente:</strong> ${escapeHtml(customerEmail)}<br>
+              <strong>Pagina:</strong> ${escapeHtml(title)}<br>
+              <strong>Categoria:</strong> ${escapeHtml(typeLabel)}<br>
+              ${code ? `<strong>Codice:</strong> ${escapeHtml(code)}<br>` : ""}
+              ${publicUrl ? `<strong>Link:</strong> <a href="${escapeHtml(publicUrl)}" style="color:#071A3C">${escapeHtml(publicUrl)}</a><br>` : ""}
+              <strong>Quando:</strong> ${escapeHtml(when)}
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 32px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#8a6a70">
+            KhamaKey Moments · avviso di attivazione
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`;
+
+  try {
+    await sendResendEmail(env, {
+      to: recipients,
+      subject: `[Moments] Nuovo oggetto attivato — ${title}`.slice(0, 180),
+      html,
+      text,
+      replyTo: customerEmail,
+      tags: [{ name: "type", value: "moments_activation" }]
+    });
+    return cors(json({ ok: true }));
+  } catch (error) {
+    console.error("activation-notify", error);
     return cors(json({ error: "Invio avviso non riuscito" }, 500));
   }
 }

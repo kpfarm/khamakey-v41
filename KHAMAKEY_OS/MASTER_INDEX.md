@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v300 live** | Menu account fluido, titoli in grassetto |
-| Worker | **v240-plan-copy** | Spazio pieno: rimuovi un file |
+| Editor Moments | **v301 live** | Avviso email a ogni nuova attivazione |
+| Worker | **v241-activation-alert** | Email staff su attivazione codice |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

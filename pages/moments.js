@@ -1384,7 +1384,29 @@ async function activateCode({ code, title, pin }){
   if(item.event_id && item.slug){
     await bindMomentPinAfterActivation(item.event_id, item.slug, cleanPin, title);
   }
+  await notifyStaffOfActivation(item);
   return item;
+}
+
+/** Avvisa lo staff. Se l'email non parte, l'attivazione resta valida. */
+async function notifyStaffOfActivation(item){
+  try{
+    const eventId = String(item?.event_id || "").trim();
+    if(!eventId) return;
+    const { data } = await supabase.auth.getSession();
+    const token = data?.session?.access_token;
+    if(!token) return;
+    await fetch(`${WORKER_BASE_URL}/api/moment/activation-notify`, {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:`Bearer ${token}`
+      },
+      body:JSON.stringify({ event_id:eventId })
+    });
+  }catch(error){
+    console.warn("activation-notify", error);
+  }
 }
 
 /** Scrive pin_hash con lo slug reale restituito dall'attivazione. */

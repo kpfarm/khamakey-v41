@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v301 + Worker v241 (2026-10-08)** — live
+  - A ogni nuova attivazione di un codice arriva un’email allo staff: cliente, nome pagina, categoria, codice e link. Se l’email non parte, l’attivazione resta valida.
+  - NFC, Salva, upload **invariati**.
 - **Moments v300 (2026-10-08)** — live
   - Il menu account in alto a destra si apre in modo continuo, resta sopra la barra del telefono e si chiude con un tocco fuori o con Esc.
   - I titoli delle sezioni, delle schede e della barra laterale sono in grassetto, così si leggono subito.

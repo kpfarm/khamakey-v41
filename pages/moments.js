@@ -17,7 +17,7 @@ import {
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=263";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=230";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=233";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=217";
@@ -667,7 +667,10 @@ function invalidateLivePreview(){
 
 function setUploadBusy(busy){
   uploadBusy = Boolean(busy);
-  if(!uploadBusy) flushQueuedMomentSave();
+  if(!uploadBusy){
+    flushQueuedMomentSave();
+    if(historyBurst) scheduleHistorySeal(60);
+  }
 }
 
 function setStatus(node,message="",type=""){
@@ -4293,10 +4296,10 @@ function updateSaveStatus(saved){
     barMsg.setAttribute("data-i18n-html", "shell.save_bar");
     barMsg.innerHTML = t("shell.save_bar");
   }
-  document.querySelectorAll(".editor-undo-btn").forEach(button=>{
-    button.hidden = saved;
-    button.disabled = saved;
+  document.querySelectorAll(".editor-undo-btn, .editor-redo-btn").forEach(button=>{
+    button.hidden = false;
   });
+  refreshUndoButtons();
 }
 
 function refreshNavChrome(){
@@ -4358,29 +4361,250 @@ function refreshShellChrome(){
   });
 }
 
-function revertEditorChanges(){
-  if(!editorDirty || !savedEditorSnapshot || !activeId) return;
-  if(!window.confirm(t("shell.confirm_undo"))) return;
+const EDITOR_HISTORY_LIMIT = 40;
+let editorUndoStack = [];
+let editorRedoStack = [];
+let historyBurst = "";
+let historyBurstField = null;
+let historyLock = false;
+let historyPointerDown = false;
+
+function resetEditorHistory(){
+  editorUndoStack = [];
+  editorRedoStack = [];
+  historyBurst = "";
+  historyBurstField = null;
+  clearTimeout(scheduleHistorySeal.timer);
+}
+
+function editorSurfaceOpen(){
+  const form = document.getElementById("momentEditorForm");
+  const detail = document.getElementById("momentDetail");
+  if(!form || !detail || detail.hidden) return false;
+  if(document.querySelector(".moments-app.account-mode")) return false;
+  return true;
+}
+
+function currentEditorSnapshot(){
+  const form = document.getElementById("momentEditorForm");
+  if(!form) return "";
+  try{ return formSnapshotForDirty(form); }catch{ return ""; }
+}
+
+function canUndoEditor(){
+  return Boolean(historyBurst) || editorUndoStack.length > 0;
+}
+
+function canRedoEditor(){
+  return editorRedoStack.length > 0;
+}
+
+function refreshUndoButtons(){
+  const undoOn = canUndoEditor();
+  const redoOn = canRedoEditor();
+  document.querySelectorAll(".editor-undo-btn").forEach(button=>{
+    button.disabled = !undoOn;
+    button.hidden = false;
+  });
+  document.querySelectorAll(".editor-redo-btn").forEach(button=>{
+    button.disabled = !redoOn;
+    button.hidden = false;
+  });
+  document.getElementById("momentsSaveBar")?.classList.toggle("has-history", undoOn || redoOn);
+}
+
+function beginHistoryStep(field){
+  if(historyLock || suppressDirtyUi || bootstrapInFlight || saveInFlight) return;
+  if(historyBurst) return;
+  const snap = currentEditorSnapshot();
+  if(!snap) return;
+  historyBurst = snap;
+  historyBurstField = field || null;
+  editorRedoStack = [];
+  refreshUndoButtons();
+}
+
+function scheduleHistorySeal(delay){
+  clearTimeout(scheduleHistorySeal.timer);
+  scheduleHistorySeal.timer = setTimeout(()=>{
+    if(uploadBusy || historyPointerDown){
+      scheduleHistorySeal(120);
+      return;
+    }
+    sealHistoryBurst();
+  }, delay);
+}
+
+function sealHistoryBurst(){
+  clearTimeout(scheduleHistorySeal.timer);
+  if(!historyBurst) return;
+  const before = historyBurst;
+  historyBurst = "";
+  historyBurstField = null;
+  const now = currentEditorSnapshot();
+  if(now && now !== before){
+    editorUndoStack.push(before);
+    if(editorUndoStack.length > EDITOR_HISTORY_LIMIT) editorUndoStack.shift();
+  }
+  refreshUndoButtons();
+}
+
+function captureEditorFocus(){
+  const el = document.activeElement;
+  const form = document.getElementById("momentEditorForm");
+  if(!el || !form || !form.contains(el)) return null;
+  return {
+    name: el.getAttribute("name") || "",
+    id: el.id || "",
+    start: typeof el.selectionStart === "number" ? el.selectionStart : null,
+    end: typeof el.selectionEnd === "number" ? el.selectionEnd : null
+  };
+}
+
+function restoreEditorFocus(info){
+  if(!info) return;
+  const form = document.getElementById("momentEditorForm");
+  if(!form) return;
+  let el = null;
+  if(info.name){
+    el = form.querySelector(`[name="${CSS.escape(info.name)}"]`);
+  }
+  if(!el && info.id) el = document.getElementById(info.id);
+  if(!el || typeof el.focus !== "function") return;
+  try{ el.focus({ preventScroll:true }); }catch{ el.focus(); }
+  if(info.start != null && typeof el.setSelectionRange === "function"){
+    try{ el.setSelectionRange(info.start, info.end ?? info.start); }catch{ /* ignore */ }
+  }
+}
+
+function applyEditorSnapshot(snapshot){
   const row = rows.find(item=>item.id === activeId);
-  if(!row) return;
-  let savedState;
+  if(!row || !snapshot) return;
+  let state;
+  try{ state = JSON.parse(snapshot); }catch{ return; }
+  const focus = captureEditorFocus();
+  const scrollY = window.scrollY;
+  const panel = activeEditorPanel;
+  const baseline = savedEditorSnapshot;
+  historyLock = true;
+  suppressDirtyUi = true;
   try{
-    savedState = JSON.parse(savedEditorSnapshot);
-  }catch{
+    row.page_state = state;
+    row.title = state.title || row.title;
+    row.description = state.description ?? row.description;
+    if(state.type){
+      row.moment_type = state.type;
+      row.event_type = state.type;
+    }
+    renderDetail(activeId, {
+      skipDraft:true,
+      keepHistory:true,
+      savedBaseline:baseline,
+      restoredSnapshot:snapshot
+    });
+    activeEditorPanel = panel;
+    setEditorPanel(panel);
+    syncMobileNav(panel);
+    const hint = document.getElementById("editorActionHint");
+    if(hint) hint.hidden = true;
+    requestAnimationFrame(()=>{
+      window.scrollTo(0, scrollY);
+      restoreEditorFocus(focus);
+      const form = document.getElementById("momentEditorForm");
+      if(form) schedulePreviewUpdate(form, { immediate:true, force:true });
+    });
+  }finally{
+    historyLock = false;
+    suppressDirtyUi = false;
+    refreshUndoButtons();
+  }
+}
+
+function undoEditorChange(){
+  if(!editorSurfaceOpen() || historyLock || saveInFlight || bootstrapInFlight || uploadBusy) return;
+  sealHistoryBurst();
+  const prev = editorUndoStack.pop();
+  if(!prev){
+    refreshUndoButtons();
     return;
   }
-  const panel = activeEditorPanel;
-  row.page_state = savedState;
-  row.title = savedState.title || row.title;
-  row.moment_type = savedState.type || row.moment_type;
-  row.event_type = savedState.type || row.event_type;
-  row.description = savedState.description ?? row.description;
-  renderDetail(activeId);
-  activeEditorPanel = panel;
-  setEditorPanel(panel);
-  syncMobileNav(panel);
-  const hint = document.getElementById("editorActionHint");
-  if(hint) hint.hidden = true;
+  const now = currentEditorSnapshot();
+  if(now) editorRedoStack.push(now);
+  applyEditorSnapshot(prev);
+}
+
+function redoEditorChange(){
+  if(!editorSurfaceOpen() || historyLock || saveInFlight || bootstrapInFlight || uploadBusy) return;
+  sealHistoryBurst();
+  const next = editorRedoStack.pop();
+  if(!next){
+    refreshUndoButtons();
+    return;
+  }
+  const now = currentEditorSnapshot();
+  if(now) editorUndoStack.push(now);
+  applyEditorSnapshot(next);
+}
+
+function historyTargetIsText(el){
+  if(!el) return false;
+  if(el.tagName === "TEXTAREA") return true;
+  if(el.tagName !== "INPUT") return false;
+  const type = String(el.getAttribute("type") || "text").toLowerCase();
+  return !["checkbox","radio","range","file","button","submit","reset","hidden","color"].includes(type);
+}
+
+function ensureEditorHistory(){
+  if(document.body.dataset.momentsHistoryBound === "1") return;
+  document.body.dataset.momentsHistoryBound = "1";
+  document.addEventListener("click", event=>{
+    const undoBtn = event.target?.closest?.(".editor-undo-btn");
+    const redoBtn = event.target?.closest?.(".editor-redo-btn");
+    if(!undoBtn && !redoBtn) return;
+    event.preventDefault();
+    if(undoBtn) undoEditorChange();
+    else redoEditorChange();
+  });
+  document.addEventListener("keydown", event=>{
+    if(!(event.metaKey || event.ctrlKey) || event.altKey) return;
+    const key = String(event.key || "").toLowerCase();
+    if(key !== "z" && key !== "y") return;
+    if(!editorSurfaceOpen()) return;
+    const redo = key === "y" || event.shiftKey;
+    if(redo){
+      if(!canRedoEditor()) return;
+      event.preventDefault();
+      redoEditorChange();
+      return;
+    }
+    if(!canUndoEditor()) return;
+    event.preventDefault();
+    undoEditorChange();
+  }, true);
+  document.addEventListener("beforeinput", event=>{
+    if(historyLock || !editorSurfaceOpen()) return;
+    const form = document.getElementById("momentEditorForm");
+    if(!form || !form.contains(event.target) || !historyTargetIsText(event.target)) return;
+    if(historyBurst && historyBurstField !== event.target) sealHistoryBurst();
+    beginHistoryStep(event.target);
+  }, true);
+  document.addEventListener("pointerdown", event=>{
+    if(historyLock || !editorSurfaceOpen()) return;
+    const form = document.getElementById("momentEditorForm");
+    if(!form || !form.contains(event.target)) return;
+    if(event.target.closest(".editor-undo-btn, .editor-redo-btn, .editor-save-btn, button[type='submit']")) return;
+    const hit = event.target.closest("button, select, input, textarea, [data-cover-tap]");
+    if(!hit || historyTargetIsText(hit)) return;
+    historyPointerDown = true;
+    if(historyBurst) sealHistoryBurst();
+    beginHistoryStep(hit);
+  }, true);
+  document.addEventListener("pointerup", ()=>{ historyPointerDown = false; });
+  document.addEventListener("pointercancel", ()=>{ historyPointerDown = false; });
+}
+
+function revertEditorChanges(){
+  undoEditorChange();
 }
 
 function renderSectionOrderItem(key,idx,momentType = currentMomentType,formNode = null){
@@ -4583,9 +4807,10 @@ function promptSaveReminder(message = t("save.reminder_default")){
   setTimeout(()=>document.querySelector(".editor-save-btn")?.classList.remove("pulse-save"),2400);
 }
 
-function renderDetail(id){
+function renderDetail(id, options = {}){
   invalidateLivePreview();
   activeId = id;
+  if(!options.keepHistory) resetEditorHistory();
   let row = rows.find(item=>item.id === id);
   if(!row){
     showAccountHub("products");
@@ -4594,7 +4819,7 @@ function renderDetail(id){
   showEditorView();
   if(activeEditorPanel === "objects") activeEditorPanel = "overview";
   let restoredDraft = false;
-  if(!needsFreshTemplateBootstrap(row)){
+  if(!options.skipDraft && !needsFreshTemplateBootstrap(row)){
     const draftState = peekEditorDraft(id);
     if(draftState){
       row = {
@@ -4653,7 +4878,8 @@ function renderDetail(id){
           </div>
           <button type="button" class="ghost quick-publish published" id="quickPublishBtn" title="Rende la pagina visibile a chi ha il link">Pubblica pagina</button>
           <button type="button" class="ghost editor-open-link" id="editorOpenPageBtn" data-i18n="shell.open_page" data-i18n-title="shell.open_title" title="${esc(t("shell.open_title"))}">${esc(t("shell.open_page"))}</button>
-          <button type="button" class="ghost editor-undo-btn" id="editorUndoBtn" hidden data-i18n="shell.undo" data-i18n-title="shell.undo_title" title="${esc(t("shell.undo_title"))}">${esc(t("shell.undo"))}</button>
+          <button type="button" class="ghost editor-undo-btn" id="editorUndoBtn" data-i18n="shell.undo" data-i18n-title="shell.undo_title" title="${esc(t("shell.undo_title"))}">${esc(t("shell.undo"))}</button>
+          <button type="button" class="ghost editor-redo-btn" id="editorRedoBtn" data-i18n="shell.redo" data-i18n-title="shell.redo_title" title="${esc(t("shell.redo_title"))}">${esc(t("shell.redo"))}</button>
           <button type="submit" form="momentEditorForm" class="primary editor-save-btn" data-i18n="shell.save">${esc(t("shell.save"))}</button>
         </div>
       </div>
@@ -4711,11 +4937,20 @@ function renderDetail(id){
   }
   lastPreviewHash = "";
   updateSaveStatus(true);
-  document.getElementById("editorUndoBtn")?.addEventListener("click",revertEditorChanges);
-  if(document.body.dataset.momentsUndoBound !== "1"){
-    document.body.dataset.momentsUndoBound = "1";
-    document.getElementById("editorUndoBtnMobile")?.addEventListener("click",revertEditorChanges);
+  if(options.savedBaseline != null){
+    savedEditorSnapshot = options.savedBaseline;
+    try{
+      const now = formSnapshotForDirty(editorForm);
+      const restoredSameAsSave = options.restoredSnapshot === savedEditorSnapshot;
+      editorDirty = !restoredSameAsSave && now !== savedEditorSnapshot;
+    }catch{
+      editorDirty = options.restoredSnapshot !== savedEditorSnapshot;
+    }
+    updateSaveStatus(!editorDirty);
+    if(editorDirty) stashEditorDraft();
+    else clearEditorDraft(id);
   }
+  refreshUndoButtons();
   editorForm.addEventListener("submit",event=>{
     event.preventDefault();
     if(saveInFlight){
@@ -4727,6 +4962,7 @@ function renderDetail(id){
   });
   // Salva top/bottom: delega una sola volta → sempre form + pezzo correnti (no closure stale)
   ensureMomentsSaveDelegation();
+  ensureEditorHistory();
   syncRsvpWhatsappWarn(editorForm);
   editorForm.addEventListener("input",event=>{
     markEditorDirty(editorForm);
@@ -6044,6 +6280,7 @@ function formSnapshotForDirty(formNode){
 
 function markEditorDirty(formNode){
   if(suppressDirtyUi) return;
+  if(historyBurst) scheduleHistorySeal(historyTargetIsText(historyBurstField) ? 480 : 80);
   scheduleHowEmptyHintRefresh(formNode);
   // Dirty immediato: evita JSON.stringify a ogni keystroke (costoso su form grandi)
   if(!editorDirty){

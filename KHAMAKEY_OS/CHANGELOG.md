@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v299 (2026-10-08)** — live
+  - Annulla toglie l’ultima modifica, subito, senza conferma. Ripeti la rimette. Funziona anche con ⌘Z / Ctrl+Z. Una frase scritta di seguito conta come un solo passo.
+  - NFC, Salva, upload **invariati**.
 - **Moments v298 + SQL v181 (2026-10-08)** — live
   - Il titolare può invitare fino a 4 persone sulla stessa pagina. Chi è già invitato resta. Ogni invitato usa l’editor e non può invitare altri né cancellare la pagina.
   - NFC, Salva, upload **invariati**.

@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v298 live** | Fino a 4 invitati. Piano visibile: Incluso |
+| Editor Moments | **v299 live** | Annulla e Ripeti passo passo |
 | Worker | **v240-plan-copy** | Spazio pieno: rimuovi un file |
 | Officina | **v203** | PNG codice più basso |
 

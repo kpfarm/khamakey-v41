@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v300 (2026-10-08)** — live
+  - Il menu account in alto a destra si apre in modo continuo, resta sopra la barra del telefono e si chiude con un tocco fuori o con Esc.
+  - I titoli delle sezioni, delle schede e della barra laterale sono in grassetto, così si leggono subito.
+  - NFC, Salva, upload **invariati**.
 - **Moments v299 (2026-10-08)** — live
   - Annulla toglie l’ultima modifica, subito, senza conferma. Ripeti la rimette. Funziona anche con ⌘Z / Ctrl+Z. Una frase scritta di seguito conta come un solo passo.
   - NFC, Salva, upload **invariati**.

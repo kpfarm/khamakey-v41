@@ -1765,7 +1765,7 @@ function refreshAccountMenu(){
   }).join("");
   userMenuProducts.querySelectorAll("[data-menu-object-id]").forEach(button=>{
     button.addEventListener("click",async()=>{
-      userMenu?.classList.remove("open");
+      setUserMenuOpen(false);
       const nextId = button.dataset.menuObjectId;
       if(!nextId) return;
       await openMomentProduct(nextId);
@@ -1825,15 +1825,30 @@ async function showApp(user){
   }
 }
 
+function setUserMenuOpen(open){
+  if(!userMenu || !userMenuBtn) return;
+  const next = Boolean(open);
+  userMenu.classList.toggle("open", next);
+  userMenuBtn.setAttribute("aria-expanded", next ? "true" : "false");
+  userMenu.setAttribute("aria-hidden", next ? "false" : "true");
+}
+
 function bindGlobalAppChrome(){
   if(userMenuBtn && userMenu && userMenuBtn.dataset.bound !== "1"){
     userMenuBtn.dataset.bound = "1";
     userMenuBtn.addEventListener("click",event=>{
       event.stopPropagation();
-      userMenu.classList.toggle("open");
+      setUserMenuOpen(!userMenu.classList.contains("open"));
     });
     document.addEventListener("click",event=>{
-      if(!userMenu.contains(event.target) && event.target !== userMenuBtn) userMenu.classList.remove("open");
+      if(!userMenu.classList.contains("open")) return;
+      if(userMenu.contains(event.target) || userMenuBtn.contains(event.target)) return;
+      setUserMenuOpen(false);
+    });
+    document.addEventListener("keydown",event=>{
+      if(event.key !== "Escape" || !userMenu.classList.contains("open")) return;
+      setUserMenuOpen(false);
+      userMenuBtn.focus();
     });
   }
   if(document.getElementById("momentsPreviewFab")?.dataset.bound !== "1"){
@@ -1856,7 +1871,7 @@ function bindGlobalAppChrome(){
   if(accountBtn && accountBtn.dataset.bound !== "1"){
     accountBtn.dataset.bound = "1";
     accountBtn.addEventListener("click",()=>{
-      userMenu?.classList.remove("open");
+      setUserMenuOpen(false);
       showAccountHub("products");
     });
   }
@@ -1864,7 +1879,7 @@ function bindGlobalAppChrome(){
   if(supportBtn && supportBtn.dataset.bound !== "1"){
     supportBtn.dataset.bound = "1";
     supportBtn.addEventListener("click",()=>{
-      userMenu?.classList.remove("open");
+      setUserMenuOpen(false);
       showAccountHub("support");
     });
   }
@@ -1874,7 +1889,7 @@ function bindGlobalAppChrome(){
     planBlock.style.cursor = "pointer";
     planBlock.title = t("menu.plan_title");
     planBlock.addEventListener("click",()=>{
-      userMenu?.classList.remove("open");
+      setUserMenuOpen(false);
       showAccountHub("plan");
     });
   }

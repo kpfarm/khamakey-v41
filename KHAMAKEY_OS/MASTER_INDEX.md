@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v299 live** | Annulla e Ripeti passo passo |
+| Editor Moments | **v300 live** | Menu account fluido, titoli in grassetto |
 | Worker | **v240-plan-copy** | Spazio pieno: rimuovi un file |
 | Officina | **v203** | PNG codice più basso |
 

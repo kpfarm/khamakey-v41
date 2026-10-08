@@ -10,8 +10,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cuxlwaocjqwzluycznyp.supabase.co">
   <link rel="dns-prefetch" href="https://cuxlwaocjqwzluycznyp.supabase.co">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap">
-  <link rel="stylesheet" href="moments.css?v=280">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap">
+  <link rel="stylesheet" href="moments.css?v=281">
 </head>
 <body class="session-pending">
   <main class="moments-boot" id="momentsBoot" aria-live="polite">
@@ -182,10 +182,10 @@
       </div>
       <div class="topbar-right">
         <div class="user-menu-wrap">
-          <button type="button" class="user-menu-btn" id="momentsUserMenuBtn" data-i18n-aria="menu.account_aria" aria-label="Menu account">
+          <button type="button" class="user-menu-btn" id="momentsUserMenuBtn" data-i18n-aria="menu.account_aria" aria-label="Menu account" aria-haspopup="true" aria-expanded="false" aria-controls="momentsUserMenu">
             <span class="user-avatar" id="momentsUserAvatar">K</span>
           </button>
-          <div class="user-menu" id="momentsUserMenu">
+          <div class="user-menu" id="momentsUserMenu" aria-hidden="true">
             <div class="user-menu-head">
               <p class="user-menu-name" id="momentsUserName">Account</p>
               <p class="user-menu-email" id="momentsUserEmail"></p>
@@ -260,6 +260,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=299"></script>
+  <script type="module" src="moments.js?v=300"></script>
 </body>
 </html>

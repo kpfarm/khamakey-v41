@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v295 (2026-10-08)** — live
+  - Il cliente vede **Incluso** al posto di «Moments Free», nel menu e in Account. La chiave interna resta `moments_free`. Officina continua a dire Free / Plus / Pro.
+  - NFC, Salva, upload **invariati**.
 - **Moments v294 + CSS v276 (2026-10-08)** — live
   - Su Evento generale le quattro schede sono Amore, Famiglia, Animali e Viaggio. Gli altri modelli sono nella lista.
   - Pagina vuota: arrivano sezioni e titoli di quel modello, più colore, font e copertina. Pagina già scritta: cambiano solo colore, font e copertina.

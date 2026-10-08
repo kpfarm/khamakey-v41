@@ -233,7 +233,7 @@ export const AUTH_MESSAGES_IT = {
   "activate.code.ph": "Es. M7K2-9XPL-H3WN",
   "activate.code.hint": "I trattini compaiono da soli, come sull’etichetta.",
 
-  "plan.menu_name": "Moments Free",
+  "plan.menu_name": "Incluso",
   "plan.eyebrow": "Piano Moments",
   "plan.hint.free": "Piano incluso con il tuo oggetto NFC. Questi sono i limiti di spazio e contenuti.",
   "plan.hint.active": "Limiti attivi per questo Moment.",
@@ -478,7 +478,7 @@ export const AUTH_MESSAGES_EN = {
   "activate.code.ph": "e.g. M7K2-9XPL-H3WN",
   "activate.code.hint": "Dashes appear as you type, as on the label.",
 
-  "plan.menu_name": "Moments Free",
+  "plan.menu_name": "Included",
   "plan.eyebrow": "Moments plan",
   "plan.hint.free": "Plan included with your NFC piece. These are the storage and content limits.",
   "plan.hint.active": "Active limits for this Moment.",

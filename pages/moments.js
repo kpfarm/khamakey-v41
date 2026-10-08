@@ -16,10 +16,10 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=261";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=262";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=230";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=231";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=217";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=260";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
@@ -1668,13 +1668,13 @@ function renderAccountPanels(){
   }
   if(activeAccountTab === "plan"){
     const ent = normalizeEntitlements(currentEntitlements);
-    const planLabel = PLAN_LABELS[ent.plan_key] || ent.plan_name || "Free";
+    const planLabel = customerPlanLabel(ent.plan_key);
     accountPanels.innerHTML = `
       <div class="account-panel-card">
         <h3>${esc(t("account.plan.title"))}</h3>
         <p>${esc(t("account.plan.lead"))}</p>
         <div class="account-plan-card">
-          <strong>Moments ${esc(planLabel)}</strong>
+          <strong>${esc(planLabel)}</strong>
           <p>${esc(t("account.plan.included"))}</p>
           ${renderPlanLimitsList(ent.limits)}
         </div>
@@ -2351,11 +2351,16 @@ function renderPlanLimitsList(limits){
   return `<ul class="plan-limits-list">${lines.map(line=>`<li>${esc(line)}</li>`).join("")}</ul>`;
 }
 
+function customerPlanLabel(planKey){
+  if(!planKey || planKey === "moments_free") return t("plan.menu_name");
+  return PLAN_LABELS[planKey] || t("plan.menu_name");
+}
+
 function renderPlanStorageCard(entitlements = currentEntitlements){
   const ent = normalizeEntitlements(entitlements);
   const pct = storageUsagePercent(ent);
   const maxBytes = storageBytesLimit(ent.limits);
-  const planLabel = PLAN_LABELS[ent.plan_key] || ent.plan_name || "Free";
+  const planLabel = customerPlanLabel(ent.plan_key);
   const planHint = ent.plan_key === "moments_free"
     ? t("plan.hint.free")
     : t("plan.hint.active");

@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v294 live** | Evento generale: Amore, Famiglia, Animali, Viaggio + lista |
+| Editor Moments | **v295 live** | Piano visibile: Incluso |
 | Worker | **v240-plan-copy** | Spazio pieno: rimuovi un file |
 | Officina | **v203** | PNG codice più basso |
 

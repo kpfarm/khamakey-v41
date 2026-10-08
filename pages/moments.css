@@ -495,6 +495,15 @@ html.admin-embed .main-panel{padding:8px;max-width:none}
   gap:14px;
 }
 .how-it-works-lead{margin:8px 0 0;font-size:.92rem;line-height:1.55;color:var(--muted);font-weight:400;max-width:42em}
+.first-step{display:grid;gap:8px;margin:0 0 16px;padding:16px 16px 14px;border-radius:16px;background:var(--navy);color:#fff}
+.first-step-kicker{margin:0;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--rosa-cipria)}
+.first-step-title{margin:0;font-size:1.28rem;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.first-step-body{margin:0;font-size:.9rem;font-weight:400;line-height:1.45;color:rgba(255,249,245,.9)}
+.first-step .primary{justify-self:start;margin-top:4px;background:#fff;color:var(--navy)}
+.first-step.is-ready{background:#fff;color:var(--navy);border:1px solid var(--border)}
+.first-step.is-ready .first-step-kicker{color:var(--rosa-ricordo)}
+.first-step.is-ready .first-step-body{color:var(--muted)}
+.first-step.is-ready .primary{background:var(--navy);color:#fff}
 .how-it-works-lead strong{color:var(--navy);font-weight:600}
 .how-next .ecard-title,.how-discover .ecard-title{margin:0;font-family:var(--font-display);font-size:1.32rem;font-weight:500;letter-spacing:-0.02em;line-height:1.2}
 .how-discover-chips{

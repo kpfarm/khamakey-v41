@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v301 live** · CSS **v282** | Titoli di sezione grandi e distinti |
+| Editor Moments | **v302 live** · CSS **v283** | Un passo successivo nel Riepilogo |
 | Worker | **v241-activation-alert** | Email staff su attivazione codice |
 | Officina | **v203** | PNG codice più basso |
 

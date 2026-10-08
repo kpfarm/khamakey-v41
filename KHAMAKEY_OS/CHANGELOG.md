@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v302 (2026-10-08)** — live
+  - Dopo l’attivazione il Riepilogo mostra un solo passo, nel riquadro scuro, con un pulsante. Il codice e il PIN restano sul telefono anche se la mail di conferma si apre in un’altra scheda.
+  - NFC, Salva, upload **invariati**.
 - **Moments CSS v282 (2026-10-08)** — live
   - Nell’editor il titolo di sezione è grande e in grassetto, il nome della scheda è medio, l’etichetta del campo è piccola e il testo che si scrive resta normale. Così si distingue a colpo d’occhio.
   - NFC, Salva, upload **invariati**.

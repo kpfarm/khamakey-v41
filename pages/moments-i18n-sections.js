@@ -310,6 +310,7 @@ export const SECTION_SUBTITLE_EN = {
   "Sogni da realizzare insieme": "Dreams to make real together",
   "Sogni legati a questo capitolo": "Dreams tied to this chapter",
   "Stato pagina, link e statistiche RSVP / libro ospiti": "Page status, link and RSVP / guestbook stats",
+  "Il passo da fare adesso è nel riquadro scuro. Il resto è spiegato sotto.": "The step to do now is in the dark box. The rest is explained below.",
   "Tappe e ricordi lungo la vita": "Stops and memories along life",
   "Tappe professionali": "Career milestones",
   "Tappe, date o programma": "Stops, dates or schedule",

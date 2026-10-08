@@ -16,11 +16,11 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=263";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=264";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=230";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=233";
-import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=217";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=234";
+import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=218";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=261";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
@@ -203,7 +203,7 @@ let activeAccountTab = "products";
 let appView = "editor"; // editor | account
 
 const EDITOR_PANELS = {
-  overview:{titleKey:"nav.overview",subtitle:"Stato pagina, link e statistiche RSVP / libro ospiti"},
+  overview:{titleKey:"nav.overview",subtitle:"Il passo da fare adesso è nel riquadro scuro. Il resto è spiegato sotto."},
   objects:{title:"Le tue pagine",subtitle:"Scegli quale pagina modificare"},
   cover:{titleKey:"nav.cover",subtitle:"Titolo, foto e messaggio — la prima cosa che si vede"},
   styling:{titleKey:"nav.colors",subtitle:"Scegli lo stile — colori classici, molto contrasto"},
@@ -411,30 +411,42 @@ let recoveryMode = false;
 let signupStep = 1;
 const PENDING_MOMENT_KEY = "khamakey_pending_moment_activation";
 
+const PENDING_MOMENT_MAX_AGE = 14 * 24 * 60 * 60 * 1000;
+
 function storePendingMomentActivation({ code, title, pin }){
-  try{
-    sessionStorage.setItem(PENDING_MOMENT_KEY, JSON.stringify({
-      code:normalizeCode(code),
-      title:String(title || "").trim(),
-      pin:String(pin || "").trim(),
-      at:Date.now()
-    }));
-  }catch{ /* ignore */ }
+  const payload = JSON.stringify({
+    code:normalizeCode(code),
+    title:String(title || "").trim(),
+    pin:String(pin || "").trim(),
+    at:Date.now()
+  });
+  try{ localStorage.setItem(PENDING_MOMENT_KEY, payload); }catch{ /* ignore */ }
+  try{ sessionStorage.removeItem(PENDING_MOMENT_KEY); }catch{ /* ignore */ }
 }
 
 function readPendingMomentActivation(){
-  try{
-    const raw = sessionStorage.getItem(PENDING_MOMENT_KEY);
-    if(!raw) return null;
-    const data = JSON.parse(raw);
-    if(!data?.code) return null;
-    return data;
-  }catch{
-    return null;
+  for(const store of [localStorage, sessionStorage]){
+    try{
+      const raw = store.getItem(PENDING_MOMENT_KEY);
+      if(!raw) continue;
+      const data = JSON.parse(raw);
+      if(!data?.code) continue;
+      if(data.at && Date.now() - Number(data.at) > PENDING_MOMENT_MAX_AGE){
+        store.removeItem(PENDING_MOMENT_KEY);
+        continue;
+      }
+      if(store === sessionStorage){
+        try{ localStorage.setItem(PENDING_MOMENT_KEY, raw); }catch{ /* ignore */ }
+        try{ sessionStorage.removeItem(PENDING_MOMENT_KEY); }catch{ /* ignore */ }
+      }
+      return data;
+    }catch{ /* ignore */ }
   }
+  return null;
 }
 
 function clearPendingMomentActivation(){
+  try{ localStorage.removeItem(PENDING_MOMENT_KEY); }catch{ /* ignore */ }
   try{ sessionStorage.removeItem(PENDING_MOMENT_KEY); }catch{ /* ignore */ }
 }
 
@@ -2675,9 +2687,34 @@ function renderHowDiscover(row){
   </div>`;
 }
 
+function renderFirstStep(state){
+  const cover = pageHasCoverPhoto(state);
+  const sentence = pageHasGiftSentence(state);
+  const photo = pageHasGiftPhoto(state);
+  let key = "ready";
+  let go = "publish";
+  if(!cover){
+    key = "cover";
+    go = "cover";
+  }else if(!sentence){
+    key = "sentence";
+    go = "texts";
+  }else if(!photo){
+    key = "photo";
+    go = "gallery";
+  }
+  const ready = key === "ready";
+  return `<div class="first-step${ready ? " is-ready" : ""}">
+    <p class="first-step-kicker" data-i18n="overview.next.kicker">${esc(t("overview.next.kicker"))}</p>
+    <p class="first-step-title" data-i18n="overview.next.${key}.title">${esc(t(`overview.next.${key}.title`))}</p>
+    <p class="first-step-body" data-i18n="overview.next.${key}.body">${esc(t(`overview.next.${key}.body`))}</p>
+    <button type="button" class="primary" data-how-go="${esc(go)}" data-i18n="overview.next.${key}.go">${esc(t(`overview.next.${key}.go`))}</button>
+  </div>`;
+}
+
 function renderHowItWorksCard(row, state){
-  void state;
   return `<div class="editor-card how-it-works" id="momentHowItWorks">
+    ${renderFirstStep(state)}
     ${renderHowDiscover(row)}
   </div>`;
 }
@@ -4884,7 +4921,7 @@ function renderDetail(id, options = {}){
   editorDirty = false;
   const publicUrl = `${PUBLIC_BASE_URL}/m/${encodeURIComponent(row.slug)}`;
   const nfcUrl = row.nfc_code ? `${PUBLIC_BASE_URL}/k/${encodeURIComponent(row.nfc_code)}` : "";
-  const showWizard = needsOnboarding(row) && activeEditorPanel !== "overview";
+  const showWizard = false;
   let editorHtml;
   try{
     editorHtml = `

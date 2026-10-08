@@ -111,7 +111,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | **Moments editor** | **v292 live** | Romantico in tendina è un carattere diverso. Pagine già salvate con il vecchio restano uguali. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
-| **SQL Supabase Moments** | **≥ v179 (prod)** | v179 `owner_ui_locale` sulla due anniversari; v178 copertina/data; v177 cron ingest. |
+| **SQL Supabase Moments** | **≥ v180 (prod)** | v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
 | **Prossima release piattaforma** | quando serve un cambio prodotto | Un solo piano Moments fino a nuova decisione. Plus/Pro restano in Officina, senza Stripe. |
 
 ---

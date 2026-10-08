@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **SQL v180 (2026-10-08)** — live su Moments
+  - I visitatori non possono più chiamare cambio piano, contatori file, analytics e consegne. NFC, RSVP, guestbook, anniversari e webhook restano.
+  - Editor, upload e pagine già salvate **invariati**.
 - **Moments v292 + Worker v239-romantico (2026-10-08)** — live
   - «Romantico» nella tendina è Parisienne, diverso da Classico. Le pagine già salvate con il font precedente restano Great Vibes finché non si cambia stile.
   - NFC, Salva, upload **invariati**.

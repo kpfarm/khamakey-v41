@@ -115,6 +115,7 @@ body.invite-join .auth-steps{display:none}
 .auth-form.is-invite-signup .signup-invite-hide,
 .auth-form.is-invite-signup #signupPrevStep{display:none!important}
 .editors-invite-form{display:grid;gap:12px;margin:4px 0 8px}
+.editors-list{display:grid;gap:8px;margin:0 0 12px}
 .editors-invite-form .primary{justify-self:start}
 .editors-slot{
   display:flex;

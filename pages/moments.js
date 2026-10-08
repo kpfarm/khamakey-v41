@@ -16,10 +16,10 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=262";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=263";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=232";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=233";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=217";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=261";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
@@ -439,6 +439,7 @@ function clearPendingMomentActivation(){
 }
 
 const PENDING_INVITE_KEY = "khamakey_pending_moment_invite";
+const MOMENT_EDITOR_CAP = 4;
 let pendingInviteToken = "";
 let invitePeek = null;
 let inviteSignupMode = false;
@@ -2215,7 +2216,7 @@ function renderEditorsCardHtml(){
   }
   return `<div class="account-panel-card" id="momentEditorsCard">
     <h3>${esc(t("account.editors.title"))}</h3>
-    <p>${esc(t("account.editors.lead"))}</p>
+    <p>${esc(t("account.editors.lead", { n: MOMENT_EDITOR_CAP }))}</p>
     <div id="momentEditorsList"><p class="field-hint">${esc(t("account.editors.loading"))}</p></div>
     <p class="status" id="momentEditorsStatus" aria-live="polite"></p>
   </div>`;
@@ -2230,6 +2231,13 @@ function bindMomentEditorsCard(){
   refreshMomentEditorsList(row);
 }
 
+function editorSeatOpen(item){
+  if(item?.status === "accepted") return true;
+  if(item?.status !== "pending") return false;
+  const expires = item.expires_at ? new Date(item.expires_at).getTime() : NaN;
+  return !Number.isFinite(expires) || expires > Date.now();
+}
+
 async function refreshMomentEditorsList(row){
   const list = document.getElementById("momentEditorsList");
   const status = document.getElementById("momentEditorsStatus");
@@ -2238,22 +2246,41 @@ async function refreshMomentEditorsList(row){
     const { data, error } = await supabase.rpc("list_moment_page_editors", { p_event_id: row.id });
     if(error) throw error;
     const members = Array.isArray(data) ? data : [];
-    const occupant = members.find(item=>item.status === "accepted" || item.status === "pending");
-    if(occupant){
-      const label = occupant.status === "accepted" ? t("account.editors.accepted") : t("account.editors.pending");
-      list.innerHTML = `<div class="editors-slot">
+    const openSeats = members.filter(editorSeatOpen).length;
+    const rowsHtml = members.map(member=>{
+      const expired = member.status === "pending" && !editorSeatOpen(member);
+      const label = member.status === "accepted"
+        ? t("account.editors.accepted")
+        : expired
+          ? t("account.editors.expired")
+          : t("account.editors.pending");
+      return `<div class="editors-slot">
         <div>
-          <strong>${esc(occupant.email || "")}</strong>
+          <strong>${esc(member.email || "")}</strong>
           <span class="field-hint">${esc(label)}</span>
         </div>
-        <button type="button" class="ghost" id="momentEditorRevokeBtn">${esc(t("account.editors.revoke"))}</button>
+        <button type="button" class="ghost" data-revoke-email="${esc(member.email || "")}">${esc(t("account.editors.revoke"))}</button>
       </div>`;
-      document.getElementById("momentEditorRevokeBtn")?.addEventListener("click", async()=>{
+    }).join("");
+    const formHtml = openSeats >= MOMENT_EDITOR_CAP
+      ? `<p class="field-hint">${esc(t("account.editors.full", { n: MOMENT_EDITOR_CAP }))}</p>`
+      : `<form id="momentInviteForm" class="editors-invite-form">
+      <label><span>${esc(t("account.editors.email"))}</span>
+        <input type="email" name="email" autocomplete="email" required placeholder="nome@email.com">
+      </label>
+      <button type="submit" class="primary" id="momentInviteSendBtn">${esc(t("account.editors.send"))}</button>
+    </form>
+    ${members.length ? "" : `<p class="field-hint">${esc(t("account.editors.empty", { n: MOMENT_EDITOR_CAP }))}</p>`}`;
+    list.innerHTML = `${rowsHtml ? `<div class="editors-list">${rowsHtml}</div>` : ""}${formHtml}`;
+    list.querySelectorAll("[data-revoke-email]").forEach(button=>{
+      button.addEventListener("click", async()=>{
+        const email = button.getAttribute("data-revoke-email") || "";
+        if(!email) return;
         if(status) setStatus(status, t("account.editors.sending"));
         try{
           const { error: revokeError } = await supabase.rpc("revoke_moment_page_editor", {
             p_event_id: row.id,
-            p_email: occupant.email
+            p_email: email
           });
           if(revokeError) throw revokeError;
           if(status) setStatus(status, t("account.editors.revoke_ok"), "ok");
@@ -2262,15 +2289,7 @@ async function refreshMomentEditorsList(row){
           if(status) setStatus(status, err?.message || t("account.editors.fail"), "error");
         }
       });
-      return;
-    }
-    list.innerHTML = `<form id="momentInviteForm" class="editors-invite-form">
-      <label><span>${esc(t("account.editors.email"))}</span>
-        <input type="email" name="email" autocomplete="email" required placeholder="nome@email.com">
-      </label>
-      <button type="submit" class="primary" id="momentInviteSendBtn">${esc(t("account.editors.send"))}</button>
-    </form>
-    <p class="field-hint">${esc(t("account.editors.empty"))}</p>`;
+    });
     document.getElementById("momentInviteForm")?.addEventListener("submit", async event=>{
       event.preventDefault();
       const email = String(new FormData(event.currentTarget).get("email") || "").trim().toLowerCase();

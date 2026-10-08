@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-10-08 | Cursor | **Moments v298 + SQL v181**: il titolare invita fino a 4 persone sulla stessa pagina. Chi è già invitato resta. L’invitato non invita altri e non cancella la pagina. |
 | 2026-10-08 | Cursor | **Moments v297**: con «Tutta la foto» l’editor mostra la copertina intera in verticale e in orizzontale. «Riempi lo spazio» resta il riquadro unico. |
 | 2026-10-08 | Cursor | **Moments v296**: nel Riepilogo una riga dice se la pagina è pronta da regalare (copertina, una frase, una foto) e nomina ciò che manca. |
 | 2026-10-08 | Cursor | **Moments v295**: il cliente vede «Incluso» al posto di «Moments Free». Chiave interna invariata. Officina resta Free/Plus/Pro. |

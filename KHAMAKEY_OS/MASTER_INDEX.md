@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v297 live** | «Tutta la foto»: verticale e orizzontale. Piano visibile: Incluso |
+| Editor Moments | **v298 live** | Fino a 4 invitati. Piano visibile: Incluso |
 | Worker | **v240-plan-copy** | Spazio pieno: rimuovi un file |
 | Officina | **v203** | PNG codice più basso |
 

@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v298 + SQL v181 (2026-10-08)** — live
+  - Il titolare può invitare fino a 4 persone sulla stessa pagina. Chi è già invitato resta. Ogni invitato usa l’editor e non può invitare altri né cancellare la pagina.
+  - NFC, Salva, upload **invariati**.
 - **Moments v297 + CSS v278 (2026-10-08)** — live
   - Con «Tutta la foto» l’editor mostra la stessa copertina in verticale e in orizzontale, intera. «Riempi lo spazio» resta il riquadro unico, con trascinamento.
   - NFC, Salva, upload **invariati**.

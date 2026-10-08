@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-08** (Moments **v297** copertina verticale e orizzontale; Worker **v240**; SQL **v180**)
+> Ultimo aggiornamento: **2026-10-08** (Moments **v298** fino a 4 invitati; SQL **v181**; Worker **v240**)
 
 ### Fonte di verità versioni
 
@@ -108,10 +108,10 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v240-plan-copy** | Spazio pieno: rimuovi un file. Nessun invito a Plus/Pro. |
-| **Moments editor** | **v297 live** | «Tutta la foto»: anteprima in verticale e in orizzontale. Piano visibile: Incluso. |
+| **Moments editor** | **v298 live** | Fino a 4 invitati sulla stessa pagina. «Tutta la foto»: verticale e orizzontale. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
-| **SQL Supabase Moments** | **≥ v180 (prod)** | v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
+| **SQL Supabase Moments** | **≥ v181 (prod)** | v181 tetto invitati = 4. v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
 | **Prossima release piattaforma** | quando serve un cambio prodotto | Un solo piano Moments fino a nuova decisione. Plus/Pro restano in Officina, senza Stripe. |
 
 ---
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-08:** Editor **v297**: con «Tutta la foto» si vedono i due riquadri, verticale e orizzontale. Piano visibile: Incluso. Worker **v240**. SQL **v180**.  
+> **Oggi 2026-10-08:** Editor **v298** e SQL **v181**: il titolare invita fino a 4 persone. Chi è già invitato resta. Worker **v240**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

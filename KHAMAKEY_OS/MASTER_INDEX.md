@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v295 live** | Piano visibile: Incluso |
+| Editor Moments | **v296 live** | Riepilogo: «Pronto da regalare». Piano visibile: Incluso |
 | Worker | **v240-plan-copy** | Spazio pieno: rimuovi un file |
 | Officina | **v203** | PNG codice più basso |
 

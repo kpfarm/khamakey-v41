@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-08** (Moments **v295** piano Incluso; Worker **v240**; SQL **v180**)
+> Ultimo aggiornamento: **2026-10-08** (Moments **v296** riga «Pronto da regalare»; Worker **v240**; SQL **v180**)
 
 ### Fonte di verità versioni
 
@@ -108,7 +108,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v240-plan-copy** | Spazio pieno: rimuovi un file. Nessun invito a Plus/Pro. |
-| **Moments editor** | **v295 live** | Il cliente vede «Incluso». La chiave del piano resta `moments_free`. |
+| **Moments editor** | **v296 live** | Riepilogo: riga «Pronto da regalare» (copertina, frase, foto). Piano visibile: Incluso. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v180 (prod)** | v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-08:** Editor **v295**: il piano visibile al cliente si chiama Incluso. Worker **v240**. SQL **v180**.  
+> **Oggi 2026-10-08:** Editor **v296**: nel Riepilogo una riga dice se mancano copertina, frase o foto. Piano visibile: Incluso. Worker **v240**. SQL **v180**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

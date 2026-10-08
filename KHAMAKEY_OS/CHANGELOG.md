@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v296 + CSS v277 (2026-10-08)** — live
+  - Nel Riepilogo una riga dice se la pagina è pronta da regalare: copertina, una frase e una foto. Se manca qualcosa, la riga lo nomina.
+  - NFC, Salva, upload **invariati**.
 - **Moments v295 (2026-10-08)** — live
   - Il cliente vede **Incluso** al posto di «Moments Free», nel menu e in Account. La chiave interna resta `moments_free`. Officina continua a dire Free / Plus / Pro.
   - NFC, Salva, upload **invariati**.

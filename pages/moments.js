@@ -19,7 +19,7 @@ import {
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=262";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=231";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=232";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=217";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=260";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
@@ -2484,10 +2484,11 @@ function refreshHowEmptyHints(formNode){
 }
 
 function scheduleHowEmptyHintRefresh(formNode){
-  if(!formNode?.querySelector?.("[data-how-empty]")) return;
+  if(!formNode) return;
   clearTimeout(scheduleHowEmptyHintRefresh.timer);
   scheduleHowEmptyHintRefresh.timer = setTimeout(() => {
     try{ refreshHowEmptyHints(formNode); }catch{ /* ignore */ }
+    try{ refreshGiftReadyLine(formNode); }catch{ /* ignore */ }
   }, 160);
 }
 
@@ -2499,6 +2500,58 @@ function renderHowItWorksList(withActiveFirst = false){
 
 function pageHasCoverPhoto(state){
   return Boolean(String(state?.cover_url || "").trim());
+}
+
+function pageHasGiftSentence(state){
+  if(String(state?.subtitle || "").trim() || String(state?.description || "").trim()) return true;
+  const sections = state?.sections || {};
+  for(const key of ["intro", "dedication", "quote", "letter_future"]){
+    if(String(sections[key]?.body || "").trim()) return true;
+  }
+  const steps = Array.isArray(sections.timeline?.items) ? sections.timeline.items : [];
+  return steps.some(step => String(step?.text || "").trim());
+}
+
+function pageHasGiftPhoto(state){
+  const sections = state?.sections || {};
+  if(sectionHasContent("gallery", sections.gallery)) return true;
+  const steps = Array.isArray(sections.timeline?.items) ? sections.timeline.items : [];
+  return steps.some(step => String(step?.image_url || "").trim());
+}
+
+function giftReadyMissing(state){
+  const missing = [];
+  if(!pageHasCoverPhoto(state)) missing.push(t("overview.gift.cover"));
+  if(!pageHasGiftSentence(state)) missing.push(t("overview.gift.sentence"));
+  if(!pageHasGiftPhoto(state)) missing.push(t("overview.gift.photo"));
+  return missing;
+}
+
+function giftReadyMessage(state){
+  const missing = giftReadyMissing(state);
+  if(!missing.length) return t("overview.gift.ready");
+  const last = missing[missing.length - 1];
+  const head = missing.slice(0, -1);
+  const what = head.length ? `${head.join(", ")} ${t("overview.gift.and")} ${last}` : last;
+  return t(missing.length === 1 ? "overview.gift.missing.one" : "overview.gift.missing.many", { what });
+}
+
+function renderGiftReadyLine(state){
+  const ready = giftReadyMissing(state).length === 0;
+  return `<p class="gift-ready${ready ? " is-ready" : ""}" id="giftReadyLine">${esc(giftReadyMessage(state))}</p>`;
+}
+
+function refreshGiftReadyLine(formNode){
+  const el = document.getElementById("giftReadyLine");
+  if(!el || !formNode) return;
+  let state;
+  try{
+    state = readFormState(formNode);
+  }catch{
+    return;
+  }
+  el.textContent = giftReadyMessage(state);
+  el.classList.toggle("is-ready", giftReadyMissing(state).length === 0);
 }
 
 function howDiscoverGroups({ canInvite = false } = {}){
@@ -2573,6 +2626,7 @@ function renderHowItWorksCard(row, state){
 function renderOverviewPanel(row, state, publicUrl){
   return `<div class="editor-panel ${activeEditorPanel === "overview" ? "active" : ""}" data-editor-panel="overview">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.overview),editorPanelSubtitle(EDITOR_PANELS.overview))}
+    ${renderGiftReadyLine(state)}
     ${renderHowItWorksCard(row, state)}
     ${renderPlanStorageCard(currentEntitlements)}
     ${renderMomentDashboardShell({ publicUrl, published:row.public_visible, slug:row.slug })}
@@ -6737,6 +6791,7 @@ function syncLangSwitchers(locale = getUiLocale()){
     run("rsvpResponses", ()=>refreshRsvpResponsesLocale());
     run("horoscope", ()=>refreshHoroscopePeopleEditor(editorForm));
     run("pets", ()=>refreshPetsEditor(editorForm));
+    run("gift", ()=>refreshGiftReadyLine(editorForm));
     run("dashboard", ()=>refreshMomentDashboardLocale());
     run("preview", ()=>schedulePreviewUpdate(editorForm,{ immediate:true, force:true }));
     run("planCard", ()=>{

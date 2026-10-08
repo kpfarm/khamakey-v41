@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v291 live** | Più font in Stile scritte; schede stile invariate |
-| Worker | **v238-font-pairs** | Stessi font nuovi sulla pagina pubblica |
+| Editor Moments | **v292 live** | Romantico nuovo; pagine già salvate invariate |
+| Worker | **v239-romantico** | Parisienne solo sul font nuovo |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

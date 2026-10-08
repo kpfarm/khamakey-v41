@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v292 + Worker v239-romantico (2026-10-08)** — live
+  - «Romantico» nella tendina è Parisienne, diverso da Classico. Le pagine già salvate con il font precedente restano Great Vibes finché non si cambia stile.
+  - NFC, Salva, upload **invariati**.
 - **Moments v291 + Worker v238-font-pairs (2026-10-08)** — live
   - Design → Stile scritte: cinque font in più (editoriale, calligrafia, morbido, pulito, macchina da scrivere). Le quattro schede stile non aumentano.
   - Classico, Romantico, Elegante e Moderno restano gli stessi caratteri. NFC, Salva, upload **invariati**.

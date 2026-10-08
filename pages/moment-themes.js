@@ -104,11 +104,18 @@ export const FONT_PAIRS = {
     google:"family=Great+Vibes&family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;600;700"
   },
   romantic:{
-    label:"Romantico (script elegante)",
+    label:"Romantico (già sulla pagina)",
     display:'"Great Vibes", cursive',
     body:'"Cormorant Infant", Georgia, serif',
     ui:'"DM Sans", sans-serif',
     google:"family=Great+Vibes&family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;600;700"
+  },
+  romantico:{
+    label:"Romantico",
+    display:'"Parisienne", cursive',
+    body:'"Cormorant Infant", Georgia, serif',
+    ui:'"DM Sans", sans-serif',
+    google:"family=Parisienne&family=Cormorant+Infant:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;600;700"
   },
   elegant:{
     label:"Elegante (solo serif)",
@@ -267,7 +274,7 @@ export const PAGE_LOOKS = {
     hint:"Rosso vivo · riquadri bianchi · testi neri",
     palette:"rosso",
     variant:"chiaro",
-    fontPair:"romantic",
+    fontPair:"romantico",
     heroStyle:"romantico"
   },
   passion:{
@@ -276,7 +283,7 @@ export const PAGE_LOOKS = {
     hint:"Bordeaux · riquadri bianchi · testi neri",
     palette:"bordeaux",
     variant:"chiaro",
-    fontPair:"romantic",
+    fontPair:"romantico",
     heroStyle:"romantico"
   },
   gentleman:{
@@ -303,7 +310,7 @@ export const PAGE_LOOKS = {
     hint:"Rosa pieno · riquadri bianchi · testi neri",
     palette:"rosa",
     variant:"chiaro",
-    fontPair:"romantic",
+    fontPair:"romantico",
     heroStyle:"classico"
   },
   elegant:{
@@ -402,7 +409,7 @@ export const PAGE_LOOKS = {
     hint:"Bordeaux · riquadri bianchi · testi neri",
     palette:"bordeaux",
     variant:"chiaro",
-    fontPair:"romantic",
+    fontPair:"romantico",
     heroStyle:"romantico"
   },
   memory:{

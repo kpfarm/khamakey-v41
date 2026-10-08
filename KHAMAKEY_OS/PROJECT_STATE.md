@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-08** (Moments **v291** font in più; Worker **v238**; SQL **v179**)
+> Ultimo aggiornamento: **2026-10-08** (Moments **v292** Romantico diverso; Worker **v239**; SQL **v179**)
 
 ### Fonte di verità versioni
 
@@ -107,8 +107,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v238-font-pairs** | Tendina font: 5 caratteri in più. I quattro già salvati restano uguali. |
-| **Moments editor** | **v291 live** | Stile scritte: più font, le schede stile restano quattro. CSS `?v=275`. |
+| **Worker NFC** | **v239-romantico** | Romantico nuovo = Parisienne. Il font `romantic` già salvato resta Great Vibes. |
+| **Moments editor** | **v292 live** | Romantico in tendina è un carattere diverso. Pagine già salvate con il vecchio restano uguali. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v179 (prod)** | v179 `owner_ui_locale` sulla due anniversari; v178 copertina/data; v177 cron ingest. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-08:** Editor **v291**, Worker **v238**: più font in Stile scritte. Schede stile invariate. SQL **v179**.  
+> **Oggi 2026-10-08:** Editor **v292**, Worker **v239**: Romantico nuovo. Pagine già salvate con il font vecchio invariate. SQL **v179**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

@@ -85,6 +85,8 @@ export const FIELD_PHRASE_EN = {
   "Stile scritte": "Type style",
   "Classico KhamaKey (script + serif)": "Classic KhamaKey (script + serif)",
   "Romantico (script elegante)": "Romantic (elegant script)",
+  "Romantico (già sulla pagina)": "Romantic (already on this page)",
+  "Romantico": "Romantic",
   "Elegante (solo serif)": "Elegant (serif only)",
   "Moderno (sans-serif pulito)": "Modern (clean sans-serif)",
   "Editoriale (serif da libro)": "Editorial (book serif)",

@@ -123,6 +123,41 @@ export const FONT_PAIRS = {
     body:'"DM Sans", sans-serif',
     ui:'"DM Sans", sans-serif',
     google:"family=DM+Sans:wght@400;600;700"
+  },
+  editorial:{
+    label:"Editoriale (serif da libro)",
+    display:'"Libre Baskerville", Georgia, serif',
+    body:'"Libre Baskerville", Georgia, serif',
+    ui:'"DM Sans", sans-serif',
+    google:"family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;600;700"
+  },
+  calligrafia:{
+    label:"Calligrafia (per dediche)",
+    display:'"Allura", cursive',
+    body:'"Cormorant Infant", Georgia, serif',
+    ui:'"DM Sans", sans-serif',
+    google:"family=Allura&family=Cormorant+Infant:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;600;700"
+  },
+  morbido:{
+    label:"Morbido (scrittura a mano)",
+    display:'"Caveat", cursive',
+    body:'"DM Sans", sans-serif',
+    ui:'"DM Sans", sans-serif',
+    google:"family=Caveat:wght@500;700&family=DM+Sans:wght@400;600;700"
+  },
+  pulito:{
+    label:"Pulito (sans geometrico)",
+    display:'"Outfit", sans-serif',
+    body:'"Outfit", sans-serif',
+    ui:'"DM Sans", sans-serif',
+    google:"family=Outfit:wght@400;600&family=DM+Sans:wght@400;600;700"
+  },
+  macchina:{
+    label:"Macchina da scrivere",
+    display:'"Special Elite", serif',
+    body:'"Special Elite", serif',
+    ui:'"DM Sans", sans-serif',
+    google:"family=Special+Elite&family=DM+Sans:wght@400;600;700"
   }
 };
 

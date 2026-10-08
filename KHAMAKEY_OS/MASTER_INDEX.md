@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v290 live** | Un solo piano incluso con l’oggetto |
-| Worker | **v237-single-plan** | Limite senza invito a Plus/Pro |
+| Editor Moments | **v291 live** | Più font in Stile scritte; schede stile invariate |
+| Worker | **v238-font-pairs** | Stessi font nuovi sulla pagina pubblica |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

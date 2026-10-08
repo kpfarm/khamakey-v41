@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v237-single-plan";
+const WORKER_VERSION = "v238-font-pairs";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -2391,7 +2391,12 @@ function resolveMomentFontPair(key) {
     romantic:{display:'"Great Vibes", cursive',body:'"Cormorant Infant", Georgia, serif',ui:'"DM Sans", sans-serif',google:"family=Great+Vibes&family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;600;700"},
     // Great Vibes sempre caricato: la firma resta calligrafica anche con pair elegant/modern
     elegant:{display:'"Cormorant Infant", Georgia, serif',body:'"Cormorant Infant", Georgia, serif',ui:'"DM Sans", sans-serif',google:"family=Great+Vibes&family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;600;700"},
-    modern:{display:'"DM Sans", sans-serif',body:'"DM Sans", sans-serif',ui:'"DM Sans", sans-serif',google:"family=Great+Vibes&family=DM+Sans:wght@400;600;700"}
+    modern:{display:'"DM Sans", sans-serif',body:'"DM Sans", sans-serif',ui:'"DM Sans", sans-serif',google:"family=Great+Vibes&family=DM+Sans:wght@400;600;700"},
+    editorial:{display:'"Libre Baskerville", Georgia, serif',body:'"Libre Baskerville", Georgia, serif',ui:'"DM Sans", sans-serif',google:"family=Great+Vibes&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;600;700"},
+    calligrafia:{display:'"Allura", cursive',body:'"Cormorant Infant", Georgia, serif',ui:'"DM Sans", sans-serif',google:"family=Great+Vibes&family=Allura&family=Cormorant+Infant:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;600;700"},
+    morbido:{display:'"Caveat", cursive',body:'"DM Sans", sans-serif',ui:'"DM Sans", sans-serif',google:"family=Great+Vibes&family=Caveat:wght@500;700&family=DM+Sans:wght@400;600;700"},
+    pulito:{display:'"Outfit", sans-serif',body:'"Outfit", sans-serif',ui:'"DM Sans", sans-serif',google:"family=Great+Vibes&family=Outfit:wght@400;600&family=DM+Sans:wght@400;600;700"},
+    macchina:{display:'"Special Elite", serif',body:'"Special Elite", serif',ui:'"DM Sans", sans-serif',google:"family=Great+Vibes&family=Special+Elite&family=DM+Sans:wght@400;600;700"}
   };
   return pairs[key] || pairs.classic;
 }

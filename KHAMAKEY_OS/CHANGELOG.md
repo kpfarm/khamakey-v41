@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v291 + Worker v238-font-pairs (2026-10-08)** — live
+  - Design → Stile scritte: cinque font in più (editoriale, calligrafia, morbido, pulito, macchina da scrivere). Le quattro schede stile non aumentano.
+  - Classico, Romantico, Elegante e Moderno restano gli stessi caratteri. NFC, Salva, upload **invariati**.
 - **Moments v290 + Worker v237-single-plan (2026-09-25)** — live
   - Un solo piano, incluso con l’oggetto, anche dopo il lancio. Account, guida, Termini e messaggi di limite non promettono più Plus/Pro.
   - Plus/Pro restano in Officina, senza pagamento. NFC, Salva, upload **invariati**.

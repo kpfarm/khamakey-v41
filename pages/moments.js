@@ -21,7 +21,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=241";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=230";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=217";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=256";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=257";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -118,7 +118,7 @@ import {
   findLookForDesign,
   suggestLookForMomentType,
   looksForMomentType
-} from "./moment-themes.js?v=162";
+} from "./moment-themes.js?v=163";
 import {
   SECTION_ORDER_DEFAULT,
   DEFAULT_SECTIONS,

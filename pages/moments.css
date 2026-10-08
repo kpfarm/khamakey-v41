@@ -307,19 +307,19 @@ html.admin-embed .main-panel{padding:8px;max-width:none}
   max-height:calc(100vh - 220px);
   overflow-y:auto;
 }
-.editor-sidebar-group{padding:12px 16px 6px;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--navy)}
-.editor-nav-item{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;color:var(--navy);padding:10px 16px;font-size:.84rem;font-weight:700;text-align:left;font-family:var(--font-ui)}
+.editor-sidebar-group{padding:14px 16px 4px;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.editor-nav-item{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;color:var(--navy);padding:10px 16px;font-size:.86rem;font-weight:600;text-align:left;font-family:var(--font-ui)}
 .editor-nav-item:hover{background:var(--soft)}
-.editor-nav-item.active{background:var(--soft-strong);color:var(--blu-notte);box-shadow:inset 3px 0 0 var(--rosa-ricordo)}
+.editor-nav-item.active{background:var(--soft-strong);color:var(--blu-notte);font-weight:700;box-shadow:inset 3px 0 0 var(--rosa-ricordo)}
 .editor-nav-icon{width:28px;height:28px;border-radius:8px;background:transparent;border:1px solid rgba(7,26,60,.1);display:grid;place-items:center;font-size:.92rem;line-height:1;flex-shrink:0;color:var(--navy)}
 .editor-nav-icon svg{width:15px;height:15px;display:block}
 .editor-nav-item.active .editor-nav-icon{background:var(--accent-wash);border-color:rgba(170,98,108,.35);color:var(--rosa-ricordo)}
 .editor-main{padding:18px;display:grid;gap:0;align-content:start;min-width:0}
 .editor-form-inner{display:grid;gap:0;align-content:start}
 .editor-panel{display:none;gap:12px}.editor-panel.active{display:grid}
-.section-header{margin-bottom:14px}
-.section-title{font-family:var(--font-display);font-size:1.35rem;font-weight:700;color:var(--navy);line-height:1.15;letter-spacing:-0.02em}
-.section-sub{margin-top:4px;font-size:.84rem;color:var(--muted);line-height:1.45;font-weight:400}
+.section-header{margin:0 0 18px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.section-title{font-family:var(--font-ui);font-size:1.7rem;font-weight:700;color:var(--navy);line-height:1.1;letter-spacing:-0.03em}
+.section-sub{margin-top:6px;font-size:.92rem;color:var(--muted);line-height:1.45;font-weight:400}
 .section-toggle-wrap{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;background:var(--soft-strong);border:1px solid var(--border);margin-bottom:12px;flex-wrap:wrap}
 .section-toggle-hint{font-size:.84rem;font-weight:600;color:var(--navy);flex:1 1 180px}
 .section-switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:16px;border:2px solid var(--border);background:#fff;margin-bottom:12px;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;min-height:64px}
@@ -946,8 +946,8 @@ body.media-modal-open{overflow:hidden}
     z-index:2;
     width:100%;
   }
-  .section-title{font-size:1.28rem}
-  .section-sub{font-size:.78rem}
+  .section-title{font-size:1.45rem}
+  .section-sub{font-size:.84rem}
   .detail-head{display:none}
   .editor-topbar{display:none}
   .editor-shell{border-radius:12px}
@@ -1249,16 +1249,49 @@ body.media-modal-open{overflow:hidden}
 .gallery-add{font-weight:500;border-radius:10px}
 .editor-card{border:1px solid var(--border);border-radius:14px;background:var(--soft);padding:16px}
 label{font-weight:500}
-.section-title,
-.account-hub-head h2,
+/* Gerarchia dell’editor: titolo grande, scheda media, etichetta piccola, testo normale leggero. */
+.editor-main .section-title,
+.account-hub-head h2{
+  font-family:var(--font-ui);
+  font-weight:700;
+  letter-spacing:-0.03em;
+}
+.editor-main .section-title{font-size:1.7rem;line-height:1.1}
 .account-panel-card h3,
-.ecard-title,
-.how-guide-item h4,
-.how-discover-row-title,
-.how-next .ecard-title,
-.how-discover .ecard-title,
-.look-card strong,
-.extras-card-copy strong,
-.publish-pick b,
-.editor-progress-label,
-.how-empty-title{font-weight:700}
+.editor-main .ecard-title,
+.editor-main .gallery-type-title,
+.editor-main .section-switch-copy strong,
+.editor-main .extras-card-copy strong,
+.editor-main .how-empty-title,
+.editor-main .how-guide-item h4,
+.editor-main .how-discover-row-title,
+.editor-main .publish-pick b,
+.editor-main .look-card strong{
+  font-family:var(--font-ui);
+  font-weight:700;
+  color:var(--navy);
+  letter-spacing:-0.015em;
+}
+.editor-main .ecard-title,
+.editor-main .how-empty-title{font-size:1.08rem;margin:0 0 12px}
+.editor-main .how-next .ecard-title,
+.editor-main .how-discover .ecard-title{font-family:var(--font-ui);font-size:1.35rem;font-weight:700;line-height:1.15}
+.editor-main .section-switch-copy strong,
+.editor-main .extras-card-copy strong,
+.editor-main .gallery-type-title{font-size:1rem;font-weight:700}
+.editor-main .how-guide-item h4,
+.editor-main .how-discover-row-title,
+.editor-main .publish-pick b{font-size:1.05rem;font-weight:700}
+.editor-main .look-card strong{font-size:.95rem;font-weight:700}
+.editor-main .editor-progress-label{font-family:var(--font-ui);font-size:.8rem;font-weight:700}
+.editor-main label{font-size:.78rem;font-weight:700;color:var(--navy)}
+.editor-main .field-hint,
+.editor-main .section-sub,
+.editor-main .how-discover-row-blurb,
+.editor-main .extras-card-copy small{font-weight:400;color:var(--muted)}
+.editor-main input,
+.editor-main textarea,
+.editor-main select{font-size:1rem;font-weight:400;color:var(--text)}
+@media(max-width:768px){
+  .editor-main .section-title,.section-title{font-size:1.45rem}
+}

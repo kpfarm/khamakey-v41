@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v282 (2026-10-08)** — live
+  - Nell’editor il titolo di sezione è grande e in grassetto, il nome della scheda è medio, l’etichetta del campo è piccola e il testo che si scrive resta normale. Così si distingue a colpo d’occhio.
+  - NFC, Salva, upload **invariati**.
 - **Moments v301 + Worker v241 (2026-10-08)** — live
   - A ogni nuova attivazione di un codice arriva un’email allo staff: cliente, nome pagina, categoria, codice e link. Se l’email non parte, l’attivazione resta valida.
   - NFC, Salva, upload **invariati**.

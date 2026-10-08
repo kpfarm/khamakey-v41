@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-08** (Moments **v301** avviso attivazione; SQL **v181**; Worker **v241**)
+> Ultimo aggiornamento: **2026-10-08** (Moments **v301** · CSS **v282** titoli; SQL **v181**; Worker **v241**)
 
 ### Fonte di verità versioni
 
@@ -108,7 +108,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v241-activation-alert** | Email allo staff a ogni nuova attivazione. |
-| **Moments editor** | **v301 live** | Dopo l’attivazione chiede l’avviso email. Il cliente non vede errori se l’email non parte. |
+| **Moments editor** | **v301 live** · CSS **v282** | Titoli di sezione grandi. Avviso email dopo l’attivazione. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v181 (prod)** | v181 tetto invitati = 4. v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |

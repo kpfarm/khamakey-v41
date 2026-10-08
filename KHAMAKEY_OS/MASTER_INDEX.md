@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v292 live** | Romantico nuovo; pagine già salvate invariate |
-| Worker | **v239-romantico** | Parisienne solo sul font nuovo |
+| Editor Moments | **v293 live** | Testi limiti senza Plus/Pro |
+| Worker | **v240-plan-copy** | Spazio pieno: rimuovi un file |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

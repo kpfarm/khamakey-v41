@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-08** (Moments **v292** Romantico diverso; Worker **v239**; SQL **v179**)
+> Ultimo aggiornamento: **2026-10-08** (Moments **v293** testi piano; Worker **v240**; SQL **v180**)
 
 ### Fonte di verità versioni
 
@@ -107,8 +107,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v239-romantico** | Romantico nuovo = Parisienne. Il font `romantic` già salvato resta Great Vibes. |
-| **Moments editor** | **v292 live** | Romantico in tendina è un carattere diverso. Pagine già salvate con il vecchio restano uguali. |
+| **Worker NFC** | **v240-plan-copy** | Spazio pieno: rimuovi un file. Nessun invito a Plus/Pro. |
+| **Moments editor** | **v293 live** | Video e lettera dicono i numeri inclusi. Pagine già salvate invariate. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v180 (prod)** | v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-08:** Editor **v292**, Worker **v239**: Romantico nuovo. Pagine già salvate con il font vecchio invariate. SQL **v179**.  
+> **Oggi 2026-10-08:** Editor **v293**, Worker **v240**: i testi cliente non invitano più a Plus/Pro. SQL **v180**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

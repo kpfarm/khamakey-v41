@@ -19,7 +19,7 @@ import {
 } from "./moment-media.js?v=244";
 import { canFitBytes, formatBytes, storageBytesLimit } from "./moment-plans.js?v=238";
 import { getUiLocale } from "./moments-i18n.js?v=216";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=256";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=259";
 
 let mediaEditContext = null;
 
@@ -185,7 +185,7 @@ function canAddFiles(current,batch,key = "gallery"){
       throw new Error(lf("Formato non supportato nella lettera al futuro."));
     }
     if(next.length >= limits.maxItems){
-      throw new Error(lfFill("Limite raggiunto: massimo {n} allegati nella {label}. Passa a Plus o Pro per sbloccare di più.", { n: limits.maxItems, label }));
+      throw new Error(lfFill("Limite raggiunto: massimo {n} allegati nella {label}. Rimuovine uno per aggiungerne un altro.", { n: limits.maxItems, label }));
     }
     if(type === "image" && countMediaByType(next,"image") >= limits.maxImages){
       throw new Error(lfFill("Massimo {n} foto nella {label}.", { n: limits.maxImages, label }));
@@ -701,7 +701,7 @@ export function renderGalleryUploadPanel(section,key){
   const intro = isLetter
     ? `<p><strong data-lf="Allegati sigillati">${esc(lf("Allegati sigillati"))}</strong></p><p class="field-hint" data-lf="Foto, video, audio o PDF che si sbloccano insieme alla lettera. Tocca Aggiungi, poi Salva.">${esc(lf("Foto, video, audio o PDF che si sbloccano insieme alla lettera. Tocca Aggiungi, poi Salva."))}</p>`
     : isVideo
-      ? `<p><strong data-lf="Video">${esc(lf("Video"))}</strong></p><p class="field-hint" data-lf="Carica video MP4/MOV. Titolo e descrizione sotto ciascuno, poi Salva. Il numero massimo dipende dal piano.">${esc(lf("Carica video MP4/MOV. Titolo e descrizione sotto ciascuno, poi Salva. Il numero massimo dipende dal piano."))}</p>`
+      ? `<p><strong data-lf="Video">${esc(lf("Video"))}</strong></p><p class="field-hint" data-lf="Carica un video MP4/MOV (max 90 MB). Titolo e descrizione sotto, poi Salva.">${esc(lf("Carica un video MP4/MOV (max 90 MB). Titolo e descrizione sotto, poi Salva."))}</p>`
       : isMusic
         ? `<p><strong data-lf="Audio">${esc(lf("Audio"))}</strong></p><p class="field-hint" data-lf="Messaggi vocali o brani — complemento a Spotify/YouTube. Poi Salva.">${esc(lf("Messaggi vocali o brani — complemento a Spotify/YouTube. Poi Salva."))}</p>`
         : `<p><strong data-lf="Galleria foto">${esc(lf("Galleria foto"))}</strong></p><p class="field-hint" data-lf="Solo immagini qui. Tocca Aggiungi foto, scrivi titolo e descrizione, poi Salva.">${esc(lf("Solo immagini qui. Tocca Aggiungi foto, scrivi titolo e descrizione, poi Salva."))}</p>`;

@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-10-08 | Cursor | **Moments v293 + Worker v240**: i testi cliente non invitano più a Plus/Pro. Video e lettera dicono i numeri inclusi. NFC/Salva/upload invariati. |
 | 2026-10-08 | Cursor | **SQL v180**: i visitatori non chiamano più piano, contatori file e analytics. NFC, RSVP e webhook restano. |
 | 2026-09-25 | Cursor | **Worker v236 + SQL v179 + Moments v289**: mail invito/anniversario IT/EN da `ui_locale`; YouTube play dopo incolla (CSP frame-src YouTube/Spotify). NFC/Salva/upload invariati. |
 | 2026-09-20 | Cursor | **Moments v287 live**: titoli editor più bassi e sezioni di nuovo in card. Form a sinistra. Worker/NFC/SQL invariati. |

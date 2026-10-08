@@ -21,7 +21,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=241";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=230";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=217";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=258";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=259";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -63,7 +63,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=247";
+} from "./moments-media-ui.js?v=249";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -138,7 +138,7 @@ import {
   isSectionExcluded,
   youtubeVideoId,
   youtubeEmbedUrl
-} from "./moment-sections.js?v=251";
+} from "./moment-sections.js?v=252";
 import {
   renderCategorySelect,
   templateForType,
@@ -159,7 +159,7 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js?v=189";
+} from "./moment-editor-kit.js?v=190";
 import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=221";
 import { bindRsvpResponsesPanel, refreshRsvpResponsesLocale } from "./moment-rsvp-responses.js?v=222";
 import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=225";

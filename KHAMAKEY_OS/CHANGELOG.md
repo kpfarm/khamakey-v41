@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v293 + Worker v240-plan-copy (2026-10-08)** — live
+  - Nessun messaggio cliente invita più a Plus o Pro. Spazio pieno: «Rimuovi un file». Lettera: massimo allegati, poi «rimuovine uno».
+  - Video e lettera dicono i numeri inclusi (1 video, 2 foto / 1 video / 1 audio / 1 PDF). NFC, Salva, upload **invariati**.
 - **SQL v180 (2026-10-08)** — live su Moments
   - I visitatori non possono più chiamare cambio piano, contatori file, analytics e consegne. NFC, RSVP, guestbook, anniversari e webhook restano.
   - Editor, upload e pagine già salvate **invariati**.

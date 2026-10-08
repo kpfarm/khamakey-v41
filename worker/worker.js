@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v239-romantico";
+const WORKER_VERSION = "v240-plan-copy";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1616,7 +1616,7 @@ async function handleMediaUpload(request, env) {
       if (bytesUsed + file.size > maxBytes) {
         const usedMb = (bytesUsed / (1024 * 1024)).toFixed(1);
         return cors(json({
-          error: `Spazio esaurito per questo Moment (${usedMb} / ${storageMb} MB). Passa a Plus o Pro, oppure rimuovi file.`,
+          error: `Spazio esaurito per questo Moment (${usedMb} / ${storageMb} MB). Rimuovi un file per caricarne un altro.`,
           code: "storage_quota",
           plan_key: planKey,
           bytes_used: bytesUsed,
@@ -1634,7 +1634,7 @@ async function handleMediaUpload(request, env) {
         } catch (countError) {
           console.error("handleMediaUpload kind count", countError);
           return cors(json({
-            error: "Non riesco a verificare i limiti del piano. Riprova tra poco.",
+            error: "Non riesco a verificare lo spazio disponibile. Riprova tra poco.",
             code: "plan_count_unavailable"
           }, 503));
         }
@@ -1721,7 +1721,7 @@ async function handleMediaUpload(request, env) {
       if (usage && Number(usage.bytes_used) > maxBytes) {
         const usedMb = (Number(usage.bytes_used) / (1024 * 1024)).toFixed(1);
         return rollbackQuota({
-          error: `Spazio esaurito per questo Moment (${usedMb} / ${storageMb} MB). Passa a Plus o Pro, oppure rimuovi file.`,
+          error: `Spazio esaurito per questo Moment (${usedMb} / ${storageMb} MB). Rimuovi un file per caricarne un altro.`,
           code: "storage_quota",
           plan_key: planKey,
           bytes_used: usage.bytes_used,

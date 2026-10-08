@@ -18,10 +18,10 @@ import {
 } from "./moments-i18n.js?v=236";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=261";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=229";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=241";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=230";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=217";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=259";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=260";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -140,6 +140,8 @@ import {
   youtubeEmbedUrl
 } from "./moment-sections.js?v=252";
 import {
+  MOMENT_TYPE_GROUPS,
+  TYPE_LABELS,
   renderCategorySelect,
   templateForType,
   normalizeMomentType,
@@ -1464,6 +1466,7 @@ function mergedState(row){
     heroCut:state.heroCut || "dritto",
     heroFade:state.heroFade !== false,
     fontPair:Object.keys(FONT_PAIRS).includes(state.fontPair) ? state.fontPair : "classic",
+    pageModel:normalizePageModel(state.pageModel),
     pageDecor:"none",
     show_together_counter:Boolean(state.show_together_counter),
     together_since:state.together_since || "",
@@ -3333,6 +3336,7 @@ function syncLookCards(formNode, lookId = ""){
   if(!stylingPanel) return;
   const activeLook = lookId || findLookForDesign(readDesignFields(formNode));
   stylingPanel.querySelectorAll(".look-card").forEach(card=>{
+    if(card.dataset.model) return;
     card.classList.toggle("active", card.dataset.look === activeLook);
   });
   const lookInput = formNode.querySelector("#pageLookInput");
@@ -3350,12 +3354,21 @@ function refreshDesignPickers(formNode, momentType){
   const currentLook = formNode.querySelector("#pageLookInput")?.value
     || findLookForDesign({ colorPalette:palette, themeVariant:variant, fontPair, heroStyle })
     || suggestLookForMomentType(type);
+  const pageModel = formNode.querySelector("#pageModelInput")?.value || "";
   const lookHost = stylingPanel.querySelector(".look-picker-host");
-  if(lookHost) lookHost.innerHTML = renderLookPicker(currentLook, type);
+  if(lookHost) lookHost.innerHTML = renderLookPicker(currentLook, type, pageModel);
   stylingPanel.querySelectorAll(".look-card").forEach(button=>{
-    button.addEventListener("click",()=>applyPageLook(formNode, button.dataset.look || "classic"));
+    button.addEventListener("click",()=>{
+      if(button.dataset.model){
+        applyModelToForm(formNode, button.dataset.model);
+        return;
+      }
+      applyPageLook(formNode, button.dataset.look || "classic");
+    });
   });
+  bindPageModelSelect(formNode, stylingPanel);
   syncLookCards(formNode, formNode.querySelector("#pageLookInput")?.value || currentLook);
+  syncModelCards(formNode, pageModel);
 }
 
 function applySuggestedLookForType(formNode, type, { preview = true } = {}){
@@ -3400,7 +3413,151 @@ function syncPaletteButtons(formNode, palette){
   });
 }
 
-function renderLookPicker(currentLook, momentType = "free"){
+const FEATURED_PAGE_MODELS = ["love", "family", "pet", "travel"];
+
+function normalizePageModel(value){
+  const raw = String(value || "").trim().toLowerCase();
+  if(!raw || raw === "free") return "";
+  const key = normalizeMomentType(raw);
+  return key === "free" ? "" : key;
+}
+
+function bindPageModelSelect(formNode, stylingPanel){
+  const modelSelect = stylingPanel?.querySelector("#pageModelSelect");
+  if(!modelSelect || modelSelect.dataset.bound === "1") return;
+  modelSelect.dataset.bound = "1";
+  modelSelect.addEventListener("change", ()=>{
+    if(modelSelect.value) applyModelToForm(formNode, modelSelect.value);
+  });
+}
+
+function syncModelCards(formNode, modelId = ""){
+  const stylingPanel = formNode.querySelector('[data-editor-panel="styling"]');
+  if(!stylingPanel) return;
+  const id = normalizePageModel(modelId || stylingPanel.querySelector("#pageModelInput")?.value || "");
+  stylingPanel.querySelectorAll(".look-card[data-model]").forEach(card=>{
+    const on = card.dataset.model === id;
+    card.classList.toggle("active", on);
+    card.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  const select = stylingPanel.querySelector("#pageModelSelect");
+  if(select){
+    const listed = [...select.options].some(option => option.value === id);
+    select.value = listed ? id : "";
+  }
+  const input = stylingPanel.querySelector("#pageModelInput");
+  if(input) input.value = id;
+}
+
+function refreshEditorSidebarFromForm(formNode){
+  const sidebar = document.querySelector("#momentEditorShell .editor-sidebar");
+  if(!sidebar || !formNode) return;
+  const enabled = enabledMapFromForm(formNode);
+  sidebar.outerHTML = renderEditorSidebar(activeEditorPanel, currentTypeFromForm(formNode), pinnedExtraSections, enabled);
+  const shell = document.getElementById("momentEditorShell");
+  if(shell) bindEditorNavigation(shell);
+  syncEditorKitUi(formNode);
+}
+
+function applyEmptyModelTitles(formNode, type){
+  const template = localizeMomentTemplate(templateForType(type), getUiLocale());
+  for(const [key, section] of Object.entries(template.sections || {})){
+    const title = formNode.querySelector(`[name="section_${key}_title"]`);
+    if(title && !String(title.value || "").trim() && section.title) title.value = section.title;
+  }
+}
+
+function applyModelStructure(formNode, type){
+  const template = localizeMomentTemplate(templateForType(type), getUiLocale());
+  if(formNode.elements.subtitle) formNode.elements.subtitle.value = "";
+  if(formNode.elements.pill) formNode.elements.pill.value = "";
+  for(const [key, section] of Object.entries(template.sections || {})){
+    const enabled = formNode.querySelector(`[name="section_${key}_enabled"]`);
+    const title = formNode.querySelector(`[name="section_${key}_title"]`);
+    const body = formNode.querySelector(`[name="section_${key}_body"]`);
+    const images = formNode.querySelector(`[name="section_${key}_images"]`);
+    const panel = formNode.querySelector(`details[data-section-key="${key}"]`);
+    if(enabled) enabled.checked = Boolean(section.enabled);
+    if(title) title.value = section.title || "";
+    if(body) body.value = "";
+    if(images) images.value = "";
+    if(key === "rsvp"){
+      const askGuests = formNode.querySelector('[name="section_rsvp_field_guests"]');
+      const askNotes = formNode.querySelector('[name="section_rsvp_field_notes"]');
+      if(askGuests) askGuests.checked = section.field_keys ? section.field_keys.includes("guests") : section.ask_guests !== false;
+      if(askNotes) askNotes.checked = section.field_keys ? section.field_keys.includes("notes") : section.ask_notes !== false;
+    }
+    TEMPLATE_STOCK_FIELDS.forEach(field=>{
+      const input = formNode.querySelector(`[name="section_${key}_${field}"]`);
+      if(input) input.value = "";
+    });
+    if(panel) panel.open = Boolean(section.enabled);
+  }
+  sectionOrder = sectionOrderForType(type);
+  refreshSectionOrderList(formNode);
+  pinnedExtraSections = [];
+  syncPinnedSectionsInput(formNode);
+  writeJourneySteps(formNode, "timeline", []);
+  try{ renderJourneySteps(formNode, "timeline"); }catch{ /* panel assente */ }
+  for(const key of LIST_SECTION_KEYS){
+    writeListItems(formNode, key, []);
+    try{ renderListItems(formNode, key); }catch{ /* panel assente */ }
+  }
+  const petsInput = formNode.querySelector('[name="section_pet_pets"]');
+  if(petsInput) petsInput.value = "[]";
+  try{ refreshPetsEditor(formNode); }catch{ /* panel assente */ }
+  syncAllSectionToggleButtons(formNode);
+  refreshEditorSidebarFromForm(formNode);
+}
+
+function applyModelToForm(formNode, modelType){
+  const type = normalizePageModel(modelType);
+  if(!type || !formNode) return;
+  const momentType = currentTypeFromForm(formNode);
+  if(momentType !== "free") return;
+  const empty = !formHasMeaningfulContent(formNode);
+  if(empty) applyModelStructure(formNode, type);
+  else applyEmptyModelTitles(formNode, type);
+  const suggestedLook = suggestLookForMomentType(type);
+  if(suggestedLook && PAGE_LOOKS[suggestedLook]) applyPageLook(formNode, suggestedLook, { preview:false });
+  syncModelCards(formNode, type);
+  markEditorDirty(formNode);
+  schedulePreviewUpdate(formNode, { immediate:true, force:true });
+  promptSaveReminder(t(empty ? "save.reminder_model_empty" : "save.reminder_model_look"));
+}
+
+function renderGeneralModelPicker(pageModel = ""){
+  const current = normalizePageModel(pageModel);
+  const cards = FEATURED_PAGE_MODELS.map(id=>{
+    const look = PAGE_LOOKS[suggestLookForMomentType(id)] || PAGE_LOOKS.classic;
+    const colors = resolvePalette(look.palette, look.variant);
+    const hint = templateForType(id).subtitle || look.hint || "";
+    const on = current === id;
+    return `<button type="button" class="look-card model-card ${on ? "active" : ""}" data-model="${esc(id)}" aria-pressed="${on ? "true" : "false"}">
+      <span class="look-card-preview" style="--lk-go:${esc(colors.go)};--lk-g2:${esc(colors.g2)};--lk-hero:${esc(colors.hero)};--lk-ro:${esc(colors.ro)};--lk-bl:${esc(colors.bl)};--lk-card:${esc(colors.card || colors.bl2)};--lk-in:${esc(colors.in)}"></span>
+      <strong><span data-lf-type="${esc(id)}">${esc(localizedTypeLabel(id))}</span></strong>
+      <small data-lf="${esc(hint)}">${esc(localizeFieldPhrase(hint))}</small>
+    </button>`;
+  }).join("");
+  const groups = MOMENT_TYPE_GROUPS.map(group=>{
+    const types = group.types.filter(type => type !== "free" && !FEATURED_PAGE_MODELS.includes(type) && TYPE_LABELS[type]);
+    if(!types.length) return "";
+    const options = types.map(type => `<option value="${esc(type)}" data-lf-type="${esc(type)}" ${current === type ? "selected" : ""}>${esc(localizedTypeLabel(type))}</option>`).join("");
+    return `<optgroup label="${esc(localizeFieldPhrase(group.label))}">${options}</optgroup>`;
+  }).join("");
+  return `<div class="look-grid">${cards}</div>
+    <label class="model-picker">${lfSpan("Altri modelli")}
+      <select id="pageModelSelect">
+        <option value="">${esc(localizeFieldPhrase("Scegli nella lista"))}</option>
+        ${groups}
+      </select>
+    </label>
+    <input type="hidden" name="page_model" id="pageModelInput" value="${esc(current)}">
+    <input type="hidden" name="page_look" id="pageLookInput" value="">`;
+}
+
+function renderLookPicker(currentLook, momentType = "free", pageModel = ""){
+  if(normalizeMomentType(momentType) === "free") return renderGeneralModelPicker(pageModel);
   const suggested = suggestLookForMomentType(momentType);
   const order = looksForMomentType(momentType);
   return `<div class="look-grid">${order.map(id=>{
@@ -3460,9 +3617,14 @@ function bindDesignPanelHandlers(formNode){
 
   stylingPanel.querySelectorAll(".look-card").forEach(button=>{
     button.addEventListener("click",()=>{
+      if(button.dataset.model){
+        applyModelToForm(formNode, button.dataset.model);
+        return;
+      }
       applyPageLook(formNode, button.dataset.look || "classic");
     });
   });
+  bindPageModelSelect(formNode, stylingPanel);
 
   stylingPanel.querySelectorAll("[data-suggest-look]").forEach(button=>{
     button.addEventListener("click",()=>{
@@ -3492,6 +3654,7 @@ function bindDesignPanelHandlers(formNode){
 }
 
 function renderDesignSuggestBanner(momentType, currentLook){
+  if(normalizeMomentType(momentType) === "free") return "";
   const suggested = suggestLookForMomentType(momentType);
   if(!suggested || suggested === currentLook) return "";
   const look = PAGE_LOOKS[suggested];
@@ -3510,13 +3673,14 @@ function renderDesignPanel(state){
     fontPair,
     heroStyle: state.heroStyle || "classico"
   });
+  const general = normalizeMomentType(state.type) === "free";
   return `<div class="editor-panel ${activeEditorPanel === "styling" ? "active" : ""}" data-editor-panel="styling">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.styling),editorPanelSubtitle(EDITOR_PANELS.styling))}
     <div class="editor-card">
-      <p class="ecard-title">${lfSpan("Scegli lo stile")}</p>
-      <p class="design-intro">${lfSpan("Il colore scelto è lo sfondo della pagina; i riquadri restano bianchi con testo nero.")}</p>
-      ${renderDesignSuggestBanner(state.type, currentLook)}
-      <div class="look-picker-host">${renderLookPicker(currentLook, state.type)}</div>
+      <p class="ecard-title">${lfSpan(general ? "Scegli il modello" : "Scegli lo stile")}</p>
+      <p class="design-intro">${lfSpan(general ? "Amore, Famiglia, Animali e Viaggio sono i più usati. Gli altri modelli sono nella lista." : "Il colore scelto è lo sfondo della pagina; i riquadri restano bianchi con testo nero.")}</p>
+      ${general ? "" : renderDesignSuggestBanner(state.type, currentLook)}
+      <div class="look-picker-host">${renderLookPicker(currentLook, state.type, state.pageModel || "")}</div>
     </div>
     <div class="editor-card">
       <p class="ecard-title">${lfSpan("Ecco come sarà")}</p>
@@ -5775,6 +5939,7 @@ function readFormState(formNode){
     heroCut:live("hero_cut") || "dritto",
     heroFade:live("hero_fade") !== "off",
     fontPair:live("font_pair") || "classic",
+    pageModel:normalizePageModel(live("page_model")),
     pageDecor:"none",
     show_together_counter:liveTopChecked(formNode, form, "show_together_counter"),
     together_since:live("together_since"),

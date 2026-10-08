@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v294 + CSS v276 (2026-10-08)** — live
+  - Su Evento generale le quattro schede sono Amore, Famiglia, Animali e Viaggio. Gli altri modelli sono nella lista.
+  - Pagina vuota: arrivano sezioni e titoli di quel modello, più colore, font e copertina. Pagina già scritta: cambiano solo colore, font e copertina.
+  - I codici già stampati con una categoria restano con le loro quattro schede. NFC, Salva, upload **invariati**.
 - **Moments v293 + Worker v240-plan-copy (2026-10-08)** — live
   - Nessun messaggio cliente invita più a Plus o Pro. Spazio pieno: «Rimuovi un file». Lettera: massimo allegati, poi «rimuovine uno».
   - Video e lettera dicono i numeri inclusi (1 video, 2 foto / 1 video / 1 audio / 1 PDF). NFC, Salva, upload **invariati**.

@@ -735,6 +735,7 @@ body.media-modal-open{overflow:hidden}
 .design-suggest{margin:0 0 14px;padding:10px 12px;border-radius:12px;background:var(--soft-strong);border:1px solid var(--border);font-size:.82rem;line-height:1.45;color:var(--ink);box-shadow:inset 3px 0 0 var(--rosa-ricordo)}
 .design-suggest-btn{background:none;border:none;padding:0;color:var(--green);font-weight:700;cursor:pointer;text-decoration:underline;font-size:inherit}
 .look-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:4px}
+.model-picker{display:block;margin-top:14px}
 .look-card{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:0 0 10px;border:1px solid var(--border);border-radius:0;background:#fff;cursor:pointer;text-align:left;transition:outline .12s,border-color .12s;font:inherit;color:inherit;width:100%}
 .look-card:hover{border-color:rgba(7,26,60,.28);transform:none}
 .look-card.active{border-color:var(--navy);outline:2px solid var(--navy);outline-offset:2px;box-shadow:none}

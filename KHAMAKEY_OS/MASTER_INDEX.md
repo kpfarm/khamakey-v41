@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v293 live** | Testi limiti senza Plus/Pro |
+| Editor Moments | **v294 live** | Evento generale: Amore, Famiglia, Animali, Viaggio + lista |
 | Worker | **v240-plan-copy** | Spazio pieno: rimuovi un file |
 | Officina | **v203** | PNG codice più basso |
 

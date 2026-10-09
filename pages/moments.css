@@ -835,6 +835,9 @@ body.media-modal-open{overflow:hidden}
 .activation-inline{display:grid;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
 .activation-inline h3{font-size:1rem;margin:0 0 4px}
 .activation-inline-form{display:grid;gap:10px}
+.resume-code{margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:1.15rem;font-weight:700;letter-spacing:.08em}
+.resume-title{margin:0;font-weight:600}
+#pendingResumeCard .text-button{margin-top:4px}
 .account-card p{margin:4px 0 0;color:var(--muted);font-size:.84rem;word-break:break-all}
 .empty-inline{margin:0;color:var(--muted);font-size:.84rem;line-height:1.5;padding:8px 2px}
 

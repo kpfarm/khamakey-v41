@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v302 live** · CSS **v283** | Un passo successivo nel Riepilogo |
+| Editor Moments | **v303 live** · CSS **v284** | Dopo la mail il codice non si riscrive |
 | Worker | **v241-activation-alert** | Email staff su attivazione codice |
 | Officina | **v203** | PNG codice più basso |
 

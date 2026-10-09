@@ -16,7 +16,7 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=264";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=265";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=230";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=234";
@@ -448,6 +448,32 @@ function readPendingMomentActivation(){
 function clearPendingMomentActivation(){
   try{ localStorage.removeItem(PENDING_MOMENT_KEY); }catch{ /* ignore */ }
   try{ sessionStorage.removeItem(PENDING_MOMENT_KEY); }catch{ /* ignore */ }
+}
+
+let pendingActivationResume = null;
+
+function setPendingActivationResume(code, title, error){
+  const clean = normalizeCode(code);
+  if(!clean){
+    pendingActivationResume = null;
+    return;
+  }
+  pendingActivationResume = {
+    code:clean,
+    title:String(title || "").trim(),
+    error:String(error || "").trim()
+  };
+}
+
+async function clearPendingMomentMetadata(){
+  if(!supabase) return;
+  try{
+    const { data, error } = await supabase.auth.updateUser({
+      data:{ pending_moment_code:"", pending_moment_title:"" }
+    });
+    if(error) return;
+    if(data?.user) currentUser = data.user;
+  }catch{ /* ignore */ }
 }
 
 const PENDING_INVITE_KEY = "khamakey_pending_moment_invite";
@@ -1744,6 +1770,7 @@ function renderAccountPanels(){
     return;
   }
   accountPanels.innerHTML = `
+    ${renderPendingResumeHtml()}
     <div class="account-panel-card">
       <h3>${esc(t("account.products.title"))}</h3>
       <p>${esc(t("account.products.lead"))}</p>
@@ -1754,13 +1781,16 @@ function renderAccountPanels(){
       <div class="objects-switcher" id="objectsSwitcher">${renderObjectsListHtml()}</div>
     </div>
     ${renderEditorsCardHtml()}
-    <div class="account-panel-card">
+    ${pendingActivationResume ? "" : `<div class="account-panel-card">
       <h3>${esc(rows.length ? t("account.activate.another") : t("account.activate.first"))}</h3>
       <p>${esc(t("account.activate.lead"))}</p>
       ${renderActivationFormHtml("accountActivationForm","accountActivationStatus")}
-    </div>`;
+    </div>`}`;
   bindObjectSwitcher(accountPanels);
-  bindActivationForm(document.getElementById("accountActivationForm"), document.getElementById("accountActivationStatus"));
+  if(!pendingActivationResume){
+    bindActivationForm(document.getElementById("accountActivationForm"), document.getElementById("accountActivationStatus"));
+  }
+  bindPendingResumeForm();
   bindMomentEditorsCard();
 }
 
@@ -2194,6 +2224,7 @@ async function tryPendingActivation(user){
   if(!pendingCode) return;
   if(rows.some(row=>normalizeCode(row.nfc_code) === pendingCode)){
     clearPendingMomentActivation();
+    pendingActivationResume = null;
     return;
   }
   const title = String(stored?.title || user?.user_metadata?.pending_moment_title || "").trim();
@@ -2202,6 +2233,8 @@ async function tryPendingActivation(user){
     try{
       const item = await activateCode({ code:pendingCode, title, pin });
       clearPendingMomentActivation();
+      pendingActivationResume = null;
+      await clearPendingMomentMetadata();
       activeId = item.event_id || "";
       rememberPin(activeId, pin);
       await loadObjects({ render:true });
@@ -2209,24 +2242,13 @@ async function tryPendingActivation(user){
       return;
     }catch(error){
       console.error(error);
-      showAccountHub("products");
-      const status = document.getElementById("accountActivationStatus");
-      if(status) setStatus(status, error.message || t("auth.msg.activate_fail"),"error");
-      const codeInput = document.querySelector("#accountActivationForm [name='code']");
-      if(codeInput) codeInput.value = formatMomentCodeDisplay(pendingCode);
+      setPendingActivationResume(pendingCode, title, error.message || t("auth.msg.activate_fail"));
+      await showAccountHub("products");
       return;
     }
   }
-  if(activeId){
-    showEditorView();
-    renderDetail(activeId);
-  }else{
-    showAccountHub("products");
-    const codeInput = document.querySelector("#accountActivationForm [name='code']");
-    if(codeInput) codeInput.value = formatMomentCodeDisplay(pendingCode);
-    const status = document.getElementById("accountActivationStatus");
-    if(status) setStatus(status, t("auth.msg.pending_code", { code: formatMomentCodeDisplay(pendingCode) }));
-  }
+  setPendingActivationResume(pendingCode, title, "");
+  await showAccountHub("products");
 }
 
 function renderObjectsListHtml(){
@@ -3020,6 +3042,69 @@ function bindObjectSwitcher(root){
   });
 }
 
+function renderPendingResumeHtml(){
+  if(!pendingActivationResume?.code) return "";
+  const code = formatMomentCodeDisplay(pendingActivationResume.code);
+  const title = String(pendingActivationResume.title || "").trim();
+  const titleField = title
+    ? `<p class="resume-title">${esc(t("auth.resume.title_set", { title }))}</p>`
+    : `<label><span>${esc(t("activate.page"))}</span><input name="title" placeholder="${esc(t("activate.page.ph"))}" required></label>`;
+  return `<div class="account-panel-card" id="pendingResumeCard">
+    <h3>${esc(t("auth.resume.title"))}</h3>
+    <p>${esc(t("auth.resume.lead"))}</p>
+    <p class="resume-code">${esc(code)}</p>
+    <form id="pendingResumeForm" class="activation-inline-form">
+      ${titleField}
+      <label><span>${esc(t("auth.resume.pin"))}</span>
+        <input name="access_pin" inputmode="numeric" autocomplete="one-time-code" placeholder="${esc(t("activate.pin.ph"))}" minlength="4" required>
+        <span class="field-hint">${esc(t("auth.resume.pin.hint"))}</span>
+      </label>
+      <button type="submit" class="primary">${esc(t("auth.resume.submit"))}</button>
+    </form>
+    <p class="status" id="pendingResumeStatus"></p>
+    <button type="button" class="text-button" id="pendingResumeOtherCode">${esc(t("auth.resume.other"))}</button>
+  </div>`;
+}
+
+function bindPendingResumeForm(){
+  const form = document.getElementById("pendingResumeForm");
+  const statusEl = document.getElementById("pendingResumeStatus");
+  const resume = pendingActivationResume;
+  if(!form || !resume?.code) return;
+  if(resume.error && statusEl) setStatus(statusEl, resume.error, "error");
+  form.addEventListener("submit", async event=>{
+    event.preventDefault();
+    const data = new FormData(form);
+    const title = String(resume.title || data.get("title") || "").trim();
+    const pin = String(data.get("access_pin") || "").trim();
+    if(!title) return setStatus(statusEl, t("auth.msg.page_title_required"), "error");
+    try{ validatePin(pin); }catch(error){ return setStatus(statusEl, error.message, "error"); }
+    setStatus(statusEl, t("auth.msg.linking"));
+    try{
+      const item = await activateCode({ code:resume.code, title, pin });
+      clearPendingMomentActivation();
+      pendingActivationResume = null;
+      await clearPendingMomentMetadata();
+      activeId = item.event_id || activeId;
+      rememberPin(activeId, pin);
+      setStatus(statusEl, t("auth.msg.linked_ok"), "ok");
+      activeEditorPanel = "overview";
+      activeNavGroup = "page";
+      await loadObjects();
+      if(activeId) showPinSuccessBanner(activeId, pin, title);
+    }catch(error){
+      console.error(error);
+      setStatus(statusEl, error.message || t("auth.msg.link_fail"), "error");
+    }
+  });
+  document.getElementById("pendingResumeOtherCode")?.addEventListener("click", async()=>{
+    pendingActivationResume = null;
+    clearPendingMomentActivation();
+    await clearPendingMomentMetadata();
+    showAccountHub("products");
+  });
+}
+
 function bindActivationForm(form,statusEl){
   if(!form) return;
   bindCodeInputs(form);
@@ -3036,6 +3121,8 @@ function bindActivationForm(form,statusEl){
     try{
       const item = await activateCode({code,title,pin});
       clearPendingMomentActivation();
+      pendingActivationResume = null;
+      await clearPendingMomentMetadata();
       activeId = item.event_id || activeId;
       rememberPin(activeId,pin);
       form.reset();

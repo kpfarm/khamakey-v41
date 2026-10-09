@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-10-09 | Cursor | **Moments v303**: dopo la mail di conferma il codice del pacchetto non si riscrive. Se manca il PIN, si chiede solo quello. |
 | 2026-10-08 | Cursor | **Moments v302**: nel Riepilogo un solo passo con pulsante; il codice resta sul dispositivo dopo la mail. |
 | 2026-10-08 | Cursor | **Moments CSS v282**: titoli di sezione grandi, schede medie, etichette piccole. |
 | 2026-10-08 | Cursor | **Moments v301 + Worker v241**: email allo staff quando un cliente attiva un codice. |

@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v303 (2026-10-09)** — live
+  - Dopo la mail di conferma il codice del pacchetto non si riscrive. Se il PIN non è su quel browser, si vede il codice già salvato e si chiede solo il PIN scelto in registrazione.
+  - NFC, Salva, upload **invariati**.
 - **Moments v302 (2026-10-08)** — live
   - Dopo l’attivazione il Riepilogo mostra un solo passo, nel riquadro scuro, con un pulsante. Il codice e il PIN restano sul telefono anche se la mail di conferma si apre in un’altra scheda.
   - NFC, Salva, upload **invariati**.

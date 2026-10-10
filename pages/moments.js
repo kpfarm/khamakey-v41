@@ -17,7 +17,7 @@ import {
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=267";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=230";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=231";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=235";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=218";
@@ -3937,6 +3937,8 @@ function bindDesignPanelHandlers(formNode){
       }
       syncPaletteButtons(formNode, key);
       onDesignChange();
+      historyPointerDown = false;
+      sealHistoryBurst();
     });
   });
 
@@ -3952,6 +3954,8 @@ function bindDesignPanelHandlers(formNode){
     if(!select || !next || select.value === next) return;
     select.value = next;
     select.dispatchEvent(new Event("change", { bubbles:true }));
+    historyPointerDown = false;
+    sealHistoryBurst();
   });
   ensureFontPairPicker();
   updateDesignSwatch(formNode);
@@ -4065,8 +4069,11 @@ function ensureFontPairPicker(){
       const select = picker?.querySelector('[name="font_pair"]');
       const next = optionBtn.dataset.fontPair || "";
       if(select && next && select.value !== next){
+        if(!historyBurst) beginHistoryStep(select);
         select.value = next;
         select.dispatchEvent(new Event("change", { bubbles:true }));
+        historyPointerDown = false;
+        sealHistoryBurst();
       }
       syncFontPairPicker(picker);
       closeFontPairMenus();
@@ -4662,9 +4669,6 @@ function updateSaveStatus(saved){
     barMsg.setAttribute("data-i18n-html", "shell.save_bar");
     barMsg.innerHTML = t("shell.save_bar");
   }
-  document.querySelectorAll(".editor-undo-btn, .editor-redo-btn").forEach(button=>{
-    button.hidden = false;
-  });
   refreshUndoButtons();
 }
 
@@ -4758,7 +4762,8 @@ function currentEditorSnapshot(){
 }
 
 function canUndoEditor(){
-  return editorUndoStack.length > 0;
+  if(editorUndoStack.length > 0 || editorDirty) return true;
+  return Boolean(historyBurst && historyTargetIsText(historyBurstField));
 }
 
 function canRedoEditor(){
@@ -4774,9 +4779,18 @@ function refreshUndoButtons(){
   });
   document.querySelectorAll(".editor-redo-btn").forEach(button=>{
     button.disabled = !redoOn;
-    button.hidden = false;
+    button.hidden = !redoOn;
   });
-  document.getElementById("momentsSaveBar")?.classList.toggle("has-history", undoOn || redoOn);
+  const bar = document.getElementById("momentsSaveBar");
+  const redoOnly = redoOn && !editorDirty;
+  bar?.classList.toggle("has-redo", redoOnly);
+  bar?.classList.remove("has-history");
+  const barMsg = bar?.querySelector(".save-msg");
+  if(barMsg && redoOnly){
+    barMsg.hidden = false;
+    barMsg.setAttribute("data-i18n-html", "shell.redo_bar");
+    barMsg.innerHTML = t("shell.redo_bar");
+  }
 }
 
 function beginHistoryStep(field){
@@ -4786,15 +4800,21 @@ function beginHistoryStep(field){
   if(!snap) return;
   historyBurst = snap;
   historyBurstField = field || null;
+  refreshUndoButtons();
 }
 
-function scheduleHistorySeal(delay){
+function scheduleHistorySeal(delay, attempt = 0){
   clearTimeout(scheduleHistorySeal.timer);
   scheduleHistorySeal.timer = setTimeout(()=>{
-    if(uploadBusy || historyPointerDown){
-      scheduleHistorySeal(120);
+    if(uploadBusy){
+      scheduleHistorySeal(120, attempt);
       return;
     }
+    if(historyPointerDown && attempt < 8){
+      scheduleHistorySeal(120, attempt + 1);
+      return;
+    }
+    historyPointerDown = false;
     sealHistoryBurst();
   }, delay);
 }
@@ -4847,22 +4867,31 @@ function applyEditorSnapshot(snapshot){
   if(!row || !snapshot) return;
   let state;
   try{ state = JSON.parse(snapshot); }catch{ return; }
-  const focus = captureEditorFocus();
   const scrollY = window.scrollY;
   const panel = activeEditorPanel;
   const baseline = savedEditorSnapshot;
   historyLock = true;
   suppressDirtyUi = true;
+  clearTimeout(markEditorDirty.timer);
+  let held = false;
+  const releaseHistoryLock = ()=>{
+    historyLock = false;
+    suppressDirtyUi = false;
+    refreshUndoButtons();
+  };
   try{
+    const active = document.activeElement;
+    if(active && active !== document.body && typeof active.blur === "function") active.blur();
     row.page_state = state;
-    row.title = state.title || row.title;
-    row.description = state.description ?? row.description;
+    if(typeof state.title === "string") row.title = state.title;
+    if(typeof state.description === "string") row.description = state.description;
     if(state.type){
       row.moment_type = state.type;
       row.event_type = state.type;
     }
     renderDetail(activeId, {
       skipDraft:true,
+      skipBootstrap:true,
       keepHistory:true,
       savedBaseline:baseline,
       restoredSnapshot:snapshot
@@ -4872,34 +4901,46 @@ function applyEditorSnapshot(snapshot){
     syncMobileNav(panel);
     const hint = document.getElementById("editorActionHint");
     if(hint) hint.hidden = true;
+    held = true;
     requestAnimationFrame(()=>{
       window.scrollTo(0, scrollY);
-      restoreEditorFocus(focus);
       const form = document.getElementById("momentEditorForm");
       if(form) schedulePreviewUpdate(form, { immediate:true, force:true });
     });
+    // Il telefono può riscrivere l’ultima lettera nel campo appena ricreato.
+    setTimeout(releaseHistoryLock, 80);
   }finally{
-    historyLock = false;
-    suppressDirtyUi = false;
-    refreshUndoButtons();
+    if(!held) releaseHistoryLock();
   }
 }
 
 function undoEditorChange(){
   if(!editorSurfaceOpen() || historyLock || saveInFlight || bootstrapInFlight || uploadBusy) return;
+  historyPointerDown = false;
+  clearTimeout(markEditorDirty.timer);
   sealHistoryBurst();
-  const prev = editorUndoStack.pop();
-  if(!prev){
-    refreshUndoButtons();
+  let prev = editorUndoStack.pop();
+  const now = currentEditorSnapshot();
+  if((!prev || prev === now) && editorDirty && savedEditorSnapshot && savedEditorSnapshot !== now){
+    prev = savedEditorSnapshot;
+  }
+  if(!prev || prev === now){
+    if(now && savedEditorSnapshot && now === savedEditorSnapshot){
+      editorDirty = false;
+      updateSaveStatus(true);
+    }else{
+      refreshUndoButtons();
+    }
     return;
   }
-  const now = currentEditorSnapshot();
   if(now) editorRedoStack.push(now);
   applyEditorSnapshot(prev);
 }
 
 function redoEditorChange(){
   if(!editorSurfaceOpen() || historyLock || saveInFlight || bootstrapInFlight || uploadBusy) return;
+  historyPointerDown = false;
+  clearTimeout(markEditorDirty.timer);
   sealHistoryBurst();
   const next = editorRedoStack.pop();
   if(!next){
@@ -4907,7 +4948,11 @@ function redoEditorChange(){
     return;
   }
   const now = currentEditorSnapshot();
-  if(now) editorUndoStack.push(now);
+  if(!now || now === next){
+    refreshUndoButtons();
+    return;
+  }
+  editorUndoStack.push(now);
   applyEditorSnapshot(next);
 }
 
@@ -4922,14 +4967,18 @@ function historyTargetIsText(el){
 function ensureEditorHistory(){
   if(document.body.dataset.momentsHistoryBound === "1") return;
   document.body.dataset.momentsHistoryBound = "1";
+  document.addEventListener("mousedown", event=>{
+    if(event.target?.closest?.(".editor-undo-btn, .editor-redo-btn")) event.preventDefault();
+  }, true);
   document.addEventListener("click", event=>{
     const undoBtn = event.target?.closest?.(".editor-undo-btn");
     const redoBtn = event.target?.closest?.(".editor-redo-btn");
     if(!undoBtn && !redoBtn) return;
+    if(undoBtn?.disabled && redoBtn?.disabled) return;
     event.preventDefault();
-    if(undoBtn) undoEditorChange();
-    else redoEditorChange();
-  });
+    if(undoBtn && !undoBtn.disabled) undoEditorChange();
+    else if(redoBtn && !redoBtn.disabled) redoEditorChange();
+  }, true);
   document.addEventListener("keydown", event=>{
     if(!(event.metaKey || event.ctrlKey) || event.altKey) return;
     const key = String(event.key || "").toLowerCase();
@@ -4964,8 +5013,15 @@ function ensureEditorHistory(){
     if(historyBurst) sealHistoryBurst();
     beginHistoryStep(hit);
   }, true);
-  document.addEventListener("pointerup", ()=>{ historyPointerDown = false; });
-  document.addEventListener("pointercancel", ()=>{ historyPointerDown = false; });
+  document.addEventListener("pointerup", ()=>{ historyPointerDown = false; }, true);
+  document.addEventListener("pointercancel", ()=>{ historyPointerDown = false; }, true);
+  document.addEventListener("focusout", event=>{
+    if(historyLock || !historyBurst) return;
+    const form = document.getElementById("momentEditorForm");
+    if(!form || !form.contains(event.target) || !historyTargetIsText(event.target)) return;
+    historyPointerDown = false;
+    scheduleHistorySeal(0);
+  }, true);
 }
 
 function revertEditorChanges(){
@@ -5476,7 +5532,7 @@ function renderDetail(id, options = {}){
       }
     }
   });
-  if(needsFreshTemplateBootstrap(row)){
+  if(!options.skipBootstrap && needsFreshTemplateBootstrap(row)){
     // Struttura categoria (sezioni/look/titoli) senza testi stock; «Prepara tutto per me» resta opt-in
     bootstrapFreshMomentPage(row, editorForm);
   }else if(restoredDraft){
@@ -6649,7 +6705,8 @@ function markEditorDirty(formNode, options = {}){
   if(historyBurst) scheduleHistorySeal(historyTargetIsText(historyBurstField) ? 480 : 80);
   scheduleHowEmptyHintRefresh(formNode);
   const applySnapshot = ()=>{
-    if(!formNode || suppressDirtyUi || saveInFlight) return;
+    const liveForm = document.getElementById("momentEditorForm");
+    if(!formNode?.isConnected || formNode !== liveForm || suppressDirtyUi || saveInFlight) return;
     try{
       const snapshot = formSnapshotForDirty(formNode);
       editorDirty = snapshot !== savedEditorSnapshot;
@@ -7063,6 +7120,7 @@ async function saveMoment(event,row, options = {}){
     }
     clearTimeout(markEditorDirty.timer);
     clearEditorDraft(row.id);
+    resetEditorHistory();
     // Se durante il Salva hanno digitato altro, non marcare "salvato" a falso
     let moreEditsDuringSave = false;
     try{

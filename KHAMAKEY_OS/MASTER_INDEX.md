@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v308 live** · CSS **v287** | In Colori le scelte si vedono prima di toccarle |
+| Editor Moments | **v309 live** · CSS **v288** | Annulla rimette il testo; Rimetti solo dopo un annullamento |
 | Worker | **v241-activation-alert** | Email staff su attivazione codice |
 | Officina | **v203** | PNG codice più basso |
 

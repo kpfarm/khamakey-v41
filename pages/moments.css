@@ -911,14 +911,15 @@ body.media-modal-open{overflow:hidden}
 .editor-mobile-nav{display:none}
 
 /* Save bar + preview FAB + bottom nav (stile Business) */
-.save-bar{position:fixed;bottom:0;left:0;right:0;background:var(--navy);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:300;transform:translateY(100%);transition:transform .3s;box-shadow:0 -4px 20px rgba(27,42,94,.25)}
+.save-bar{position:fixed;bottom:0;left:0;right:0;background:var(--navy);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:460;transform:translateY(100%);transition:transform .3s;box-shadow:0 -4px 20px rgba(27,42,94,.25)}
 .save-bar-actions{display:flex;align-items:center;gap:8px}
 .btn-undo{border:1px solid rgba(255,255,255,.28);background:transparent;color:#fff;border-radius:10px;padding:9px 12px;font-size:.78rem;font-weight:800;cursor:pointer;flex-shrink:0;white-space:nowrap}
 .btn-undo:hover{background:rgba(255,255,255,.1)}
 .btn-undo:disabled{opacity:.4;cursor:default}
 .btn-undo:disabled:hover{background:transparent}
-.save-bar.has-history{transform:translateY(0)}
-.save-bar.has-history:not(.visible) .save-msg{visibility:hidden}
+.save-bar.has-redo:not(.visible){transform:translateY(0)}
+.save-bar.has-redo:not(.visible) .editor-undo-btn,
+.save-bar.has-redo:not(.visible) .btn-save{display:none}
 .btn-undo[hidden]{display:none!important}
 .save-bar.visible{transform:translateY(0)}
 .save-msg{color:rgba(255,255,255,.7);font-size:.78rem;line-height:1.3}
@@ -1087,7 +1088,7 @@ body.media-modal-open{overflow:hidden}
     border-radius:0;
     box-shadow:none;
   }
-  .save-bar.visible,.save-bar.has-history{bottom:var(--bottomnav-h)}
+  .save-bar.visible,.save-bar.has-redo{bottom:var(--bottomnav-h)}
   .object-pick{padding:14px}
   .editor-card{padding:12px}
   .editor-topbar-actions .editor-open-link,.editor-topbar-actions .quick-publish{display:none}

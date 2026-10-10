@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-10-10 | Cursor | **Moments v309**: Annulla rimette il testo e chiude il banner; Rimetti riporta solo la modifica annullata. |
 | 2026-10-10 | Cursor | **Moments v308**: in Colori atmosfera, copertina, taglio e sfumatura si scelgono da un disegno. |
 | 2026-10-10 | Cursor | **Moments v307**: in registrazione la password è per entrare nell’account e il PIN è per chi apre la pagina. |
 | 2026-10-10 | Cursor | **Moments v306**: in «Stile scritte» ogni font mostra «KhamaKey Moments» in quel carattere. |

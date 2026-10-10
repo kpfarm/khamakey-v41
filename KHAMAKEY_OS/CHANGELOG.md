@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v309 (2026-10-10)** — live
+  - Annulla rimette il testo com’era e, se la pagina torna all’ultimo Salva, il banner si chiude. Salva chiude il banner. Rimetti compare solo dopo un annullamento e riporta quella modifica.
+  - NFC, Salva, upload **invariati**.
 - **Moments v308 (2026-10-10)** — live
   - In Colori, atmosfera, copertina, taglio e sfumatura si scelgono da un disegno. Il riquadro «Ecco come sarà» mostra colore, font e forma insieme.
   - NFC, Salva, upload **invariati**.

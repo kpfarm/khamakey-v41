@@ -19,7 +19,7 @@ import {
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=266";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=230";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=234";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=235";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=218";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=261";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
@@ -3653,6 +3653,7 @@ function applyPageLook(formNode, lookId, { preview = true, resetZoom = true } = 
   syncPaletteButtons(formNode, look.palette);
   syncLookCards(formNode, lookId);
   updateDesignSwatch(formNode);
+  syncFontPairPicker(formNode.querySelector(".font-pair-picker"));
   markEditorDirty(formNode);
   if(preview) schedulePreviewUpdate(formNode,{ immediate:true });
 }
@@ -3909,6 +3910,142 @@ function bindDesignPanelHandlers(formNode){
   ["theme_variant","font_pair","hero_style"].forEach(name=>{
     formNode.querySelector(`[name="${name}"]`)?.addEventListener("change", onDesignChange);
   });
+  ensureFontPairPicker();
+}
+
+function fontPairChoices(current){
+  return Object.entries(FONT_PAIRS).filter(([value])=>value !== "romantic" || current === "romantic");
+}
+
+function renderFontPairPicker(current){
+  const entries = fontPairChoices(current);
+  const selected = FONT_PAIRS[current] || FONT_PAIRS.classic;
+  const sample = t("design.font.sample");
+  const options = entries.map(([value, meta])=>{
+    const on = value === current;
+    return `<button type="button" class="font-pair-option${on ? " is-selected" : ""}" data-font-pair="${esc(value)}" role="option" aria-selected="${on ? "true" : "false"}">
+      <span class="font-pair-name">${esc(localizeFieldPhrase(meta.label))}</span>
+      <span class="font-pair-sample" style="font-family:${esc(meta.display)}">${esc(sample)}</span>
+    </button>`;
+  }).join("");
+  return `<div class="font-pair-field">
+    <label>${lfSpan("Stile scritte")}</label>
+    <div class="font-pair-picker">
+      <select name="font_pair" class="font-pair-native" tabindex="-1" aria-hidden="true">
+        ${entries.map(([value, meta])=>option(value, meta.label, current)).join("")}
+      </select>
+      <button type="button" class="font-pair-trigger" aria-haspopup="listbox" aria-expanded="false">
+        <span class="font-pair-name">${esc(localizeFieldPhrase(selected.label))}</span>
+        <span class="font-pair-sample" style="font-family:${esc(selected.display)}">${esc(sample)}</span>
+      </button>
+      <div class="font-pair-menu" role="listbox" hidden>${options}</div>
+    </div>
+  </div>`;
+}
+
+function syncFontPairPicker(picker){
+  if(!picker) return;
+  const select = picker.querySelector('[name="font_pair"]');
+  const value = select?.value || "classic";
+  const meta = FONT_PAIRS[value] || FONT_PAIRS.classic;
+  const sample = t("design.font.sample");
+  const trigger = picker.querySelector(".font-pair-trigger");
+  const name = trigger?.querySelector(".font-pair-name");
+  const triggerSample = trigger?.querySelector(".font-pair-sample");
+  if(name) name.textContent = localizeFieldPhrase(meta.label);
+  if(triggerSample){
+    triggerSample.textContent = sample;
+    triggerSample.style.fontFamily = meta.display;
+  }
+  const menu = picker._menu || picker.querySelector(".font-pair-menu");
+  menu?.querySelectorAll(".font-pair-option").forEach(button=>{
+    const on = button.dataset.fontPair === value;
+    button.classList.toggle("is-selected", on);
+    button.setAttribute("aria-selected", on ? "true" : "false");
+    const sampleNode = button.querySelector(".font-pair-sample");
+    if(sampleNode) sampleNode.textContent = sample;
+  });
+}
+
+function closeFontPairMenus(){
+  document.querySelectorAll(".font-pair-menu").forEach(menu=>{
+    menu.hidden = true;
+    const picker = menu._picker;
+    picker?.classList.remove("is-open");
+    picker?.querySelector(".font-pair-trigger")?.setAttribute("aria-expanded", "false");
+    if(picker && menu.parentElement === document.body) picker.appendChild(menu);
+  });
+}
+
+function openFontPairMenu(picker){
+  closeFontPairMenus();
+  document.querySelectorAll("body > .font-pair-menu").forEach(menu=>{
+    if(!menu._picker || !menu._picker.isConnected) menu.remove();
+  });
+  const menu = picker.querySelector(".font-pair-menu") || picker._menu;
+  const trigger = picker.querySelector(".font-pair-trigger");
+  if(!menu || !trigger) return;
+  menu._picker = picker;
+  picker._menu = menu;
+  document.body.appendChild(menu);
+  const rect = trigger.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const openUp = spaceBelow < 240 && rect.top > spaceBelow;
+  menu.hidden = false;
+  menu.style.position = "fixed";
+  menu.style.left = `${Math.max(8, rect.left)}px`;
+  menu.style.width = `${Math.min(rect.width, window.innerWidth - 16)}px`;
+  menu.style.zIndex = "700";
+  if(openUp){
+    menu.style.top = "auto";
+    menu.style.bottom = `${window.innerHeight - rect.top + 6}px`;
+    menu.style.maxHeight = `${Math.max(160, rect.top - 16)}px`;
+  }else{
+    menu.style.bottom = "auto";
+    menu.style.top = `${rect.bottom + 6}px`;
+    menu.style.maxHeight = `${Math.max(160, spaceBelow - 16)}px`;
+  }
+  picker.classList.add("is-open");
+  trigger.setAttribute("aria-expanded", "true");
+}
+
+function ensureFontPairPicker(){
+  if(document.body.dataset.fontPairBound === "1") return;
+  document.body.dataset.fontPairBound = "1";
+  document.addEventListener("click", event=>{
+    const optionBtn = event.target.closest?.(".font-pair-option");
+    if(optionBtn){
+      event.preventDefault();
+      const menu = optionBtn.closest(".font-pair-menu");
+      const picker = menu?._picker;
+      const select = picker?.querySelector('[name="font_pair"]');
+      const next = optionBtn.dataset.fontPair || "";
+      if(select && next && select.value !== next){
+        select.value = next;
+        select.dispatchEvent(new Event("change", { bubbles:true }));
+      }
+      syncFontPairPicker(picker);
+      closeFontPairMenus();
+      return;
+    }
+    const trigger = event.target.closest?.(".font-pair-trigger");
+    if(trigger){
+      event.preventDefault();
+      const picker = trigger.closest(".font-pair-picker");
+      if(!picker) return;
+      if(picker.classList.contains("is-open")) closeFontPairMenus();
+      else openFontPairMenu(picker);
+      return;
+    }
+    if(!event.target.closest?.(".font-pair-menu")) closeFontPairMenus();
+  });
+  document.addEventListener("keydown", event=>{
+    if(event.key === "Escape") closeFontPairMenus();
+  });
+  window.addEventListener("scroll", event=>{
+    if(event.target?.closest?.(".font-pair-menu")) return;
+    closeFontPairMenus();
+  }, true);
 }
 
 function renderDesignSuggestBanner(momentType, currentLook){
@@ -3959,11 +4096,7 @@ function renderDesignPanel(state){
         </select>
       </label>
       <p class="field-hint">${lfSpan("Chiaro · Caldo (sfondo più intenso) · Scuro (pagina di sera)")}</p>
-      <label>${lfSpan("Stile scritte")}
-        <select name="font_pair">
-          ${Object.entries(FONT_PAIRS).filter(([value])=>value !== "romantic" || fontPair === "romantic").map(([value,meta])=>option(value,meta.label,fontPair)).join("")}
-        </select>
-      </label>
+      ${renderFontPairPicker(fontPair)}
       <label>${lfSpan("Copertina in alto")}
         <select name="hero_style">
           ${Object.entries(HERO_STYLES).map(([value,label])=>option(value,label,state.heroStyle || "classico")).join("")}
@@ -4984,6 +5117,7 @@ function promptSaveReminder(message = t("save.reminder_default")){
 }
 
 function renderDetail(id, options = {}){
+  closeFontPairMenus();
   invalidateLivePreview();
   activeId = id;
   if(!options.keepHistory) resetEditorHistory();

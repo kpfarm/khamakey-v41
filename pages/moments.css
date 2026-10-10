@@ -836,6 +836,17 @@ body.media-modal-open{overflow:hidden}
 .activation-inline{display:grid;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
 .activation-inline h3{font-size:1rem;margin:0 0 4px}
 .activation-inline-form{display:grid;gap:10px}
+.font-pair-field{display:grid;gap:6px}
+.font-pair-field > label{margin:0}
+.font-pair-picker{position:relative}
+.font-pair-native{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.font-pair-trigger,.font-pair-option{width:100%;display:flex;align-items:baseline;justify-content:space-between;gap:6px 12px;flex-wrap:wrap;text-align:left;color:var(--text)}
+.font-pair-trigger{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;min-height:56px}
+.font-pair-option{border:0;border-radius:8px;padding:8px 10px;min-height:52px;background:transparent}
+.font-pair-option.is-selected,.font-pair-option:hover{background:var(--soft)}
+.font-pair-name{flex:1 1 9rem;font-family:"DM Sans",sans-serif;font-size:.86rem;font-weight:600;line-height:1.25}
+.font-pair-sample{flex:1 1 8rem;margin-left:auto;font-size:1.65rem;font-weight:400;line-height:1.45;color:var(--navy);text-align:right;white-space:nowrap}
+.font-pair-menu{background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 16px 40px rgba(7,26,60,.16);overflow:auto;padding:6px}
 .resume-code{margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:1.15rem;font-weight:700;letter-spacing:.08em}
 .resume-title{margin:0;font-weight:600}
 #pendingResumeCard .text-button{margin-top:4px}

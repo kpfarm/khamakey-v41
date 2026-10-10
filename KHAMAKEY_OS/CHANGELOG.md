@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v306 (2026-10-10)** — live
+  - Nella lista «Stile scritte» ogni font mostra accanto al nome la scritta «KhamaKey Moments» in quel carattere. Chiudere la lista senza scegliere non salva.
+  - NFC, Salva, upload **invariati**.
 - **Moments v305 (2026-10-10)** — live
   - In tutto l’editor, Annulla, Ripeti e Salva escono solo se la pagina è davvero cambiata. Aprire una tendina, un menu o un controllo e richiuderlo senza modificare non conta.
   - NFC, Salva, upload **invariati**.

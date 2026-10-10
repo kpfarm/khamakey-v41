@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-10** (Moments **v305** Annulla/Salva solo se cambia la pagina; SQL **v181**; Worker **v241**)
+> Ultimo aggiornamento: **2026-10-10** (Moments **v306** anteprima font «KhamaKey Moments»; SQL **v181**; Worker **v241**)
 
 ### Fonte di verità versioni
 
@@ -108,7 +108,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v241-activation-alert** | Email allo staff a ogni nuova attivazione. |
-| **Moments editor** | **v305 live** · CSS **v285** | Annulla/Salva solo se la pagina è cambiata. |
+| **Moments editor** | **v306 live** · CSS **v286** | Lista font con «KhamaKey Moments» nel carattere. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v181 (prod)** | v181 tetto invitati = 4. v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-10:** Editor **v305**: Annulla/Salva solo se la pagina è cambiata. Worker **v241**. SQL **v181**.  
+> **Oggi 2026-10-10:** Editor **v306**: ogni font mostra «KhamaKey Moments» in quel carattere. Worker **v241**. SQL **v181**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v305 live** · CSS **v285** | Annulla/Salva solo se la pagina è cambiata |
+| Editor Moments | **v306 live** · CSS **v286** | Lista font con «KhamaKey Moments» nel carattere |
 | Worker | **v241-activation-alert** | Email staff su attivazione codice |
 | Officina | **v203** | PNG codice più basso |
 

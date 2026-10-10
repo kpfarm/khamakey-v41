@@ -195,6 +195,7 @@ textarea{min-height:86px;resize:vertical}
 .account-legal-links a{color:var(--navy);text-decoration:none}
 .account-legal-links a:hover{text-decoration:underline}
 .status{margin:10px 0 0;color:var(--muted);font-size:.86rem;min-height:1.2em}.status.error{color:var(--red)}.status.ok{color:var(--green-dark)}
+.status.notice{margin-top:14px;padding:12px 14px;border-radius:12px;background:#fff7ed;border:1px solid #fdba74;color:#9a3412;line-height:1.45;min-height:0}
 
 /* App */
 .moments-app{min-height:100dvh;background:radial-gradient(circle at 8% 0%, rgba(243,227,222,.9) 0%, transparent 38%), radial-gradient(circle at 100% 100%, rgba(7,26,60,.05) 0%, transparent 42%), var(--bg)}

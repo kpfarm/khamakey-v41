@@ -16,7 +16,7 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=265";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=266";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=230";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=234";
@@ -996,6 +996,22 @@ async function copyText(value,button){
   }catch{
     window.prompt("Copia questo link:",value);
   }
+}
+
+function isAlreadyRegisteredSignup(data, error){
+  const code = String(error?.code || "");
+  const message = String(error?.message || "");
+  if(code === "user_already_exists" || /already registered|already been registered/i.test(message)) return true;
+  const identities = data?.user?.identities;
+  return Array.isArray(identities) && identities.length === 0;
+}
+
+function showAlreadyRegistered(email, messageKey){
+  showAuthTab("login");
+  const loginEmail = document.getElementById("momentsEmail");
+  if(loginEmail && email) loginEmail.value = email;
+  setStatus(statusNode, t(messageKey), "notice");
+  statusNode?.scrollIntoView({ behavior:"smooth", block:"nearest" });
 }
 
 function showAuthTab(tab){
@@ -7073,6 +7089,9 @@ signupForm?.addEventListener("submit",async event=>{
         }
       }
     });
+    if(isAlreadyRegisteredSignup(data, error)){
+      return showAlreadyRegistered(email, "auth.msg.already_registered_invite");
+    }
     if(error) return setStatus(statusNode,error.message || t("auth.msg.signup_fail"),"error");
     if(data.session?.user){
       await showApp(data.session.user);
@@ -7107,6 +7126,9 @@ signupForm?.addEventListener("submit",async event=>{
       }
     }
   });
+  if(isAlreadyRegisteredSignup(data, error)){
+    return showAlreadyRegistered(email, "auth.msg.already_registered");
+  }
   if(error) return setStatus(statusNode,error.message || t("auth.msg.signup_fail"),"error");
   if(data.session?.user){
     try{

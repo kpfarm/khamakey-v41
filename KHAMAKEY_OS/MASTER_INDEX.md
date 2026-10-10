@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v303 live** · CSS **v284** | Dopo la mail il codice non si riscrive |
+| Editor Moments | **v304 live** · CSS **v285** | Email già registrata: percorso per un altro Moment |
 | Worker | **v241-activation-alert** | Email staff su attivazione codice |
 | Officina | **v203** | PNG codice più basso |
 

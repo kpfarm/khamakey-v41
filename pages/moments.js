@@ -3848,18 +3848,51 @@ function renderPalettePicker(current){
   }).join("")}</div><input type="hidden" name="color_palette" id="colorPaletteInput" value="${esc(active)}">`;
 }
 
+function applySwatchColors(node, colors){
+  if(!node || !colors) return;
+  node.style.setProperty("--sw-bl", colors.bl);
+  node.style.setProperty("--sw-go", colors.go);
+  node.style.setProperty("--sw-ro", colors.ro);
+  node.style.setProperty("--sw-g2", colors.g2);
+  node.style.setProperty("--sw-in", colors.in);
+  node.style.setProperty("--sw-hero", colors.hero);
+}
+
 function updateDesignSwatch(formNode){
-  const swatch = formNode?.querySelector(".design-swatch");
-  if(!swatch) return;
+  if(!formNode) return;
+  const swatch = formNode.querySelector(".design-swatch");
   const palette = formNode.querySelector("#colorPaletteInput")?.value || "classic";
   const variant = formNode.querySelector('[name="theme_variant"]')?.value || "chiaro";
   const colors = resolvePalette(palette, variant);
-  swatch.style.setProperty("--sw-bl", colors.bl);
-  swatch.style.setProperty("--sw-go", colors.go);
-  swatch.style.setProperty("--sw-ro", colors.ro);
-  swatch.style.setProperty("--sw-g2", colors.g2);
-  swatch.style.setProperty("--sw-in", colors.in);
-  swatch.style.setProperty("--sw-hero", colors.hero);
+  const fontPair = formNode.querySelector('[name="font_pair"]')?.value || "classic";
+  const heroStyle = formNode.querySelector('[name="hero_style"]')?.value || "classico";
+  const heroCut = formNode.querySelector('[name="hero_cut"]')?.value || "dritto";
+  const heroFade = formNode.querySelector('[name="hero_fade"]')?.value !== "off";
+  const fonts = FONT_PAIRS[fontPair] || FONT_PAIRS.classic;
+  applySwatchColors(swatch, colors);
+  applySwatchColors(formNode.querySelector(".style-stage"), colors);
+  if(swatch){
+    swatch.dataset.cut = heroCut;
+    swatch.dataset.fade = heroFade ? "on" : "off";
+    swatch.dataset.hero = heroStyle;
+    swatch.dataset.variant = variant;
+    const title = swatch.querySelector(".design-swatch-title");
+    if(title){
+      title.textContent = t("design.font.sample");
+      title.style.fontFamily = fonts.display;
+    }
+  }
+  formNode.querySelectorAll("[data-style-choice]").forEach(button=>{
+    const select = formNode.querySelector(`[name="${button.dataset.styleChoice}"]`);
+    const on = select?.value === button.dataset.styleValue;
+    button.classList.toggle("is-selected", on);
+    button.setAttribute("aria-pressed", on ? "true" : "false");
+    if(button.dataset.styleChoice !== "theme_variant") return;
+    const variantColors = resolvePalette(palette, button.dataset.styleValue || "chiaro");
+    button.style.setProperty("--mini-bl", variantColors.bl);
+    button.style.setProperty("--mini-g2", variantColors.g2 || variantColors.hero);
+    button.style.setProperty("--mini-go", variantColors.go);
+  });
 }
 
 function bindDesignPanelHandlers(formNode){
@@ -3907,10 +3940,21 @@ function bindDesignPanelHandlers(formNode){
     });
   });
 
-  ["theme_variant","font_pair","hero_style"].forEach(name=>{
+  ["theme_variant","font_pair","hero_style","hero_cut","hero_fade"].forEach(name=>{
     formNode.querySelector(`[name="${name}"]`)?.addEventListener("change", onDesignChange);
   });
+  stylingPanel.addEventListener("click", event=>{
+    const button = event.target.closest("[data-style-choice]");
+    if(!button || !stylingPanel.contains(button)) return;
+    event.preventDefault();
+    const select = stylingPanel.querySelector(`[name="${button.dataset.styleChoice}"]`);
+    const next = button.dataset.styleValue || "";
+    if(!select || !next || select.value === next) return;
+    select.value = next;
+    select.dispatchEvent(new Event("change", { bubbles:true }));
+  });
   ensureFontPairPicker();
+  updateDesignSwatch(formNode);
 }
 
 function fontPairChoices(current){
@@ -4048,6 +4092,42 @@ function ensureFontPairPicker(){
   }, true);
 }
 
+const STYLE_CHOICE_OPTIONS = {
+  theme_variant:[["chiaro","Chiaro"],["caldo","Caldo"],["scuro","Scuro"]],
+  hero_style:Object.entries(HERO_STYLES),
+  hero_cut:[
+    ["dritto","Dritto classico"],
+    ["divider","Divisore con icona"],
+    ["arco","Taglio ad arco"],
+    ["diagonale","Taglio diagonale"]
+  ],
+  hero_fade:[["on","Attiva (colore pagina)"],["off","Spenta (taglio netto)"]]
+};
+
+function renderStyleChoiceField(name, legend, current, palette){
+  const grid = name === "theme_variant" ? "is-atmosphere" : name === "hero_style" ? "is-hero" : name === "hero_cut" ? "is-cut" : "is-fade";
+  const buttons = STYLE_CHOICE_OPTIONS[name].map(([value, label])=>{
+    const on = value === current;
+    const variantStyle = name === "theme_variant"
+      ? (()=>{
+        const tone = resolvePalette(palette, value);
+        return ` style="--mini-bl:${esc(tone.bl)};--mini-g2:${esc(tone.g2 || tone.hero)};--mini-go:${esc(tone.go)}"`;
+      })()
+      : "";
+    return `<button type="button" class="style-choice${on ? " is-selected" : ""}" data-style-choice="${esc(name)}" data-style-value="${esc(value)}" aria-pressed="${on ? "true" : "false"}"${variantStyle}>
+      <span class="style-mini" aria-hidden="true"><span class="style-mini-photo"></span><span class="style-mini-mark"></span><span class="style-mini-page"></span></span>
+      <span class="style-choice-name">${esc(localizeFieldPhrase(label))}</span>
+    </button>`;
+  }).join("");
+  return `<div class="style-field">
+    <p class="style-legend">${lfSpan(legend)}</p>
+    <select name="${esc(name)}" class="style-native" tabindex="-1" aria-hidden="true">
+      ${STYLE_CHOICE_OPTIONS[name].map(([value, label])=>option(value, label, current)).join("")}
+    </select>
+    <div class="style-choice-grid ${grid}">${buttons}</div>
+  </div>`;
+}
+
 function renderDesignSuggestBanner(momentType, currentLook){
   if(normalizeMomentType(momentType) === "free") return "";
   const suggested = suggestLookForMomentType(momentType);
@@ -4079,8 +4159,8 @@ function renderDesignPanel(state){
     </div>
     <div class="editor-card">
       <p class="ecard-title">${lfSpan("Ecco come sarà")}</p>
-      <div class="design-swatch" style="--sw-bl:${esc(colors.bl)};--sw-go:${esc(colors.go)};--sw-g2:${esc(colors.g2)};--sw-ro:${esc(colors.ro)};--sw-in:${esc(colors.in)};--sw-hero:${esc(colors.hero)}">
-        <div class="design-swatch-hero"><span>${lfSpan("Il titolo della tua pagina")}</span></div>
+      <div class="design-swatch" data-cut="${esc(state.heroCut || "dritto")}" data-fade="${state.heroFade === false ? "off" : "on"}" data-hero="${esc(state.heroStyle || "classico")}" data-variant="${esc(variant)}" style="--sw-bl:${esc(colors.bl)};--sw-go:${esc(colors.go)};--sw-g2:${esc(colors.g2)};--sw-ro:${esc(colors.ro)};--sw-in:${esc(colors.in)};--sw-hero:${esc(colors.hero)}">
+        <div class="design-swatch-hero"><span class="design-swatch-portrait" aria-hidden="true"></span><span class="design-swatch-title" style="font-family:${esc((FONT_PAIRS[fontPair] || FONT_PAIRS.classic).display)}">${esc(t("design.font.sample"))}</span></div>
         <div class="design-swatch-body"><span>${lfSpan("Sfondo")}</span><span>${lfSpan("Accenti")}</span></div>
       </div>
     </div>
@@ -4090,37 +4170,13 @@ function renderDesignPanel(state){
         ${renderPalettePicker(palette)}
       </label>
       <p class="field-hint">${lfSpan("Ogni cerchio è uno sfondo diverso (incluso il rosso). Nero e antracite = pagina scura.")}</p>
-      <label>${lfSpan("Atmosfera")}
-        <select name="theme_variant">
-          ${Object.entries(VARIANT_LABELS).map(([value,label])=>option(value,label,variant)).join("")}
-        </select>
-      </label>
-      <p class="field-hint">${lfSpan("Chiaro · Caldo (sfondo più intenso) · Scuro (pagina di sera)")}</p>
-      ${renderFontPairPicker(fontPair)}
-      <label>${lfSpan("Copertina in alto")}
-        <select name="hero_style">
-          ${Object.entries(HERO_STYLES).map(([value,label])=>option(value,label,state.heroStyle || "classico")).join("")}
-        </select>
-      </label>
-      <label>${lfSpan("Raccordo fondo copertina")}
-        <select name="hero_cut">
-          ${[
-            ["dritto", "Dritto classico"],
-            ["divider", "Divisore con icona"],
-            ["arco", "Taglio ad arco"],
-            ["diagonale", "Taglio diagonale"]
-          ].map(([value,label])=>option(value,label,state.heroCut || "dritto")).join("")}
-        </select>
-      </label>
-      <label>${lfSpan("Sfumatura sotto la foto")}
-        <select name="hero_fade">
-          ${[
-            ["on", "Attiva (colore pagina)"],
-            ["off", "Spenta (taglio netto)"]
-          ].map(([value,label])=>option(value,label,state.heroFade === false ? "off" : "on")).join("")}
-        </select>
-      </label>
-      <p class="field-hint">${lfSpan("La sfumatura fonde la foto con lo sfondo della pagina. Puoi spegnerla per un distacco netto.")}</p>
+      <div class="style-stage" style="--sw-bl:${esc(colors.bl)};--sw-go:${esc(colors.go)};--sw-g2:${esc(colors.g2)};--sw-ro:${esc(colors.ro)};--sw-in:${esc(colors.in)};--sw-hero:${esc(colors.hero)}">
+        ${renderStyleChoiceField("theme_variant", "Atmosfera", variant, palette)}
+        ${renderFontPairPicker(fontPair)}
+        ${renderStyleChoiceField("hero_style", "Copertina in alto", state.heroStyle || "classico", palette)}
+        ${renderStyleChoiceField("hero_cut", "Raccordo fondo copertina", state.heroCut || "dritto", palette)}
+        ${renderStyleChoiceField("hero_fade", "Sfumatura sotto la foto", state.heroFade === false ? "off" : "on", palette)}
+      </div>
     </div>
   </div>`;
 }

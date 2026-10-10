@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v307 live** · CSS **v286** | In registrazione il PIN è per chi apre la pagina |
+| Editor Moments | **v308 live** · CSS **v287** | In Colori le scelte si vedono prima di toccarle |
 | Worker | **v241-activation-alert** | Email staff su attivazione codice |
 | Officina | **v203** | PNG codice più basso |
 

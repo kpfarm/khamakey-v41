@@ -3869,7 +3869,7 @@ function bindDesignPanelHandlers(formNode){
   const onDesignChange = ()=>{
     syncLookCards(formNode);
     updateDesignSwatch(formNode);
-    markEditorDirty(formNode);
+    markEditorDirty(formNode, { immediate: true });
     schedulePreviewUpdate(formNode,{ immediate:true });
   };
 
@@ -4569,7 +4569,7 @@ function currentEditorSnapshot(){
 }
 
 function canUndoEditor(){
-  return Boolean(historyBurst) || editorUndoStack.length > 0;
+  return editorUndoStack.length > 0;
 }
 
 function canRedoEditor(){
@@ -4597,8 +4597,6 @@ function beginHistoryStep(field){
   if(!snap) return;
   historyBurst = snap;
   historyBurstField = field || null;
-  editorRedoStack = [];
-  refreshUndoButtons();
 }
 
 function scheduleHistorySeal(delay){
@@ -4622,6 +4620,7 @@ function sealHistoryBurst(){
   if(now && now !== before){
     editorUndoStack.push(before);
     if(editorUndoStack.length > EDITOR_HISTORY_LIMIT) editorUndoStack.shift();
+    editorRedoStack = [];
   }
   refreshUndoButtons();
 }
@@ -4754,7 +4753,7 @@ function ensureEditorHistory(){
       redoEditorChange();
       return;
     }
-    if(!canUndoEditor()) return;
+    if(!canUndoEditor() && !historyBurst) return;
     event.preventDefault();
     undoEditorChange();
   }, true);
@@ -5142,14 +5141,14 @@ function renderDetail(id, options = {}){
   ensureEditorHistory();
   syncRsvpWhatsappWarn(editorForm);
   editorForm.addEventListener("input",event=>{
-    markEditorDirty(editorForm);
+    markEditorDirty(editorForm, { immediate: !historyTargetIsText(event.target) });
     const coverField = event.target?.name === "cover_url" || event.target?.name?.startsWith("cover_focus") || event.target?.name === "cover_zoom" || event.target?.name === "cover_fit";
     if(coverField) updateCoverPreview(editorForm);
     if(/^section_.+_title$/.test(event.target?.name || "")) syncEditorKitUi(editorForm);
     schedulePreviewUpdate(editorForm);
   });
   editorForm.addEventListener("change",event=>{
-    markEditorDirty(editorForm);
+    markEditorDirty(editorForm, { immediate: true });
     const isSectionToggle = /^section_.+_enabled$/.test(event.target?.name || "");
     if(event.target?.name === "theme_variant") updateDesignSwatch(editorForm);
     schedulePreviewUpdate(editorForm,{immediate:isSectionToggle || event.target?.name === "theme_variant"});
@@ -6455,11 +6454,28 @@ function formSnapshotForDirty(formNode){
   return JSON.stringify(sanitizeStateForSave(readFormState(formNode)));
 }
 
-function markEditorDirty(formNode){
+function markEditorDirty(formNode, options = {}){
   if(suppressDirtyUi) return;
+  const immediate = options.immediate === true;
   if(historyBurst) scheduleHistorySeal(historyTargetIsText(historyBurstField) ? 480 : 80);
   scheduleHowEmptyHintRefresh(formNode);
-  // Dirty immediato: evita JSON.stringify a ogni keystroke (costoso su form grandi)
+  const applySnapshot = ()=>{
+    if(!formNode || suppressDirtyUi || saveInFlight) return;
+    try{
+      const snapshot = formSnapshotForDirty(formNode);
+      editorDirty = snapshot !== savedEditorSnapshot;
+      updateSaveStatus(!editorDirty);
+      const flag = document.getElementById("unsavedFlag");
+      if(flag) flag.hidden = !editorDirty;
+    }catch{
+      /* ignore parse errors during typing */
+    }
+  };
+  if(immediate){
+    applySnapshot();
+    return;
+  }
+  // Dirty immediato mentre si scrive: evita JSON.stringify a ogni tasto
   if(!editorDirty){
     editorDirty = true;
     updateSaveStatus(false);
@@ -6467,18 +6483,7 @@ function markEditorDirty(formNode){
     if(flag) flag.hidden = false;
   }
   clearTimeout(markEditorDirty.timer);
-  markEditorDirty.timer = setTimeout(()=>{
-    if(!formNode || suppressDirtyUi || saveInFlight) return;
-    try{
-    const snapshot = formSnapshotForDirty(formNode);
-    editorDirty = snapshot !== savedEditorSnapshot;
-    updateSaveStatus(!editorDirty);
-    const flag = document.getElementById("unsavedFlag");
-    if(flag) flag.hidden = !editorDirty;
-    }catch{
-      /* ignore parse errors during typing */
-    }
-  },900);
+  markEditorDirty.timer = setTimeout(applySnapshot, 900);
 }
 
 function shouldLivePreview(){

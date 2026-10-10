@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v304 live** · CSS **v285** | Email già registrata: percorso per un altro Moment |
+| Editor Moments | **v305 live** · CSS **v285** | Tendina chiusa senza scelta: niente Annulla/Salva |
 | Worker | **v241-activation-alert** | Email staff su attivazione codice |
 | Officina | **v203** | PNG codice più basso |
 

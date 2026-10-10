@@ -8,7 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
-- **Moments v304 (2026-10-10)** — live
+- **Moments v305 (2026-10-10)** — live
+  - Aprire una tendina e chiuderla senza scegliere non fa più uscire Annulla, Ripeti e Salva. Il banner resta per una modifica vera.
+  - NFC, Salva, upload **invariati**.
   - Se l’email è già registrata, la registrazione non dice più di controllare la posta. Dice di accedere e, per un altro Moment, di aprire il menu, Gestisci account, Prodotti, Attiva un altro oggetto.
   - NFC, Salva, upload **invariati**.
   - Dopo la mail di conferma il codice del pacchetto non si riscrive. Se il PIN non è su quel browser, si vede il codice già salvato e si chiede solo il PIN scelto in registrazione.

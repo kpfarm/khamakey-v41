@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v307 (2026-10-10)** — live
+  - In registrazione la password è «per entrare in questo account». Il PIN è «per chi apre la pagina», con la frase che non è la password.
+  - NFC, Salva, upload **invariati**.
 - **Moments v306 (2026-10-10)** — live
   - Nella lista «Stile scritte» ogni font mostra accanto al nome la scritta «KhamaKey Moments» in quel carattere. Chiudere la lista senza scegliere non salva.
   - NFC, Salva, upload **invariati**.

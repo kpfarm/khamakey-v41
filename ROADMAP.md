@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-10-10 | Cursor | **Moments v307**: in registrazione la password è per entrare nell’account e il PIN è per chi apre la pagina. |
 | 2026-10-10 | Cursor | **Moments v306**: in «Stile scritte» ogni font mostra «KhamaKey Moments» in quel carattere. |
 | 2026-10-10 | Cursor | **Moments v305**: in tutto l’editor Annulla, Ripeti e Salva escono solo se la pagina è cambiata. |
 | 2026-10-10 | Cursor | **Moments v304**: se l’email è già registrata, niente «controlla la posta». Il messaggio dice di accedere e, per un altro Moment, menu → Gestisci account → Prodotti → Attiva un altro oggetto. |

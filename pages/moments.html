@@ -130,12 +130,13 @@
                   <svg class="eye-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 5.2A11 11 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-2.1 2.9M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.2-1"/></svg>
                 </button>
               </span>
+              <span class="field-hint" data-i18n="auth.signup.password.hint">Serve a te per entrare in questo account.</span>
             </label>
             <label class="signup-invite-hide"><span data-i18n="auth.signup.page">Nome pagina</span><input id="momentsSignupTitle" type="text" data-i18n-placeholder="auth.signup.page.ph" placeholder="Esempio Il nostro ricordo" required></label>
             <p class="field-hint activation-code-type signup-invite-hide" id="momentsSignupTypeHint" hidden></p>
-            <label class="signup-invite-hide"><span data-i18n="auth.signup.pin">PIN pagina (per aprire il link)</span>
-              <input id="momentsSignupPin" type="text" inputmode="numeric" autocomplete="new-password" data-i18n-placeholder="auth.signup.pin.ph" placeholder="Esempio 1234" minlength="4" required>
-              <span class="field-hint" data-i18n="auth.signup.pin.hint">Scegli un PIN da 4 cifre o più. Lo userai per aprire la pagina collegata all’NFC.</span>
+            <label class="signup-invite-hide"><span data-i18n="auth.signup.pin">PIN per chi apre la pagina</span>
+              <input id="momentsSignupPin" type="text" inputmode="numeric" autocomplete="off" data-i18n-placeholder="auth.signup.pin.ph" placeholder="Esempio 1234" minlength="4" required>
+              <span class="field-hint" data-i18n="auth.signup.pin.hint">Lo scegli tu, almeno 4 cifre. Chi apre il portachiavi lo inserisce per vedere la pagina. Non è la password dell’account.</span>
             </label>
             <div class="consent-stack">
             <label class="consent-check">
@@ -261,6 +262,6 @@
     </nav>
   </main>
 
-  <script type="module" src="moments.js?v=306"></script>
+  <script type="module" src="moments.js?v=307"></script>
 </body>
 </html>

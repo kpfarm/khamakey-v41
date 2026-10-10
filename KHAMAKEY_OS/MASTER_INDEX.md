@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v306 live** · CSS **v286** | Lista font con «KhamaKey Moments» nel carattere |
+| Editor Moments | **v307 live** · CSS **v286** | In registrazione il PIN è per chi apre la pagina |
 | Worker | **v241-activation-alert** | Email staff su attivazione codice |
 | Officina | **v203** | PNG codice più basso |
 

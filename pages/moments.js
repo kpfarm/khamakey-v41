@@ -17,7 +17,7 @@ import {
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=267";
-import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=231";
+import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=232";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=235";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=218";
@@ -3904,7 +3904,7 @@ function bindDesignPanelHandlers(formNode){
     syncLookCards(formNode);
     updateDesignSwatch(formNode);
     markEditorDirty(formNode, { immediate: true });
-    schedulePreviewUpdate(formNode,{ immediate:true });
+    schedulePreviewUpdate(formNode,{ immediate:true, force:true });
   };
 
   stylingPanel.querySelectorAll(".look-card").forEach(button=>{
@@ -4738,6 +4738,8 @@ let historyBurst = "";
 let historyBurstField = null;
 let historyLock = false;
 let historyPointerDown = false;
+let editorEditEpoch = 0;
+let historyRestore = null;
 
 function resetEditorHistory(){
   editorUndoStack = [];
@@ -4834,6 +4836,33 @@ function sealHistoryBurst(){
   refreshUndoButtons();
 }
 
+function captureFormControls(form){
+  if(!form) return [];
+  return [...form.querySelectorAll("input, textarea, select")].map(el=>({
+    name: el.getAttribute("name") || "",
+    type: (el.getAttribute("type") || "").toLowerCase(),
+    value: el.value,
+    checked: !!el.checked
+  }));
+}
+
+function reapplyFormControls(form, controls){
+  if(!form || !controls?.length) return;
+  const live = [...form.querySelectorAll("input, textarea, select")];
+  if(live.length !== controls.length) return;
+  live.forEach((el, index)=>{
+    const item = controls[index];
+    if(!item || (el.getAttribute("name") || "") !== item.name) return;
+    const type = (el.getAttribute("type") || "").toLowerCase();
+    if(type === "file") return;
+    if(type === "checkbox" || type === "radio"){
+      if(el.checked !== item.checked) el.checked = item.checked;
+      return;
+    }
+    if(el.value !== item.value) el.value = item.value;
+  });
+}
+
 function captureEditorFocus(){
   const el = document.activeElement;
   const form = document.getElementById("momentEditorForm");
@@ -4902,13 +4931,26 @@ function applyEditorSnapshot(snapshot){
     const hint = document.getElementById("editorActionHint");
     if(hint) hint.hidden = true;
     held = true;
+    const form = document.getElementById("momentEditorForm");
+    historyRestore = captureFormControls(form);
+    const putBack = ()=>{
+      const liveForm = document.getElementById("momentEditorForm");
+      if(!liveForm || !historyRestore) return;
+      reapplyFormControls(liveForm, historyRestore);
+    };
     requestAnimationFrame(()=>{
       window.scrollTo(0, scrollY);
-      const form = document.getElementById("momentEditorForm");
-      if(form) schedulePreviewUpdate(form, { immediate:true, force:true });
+      putBack();
+      const liveForm = document.getElementById("momentEditorForm");
+      if(liveForm) schedulePreviewUpdate(liveForm, { immediate:true, force:true });
     });
-    // Il telefono può riscrivere l’ultima lettera nel campo appena ricreato.
-    setTimeout(releaseHistoryLock, 80);
+    setTimeout(putBack, 120);
+    // Il telefono può riscrivere il testo nel campo appena ricreato.
+    setTimeout(()=>{
+      putBack();
+      historyRestore = null;
+      releaseHistoryLock();
+    }, 500);
   }finally{
     if(!held) releaseHistoryLock();
   }
@@ -4967,9 +5009,6 @@ function historyTargetIsText(el){
 function ensureEditorHistory(){
   if(document.body.dataset.momentsHistoryBound === "1") return;
   document.body.dataset.momentsHistoryBound = "1";
-  document.addEventListener("mousedown", event=>{
-    if(event.target?.closest?.(".editor-undo-btn, .editor-redo-btn")) event.preventDefault();
-  }, true);
   document.addEventListener("click", event=>{
     const undoBtn = event.target?.closest?.(".editor-undo-btn");
     const redoBtn = event.target?.closest?.(".editor-redo-btn");
@@ -5004,6 +5043,14 @@ function ensureEditorHistory(){
   }, true);
   document.addEventListener("pointerdown", event=>{
     if(historyLock || !editorSurfaceOpen()) return;
+    const historyButton = event.target?.closest?.(".editor-undo-btn, .editor-redo-btn");
+    if(historyButton){
+      if(!historyButton.disabled){
+        historyPointerDown = false;
+        if(historyBurst) sealHistoryBurst();
+      }
+      return;
+    }
     const form = document.getElementById("momentEditorForm");
     if(!form || !form.contains(event.target)) return;
     if(event.target.closest(".editor-undo-btn, .editor-redo-btn, .editor-save-btn, button[type='submit']")) return;
@@ -5352,27 +5399,7 @@ function renderDetail(id, options = {}){
   mobilePreviewMode = false;
   setPreviewFabLabel();
   editorShell?.classList.remove("show-preview");
-  try{
-    savedEditorSnapshot = formSnapshotForDirty(editorForm);
-  }catch{
-    savedEditorSnapshot = JSON.stringify(readFormState(editorForm));
-  }
   lastPreviewHash = "";
-  updateSaveStatus(true);
-  if(options.savedBaseline != null){
-    savedEditorSnapshot = options.savedBaseline;
-    try{
-      const now = formSnapshotForDirty(editorForm);
-      const restoredSameAsSave = options.restoredSnapshot === savedEditorSnapshot;
-      editorDirty = !restoredSameAsSave && now !== savedEditorSnapshot;
-    }catch{
-      editorDirty = options.restoredSnapshot !== savedEditorSnapshot;
-    }
-    updateSaveStatus(!editorDirty);
-    if(editorDirty) stashEditorDraft();
-    else clearEditorDraft(id);
-  }
-  refreshUndoButtons();
   editorForm.addEventListener("submit",event=>{
     event.preventDefault();
     if(saveInFlight){
@@ -5387,6 +5414,10 @@ function renderDetail(id, options = {}){
   ensureEditorHistory();
   syncRsvpWhatsappWarn(editorForm);
   editorForm.addEventListener("input",event=>{
+    if(historyRestore){
+      reapplyFormControls(editorForm, historyRestore);
+      return;
+    }
     markEditorDirty(editorForm, { immediate: !historyTargetIsText(event.target) });
     const coverField = event.target?.name === "cover_url" || event.target?.name?.startsWith("cover_focus") || event.target?.name === "cover_zoom" || event.target?.name === "cover_fit";
     if(coverField) updateCoverPreview(editorForm);
@@ -5394,6 +5425,10 @@ function renderDetail(id, options = {}){
     schedulePreviewUpdate(editorForm);
   });
   editorForm.addEventListener("change",event=>{
+    if(historyRestore){
+      reapplyFormControls(editorForm, historyRestore);
+      return;
+    }
     markEditorDirty(editorForm, { immediate: true });
     const isSectionToggle = /^section_.+_enabled$/.test(event.target?.name || "");
     if(event.target?.name === "theme_variant") updateDesignSwatch(editorForm);
@@ -5536,11 +5571,35 @@ function renderDetail(id, options = {}){
     // Struttura categoria (sezioni/look/titoli) senza testi stock; «Prepara tutto per me» resta opt-in
     bootstrapFreshMomentPage(row, editorForm);
   }else if(restoredDraft){
+    try{ savedEditorSnapshot = formSnapshotForDirty(editorForm); }catch{ /* ignore */ }
     editorDirty = true;
     updateSaveStatus(false);
     promptSaveReminder(t("save.draft_restored"));
+  }else{
+    settleEditorBaseline(editorForm, options, id);
   }
   setEditorChromeVisible(true);
+}
+
+function settleEditorBaseline(form, options, id){
+  let now = "";
+  try{
+    now = formSnapshotForDirty(form);
+  }catch{
+    return;
+  }
+  if(options.savedBaseline != null){
+    savedEditorSnapshot = options.savedBaseline;
+    const restoredToSave = options.restoredSnapshot === options.savedBaseline;
+    editorDirty = !restoredToSave && now !== savedEditorSnapshot;
+    updateSaveStatus(!editorDirty);
+    if(editorDirty) stashEditorDraft();
+    else clearEditorDraft(id);
+    return;
+  }
+  savedEditorSnapshot = now;
+  editorDirty = false;
+  updateSaveStatus(true);
 }
 
 function setUploadStatus(node,message="",type=""){
@@ -6701,7 +6760,8 @@ function formSnapshotForDirty(formNode){
 }
 
 function markEditorDirty(formNode, options = {}){
-  if(suppressDirtyUi) return;
+  if(suppressDirtyUi || historyRestore) return;
+  if(!saveInFlight) editorEditEpoch += 1;
   if(historyBurst) scheduleHistorySeal(historyTargetIsText(historyBurstField) ? 480 : 80);
   scheduleHowEmptyHintRefresh(formNode);
   const applySnapshot = ()=>{
@@ -7069,8 +7129,9 @@ async function saveMoment(event,row, options = {}){
       syncEditorKitUi(formNode);
     }
   }
-  showEditorSaveFeedback(rsvpAutoOff ? t("save.saving_rsvp_off") : t("save.saving"),"");
-  try{
+    showEditorSaveFeedback(rsvpAutoOff ? t("save.saving_rsvp_off") : t("save.saving"),"");
+    const epochAtSave = editorEditEpoch;
+    try{
     let pinHash = null;
     if(pin){
       try{
@@ -7120,16 +7181,14 @@ async function saveMoment(event,row, options = {}){
     }
     clearTimeout(markEditorDirty.timer);
     clearEditorDraft(row.id);
+    const moreEditsDuringSave = editorEditEpoch !== epochAtSave;
     resetEditorHistory();
-    // Se durante il Salva hanno digitato altro, non marcare "salvato" a falso
-    let moreEditsDuringSave = false;
-    try{
-      const nowSnap = formSnapshotForDirty(formNode);
+    if(moreEditsDuringSave){
       savedEditorSnapshot = persistedSnapshot;
-      moreEditsDuringSave = nowSnap !== persistedSnapshot;
-      editorDirty = moreEditsDuringSave;
-    }catch{
-      savedEditorSnapshot = persistedSnapshot;
+      editorDirty = true;
+    }else{
+      try{ savedEditorSnapshot = formSnapshotForDirty(formNode); }
+      catch{ savedEditorSnapshot = persistedSnapshot; }
       editorDirty = false;
     }
     lastPreviewHash = savedEditorSnapshot;

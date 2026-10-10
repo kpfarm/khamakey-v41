@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v241-activation-alert";
+const WORKER_VERSION = "v242-page-font";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -3971,7 +3971,7 @@ body.nav-open{overflow:hidden}
 .moment-hero small{display:block;font-family:${f.ui};font-weight:800;text-transform:uppercase;letter-spacing:.16em;opacity:.88;margin-bottom:12px}
 .moment-profile{width:104px;height:104px;border-radius:999px;object-fit:cover;border:4px solid rgba(255,255,255,0.9);box-shadow:0 12px 32px rgba(15,23,42,0.18);margin:0 auto 20px;display:block;transition:transform .3s ease}
 .moment-profile:hover{transform:scale(1.05)}
-.moment-hero h1{font-family:${f.display};font-size:clamp(2.4rem,9vw,4.2rem);font-weight:800;line-height:1.12;margin:8px 0;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.45),0 8px 32px rgba(0,0,0,0.35)}
+.moment-hero h1{font-family:${f.display};font-size:clamp(2.4rem,9vw,4.2rem);font-weight:400;font-synthesis:none;line-height:1.12;margin:8px 0;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.45),0 8px 32px rgba(0,0,0,0.35)}
 .moment-hero p{font-family:${f.body};font-size:clamp(1.05rem,4vw,1.2rem);font-style:italic;line-height:1.75;margin:0 auto;max-width:480px;color:rgba(255,255,255,.98);text-shadow:0 1px 6px rgba(0,0,0,0.4),0 4px 16px rgba(0,0,0,0.28)}
 .moment-hero p.moment-hero-desc{margin-top:10px;font-size:clamp(.95rem,3.6vw,1.05rem);font-style:normal;opacity:.95}
 @keyframes scrollPulse{0%,100%{opacity:.5;transform:scaleY(1)}50%{opacity:.15;transform:scaleY(.55)}}
@@ -3998,6 +3998,8 @@ body.nav-open{overflow:hidden}
 }
 
 .moment-card p, .moment-journey-text, .moment-rsvp-intro, .moment-guestbook-intro, .moment-letter p {
+  font-family:${f.body};
+  font-weight:400;
   opacity: 0.96 !important;
   color: ${cardInk} !important;
   -webkit-text-fill-color: ${cardInk};
@@ -4045,7 +4047,7 @@ body.nav-open{overflow:hidden}
   box-shadow: 0 12px 24px -4px rgba(17,32,65,0.14), inset 0 1px 0 rgba(255,255,255,0.8) !important;
 }
 
-.moment-card-head strong{display:block;color:${cardInk};font-size:clamp(1.1rem,4.5vw,1.3rem);font-family:${f.ui};font-weight:800;letter-spacing:.02em;line-height:1.25;text-transform:none}
+.moment-card-head strong{display:block;color:${cardInk};font-size:clamp(1.35rem,5vw,1.7rem);font-family:${f.display};font-weight:400;font-synthesis:none;letter-spacing:0;line-height:1.2;text-transform:none}
 .moment-card-head strong::before,.moment-card-head strong::after{content:"";display:inline-block;width:14px;height:1px;background:${c.lineStrong};opacity:0.8;vertical-align:middle;margin:0 8px;border-radius:999px}
 .moment-card-empty{text-align:center;padding:48px 24px}
 .moment-card-message p{font-style:italic;text-align:center;font-size:clamp(1.05rem,4vw,1.2rem)}
@@ -4061,7 +4063,7 @@ body.nav-open{overflow:hidden}
 .moment-journey-photo{width:100%;max-height:220px;object-fit:cover;border-radius:14px;border:1px solid ${c.line};box-shadow:0 6px 18px rgba(0,0,0,.04)}
 .moment-journey-copy{display:grid;gap:6px;min-width:0}
 .moment-journey-date{font-family:${f.ui};font-size:.62rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:${c.go}}
-.moment-journey-place{display:block;font-size:1.08rem;color:${cardInk};font-weight:800;line-height:1.25;font-family:${f.ui}}
+.moment-journey-place{display:block;font-size:1.2rem;color:${cardInk};font-weight:400;font-synthesis:none;line-height:1.25;font-family:${f.display}}
 .moment-journey-map{display:inline-flex;align-items:center;gap:4px;font-family:${f.ui};font-size:.78rem;font-weight:700;color:${c.go};text-decoration:underline;text-underline-offset:3px;margin-top:4px;opacity:.88}
 @media(min-width:560px){.moment-journey-item{grid-template-columns:120px minmax(0,1fr);align-items:start}.moment-journey-photo{width:120px;height:120px;max-height:none}}
 .moment-journey--scroll{display:block;overflow:hidden;max-width:100%;min-width:0;margin-top:4px}

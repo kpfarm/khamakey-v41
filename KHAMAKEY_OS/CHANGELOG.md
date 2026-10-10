@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v310 + Worker v242 (2026-10-10)** — live
+  - Annulla rimette il testo nel campo e chiude il banner quando si torna all’ultimo Salva. Salva chiude il banner. «Rimetti modifica» compare solo dopo un annullamento e riporta quella modifica.
+  - Il font scelto in «Stile scritte» è il font del titolo e dei titoli di sezione sulla pagina pubblica, lo stesso della scritta di esempio.
+  - NFC, upload **invariati**.
 - **Moments v309 (2026-10-10)** — live
   - Annulla rimette il testo com’era e, se la pagina torna all’ultimo Salva, il banner si chiude. Salva chiude il banner. Rimetti compare solo dopo un annullamento e riporta quella modifica.
   - NFC, Salva, upload **invariati**.

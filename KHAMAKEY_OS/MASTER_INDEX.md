@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v309 live** · CSS **v288** | Annulla rimette il testo; Rimetti solo dopo un annullamento |
-| Worker | **v241-activation-alert** | Email staff su attivazione codice |
+| Editor Moments | **v310 live** · CSS **v288** | Annulla rimette il testo e chiude il banner; il font scelto arriva sulla pagina |
+| Worker | **v242-page-font** | Titolo e titoli di sezione usano il font scelto |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

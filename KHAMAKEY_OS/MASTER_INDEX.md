@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v305 live** · CSS **v285** | Tendina chiusa senza scelta: niente Annulla/Salva |
+| Editor Moments | **v305 live** · CSS **v285** | Annulla/Salva solo se la pagina è cambiata |
 | Worker | **v241-activation-alert** | Email staff su attivazione codice |
 | Officina | **v203** | PNG codice più basso |
 

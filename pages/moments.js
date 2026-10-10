@@ -6456,7 +6456,6 @@ function formSnapshotForDirty(formNode){
 
 function markEditorDirty(formNode, options = {}){
   if(suppressDirtyUi) return;
-  const immediate = options.immediate === true;
   if(historyBurst) scheduleHistorySeal(historyTargetIsText(historyBurstField) ? 480 : 80);
   scheduleHowEmptyHintRefresh(formNode);
   const applySnapshot = ()=>{
@@ -6471,19 +6470,13 @@ function markEditorDirty(formNode, options = {}){
       /* ignore parse errors during typing */
     }
   };
-  if(immediate){
+  const typing = historyTargetIsText(historyBurstField) && options.immediate !== true;
+  if(!typing){
     applySnapshot();
     return;
   }
-  // Dirty immediato mentre si scrive: evita JSON.stringify a ogni tasto
-  if(!editorDirty){
-    editorDirty = true;
-    updateSaveStatus(false);
-    const flag = document.getElementById("unsavedFlag");
-    if(flag) flag.hidden = false;
-  }
   clearTimeout(markEditorDirty.timer);
-  markEditorDirty.timer = setTimeout(applySnapshot, 900);
+  markEditorDirty.timer = setTimeout(applySnapshot, editorDirty ? 400 : 60);
 }
 
 function shouldLivePreview(){

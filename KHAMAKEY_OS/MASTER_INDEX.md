@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v314 live** · CSS **v291** | Evento generale: contatore «Insieme da» |
-| Worker | **v246-title-font** | Il titolo della pagina segue il font scelto |
+| Editor Moments | **v315 live** · CSS **v292** | Copertina: verticale o orizzontale, testi sempre visibili |
+| Worker | **v247-cover-orient** | La copertina orizzontale cambia la pagina pubblica |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

@@ -168,6 +168,11 @@ export function normalizeCoverFit(value){
   return String(value || "").trim().toLowerCase() === "contain" ? "contain" : "cover";
 }
 
+export function normalizeCoverOrient(value){
+  const orient = String(value || "").trim().toLowerCase();
+  return orient === "landscape" || orient === "orizzontale" ? "landscape" : "portrait";
+}
+
 export function coverFocusStyle(state = {}){
   const x = clampNumber(state.cover_focus_x,0,100,50);
   const y = clampNumber(state.cover_focus_y,0,100,50);

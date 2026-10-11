@@ -21,7 +21,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=235";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=218";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=262";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=263";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -63,7 +63,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=250";
+} from "./moments-media-ui.js?v=251";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -78,8 +78,9 @@ import {
   migrateVideoSectionMedia,
   migrateMusicSectionMedia,
   setActivePlanLimits,
-  normalizeCoverFit
-} from "./moment-media.js?v=244";
+  normalizeCoverFit,
+  normalizeCoverOrient
+} from "./moment-media.js?v=245";
 import {
   canFitBytes,
   emptyEntitlements,
@@ -1537,6 +1538,7 @@ function mergedState(row){
     cover_focus_y:state.cover_focus_y ?? 50,
     cover_zoom:state.cover_zoom ?? 100,
     cover_fit:normalizeCoverFit(state.cover_fit),
+    cover_orient:normalizeCoverOrient(state.cover_orient),
     profile_photo:state.profile_photo || "",
     pill:state.pill || "",
     theme:state.theme || "classic",
@@ -4252,16 +4254,17 @@ function renderCoverPanel(state){
         <div id="coverFramerSlot">${renderCoverFramer(state)}</div>
       </div>
       <label class="cover-line">${lfSpan("Titolo della pagina")}<input name="title" value="${esc(state.title)}" required placeholder="${esc(localizeFieldPhrase("Es. Il nostro anniversario"))}" data-lf-placeholder="Es. Il nostro anniversario"></label>
+      <section class="cover-texts">
+        <p class="cover-texts-title">${lfSpan("Sulla copertina")}</p>
+        <p class="field-hint">${lfSpan("Facoltativi. Stanno intorno al titolo, sulla foto.")}</p>
+        <label class="cover-line">${lfSpan("Etichetta sopra il titolo")}<input name="pill" value="${esc(state.pill)}" placeholder="${esc(localizeFieldPhrase("Es. Amore · Un mondo tutto nostro"))}" data-lf-placeholder="Es. Amore · Un mondo tutto nostro"></label>
+        <label class="cover-line">${lfSpan("Frase sotto il titolo")}<input name="subtitle" value="${esc(state.subtitle)}" placeholder="${esc(localizeFieldPhrase("Es. Per sempre insieme"))}" data-lf-placeholder="Es. Per sempre insieme"></label>
+        <label class="cover-line">${lfSpan("Descrizione breve")}<textarea name="page_description" placeholder="${esc(localizeFieldPhrase("Breve frase per chi apre la pagina — non incollare link o indirizzi tecnici"))}" data-lf-placeholder="Breve frase per chi apre la pagina — non incollare link o indirizzi tecnici">${esc(state.description)}</textarea></label>
+      </section>
       ${renderMomentTypeField(state)}
       <p class="category-change-warning"><strong>${lfSpan("Attenzione:")}</strong> ${lfSpan("«Prepara tutto per me» sostituisce testi, sezioni e colori — operazione irreversibile dopo il salvataggio.")}</p>
       <button type="button" class="primary smart-action-btn" id="applyMomentTemplate">${lfSpan("Prepara tutto per me")}</button>
       <p class="field-hint">${lfSpan("Ripristina testi e sezioni suggeriti. I contenuti attuali verranno sostituiti.")}</p>
-      <details class="design-advanced cover-extra">
-        <summary>${lfSpan("Altri testi sulla copertina (facoltativo)")}</summary>
-        <label>${lfSpan("Etichetta sopra il titolo")}<input name="pill" value="${esc(state.pill)}" placeholder="${esc(localizeFieldPhrase("Es. Amore · Un mondo tutto nostro"))}" data-lf-placeholder="Es. Amore · Un mondo tutto nostro"></label>
-        <label>${lfSpan("Frase sotto il titolo")}<input name="subtitle" value="${esc(state.subtitle)}" placeholder="${esc(localizeFieldPhrase("Es. Per sempre insieme"))}" data-lf-placeholder="Es. Per sempre insieme"></label>
-        <label>${lfSpan("Descrizione breve")}<textarea name="page_description" placeholder="${esc(localizeFieldPhrase("Breve frase per chi apre la pagina — non incollare link o indirizzi tecnici"))}" data-lf-placeholder="Breve frase per chi apre la pagina — non incollare link o indirizzi tecnici">${esc(state.description)}</textarea></label>
-      </details>
       <p class="field-hint">${lfSpan("I colori si scelgono in Design → Colori — un tap e la pagina cambia look.")}</p>
     </div>
   </div>`;
@@ -5468,7 +5471,7 @@ function renderDetail(id, options = {}){
       return;
     }
     markEditorDirty(editorForm, { immediate: !historyTargetIsText(event.target) });
-    const coverField = event.target?.name === "cover_url" || event.target?.name?.startsWith("cover_focus") || event.target?.name === "cover_zoom" || event.target?.name === "cover_fit";
+    const coverField = event.target?.name === "cover_url" || event.target?.name?.startsWith("cover_focus") || event.target?.name === "cover_zoom" || event.target?.name === "cover_fit" || event.target?.name === "cover_orient";
     if(coverField) updateCoverPreview(editorForm);
     if(/^section_.+_title$/.test(event.target?.name || "")) syncEditorKitUi(editorForm);
     schedulePreviewUpdate(editorForm);
@@ -5691,7 +5694,8 @@ async function uploadCoverImage(file,row,formNode){
         cover_focus_x:50,
         cover_focus_y:50,
         cover_zoom:100,
-        cover_fit:"contain"
+        cover_fit:"contain",
+        cover_orient:formNode.elements.cover_orient?.value || "portrait"
       });
     }
     bindCoverFramer(formNode);
@@ -6776,6 +6780,7 @@ function readFormState(formNode){
     cover_focus_y:Number(live("cover_focus_y") || 50),
     cover_zoom:Math.min(200, Math.max(100, Number(live("cover_zoom") || 100))),
     cover_fit:normalizeCoverFit(live("cover_fit")),
+    cover_orient:normalizeCoverOrient(live("cover_orient")),
     profile_photo:"",
     colorPalette:canonicalizePalette(live("color_palette") || "verde"),
     themeVariant:live("theme_variant") || "chiaro",

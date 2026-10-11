@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v315 + Worker v247 (2026-10-11)** — live
+  - Sulla copertina si sceglie verticale o orizzontale. La pagina pubblica segue il formato bordato. Senza una scelta salvata resta verticale, come prima.
+  - Etichetta, frase sotto il titolo e descrizione breve sono sempre visibili, nel riquadro «Sulla copertina».
+  - NFC, Salva, upload **invariati**.
 - **Moments v314 (2026-10-11)** — live
   - L’evento generale ha nel menu il contatore «Insieme da». Si accende solo se c’è una data, così le pagine già salvate non mostrano un contatore vuoto.
   - NFC, Salva, upload **invariati**.

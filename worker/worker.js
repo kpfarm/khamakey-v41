@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v246-title-font";
+const WORKER_VERSION = "v247-cover-orient";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -2318,6 +2318,7 @@ async function renderMomentPage(page, origin, env = {}, locale = "it", options =
   const coverFocusX = clampNumber(state.cover_focus_x, 0, 100, 50);
   const coverFocusY = clampNumber(state.cover_focus_y, 0, 100, 50);
   const coverFit = normalizeCoverFit(state.cover_fit);
+  const coverOrient = normalizeCoverOrient(state.cover_orient);
   const coverZoom = coverFit === "contain" ? 100 : clampNumber(state.cover_zoom, 100, 200, 100);
   const coverWrapClass = [
     coverZoom > 100 ? "is-zoomed" : "",
@@ -2387,7 +2388,7 @@ ${ogImage ? `<meta property="og:image" content="${attr(ogImage)}">` : ""}
 <link href="https://fonts.googleapis.com/css2?${fonts.google}&display=swap" rel="stylesheet">
 <style>${inlineFonts}${momentPageCss(colors, fonts)}</style></head>
 <body>${navHtml}
-<main class="moment-page hero-${attr(heroStyle)}${navClass} moment-type-${attr(momentType)}${extraTypeClass} moment-palette-${attr(paletteKey)} moment-cut-${attr(heroCut)} moment-fade-${heroFade ? "on" : "off"}">
+<main class="moment-page hero-${attr(heroStyle)}${navClass} moment-type-${attr(momentType)}${extraTypeClass} moment-palette-${attr(paletteKey)} moment-cut-${attr(heroCut)} moment-fade-${heroFade ? "on" : "off"}${coverOrient === "landscape" ? " moment-orient-landscape" : ""}">
 ${decorHtml}
 <section class="moment-hero" id="moment-hero">${heroCover}<div class="moment-hero-overlay"></div><div class="moment-hero-content hero-in">
 ${pill ? `<span class="moment-pill">${escapeHtml(pill)}</span>` : `<small>KhamaKey Moments</small>`}
@@ -4066,6 +4067,12 @@ body.nav-open{overflow:hidden}
 .hero-fullscreen .moment-hero{min-height:min(100dvh,780px)}
 .hero-romantico .moment-hero{min-height:min(88dvh,700px)}
 .hero-intimo .moment-hero{min-height:min(78dvh,620px)}
+.moment-page.moment-orient-landscape .moment-hero,
+.moment-page.moment-orient-landscape.hero-fullscreen .moment-hero,
+.moment-page.moment-orient-landscape.hero-romantico .moment-hero,
+.moment-page.moment-orient-landscape.hero-intimo .moment-hero{min-height:0;height:min(56.25vw,46vh,440px);max-height:none;aspect-ratio:auto;padding:max(56px,env(safe-area-inset-top) + 12px) 20px 22px;overflow:hidden}
+.moment-page.moment-orient-landscape .moment-hero h1{font-size:clamp(1.6rem,5.5vw,2.8rem);margin:4px 0}
+.moment-page.moment-orient-landscape .moment-hero p{font-size:clamp(.92rem,3.2vw,1.05rem);line-height:1.45}
 .hero-intimo .moment-cover-wrap,.hero-intimo .moment-cover{object-position:center 32%}
 .hero-profilo .moment-hero{padding-top:max(88px,env(safe-area-inset-top))}
 .moment-cover-wrap{position:absolute;inset:0;transform-origin:center center;will-change:transform;z-index:0}
@@ -6149,6 +6156,11 @@ function clampNumber(value, min, max, fallback) {
 
 function normalizeCoverFit(value) {
   return String(value || "").trim().toLowerCase() === "contain" ? "contain" : "cover";
+}
+
+function normalizeCoverOrient(value) {
+  const orient = String(value || "").trim().toLowerCase();
+  return orient === "landscape" || orient === "orizzontale" ? "landscape" : "portrait";
 }
 
 function safeUrl(value) {

@@ -106,6 +106,7 @@
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
+| 2026-10-11 | Cursor | **Moments v315 + Worker v247**: scelta verticale/orizzontale in copertina, testi sempre visibili |
 | 2026-10-11 | Cursor | **Moments v314**: evento generale con contatore «Insieme da» |
 | 2026-10-11 | Cursor | **Worker v246**: il titolo della pagina segue il font scelto, anche su Amore e Viaggio |
 | 2026-10-11 | Cursor | **Moments v313 + Worker v245**: il font scelto si vede nell’anteprima |

@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v244-intimo-card";
+const WORKER_VERSION = "v245-preview-font";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -2001,6 +2001,31 @@ function resolveMomentPreviewLocale(body = {}) {
   return "it";
 }
 
+async function loadGoogleFontFaces(query){
+  const raw = String(query || "").trim().replace(/^\?/, "");
+  if(!raw) return "";
+  const url = `https://fonts.googleapis.com/css2?${raw}${raw.includes("display=") ? "" : "&display=swap"}`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 2500);
+  try{
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1",
+        "Accept": "text/css,*/*;q=0.1"
+      }
+    });
+    if(!response.ok) return "";
+    const css = await response.text();
+    if(!css.includes("@font-face")) return "";
+    return css.replace(/<\/style/gi, "<\\/style");
+  }catch{
+    return "";
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
 async function handleMomentPreview(request, env) {
   const ip = request.headers.get("cf-connecting-ip") || "anon";
   if (!await checkRateLimit(env, `moment-preview:${ip}`, 45, 1)) {
@@ -2262,6 +2287,7 @@ async function renderMomentPage(page, origin, env = {}, locale = "it", options =
   const colors = resolveMomentPalette(state);
   const paletteKey = state.colorPalette || (state.theme === "celebration" ? "corallo" : state.theme === "minimal" ? "neve" : state.theme === "memorial" ? "perla" : "classic");
   const fonts = resolveMomentFontPair(state.fontPair);
+  const inlineFonts = options.editorPreview ? await loadGoogleFontFaces(fonts.google) : "";
   const heroStyle = ["classico", "profilo", "romantico", "intimo", "fullscreen"].includes(state.heroStyle) ? state.heroStyle : "classico";
   const sections = resolveMomentSections(state);
   const defaultOrder = ["intro","dedication","timeline","rsvp","guestbook","gallery","video","promises","dreams","countdown","music","horoscope","letter_future","rituals","pet","numbers","quote","signature"];
@@ -2359,7 +2385,7 @@ ${ogImage ? `<meta property="og:image" content="${attr(ogImage)}">` : ""}
 <meta property="og:description" content="${escapeHtml(heroLead || mt(locale, "meta.default_desc"))}">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?${fonts.google}&display=swap" rel="stylesheet">
-<style>${momentPageCss(colors, fonts)}</style></head>
+<style>${inlineFonts}${momentPageCss(colors, fonts)}</style></head>
 <body>${navHtml}
 <main class="moment-page hero-${attr(heroStyle)}${navClass} moment-type-${attr(momentType)}${extraTypeClass} moment-palette-${attr(paletteKey)} moment-cut-${attr(heroCut)} moment-fade-${heroFade ? "on" : "off"}">
 ${decorHtml}

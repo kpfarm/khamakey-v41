@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-10-11 | Cursor | **Moments v313 + Worker v245**: l’anteprima mostra il font scelto, non il carattere di riserva. |
 | 2026-10-11 | Cursor | **CSS v291 + Worker v244**: il titolo di Intimo sta su un cartoncino bianco; le pagine già online non cambiano. |
 | 2026-10-11 | Cursor | **Moments v312 + Worker v243**: Caldo e Scuro cambiano davvero lo sfondo; Chiaro resta il colore scelto. |
 | 2026-10-11 | Cursor | **Moments v311**: in Colori il risultato sta in alto; il bordo della foto è più sotto e più piccolo. |

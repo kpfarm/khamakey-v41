@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v312 live** · CSS **v291** | Copertina: Intimo ha il cartoncino vero; Profilo non disegna un ritratto inesistente |
-| Worker | **v244-intimo-card** | Il titolo di Intimo sta su un cartoncino bianco |
+| Editor Moments | **v313 live** · CSS **v291** | Il font scelto si vede nell’anteprima |
+| Worker | **v245-preview-font** | L’anteprima carica il carattere scelto |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

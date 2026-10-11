@@ -4055,9 +4055,57 @@ function openFontPairMenu(picker){
   trigger.setAttribute("aria-expanded", "true");
 }
 
+function applyFontPairValue(select, next){
+  if(!select || !FONT_PAIRS[next]) return false;
+  [...select.options].forEach(option=>{ option.selected = option.value === next; });
+  select.value = next;
+  const picker = select.closest(".font-pair-picker");
+  if(picker) picker.dataset.fontValue = next;
+  return select.value === next;
+}
+
+function readFontPairValue(formNode){
+  const select = formNode?.querySelector?.("select[name='font_pair']");
+  const picked = select?.closest(".font-pair-picker")?.dataset.fontValue || "";
+  const value = select?.selectedOptions?.[0]?.value || select?.value || picked;
+  return Object.prototype.hasOwnProperty.call(FONT_PAIRS, value) ? value : "classic";
+}
+
 function ensureFontPairPicker(){
   if(document.body.dataset.fontPairBound === "1") return;
   document.body.dataset.fontPairBound = "1";
+  let fontPointer = null;
+  document.addEventListener("pointerdown", event=>{
+    const optionBtn = event.target?.closest?.(".font-pair-option");
+    if(!optionBtn){
+      fontPointer = null;
+      return;
+    }
+    fontPointer = { x: event.clientX, y: event.clientY, btn: optionBtn };
+  }, true);
+  document.addEventListener("pointerup", event=>{
+    const start = fontPointer;
+    fontPointer = null;
+    if(!start?.btn) return;
+    if(Math.abs(event.clientX - start.x) > 8 || Math.abs(event.clientY - start.y) > 8) return;
+    const optionBtn = start.btn;
+    const menu = optionBtn.closest(".font-pair-menu");
+    const picker = menu?._picker || optionBtn.closest(".font-pair-picker");
+    const select = picker?.querySelector("select[name='font_pair']");
+    const next = optionBtn.getAttribute("data-font-pair") || "";
+    if(select && next && select.value !== next){
+      if(!historyBurst) beginHistoryStep(select);
+      applyFontPairValue(select, next);
+      select.dispatchEvent(new Event("change", { bubbles:true }));
+      historyPointerDown = false;
+      sealHistoryBurst();
+    }else if(select && next){
+      applyFontPairValue(select, next);
+    }
+    syncFontPairPicker(picker);
+    closeFontPairMenus();
+  }, true);
+  document.addEventListener("pointercancel", ()=>{ fontPointer = null; }, true);
   document.addEventListener("click", event=>{
     const optionBtn = event.target.closest?.(".font-pair-option");
     if(optionBtn){
@@ -4065,10 +4113,10 @@ function ensureFontPairPicker(){
       const menu = optionBtn.closest(".font-pair-menu");
       const picker = menu?._picker;
       const select = picker?.querySelector('[name="font_pair"]');
-      const next = optionBtn.dataset.fontPair || "";
+      const next = optionBtn.getAttribute("data-font-pair") || "";
       if(select && next && select.value !== next){
         if(!historyBurst) beginHistoryStep(select);
-        select.value = next;
+        applyFontPairValue(select, next);
         select.dispatchEvent(new Event("change", { bubbles:true }));
         historyPointerDown = false;
         sealHistoryBurst();
@@ -4092,6 +4140,7 @@ function ensureFontPairPicker(){
     if(event.key === "Escape") closeFontPairMenus();
   });
   window.addEventListener("scroll", event=>{
+    if(fontPointer) return;
     if(event.target?.closest?.(".font-pair-menu")) return;
     closeFontPairMenus();
   }, true);
@@ -6733,7 +6782,7 @@ function readFormState(formNode){
     heroStyle:live("hero_style") || "classico",
     heroCut:live("hero_cut") || "dritto",
     heroFade:live("hero_fade") !== "off",
-    fontPair:live("font_pair") || "classic",
+    fontPair:readFontPairValue(formNode),
     pageModel:normalizePageModel(live("page_model")),
     pageDecor:"none",
     show_together_counter:liveTopChecked(formNode, form, "show_together_counter"),

@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v313 + Worker v245 (2026-10-11)** — live
+  - L’anteprima incorpora il file del font scelto, così non resta il carattere di riserva. Il tocco sulla lista scrive il font nel modulo prima di Salva.
+  - NFC, Salva, upload **invariati**.
 - **Moments CSS v291 + Worker v244 (2026-10-11)** — live
   - Copertina Intimo: il titolo della pagina sta in un cartoncino bianco, come nel disegno. Nessuna pagina già salvata usa Intimo.
   - Profilo non disegna più un cerchio: la foto profilo non si può caricare, quindi il disegno non la promette.

@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-11** (Moments **v312** · CSS **v291**; Worker **v244**; SQL **v181**)
+> Ultimo aggiornamento: **2026-10-11** (Moments **v313** · CSS **v291**; Worker **v245**; SQL **v181**)
 
 ### Fonte di verità versioni
 
@@ -107,8 +107,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v244-intimo-card** | Copertina Intimo: il titolo sta in un cartoncino bianco, come nel disegno. |
-| **Moments editor** | **v312 live** · CSS **v291** | I disegni della copertina non promettono più un ritratto o un tramonto che la pagina non ha. |
+| **Worker NFC** | **v245-preview-font** | L’anteprima dell’editor incorpora il font scelto, così si vede davvero. |
+| **Moments editor** | **v313 live** · CSS **v291** | Scegliere un font lo scrive nel modulo e l’anteprima lo mostra. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v181 (prod)** | v181 tetto invitati = 4. v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-11:** CSS **v291** + Worker **v244**: Intimo mette il titolo in un cartoncino bianco. Profilo non disegna più un cerchio, perché la foto profilo non si carica. Le 12 pagine già online restano com’erano (nessuna usa Intimo o Profilo). Editor script **v312**. Worker **v244**. SQL **v181**.  
+> **Oggi 2026-10-11:** Editor **v313** + Worker **v245**: il font scelto entra nell’anteprima. Il clic sulla lista scrive il font nel modulo prima di Salva. CSS **v291**. SQL **v181**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

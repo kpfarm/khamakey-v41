@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v246 (2026-10-11)** — live
+  - Il titolo della pagina segue il font scelto. Prima, su Amore, Anniversario e Viaggio, restava bloccato su un carattere fisso.
+  - NFC, Salva, upload **invariati**.
 - **Moments v313 + Worker v245 (2026-10-11)** — live
   - L’anteprima incorpora il file del font scelto, così non resta il carattere di riserva. Il tocco sulla lista scrive il font nel modulo prima di Salva.
   - NFC, Salva, upload **invariati**.

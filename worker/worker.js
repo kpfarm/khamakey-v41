@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v245-preview-font";
+const WORKER_VERSION = "v246-title-font";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -4513,8 +4513,6 @@ main.moment-type-anniversary {
 .moment-type-love .moment-hero h1,
 .moment-type-wedding .moment-hero h1,
 .moment-type-anniversary .moment-hero h1 {
-  font-family: 'Playfair Display', serif !important;
-  font-weight: 700 !important;
   color: #ffffff !important;
   text-shadow: 0 4px 24px rgba(10,10,20,0.5) !important;
 }
@@ -4800,13 +4798,9 @@ main.moment-type-travel {
 }
 
 .moment-type-travel .moment-hero h1 {
-  font-family: 'Playfair Display', serif !important;
   font-size: clamp(2.2rem, 9vw, 3.5rem) !important;
-  font-weight: 700 !important;
   margin: 12px 0 !important;
   line-height: 1.15 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.02em !important;
   color: #ffffff !important;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5) !important;
 }

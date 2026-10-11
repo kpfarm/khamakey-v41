@@ -9,7 +9,7 @@
 | Live | Versione | Nota |
 |------|----------|------|
 | Editor Moments | **v313 live** · CSS **v291** | Il font scelto si vede nell’anteprima |
-| Worker | **v245-preview-font** | L’anteprima carica il carattere scelto |
+| Worker | **v246-title-font** | Il titolo della pagina segue il font scelto |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

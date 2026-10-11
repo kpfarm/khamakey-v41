@@ -92,6 +92,7 @@ export const FIELD_PHRASE_EN = {
   "Accenti": "Accents",
   "Vuoi cambiare qualcosa in più? (facoltativo)": "Want to tweak more? (optional)",
   "Colore di sfondo": "Background colour",
+  "Il bordo della foto": "The edge of the photo",
   "Ogni cerchio è uno sfondo diverso (incluso il rosso). Nero e antracite = pagina scura.": "Each circle is a different background (including red). Black and anthracite = dark page.",
   "Atmosfera": "Mood",
   "Chiaro": "Light",

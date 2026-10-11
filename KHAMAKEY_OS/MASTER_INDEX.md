@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v310 live** · CSS **v288** | Annulla rimette il testo e chiude il banner; il font scelto arriva sulla pagina |
+| Editor Moments | **v311 live** · CSS **v289** | Colori più ariosa: risultato in alto, bordo della foto più sotto |
 | Worker | **v242-page-font** | Titolo e titoli di sezione usano il font scelto |
 | Officina | **v203** | PNG codice più basso |
 

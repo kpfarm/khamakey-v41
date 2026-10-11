@@ -21,7 +21,7 @@ import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=235";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=218";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=261";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=262";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -4159,12 +4159,6 @@ function renderDesignPanel(state){
   return `<div class="editor-panel ${activeEditorPanel === "styling" ? "active" : ""}" data-editor-panel="styling">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.styling),editorPanelSubtitle(EDITOR_PANELS.styling))}
     <div class="editor-card">
-      <p class="ecard-title">${lfSpan(general ? "Scegli il modello" : "Scegli lo stile")}</p>
-      <p class="design-intro">${lfSpan(general ? "Amore, Famiglia, Animali e Viaggio sono i più usati. Gli altri modelli sono nella lista." : "Il colore scelto è lo sfondo della pagina; i riquadri restano bianchi con testo nero.")}</p>
-      ${general ? "" : renderDesignSuggestBanner(state.type, currentLook)}
-      <div class="look-picker-host">${renderLookPicker(currentLook, state.type, state.pageModel || "")}</div>
-    </div>
-    <div class="editor-card">
       <p class="ecard-title">${lfSpan("Ecco come sarà")}</p>
       <div class="design-swatch" data-cut="${esc(state.heroCut || "dritto")}" data-fade="${state.heroFade === false ? "off" : "on"}" data-hero="${esc(state.heroStyle || "classico")}" data-variant="${esc(variant)}" style="--sw-bl:${esc(colors.bl)};--sw-go:${esc(colors.go)};--sw-g2:${esc(colors.g2)};--sw-ro:${esc(colors.ro)};--sw-in:${esc(colors.in)};--sw-hero:${esc(colors.hero)}">
         <div class="design-swatch-hero"><span class="design-swatch-portrait" aria-hidden="true"></span><span class="design-swatch-title" style="font-family:${esc((FONT_PAIRS[fontPair] || FONT_PAIRS.classic).display)}">${esc(t("design.font.sample"))}</span></div>
@@ -4172,17 +4166,25 @@ function renderDesignPanel(state){
       </div>
     </div>
     <div class="editor-card">
+      <p class="ecard-title">${lfSpan(general ? "Scegli il modello" : "Scegli lo stile")}</p>
+      <p class="design-intro">${lfSpan(general ? "Amore, Famiglia, Animali e Viaggio sono i più usati. Gli altri modelli sono nella lista." : "Il colore scelto è lo sfondo della pagina; i riquadri restano bianchi con testo nero.")}</p>
+      ${general ? "" : renderDesignSuggestBanner(state.type, currentLook)}
+      <div class="look-picker-host">${renderLookPicker(currentLook, state.type, state.pageModel || "")}</div>
+    </div>
+    <div class="editor-card">
       <p class="ecard-title">${lfSpan("Colore e stile")}</p>
       <label>${lfSpan("Colore di sfondo")}
         ${renderPalettePicker(palette)}
       </label>
-      <p class="field-hint">${lfSpan("Ogni cerchio è uno sfondo diverso (incluso il rosso). Nero e antracite = pagina scura.")}</p>
       <div class="style-stage" style="--sw-bl:${esc(colors.bl)};--sw-go:${esc(colors.go)};--sw-g2:${esc(colors.g2)};--sw-ro:${esc(colors.ro)};--sw-in:${esc(colors.in)};--sw-hero:${esc(colors.hero)}">
         ${renderStyleChoiceField("theme_variant", "Atmosfera", variant, palette)}
         ${renderFontPairPicker(fontPair)}
-        ${renderStyleChoiceField("hero_style", "Copertina in alto", state.heroStyle || "classico", palette)}
-        ${renderStyleChoiceField("hero_cut", "Raccordo fondo copertina", state.heroCut || "dritto", palette)}
-        ${renderStyleChoiceField("hero_fade", "Sfumatura sotto la foto", state.heroFade === false ? "off" : "on", palette)}
+        <div class="style-photo-edge">
+          <p class="style-group-title">${lfSpan("Il bordo della foto")}</p>
+          ${renderStyleChoiceField("hero_style", "Copertina in alto", state.heroStyle || "classico", palette)}
+          ${renderStyleChoiceField("hero_cut", "Raccordo fondo copertina", state.heroCut || "dritto", palette)}
+          ${renderStyleChoiceField("hero_fade", "Sfumatura sotto la foto", state.heroFade === false ? "off" : "on", palette)}
+        </div>
       </div>
     </div>
   </div>`;

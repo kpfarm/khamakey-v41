@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v311 (2026-10-11)** — live
+  - In Colori, «Ecco come sarà» sta in alto. Sotto restano colore, atmosfera e font. Copertina, raccordo e sfumatura stanno più giù, più piccoli, sotto «Il bordo della foto». Tolta la frase ripetuta sotto i cerchi.
+  - I colori della pagina pubblica **non cambiano**. NFC, Salva, upload **invariati**.
 - **Moments v310 + Worker v242 (2026-10-10)** — live
   - Annulla rimette il testo nel campo e chiude il banner quando si torna all’ultimo Salva. Salva chiude il banner. «Rimetti modifica» compare solo dopo un annullamento e riporta quella modifica.
   - Il font scelto in «Stile scritte» è il font del titolo e dei titoli di sezione sulla pagina pubblica, lo stesso della scritta di esempio.

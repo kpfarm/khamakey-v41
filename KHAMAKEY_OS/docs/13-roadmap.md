@@ -106,6 +106,7 @@
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
+| 2026-10-11 | Cursor | **Moments v311**: Colori più ariosa, senza cambiare i colori della pagina pubblica |
 | 2026-10-10 | Cursor | **Moments v310 + Worker v242**: Annulla chiude il banner; il font scelto si vede sul titolo della pagina |
 | 2026-10-10 | Cursor | **Moments v309**: Annulla rimette il testo; il banner si chiude; Rimetti solo dopo Annulla |
 | 2026-10-10 | Cursor | **Moments v308**: Colori con disegni per atmosfera, copertina, taglio e sfumatura |

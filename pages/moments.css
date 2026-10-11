@@ -763,6 +763,11 @@ body.media-modal-open{overflow:hidden}
 .style-choice-grid{display:grid;gap:8px}
 .style-choice-grid.is-atmosphere{grid-template-columns:repeat(3,minmax(0,1fr))}
 .style-choice-grid.is-cut,.style-choice-grid.is-hero,.style-choice-grid.is-fade{grid-template-columns:repeat(2,minmax(0,1fr))}
+.style-photo-edge{margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+.style-group-title{margin:0;font-size:.8rem;font-weight:650;color:var(--navy)}
+.style-photo-edge .style-mini,.style-photo-edge .style-choice-grid.is-hero .style-mini{height:64px}
+.style-photo-edge .style-choice{padding:4px;gap:4px}
+.style-photo-edge .style-choice-name{font-size:.66rem}
 .style-choice{display:grid;gap:6px;align-content:start;justify-items:stretch;padding:6px;border:1px solid var(--border);border-radius:12px;background:#fff;color:var(--navy);min-height:44px}
 .style-choice.is-selected{border-color:var(--navy);outline:2px solid var(--navy);outline-offset:1px}
 .style-choice-name{font-family:"DM Sans",sans-serif;font-size:.72rem;font-weight:650;line-height:1.25;text-align:center}

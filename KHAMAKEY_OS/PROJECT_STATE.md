@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-11** (Moments **v313** · CSS **v291**; Worker **v245**; SQL **v181**)
+> Ultimo aggiornamento: **2026-10-11** (Moments **v314** contatore evento generale; Worker **v246**; SQL **v181**)
 
 ### Fonte di verità versioni
 
@@ -108,7 +108,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v246-title-font** | Il titolo della pagina usa il font scelto, anche su Amore e Viaggio. |
-| **Moments editor** | **v313 live** · CSS **v291** | Scegliere un font lo scrive nel modulo e l’anteprima lo mostra. |
+| **Moments editor** | **v314 live** · CSS **v291** | Evento generale: menu «Insieme da». Si accende quando c’è una data. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v181 (prod)** | v181 tetto invitati = 4. v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-11:** Worker **v246**: il titolo della pagina usa il font scelto. Prima, sulle pagine Amore e Viaggio, restava un carattere fisso. Editor **v313**. CSS **v291**. SQL **v181**.  
+> **Oggi 2026-10-11:** Editor **v314**: l’evento generale ha il contatore «Insieme da» nel menu. Resta spento finché non si sceglie una data. Worker **v246**. CSS **v291**. SQL **v181**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

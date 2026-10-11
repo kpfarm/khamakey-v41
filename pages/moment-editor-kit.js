@@ -433,6 +433,8 @@ const TYPE_OVERRIDES = {
     nav:{ timeline:"Tappe", letter_future:"Futuro" }
   },
   free:{
+    showCounter:true,
+    counterLabel:"Insieme da",
     sections:["intro","gallery","dedication","timeline","music","signature"]
   }
 };

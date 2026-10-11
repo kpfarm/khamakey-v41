@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v313 live** · CSS **v291** | Il font scelto si vede nell’anteprima |
+| Editor Moments | **v314 live** · CSS **v291** | Evento generale: contatore «Insieme da» |
 | Worker | **v246-title-font** | Il titolo della pagina segue il font scelto |
 | Officina | **v203** | PNG codice più basso |
 

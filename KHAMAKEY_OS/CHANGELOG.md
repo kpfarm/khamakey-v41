@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v314 (2026-10-11)** — live
+  - L’evento generale ha nel menu il contatore «Insieme da». Si accende solo se c’è una data, così le pagine già salvate non mostrano un contatore vuoto.
+  - NFC, Salva, upload **invariati**.
 - **Worker v246 (2026-10-11)** — live
   - Il titolo della pagina segue il font scelto. Prima, su Amore, Anniversario e Viaggio, restava bloccato su un carattere fisso.
   - NFC, Salva, upload **invariati**.

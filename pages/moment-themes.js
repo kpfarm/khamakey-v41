@@ -57,23 +57,129 @@ export function isDarkPageBackground(hex = ""){
   return ((r * 299) + (g * 587) + (b * 114)) / 1000 < 160;
 }
 
-export const PALETTE_VARIANTS = {
-  chiaro: {},
-  caldo: {
-    rosso: { bl:"#EF4444", hero:"#DC2626", go:"#B91C1C" },
-    rosa: { bl:"#EC4899", hero:"#DB2777", go:"#BE185D" },
-    arancio: { bl:"#F97316", hero:"#EA580C", go:"#C2410C" },
-    ambra: { bl:"#D97706", hero:"#B45309", go:"#92400E", in:"#FFFBEB" },
-    verde: { bl:"#16A34A", hero:"#15803D", go:"#166534" },
-    crema: { bl:"#FFEDD5", hero:"#FDBA74", go:"#C2410C", in:"#111111" }
-  },
-  scuro: {
-    nero: { bl:"#000000", hero:"#0A0A0A", go:"#64748B" },
-    antracite: { bl:"#020617", hero:"#0F172A", go:"#0284C7" },
-    bordeaux: { bl:"#450A0A", hero:"#7F1D1D", go:"#BE123C" },
-    rosso: { bl:"#991B1B", hero:"#7F1D1D", go:"#DC2626" }
+function hexToRgb(hex){
+  const raw = String(hex || "").replace("#", "").trim();
+  if(raw.length !== 6) return [255, 255, 255];
+  const n = Number.parseInt(raw, 16);
+  if(Number.isNaN(n)) return [255, 255, 255];
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function rgbToHex(r, g, b){
+  const byte = (value)=> Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, "0");
+  return `#${byte(r)}${byte(g)}${byte(b)}`.toUpperCase();
+}
+
+function rgbToHsl(r, g, b){
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const l = (max + min) / 2;
+  if(max === min) return [0, 0, l];
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h = 0;
+  if(max === rn) h = (gn - bn) / d + (gn < bn ? 6 : 0);
+  else if(max === gn) h = (bn - rn) / d + 2;
+  else h = (rn - gn) / d + 4;
+  return [h / 6, s, l];
+}
+
+function hslToHex(h, s, l){
+  const hue = ((h % 1) + 1) % 1;
+  const sat = Math.max(0, Math.min(1, s));
+  const light = Math.max(0, Math.min(1, l));
+  if(sat === 0){
+    const value = light * 255;
+    return rgbToHex(value, value, value);
   }
-};
+  const q = light < 0.5 ? light * (1 + sat) : light + sat - light * sat;
+  const p = 2 * light - q;
+  const hueToRgb = (t)=>{
+    let channel = t;
+    if(channel < 0) channel += 1;
+    if(channel > 1) channel -= 1;
+    if(channel < 1 / 6) return p + (q - p) * 6 * channel;
+    if(channel < 1 / 2) return q;
+    if(channel < 2 / 3) return p + (q - p) * (2 / 3 - channel) * 6;
+    return p;
+  };
+  return rgbToHex(hueToRgb(hue + 1 / 3) * 255, hueToRgb(hue) * 255, hueToRgb(hue - 1 / 3) * 255);
+}
+
+function relLuminance(hex){
+  const channels = hexToRgb(hex).map(value=>{
+    const channel = value / 255;
+    return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return (0.2126 * channels[0]) + (0.7152 * channels[1]) + (0.0722 * channels[2]);
+}
+
+function contrastHex(a, b){
+  const left = relLuminance(a);
+  const right = relLuminance(b);
+  return (Math.max(left, right) + 0.05) / (Math.min(left, right) + 0.05);
+}
+
+/** Stessa formula in worker/worker.js → resolveMomentPalette. Chiaro non passa di qui. */
+function warmerPageColor(hex){
+  let [h, s, l] = rgbToHsl(...hexToRgb(hex));
+  if(l > 0.9){
+    s = Math.min(1, Math.max(s, 0.45) + 0.25);
+    l = 0.84;
+  }else if(l < 0.08){
+    if(s < 0.12) h = 0.07;
+    s = Math.max(s, 0.22);
+    l = 0.24;
+  }else{
+    s = Math.min(1, s + 0.16);
+    l = l < 0.42 ? Math.min(0.5, l + 0.07) : Math.min(0.62, l + 0.04);
+  }
+  let next = hslToHex(h, s, l);
+  let guard = 0;
+  while(guard < 8 && Math.max(contrastHex(next, "#F8FAFC"), contrastHex(next, "#111111")) < 4.5){
+    l = Math.max(0.08, l - 0.03);
+    next = hslToHex(h, s, l);
+    guard += 1;
+  }
+  return next;
+}
+
+function eveningPageColor(hex){
+  let [h, s, l] = rgbToHsl(...hexToRgb(hex));
+  if(l < 0.08) return "#000000";
+  if(l > 0.82){
+    s = Math.min(1, Math.max(s, 0.4));
+    l = 0.2;
+  }else{
+    s = Math.min(1, Math.max(0.42, s));
+    l = Math.max(0.1, Math.min(0.26, l * 0.46));
+  }
+  let next = hslToHex(h, s, l);
+  let guard = 0;
+  while(contrastHex(next, "#F8FAFC") < 4.5 && l > 0.08 && guard < 8){
+    l -= 0.03;
+    next = hslToHex(h, s, l);
+    guard += 1;
+  }
+  return next;
+}
+
+function shiftAtmosphereColor(hex, variant){
+  if(variant === "caldo") return warmerPageColor(hex);
+  if(variant === "scuro") return eveningPageColor(hex);
+  return hex;
+}
+
+function atmosphereUsesLightInk(hex, variant){
+  if(variant === "scuro") return true;
+  if(variant !== "caldo") return isDarkPageBackground(hex);
+  const light = contrastHex(hex, "#F8FAFC");
+  const dark = contrastHex(hex, "#111111");
+  return dark < 4.5 || (light >= 4.5 && light + 0.15 >= dark);
+}
 
 export const PALETTE_LABELS = {
   rosso:"Rosso", rosa:"Rosa", bordeaux:"Bordeaux", arancio:"Arancio",
@@ -227,19 +333,30 @@ export const CREATOR_SERVICES_GAP = {
 export function resolvePalette(palette = "verde", variant = "chiaro"){
   const key = canonicalizePalette(palette);
   const base = { ...(COLOR_PALETTES[key] || COLOR_PALETTES.verde) };
-  const overrides = PALETTE_VARIANTS[variant]?.[key];
-  if(overrides) Object.assign(base, overrides);
+  const mode = variant === "caldo" || variant === "scuro" ? variant : "chiaro";
+  if(mode !== "chiaro"){
+    base.bl = shiftAtmosphereColor(base.bl, mode);
+    base.hero = shiftAtmosphereColor(base.hero || base.bl, mode);
+    base.g2 = shiftAtmosphereColor(base.g2 || base.hero || base.bl, mode);
+  }
   // Card sempre bianche + testo scuro (mai ink chiaro sulle card)
   base.card = "#FFFFFF";
   base.bl2 = "#FFFFFF";
   base.cardInk = "#111111";
-  const darkPage = isDarkPageBackground(base.bl) || variant === "scuro";
-  if(darkPage){
-    if(!base.in || base.in === "#111111" || isDarkPageBackground(base.in)) base.in = "#F8FAFC";
-    base.mu = base.mu || "#E2E8F0";
+  if(mode === "chiaro"){
+    if(isDarkPageBackground(base.bl)){
+      if(!base.in || base.in === "#111111" || isDarkPageBackground(base.in)) base.in = "#F8FAFC";
+      base.mu = base.mu || "#E2E8F0";
+    }else{
+      base.in = "#111111";
+      base.mu = base.mu || "#475569";
+    }
+  }else if(atmosphereUsesLightInk(base.bl, mode)){
+    base.in = "#F8FAFC";
+    base.mu = "#E2E8F0";
   }else{
     base.in = "#111111";
-    base.mu = base.mu || "#475569";
+    base.mu = "#111111";
   }
   base.ink = base.in;
   return base;

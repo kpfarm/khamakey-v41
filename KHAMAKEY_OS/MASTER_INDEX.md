@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v311 live** · CSS **v289** | Colori più ariosa: risultato in alto, bordo della foto più sotto |
-| Worker | **v242-page-font** | Titolo e titoli di sezione usano il font scelto |
+| Editor Moments | **v312 live** · CSS **v290** | Atmosfera vera nei tre riquadri e sulla pagina |
+| Worker | **v243-atmosphere** | Caldo e Scuro cambiano lo sfondo; Chiaro resta |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

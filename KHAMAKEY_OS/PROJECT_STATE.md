@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-11** (Moments **v311** Colori più ariosa; SQL **v181**; Worker **v242**)
+> Ultimo aggiornamento: **2026-10-11** (Moments **v312** atmosfera vera; SQL **v181**; Worker **v243**)
 
 ### Fonte di verità versioni
 
@@ -107,8 +107,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v242-page-font** | Il font scelto in editor è quello del titolo e dei titoli di sezione. |
-| **Moments editor** | **v311 live** · CSS **v289** | Colori: un riquadro in alto, poi colore, atmosfera e font; il bordo della foto è più sotto e più piccolo. |
+| **Worker NFC** | **v243-atmosphere** | Chiaro resta il colore scelto. Caldo e Scuro lo cambiano davvero, su ogni palette. |
+| **Moments editor** | **v312 live** · CSS **v290** | Atmosfera: i tre riquadri usano il colore vero della pagina. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v181 (prod)** | v181 tetto invitati = 4. v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-11:** Editor **v311**: in Colori il riquadro «Ecco come sarà» sta in alto; colore, atmosfera e font subito sotto; copertina, raccordo e sfumatura sono più piccoli, sotto «Il bordo della foto». I colori delle pagine pubbliche non cambiano. Worker **v242**. SQL **v181**.  
+> **Oggi 2026-10-11:** Editor **v312** + Worker **v243**: Chiaro non cambia. Caldo è lo stesso colore più acceso. Scuro è lo stesso colore di sera, con scritta chiara e card bianca. I tre riquadri mostrano quei colori. Worker **v243**. SQL **v181**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

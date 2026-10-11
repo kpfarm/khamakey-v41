@@ -118,7 +118,7 @@ import {
   findLookForDesign,
   suggestLookForMomentType,
   looksForMomentType
-} from "./moment-themes.js?v=164";
+} from "./moment-themes.js?v=165";
 import {
   SECTION_ORDER_DEFAULT,
   DEFAULT_SECTIONS,
@@ -3892,6 +3892,7 @@ function updateDesignSwatch(formNode){
     button.style.setProperty("--mini-bl", variantColors.bl);
     button.style.setProperty("--mini-g2", variantColors.g2 || variantColors.hero);
     button.style.setProperty("--mini-go", variantColors.go);
+    button.style.setProperty("--mini-in", variantColors.in || "#111111");
   });
 }
 
@@ -3930,11 +3931,8 @@ function bindDesignPanelHandlers(formNode){
       const input = formNode.querySelector("#colorPaletteInput");
       if(input) input.value = key;
       const variantSelect = formNode.querySelector('[name="theme_variant"]');
-      // Solo nero/antracite impostano «scuro»; rosso/verde/ecc. restano sfondo colorato
-      if(variantSelect){
-        if(DARK_PAGE_PALETTES.has(key)) variantSelect.value = "scuro";
-        else if(variantSelect.value === "scuro") variantSelect.value = "chiaro";
-      }
+      // Nero e antracite partono da Scuro. Un colore già in Scuro resta sera.
+      if(variantSelect && DARK_PAGE_PALETTES.has(key)) variantSelect.value = "scuro";
       syncPaletteButtons(formNode, key);
       onDesignChange();
       historyPointerDown = false;
@@ -4118,7 +4116,7 @@ function renderStyleChoiceField(name, legend, current, palette){
     const variantStyle = name === "theme_variant"
       ? (()=>{
         const tone = resolvePalette(palette, value);
-        return ` style="--mini-bl:${esc(tone.bl)};--mini-g2:${esc(tone.g2 || tone.hero)};--mini-go:${esc(tone.go)}"`;
+        return ` style="--mini-bl:${esc(tone.bl)};--mini-g2:${esc(tone.g2 || tone.hero)};--mini-go:${esc(tone.go)};--mini-in:${esc(tone.in || "#111111")}"`;
       })()
       : "";
     return `<button type="button" class="style-choice${on ? " is-selected" : ""}" data-style-choice="${esc(name)}" data-style-value="${esc(value)}" aria-pressed="${on ? "true" : "false"}"${variantStyle}>

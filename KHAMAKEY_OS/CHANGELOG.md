@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v312 + Worker v243 (2026-10-11)** — live
+  - Atmosfera funzionante su ogni colore. Chiaro resta il colore scelto. Caldo è lo stesso colore, più acceso. Scuro è lo stesso colore di sera, con scritta chiara. Le card restano bianche. I tre riquadri usano quei colori, senza velo finto.
+  - NFC, Salva, upload **invariati**.
 - **Moments v311 (2026-10-11)** — live
   - In Colori, «Ecco come sarà» sta in alto. Sotto restano colore, atmosfera e font. Copertina, raccordo e sfumatura stanno più giù, più piccoli, sotto «Il bordo della foto». Tolta la frase ripetuta sotto i cerchi.
   - I colori della pagina pubblica **non cambiano**. NFC, Salva, upload **invariati**.

@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v312 live** · CSS **v290** | Atmosfera vera nei tre riquadri e sulla pagina |
-| Worker | **v243-atmosphere** | Caldo e Scuro cambiano lo sfondo; Chiaro resta |
+| Editor Moments | **v312 live** · CSS **v291** | Copertina: Intimo ha il cartoncino vero; Profilo non disegna un ritratto inesistente |
+| Worker | **v244-intimo-card** | Il titolo di Intimo sta su un cartoncino bianco |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

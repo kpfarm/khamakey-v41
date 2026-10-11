@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v243-atmosphere";
+const WORKER_VERSION = "v244-intimo-card";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -4061,6 +4061,7 @@ body.nav-open{overflow:hidden}
 .moment-profile{width:104px;height:104px;border-radius:999px;object-fit:cover;border:4px solid rgba(255,255,255,0.9);box-shadow:0 12px 32px rgba(15,23,42,0.18);margin:0 auto 20px;display:block;transition:transform .3s ease}
 .moment-profile:hover{transform:scale(1.05)}
 .moment-hero h1{font-family:${f.display};font-size:clamp(2.4rem,9vw,4.2rem);font-weight:400;font-synthesis:none;line-height:1.12;margin:8px 0;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.45),0 8px 32px rgba(0,0,0,0.35)}
+.hero-intimo .moment-hero h1{display:inline-block;background:#fff;color:#111111;-webkit-text-fill-color:#111111;text-shadow:none;padding:10px 18px;border-radius:14px;box-shadow:0 10px 28px rgba(0,0,0,.18)}
 .moment-hero p{font-family:${f.body};font-size:clamp(1.05rem,4vw,1.2rem);font-style:italic;line-height:1.75;margin:0 auto;max-width:480px;color:rgba(255,255,255,.98);text-shadow:0 1px 6px rgba(0,0,0,0.4),0 4px 16px rgba(0,0,0,0.28)}
 .moment-hero p.moment-hero-desc{margin-top:10px;font-size:clamp(.95rem,3.6vw,1.05rem);font-style:normal;opacity:.95}
 @keyframes scrollPulse{0%,100%{opacity:.5;transform:scaleY(1)}50%{opacity:.15;transform:scaleY(.55)}}

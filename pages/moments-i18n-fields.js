@@ -105,6 +105,7 @@ export const FIELD_PHRASE_EN = {
   "Scuro": "Dark",
   "Chiaro · Caldo (sfondo più intenso) · Scuro (pagina di sera)": "Light · Warm (richer background) · Dark (evening page)",
   "Stile scritte": "Type style",
+  "Cambia il titolo della pagina e i titoli delle sezioni.": "It changes the page title and the section titles.",
   "Classico KhamaKey (script + serif)": "Classic KhamaKey (script + serif)",
   "Romantico (script elegante)": "Romantic (elegant script)",
   "Romantico (già sulla pagina)": "Romantic (already on this page)",

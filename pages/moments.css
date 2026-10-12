@@ -906,6 +906,7 @@ body.media-modal-open{overflow:hidden}
 .activation-inline-form{display:grid;gap:10px}
 .font-pair-field{display:grid;gap:6px}
 .font-pair-field > label{margin:0}
+.font-pair-field .field-hint{margin:0}
 .font-pair-picker{position:relative}
 .font-pair-native{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .font-pair-trigger,.font-pair-option{width:100%;display:flex;align-items:baseline;justify-content:space-between;gap:6px 12px;flex-wrap:wrap;text-align:left;color:var(--text)}

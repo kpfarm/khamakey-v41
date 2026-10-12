@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v316 (2026-10-12)** — live
+  - Sotto Stile scritte c’è la frase: cambia il titolo della pagina e i titoli delle sezioni.
+  - NFC, Salva, upload e i colori **invariati**.
 - **Moments v315 + Worker v247 (2026-10-11)** — live
   - Sulla copertina si sceglie verticale o orizzontale. La pagina pubblica segue il formato bordato. Senza una scelta salvata resta verticale, come prima.
   - Etichetta, frase sotto il titolo e descrizione breve sono sempre visibili, nel riquadro «Sulla copertina».

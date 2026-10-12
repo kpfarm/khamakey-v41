@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-11** (Moments **v315** formato copertina; Worker **v247**; SQL **v181**)
+> Ultimo aggiornamento: **2026-10-12** (Moments **v316** frase sotto Stile scritte; Worker **v247**; SQL **v181**)
 
 ### Fonte di verità versioni
 
@@ -108,7 +108,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v247-cover-orient** | Copertina orizzontale solo se scelta. Il titolo segue il font. |
-| **Moments editor** | **v315 live** · CSS **v292** | Copertina: scelta verticale/orizzontale. Testi della copertina sempre visibili. |
+| **Moments editor** | **v316 live** · CSS **v293** | Sotto Stile scritte: il font cambia titolo e titoli delle sezioni. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v181 (prod)** | v181 tetto invitati = 4. v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-11:** Editor **v315**: sulla copertina si sceglie verticale o orizzontale, e i testi intorno al titolo restano in vista. Senza scelta salvata la pagina resta verticale. Worker **v247**. CSS **v292**. SQL **v181**.  
+> **Oggi 2026-10-12:** Editor **v316**: sotto Stile scritte si legge che il font cambia il titolo della pagina e i titoli delle sezioni. Worker **v247**. CSS **v293**. SQL **v181**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v315 live** · CSS **v292** | Copertina: verticale o orizzontale, testi sempre visibili |
+| Editor Moments | **v316 live** · CSS **v293** | Sotto Stile scritte: il font cambia titolo e titoli delle sezioni |
 | Worker | **v247-cover-orient** | La copertina orizzontale cambia la pagina pubblica |
 | Officina | **v203** | PNG codice più basso |
 

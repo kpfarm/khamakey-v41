@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v317 (2026-10-13)** — live
+  - Il quarto passo di Come si crea indica il percorso vero per invitare: Gestisci account, Prodotti, Chi modifica. Condividi resta link, QR e PIN.
+  - NFC, Salva, upload **invariati**.
 - **Moments v316 (2026-10-12)** — live
   - Sotto Stile scritte c’è la frase: cambia il titolo della pagina e i titoli delle sezioni.
   - NFC, Salva, upload e i colori **invariati**.

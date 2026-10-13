@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v316 live** · CSS **v293** | Sotto Stile scritte: il font cambia titolo e titoli delle sezioni |
+| Editor Moments | **v317 live** · CSS **v293** | Invito: Gestisci account, Prodotti, Chi modifica |
 | Worker | **v247-cover-orient** | La copertina orizzontale cambia la pagina pubblica |
 | Officina | **v203** | PNG codice più basso |
 

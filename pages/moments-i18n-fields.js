@@ -483,6 +483,7 @@ export const FIELD_PHRASE_EN = {
   // B1 — Horoscope editor chrome (no Astroway / people[] save logic)
   "Persone e segni": "People and signs",
   "Fino a 5 persone (bundle). Ogni segno mostra l’oroscopo del giorno, aggiornato automaticamente.": "Up to 5 people (bundle). Each sign shows today’s horoscope, updated automatically.",
+  "Fino a 5 persone. Ogni segno mostra l’oroscopo del giorno, nella lingua della pagina.": "Up to 5 people. Each sign shows today’s horoscope, in the page language.",
   "persone": "people",
   "+ Aggiungi persona": "+ Add person",
   "Rimuovi persona": "Remove person",

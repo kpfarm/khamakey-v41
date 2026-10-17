@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v247-cover-orient";
+const WORKER_VERSION = "v248-horoscope-it";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -281,7 +281,6 @@ function momentsLegalUrl(pagesBase, locale, kind) {
 const MOMENT_GUESTBOOK_PUBLIC_ENABLED = false; // escluso dal prodotto (API + sezione pubblica off)
 const ASTROWAY_DAILY_URL = "https://api.astroway.info/v1/horoscope/daily";
 const HOROSCOPE_CACHE_HOST = "https://horoscope-cache.khamakey.internal";
-const HOROSCOPE_LANG_FALLBACKS = ["it", "en"];
 const HOROSCOPE_SHORT_MAX_CHARS = 380;
 const ZODIAC_SIGN_SET = new Set([
   "aries", "taurus", "gemini", "cancer", "leo", "virgo",
@@ -2767,6 +2766,20 @@ function horoscopeDateRome() {
   }).format(new Date());
 }
 
+function horoscopeDateLabel(locale) {
+  const iso = horoscopeDateRome();
+  const [year, month, day] = iso.split("-").map(Number);
+  if (!year || !month || !day) return iso;
+  const date = new Date(Date.UTC(year, month - 1, day));
+  const tag = String(locale || "it").toLowerCase() === "en" ? "en-GB" : "it-IT";
+  return new Intl.DateTimeFormat(tag, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC"
+  }).format(date);
+}
+
 function extractAstroWayHoroscopeText(body) {
   if (!body || typeof body !== "object") return { text: "", disclaimer: "", language: "", model: "" };
   const data = body.data && typeof body.data === "object" ? body.data : body;
@@ -2904,6 +2917,7 @@ function distillNewspaperHoroscope(raw, signKey, date = "") {
     .map(polishHoroscopeSentence)
     .filter(Boolean)
     .filter(s => !isPlanetHeavySentence(s))
+    .filter(s => !looksLikeEnglishHoroscope(s))
     .filter(isCoherentHoroscopeSentence)
     .map(s => ({ s, score: scoreHoroscopeSentence(s) }))
     .filter(item => item.score > 0)
@@ -2982,9 +2996,15 @@ function toNewspaperHoroscopeFallback(raw, signKey, date = "") {
   return parts.filter(Boolean).slice(0, 3).join(" ");
 }
 
+function looksLikeEnglishHoroscope(text) {
+  const t = ` ${String(text || "").toLowerCase()} `;
+  return /\b(the|and|with|your|you|today|don't|can't|cannot|thanks|expect|this is|a calm|for entertainment)\b/.test(t);
+}
+
 function isNewspaperHoroscopeClean(text) {
   const t = String(text || "").toLowerCase();
   if (!t) return false;
+  if (looksLikeEnglishHoroscope(t)) return false;
   if (isAiOpeningSentence(t)) return false;
   if (/planetar|influenze planet|aspetti?|transiti?|congiunzione|trigono|astrolog|influenzando/.test(t)) return false;
   if (/\b(the|and|with|your|can expect|thanks to|libra|aries|taurus)\b/.test(t)) return false;
@@ -2992,6 +3012,27 @@ function isNewspaperHoroscopeClean(text) {
   // Troppo lungo = quasi sempre blocco AI grezzo
   if (t.length > 280) return false;
   return true;
+}
+
+function horoscopeLang(language) {
+  return String(language || "it").trim().toLowerCase() === "en" ? "en" : "it";
+}
+
+function localHoroscopeReading(sign, date, language, reason) {
+  const lang = horoscopeLang(language);
+  const text = lang === "en"
+    ? shapeHoroscopeForMoments("", sign, date, "en")
+    : shapeHoroscopeForMoments("", sign, date, "it");
+  return {
+    text,
+    disclaimer: lang === "en" ? "For entertainment purposes only." : "Solo a scopo di intrattenimento.",
+    sign,
+    date,
+    language: lang,
+    unavailable: false,
+    reason: reason || "locale_fallback",
+    format: lang === "en" ? "en-short-v1" : "giornale-v9"
+  };
 }
 
 function shapeHoroscopeForMoments(raw, signKey, date = "", language = "it") {
@@ -3012,8 +3053,8 @@ function shapeHoroscopeForMoments(raw, signKey, date = "", language = "it") {
 }
 
 function horoscopeCacheUrl(sign, language, date) {
-  // v8 — solo frasi coerenti (niente strip mid-sentence)
-  return `${HOROSCOPE_CACHE_HOST}/daily-paper/v8/${encodeURIComponent(sign)}/${encodeURIComponent(language)}/${date}`;
+  // v9 — niente testo dell’altra lingua in cache
+  return `${HOROSCOPE_CACHE_HOST}/daily-paper/v9/${encodeURIComponent(sign)}/${encodeURIComponent(language)}/${date}`;
 }
 
 async function cacheHoroscopePayload(cacheUrl, payload) {
@@ -3109,83 +3150,55 @@ async function fetchAstroWayDailyOnce(env, sign, language, date) {
     language: extracted.language || language,
     unavailable: !text,
     reason: text ? "" : "empty_text",
-    format: String(language || "").toLowerCase() === "en" ? "en-short-v1" : "giornale-v8"
+    format: String(language || "").toLowerCase() === "en" ? "en-short-v1" : "giornale-v9"
   };
+}
+
+function horoscopeDisclaimerFor(reading, lang) {
+  const raw = String(reading?.disclaimer || "").trim();
+  const fallback = lang === "en" ? "For entertainment purposes only." : "Solo a scopo di intrattenimento.";
+  if (!raw) return fallback;
+  if (lang === "it" && looksLikeEnglishHoroscope(raw)) return fallback;
+  if (lang === "en" && /intrattenimento/.test(raw.toLowerCase())) return fallback;
+  return raw;
 }
 
 async function fetchAstroWayDaily(env, sign, language = "it") {
   const cleanSign = normalizeZodiacSignWorker(sign);
   if (!cleanSign) return null;
   const date = horoscopeDateRome();
-  const preferred = String(language || "it").trim().toLowerCase() || "it";
-  const languages = [...new Set([preferred, ...HOROSCOPE_LANG_FALLBACKS])];
-
-  for (const lang of languages) {
-    const cacheUrl = horoscopeCacheUrl(cleanSign, lang, date);
-    try {
-      const cached = await caches.default.match(new Request(cacheUrl, { method: "GET" }));
-      if (cached) {
-        const payload = await cached.json();
-        if (payload?.text) {
-          if (lang === "en") {
-            if (payload.format === "en-short-v1" && payload.text) return payload;
-            const paper = shapeHoroscopeForMoments(payload.text, cleanSign, date, "en");
-            return { ...payload, text: paper, format: "en-short-v1", language: "en", unavailable: !paper };
-          }
-          // Se la cache è già in formato giornale, usala; altrimenti riscrivi
-          if (payload.format === "giornale-v8" && isNewspaperHoroscopeClean(payload.text)) return payload;
-          const paper = shapeHoroscopeForMoments(payload.text, cleanSign, date, "it");
-          return { ...payload, text: paper, format: "giornale-v8", unavailable: !paper };
-        }
-      }
-    } catch (error) {
-      console.error("horoscope cache match", error);
+  const lang = horoscopeLang(language);
+  const cacheUrl = horoscopeCacheUrl(cleanSign, lang, date);
+  try {
+    const cached = await caches.default.match(new Request(cacheUrl, { method: "GET" }));
+    if (cached) {
+      const payload = await cached.json();
+      const usable = payload?.text
+        && horoscopeLang(payload.language || lang) === lang
+        && (lang === "en" || (isNewspaperHoroscopeClean(payload.text) && !looksLikeEnglishHoroscope(payload.text)));
+      if (usable) return { ...payload, language: lang, disclaimer: horoscopeDisclaimerFor(payload, lang) };
     }
+  } catch (error) {
+    console.error("horoscope cache match", error);
   }
 
   if (!String(env.ASTROWAY_API_KEY || "").trim()) {
-    return {
-      text: "",
-      disclaimer: "",
-      unavailable: true,
-      reason: "missing_key",
-      sign: cleanSign,
-      date,
-      language: preferred
-    };
+    return localHoroscopeReading(cleanSign, date, lang, "missing_key");
   }
 
-  let last = null;
-  for (const lang of languages) {
-    try {
-      last = await fetchAstroWayDailyOnce(env, cleanSign, lang, date);
-      if (last?.text) {
-        const cacheUrl = horoscopeCacheUrl(cleanSign, lang, date);
-        await cacheHoroscopePayload(cacheUrl, last);
-        return last;
-      }
-    } catch (error) {
-      console.error("astroway daily fetch", error);
-      last = {
-        text: "",
-        disclaimer: "",
-        unavailable: true,
-        reason: "fetch_error",
-        sign: cleanSign,
-        date,
-        language: lang
-      };
+  try {
+    const fresh = await fetchAstroWayDailyOnce(env, cleanSign, lang, date);
+    if (fresh?.text && (lang === "en" || !looksLikeEnglishHoroscope(fresh.text))) {
+      fresh.language = lang;
+      fresh.format = lang === "en" ? "en-short-v1" : "giornale-v9";
+      fresh.disclaimer = horoscopeDisclaimerFor(fresh, lang);
+      await cacheHoroscopePayload(cacheUrl, fresh);
+      return fresh;
     }
+  } catch (error) {
+    console.error("astroway daily fetch", error);
   }
-  return last || {
-    text: "",
-    disclaimer: "",
-    unavailable: true,
-    reason: "unavailable",
-    sign: cleanSign,
-    date,
-    language: preferred
-  };
+  return localHoroscopeReading(cleanSign, date, lang, "locale_fallback");
 }
 
 /** Un paragrafo leggibile stile giornale. */
@@ -5734,19 +5747,21 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   if (key === "horoscope") {
     const people = normalizeHoroscopePeopleWorker(section);
     const readings = live?.horoscopeReadings && typeof live.horoscopeReadings === "object" ? live.horoscopeReadings : {};
-    const dateLabel = horoscopeDateRome();
+    const pageLang = String(locale || "it").toLowerCase() === "en" ? "en" : "it";
+    const dateLabel = horoscopeDateLabel(pageLang);
     const cards = people.map(person => {
       const reading = readings[person.sign] || {};
       const signLabel = zodiacSignLabelPublic(person.sign, locale);
       const titleLine = person.name
         ? `${escapeHtml(person.name)} · ${escapeHtml(signLabel)}`
         : escapeHtml(signLabel);
-      const body = reading.text
-        ? `<div class="moment-horoscope-text">${formatHoroscopeHtml(reading.text)}</div>`
+      const readingText = reading.text && (pageLang === "en" || !looksLikeEnglishHoroscope(reading.text))
+        ? reading.text
+        : "";
+      const body = readingText
+        ? `<div class="moment-horoscope-text">${formatHoroscopeHtml(readingText)}</div>`
         : `<p class="moment-horoscope-empty">${escapeHtml(mt(locale, "horoscope.empty"))}</p>`;
-      const disclaimer = reading.disclaimer
-        ? `<p class="moment-horoscope-disclaimer">${escapeHtml(reading.disclaimer)}</p>`
-        : `<p class="moment-horoscope-disclaimer">${escapeHtml(mt(locale, "horoscope.disclaimer"))}</p>`;
+      const disclaimer = `<p class="moment-horoscope-disclaimer">${escapeHtml(horoscopeDisclaimerFor(readingText ? reading : {}, pageLang))}</p>`;
       return `<div class="moment-horoscope-card"><p class="moment-horoscope-person">${titleLine}</p>${body}${disclaimer}</div>`;
     }).join("");
     return `<article class="${rv} moment-horoscope">${head(section.title || mt(locale, "horoscope.default_title"))}${section.body ? `<p class="moment-horoscope-intro">${escapeHtml(section.body)}</p>` : ""}<p class="moment-horoscope-date">${escapeHtml(mt(locale, "horoscope.today"))} · ${escapeHtml(dateLabel)}</p><div class="moment-horoscope-list">${cards}</div></article>`;

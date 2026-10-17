@@ -171,7 +171,7 @@ import {
   renderHoroscopePeoplePanel,
   bindHoroscopePeopleEditor,
   refreshHoroscopePeopleEditor
-} from "./moment-horoscope.js?v=218";
+} from "./moment-horoscope.js?v=219";
 import {
   renderPetsPanel,
   bindPetsEditor,

@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-10-17 | Cursor | **Moments v318 + Worker v248**: oroscopo di ogni persona nella lingua della pagina. |
 | 2026-10-13 | Cursor | **Moments v317**: Come si crea indica dove si invita a modificare. |
 | 2026-10-12 | Cursor | **Moments v316**: sotto Stile scritte si legge cosa cambia il font. |
 | 2026-10-11 | Cursor | **Moments v315 + Worker v247**: copertina verticale o orizzontale, testi della copertina sempre visibili. |

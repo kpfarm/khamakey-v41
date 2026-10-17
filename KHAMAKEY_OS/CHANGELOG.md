@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v318 + Worker v248 (2026-10-17)** — live
+  - Oroscopo: ogni persona resta nella lingua della pagina. Se l’italiano non arriva, non si usa più il testo inglese. La data si legge per esteso. Il suggerimento non dice più «bundle».
+  - NFC, Salva, upload **invariati**.
 - **Moments v317 (2026-10-13)** — live
   - Il quarto passo di Come si crea indica il percorso vero per invitare: Gestisci account, Prodotti, Chi modifica. Condividi resta link, QR e PIN.
   - NFC, Salva, upload **invariati**.

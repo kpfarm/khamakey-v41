@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v317 live** · CSS **v293** | Invito: Gestisci account, Prodotti, Chi modifica |
-| Worker | **v247-cover-orient** | La copertina orizzontale cambia la pagina pubblica |
+| Editor Moments | **v318 live** · CSS **v293** | Oroscopo nella lingua della pagina |
+| Worker | **v248-horoscope-it** | Niente oroscopo inglese se la pagina è in italiano |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

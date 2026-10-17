@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-13** (Moments **v317** percorso invito; Worker **v247**; SQL **v181**)
+> Ultimo aggiornamento: **2026-10-17** (Moments **v318** oroscopo in italiano; Worker **v248**; SQL **v181**)
 
 ### Fonte di verità versioni
 
@@ -107,8 +107,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v247-cover-orient** | Copertina orizzontale solo se scelta. Il titolo segue il font. |
-| **Moments editor** | **v317 live** · CSS **v293** | Come si crea indica Gestisci account → Prodotti → Chi modifica per invitare. |
+| **Worker NFC** | **v248-horoscope-it** | L’oroscopo resta nella lingua della pagina, anche con più persone. |
+| **Moments editor** | **v318 live** · CSS **v293** | Oroscopo: niente «bundle». La lingua del testo segue la pagina. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v181 (prod)** | v181 tetto invitati = 4. v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-13:** Editor **v317**: il quarto passo dice dove si invita a modificare (Gestisci account, Prodotti, Chi modifica). Condividi resta link, QR e PIN. Worker **v247**. CSS **v293**. SQL **v181**.  
+> **Oggi 2026-10-17:** Editor **v318** e Worker **v248**: l’oroscopo di ogni persona resta in italiano se la pagina è in italiano. Non si prende più il testo inglese di riserva. CSS **v293**. SQL **v181**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

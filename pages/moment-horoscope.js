@@ -1,7 +1,7 @@
 /** Oroscopo Moments — fino a 5 persone (nome opzionale + segno), testo daily via AstroWay (Worker). */
 
 import { getUiLocale } from "./moments-i18n.js?v=218";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=218";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=265";
 
 export const MAX_HOROSCOPE_PEOPLE = 5;
 
@@ -154,7 +154,7 @@ function personRowHtml(person, index){
 
 export function renderHoroscopePeoplePanel(section = {}){
   const people = horoscopePeopleForEditor(section);
-  const hintIt = "Fino a 5 persone (bundle). Ogni segno mostra l’oroscopo del giorno, aggiornato automaticamente.";
+  const hintIt = "Fino a 5 persone. Ogni segno mostra l’oroscopo del giorno, nella lingua della pagina.";
   const peopleWord = "persone";
   const addIt = "+ Aggiungi persona";
   return `<div class="list-items-panel horoscope-people-panel" data-horoscope-panel>

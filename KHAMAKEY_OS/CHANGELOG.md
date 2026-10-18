@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v249 (2026-10-18)** — live
+  - Sezioni senza titolo usano il nome nella lingua della pagina. La dedica tiene la firma anche da sola. La citazione tiene l’autore. Il conto alla rovescia e la lettera sigillata non restano in italiano su una pagina inglese.
+  - I titoli scritti dal cliente **restano**. NFC, Salva, upload **invariati**.
 - **Moments v318 + Worker v248 (2026-10-17)** — live
   - Oroscopo: ogni persona resta nella lingua della pagina. Se l’italiano non arriva, non si usa più il testo inglese. La data si legge per esteso. Il suggerimento non dice più «bundle».
   - NFC, Salva, upload **invariati**.

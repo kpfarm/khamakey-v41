@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v248-horoscope-it";
+const WORKER_VERSION = "v249-section-locale";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -119,6 +119,43 @@ const MOMENTS_PUBLIC_I18N = {
     "horoscope.sign.capricorn": "Capricorno",
     "horoscope.sign.aquarius": "Acquario",
     "horoscope.sign.pisces": "Pesci",
+    "section.fallback": "Sezione",
+    "section.intro": "Introduzione",
+    "section.dedication": "Dedica",
+    "section.timeline": "Tappe & luoghi",
+    "section.gallery": "Galleria foto",
+    "section.video": "Video",
+    "section.promises": "Promesse",
+    "section.dreams": "Sogni",
+    "section.countdown": "Conto alla rovescia",
+    "section.music": "La nostra canzone",
+    "section.letter": "Lettera al futuro",
+    "section.rituals": "Rituali",
+    "section.pet": "Il nostro compagno",
+    "section.numbers": "I nostri numeri",
+    "dedication.empty": "Scrivi la dedica personale.",
+    "quote.empty": "Aggiungi la citazione nell'editor.",
+    "letter.sealed": "Questa lettera è sigillata.",
+    "letter.sealed_until": "Questa lettera è sigillata fino al {date}.",
+    "letter.come_back": "Torna in quella data per rileggerla.",
+    "nav.section.intro": "Intro",
+    "nav.section.dedication": "Dedica",
+    "nav.section.timeline": "Programma",
+    "nav.section.rsvp": "RSVP",
+    "nav.section.guestbook": "Ospiti",
+    "nav.section.gallery": "Foto",
+    "nav.section.video": "Video",
+    "nav.section.promises": "Promesse",
+    "nav.section.dreams": "Sogni",
+    "nav.section.countdown": "Conto",
+    "nav.section.music": "Musica",
+    "nav.section.horoscope": "Oroscopo",
+    "nav.section.letter_future": "Lettera",
+    "nav.section.rituals": "Rituali",
+    "nav.section.pet": "Pet",
+    "nav.section.numbers": "Numeri",
+    "nav.section.quote": "Citazione",
+    "nav.section.signature": "Firma",
     "gallery.open_pdf": "Apri PDF",
     "gallery.open_photo": "Apri foto",
     "gallery.open_photo_full": "Apri foto a schermo intero",
@@ -228,6 +265,43 @@ const MOMENTS_PUBLIC_I18N = {
     "horoscope.sign.capricorn": "Capricorn",
     "horoscope.sign.aquarius": "Aquarius",
     "horoscope.sign.pisces": "Pisces",
+    "section.fallback": "Section",
+    "section.intro": "Introduction",
+    "section.dedication": "Dedication",
+    "section.timeline": "Stops & places",
+    "section.gallery": "Photo gallery",
+    "section.video": "Video",
+    "section.promises": "Promises",
+    "section.dreams": "Dreams",
+    "section.countdown": "Countdown",
+    "section.music": "Our song",
+    "section.letter": "Letter to the future",
+    "section.rituals": "Rituals",
+    "section.pet": "Our companion",
+    "section.numbers": "Our numbers",
+    "dedication.empty": "Write the personal dedication.",
+    "quote.empty": "Add the quote in the editor.",
+    "letter.sealed": "This letter is sealed.",
+    "letter.sealed_until": "This letter is sealed until {date}.",
+    "letter.come_back": "Come back on that date to read it.",
+    "nav.section.intro": "Intro",
+    "nav.section.dedication": "Dedication",
+    "nav.section.timeline": "Plan",
+    "nav.section.rsvp": "RSVP",
+    "nav.section.guestbook": "Guests",
+    "nav.section.gallery": "Photos",
+    "nav.section.video": "Video",
+    "nav.section.promises": "Promises",
+    "nav.section.dreams": "Dreams",
+    "nav.section.countdown": "Countdown",
+    "nav.section.music": "Music",
+    "nav.section.horoscope": "Horoscope",
+    "nav.section.letter_future": "Letter",
+    "nav.section.rituals": "Rituals",
+    "nav.section.pet": "Pet",
+    "nav.section.numbers": "Numbers",
+    "nav.section.quote": "Quote",
+    "nav.section.signature": "Close",
     "gallery.open_pdf": "Open PDF",
     "gallery.open_photo": "Open photo",
     "gallery.open_photo_full": "Open full-screen photo",
@@ -2461,7 +2535,10 @@ function buildMomentNavItems(ordered, hasCounter, locale = "it"){
   const items = [{ id:"moment-hero", label: mt(locale, "nav.home") }];
   if(hasCounter) items.push({ id:"moment-section-counter", label: mt(locale, "nav.counter") });
   ordered.forEach(({ key, section })=>{
-    const fallback = MOMENT_NAV_LABELS[key] || key;
+    const translated = String(locale || "it").toLowerCase() === "en"
+      ? MOMENTS_PUBLIC_I18N.en[`nav.section.${key}`]
+      : "";
+    const fallback = translated || MOMENT_NAV_LABELS[key] || key;
     const label = shortenMomentNavLabel(section.title) || fallback;
     items.push({ id:`moment-section-${key}`, label });
   });
@@ -5679,12 +5756,37 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
       icon = loveSvgs[key];
     }
   }
-  const head = (title) => `<div class="moment-card-head"><span class="moment-card-icon">${icon}</span><strong>${escapeHtml(title || "Sezione")}</strong></div>`;
+  const heading = () => {
+    const custom = String(section.title || "").trim();
+    if (custom) return custom;
+    const titleKey = {
+      intro: "section.intro",
+      dedication: "section.dedication",
+      timeline: "section.timeline",
+      gallery: "section.gallery",
+      video: "section.video",
+      promises: "section.promises",
+      dreams: "section.dreams",
+      countdown: "section.countdown",
+      music: "section.music",
+      letter_future: "section.letter",
+      rituals: "section.rituals",
+      pet: "section.pet",
+      numbers: "section.numbers"
+    }[key];
+    return mt(locale, titleKey || "section.fallback");
+  };
+  const head = (title) => `<div class="moment-card-head"><span class="moment-card-icon">${icon}</span><strong>${escapeHtml(title || mt(locale, "section.fallback"))}</strong></div>`;
   const rv = `moment-card moment-card-${escapeHtml(key)} rv`;
 
-  if (key === "quote" && section.body) {
-    const titleHead = section.title ? head(section.title) : "";
-    return `<article class="${rv} moment-quote-wrap">${titleHead}<span class="moment-quote-mark">"</span><p class="moment-quote-text">${escapeHtml(section.body)}</p>${section.author ? `<span class="moment-quote-author">— ${escapeHtml(section.author)}</span>` : ""}</article>`;
+  if (key === "quote" && (String(section.body || "").trim() || String(section.author || "").trim())) {
+    const titleHead = String(section.title || "").trim() ? head(section.title) : "";
+    const quoteText = String(section.body || "").trim();
+    const author = String(section.author || "").trim();
+    const textHtml = quoteText ? `<p class="moment-quote-text">${escapeHtml(quoteText)}</p>` : "";
+    const authorHtml = author ? `<span class="moment-quote-author">— ${escapeHtml(author)}</span>` : "";
+    const mark = quoteText ? `<span class="moment-quote-mark">"</span>` : "";
+    return `<article class="${rv} moment-quote-wrap">${titleHead}${mark}${textHtml}${authorHtml}</article>`;
   }
 
   if (key === "signature") {
@@ -5712,10 +5814,10 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     return `<article class="${rv} moment-signature">${labelHtml}${nameHtml}${subHtml}${messageHtml}</article>`;
   }
 
-  if (key === "dedication" && (section.body || section.recipient)) {
+  if (key === "dedication" && (String(section.body || "").trim() || String(section.recipient || "").trim() || String(section.signature || "").trim())) {
     const recipient = renderLetterRecipientLine(section.recipient);
-    const sign = section.signature ? `<span class="moment-letter-sign">${escapeHtml(section.signature)}</span>` : "";
-    return `<article class="${rv}">${head(section.title || "Dedica")}${renderSectionTag("", colors)}<div class="moment-letter">${recipient}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${sign}<span class="moment-letter-heart" aria-hidden="true">♥</span></div></article>`;
+    const sign = String(section.signature || "").trim() ? `<span class="moment-letter-sign">${escapeHtml(section.signature)}</span>` : "";
+    return `<article class="${rv}">${head(heading())}${renderSectionTag("", colors)}<div class="moment-letter">${recipient}${String(section.body || "").trim() ? `<p>${escapeHtml(section.body)}</p>` : ""}${sign}<span class="moment-letter-heart" aria-hidden="true">♥</span></div></article>`;
   }
 
   if (key === "places") return "";
@@ -5769,7 +5871,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
 
   if (key === "timeline") {
     const steps = resolveJourneyStepsWorker(section);
-    const headBlock = head(section.title || "Tappe & luoghi");
+    const headBlock = head(heading());
     const scrollLayout = Boolean(section.scroll_layout);
     if (!steps.length) {
       return `<article class="${rv}">${headBlock}<p class="moment-empty-hint">Aggiungi tappe con data, luogo, descrizione e foto nell'editor.</p></article>`;
@@ -5796,32 +5898,32 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   if (key === "promises") {
     const items = resolveListItems(section, "promise");
     if (!items.length) return "";
-    return `<article class="${rv}">${head(section.title || "Promesse")}${listIntroHtml(section.body)}<div class="moment-promises">${items.map(item => `<div class="moment-promise"><span class="moment-promise-emoji">${escapeHtml(item.emoji)}</span><span>${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
+    return `<article class="${rv}">${head(heading())}${listIntroHtml(section.body)}<div class="moment-promises">${items.map(item => `<div class="moment-promise"><span class="moment-promise-emoji">${escapeHtml(item.emoji)}</span><span>${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
   }
 
   if (key === "dreams") {
     const items = resolveListItems(section, "dream");
     if (!items.length) return "";
-    return `<article class="${rv}">${head(section.title || "Sogni")}${listIntroHtml(section.body)}<div class="moment-dreams">${items.map(item => `<div class="moment-dream ${item.done ? "done" : ""}"><span class="moment-dream-mark">${item.done ? "✓" : ""}</span><span class="moment-dream-text">${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
+    return `<article class="${rv}">${head(heading())}${listIntroHtml(section.body)}<div class="moment-dreams">${items.map(item => `<div class="moment-dream ${item.done ? "done" : ""}"><span class="moment-dream-mark">${item.done ? "✓" : ""}</span><span class="moment-dream-text">${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
   }
 
   if (key === "rituals") {
     const items = resolveListItems(section, "ritual");
     if (!items.length) return "";
-    return `<article class="${rv}">${head(section.title)}${listIntroHtml(section.body)}<div class="moment-rituals">${items.map(item => `<div class="moment-ritual"><span class="moment-promise-emoji">${escapeHtml(item.emoji)}</span><span>${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
+    return `<article class="${rv}">${head(heading())}${listIntroHtml(section.body)}<div class="moment-rituals">${items.map(item => `<div class="moment-ritual"><span class="moment-promise-emoji">${escapeHtml(item.emoji)}</span><span>${escapeHtml(item.text)}</span></div>`).join("")}</div></article>`;
   }
 
   if (key === "numbers") {
     const items = resolveListItems(section, "number");
     if (!items.length) return "";
-    return `<article class="${rv}">${head(section.title)}${listIntroHtml(section.body)}<div class="moment-numbers">${items.map(item => `<div class="moment-number">${item.value ? `<b>${escapeHtml(item.value)}</b>` : ""}${item.label ? `<small>${escapeHtml(item.label)}</small>` : ""}</div>`).join("")}</div></article>`;
+    return `<article class="${rv}">${head(heading())}${listIntroHtml(section.body)}<div class="moment-numbers">${items.map(item => `<div class="moment-number">${item.value ? `<b>${escapeHtml(item.value)}</b>` : ""}${item.label ? `<small>${escapeHtml(item.label)}</small>` : ""}</div>`).join("")}</div></article>`;
   }
 
   if (key === "countdown" && section.target_date) {
     const target = String(section.target_date).replace(" ", "T");
     const imageUrl = safeUrl(section.image_url || section.images?.[0] || "") !== "#" ? safeUrl(section.image_url || section.images?.[0] || "") : "";
     const photo = imageUrl ? `<img class="moment-countdown-photo" src="${attr(imageUrl)}" alt="">` : "";
-    return `<section class="moment-countdown rv" data-target="${attr(target.length > 10 ? target : target + "T12:00:00")}">${photo}<p class="moment-countdown-label">${escapeHtml(section.title || "Conto alla rovescia")}</p>${section.event_label ? `<p class="moment-countdown-event">${escapeHtml(section.event_label)}</p>` : ""}${section.body ? `<p class="moment-countdown-note">${escapeHtml(section.body)}</p>` : ""}<div class="moment-countdown-grid"><span class="moment-countdown-unit"><b data-cd="days">0</b><small>giorni</small></span><span class="moment-countdown-unit"><b data-cd="hours">0</b><small>ore</small></span><span class="moment-countdown-unit"><b data-cd="minutes">0</b><small>minuti</small></span></div></section>`;
+    return `<section class="moment-countdown rv" data-target="${attr(target.length > 10 ? target : target + "T12:00:00")}">${photo}<p class="moment-countdown-label">${escapeHtml(heading())}</p>${section.event_label ? `<p class="moment-countdown-event">${escapeHtml(section.event_label)}</p>` : ""}${section.body ? `<p class="moment-countdown-note">${escapeHtml(section.body)}</p>` : ""}<div class="moment-countdown-grid"><span class="moment-countdown-unit"><b data-cd="days">0</b><small>${escapeHtml(mt(locale, "counter.days"))}</small></span><span class="moment-countdown-unit"><b data-cd="hours">0</b><small>${escapeHtml(mt(locale, "counter.hours"))}</small></span><span class="moment-countdown-unit"><b data-cd="minutes">0</b><small>${escapeHtml(mt(locale, "counter.minutes"))}</small></span></div></section>`;
   }
 
   if (key === "music" && (section.spotify_url || section.youtube_url || section.image_url || migrateMusicSectionMedia(section).length)) {
@@ -5833,18 +5935,21 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     const audioBlock = audioItems.length
       ? `<div class="moment-audio-list">${audioItems.map(item => `<div class="moment-audio">${item.title ? `<p class="moment-audio-title">${escapeHtml(item.title)}</p>` : ""}${item.description ? `<p class="moment-audio-desc">${escapeHtml(item.description)}</p>` : ""}<audio src="${attr(item.url)}" controls preload="metadata" playsinline></audio></div>`).join("")}</div>`
       : "";
-    return `<article class="${rv}">${head(section.title || "La nostra canzone")}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${photo}${spotify ? `<div class="moment-spotify"><iframe src="${attr(spotify)}" loading="lazy" allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture"></iframe></div>` : ""}${youtube}${audioBlock}</article>`;
+    return `<article class="${rv}">${head(heading())}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${photo}${spotify ? `<div class="moment-spotify"><iframe src="${attr(spotify)}" loading="lazy" allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture"></iframe></div>` : ""}${youtube}${audioBlock}</article>`;
   }
 
   if (key === "letter_future" && (section.body || section.unlock_date || letterMediaItems(section).length)) {
     const unlocked = isLetterUnlocked(section.unlock_date);
-    const when = formatUnlockDate(section.unlock_date);
+    const when = formatUnlockDate(section.unlock_date, locale);
     if (!unlocked) {
-      return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<div class="moment-sealed"><div class="moment-sealed-icon" aria-hidden="true">🔒</div><p>Questa lettera è sigillata${when ? ` fino al <strong>${escapeHtml(when)}</strong>` : ""}.</p><p class="moment-sealed-date">Torna in quella data per rileggerla.</p></div></article>`;
+      const sealed = when
+        ? mtFill(locale, "letter.sealed_until", { date: when })
+        : mt(locale, "letter.sealed");
+      return `<article class="${rv}">${head(heading())}<div class="moment-sealed"><div class="moment-sealed-icon" aria-hidden="true">🔒</div><p>${escapeHtml(sealed)}</p><p class="moment-sealed-date">${escapeHtml(mt(locale, "letter.come_back"))}</p></div></article>`;
     }
     const recipient = renderLetterRecipientLine(section.recipient);
     const media = renderLetterFutureMedia(section, locale);
-    return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<div class="moment-letter">${recipient}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${media}<span class="moment-letter-heart" aria-hidden="true">♥</span></div></article>`;
+    return `<article class="${rv}">${head(heading())}<div class="moment-letter">${recipient}${section.body ? `<p>${escapeHtml(section.body)}</p>` : ""}${media}<span class="moment-letter-heart" aria-hidden="true">♥</span></div></article>`;
   }
 
   if (key === "pet") {
@@ -5866,13 +5971,13 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
       }).join("");
       const gridClass = pets.length > 1 ? "moment-pets-grid is-multi" : "moment-pets-grid";
       const introHtml = intro ? `<p class="moment-pet-intro">${escapeHtml(intro)}</p>` : "";
-      return `<article class="${rv}">${head(section.title || "Il nostro compagno")}${introHtml}${pets.length ? `<div class="${gridClass}">${cards}</div>` : ""}</article>`;
+      return `<article class="${rv}">${head(heading())}${introHtml}${pets.length ? `<div class="${gridClass}">${cards}</div>` : ""}</article>`;
     }
   }
 
   if (key === "gallery") {
     const media = normalizeMomentMedia(section).filter(item => item.type === "image");
-    const headBlock = head(section.title || "Galleria foto");
+    const headBlock = head(heading());
     if (!media.length) {
       return `<article class="${rv} moment-card-gallery">${headBlock}<p class="moment-gallery-empty">Le foto verranno aggiunte presto.</p></article>`;
     }
@@ -5895,7 +6000,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   if (key === "video") {
     const media = migrateVideoSectionMedia(section);
     const youtube = youtubeIframeBlock(section.youtube_url || (youtubeVideoId(section.video_url) ? section.video_url : ""));
-    const headBlock = head(section.title || "Video");
+    const headBlock = head(heading());
     const body = section.body ? `<p>${escapeHtml(section.body)}</p>` : "";
     if (!media.length && !youtube) {
       return `<article class="${rv} moment-card-gallery">${headBlock}${body}<p class="moment-empty-hint">Aggiungi un link YouTube o carica un video MP4/MOV nell'editor.</p></article>`;
@@ -5924,27 +6029,27 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
 
   if (key === "quote" && !section.body) {
     const titleHead = section.title ? head(section.title) : "";
-    return `<article class="${rv} moment-quote-wrap">${titleHead}<span class="moment-quote-mark">"</span><p class="moment-quote-text moment-empty-hint">Aggiungi la citazione nell'editor.</p></article>`;
+    return `<article class="${rv} moment-quote-wrap">${titleHead}<span class="moment-quote-mark">"</span><p class="moment-quote-text moment-empty-hint">${escapeHtml(mt(locale, "quote.empty"))}</p></article>`;
   }
 
   if (key === "music" && !section.spotify_url && !section.youtube_url && !section.image_url && !migrateMusicSectionMedia(section).length) {
-    return `<article class="${rv}">${head(section.title || "Musica")}<p class="moment-empty-hint">Aggiungi Spotify, YouTube, un audio o un'immagine.</p></article>`;
+    return `<article class="${rv}">${head(heading())}<p class="moment-empty-hint">Aggiungi Spotify, YouTube, un audio o un'immagine.</p></article>`;
   }
 
   if (key === "pet" && !normalizePetsWorker(section).length && !String(section.body || "").trim()) {
-    return `<article class="${rv}">${head(section.title || "Il nostro compagno")}<p class="moment-empty-hint">Aggiungi uno o più animali con nome, foto e racconto.</p></article>`;
+    return `<article class="${rv}">${head(heading())}<p class="moment-empty-hint">Aggiungi uno o più animali con nome, foto e racconto.</p></article>`;
   }
 
   if (key === "letter_future" && !section.body && !section.unlock_date && !letterMediaItems(section).length) {
-    return `<article class="${rv}">${head(section.title || "Lettera al futuro")}<p class="moment-empty-hint">Scrivi la lettera, scegli la data di apertura e allega foto, video, audio o PDF.</p></article>`;
+    return `<article class="${rv}">${head(heading())}<p class="moment-empty-hint">Scrivi la lettera, scegli la data di apertura e allega foto, video, audio o PDF.</p></article>`;
   }
 
   if (key === "countdown" && !section.target_date) {
-    return `<article class="${rv}">${head(section.title || "Countdown")}<p class="moment-empty-hint">Imposta data e ora dell'evento.</p></article>`;
+    return `<article class="${rv}">${head(heading())}<p class="moment-empty-hint">Imposta data e ora dell'evento.</p></article>`;
   }
 
-  if (key === "dedication" && !section.body && !section.recipient) {
-    return `<article class="${rv}">${head(section.title || "Dedica")}<p class="moment-empty-hint">Scrivi la dedica personale.</p></article>`;
+  if (key === "dedication" && !String(section.body || "").trim() && !String(section.recipient || "").trim() && !String(section.signature || "").trim()) {
+    return `<article class="${rv}">${head(heading())}<p class="moment-empty-hint">${escapeHtml(mt(locale, "dedication.empty"))}</p></article>`;
   }
 
   if (key === "signature" && !section.sign_name && !section.sign_subtitle) {
@@ -5954,7 +6059,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
   }
 
   if (key === "intro" && !section.body) {
-    return `<article class="${rv}">${head(section.title || "Introduzione")}<p class="moment-empty-hint">Racconta chi siete e perché questo momento conta.</p></article>`;
+    return `<article class="${rv}">${head(heading())}<p class="moment-empty-hint">Racconta chi siete e perché questo momento conta.</p></article>`;
   }
 
   let gallery = "";
@@ -5962,7 +6067,7 @@ function renderMomentSection(key, section, colors, momentType = "free", fonts = 
     gallery = `<div class="moment-gallery">${images.map(url => `<img src="${attr(url)}" alt="" loading="lazy">`).join("")}</div>`;
   }
   const body = section.body ? `<p>${escapeHtml(section.body)}</p>` : "";
-  return `<article class="${rv}">${head(section.title)}${body}${gallery}</article>`;
+  return `<article class="${rv}">${head(heading())}${body}${gallery}</article>`;
 }
 
 function videoPreviewSrc(url) {

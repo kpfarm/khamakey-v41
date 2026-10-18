@@ -9,7 +9,7 @@
 | Live | Versione | Nota |
 |------|----------|------|
 | Editor Moments | **v318 live** · CSS **v293** | Oroscopo nella lingua della pagina |
-| Worker | **v248-horoscope-it** | Niente oroscopo inglese se la pagina è in italiano |
+| Worker | **v249-section-locale** | Sezioni senza titolo e testi di sistema nella lingua della pagina |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

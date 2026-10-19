@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v294 + Worker v253 (2026-10-19)** — live
+  - Il telefono in modalità scura non ridipinge più l’app. Il nome, le card e i pulsanti restano i colori disegnati. Vale per accesso, editor, pagina pubblica, PIN e pagine legali.
+  - NFC, Salva, upload **invariati**.
 - **Worker v252 (2026-10-19)** — live
   - Il menu delle sezioni va a capo sul computer e non esce dallo schermo. Nel menu del telefono il titolo resta intero. Il riquadro privacy non copre più il fondo della pagina.
   - NFC, Salva, upload **invariati**.

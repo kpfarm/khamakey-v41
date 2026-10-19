@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v252-nav-privacy";
+const WORKER_VERSION = "v253-light-scheme";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -2365,9 +2365,11 @@ function renderMomentPinGate(page, origin, failed = false, env = {}, locale = "i
   return `<!doctype html>
 <html lang="${attr(locale)}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#071A3C">
+<meta name="color-scheme" content="only light">
+<meta name="theme-color" content="#FFF9F5">
 <title>${escapeHtml(page.title || "KhamaKey Moments")}</title>
 <style>
+html{color-scheme:only light}
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#18202F;padding:20px;
 background:radial-gradient(circle at 12% 8%,rgba(217,140,149,.18) 0%,transparent 42%),radial-gradient(circle at 90% 90%,rgba(170,98,108,.12) 0%,transparent 45%),#FFF9F5}
@@ -2500,6 +2502,7 @@ async function renderMomentPage(page, origin, env = {}, locale = "it", options =
   return `<!doctype html>
 <html lang="${attr(locale)}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="only light">
 <meta name="theme-color" content="${attr(colors.bl)}">
 <title>${escapeHtml(title)} · KhamaKey Moments</title>
 <meta name="description" content="${escapeHtml(heroLead || mt(locale, "meta.default_desc"))}">
@@ -4168,7 +4171,7 @@ function momentPageCss(colors, fonts) {
   const cardInk = c.cardInk || "#111111";
   const cardMuted = c.cardMuted || "#475569";
   return `@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Special+Elite&family=Shadows+Into+Light&display=swap');
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:108px;overflow-x:hidden;overflow-y:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+*{box-sizing:border-box}html{color-scheme:only light;scroll-behavior:smooth;scroll-padding-top:108px;overflow-x:hidden;overflow-y:auto;max-width:100%;-webkit-overflow-scrolling:touch}
 body{margin:0;width:100%;max-width:100%;overflow-x:hidden;font-family:${f.body};background:radial-gradient(circle at 12% 24%, color-mix(in srgb, ${c.go} 8%, transparent) 0%, transparent 45%), radial-gradient(circle at 88% 76%, color-mix(in srgb, ${c.go} 12%, transparent) 0%, transparent 52%), linear-gradient(180deg, ${c.surface} 0%, ${c.bl} 100%)!important;color:${c.ink};-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 #moment-hero,.moment-section-anchor,#moment-section-counter{scroll-margin-top:108px}
 .moment-nav-backdrop{position:fixed;inset:0;background:rgba(12,16,24,.22);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:38}
@@ -6194,10 +6197,12 @@ function renderMomentActivationPage(product, origin, env = {}) {
   return `<!doctype html>
 <html lang="it">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#071A3C">
+<meta name="color-scheme" content="only light">
+<meta name="theme-color" content="#FFF9F5">
 <title>Attiva KhamaKey Moments</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <style>
+html{color-scheme:only light}
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#18202F;padding:20px;
 background:radial-gradient(circle at 12% 8%,rgba(217,140,149,.18) 0%,transparent 42%),radial-gradient(circle at 90% 90%,rgba(170,98,108,.12) 0%,transparent 45%),#FFF9F5}

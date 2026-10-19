@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v320 live** · CSS **v293** | Sostituzione di video, audio e PDF sullo stesso posto |
-| Worker | **v252-nav-privacy** | Menu a capo e riquadro privacy che non copre il testo |
+| Editor Moments | **v320 live** · CSS **v294** | La modalità scura del telefono non cambia i colori disegnati |
+| Worker | **v253-light-scheme** | Pagina pubblica, PIN e attivazione restano nei colori disegnati |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

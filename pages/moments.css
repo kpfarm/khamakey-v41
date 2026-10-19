@@ -1,5 +1,6 @@
 /* KhamaKey Moments brand 2026 — palette ufficiale, chrome UI bilanciato (Blu Notte base + rosa accent) */
 :root{
+  color-scheme: only light;
   --rosa-ricordo:#AA626C;
   --blu-notte:#071A3C;
   --rosa-luce:#D98C95;

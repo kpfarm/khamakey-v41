@@ -9,7 +9,7 @@
 | Live | Versione | Nota |
 |------|----------|------|
 | Editor Moments | **v320 live** · CSS **v293** | Sostituzione di video, audio e PDF sullo stesso posto |
-| Worker | **v251-replace-slot** | Il file nuovo usa il posto di quello che sostituisce |
+| Worker | **v252-nav-privacy** | Menu a capo e riquadro privacy che non copre il testo |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

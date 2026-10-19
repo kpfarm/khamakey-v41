@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Worker v252 (2026-10-19)** — live
+  - Il menu delle sezioni va a capo sul computer e non esce dallo schermo. Nel menu del telefono il titolo resta intero. Il riquadro privacy non copre più il fondo della pagina.
+  - NFC, Salva, upload **invariati**.
 - **Moments v320 + Worker v251 (2026-10-19)** — live
   - Sostituire un video, un audio o un PDF tiene il posto del file già presente. Se il nuovo non entra, il vecchio resta.
   - NFC e Salva **invariati**.

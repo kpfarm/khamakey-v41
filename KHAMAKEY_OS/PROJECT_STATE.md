@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-19** (Moments **v320** sostituzione file; Worker **v251**; SQL **v181**)
+> Ultimo aggiornamento: **2026-10-19** (Moments **v320**; Worker **v252** menu e privacy; SQL **v181**)
 
 ### Fonte di verità versioni
 
@@ -107,7 +107,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v251-replace-slot** | Sostituire un file tiene il posto di quello già caricato. |
+| **Worker NFC** | **v252-nav-privacy** | Menu a capo, titoli interi nel menu del telefono, privacy che non copre il testo. |
 | **Moments editor** | **v320 live** · CSS **v293** | Video, audio e PDF si sostituiscono senza cancellare prima. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-19:** Editor **v320** e Worker **v251**: sostituire video, audio o PDF non chiede di cancellare prima. Se il nuovo file non entra, il vecchio resta. CSS **v293**. SQL **v181**.  
+> **Oggi 2026-10-19:** Worker **v252**: il menu delle sezioni va a capo, i titoli lunghi restano interi nel menu del telefono e il riquadro privacy non copre il fondo. Editor **v320**. CSS **v293**. SQL **v181**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

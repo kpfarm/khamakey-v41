@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v251-replace-slot";
+const WORKER_VERSION = "v252-nav-privacy";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -25,7 +25,7 @@ const MOMENTS_PUBLIC_I18N = {
     "meta.default_desc": "Un ricordo da custodire nel tempo.",
     "footer.made": "Creato con cura · KhamaKey Moments",
     "footer.legal_aria": "Informazioni legali",
-    "privacy.notice": "Questa pagina usa misure di sicurezza tecniche lato server. Non usiamo cookie di marketing. Dettagli nella Privacy Policy.",
+    "privacy.notice": "Questa pagina usa misure di sicurezza tecniche lato server. Non usiamo cookie di marketing. I dettagli sono nell’informativa privacy.",
     "privacy.got_it": "Ho capito",
     "legal.privacy": "Privacy",
     "legal.terms": "Termini",
@@ -171,7 +171,7 @@ const MOMENTS_PUBLIC_I18N = {
     "meta.default_desc": "A memory to keep through time.",
     "footer.made": "Made with care · KhamaKey Moments",
     "footer.legal_aria": "Legal",
-    "privacy.notice": "This page uses technical server-side security measures. We don’t use marketing cookies. Details in the Privacy Policy.",
+    "privacy.notice": "This page uses technical server-side security measures. We don’t use marketing cookies. Details are in the privacy notice.",
     "privacy.got_it": "Got it",
     "legal.privacy": "Privacy",
     "legal.terms": "Terms",
@@ -2588,8 +2588,9 @@ function buildMomentNavItems(ordered, hasCounter, locale = "it"){
       ? MOMENTS_PUBLIC_I18N.en[`nav.section.${key}`]
       : "";
     const fallback = translated || MOMENT_NAV_LABELS[key] || key;
-    const label = shortenMomentNavLabel(section.title) || fallback;
-    items.push({ id:`moment-section-${key}`, label });
+    const full = String(section.title || "").trim() || fallback;
+    const label = shortenMomentNavLabel(full, 32) || fallback;
+    items.push({ id:`moment-section-${key}`, label, full });
   });
   return items;
 }
@@ -2599,7 +2600,7 @@ function renderMomentNav(title, ordered, hasCounter, locale = "it"){
   const items = buildMomentNavItems(ordered, hasCounter, locale);
   if(items.length < 2) return "";
   const links = items.map(item => `<li><a href="#${attr(item.id)}" data-sec="${attr(item.id)}">${escapeHtml(item.label)}</a></li>`).join("");
-  const drawerLinks = items.map(item => `<li><a href="#${attr(item.id)}" data-sec="${attr(item.id)}" data-drawer-link>${escapeHtml(item.label)}</a></li>`).join("");
+  const drawerLinks = items.map(item => `<li><a href="#${attr(item.id)}" data-sec="${attr(item.id)}" data-drawer-link>${escapeHtml(item.full || item.label)}</a></li>`).join("");
   return `<div class="moment-nav-backdrop" id="momentNavBackdrop" aria-hidden="true"></div>
 <nav class="moment-nav on-hero" id="momentNav" aria-label="${attr(mt(locale, "nav.aria"))}">
 <ul class="moment-nav-links">${links}</ul>
@@ -4167,13 +4168,13 @@ function momentPageCss(colors, fonts) {
   const cardInk = c.cardInk || "#111111";
   const cardMuted = c.cardMuted || "#475569";
   return `@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Special+Elite&family=Shadows+Into+Light&display=swap');
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:72px;overflow-x:hidden;overflow-y:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:108px;overflow-x:hidden;overflow-y:auto;max-width:100%;-webkit-overflow-scrolling:touch}
 body{margin:0;width:100%;max-width:100%;overflow-x:hidden;font-family:${f.body};background:radial-gradient(circle at 12% 24%, color-mix(in srgb, ${c.go} 8%, transparent) 0%, transparent 45%), radial-gradient(circle at 88% 76%, color-mix(in srgb, ${c.go} 12%, transparent) 0%, transparent 52%), linear-gradient(180deg, ${c.surface} 0%, ${c.bl} 100%)!important;color:${c.ink};-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-#moment-hero,.moment-section-anchor,#moment-section-counter{scroll-margin-top:72px}
+#moment-hero,.moment-section-anchor,#moment-section-counter{scroll-margin-top:108px}
 .moment-nav-backdrop{position:fixed;inset:0;background:rgba(12,16,24,.22);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:38}
 .moment-nav-backdrop.open{opacity:1;pointer-events:auto}
 body.nav-open{overflow:hidden}
-.moment-nav{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:max(8px,env(safe-area-inset-top)) 12px 8px;background:transparent;border-bottom:1px solid transparent;transition:background .28s ease,box-shadow .28s ease,border-color .28s ease,backdrop-filter .28s ease}
+.moment-nav{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:max(8px,env(safe-area-inset-top)) 12px 8px;background:transparent;border-bottom:1px solid transparent;transition:background .28s ease,box-shadow .28s ease,border-color .28s ease,backdrop-filter .28s ease;max-width:100%}
 .moment-nav.on-hero:not(.scrolled) .moment-nav-links a{color:rgba(255,255,255,.9);text-shadow:0 1px 12px rgba(0,0,0,.28)}
 .moment-nav.on-hero:not(.scrolled) .moment-nav-links a.active,.moment-nav.on-hero:not(.scrolled) .moment-nav-links a:hover{background:rgba(255,255,255,.14);color:#fff}
 .moment-nav.on-hero:not(.scrolled) .moment-nav-burger{border-color:rgba(255,255,255,.24);background:rgba(255,255,255,.08)}
@@ -4195,9 +4196,9 @@ body.nav-open{overflow:hidden}
 .moment-nav-sheet-close{width:34px;height:34px;border:0;border-radius:999px;background:#F1F5F9;color:#0F172A!important;font-size:1.25rem;line-height:1;cursor:pointer;display:grid;place-items:center;transition:background .2s}
 .moment-nav-sheet-close:hover{background:#E2E8F0}
 .moment-nav-sheet ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
-.moment-nav-sheet a{display:flex;align-items:center;min-height:44px;padding:0 14px;border-radius:12px;font-family:${f.ui};font-size:.9rem;font-weight:650;color:#0F172A!important;-webkit-text-fill-color:#0F172A;text-decoration:none;background:transparent;border:0;transition:background .15s,color .15s}
+.moment-nav-sheet a{display:flex;align-items:center;min-height:44px;padding:10px 14px;border-radius:12px;font-family:${f.ui};font-size:.9rem;font-weight:650;line-height:1.3;white-space:normal;color:#0F172A!important;-webkit-text-fill-color:#0F172A;text-decoration:none;background:transparent;border:0;transition:background .15s,color .15s}
 .moment-nav-sheet a.active,.moment-nav-sheet a:hover{background:#F1F5F9;color:#0F172A!important;-webkit-text-fill-color:#0F172A}
-@media(min-width:760px){.moment-nav-links{display:flex}.moment-nav-burger{display:none}.moment-nav-brand{max-width:160px}.moment-nav-sheet{display:none}.moment-nav-backdrop{display:none}}
+@media(min-width:760px){.moment-nav{justify-content:center;padding-left:20px;padding-right:20px}.moment-nav-links{display:flex;flex-wrap:wrap;justify-content:center;max-width:960px;row-gap:4px}.moment-nav-burger{display:none}.moment-nav-brand{max-width:160px}.moment-nav-sheet{display:none}.moment-nav-backdrop{display:none}}
 .moment-decor{display:none!important}
 .moment-decor-item{display:none!important}
 @keyframes momentDecorFloat{0%,100%{transform:translate3d(0,0,0) rotate(0deg)}50%{transform:translate3d(0,-12px,0) rotate(6deg)}}
@@ -4592,8 +4593,8 @@ body.nav-open{overflow:hidden}
 .moment-footer{text-align:center;color:${c.ink}!important;opacity:.9;font-family:${f.ui};font-size:12px;font-weight:600;letter-spacing:.02em;padding:16px 20px max(28px,env(safe-area-inset-bottom));text-shadow:0 1px 2px rgba(0,0,0,.18);display:grid;gap:8px;justify-items:center}
 .moment-footer-legal{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
 .moment-footer-legal a{color:${c.ink}!important;opacity:.95;text-decoration:underline;text-underline-offset:2px;font-weight:700}
-.moment-privacy-notice{position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:45;max-width:520px;margin:0 auto;padding:14px 14px 12px;border-radius:16px;background:rgba(17,24,39,.94);color:#fff;box-shadow:0 16px 40px rgba(9,16,36,.28);font-family:${f.ui}}
-.moment-privacy-notice p{margin:0 0 10px;font-size:.74rem;line-height:1.45;color:rgba(255,255,255,.86);font-weight:600}
+.moment-privacy-notice{position:relative;z-index:1;max-width:640px;margin:8px auto 28px;padding:14px 16px 12px;border-radius:16px;background:rgba(17,24,39,.94);color:#fff;box-shadow:0 16px 40px rgba(9,16,36,.28);font-family:${f.ui}}
+.moment-privacy-notice p{margin:0 0 10px;font-size:.74rem;line-height:1.45;color:rgba(255,255,255,.86);font-weight:600;overflow-wrap:break-word}
 .moment-privacy-actions{display:flex;gap:8px}
 .moment-privacy-actions a,.moment-privacy-actions button{flex:1;border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:9px 8px;font-family:${f.ui};font-size:.72rem;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;color:#fff;background:rgba(255,255,255,.08)}
 .moment-privacy-actions button{background:#fff;color:#111827;border-color:transparent}

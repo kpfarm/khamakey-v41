@@ -16,7 +16,7 @@ import {
   uiLocaleForPublicPage,
   UI_LOCALE_USER_META_KEY
 } from "./moments-i18n.js?v=236";
-import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=267";
+import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=268";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=232";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=236";
@@ -646,6 +646,357 @@ async function tryAcceptPendingInvite(user){
     }
   }catch(error){
     console.error(error);
+  }
+}
+
+const PENDING_TRANSFER_KEY = "khamakey_pending_moment_transfer";
+let pendingTransferToken = "";
+let transferPeek = null;
+let transferSignupMode = false;
+
+function mapTransferError(error){
+  const code = String(error?.message || error || "");
+  if(code.includes("TRANSFER_SELF")) return t("account.transfer.self");
+  if(code.includes("TRANSFER_EMAIL")) return t("account.transfer.need_email");
+  if(code.includes("TRANSFER_OWNER_ONLY")) return t("account.transfer.fail");
+  if(code.includes("TRANSFER_AUTH")) return t("account.transfer.session_fail");
+  return code && !code.startsWith("TRANSFER_") ? code : t("account.transfer.fail");
+}
+
+function readTransferTokenFromSearch(){
+  return normalizeInviteToken(new URLSearchParams(location.search).get("transfer") || "");
+}
+
+function storePendingTransfer(token){
+  const clean = normalizeInviteToken(token);
+  if(!clean) return;
+  pendingTransferToken = clean;
+  try{ sessionStorage.setItem(PENDING_TRANSFER_KEY, clean); }catch{ /* ignore */ }
+}
+
+function readPendingTransfer(){
+  try{ return normalizeInviteToken(sessionStorage.getItem(PENDING_TRANSFER_KEY) || ""); }
+  catch{ return ""; }
+}
+
+function clearPendingTransfer(){
+  pendingTransferToken = "";
+  transferPeek = null;
+  try{ sessionStorage.removeItem(PENDING_TRANSFER_KEY); }catch{ /* ignore */ }
+}
+
+async function peekMomentTransfer(token){
+  const clean = normalizeInviteToken(token);
+  if(!clean) return { ok:false, status:"invalid" };
+  const { data, error } = await supabase.rpc("peek_moment_ownership_transfer", { p_token: clean });
+  if(error) throw error;
+  return data && typeof data === "object" ? data : { ok:false, status:"invalid" };
+}
+
+function transferBannerCopy(peek){
+  const status = String(peek?.status || "invalid");
+  const title = String(peek?.page_title || "").trim() || t("menu.page_fallback");
+  const from = String(peek?.from_email || "").trim();
+  const email = String(peek?.to_email || "").trim();
+  if(status === "pending"){
+    return `${t("auth.transfer.banner.pending", { from, title })} ${email ? t("auth.transfer.banner.email", { email }) : ""}`.trim();
+  }
+  if(status === "mismatch") return t("auth.transfer.banner.mismatch", { email });
+  if(status === "expired") return t("auth.transfer.banner.expired");
+  if(status === "declined") return t("auth.transfer.banner.declined");
+  if(status === "cancelled") return t("auth.transfer.banner.cancelled");
+  if(status === "accepted") return t("auth.transfer.banner.accepted");
+  return t("auth.transfer.banner.invalid");
+}
+
+function renderTransferAuthBanner(peek){
+  const node = document.getElementById("momentInviteBanner");
+  if(!node) return;
+  if(!peek){
+    node.hidden = true;
+    node.textContent = "";
+    document.body.classList.remove("invite-join");
+    return;
+  }
+  node.hidden = false;
+  node.textContent = transferBannerCopy(peek);
+  document.body.classList.toggle("invite-join", peek.status === "pending" || peek.status === "mismatch");
+}
+
+function setTransferSignupMode(on, peek){
+  transferSignupMode = Boolean(on);
+  signupForm?.classList.toggle("is-invite-signup", transferSignupMode);
+  const email = document.getElementById("momentsSignupEmail");
+  const code = document.getElementById("momentsSignupCode");
+  const title = document.getElementById("momentsSignupTitle");
+  const pin = document.getElementById("momentsSignupPin");
+  const submit = document.getElementById("momentsSignupSubmit");
+  const introTitle = signupForm?.querySelector(".form-intro h2");
+  const introLead = signupForm?.querySelector(".form-intro p");
+  if(transferSignupMode){
+    setSignupStep(2);
+    if(email){
+      email.value = String(peek?.to_email || "").trim();
+      email.readOnly = true;
+    }
+    [code, title, pin].forEach(el => { if(el) el.required = false; });
+    if(introTitle) introTitle.textContent = t("auth.transfer.signup.title");
+    if(introLead) introLead.textContent = t("auth.transfer.signup.lead");
+    if(submit) submit.textContent = t("auth.transfer.signup.submit");
+  }else if(!inviteSignupMode){
+    if(email) email.readOnly = false;
+    [code, title, pin].forEach(el => { if(el) el.required = true; });
+    if(signupForm) applyChromeI18n(signupForm);
+  }
+}
+
+async function bootstrapTransferFromUrl(){
+  const token = readTransferTokenFromSearch() || readPendingTransfer();
+  if(!token) return;
+  storePendingTransfer(token);
+  try{
+    transferPeek = await peekMomentTransfer(token);
+  }catch(error){
+    console.error(error);
+    transferPeek = { ok:false, status:"invalid" };
+  }
+  renderTransferAuthBanner(transferPeek);
+  if(transferPeek?.status === "pending"){
+    const loginEmail = document.getElementById("momentsEmail");
+    if(loginEmail && transferPeek.to_email) loginEmail.value = transferPeek.to_email;
+    setTransferSignupMode(true, transferPeek);
+  }
+}
+
+async function tryPreparePendingTransfer(user){
+  const token = pendingTransferToken || readPendingTransfer() || readTransferTokenFromSearch();
+  if(!token || adminMode) return;
+  storePendingTransfer(token);
+  try{
+    transferPeek = await peekMomentTransfer(token);
+  }catch(error){
+    console.error(error);
+    transferPeek = { ok:false, status:"invalid" };
+  }
+  if(transferPeek?.status === "invalid"){
+    clearPendingTransfer();
+    return;
+  }
+  const userEmail = String(user?.email || "").trim().toLowerCase();
+  const toEmail = String(transferPeek?.to_email || "").trim().toLowerCase();
+  if(transferPeek?.status === "pending" && toEmail && userEmail && toEmail !== userEmail){
+    transferPeek = { ...transferPeek, status:"mismatch" };
+  }
+  await showAccountHub("products");
+}
+
+function renderIncomingTransferHtml(){
+  if(!transferPeek || adminMode) return "";
+  const status = String(transferPeek.status || "invalid");
+  if(status === "pending" && !pendingTransferToken) return "";
+  const title = String(transferPeek.page_title || "").trim() || t("menu.page_fallback");
+  const from = String(transferPeek.from_email || "").trim();
+  const email = String(transferPeek.to_email || "").trim();
+  if(status === "pending"){
+    return `<div class="account-panel-card" id="momentIncomingTransfer">
+      <h3>${esc(t("auth.transfer.incoming.title"))}</h3>
+      <p>${esc(t("auth.transfer.incoming.body", { title, from }))}</p>
+      <p class="status notice">${esc(t("account.transfer.warning"))}</p>
+      <div class="signup-actions">
+        <button type="button" class="ghost" id="momentTransferDeclineBtn">${esc(t("auth.transfer.decline"))}</button>
+        <button type="button" class="primary" id="momentTransferAcceptBtn">${esc(t("auth.transfer.accept"))}</button>
+      </div>
+      <p class="status" id="momentIncomingTransferStatus" aria-live="polite"></p>
+    </div>`;
+  }
+  const note = status === "mismatch"
+    ? t("auth.transfer.banner.mismatch", { email })
+    : status === "expired"
+      ? t("auth.transfer.banner.expired")
+      : status === "declined"
+        ? t("auth.transfer.declined_ok")
+        : status === "cancelled"
+          ? t("auth.transfer.banner.cancelled")
+          : status === "accepted"
+            ? t("auth.transfer.done")
+            : t("auth.transfer.banner.invalid");
+  return `<div class="account-panel-card" id="momentIncomingTransfer">
+    <h3>${esc(t("auth.transfer.incoming.title"))}</h3>
+    <p>${esc(note)}</p>
+    <button type="button" class="ghost" id="momentTransferDismissBtn">${esc(t("account.transfer.back"))}</button>
+  </div>`;
+}
+
+function bindIncomingTransfer(){
+  const token = pendingTransferToken;
+  document.getElementById("momentTransferDismissBtn")?.addEventListener("click", ()=>{
+    clearPendingTransfer();
+    renderAccountPanels();
+  });
+  document.getElementById("momentTransferDeclineBtn")?.addEventListener("click", async()=>{
+    const status = document.getElementById("momentIncomingTransferStatus");
+    if(status) setStatus(status, t("account.transfer.sending"));
+    try{
+      const { data, error } = await supabase.rpc("decline_moment_ownership_transfer", { p_token: token });
+      if(error) throw error;
+      if(!data?.ok){
+        transferPeek = { ...(transferPeek || {}), status: data?.status || "invalid", to_email: data?.to_email || transferPeek?.to_email };
+        renderAccountPanels();
+        return;
+      }
+      clearPendingTransfer();
+      transferPeek = { status:"declined" };
+      renderAccountPanels();
+    }catch(error){
+      if(status) setStatus(status, mapTransferError(error), "error");
+    }
+  });
+  document.getElementById("momentTransferAcceptBtn")?.addEventListener("click", async()=>{
+    const status = document.getElementById("momentIncomingTransferStatus");
+    const button = document.getElementById("momentTransferAcceptBtn");
+    if(button) button.disabled = true;
+    if(status) setStatus(status, t("account.transfer.sending"));
+    try{
+      const { data, error } = await supabase.rpc("accept_moment_ownership_transfer", { p_token: token });
+      if(error) throw error;
+      if(!data?.ok){
+        transferPeek = { ...(transferPeek || {}), status: data?.status || "invalid" };
+        if(data?.status === "invalid") clearPendingTransfer();
+        renderAccountPanels();
+        return;
+      }
+      const eventId = data.event_id || "";
+      clearPendingTransfer();
+      transferPeek = { status:"accepted", page_title: data.title || "" };
+      pendingTransferToken = "";
+      if(eventId) activeId = eventId;
+      await loadObjects({ render:true });
+      renderAccountPanels();
+    }catch(error){
+      if(button) button.disabled = false;
+      if(status) setStatus(status, mapTransferError(error), "error");
+    }
+  });
+}
+
+function renderTransferCardHtml(){
+  if(adminMode) return "";
+  const row = editorsTargetRow();
+  if(!row || !isOwnedMoment(row)) return "";
+  return `<div class="account-panel-card" id="momentTransferCard">
+    <h3>${esc(t("account.transfer.title"))}</h3>
+    <p>${esc(t("account.transfer.lead"))}</p>
+    <div id="momentTransferBody"><p class="field-hint">${esc(t("account.editors.loading"))}</p></div>
+    <p class="status" id="momentTransferStatus" aria-live="polite"></p>
+  </div>`;
+}
+
+function transferFormHtml(){
+  return `<form id="momentTransferForm" class="editors-invite-form">
+    <label><span>${esc(t("account.transfer.email"))}</span>
+      <input type="email" name="email" autocomplete="email" required placeholder="nome@email.com">
+    </label>
+    <button type="submit" class="primary">${esc(t("account.transfer.continue"))}</button>
+  </form>`;
+}
+
+function bindMomentTransferCard(){
+  const body = document.getElementById("momentTransferBody");
+  const row = editorsTargetRow();
+  if(!body || !row || !isOwnedMoment(row)) return;
+  refreshMomentTransferCard(row);
+}
+
+async function refreshMomentTransferCard(row){
+  const body = document.getElementById("momentTransferBody");
+  const status = document.getElementById("momentTransferStatus");
+  if(!body) return;
+  try{
+    const { data, error } = await supabase.rpc("get_moment_ownership_transfer", { p_event_id: row.id });
+    if(error) throw error;
+    const state = data && typeof data === "object" ? data : { status:"none" };
+    const email = String(state.email || "").trim();
+    if(state.status === "pending"){
+      body.innerHTML = `<div class="editors-slot">
+        <div>
+          <strong>${esc(email)}</strong>
+          <span class="field-hint">${esc(t("account.transfer.pending"))}</span>
+        </div>
+        <button type="button" class="ghost" id="momentTransferCancelBtn">${esc(t("account.transfer.cancel"))}</button>
+      </div>`;
+      document.getElementById("momentTransferCancelBtn")?.addEventListener("click", async()=>{
+        if(status) setStatus(status, t("account.transfer.sending"));
+        try{
+          const { error: cancelError } = await supabase.rpc("cancel_moment_ownership_transfer", { p_event_id: row.id });
+          if(cancelError) throw cancelError;
+          if(status) setStatus(status, t("account.transfer.cancel_ok"), "ok");
+          await refreshMomentTransferCard(row);
+        }catch(err){
+          if(status) setStatus(status, mapTransferError(err), "error");
+        }
+      });
+      return;
+    }
+    const note = state.status === "expired"
+      ? t("account.transfer.expired")
+      : state.status === "declined"
+        ? t("account.transfer.declined", { email })
+        : state.status === "cancelled"
+          ? t("account.transfer.cancelled")
+          : "";
+    body.innerHTML = `${note ? `<p class="field-hint">${esc(note)}</p>` : ""}${transferFormHtml()}`;
+    document.getElementById("momentTransferForm")?.addEventListener("submit", event=>{
+      event.preventDefault();
+      const nextEmail = String(new FormData(event.currentTarget).get("email") || "").trim().toLowerCase();
+      const mine = String(currentUser?.email || "").trim().toLowerCase();
+      if(!nextEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nextEmail)){
+        if(status) setStatus(status, t("account.transfer.need_email"), "error");
+        return;
+      }
+      if(mine && nextEmail === mine){
+        if(status) setStatus(status, t("account.transfer.self"), "error");
+        return;
+      }
+      body.innerHTML = `<p class="status notice">${esc(t("account.transfer.warning"))}</p>
+        <p>${esc(t("account.transfer.to", { email: nextEmail }))}</p>
+        <div class="signup-actions">
+          <button type="button" class="ghost" id="momentTransferBackBtn">${esc(t("account.transfer.back"))}</button>
+          <button type="button" class="primary" id="momentTransferSendBtn">${esc(t("account.transfer.confirm"))}</button>
+        </div>`;
+      document.getElementById("momentTransferBackBtn")?.addEventListener("click", ()=> refreshMomentTransferCard(row));
+      document.getElementById("momentTransferSendBtn")?.addEventListener("click", async()=>{
+        const sendBtn = document.getElementById("momentTransferSendBtn");
+        if(sendBtn){
+          sendBtn.disabled = true;
+          sendBtn.textContent = t("account.transfer.sending");
+        }
+        if(status) setStatus(status, t("account.transfer.sending"));
+        try{
+          const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+          const access = sessionData?.session?.access_token;
+          if(sessionError || !access) throw new Error("TRANSFER_AUTH");
+          const response = await fetch(`${WORKER_BASE_URL}/api/moment/transfer`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${access}` },
+            body: JSON.stringify({ event_id: row.id, email: nextEmail, locale: getUiLocale() })
+          });
+          const payload = await response.json().catch(()=>({}));
+          if(response.status === 429) throw new Error(t("account.transfer.rate"));
+          if(!response.ok) throw new Error(payload.error || t("account.transfer.fail"));
+          if(status) setStatus(status, t("account.transfer.sent", { email: nextEmail }), "ok");
+          await refreshMomentTransferCard(row);
+        }catch(err){
+          if(status) setStatus(status, mapTransferError(err), "error");
+          if(sendBtn){
+            sendBtn.disabled = false;
+            sendBtn.textContent = t("account.transfer.confirm");
+          }
+        }
+      });
+    });
+  }catch(error){
+    console.error(error);
+    body.innerHTML = `<p class="field-hint">${esc(mapTransferError(error))}</p>`;
   }
 }
 let editorDirty = false;
@@ -1789,6 +2140,7 @@ function renderAccountPanels(){
   }
   accountPanels.innerHTML = `
     ${renderPendingResumeHtml()}
+    ${renderIncomingTransferHtml()}
     <div class="account-panel-card">
       <h3>${esc(t("account.products.title"))}</h3>
       <p>${esc(t("account.products.lead"))}</p>
@@ -1799,6 +2151,7 @@ function renderAccountPanels(){
       <div class="objects-switcher" id="objectsSwitcher">${renderObjectsListHtml()}</div>
     </div>
     ${renderEditorsCardHtml()}
+    ${renderTransferCardHtml()}
     ${pendingActivationResume ? "" : `<div class="account-panel-card">
       <h3>${esc(rows.length ? t("account.activate.another") : t("account.activate.first"))}</h3>
       <p>${esc(t("account.activate.lead"))}</p>
@@ -1810,6 +2163,8 @@ function renderAccountPanels(){
   }
   bindPendingResumeForm();
   bindMomentEditorsCard();
+  bindMomentTransferCard();
+  bindIncomingTransfer();
 }
 
 function refreshAccountMenu(){
@@ -1894,7 +2249,8 @@ async function showApp(user){
   try{
     await loadObjects();
     if(!adminMode) await tryPendingActivation(user);
-    if(!adminMode) await tryAcceptPendingInvite(user);
+    if(!adminMode && !readPendingTransfer() && !readTransferTokenFromSearch()) await tryAcceptPendingInvite(user);
+    if(!adminMode) await tryPreparePendingTransfer(user);
     warmUploadAuth(supabase);
     // Prefetch HEIC in idle: non blocca lista/editor
     if(typeof requestIdleCallback === "function"){
@@ -7601,6 +7957,11 @@ function syncLangSwitchers(locale = getUiLocale()){
   run("accountMenu", ()=>{ if(currentUser) refreshAccountMenu(); });
   run("accountPanels", ()=>{ if(appView === "account") renderAccountPanels(); });
   run("invite", ()=>{
+    if(transferSignupMode && transferPeek){
+      renderTransferAuthBanner(transferPeek);
+      setTransferSignupMode(true, transferPeek);
+      return;
+    }
     if(invitePeek) renderInviteBanner(invitePeek);
     if(inviteSignupMode) setInviteSignupMode(true, invitePeek);
   });
@@ -7647,7 +8008,8 @@ function bindLangSwitchers(){
 bindLangSwitchers();
 
 try{
-  await bootstrapInviteFromUrl();
+  if(readTransferTokenFromSearch()) await bootstrapTransferFromUrl();
+  else await bootstrapInviteFromUrl();
   const { data,error } = await supabase.auth.getSession();
   if(error) throw error;
   if(data.session?.user){
@@ -7655,7 +8017,7 @@ try{
   }else{
     showAuth();
     const params = new URLSearchParams(location.search);
-    if(pendingInviteToken){
+    if(pendingInviteToken || pendingTransferToken){
       showAuthTab("login");
     }else if(!params.get("code") && params.get("tab") !== "signup"){
       showAuthTab("login");

@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v253-light-scheme";
+const WORKER_VERSION = "v254-ownership-transfer";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -422,6 +422,9 @@ export default {
       }
       if (url.pathname === "/api/moment/invite" && request.method === "POST") {
         return handleMomentPageInvite(request, env);
+      }
+      if (url.pathname === "/api/moment/transfer" && request.method === "POST") {
+        return handleMomentOwnershipTransfer(request, env);
       }
       if (url.pathname === "/api/support/reply" && request.method === "POST") {
         return handleSupportReply(request, env);
@@ -1457,6 +1460,177 @@ async function handleMomentPageInvite(request, env) {
     email: inviteeEmail,
     status: "pending",
     expires_at: invited?.expires_at || null
+  }));
+}
+
+function transferErrorMessage(raw, locale) {
+  const code = String(raw || "");
+  const en = mailLocale(locale) === "en";
+  if (code.includes("TRANSFER_SELF")) return en ? "You can’t transfer a Moment to yourself." : "Non puoi trasferire un Moment a te stesso.";
+  if (code.includes("TRANSFER_OWNER_ONLY")) return en ? "Only the owner can transfer this Moment." : "Solo il titolare può trasferire questo Moment.";
+  if (code.includes("TRANSFER_EMAIL")) return en ? "Enter a valid email." : "Email non valida.";
+  if (code.includes("TRANSFER_NOT_FOUND")) return en ? "Page not found." : "Pagina non trovata.";
+  if (code.includes("TRANSFER_NONE")) return en ? "There is no transfer waiting." : "Non c’è un trasferimento in attesa.";
+  if (code.includes("TRANSFER_AUTH")) return en ? "Sign in again." : "Accesso richiesto.";
+  return en ? "Couldn’t start the transfer." : "Trasferimento non avviato.";
+}
+
+function buildMomentOwnershipTransferMail({ transferUrl, pageTitle, fromEmail, toEmail, expiresAt, wordmarkUrl, locale }) {
+  const lang = mailLocale(locale);
+  const title = String(pageTitle || "").trim()
+    || (lang === "en" ? "a KhamaKey Moments page" : "una pagina KhamaKey Moments");
+  const from = String(fromEmail || "").trim();
+  const to = String(toEmail || "").trim();
+  const url = String(transferUrl || "").trim();
+  const logo = String(wordmarkUrl || "https://app.khamakeymoments.com/khamakey-moments-wordmark.png").trim();
+  const expiresLabel = formatUnlockDate(expiresAt, lang);
+  const copy = lang === "en" ? {
+    subject: `KhamaKey Moments: ownership of «${title.slice(0, 80)}»`,
+    kicker: "Transfer of a Moment",
+    headline: "Someone wants to give you a Moment.",
+    hello: "Hello,",
+    body1: `<strong>${escapeHtml(from)}</strong> wants to transfer ownership of «<strong>${escapeHtml(title)}</strong>» to you.`,
+    body1Text: `${from} wants to transfer ownership of «${title}» to you.`,
+    body2: `The page stays the same: photos, words and the NFC piece do not move. If you accept, ${escapeHtml(from)} will no longer manage it as the owner. Sign in with <strong>${escapeHtml(to)}</strong>. You can also refuse.`,
+    body2Text: `The page stays the same: photos, words and the NFC piece do not move. If you accept, ${from} will no longer manage it as the owner. Sign in with ${to}. You can also refuse.`,
+    cta: "Open the transfer",
+    expires: expiresLabel ? `The link expires on ${expiresLabel}.` : "",
+    sign: "See you soon,",
+    auto: "This is an automatic email. Don't reply to this address."
+  } : {
+    subject: `KhamaKey Moments: proprietà di «${title.slice(0, 80)}»`,
+    kicker: "Passaggio di un Moment",
+    headline: "Qualcuno vuole affidarti un Moment.",
+    hello: "Ciao,",
+    body1: `<strong>${escapeHtml(from)}</strong> vuole trasferirti la proprietà di «<strong>${escapeHtml(title)}</strong>».`,
+    body1Text: `${from} vuole trasferirti la proprietà di «${title}».`,
+    body2: `La pagina resta la stessa: foto, testi e il portachiavi non si spostano. Se accetti, ${escapeHtml(from)} non potrà più gestirla come titolare. Entra con <strong>${escapeHtml(to)}</strong>. Puoi anche rifiutare.`,
+    body2Text: `La pagina resta la stessa: foto, testi e il portachiavi non si spostano. Se accetti, ${from} non potrà più gestirla come titolare. Entra con ${to}. Puoi anche rifiutare.`,
+    cta: "Apri il trasferimento",
+    expires: expiresLabel ? `Il link scade il ${expiresLabel}.` : "",
+    sign: "A presto,",
+    auto: "Questa è una mail automatica. Non rispondere a questo indirizzo."
+  };
+  const text = [
+    copy.headline,
+    "",
+    copy.hello,
+    "",
+    copy.body1Text,
+    copy.body2Text,
+    "",
+    url,
+    copy.expires,
+    "",
+    copy.sign,
+    "Il team KhamaKey Moments"
+  ].filter(Boolean).join("\n");
+  const html = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3E3DE;margin:0;padding:0">
+  <tr><td align="center" style="padding:28px 12px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#FFF9F5;border-radius:22px;overflow:hidden">
+      <tr><td style="background:#071A3C;padding:28px 32px 22px;text-align:center">
+        <img src="${escapeHtml(logo)}" width="200" alt="KhamaKey Moments" style="display:block;margin:0 auto;width:200px;height:auto;border:0">
+      </td></tr>
+      <tr><td style="padding:32px 36px 8px;font-family:Georgia,'Times New Roman',serif;color:#071A3C;text-align:left">
+        <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#AA626C">${escapeHtml(copy.kicker)}</p>
+        <h1 style="margin:12px 0 0;font-size:28px;line-height:1.28;font-weight:normal">${escapeHtml(copy.headline)}</h1>
+        <p style="margin:18px 0 0;font-size:16px;line-height:1.65;color:#18202F">${escapeHtml(copy.hello)}</p>
+        <p style="margin:12px 0 0;font-size:16px;line-height:1.65;color:#18202F">${copy.body1}</p>
+        <p style="margin:14px 0 0;font-size:16px;line-height:1.65;color:#18202F">${copy.body2}</p>
+      </td></tr>
+      <tr><td align="center" style="padding:24px 36px 8px">
+        <a href="${escapeHtml(url)}" style="display:inline-block;background:#AA626C;color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:999px;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif">${escapeHtml(copy.cta)}</a>
+      </td></tr>
+      <tr><td style="padding:8px 36px 32px;font-family:Georgia,'Times New Roman',serif;text-align:center">
+        <p style="margin:0;font-size:14px;line-height:1.6;color:#18202F">${escapeHtml(copy.expires)}</p>
+        <p style="margin:16px 0 0;font-size:15px;line-height:1.6;color:#071A3C">${escapeHtml(copy.sign)}<br>Il team KhamaKey Moments</p>
+        <p style="margin:18px 0 0;font-size:11px;line-height:1.5;color:#8a6a70">${escapeHtml(copy.auto)}</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>`;
+  return { subject: copy.subject, text, html };
+}
+
+async function handleMomentOwnershipTransfer(request, env) {
+  const jwt = String(request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  if (!jwt) return cors(json({ error: "Accesso richiesto" }, 401));
+  const user = await supabaseUser(env, jwt);
+  if (!user?.email) return cors(json({ error: "Sessione non valida" }, 401));
+
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object") return cors(json({ error: "Richiesta non valida" }, 400));
+  const eventId = String(body.event_id || "").trim();
+  const toEmail = String(body.email || "").trim().toLowerCase();
+  const locale = mailLocale(body.locale, user?.user_metadata?.ui_locale);
+  if (!eventId) return cors(json({ error: transferErrorMessage("TRANSFER_NOT_FOUND", locale) }, 400));
+  if (!validEmail(toEmail)) return cors(json({ error: transferErrorMessage("TRANSFER_EMAIL", locale) }, 400));
+
+  if (!await checkRateLimit(env, `moment-transfer:${user.id || user.email}`, 5, 60, null, { failClosed: true })) {
+    return tooManyRequests();
+  }
+  if (!env.RESEND_API_KEY) {
+    return cors(json({ error: locale === "en" ? "Email is not available. Try again later." : "Invio email non configurato. Riprova più tardi." }, 503));
+  }
+
+  let opened;
+  try {
+    opened = await rpcAsUser(env, jwt, "request_moment_ownership_transfer", {
+      p_event_id: eventId,
+      p_email: toEmail
+    });
+  } catch (error) {
+    console.error("request_moment_ownership_transfer", String(error?.message || "fail").slice(0, 180));
+    const status = Number(error?.status) === 401 ? 401 : 400;
+    return cors(json({ error: transferErrorMessage(error?.message, locale) }, status));
+  }
+
+  const token = String(opened?.invite_token || "").trim();
+  if (!token) {
+    return cors(json({ error: transferErrorMessage("TRANSFER_NONE", locale) }, 500));
+  }
+
+  const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
+  const transferUrl = `${pagesBase}/moments.html?transfer=${encodeURIComponent(token)}`;
+  const pageTitle = String(opened?.page_title || "").trim();
+  const fromEmail = String(opened?.from_email || user.email).trim();
+  const { subject, text, html } = buildMomentOwnershipTransferMail({
+    transferUrl,
+    pageTitle,
+    fromEmail,
+    toEmail,
+    expiresAt: opened?.expires_at ? String(opened.expires_at) : "",
+    wordmarkUrl: `${pagesBase}/khamakey-moments-wordmark.png`,
+    locale
+  });
+
+  try {
+    await sendResendEmail(env, {
+      to: toEmail,
+      subject,
+      html,
+      text,
+      tags: [{ name: "type", value: "moments_ownership_transfer" }]
+    });
+  } catch (error) {
+    console.error("moment-transfer-email", String(error?.message || "fail").slice(0, 180));
+    try {
+      await rpcAsUser(env, jwt, "cancel_moment_ownership_transfer", { p_event_id: eventId });
+    } catch (cancelError) {
+      console.error("moment-transfer-cancel-after-mail-fail", String(cancelError?.message || "fail").slice(0, 180));
+    }
+    return cors(json({
+      error: locale === "en"
+        ? "The email could not be sent. If a transfer is still waiting, cancel it and try again."
+        : "Invio email non riuscito. Se resta un invito in attesa, annullalo e riprova."
+    }, 500));
+  }
+
+  return cors(json({
+    ok: true,
+    email: toEmail,
+    status: "pending",
+    expires_at: opened?.expires_at || null
   }));
 }
 

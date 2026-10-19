@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v320 live** · CSS **v294** | La modalità scura del telefono non cambia i colori disegnati |
-| Worker | **v253-light-scheme** | Pagina pubblica, PIN e attivazione restano nei colori disegnati |
+| Editor Moments | **v321 live** · CSS **v294** | Trasferimento proprietà da Account → Prodotti |
+| Worker | **v254-ownership-transfer** | Email di passaggio. La pagina pubblica non si sposta da sola |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

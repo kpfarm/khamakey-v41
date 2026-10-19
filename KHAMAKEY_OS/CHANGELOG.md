@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v321 + Worker v254 + SQL v182 (2026-10-19)** — live
+  - Il titolare può trasferire un Moment. Il destinatario accetta o rifiuta. Solo dopo l’accettazione cambia il proprietario. Link, chip, contenuti e collaboratori già presenti restano.
+  - NFC, Salva e upload **invariati**.
 - **Moments CSS v294 + Worker v253 (2026-10-19)** — live
   - Il telefono in modalità scura non ridipinge più l’app. Il nome, le card e i pulsanti restano i colori disegnati. Vale per accesso, editor, pagina pubblica, PIN e pagine legali.
   - NFC, Salva, upload **invariati**.

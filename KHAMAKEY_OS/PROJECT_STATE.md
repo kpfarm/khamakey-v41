@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-18** (Moments **v318**; Worker **v249** sezioni in lingua; SQL **v181**)
+> Ultimo aggiornamento: **2026-10-19** (Moments **v319** memo vocale; Worker **v250**; SQL **v181**)
 
 ### Fonte di verità versioni
 
@@ -107,8 +107,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v249-section-locale** | Titoli vuoti, conto alla rovescia e lettera sigillata seguono la lingua della pagina. |
-| **Moments editor** | **v318 live** · CSS **v293** | Oroscopo: niente «bundle». La lingua del testo segue la pagina. |
+| **Worker NFC** | **v250-m4a-audio** | Il memo vocale .m4a dell’iPhone si carica come audio. |
+| **Moments editor** | **v319 live** · CSS **v293** | Musica accetta il memo vocale dell’iPhone. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v181 (prod)** | v181 tetto invitati = 4. v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-18:** Worker **v249**: se il titolo di una sezione è vuoto, la pagina usa il nome nella sua lingua. Firma e autore non spariscono. Conto alla rovescia e lettera sigillata seguono la lingua. Editor **v318**. CSS **v293**. SQL **v181**.  
+> **Oggi 2026-10-19:** Editor **v319** e Worker **v250**: il memo vocale dell’iPhone entra in Musica. Un video .mp4 resta video. CSS **v293**. SQL **v181**.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

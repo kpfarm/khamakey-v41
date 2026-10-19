@@ -67,16 +67,19 @@ export function inferMediaKind(file){
   const name = String(file?.name || "").toLowerCase();
   if(isHeicFile(file)) return "image";
   if(type === "application/pdf" || PDF_EXT.test(name)) return "pdf";
+  // Memo vocale iPhone: il file è .m4a ma il tipo arriva come video/mp4.
+  if(AUDIO_EXT.test(name)) return "audio";
   if(type.startsWith("video/") || VIDEO_EXT.test(name)) return "video";
-  if(type.startsWith("audio/") || AUDIO_EXT.test(name)) return "audio";
+  if(type.startsWith("audio/")) return "audio";
   if(type.startsWith("image/") || IMAGE_EXT.test(name)) return "image";
   return "";
 }
 
 export function mimeForUpload(file, kind = inferMediaKind(file)){
   const type = String(file?.type || "").toLowerCase();
-  if(type) return type;
   const name = String(file?.name || "").toLowerCase();
+  if(kind === "audio" && name.endsWith(".m4a")) return "audio/mp4";
+  if(type && !(kind === "audio" && type.startsWith("video/"))) return type;
   if(kind === "video"){
     if(name.endsWith(".webm")) return "video/webm";
     if(name.endsWith(".mov")) return "video/quicktime";

@@ -1,4 +1,4 @@
-import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT, validateMediaFile } from "./media-upload.js?v=246";
+import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT, validateMediaFile } from "./media-upload.js?v=247";
 import {
   normalizeMediaItem,
   normalizeMediaList,

@@ -41,7 +41,7 @@ import {
   warmUploadPipeline,
   warmUploadAuth,
   MAX_GALLERY_IMAGES
-} from "./media-upload.js?v=246";
+} from "./media-upload.js?v=247";
 import {
   readGalleryMedia,
   writeGalleryMedia,
@@ -63,7 +63,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=251";
+} from "./moments-media-ui.js?v=252";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -80,7 +80,7 @@ import {
   setActivePlanLimits,
   normalizeCoverFit,
   normalizeCoverOrient
-} from "./moment-media.js?v=245";
+} from "./moment-media.js?v=246";
 import {
   canFitBytes,
   emptyEntitlements,

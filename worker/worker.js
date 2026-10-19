@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v249-section-locale";
+const WORKER_VERSION = "v250-m4a-audio";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1547,9 +1547,12 @@ function mimeFromFilename(name) {
 }
 
 function resolveUploadMime(file) {
+  const fromName = mimeFromFilename(file?.name || "");
   const direct = String(file?.type || "").toLowerCase();
+  // Memo vocale iPhone: .m4a arriva spesso come video/mp4.
+  if (mediaKindFromMime(fromName) === "audio") return fromName;
   if (direct && mediaKindFromMime(direct)) return direct;
-  return mimeFromFilename(file?.name || "") || direct;
+  return fromName || direct;
 }
 
 function mediaExtFromMime(mime) {
@@ -1801,9 +1804,12 @@ async function handleMediaUpload(request, env) {
     }
 
     const hintedMime = String(form.get("clientMime") || "").toLowerCase();
-    const mime = (hintedMime && mediaKindFromMime(hintedMime) && MEDIA_MIME[mediaKindFromMime(hintedMime)]?.has(hintedMime))
-      ? hintedMime
-      : resolveUploadMime(file);
+    const fromName = mimeFromFilename(file.name || "");
+    const mime = mediaKindFromMime(fromName) === "audio"
+      ? fromName
+      : (hintedMime && mediaKindFromMime(hintedMime) && MEDIA_MIME[mediaKindFromMime(hintedMime)]?.has(hintedMime))
+        ? hintedMime
+        : resolveUploadMime(file);
     const kind = mediaKindFromMime(mime);
     if (!kind || !MEDIA_MIME[kind]?.has(mime)) {
       return cors(json({ error: "Formato file non supportato." }, 400));

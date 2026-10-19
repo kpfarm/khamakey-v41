@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v318 live** · CSS **v293** | Oroscopo nella lingua della pagina |
-| Worker | **v249-section-locale** | Sezioni senza titolo e testi di sistema nella lingua della pagina |
+| Editor Moments | **v319 live** · CSS **v293** | Memo vocale iPhone accettato in Musica |
+| Worker | **v250-m4a-audio** | Il file .m4a non viene più trattato come video |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v319 + Worker v250 (2026-10-19)** — live
+  - Il memo vocale dell’iPhone (file .m4a presentato come video) entra in Musica come audio. Un video .mp4 resta video.
+  - NFC, Salva e lo spazio **invariati**.
 - **Worker v249 (2026-10-18)** — live
   - Sezioni senza titolo usano il nome nella lingua della pagina. La dedica tiene la firma anche da sola. La citazione tiene l’autore. Il conto alla rovescia e la lettera sigillata non restano in italiano su una pagina inglese.
   - I titoli scritti dal cliente **restano**. NFC, Salva, upload **invariati**.

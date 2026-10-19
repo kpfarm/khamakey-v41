@@ -106,6 +106,7 @@
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
+| 2026-10-19 | Cursor | **Moments v319 + Worker v250**: memo vocale .m4a dell’iPhone in Musica |
 | 2026-10-18 | Cursor | **Worker v249**: sezioni senza titolo e testi di sistema nella lingua della pagina |
 | 2026-10-17 | Cursor | **Moments v318 + Worker v248**: oroscopo resta in italiano anche con più persone |
 | 2026-10-13 | Cursor | **Moments v317**: percorso invito in Come si crea (Gestisci account, Prodotti, Chi modifica) |

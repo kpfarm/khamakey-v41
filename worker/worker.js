@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v250-m4a-audio";
+const WORKER_VERSION = "v251-replace-slot";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1622,8 +1622,8 @@ async function sumMomentsR2Usage(env, scopeId) {
   return { bytes_used: bytes, file_count: files };
 }
 
-/** Conta oggetti sotto un prefisso R2 (paginato). */
-async function countR2PrefixObjects(env, prefix) {
+/** Conta oggetti sotto un prefisso R2 (paginato). `ignoreKey` è il file che si sta sostituendo. */
+async function countR2PrefixObjects(env, prefix, ignoreKey = "") {
   const clean = String(prefix || "").trim();
   if (!clean || !env.MEDIA) return 0;
   let cursor;
@@ -1631,11 +1631,34 @@ async function countR2PrefixObjects(env, prefix) {
   let files = 0;
   while (truncated) {
     const listed = await env.MEDIA.list({ prefix: clean, cursor, limit: 1000 });
-    files += (listed.objects || []).length;
+    for (const obj of listed.objects || []) {
+      if (ignoreKey && obj.key === ignoreKey) continue;
+      files += 1;
+    }
     truncated = Boolean(listed.truncated);
     cursor = listed.cursor;
   }
   return files;
+}
+
+function mediaKeyFromCdnUrl(rawUrl) {
+  const value = String(rawUrl || "").trim();
+  if (!value) return "";
+  try {
+    const parsed = new URL(value);
+    const match = parsed.pathname.match(/^\/cdn\/(.+)$/);
+    const key = match ? decodeURIComponent(match[1]) : "";
+    if (!key || key.includes("..") || key.includes("\\")) return "";
+    return key;
+  } catch {
+    return "";
+  }
+}
+
+function replacementKeyForUpload(rawUrl, scope, scopeId, folder) {
+  const key = mediaKeyFromCdnUrl(rawUrl);
+  const prefix = `${scope}/${scopeId}/${folder}/`;
+  return key.startsWith(prefix) ? key : "";
 }
 
 /**
@@ -1814,6 +1837,19 @@ async function handleMediaUpload(request, env) {
     if (!kind || !MEDIA_MIME[kind]?.has(mime)) {
       return cors(json({ error: "Formato file non supportato." }, 400));
     }
+    const folder = momentsKindFolder(kind) || "documents";
+    const replaceKey = scope === "moments"
+      ? replacementKeyForUpload(form.get("replaceUrl"), scope, scopeId, folder)
+      : "";
+    let replacedBytes = 0;
+    if (replaceKey) {
+      try {
+        const head = await env.MEDIA.head(replaceKey);
+        replacedBytes = Number(head?.size) || Number(head?.customMetadata?.bytes) || 0;
+      } catch {
+        replacedBytes = 0;
+      }
+    }
 
     let planLimits = DEFAULT_MOMENTS_PLAN_LIMITS;
     let planKey = "moments_free";
@@ -1846,7 +1882,7 @@ async function handleMediaUpload(request, env) {
       storageMb = Number(planLimits.storage_mb) || DEFAULT_MOMENTS_PLAN_LIMITS.storage_mb;
       const bytesUsed = Number(entitlements?.bytes_used) || 0;
       maxBytes = Math.max(0, storageMb) * 1024 * 1024;
-      if (bytesUsed + file.size > maxBytes) {
+      if (bytesUsed + file.size - replacedBytes > maxBytes) {
         const usedMb = (bytesUsed / (1024 * 1024)).toFixed(1);
         return cors(json({
           error: `Spazio esaurito per questo Moment (${usedMb} / ${storageMb} MB). Rimuovi un file per caricarne un altro.`,
@@ -1863,7 +1899,7 @@ async function handleMediaUpload(request, env) {
         const folderName = momentsKindFolder(kind);
         let kindCount = 0;
         try {
-          kindCount = await countR2PrefixObjects(env, `moments/${scopeId}/${folderName}/`);
+          kindCount = await countR2PrefixObjects(env, `moments/${scopeId}/${folderName}/`, replaceKey);
         } catch (countError) {
           console.error("handleMediaUpload kind count", countError);
           return cors(json({
@@ -1904,7 +1940,6 @@ async function handleMediaUpload(request, env) {
       }, 413));
     }
 
-    const folder = momentsKindFolder(kind) || "documents";
     const ext = mediaExtFromMime(mime);
     const key = `${scope}/${scopeId}/${folder}/${crypto.randomUUID()}.${ext}`;
     await env.MEDIA.put(key, file.stream(), {
@@ -1951,7 +1986,7 @@ async function handleMediaUpload(request, env) {
       };
 
       // Post-check anti-race bytes.
-      if (usage && Number(usage.bytes_used) > maxBytes) {
+      if (usage && Number(usage.bytes_used) - replacedBytes > maxBytes) {
         const usedMb = (Number(usage.bytes_used) / (1024 * 1024)).toFixed(1);
         return rollbackQuota({
           error: `Spazio esaurito per questo Moment (${usedMb} / ${storageMb} MB). Rimuovi un file per caricarne un altro.`,
@@ -1963,10 +1998,9 @@ async function handleMediaUpload(request, env) {
       }
 
       // Post-check anti-race conteggio kind (video/audio/PDF).
-      const kindCap = momentsKindObjectCap(planLimits, kind);
       if (kindCap != null) {
         try {
-          const kindCount = await countR2PrefixObjects(env, `moments/${scopeId}/${folder}/`);
+          const kindCount = await countR2PrefixObjects(env, `moments/${scopeId}/${folder}/`, replaceKey);
           if (kindCount > kindCap) {
             const label = kind === "video" ? "video" : kind === "audio" ? "audio" : "PDF";
             return rollbackQuota({
@@ -1982,6 +2016,15 @@ async function handleMediaUpload(request, env) {
         } catch (postCountError) {
           console.error("handleMediaUpload kind post-count", postCountError);
           // Non rollback su errore list: pre-check già passato; evita perdita file legittimo.
+        }
+      }
+
+      if (replaceKey && replaceKey !== key) {
+        try {
+          await env.MEDIA.delete(replaceKey);
+          usage = await syncMomentMediaUsageFromR2(env, jwt, scopeId);
+        } catch (replaceDeleteError) {
+          console.error("handleMediaUpload replace delete", replaceDeleteError);
         }
       }
     }

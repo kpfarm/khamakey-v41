@@ -1,6 +1,6 @@
 /** Modello media Moments — foto, video, audio, PDF con titolo e descrizione. */
 
-import { inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=247";
+import { inferMediaKind, IMAGE_ACCEPT } from "./media-upload.js?v=248";
 import {
   DEFAULT_MOMENTS_LIMITS,
   mediaLimitsFromPlan,

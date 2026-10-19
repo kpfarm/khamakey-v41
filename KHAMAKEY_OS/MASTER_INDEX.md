@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v319 live** · CSS **v293** | Memo vocale iPhone accettato in Musica |
-| Worker | **v250-m4a-audio** | Il file .m4a non viene più trattato come video |
+| Editor Moments | **v320 live** · CSS **v293** | Sostituzione di video, audio e PDF sullo stesso posto |
+| Worker | **v251-replace-slot** | Il file nuovo usa il posto di quello che sostituisce |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

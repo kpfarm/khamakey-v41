@@ -407,7 +407,7 @@ export async function prepareUploadBatch(supabase,files,{imageMaxSide = GALLERY_
   });
 }
 
-async function uploadViaCloudflare(supabase,{scope,scopeId,file,session},retry = true){
+async function uploadViaCloudflare(supabase,{scope,scopeId,file,session,replaceUrl},retry = true){
   const client = supabase || getUploadClient();
   let activeSession = session || await ensureAuthSession(client);
   const kind = inferMediaKind(file);
@@ -417,6 +417,7 @@ async function uploadViaCloudflare(supabase,{scope,scopeId,file,session},retry =
   form.append("scope",scope);
   form.append("scopeId",scopeId);
   form.append("clientMime", mimeForUpload(uploadFile, kind));
+  if(replaceUrl && isCloudflareMediaUrl(replaceUrl)) form.append("replaceUrl", replaceUrl);
   const controller = new AbortController();
   const timer = setTimeout(()=>controller.abort(), UPLOAD_TIMEOUT_MS);
   let response;
@@ -443,7 +444,7 @@ async function uploadViaCloudflare(supabase,{scope,scopeId,file,session},retry =
     if(!refreshError && refreshed?.session){
       cachedUploadSession = refreshed.session;
       cachedUploadSessionExp = (refreshed.session.expires_at || 0) * 1000;
-      return uploadViaCloudflare(client,{scope,scopeId,file,session:refreshed.session},false);
+      return uploadViaCloudflare(client,{scope,scopeId,file,session:refreshed.session,replaceUrl},false);
     }
     throw new Error("Sessione scaduta. Esci e accedi di nuovo, poi riprova il caricamento.");
   }
@@ -534,7 +535,8 @@ export async function uploadMediaBatch(supabase,options,files,{onProgress,imageM
         scope:options.scope,
         scopeId:options.scopeId,
         file:item.uploadFile,
-        session
+        session,
+        replaceUrl:list.length === 1 ? options.replaceUrl : ""
       });
       done += 1;
       onProgress?.({phase:"upload",done,total:prepared.length,success:true,file:item.file});

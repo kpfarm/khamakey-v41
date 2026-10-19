@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v320 + Worker v251 (2026-10-19)** — live
+  - Sostituire un video, un audio o un PDF tiene il posto del file già presente. Se il nuovo non entra, il vecchio resta.
+  - NFC e Salva **invariati**.
 - **Moments v319 + Worker v250 (2026-10-19)** — live
   - Il memo vocale dell’iPhone (file .m4a presentato come video) entra in Musica come audio. Un video .mp4 resta video.
   - NFC, Salva e lo spazio **invariati**.

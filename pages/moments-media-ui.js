@@ -1,4 +1,4 @@
-import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT, validateMediaFile } from "./media-upload.js?v=247";
+import { uploadMediaBatch, inferMediaKind, IMAGE_ACCEPT, validateMediaFile } from "./media-upload.js?v=248";
 import {
   normalizeMediaItem,
   normalizeMediaList,
@@ -291,7 +291,7 @@ export async function replaceGalleryMediaItem({supabase,row,formNode,key,mediaId
   onBusy?.(true);
   try{
     let uploadError = null;
-    const results = await uploadMediaBatch(supabase,{scope:"moments",scopeId:row.id},[file],{
+    const results = await uploadMediaBatch(supabase,{scope:"moments",scopeId:row.id,replaceUrl:existing.url},[file],{
       limits: getActivePlanLimits(),
       onProgress:({phase,done,total,success,file:progressFile,error})=>{
         if(phase === "prepare"){

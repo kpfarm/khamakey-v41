@@ -41,7 +41,7 @@ import {
   warmUploadPipeline,
   warmUploadAuth,
   MAX_GALLERY_IMAGES
-} from "./media-upload.js?v=247";
+} from "./media-upload.js?v=248";
 import {
   readGalleryMedia,
   writeGalleryMedia,
@@ -63,7 +63,7 @@ import {
   coverFocusStyle,
   normalizeMediaList,
   renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=252";
+} from "./moments-media-ui.js?v=253";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -80,7 +80,7 @@ import {
   setActivePlanLimits,
   normalizeCoverFit,
   normalizeCoverOrient
-} from "./moment-media.js?v=246";
+} from "./moment-media.js?v=247";
 import {
   canFitBytes,
   emptyEntitlements,
@@ -5769,10 +5769,10 @@ async function uploadSectionVideo(file,row,formNode){
   setUploadBusy(true);
   try{
     validateVideoFile(file, maxMbForKind("video", currentEntitlements?.limits));
-    assertCanFitUploadBytes(file);
-    const url = await uploadVideo(supabase,{scope:"moments",scopeId:row.id,file,limits:currentEntitlements?.limits});
     const urlInput = formNode.querySelector('[name="section_video_video_url"]');
     const oldUrl = urlInput?.value || "";
+    if(!oldUrl) assertCanFitUploadBytes(file);
+    const url = await uploadVideo(supabase,{scope:"moments",scopeId:row.id,file,limits:currentEntitlements?.limits,replaceUrl:oldUrl});
     if(urlInput) urlInput.value = url;
     refreshVideoSectionPreview(formNode,url);
     enableSection(formNode,"video");
@@ -5818,11 +5818,11 @@ async function uploadMusicAudio(file,row,formNode){
   let uploaded = false;
   setUploadBusy(true);
   try{
-    validateMediaFile(file, currentEntitlements?.limits || {});
-    assertCanFitUploadBytes(file);
-    const url = await uploadAudio(supabase,{scope:"moments",scopeId:row.id,file});
     const urlInput = formNode.querySelector('[name="section_music_audio_url"]');
     const oldUrl = urlInput?.value || "";
+    validateMediaFile(file, currentEntitlements?.limits || {});
+    if(!oldUrl) assertCanFitUploadBytes(file);
+    const url = await uploadAudio(supabase,{scope:"moments",scopeId:row.id,file,replaceUrl:oldUrl});
     if(urlInput) urlInput.value = url;
     if(panel){
       panel.querySelector("[data-music-audio-add]")?.remove();

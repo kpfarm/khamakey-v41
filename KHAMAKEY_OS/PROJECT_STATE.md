@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-20:** Lo stesso codice di attivazione vale per ogni linea e prodotto. Prezzo e bundle non contano. I lotti nuovi vanno come codice generale; i codici già stampati con una categoria restano. Worker **v255**. Officina **v203**. Editor **v322**. SQL **v182**. File **v183** non applicato.  
+> **Oggi 2026-10-20:** In Officina codici e pagine si creano senza vincoli di linea o prezzo. Lo stesso codice vale per ogni prodotto. Worker **v255**. Officina **v203**. Editor **v322**. SQL **v182**. File **v183** non applicato.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

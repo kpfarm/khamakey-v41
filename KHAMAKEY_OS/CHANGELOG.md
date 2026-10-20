@@ -9,7 +9,7 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 ## [Unreleased]
 
 - **Vault (2026-10-20)** — uso del codice
-  - Lo stesso codice di attivazione vale per ogni linea e prodotto. I lotti nuovi restano generali.
+  - In Officina codici e pagine si creano liberamente. Lo stesso codice vale per ogni linea e prodotto. Nessun vincolo da sistemare.
 - **Vault (2026-10-20)** — controllo, nessun deploy
   - Worker live v255 uguale a git. Officina v203 e la creazione codici non sono state toccate.
 - **Moments v322 + Worker v255 (2026-10-20)** — live

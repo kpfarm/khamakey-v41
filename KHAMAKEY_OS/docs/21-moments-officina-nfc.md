@@ -31,9 +31,9 @@ Cliente
 
 ## Come si usa il codice (2026-10-20)
 
-Lo stesso codice di attivazione vale per qualsiasi linea e prodotto. Prezzo, costo e bundle non cambiano la pagina.
+La creazione di codici e pagine in Officina funziona. Non c’è un blocco legato a linea, prezzo o prodotto.
 
-In Officina linea, template e prezzo sono note di magazzino. Se un lotto nuovo viene generato con un template preciso (Amore, Matrimonio, …), quel tipo viene scritto sul codice e la pagina del cliente nasce già così, senza le quattro carte. I lotti nuovi vanno generati come codice generale: il cliente sceglie il modello in editor. I codici già stampati con una categoria restano com’erano.
+Lo stesso codice di attivazione si usa per qualsiasi linea e prodotto. Prezzo e bundle non impediscono di generare il pezzo né di aprire la pagina.
 
 ## Fabbricazione (`build_stage`) — Admin v180 + SQL v170
 

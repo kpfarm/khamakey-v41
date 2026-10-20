@@ -672,6 +672,12 @@ function storePendingTransfer(token){
   if(!clean) return;
   pendingTransferToken = clean;
   try{ sessionStorage.setItem(PENDING_TRANSFER_KEY, clean); }catch{ /* ignore */ }
+  try{
+    const url = new URL(location.href);
+    if(!url.searchParams.has("transfer")) return;
+    url.searchParams.delete("transfer");
+    history.replaceState(null, "", url.pathname + url.search + url.hash);
+  }catch{ /* ignore */ }
 }
 
 function readPendingTransfer(){
@@ -757,7 +763,7 @@ async function bootstrapTransferFromUrl(){
   try{
     transferPeek = await peekMomentTransfer(token);
   }catch(error){
-    console.error(error);
+    console.error("transfer-peek", String(error?.message || "fail").slice(0, 180));
     transferPeek = { ok:false, status:"invalid" };
   }
   renderTransferAuthBanner(transferPeek);
@@ -775,7 +781,7 @@ async function tryPreparePendingTransfer(user){
   try{
     transferPeek = await peekMomentTransfer(token);
   }catch(error){
-    console.error(error);
+    console.error("transfer-peek", String(error?.message || "fail").slice(0, 180));
     transferPeek = { ok:false, status:"invalid" };
   }
   if(transferPeek?.status === "invalid"){
@@ -801,7 +807,6 @@ function renderIncomingTransferHtml(){
     return `<div class="account-panel-card" id="momentIncomingTransfer">
       <h3>${esc(t("auth.transfer.incoming.title"))}</h3>
       <p>${esc(t("auth.transfer.incoming.body", { title, from }))}</p>
-      <p class="status notice">${esc(t("account.transfer.warning"))}</p>
       <div class="signup-actions">
         <button type="button" class="ghost" id="momentTransferDeclineBtn">${esc(t("auth.transfer.decline"))}</button>
         <button type="button" class="primary" id="momentTransferAcceptBtn">${esc(t("auth.transfer.accept"))}</button>

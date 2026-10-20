@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v254-ownership-transfer";
+const WORKER_VERSION = "v255-transfer-guard";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -1485,7 +1485,7 @@ function buildMomentOwnershipTransferMail({ transferUrl, pageTitle, fromEmail, t
   const logo = String(wordmarkUrl || "https://app.khamakeymoments.com/khamakey-moments-wordmark.png").trim();
   const expiresLabel = formatUnlockDate(expiresAt, lang);
   const copy = lang === "en" ? {
-    subject: `KhamaKey Moments: ownership of «${title.slice(0, 80)}»`,
+    subject: `KhamaKey Moments: ownership of «${title.replace(/[\r\n]+/g, " ").slice(0, 80)}»`,
     kicker: "Transfer of a Moment",
     headline: "Someone wants to give you a Moment.",
     hello: "Hello,",
@@ -1498,7 +1498,7 @@ function buildMomentOwnershipTransferMail({ transferUrl, pageTitle, fromEmail, t
     sign: "See you soon,",
     auto: "This is an automatic email. Don't reply to this address."
   } : {
-    subject: `KhamaKey Moments: proprietà di «${title.slice(0, 80)}»`,
+    subject: `KhamaKey Moments: proprietà di «${title.replace(/[\r\n]+/g, " ").slice(0, 80)}»`,
     kicker: "Passaggio di un Moment",
     headline: "Qualcuno vuole affidarti un Moment.",
     hello: "Ciao,",
@@ -1563,7 +1563,9 @@ async function handleMomentOwnershipTransfer(request, env) {
   const eventId = String(body.event_id || "").trim();
   const toEmail = String(body.email || "").trim().toLowerCase();
   const locale = mailLocale(body.locale, user?.user_metadata?.ui_locale);
-  if (!eventId) return cors(json({ error: transferErrorMessage("TRANSFER_NOT_FOUND", locale) }, 400));
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(eventId)) {
+    return cors(json({ error: transferErrorMessage("TRANSFER_NOT_FOUND", locale) }, 400));
+  }
   if (!validEmail(toEmail)) return cors(json({ error: transferErrorMessage("TRANSFER_EMAIL", locale) }, 400));
 
   if (!await checkRateLimit(env, `moment-transfer:${user.id || user.email}`, 5, 60, null, { failClosed: true })) {
@@ -1590,6 +1592,24 @@ async function handleMomentOwnershipTransfer(request, env) {
     return cors(json({ error: transferErrorMessage("TRANSFER_NONE", locale) }, 500));
   }
 
+  let stillCurrent = true;
+  try {
+    stillCurrent = await rpcAsUser(env, jwt, "moment_ownership_transfer_is_current", {
+      p_event_id: eventId,
+      p_token: token
+    });
+  } catch (error) {
+    console.error("moment-transfer-current", String(error?.message || "fail").slice(0, 180));
+    stillCurrent = true;
+  }
+  if (stillCurrent === false) {
+    return cors(json({
+      error: locale === "en"
+        ? "A newer transfer replaced this one."
+        : "Un invio più recente ha sostituito questo."
+    }, 409));
+  }
+
   const pagesBase = String(env.PAGES_ASSET_BASE || "https://app.khamakeymoments.com").replace(/\/$/, "");
   const transferUrl = `${pagesBase}/moments.html?transfer=${encodeURIComponent(token)}`;
   const pageTitle = String(opened?.page_title || "").trim();
@@ -1614,15 +1634,24 @@ async function handleMomentOwnershipTransfer(request, env) {
     });
   } catch (error) {
     console.error("moment-transfer-email", String(error?.message || "fail").slice(0, 180));
+    let kept = true;
     try {
-      await rpcAsUser(env, jwt, "cancel_moment_ownership_transfer", { p_event_id: eventId });
+      const abandoned = await rpcAsUser(env, jwt, "abandon_unsent_moment_ownership_transfer", {
+        p_event_id: eventId,
+        p_token: token
+      });
+      kept = abandoned?.status === "kept";
     } catch (cancelError) {
-      console.error("moment-transfer-cancel-after-mail-fail", String(cancelError?.message || "fail").slice(0, 180));
+      console.error("moment-transfer-abandon-after-mail-fail", String(cancelError?.message || "fail").slice(0, 180));
     }
     return cors(json({
-      error: locale === "en"
-        ? "The email could not be sent. If a transfer is still waiting, cancel it and try again."
-        : "Invio email non riuscito. Se resta un invito in attesa, annullalo e riprova."
+      error: kept
+        ? (locale === "en"
+          ? "This email was not sent. If an invite is still waiting, cancel it and try again."
+          : "Questa email non è partita. Se resta un invito in attesa, annullalo e riprova.")
+        : (locale === "en"
+          ? "The email could not be sent. The invite was cancelled."
+          : "Invio email non riuscito. L’invito è stato annullato.")
     }, 500));
   }
 

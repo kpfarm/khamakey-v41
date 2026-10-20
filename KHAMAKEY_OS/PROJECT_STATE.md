@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-19** (Moments **v321** · CSS **v294**; Worker **v254** trasferimento; SQL **v182**)
+> Ultimo aggiornamento: **2026-10-20** (Moments **v322** · CSS **v294**; Worker **v255** trasferimento; SQL **v182**, file **v183** da applicare)
 
 ### Fonte di verità versioni
 
@@ -107,8 +107,8 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | Componente | Versione | Note |
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
-| **Worker NFC** | **v254-ownership-transfer** | Invito email per il passaggio di proprietà. La pagina pubblica non cambia titolare da sola. |
-| **Moments editor** | **v321 live** · CSS **v294** | Account → Prodotti: Trasferisci proprietà. Il destinatario accetta o rifiuta. |
+| **Worker NFC** | **v255-transfer-guard** | Un’email non partita non cancella un invito più recente. |
+| **Moments editor** | **v322 live** · CSS **v294** | Chi riceve il Moment vede solo la richiesta di accettare o rifiutare. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **≥ v181 (prod)** | v181 tetto invitati = 4. v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-19:** Il titolare può trasferire un Moment. Il passaggio avviene solo se il destinatario accetta. Link, chip e contenuti restano. Editor **v321**. CSS **v294**. Worker **v254**. SQL **v182**.  
+> **Oggi 2026-10-20:** Controllo del trasferimento. Un’email fallita non cancella un invito più nuovo. Chi riceve non vede l’avviso del titolare. Editor **v322**. Worker **v255**. SQL live **v182**. File **v183** pronto, non ancora applicato.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

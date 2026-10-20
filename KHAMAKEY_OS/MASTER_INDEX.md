@@ -8,8 +8,8 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v321 live** · CSS **v294** | Trasferimento proprietà da Account → Prodotti |
-| Worker | **v254-ownership-transfer** | Email di passaggio. La pagina pubblica non si sposta da sola |
+| Editor Moments | **v322 live** · CSS **v294** | Accetta o rifiuta il Moment, senza l’avviso del titolare |
+| Worker | **v255-transfer-guard** | L’email fallita non cancella un invito più recente |
 | Officina | **v203** | PNG codice più basso |
 
 - **P.IVA** ancora da inserire su Privacy/Termini (IT+EN) — non inventare. → [[PROJECT_STATE]]

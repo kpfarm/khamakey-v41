@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v322 + Worker v255 (2026-10-20)** — live
+  - Un invio email fallito non annulla più un trasferimento più recente. Chi riceve il Moment non vede l’avviso di chi lo cede. Il link esce dalla barra del browser dopo l’apertura.
+  - NFC, Salva e upload **invariati**.
 - **Moments v321 + Worker v254 + SQL v182 (2026-10-19)** — live
   - Il titolare può trasferire un Moment. Il destinatario accetta o rifiuta. Solo dopo l’accettazione cambia il proprietario. Link, chip, contenuti e collaboratori già presenti restano.
   - NFC, Salva e upload **invariati**.

@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Vault (2026-10-20)** — controllo, nessun deploy
+  - Worker live v255 uguale a git. Officina v203 e la creazione codici non sono state toccate.
 - **Moments v322 + Worker v255 (2026-10-20)** — live
   - Un invio email fallito non annulla più un trasferimento più recente. Chi riceve il Moment non vede l’avviso di chi lo cede. Il link esce dalla barra del browser dopo l’apertura.
   - NFC, Salva e upload **invariati**.

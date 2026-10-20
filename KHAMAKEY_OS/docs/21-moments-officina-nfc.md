@@ -1,5 +1,7 @@
 # 21 — Officina NFC Moments
 
+> Aggiornamento 2026-10-20: la creazione codici e pagine non è stata toccata dai lavori recenti sul worker (menu, privacy, modalità scura, trasferimento). Officina live **v203**. Generazione: `create_moment_product_batch` (solo staff `moments.write`). Pagina pre-attivazione: worker, slug opaco, codice solo nell’inserto.
+>
 > Aggiornamento 2026-07-20: sicurezza scaffale — codice attivazione **solo in confezione**; chip NFC = `/m/<slug opaco>`.
 
 ## Cosa fa questa consolle

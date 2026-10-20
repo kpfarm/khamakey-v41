@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-10-20 | Cursor | **Controllo vault:** worker v255 integro. Officina v203 e creazione codici non toccate. |
 | 2026-10-20 | Cursor | **Moments v322 + Worker v255**: l’email fallita non cancella un invito più nuovo. SQL v183 pronta. |
 | 2026-10-19 | Cursor | **Moments v321 + Worker v254 + SQL v182**: trasferimento proprietà, solo dopo accettazione. |
 | 2026-10-19 | Cursor | **CSS v294 + Worker v253**: la modalità scura del telefono non ridipinge l’app. |

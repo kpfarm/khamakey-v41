@@ -106,6 +106,7 @@
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
+| 2026-10-20 | Cursor | **Controllo:** worker v255 integro. Officina e creazione codici non toccate |
 | 2026-10-20 | Cursor | **Moments v322 + Worker v255**: l’email fallita non cancella un invito più nuovo |
 | 2026-10-19 | Cursor | **Moments v321 + Worker v254 + SQL v182**: trasferimento proprietà |
 | 2026-10-19 | Cursor | **CSS v294 + Worker v253**: modalità scura del telefono spenta sull’app |

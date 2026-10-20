@@ -111,7 +111,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 | **Moments editor** | **v322 live** · CSS **v294** | Chi riceve il Moment vede solo la richiesta di accettare o rifiutare. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
-| **SQL Supabase Moments** | **≥ v181 (prod)** | v181 tetto invitati = 4. v180 anon non chiama piano/contatori/analytics. v179 `owner_ui_locale`. |
+| **SQL Supabase Moments** | **v182 live** | v182 trasferimento proprietà. v181 tetto invitati = 4. File v183 (annulla solo l’invito non spedito) **non applicato**. |
 | **Prossima release piattaforma** | quando serve un cambio prodotto | Un solo piano Moments fino a nuova decisione. Plus/Pro restano in Officina, senza Stripe. |
 
 ---
@@ -214,7 +214,7 @@ RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-20:** Controllo del trasferimento. Un’email fallita non cancella un invito più nuovo. Chi riceve non vede l’avviso del titolare. Editor **v322**. Worker **v255**. SQL live **v182**. File **v183** pronto, non ancora applicato.  
+> **Oggi 2026-10-20:** Worker live **v255**, file pulito, uguale a git. Le prove email su prenotazioni, risposta al cliente e ordine non sono state pubblicate. Officina **v203** non è stata modificata: creazione codici `create_moment_product_batch` e pagine pre-attivazione restano com’erano. Editor **v322**. SQL live **v182**. File **v183** non applicato.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

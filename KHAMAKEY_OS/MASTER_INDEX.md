@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v322 live** · CSS **v294** | Accetta o rifiuta il Moment, senza l’avviso del titolare |
+| Editor Moments | **v323 live** · CSS **v294** | Oroscopo, musica e trasferimento spiegati in modo chiaro |
 | Worker | **v255-transfer-guard** | L’email fallita non cancella un invito più recente |
 | Officina | **v203** | PNG codice più basso |
 

@@ -560,7 +560,7 @@ export function sectionFillGuide(key){
     promises:"Tocca «Aggiungi promessa» per ogni voce — niente più righe manuali.",
     dreams:"Tocca il cerchio accanto a ogni voce (anche in anteprima) per segnarla come raggiunta — poi Salva.",
     countdown:"Scegli data e ora — compare il timer live. Puoi aggiungere anche una foto.",
-    music:"Spotify, YouTube, audio caricato o foto copertina — combina come preferite.",
+    music:"In pubblico la sezione compare solo con Spotify, YouTube, un audio o una foto. Una frase da sola resta qui e non si vede sulla pagina.",
     horoscope:"Aggiungi fino a 5 persone (nome facoltativo + segno). In pagina compare l’oroscopo del giorno per ciascuno, aggiornato automaticamente.",
     letter_future:"Scrivi la lettera, scegli la data di apertura e allega fino a 2 foto, 1 video, 1 audio e 1 PDF. Riceverai un'email il giorno dell'apertura.",
     rituals:"Tocca «Aggiungi rituale» per ogni abitudine quotidiana.",

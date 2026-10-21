@@ -19,9 +19,9 @@ import {
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=268";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=232";
 import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=236";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=237";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=218";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=264";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=266";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -139,7 +139,7 @@ import {
   isSectionExcluded,
   youtubeVideoId,
   youtubeEmbedUrl
-} from "./moment-sections.js?v=252";
+} from "./moment-sections.js?v=253";
 import {
   MOMENT_TYPE_GROUPS,
   TYPE_LABELS,
@@ -162,7 +162,7 @@ import {
   sectionOrderForType,
   sectionFillGuideForType,
   primarySectionsForType
-} from "./moment-editor-kit.js?v=191";
+} from "./moment-editor-kit.js?v=192";
 import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=221";
 import { bindRsvpResponsesPanel, refreshRsvpResponsesLocale } from "./moment-rsvp-responses.js?v=222";
 import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=225";
@@ -171,7 +171,7 @@ import {
   renderHoroscopePeoplePanel,
   bindHoroscopePeopleEditor,
   refreshHoroscopePeopleEditor
-} from "./moment-horoscope.js?v=219";
+} from "./moment-horoscope.js?v=220";
 import {
   renderPetsPanel,
   bindPetsEditor,
@@ -6771,6 +6771,7 @@ function sectionEditor(key,section,standalone=false){
   const musicFields = key === "music" ? `
     <div class="editor-card">
       <p class="ecard-title"><span class="step-badge">1</span> ${lfSpan("Collegamenti")}</p>
+      <p class="field-hint" data-lf="In pubblico la sezione compare solo con Spotify, YouTube, un audio o una foto. Una frase da sola resta qui e non si vede sulla pagina.">${esc(localizeFieldPhrase("In pubblico la sezione compare solo con Spotify, YouTube, un audio o una foto. Una frase da sola resta qui e non si vede sulla pagina."))}</p>
       <label>${lfSpan("Link Spotify")}<input name="section_${esc(key)}_spotify_url" value="${esc(safe.spotify_url || "")}" placeholder="https://open.spotify.com/track/..." autocomplete="off" inputmode="url"><span class="field-hint" data-lf="Link pubblico — non file caricati.">${esc(localizeFieldPhrase("Link pubblico — non file caricati."))}</span></label>
       <label>${lfSpan("Link YouTube")}<input name="section_${esc(key)}_youtube_url" data-youtube-input value="${esc(safe.youtube_url || "")}" placeholder="https://youtube.com/watch?v=..." autocomplete="off" inputmode="url"><span class="field-hint" data-lf="Link pubblico del video. Dopo l’incolla puoi già ascoltarlo qui; Salva lo mette in pagina pubblica.">${esc(localizeFieldPhrase("Link pubblico del video. Dopo l’incolla puoi già ascoltarlo qui; Salva lo mette in pagina pubblica."))}</span></label>
       ${renderYoutubeThumb(safe.youtube_url)}

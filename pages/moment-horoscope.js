@@ -1,7 +1,7 @@
 /** Oroscopo Moments — fino a 5 persone (nome opzionale + segno), testo daily via AstroWay (Worker). */
 
 import { getUiLocale } from "./moments-i18n.js?v=218";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=265";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=266";
 
 export const MAX_HOROSCOPE_PEOPLE = 5;
 
@@ -203,7 +203,7 @@ export function bindHoroscopePeopleEditor(formNode){
       event.stopPropagation();
       const people = readPeopleHidden(formNode);
       if(people.length >= MAX_HOROSCOPE_PEOPLE){
-        alert(lfFill("Massimo {n} persone (bundle).", { n: MAX_HOROSCOPE_PEOPLE }));
+        alert(lfFill("Puoi aggiungere fino a {n} persone.", { n: MAX_HOROSCOPE_PEOPLE }));
         return;
       }
       const next = [...people, normalizeHoroscopePerson()];

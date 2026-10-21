@@ -494,6 +494,8 @@ export const FIELD_PHRASE_EN = {
   "Nessuna persona": "No people yet",
   "Aggiungi almeno un segno per mostrare l’oroscopo.": "Add at least one sign to show the horoscope.",
   "Massimo {n} persone (bundle).": "Maximum {n} people (bundle).",
+  "Puoi aggiungere fino a {n} persone.": "You can add up to {n} people.",
+  "In pubblico la sezione compare solo con Spotify, YouTube, un audio o una foto. Una frase da sola resta qui e non si vede sulla pagina.": "On the public page this section appears only with Spotify, YouTube, an audio file or a photo. A sentence on its own stays here and is not shown on the page.",
   "Ariete": "Aries",
   "Toro": "Taurus",
   "Gemelli": "Gemini",

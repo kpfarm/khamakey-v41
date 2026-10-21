@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v323 (2026-10-21)** — live
+  - L’oroscopo dice «fino a 5 persone». In Musica si legge che una frase da sola non esce in pubblico. La guida indica dove si cede la pagina.
+  - NFC, Salva e upload **invariati**.
 - **Vault (2026-10-20)** — uso del codice
   - In Officina codici e pagine si creano liberamente. Lo stesso codice vale per ogni linea e prodotto. Nessun vincolo da sistemare.
 - **Vault (2026-10-20)** — controllo, nessun deploy

@@ -196,7 +196,7 @@ Health live 2026-07-20 (`link.khamakeymoments.com/health`): Worker **v144**, Res
 | 7 | GDPR Moments | Opt-in + registro fatti; restano P.IVA e niente campagne | **v268 / SQL v176**: export/cancella in Profilo. Resta P.IVA (#6) e niente campagne finché non si decide. |
 | 8 | Guida cliente in Riepilogo | Guida ad **attivare e creare**: schede = 4 passi (Copertina, Colori, Contenuti, Condividi) | **v286** Condividi (invito in cima); niente Insieme/Servizi |
 
-RSVP/guestbook: **operativi in prod**. Resend API: **operativo** (ticket Moments).
+RSVP WhatsApp: **operativo**. Guestbook pubblico: **spento**. Assistenza Moments: email allo staff, risposta da Gmail.
 
 ---
 

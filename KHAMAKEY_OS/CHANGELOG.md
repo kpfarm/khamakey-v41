@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v324 (2026-10-21)** — live
+  - Il quarto passo di Come si crea separa link, invito a modificare e trasferimento della pagina.
+  - NFC, Salva e upload **invariati**.
 - **Moments v323 (2026-10-21)** — live
   - L’oroscopo dice «fino a 5 persone». In Musica si legge che una frase da sola non esce in pubblico. La guida indica dove si cede la pagina.
   - NFC, Salva e upload **invariati**.

@@ -1,7 +1,7 @@
 # KhamaKey — Stato del progetto
 
 > **Leggi questo file per primo** in ogni sessione AI.  
-> Ultimo aggiornamento: **2026-10-22** (Moments **v324** · CSS **v296**; Worker **v255**; SQL **v182**, file **v183** da applicare)
+> Ultimo aggiornamento: **2026-10-23** (Moments **v324** · CSS **v297**; Worker **v255**; SQL **v182**, file **v183** da applicare)
 
 ### Fonte di verità versioni
 
@@ -108,7 +108,7 @@ Nota 2026-07-13: il bootstrap ora richiede a ogni agente di dichiarare lavoro al
 |------------|----------|------|
 | **Admin / Officina Moments** | **v203** | PNG codice più basso (meno bianco) · QR A4 · schede A4 · Cricut PDF. |
 | **Worker NFC** | **v255-transfer-guard** | Un’email non partita non cancella un invito più recente. |
-| **Moments editor** | **v324 live** · CSS **v296** | I titoli di sezione si distinguono dalle etichette. Fondo bianco. |
+| **Moments editor** | **v324 live** · CSS **v297** | Editor più calmo, stessi percorsi. Pagina dell’oggetto invariata. |
 | **Business shell** | **app v168** | Messaggio ticket supporto user-facing; account Moments non finiscono nel flusso Business. |
 | **Editor Business (cache-bust HTML)** | **v165** (file) | `editor.html` / `editor-ui.css` / bootstrap `?v=165`. Attivazione Business SQL v147 + inventory v148 in repo; verificare se WIP locale è già deployato. |
 | **SQL Supabase Moments** | **v182 live** | v182 trasferimento proprietà. v181 tetto invitati = 4. File v183 (annulla solo l’invito non spedito) **non applicato**. |
@@ -214,7 +214,7 @@ RSVP WhatsApp: **operativo**. Guestbook pubblico: **spento**. Assistenza Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-22:** Titoli di sezione distinti dalle etichette (CSS **v296**). Script **v324**. Worker **v255**. Officina **v203**. SQL **v182**. File **v183** non applicato.  
+> **Oggi 2026-10-23:** Editor più calmo, stessi comandi (CSS **v297**). Pagina dell’oggetto non toccata. Script **v324**. Worker **v255**. Officina **v203**. SQL **v182**. File **v183** non applicato.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

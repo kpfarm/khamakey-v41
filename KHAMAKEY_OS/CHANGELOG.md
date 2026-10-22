@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v297 (2026-10-23)** — live
+  - L’editor è più calmo: meno scatole, passi con una riga rosa, menu senza icone incorniciate. Stessi percorsi e stessi pulsanti. La pagina dell’oggetto non cambia.
+  - NFC, Salva e upload **invariati**.
 - **Moments CSS v296 (2026-10-22)** — live
   - Il nome della sezione è un titolo a parte, con un segno rosa. I titoli dentro le schede hanno una riga sotto e non si confondono più con le etichette.
   - NFC, Salva e upload **invariati**.

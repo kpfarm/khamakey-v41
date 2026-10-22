@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v324 live** · CSS **v296** | Titoli di sezione distinti dalle etichette |
+| Editor Moments | **v324 live** · CSS **v297** | Aspetto più calmo, stessi percorsi. Pagina oggetto invariata |
 | Worker | **v255-transfer-guard** | L’email fallita non cancella un invito più recente |
 | Officina | **v203** | PNG codice più basso |
 

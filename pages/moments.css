@@ -309,8 +309,8 @@ html.admin-embed .main-panel{padding:8px;max-width:none}
   max-height:calc(100vh - 220px);
   overflow-y:auto;
 }
-.editor-sidebar-group{padding:14px 16px 4px;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.editor-nav-item{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;color:var(--navy);padding:10px 16px;font-size:.86rem;font-weight:600;text-align:left;font-family:var(--font-ui)}
+.editor-sidebar-group{padding:14px 16px 4px;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--rosa-ricordo)}
+.editor-nav-item{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;color:var(--navy);padding:10px 16px;font-size:.95rem;font-weight:650;text-align:left;font-family:var(--font-ui)}
 .editor-nav-item:hover{background:var(--soft)}
 .editor-nav-item.active{background:var(--soft-strong);color:var(--blu-notte);font-weight:700;box-shadow:inset 3px 0 0 var(--rosa-ricordo)}
 .editor-nav-icon{width:28px;height:28px;border-radius:8px;background:transparent;border:1px solid rgba(7,26,60,.1);display:grid;place-items:center;font-size:.92rem;line-height:1;flex-shrink:0;color:var(--navy)}
@@ -1348,16 +1348,27 @@ body.media-modal-open{overflow:hidden}
 .snav-icon{display:none}
 .design-suggest{background:var(--soft);border:1px solid var(--border);border-radius:14px;box-shadow:none;padding:14px 16px}
 .gallery-add{font-weight:500;border-radius:10px}
-.editor-card{border:1px solid var(--border);border-radius:14px;background:var(--soft);padding:16px}
+.editor-card{border:1px solid var(--border);border-radius:14px;background:#fff;padding:16px}
 label{font-weight:500}
 /* Gerarchia dell’editor: titolo grande, scheda media, etichetta piccola, testo normale leggero. */
+.editor-main .section-header{border-bottom:0;padding-bottom:0;margin-bottom:20px}
 .editor-main .section-title,
 .account-hub-head h2{
-  font-family:var(--font-ui);
-  font-weight:700;
-  letter-spacing:-0.03em;
+  font-family:var(--font-display);
+  font-weight:600;
+  letter-spacing:-0.02em;
+  color:var(--navy);
 }
-.editor-main .section-title{font-size:1.7rem;line-height:1.1}
+.editor-main .section-title{font-size:2.05rem;line-height:1.05}
+.editor-main .section-title::after{
+  content:"";
+  display:block;
+  width:36px;
+  height:3px;
+  margin-top:10px;
+  border-radius:999px;
+  background:var(--rosa-ricordo);
+}
 .account-panel-card h3,
 .editor-main .ecard-title,
 .editor-main .gallery-type-title,
@@ -1374,18 +1385,18 @@ label{font-weight:500}
   letter-spacing:-0.015em;
 }
 .editor-main .ecard-title,
-.editor-main .how-empty-title{font-size:1.08rem;margin:0 0 12px}
+.editor-main .how-empty-title{font-size:1.22rem;margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid rgba(7,26,60,.16)}
 .editor-main .how-next .ecard-title,
 .editor-main .how-discover .ecard-title{font-family:var(--font-ui);font-size:1.35rem;font-weight:700;line-height:1.15}
 .editor-main .section-switch-copy strong,
 .editor-main .extras-card-copy strong,
-.editor-main .gallery-type-title{font-size:1rem;font-weight:700}
+.editor-main .gallery-type-title{font-size:1.08rem;font-weight:700}
 .editor-main .how-guide-item h4,
 .editor-main .how-discover-row-title,
 .editor-main .publish-pick b{font-size:1.05rem;font-weight:700}
 .editor-main .look-card strong{font-size:.95rem;font-weight:700}
 .editor-main .editor-progress-label{font-family:var(--font-ui);font-size:.8rem;font-weight:700}
-.editor-main label{font-size:.78rem;font-weight:700;color:var(--navy)}
+.editor-main label{font-size:.78rem;font-weight:600;color:var(--navy)}
 .editor-main .field-hint,
 .editor-main .section-sub,
 .editor-main .how-discover-row-blurb,
@@ -1394,5 +1405,5 @@ label{font-weight:500}
 .editor-main textarea,
 .editor-main select{font-size:1rem;font-weight:400;color:var(--text)}
 @media(max-width:768px){
-  .editor-main .section-title,.section-title{font-size:1.45rem}
+  .editor-main .section-title,.section-title{font-size:1.72rem}
 }

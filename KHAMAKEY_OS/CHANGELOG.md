@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v296 (2026-10-22)** — live
+  - Il nome della sezione è un titolo a parte, con un segno rosa. I titoli dentro le schede hanno una riga sotto e non si confondono più con le etichette.
+  - NFC, Salva e upload **invariati**.
 - **Moments CSS v295 (2026-10-22)** — live
   - Nell’editor i testi secondari e i bordi sono più scuri, su fondo bianco. Il pulsante Salva e la barra blu restano com’erano. La pagina pubblica non cambia.
   - NFC, Salva e upload **invariati**.

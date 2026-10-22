@@ -1416,3 +1416,32 @@ label{font-weight:500}
   .editor-main .cover-upload-actions .upload-trigger,
   .editor-main .smart-action-btn{width:100%}
 }
+
+/* Editor, secondo passo: stesse azioni, meno scatole anche in Contenuto, Colori e Condividi. */
+.section-switch{border:1px solid rgba(7,26,60,.18);border-radius:12px;background:#fff;box-shadow:none}
+.section-switch.is-on{border-color:var(--navy);background:#fff;box-shadow:none}
+.section-switch-icon,
+.section-switch.is-on .section-switch-icon{width:28px;height:28px;border:0;border-radius:0;background:transparent}
+.section-switch.is-on .section-switch-icon{color:var(--rosa-ricordo)}
+.section-switch-copy small{color:#4E5968}
+.how-guide-item,
+.how-empty{padding:0 0 4px;border:0;border-radius:0;background:transparent;box-shadow:none}
+.editor-main .how-guide-item h4,
+.how-empty-title{padding-bottom:8px;border-bottom:1px solid rgba(7,26,60,.14)}
+.journey-step-card{border:1px solid rgba(7,26,60,.16);border-radius:12px;background:#fff;box-shadow:none}
+.section-order-icon,
+.ecard-glyph,
+.extras-card-icon{border:0;background:transparent;width:28px;height:28px}
+.publish-pick,
+.style-choice{border-radius:10px}
+.look-card{border-radius:12px;overflow:hidden}
+.section-fill-guide{padding:0;margin:0 0 8px;border:0;border-radius:0;background:transparent}
+.section-fill-guide p{color:#4E5968;font-weight:400}
+.editor-topbar-help{color:#4E5968}
+.journey-step-card:hover,
+.pin-reminder-card:hover,
+.media-modal-card:hover,
+.decor-card:hover,
+.guestbook-card:hover,
+.dash-stat:hover,
+.dash-checklist li:hover{transform:none !important;box-shadow:none !important}

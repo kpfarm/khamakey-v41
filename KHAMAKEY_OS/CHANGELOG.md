@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v298 (2026-10-23)** — live
+  - Lo stesso aspetto calmo arriva su Contenuto, Colori e Condividi: l’interruttore resta, le guide non sono più scatole. Stessi comandi. La pagina dell’oggetto non cambia.
+  - NFC, Salva e upload **invariati**.
 - **Moments CSS v297 (2026-10-23)** — live
   - L’editor è più calmo: meno scatole, passi con una riga rosa, menu senza icone incorniciate. Stessi percorsi e stessi pulsanti. La pagina dell’oggetto non cambia.
   - NFC, Salva e upload **invariati**.

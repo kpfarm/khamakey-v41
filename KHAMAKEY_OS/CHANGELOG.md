@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v295 (2026-10-22)** — live
+  - Nell’editor i testi secondari e i bordi sono più scuri, su fondo bianco. Il pulsante Salva e la barra blu restano com’erano. La pagina pubblica non cambia.
+  - NFC, Salva e upload **invariati**.
 - **Moments v324 (2026-10-21)** — live
   - Il quarto passo di Come si crea separa link, invito a modificare e trasferimento della pagina.
   - NFC, Salva e upload **invariati**.

@@ -442,6 +442,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Worker v216**: promesse/sogni/rituali/numeri senza voci → non in pubblico |
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
+| 2026-10-22 | Cursor | **CSS v295**: contrasto editor più netto su bianco. Script v324. Pagina pubblica invariata. |
 | 2026-10-21 | Cursor | **Moments v324**: quarto passo separa link, invito e trasferimento. |
 | 2026-10-21 | Cursor | **Moments v323**: oroscopo, musica e guida al trasferimento più chiari. |
 | 2026-10-20 | Cursor | **Controllo vault:** worker v255 integro. Officina v203 e creazione codici non toccate. |

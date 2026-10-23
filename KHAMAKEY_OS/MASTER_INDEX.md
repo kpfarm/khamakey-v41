@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v326 live** · CSS **v309** | Apri pagina e Annulla con linea. Salva pieno. Pagina oggetto invariata |
+| Editor Moments | **v326 live** · CSS **v310** | Stesse regole di lettura in ogni sezione. Pagina oggetto invariata |
 | Worker | **v255-transfer-guard** | L’email fallita non cancella un invito più recente |
 | Officina | **v203** | PNG codice più basso |
 

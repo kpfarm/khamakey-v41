@@ -1573,3 +1573,71 @@ label{font-weight:500}
 .palette-btn.active{border-color:var(--navy);transform:none}
 .cover-zoom-range::-webkit-slider-runnable-track{background:rgba(7,26,60,.28)}
 .cover-zoom-range::-moz-range-track{background:rgba(7,26,60,.28)}
+
+/* Stesse regole di lettura in ogni sezione dell’editor. */
+.editor-shell h2,
+.editor-shell h3,
+.editor-shell h4{font-family:var(--font-ui)}
+.editor-main .design-intro,
+.editor-main .journey-lead,
+.editor-main .how-it-works-lead,
+.editor-main .how-guide-note,
+.editor-main .template-hint,
+.editor-main .section-order-hint,
+.editor-main .section-hint,
+.editor-main .gallery-type-empty,
+.editor-main .journey-empty,
+.editor-main .journey-photo-empty,
+.editor-main .order-intro,
+.editor-main .extras-hint,
+.editor-main .field-hint,
+.editor-main .section-order-empty,
+.editor-main .gallery-type-hint,
+.editor-main .journey-steps-count,
+.editor-main .look-card small,
+.editor-main .decor-card small,
+.editor-main .section-fill-guide p,
+.editor-main .how-it-works-list li,
+.editor-main .editor-action-hint,
+.editor-main .gallery-steps,
+.editor-main .gallery-steps p,
+.editor-main .onboarding-steps li,
+.editor-main .youtube-thumb-preview span,
+.editor-main .switch-unsaved-card p,
+.editor-main .cover-picker-hint:not(.cover-framer-top-hint){
+  font-size:.8125rem;
+  font-weight:400;
+  line-height:1.45;
+  color:#5C6570;
+}
+.editor-main .cover-picker-label,
+.editor-main .design-advanced summary{
+  font-size:.8125rem;
+  font-weight:500;
+  letter-spacing:0;
+  text-transform:none;
+  color:#3D4654;
+}
+.editor-main .pin-reminder-label{
+  text-transform:none;
+  letter-spacing:0;
+  color:#3D4654;
+  font-size:.8125rem;
+  font-weight:500;
+}
+.editor-main .field-hint.ok{color:var(--green-dark);font-weight:600}
+.editor-main .field-hint.error{color:var(--red);font-weight:600}
+.cover-framer,
+.cover-framer .field-hint,
+.cover-framer-top-hint,
+.cover-framer-top-hint.cover-picker-hint,
+.cover-orient-hint,
+.cover-orient-caption,
+.first-step,
+.first-step p{color:rgba(255,255,255,.92)}
+.first-step.is-ready,
+.first-step.is-ready p{color:var(--navy)}
+.first-step.is-ready .first-step-body,
+.first-step.is-ready .section-sub{color:#5C6570}
+.cover-framer-empty,
+.cover-framer-empty .field-hint{color:#5C6570}

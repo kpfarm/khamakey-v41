@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v310 (2026-10-23)** — live
+  - Le stesse regole di lettura valgono in ogni sezione dell’editor: titoli nel carattere dello strumento, spiegazioni a 13 pixel in grigio. Sulla foto scura le scritte restano chiare; senza foto restano grigie. La pagina dell’oggetto non cambia.
+  - NFC, Salva e upload **invariati**.
 - **Moments CSS v309 (2026-10-23)** — live
   - Sul computer, Apri pagina e Annulla hanno di nuovo una linea. Salva resta l’unico pulsante pieno. La pagina dell’oggetto non cambia.
   - NFC, Salva e upload **invariati**.

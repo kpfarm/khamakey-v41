@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v326 live** · CSS **v310** | Stesse regole di lettura in ogni sezione. Pagina oggetto invariata |
+| Editor Moments | **v327 live** · CSS **v310** | Copertina Musica: scelta foto di nuovo apribile. Pagina oggetto invariata |
 | Worker | **v255-transfer-guard** | L’email fallita non cancella un invito più recente |
 | Officina | **v203** | PNG codice più basso |
 

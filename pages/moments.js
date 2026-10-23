@@ -62,8 +62,9 @@ import {
   syncGalleryUploadStatusChrome,
   coverFocusStyle,
   normalizeMediaList,
-  renderSectionPhotoPanel
-} from "./moments-media-ui.js?v=253";
+  renderSectionPhotoPanel,
+  renderSectionPhotoFileInput
+} from "./moments-media-ui.js?v=254";
 import {
   readJourneySteps,
   writeJourneySteps,
@@ -5814,6 +5815,8 @@ function renderDetail(id, options = {}){
             ${renderGalleryFileInput("music")}
             ${renderGalleryFileInput("letter_future")}
             ${renderJourneyFileInput()}
+            ${renderSectionPhotoFileInput("music", SECTION_PHOTO_FIELDS.music.fileId)}
+            ${renderSectionPhotoFileInput("countdown", SECTION_PHOTO_FIELDS.countdown.fileId)}
             ${renderPrivacyPanel(row, state)}
             <p class="status editor-form-status" id="editorStatus"></p>
           </form>
@@ -6554,6 +6557,17 @@ async function uploadJourneyStepImage(file,row,formNode,stepId){
   if(uploaded) await persistMediaToPage(formNode, row);
 }
 
+function openSectionPhotoPicker(key){
+  const config = SECTION_PHOTO_FIELDS[key];
+  const input = config ? document.getElementById(config.fileId) : null;
+  if(!input){
+    showMediaUploadNotice(localizeFieldPhrase("Editor non pronto. Ricarica la pagina e riprova."), "error");
+    return;
+  }
+  input.value = "";
+  requestAnimationFrame(()=>{ input.click(); });
+}
+
 function openGalleryFilePicker(formNode,key,type = "",{ replaceId = "", multiple } = {}){
   setEditorPanel(`section-${key}`);
   enableSection(formNode,key);
@@ -6669,9 +6683,8 @@ function bindMediaUploadDelegation(){
     }
     const sectionPhotoUpload = event.target.closest("[data-section-photo-upload]");
     if(sectionPhotoUpload){
-      const key = sectionPhotoUpload.dataset.sectionPhotoUpload;
-      const config = SECTION_PHOTO_FIELDS[key];
-      if(config) document.getElementById(config.fileId)?.click();
+      event.preventDefault();
+      openSectionPhotoPicker(sectionPhotoUpload.dataset.sectionPhotoUpload);
       return;
     }
     const sectionPhotoRemove = event.target.closest("[data-section-photo-remove]");

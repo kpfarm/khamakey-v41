@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v327 (2026-10-23)** — live
+  - Nella sezione Musica, «Carica immagine» (copertina del brano) apre di nuovo la scelta della foto. Stesso intervento sul conto alla rovescia. Audio, Salva e pagina dell’oggetto **invariati**.
 - **Moments CSS v310 (2026-10-23)** — live
   - Le stesse regole di lettura valgono in ogni sezione dell’editor: titoli nel carattere dello strumento, spiegazioni a 13 pixel in grigio. Sulla foto scura le scritte restano chiare; senza foto restano grigie. La pagina dell’oggetto non cambia.
   - NFC, Salva e upload **invariati**.

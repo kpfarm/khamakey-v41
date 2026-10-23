@@ -803,9 +803,8 @@ export function syncGalleryUploadStatusChrome(formNode){
   }
 }
 
-export function renderSectionPhotoPanel(key, section, fieldName, { previewId, fileId, label = "Carica foto" } = {}){
+export function renderSectionPhotoPanel(key, section, fieldName, { previewId, label = "Carica foto" } = {}){
   const resolvedPreviewId = previewId || `${key}PhotoPreview`;
-  const resolvedFileId = fileId || `${key}PhotoFile`;
   const url = String(section[fieldName] || "").trim();
   const labelIt = label || "Carica foto";
   const preview = url
@@ -814,8 +813,12 @@ export function renderSectionPhotoPanel(key, section, fieldName, { previewId, fi
   return `<div class="section-photo-panel" data-section-photo-key="${esc(key)}">
     <input type="hidden" name="section_${esc(key)}_${esc(fieldName)}" value="${esc(url)}">
     <div class="section-photo-preview" id="${esc(resolvedPreviewId)}">${preview}</div>
-    <input type="file" id="${esc(resolvedFileId)}" accept="${IMAGE_ACCEPT}" hidden data-section-photo-input="${esc(key)}">
   </div>`;
+}
+
+/** Fuori dai pannelli nascosti: Chrome/Safari non aprono il file se l’input nasce in display:none. */
+export function renderSectionPhotoFileInput(key, fileId){
+  return `<input type="file" id="${esc(fileId)}" accept="${IMAGE_ACCEPT}" hidden tabindex="-1" aria-hidden="true" data-section-photo-input="${esc(key)}">`;
 }
 
 export function renderVideoSectionPanel(section){

@@ -1444,4 +1444,57 @@ label{font-weight:500}
 .decor-card:hover,
 .guestbook-card:hover,
 .dash-stat:hover,
-.dash-checklist li:hover{transform:none !important;box-shadow:none !important}
+.dash-checklist li:hover,
+.empty-state:hover,
+.look-card:hover,
+.extras-card:hover{transform:none !important;box-shadow:none !important}
+
+/* Lista dei dieci punti, solo grafica dell’editor. La pagina nell’anteprima resta quella vera. */
+.editor-sidebar-group{letter-spacing:0;text-transform:none;font-size:.8rem;font-weight:650}
+.editor-shell .primary,
+.editor-topbar .primary,
+.editor-shell .ghost,
+.editor-shell input,
+.editor-shell textarea,
+.editor-shell select,
+.editor-shell .publish-pick,
+.editor-shell .style-choice,
+.cover-fit-btn,
+.cover-quick-btn,
+.cover-zoom-step-btn,
+.section-order-item,
+.detail-head .status-pill,
+.detail-head .copy-button{border-radius:10px}
+.editor-shell .journey-step-card,
+.editor-shell .section-switch,
+.editor-shell .look-card,
+.editor-shell .pin-reminder-card,
+.editor-shell .guestbook-card{border-radius:12px}
+.editor-shell input:focus,
+.editor-shell textarea:focus,
+.editor-shell select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(7,26,60,.14)}
+.editor-topbar .ghost{border-color:transparent;background:transparent}
+.editor-topbar .ghost:hover{background:rgba(7,26,60,.06)}
+.quick-publish.published{background:var(--navy);color:#fff;border-color:var(--navy)}
+.gallery-add-primary{border-color:var(--navy);color:var(--navy);background:#fff}
+.cover-fit-btn.active,
+.cover-quick-btn.active,
+.cover-fit-btn:hover,
+.cover-quick-btn:hover,
+.cover-zoom-step-btn:not(:disabled):hover{border-color:var(--navy);background:#fff;color:var(--navy)}
+.section-drag-handle,
+.section-move-btn{border:0;background:transparent;color:var(--navy);border-radius:10px}
+.section-move-btn:hover,
+.section-drag-handle:hover{border-color:transparent;background:rgba(7,26,60,.06)}
+.preview-card,
+.preview-live-wrap{background:#F7F8FA}
+.preview-label{text-transform:none;letter-spacing:0;font-size:.8rem;font-weight:600;color:#4E5968;background:transparent}
+.preview-live-iframe{border-radius:12px;box-shadow:none;border:1px solid rgba(7,26,60,.12)}
+.detail-head{margin-bottom:16px}
+.detail-head .eyebrow{text-transform:none;letter-spacing:0;font-size:.8rem}
+.detail-head .status-pill{font-weight:600}
+.editor-main label{gap:8px}
+@media(min-width:769px){
+  .editor-main{padding:32px;max-width:640px}
+  .editor-panel.active{gap:32px}
+}

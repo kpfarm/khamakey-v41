@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v308 (2026-10-23)** — live
+  - Sul computer, mentre si scorre, restano in vista «Modifiche non salvate» e Salva, sotto la barra blu. Sul telefono non cambia. La pagina dell’oggetto non cambia.
+  - NFC, Salva e upload **invariati**.
 - **Moments v326 + CSS v307 (2026-10-23)** — live
   - In Condividi, sotto Nuovo PIN, c’è Salva. Sul telefono la barra di salvataggio compare anche se cambi solo il PIN. Il PIN non finisce nel testo della pagina: resta l’hash di prima.
   - NFC, upload e pagina dell’oggetto **invariati**.

@@ -107,6 +107,7 @@
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
 | 2026-10-23 | Cursor | **Vault:** niente illustrazioni. Guide e ordine sezioni restano |
+| 2026-10-23 | Cursor | **CSS v308**: stato di salvataggio visibile sul computer mentre si scorre |
 | 2026-10-23 | Cursor | **v326**: Salva sotto il nuovo PIN |
 | 2026-10-23 | Cursor | **CSS v306**: colore scelto fermo, zoom della foto blu |
 | 2026-10-23 | Cursor | **v325 + CSS v304**: il titolo non ripete il passo già scelto |

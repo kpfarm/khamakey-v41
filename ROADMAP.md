@@ -443,6 +443,7 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-30 | Cursor | **Admin v196**: SVG/PNG codici senza titolo/bordo, sfondo trasparente |
 | 2026-08-31 | Cursor | **Worker v217**: pre-attivazione senza badge linea/lotto/categoria |
 | 2026-10-23 | Cursor | **Vault:** niente illustrazioni nell’editor. Guide e ordine sezioni restano. Grafica solo da questo repo. |
+| 2026-10-23 | Cursor | **CSS v308**: sul computer lo stato di salvataggio resta visibile mentre si scorre. |
 | 2026-10-23 | Cursor | **v326**: Salva sotto il nuovo PIN. Il PIN non entra nel testo della pagina. |
 | 2026-10-23 | Cursor | **CSS v306**: colore scelto fermo, zoom della foto blu. |
 | 2026-10-23 | Cursor | **v325 + CSS v304**: il titolo non ripete il passo già scelto. |

@@ -106,6 +106,7 @@
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
+| 2026-10-23 | Cursor | **CSS v306**: colore scelto fermo, zoom della foto blu |
 | 2026-10-23 | Cursor | **v325 + CSS v304**: il titolo non ripete il passo già scelto |
 | 2026-10-23 | Cursor | **CSS v303**: nascosta la frase che ripeteva i quattro passi |
 | 2026-10-23 | Cursor | **CSS v302**: nomi del menu telefono a 12 pixel |

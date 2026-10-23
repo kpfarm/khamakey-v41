@@ -1554,3 +1554,8 @@ label{font-weight:500}
 .section-header.is-step-name{margin-bottom:12px}
 .section-header.is-step-name .section-title{display:none}
 .section-header.is-step-name .section-sub{margin-top:0}
+
+/* Colore scelto fermo. Zoom della foto sul blu dello strumento. */
+.palette-btn.active{border-color:var(--navy);transform:none}
+.cover-zoom-range::-webkit-slider-runnable-track{background:rgba(7,26,60,.28)}
+.cover-zoom-range::-moz-range-track{background:rgba(7,26,60,.28)}

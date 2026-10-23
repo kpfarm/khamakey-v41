@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v306 (2026-10-23)** — live
+  - Il colore scelto non si ingrandisce più: resta fermo, con il bordo blu. La barra dello zoom della foto è blu, non più rosa. La scelta del colore e lo zoom funzionano come prima. La pagina dell’oggetto non cambia.
+  - NFC, Salva e upload **invariati**.
 - **Moments v325 + CSS v304 (2026-10-23)** — live
   - Se il titolo grande ripete il passo già scelto (Copertina, Colori, Condividi), resta solo la frase sotto. Musica e le altre sezioni tengono il loro nome. Stessi passi. La pagina dell’oggetto non cambia.
   - NFC, Salva e upload **invariati**.

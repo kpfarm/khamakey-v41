@@ -46,5 +46,6 @@ Test 23/10/2026 con Node 24.19: prima 15 pass e 7 fail (`ReferenceError: kindCap
 
 Baseline: 78 file Officina/SQL e Worker fuori handler upload/versione identici. Non sostituisce smoke reali: login/attivazione, Salva/riapertura, upload reale, PIN, pagina pubblica, QR/NFC, generazione lotto etichette sono ANCORA DA ESEGUIRE in staging. Non usare questa frase come attestazione di produzione funzionante.
 
-### Accesso GitHub bloccato
-Il connettore rifiuta create_branch con HTTP 403 `Resource not accessible by integration`. Git locale non ha autenticazione disponibile. Commit locali conservati; push e PR non effettuati finché non viene autorizzato l’accesso. Nessuna fusione in main o pubblicazione.
+### Accesso GitHub e passaggio consegne
+Accesso GitHub sbloccato il 2026-10-23 dopo installazione ChatGPT Codex Connector sul repository. Ramo pubblicato e verificato identico alla copia testata; PR #6 in bozza: https://github.com/kpfarm/khamakey-v41/pull/6. Nessun merge/deploy/SQL; staging completo e smoke ancora aperti.
+Git locale non ha credenziali di scrittura: pubblicazione effettuata dal connettore autorizzato, lettura remota e confronto degli alberi Git esatti. Copia locale riallineata ai commit remoti equivalenti; nessun force push. Il precedente 403 è risolto.

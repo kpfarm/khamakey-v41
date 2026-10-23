@@ -10,7 +10,7 @@
 - L'utente autorizza copia Windows `C:\Users\khama\Desktop\nuove collezioni\khamakey-v41-lab`, ramo `codex/laboratorio-sicuro`, eccezione esplicita a main/root Mac. Base `762eac7`. Non fondere/deployare automaticamente.
 - Piano, limiti di isolamento e verifiche: `../lab/README.md`, `../lab/PLAN.md`. Versioni live sopra invariate.
 - Database laboratorio creato vuoto: `ybmnrtvksvndpdiofmqm` (eu-west-1), costo di creazione quotato 0 USD/mese. Su autorizzazione esplicita dell’utente sospeso Moment Custom `bftmldytlhuznintdmdl` (INACTIVE); Business già inattivo. Nessuna cancellazione/upgrade/copia dati. Produzione Moments `cuxlwaocjqwzluycznyp` non modificata.
-- Worker candidato NON LIVE `v256-media-kindcap-scope`: correzione scope kindCap, 22/22 test locali pass (base: 7 fail). 78 file Officina/SQL e resto Worker verificati identici. Nessuna certificazione staging end-to-end, nessun SQL o deploy. Push/PR bloccati: connettore GitHub 403 scrittura, Git senza autenticazione; lavoro committato localmente.
+- Worker candidato NON LIVE `v256-media-kindcap-scope`: correzione scope kindCap, 22/22 test locali pass (base: 7 fail). 78 file Officina/SQL e resto Worker verificati identici. Nessuna certificazione staging end-to-end, nessun SQL o deploy. Accesso GitHub sbloccato il 2026-10-23 dopo installazione ChatGPT Codex Connector sul repository. Ramo pubblicato e verificato identico alla copia testata; PR #6 in bozza: https://github.com/kpfarm/khamakey-v41/pull/6. Nessun merge/deploy/SQL; staging completo e smoke ancora aperti.
 - Prima di ulteriori cambi: leggere `lab/README.md`, verificare branch/main e lock. Non avviare il frontend sorgente: la configurazione punta ancora a produzione.
 
 

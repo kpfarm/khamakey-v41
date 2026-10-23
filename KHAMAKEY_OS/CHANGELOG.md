@@ -8,7 +8,7 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
-- **Worker v256 candidato laboratorio (NON LIVE, 2026-10-23)** — corregge scope kindCap tra pre/post-check upload. Prima 7 test falliti, dopo 22/22 pass. Quote, auth e renderer invariati; 78 file Officina/SQL verificati. Smoke reali ancora da fare; push/PR bloccati dall’accesso GitHub.
+- **Worker v256 candidato laboratorio (NON LIVE, 2026-10-23)** — corregge scope kindCap tra pre/post-check upload. Prima 7 test falliti, dopo 22/22 pass. Quote, auth e renderer invariati; 78 file Officina/SQL verificati. Smoke reali ancora da fare; accesso GitHub sbloccato e PR #6 in bozza, nessun merge/deploy.
 
 - **Laboratorio Codex (2026-10-23, NON LIVE)** — ramo autorizzato `codex/laboratorio-sicuro` da `762eac7`, piano 14 operazioni e controlli locali isolati. Database laboratorio vuoto creato dopo sospensione autorizzata Moment Custom; nessun dato copiato, nessun progetto eliminato, nessun deploy o SQL. Officina e URL NFC protetti. Vedi `lab/README.md`.
 

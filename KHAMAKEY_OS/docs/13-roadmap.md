@@ -187,3 +187,5 @@
 | 2026-10-23 | Codex laboratorio | Ramo autorizzato codex/laboratorio-sicuro, base 762eac7; ambiente Supabase vuoto ybmnrtvksvndpdiofmqm; Moment Custom sospeso su richiesta. 22 test locali, baseline: 7 fallimenti da kindCap fuori scope, 15 pass. Nessun deploy/SQL/Officina. Vedi lab/README.md. |
 
 | 2026-10-23 | Codex laboratorio | Worker v256 candidato: scope kindCap, 22/22 test locali pass contro 7 fail base; Officina/SQL invariati. Nessun deploy o SQL. Push/PR bloccati (GitHub 403 scrittura, Git senza autenticazione). Lock rilasciato, staging/schema e smoke aperti. |
+
+| 2026-10-23 | Codex laboratorio | Accesso GitHub sbloccato dopo installazione app; ramo pubblicato, alberi Git identici ai due commit locali testati, PR #6 in bozza. Main invariato, nessun deploy/SQL. Staging e smoke aperti. |

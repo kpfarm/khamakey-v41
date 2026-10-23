@@ -557,3 +557,5 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-08-31 | Cursor | **Moments v250**: attivazione senza testi stock (struttura sì, body no); «Prepara tutto» resta opt-in |
 | 2026-08-31 | Cursor | **Moments v249**: scheda Come funziona in Riepilogo + wizard, stesse 4 frasi IT/EN |
 | 2026-08-30 | Cursor | **GitHub sync**: push 34 commit locali su `main` (auth kpfarm OK) |
+
+| 2026-10-23 | Codex laboratorio | Ramo autorizzato codex/laboratorio-sicuro, base 762eac7; ambiente Supabase vuoto ybmnrtvksvndpdiofmqm; Moment Custom sospeso su richiesta. 22 test locali, baseline: 7 fallimenti da kindCap fuori scope, 15 pass. Nessun deploy/SQL/Officina. Vedi lab/README.md. |

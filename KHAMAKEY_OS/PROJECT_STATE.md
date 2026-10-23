@@ -5,6 +5,15 @@
 
 ### Fonte di verità versioni
 
+### Laboratorio separato autorizzato — 2026-10-23 (NON LIVE)
+
+- L'utente autorizza copia Windows `C:\Users\khama\Desktop\nuove collezioni\khamakey-v41-lab`, ramo `codex/laboratorio-sicuro`, eccezione esplicita a main/root Mac. Base `762eac7`. Non fondere/deployare automaticamente.
+- Piano, limiti di isolamento e verifiche: `../lab/README.md`, `../lab/PLAN.md`. Versioni live sopra invariate.
+- Database laboratorio creato vuoto: `ybmnrtvksvndpdiofmqm` (eu-west-1), costo di creazione quotato 0 USD/mese. Su autorizzazione esplicita dell’utente sospeso Moment Custom `bftmldytlhuznintdmdl` (INACTIVE); Business già inattivo. Nessuna cancellazione/upgrade/copia dati. Produzione Moments `cuxlwaocjqwzluycznyp` non modificata.
+- In questa fase solo test locali simulati: nessuna certificazione di staging end-to-end, nessun SQL, nessuna modifica Officina/generazione NFC, nessun deploy.
+- Prima di ulteriori cambi: leggere `lab/README.md`, verificare branch/main e lock. Non avviare il frontend sorgente: la configurazione punta ancora a produzione.
+
+
 | Cosa | Dove leggere |
 |------|----------------|
 | Moments editor | `pages/moments.html` / `moments.js` / `moments.css` → `?v=` |

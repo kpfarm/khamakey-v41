@@ -183,3 +183,5 @@
 ---
 
 *Aggiungi una riga qui a ogni sessione significativa. Aggiornare anche `../../ROADMAP.md`.*
+
+| 2026-10-23 | Codex laboratorio | Ramo autorizzato codex/laboratorio-sicuro, base 762eac7; ambiente Supabase vuoto ybmnrtvksvndpdiofmqm; Moment Custom sospeso su richiesta. 22 test locali, baseline: 7 fallimenti da kindCap fuori scope, 15 pass. Nessun deploy/SQL/Officina. Vedi lab/README.md. |

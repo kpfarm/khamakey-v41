@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Laboratorio Codex (2026-10-23, NON LIVE)** — ramo autorizzato `codex/laboratorio-sicuro` da `762eac7`, piano 14 operazioni e controlli locali isolati. Database laboratorio vuoto creato dopo sospensione autorizzata Moment Custom; nessun dato copiato, nessun progetto eliminato, nessun deploy o SQL. Officina e URL NFC protetti. Vedi `lab/README.md`.
+
 - **Moments v327 (2026-10-23)** — live
   - Nella sezione Musica, «Carica immagine» (copertina del brano) apre di nuovo la scelta della foto. Stesso intervento sul conto alla rovescia. Audio, Salva e pagina dell’oggetto **invariati**.
 - **Moments CSS v310 (2026-10-23)** — live

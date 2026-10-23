@@ -1508,3 +1508,36 @@ label{font-weight:500}
   .detail-head h2{font-size:1.35rem}
   .editor-main .section-title{font-size:1.5rem}
 }
+
+/* Tre livelli di lettura: nome sezione, etichetta, aiuto. */
+.editor-sidebar-group{color:#3D4654}
+.editor-nav-item{font-weight:600}
+.editor-nav-item.active{font-weight:650}
+.editor-main .ecard-title,
+.editor-main .how-guide-item h4,
+.editor-main .how-empty-title,
+.editor-main .how-discover-row-title,
+.editor-main .section-switch-copy strong,
+.editor-main .extras-card-copy strong,
+.editor-main .gallery-type-title{
+  font-size:1rem;
+  font-weight:600;
+  color:var(--navy);
+}
+.editor-main label{font-size:.8125rem;font-weight:500;color:#3D4654}
+.editor-main .field-hint,
+.editor-main .section-sub,
+.editor-main .how-discover-row-blurb,
+.editor-main .extras-card-copy small,
+.editor-main .section-switch-copy small{
+  font-size:.8125rem;
+  font-weight:400;
+  line-height:1.45;
+  color:#5C6570;
+}
+.editor-main .field-hint.ok{color:var(--green-dark);font-weight:600}
+.editor-main .field-hint.error{color:var(--red);font-weight:600}
+.cover-framer-top-hint,
+.cover-framer-top-hint.cover-picker-hint,
+.cover-orient-hint,
+.cover-orient-caption{color:rgba(255,255,255,.9)}

@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v301 (2026-10-23)** — live
+  - Nell’editor il nome della sezione, l’etichetta del campo e la riga di aiuto non sono più lo stesso blu. L’aiuto è a 13 pixel. Stessi pulsanti. La pagina dell’oggetto non cambia.
+  - NFC, Salva e upload **invariati**.
 - **Moments CSS v300 (2026-10-23)** — live
   - In cima all’editor il titolo della pagina e il nome della sezione usano il carattere dello strumento, con aria tra la riga piccola e il titolo. Stessi pulsanti. La pagina dell’oggetto non cambia.
   - NFC, Salva e upload **invariati**.

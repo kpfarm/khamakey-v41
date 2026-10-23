@@ -8,10 +8,10 @@ Questa eccezione esplicita alla regola di main/root Mac vale per questo laborato
 
 - Copia Git separata, nessun dato o segreto cliente copiato.
 - Test locali del Worker con rete sostituita da risposte simulate e archivio R2 in memoria.
-- Progetto Supabase nuovo e vuoto: `ybmnrtvksvndpdiofmqm` (KhamaKey Moments Laboratorio, eu-west-1). Dopo il primo rifiuto per quota gratuita, l’utente ha autorizzato la sospensione di Moment Custom: `bftmldytlhuznintdmdl` ora INACTIVE; Business già INACTIVE. Nessun progetto eliminato, nessun upgrade. Moments produzione `cuxlwaocjqwzluycznyp` non modificato.
+- Progetto Supabase separato (ora con solo schema, 0 righe verificate): `ybmnrtvksvndpdiofmqm` (KhamaKey Moments Laboratorio, eu-west-1). Dopo il primo rifiuto per quota gratuita, l’utente ha autorizzato la sospensione di Moment Custom: `bftmldytlhuznintdmdl` ora INACTIVE; Business già INACTIVE. Nessun progetto eliminato, nessun upgrade. Moments produzione `cuxlwaocjqwzluycznyp` non modificato.
 - **Non esiste ancora uno staging completo** per login, generazione Officina e prove browser end-to-end.
 - `pages/config.js` e `worker/wrangler.toml` restano configurazioni di produzione: **non avviare Pages dalla cartella sorgente, non lanciare wrangler dalla configurazione predefinita**.
-- Nessun deploy, SQL, email, webhook, ordine, codice o lotto reale è autorizzato da questi script di laboratorio.
+- SQL strutturale applicato esclusivamente al laboratorio autorizzato; nessun SQL di produzione, deploy, email, webhook, ordine, codice o lotto reale.
 
 ## Controlli locali (Node.js 22 o successivo, nessuna dipendenza da installare)
 
@@ -49,3 +49,9 @@ Baseline: 78 file Officina/SQL e Worker fuori handler upload/versione identici. 
 ### Accesso GitHub e passaggio consegne
 Accesso GitHub sbloccato il 2026-10-23 dopo installazione ChatGPT Codex Connector sul repository. Ramo pubblicato e verificato identico alla copia testata; PR #6 in bozza: https://github.com/kpfarm/khamakey-v41/pull/6. Nessun merge/deploy/SQL; staging completo e smoke ancora aperti.
 Git locale non ha credenziali di scrittura: pubblicazione effettuata dal connettore autorizzato, lettura remota e confronto degli alberi Git esatti. Copia locale riallineata ai commit remoti equivalenti; nessun force push. Il precedente 403 è risolto.
+
+## Checkpoint schema separato
+
+- **Checkpoint schema laboratorio 2026-10-23 (NON LIVE)** — 70 tabelle, 102 funzioni, 124 policy, 4 trigger; conteggio effettivo 0 righe. Accessi anon/auth chiusi (0 tabelle, 0 funzioni); grants ampi respinti e non applicati, segreto legacy escluso dalla copia. 27/27 test locali. Staging funzionale ancora aperto; produzione/Officina invariate. Dettagli: `lab/SCHEMA-CHECKPOINT.md`.
+
+Vedi [SCHEMA-CHECKPOINT.md](SCHEMA-CHECKPOINT.md) per recuperi, limiti, advisory e passi ancora aperti. Nessun avvio dalla configurazione di produzione.

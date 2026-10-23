@@ -109,3 +109,9 @@ Bucket `khamakey-media` (SQL v44):
 2. Documentare in questo file
 3. Applicare in Supabase SQL Editor
 4. Aggiornare `PROJECT_STATE.md`
+
+## Laboratorio separato — 2026-10-23 (NON LIVE)
+
+- **Checkpoint schema laboratorio 2026-10-23 (NON LIVE)** — 70 tabelle, 102 funzioni, 124 policy, 4 trigger; conteggio effettivo 0 righe. Accessi anon/auth chiusi (0 tabelle, 0 funzioni); grants ampi respinti e non applicati, segreto legacy escluso dalla copia. 27/27 test locali. Staging funzionale ancora aperto; produzione/Officina invariate. Dettagli: `lab/SCHEMA-CHECKPOINT.md`.
+
+Le istruzioni storiche di sequenza sopra non sono un bootstrap per un database vuoto. Per il laboratorio è stato letto il catalogo strutturale senza righe: generatore con destinazione fissa e accessi chiusi. Non rieseguirlo sul database esistente. Snapshot e SQL generati in .lab/ esclusa da Git.

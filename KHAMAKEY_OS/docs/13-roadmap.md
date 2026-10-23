@@ -189,3 +189,5 @@
 | 2026-10-23 | Codex laboratorio | Worker v256 candidato: scope kindCap, 22/22 test locali pass contro 7 fail base; Officina/SQL invariati. Nessun deploy o SQL. Push/PR bloccati (GitHub 403 scrittura, Git senza autenticazione). Lock rilasciato, staging/schema e smoke aperti. |
 
 | 2026-10-23 | Codex laboratorio | Accesso GitHub sbloccato dopo installazione app; ramo pubblicato, alberi Git identici ai due commit locali testati, PR #6 in bozza. Main invariato, nessun deploy/SQL. Staging e smoke aperti. |
+
+| 2026-10-23 | Codex laboratorio | Schema solo laboratorio ricostruito, 70 tabelle / 102 funzioni / 124 policy / 4 trigger, 0 righe effettive. Accessi anon/auth chiusi; grants ampi respinti, non applicati. 27/27 test, Officina invariata. Staging e smoke aperti; nessun SQL produzione/deploy. Vedi lab/SCHEMA-CHECKPOINT.md. |

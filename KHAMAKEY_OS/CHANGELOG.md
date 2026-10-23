@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Checkpoint schema laboratorio 2026-10-23 (NON LIVE)** — 70 tabelle, 102 funzioni, 124 policy, 4 trigger; conteggio effettivo 0 righe. Accessi anon/auth chiusi (0 tabelle, 0 funzioni); grants ampi respinti e non applicati, segreto legacy escluso dalla copia. 27/27 test locali. Staging funzionale ancora aperto; produzione/Officina invariate. Dettagli: `lab/SCHEMA-CHECKPOINT.md`.
+
+
 - **Worker v256 candidato laboratorio (NON LIVE, 2026-10-23)** — corregge scope kindCap tra pre/post-check upload. Prima 7 test falliti, dopo 22/22 pass. Quote, auth e renderer invariati; 78 file Officina/SQL verificati. Smoke reali ancora da fare; accesso GitHub sbloccato e PR #6 in bozza, nessun merge/deploy.
 
 - **Laboratorio Codex (2026-10-23, NON LIVE)** — ramo autorizzato `codex/laboratorio-sicuro` da `762eac7`, piano 14 operazioni e controlli locali isolati. Database laboratorio vuoto creato dopo sospensione autorizzata Moment Custom; nessun dato copiato, nessun progetto eliminato, nessun deploy o SQL. Officina e URL NFC protetti. Vedi `lab/README.md`.

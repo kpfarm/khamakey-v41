@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v303 (2026-10-23)** — live
+  - Tolta dalla vista la frase che ripeteva i quattro passi. I passi restano nel menu. Stessi pulsanti. La pagina dell’oggetto non cambia.
+  - NFC, Salva e upload **invariati**.
 - **Moments CSS v302 (2026-10-23)** — live
   - Sul telefono i nomi del menu in basso passano da circa 9 pixel a 12. Stessi tre gruppi e stesse sezioni. La pagina dell’oggetto non cambia.
   - NFC, Salva e upload **invariati**.

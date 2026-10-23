@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v309 (2026-10-23)** — live
+  - Sul computer, Apri pagina e Annulla hanno di nuovo una linea. Salva resta l’unico pulsante pieno. La pagina dell’oggetto non cambia.
+  - NFC, Salva e upload **invariati**.
 - **Moments CSS v308 (2026-10-23)** — live
   - Sul computer, mentre si scorre, restano in vista «Modifiche non salvate» e Salva, sotto la barra blu. Sul telefono non cambia. La pagina dell’oggetto non cambia.
   - NFC, Salva e upload **invariati**.

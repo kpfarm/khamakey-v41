@@ -1473,8 +1473,9 @@ label{font-weight:500}
 .editor-shell input:focus,
 .editor-shell textarea:focus,
 .editor-shell select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(7,26,60,.14)}
-.editor-topbar .ghost{border-color:transparent;background:transparent}
-.editor-topbar .ghost:hover{background:rgba(7,26,60,.06)}
+.editor-topbar .ghost{border-color:rgba(7,26,60,.28);background:#fff}
+.editor-topbar .ghost:hover{background:rgba(7,26,60,.04)}
+.editor-topbar .quick-publish.published{background:#fff;color:var(--navy);border-color:var(--navy)}
 .quick-publish.published{background:var(--navy);color:#fff;border-color:var(--navy)}
 .gallery-add-primary{border-color:var(--navy);color:var(--navy);background:#fff}
 .cover-fit-btn.active,

@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v324 live** · CSS **v299** | Dieci punti grafici chiusi. Accesso e pagina oggetto invariati |
+| Editor Moments | **v324 live** · CSS **v300** | Titoli in alto nel carattere dello strumento. Pagina oggetto invariata |
 | Worker | **v255-transfer-guard** | L’email fallita non cancella un invito più recente |
 | Officina | **v203** | PNG codice più basso |
 

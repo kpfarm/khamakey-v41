@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments CSS v300 (2026-10-23)** — live
+  - In cima all’editor il titolo della pagina e il nome della sezione usano il carattere dello strumento, con aria tra la riga piccola e il titolo. Stessi pulsanti. La pagina dell’oggetto non cambia.
+  - NFC, Salva e upload **invariati**.
 - **Moments CSS v299 (2026-10-23)** — live
   - Chiusi i dieci punti grafici dell’editor: colonna da 640px, due raggi (10 e 12), un solo blu per le azioni, testi secondari più quieti, pulsanti secondari senza cornice, niente sollevamento al passaggio, comandi di ordine senza scatola, testata dell’editor più calma, cornice dell’anteprima più leggera. Dentro l’anteprima resta la pagina vera. L’accesso non è stato toccato.
   - NFC, Salva, upload e pagina dell’oggetto **invariati**.

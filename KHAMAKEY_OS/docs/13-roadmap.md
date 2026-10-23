@@ -106,6 +106,7 @@
 | 2026-09-04 | Cursor | **Moments v252 + Worker v218**: Privacy/Termini EN; URL IT invariati |
 | 2026-09-04 | Cursor | **P.IVA**: promemoria vault — inserire dati societari quando ci sarà partita IVA |
 | 2026-09-04 | Cursor | **i18n check**: etichette campi = contenuto cliente (già chrome EN). «Prepara tutto» segue UI, non è sempre IT |
+| 2026-10-23 | Cursor | **CSS v300**: titoli in alto dell’editor nel carattere dello strumento, con più aria |
 | 2026-10-23 | Cursor | **CSS v299**: dieci punti grafici dell’editor chiusi. Accesso e pagina oggetto invariati |
 | 2026-10-23 | Cursor | **CSS v298**: stesso aspetto calmo su Contenuto, Colori e Condividi |
 | 2026-10-23 | Cursor | **CSS v297**: editor più calmo, stessi comandi. Pagina oggetto invariata |

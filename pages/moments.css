@@ -1498,3 +1498,13 @@ label{font-weight:500}
   .editor-main{padding:32px;max-width:640px}
   .editor-panel.active{gap:32px}
 }
+
+/* Cima dell’editor: un solo carattere da strumento, aria tra le righe. */
+.detail-head .eyebrow{margin:0 0 8px;color:#4E5968;font-weight:600}
+.detail-head h2{margin:0 0 8px;font-family:var(--font-ui);font-weight:650;font-size:1.5rem;line-height:1.25;letter-spacing:-0.02em;color:var(--navy)}
+.editor-main .section-title{font-family:var(--font-ui);font-weight:650;font-size:1.75rem;line-height:1.2}
+.editor-main .section-sub{margin-top:12px}
+@media(max-width:768px){
+  .detail-head h2{font-size:1.35rem}
+  .editor-main .section-title{font-size:1.5rem}
+}

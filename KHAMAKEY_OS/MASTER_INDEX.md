@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v324 live** · CSS **v301** | Tre livelli: nome sezione, etichetta, aiuto. Pagina oggetto invariata |
+| Editor Moments | **v324 live** · CSS **v302** | Menu telefono a 12 pixel. Pagina oggetto invariata |
 | Worker | **v255-transfer-guard** | L’email fallita non cancella un invito più recente |
 | Officina | **v203** | PNG codice più basso |
 

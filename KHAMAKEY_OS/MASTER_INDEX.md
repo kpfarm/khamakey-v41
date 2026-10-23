@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v324 live** · CSS **v303** | Frase dei quattro passi non più in vista. Pagina oggetto invariata |
+| Editor Moments | **v325 live** · CSS **v304** | Il titolo non ripete il passo già scelto. Pagina oggetto invariata |
 | Worker | **v255-transfer-guard** | L’email fallita non cancella un invito più recente |
 | Officina | **v203** | PNG codice più basso |
 

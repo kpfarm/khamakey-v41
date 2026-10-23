@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v325 + CSS v304 (2026-10-23)** — live
+  - Se il titolo grande ripete il passo già scelto (Copertina, Colori, Condividi), resta solo la frase sotto. Musica e le altre sezioni tengono il loro nome. Stessi passi. La pagina dell’oggetto non cambia.
+  - NFC, Salva e upload **invariati**.
 - **Moments CSS v303 (2026-10-23)** — live
   - Tolta dalla vista la frase che ripeteva i quattro passi. I passi restano nel menu. Stessi pulsanti. La pagina dell’oggetto non cambia.
   - NFC, Salva e upload **invariati**.

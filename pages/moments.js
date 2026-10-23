@@ -2458,7 +2458,10 @@ function syncEditorKitUi(formNode){
       const title = panel.querySelector(".section-title");
       const sub = panel.querySelector(".section-sub");
       const custom = String(formNode?.querySelector(`[name="section_${key}_title"]`)?.value || "").trim();
-      if(title) title.textContent = custom || localizedSectionLabel(type, key);
+      if(title){
+        title.textContent = custom || localizedSectionLabel(type, key);
+        syncRepeatedSectionTitle(title);
+      }
       if(sub) sub.textContent = localizedSectionSubtitle(type, key);
     }
   });
@@ -2475,21 +2478,30 @@ function syncEditorKitUi(formNode){
     if(!panel) continue;
     const title = panel.querySelector(".section-title");
     const sub = panel.querySelector(".section-sub");
-    if(title) title.textContent = editorPanelTitle(panelDef);
+    if(title){
+      title.textContent = editorPanelTitle(panelDef);
+      syncRepeatedSectionTitle(title);
+    }
     if(sub) sub.textContent = editorPanelSubtitle(panelDef);
   }
   const counterPanel = document.querySelector(`#momentEditorForm [data-editor-panel="counter"]`);
   if(counterPanel){
     const title = counterPanel.querySelector(".section-title");
     const sub = counterPanel.querySelector(".section-sub");
-    if(title) title.textContent = localizedCounterLabel(type);
+    if(title){
+      title.textContent = localizedCounterLabel(type);
+      syncRepeatedSectionTitle(title);
+    }
     if(sub) sub.textContent = editorPanelSubtitle(EDITOR_PANELS.counter);
   }
   const extrasPanel = document.querySelector(`#momentEditorForm [data-editor-panel="extras"]`);
   if(extrasPanel){
     const title = extrasPanel.querySelector(".section-title");
     const sub = extrasPanel.querySelector(".section-sub");
-    if(title) title.textContent = t("sec.extras_title") || t("nav.extras");
+    if(title){
+      title.textContent = t("sec.extras_title") || t("nav.extras");
+      syncRepeatedSectionTitle(title);
+    }
     if(sub) sub.textContent = t("sec.extras_sub");
   }
 
@@ -3937,8 +3949,21 @@ function renderEditorSidebar(activePanel, momentType = currentMomentType, pinned
   </nav>`;
 }
 
+function sectionTitleRepeatsStep(title){
+  const name = String(title || "").trim();
+  if(!name) return false;
+  return [t("nav.cover"), t("nav.colors"), t("nav.publish")].includes(name);
+}
+
+function syncRepeatedSectionTitle(titleEl){
+  const header = titleEl?.closest(".section-header");
+  if(!header) return;
+  header.classList.toggle("is-step-name", sectionTitleRepeatsStep(titleEl.textContent));
+}
+
 function renderSectionHeader(title,subtitle){
-  return `<div class="section-header"><div class="section-title">${esc(title)}</div><div class="section-sub">${esc(subtitle)}</div></div>`;
+  const repeated = sectionTitleRepeatsStep(title) ? " is-step-name" : "";
+  return `<div class="section-header${repeated}"><div class="section-title">${esc(title)}</div><div class="section-sub">${esc(subtitle)}</div></div>`;
 }
 
 function readDesignFields(formNode){

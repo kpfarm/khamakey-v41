@@ -1549,3 +1549,8 @@ label{font-weight:500}
 
 /* La frase ripete i quattro passi già visibili. Il percorso resta nel menu. */
 .editor-topbar-help{display:none}
+
+/* Se il titolo grande ripete il passo già selezionato, resta solo la frase sotto. */
+.section-header.is-step-name{margin-bottom:12px}
+.section-header.is-step-name .section-title{display:none}
+.section-header.is-step-name .section-sub{margin-top:0}

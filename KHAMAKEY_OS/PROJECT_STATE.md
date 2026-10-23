@@ -214,7 +214,8 @@ RSVP WhatsApp: **operativo**. Guestbook pubblico: **spento**. Assistenza Moments
 
 ## Prossimo obiettivo
 
-> **Oggi 2026-10-23:** Sesto passo: colore scelto fermo e zoom della foto blu (CSS **v306**). Script **v325**. Pagina dell’oggetto non toccata. Worker **v255**. Officina **v203**. SQL **v182**. File **v183** non applicato.  
+> **Oggi 2026-10-23:** Sesto passo chiuso (CSS **v306**). Script **v325**. Pagina dell’oggetto non toccata. Worker **v255**. Officina **v203**. SQL **v182**. File **v183** non applicato.  
+> **Grafica editor:** niente illustrazioni nuove. Le spiegazioni ci sono già (Come si crea e la guida dentro ogni sezione). L’ordine è Copertina, poi Colori, poi le sezioni nell’ordine della pagina. La grafica si pubblica da qui, un passo alla volta. Un altro chat può proporre un’idea, non tocca il prodotto.  
 > GDPR: opt-in, registro, revoca, download JSON e cancella da Profilo. **Niente newsletter**.  
 > **P.IVA** in attesa.
 

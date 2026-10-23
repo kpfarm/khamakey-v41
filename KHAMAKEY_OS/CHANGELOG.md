@@ -8,6 +8,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Vault (2026-10-23)** — controllo grafica editor, nessun deploy
+  - Niente illustrazioni. Le guide restano quelle già scritte. L’ordine delle sezioni non si cambia. La grafica del prodotto si applica da questo repo, un passo alla volta.
 - **Moments CSS v306 (2026-10-23)** — live
   - Il colore scelto non si ingrandisce più: resta fermo, con il bordo blu. La barra dello zoom della foto è blu, non più rosa. La scelta del colore e lo zoom funzionano come prima. La pagina dell’oggetto non cambia.
   - NFC, Salva e upload **invariati**.

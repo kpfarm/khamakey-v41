@@ -123,3 +123,7 @@ Dev vars: `worker/.env.example` → `.dev.vars` (solo locale).
 Config: `pages/config.js` (`PAGES_BASE_URL`, `WORKER_BASE_URL`) + `worker/wrangler.toml` (`PAGES_ASSET_BASE`, `WORKER_PUBLIC_BASE`).
 
 Supabase Auth → Site URL `https://app.khamakeymoments.com` e Redirect URLs `https://app.khamakeymoments.com/**` (+ keep `https://khamakey-app.pages.dev/**`).
+
+## Laboratorio isolato — 2026-10-23, non deployato
+
+Copia/ramo autorizzati e condizioni in `../../lab/README.md`. Database di prova vuoto `ybmnrtvksvndpdiofmqm`, creato dopo sospensione autorizzata Moment Custom. Schema, Worker e bucket staging da preparare; nessuna migrazione o binding di produzione toccati. Worker candidato v256 corregge soltanto lo scope di kindCap in handleMediaUpload: 22 test locali pass, contro 7 fallimenti della base. Officina/SQL e renderer fuori upload identici alla baseline. Rilascio bloccato fino a smoke completo e decisione di pubblicazione. GitHub push/PR bloccati da accesso scrittura 403, commit conservati localmente.

@@ -37,3 +37,14 @@ La base Git non è un backup del database o dei file R2. Prima del rilascio veri
 La correzione resta sul ramo, con PR in bozza. Il passaggio in produzione richiede ambiente pronto, smoke completi e una decisione esplicita di rilascio. Ordine esistente SQL (solo se necessario) → Worker → Pages. Un fallimento critico blocca il rilascio; ripristinare l'artefatto precedente senza annullare dati cliente.
 
 Il piano delle 14 operazioni è in `PLAN.md`; le verifiche manuali ancora aperte non vanno considerate superate dai test simulati.
+
+## Esito correzione upload (NON LIVE)
+
+Worker candidato `v256-media-kindcap-scope`: `kindCap` dichiarata nello scope comune e assegnata dopo la lettura dei limiti. Nessun cambiamento ai valori di quota, auth, MIME, fallback R2 o sicurezza.
+
+Test 23/10/2026 con Node 24.19: prima 15 pass e 7 fail (`ReferenceError: kindCap is not defined`); dopo 22/22 pass. Verificati upload immagini/video/audio/PDF, mancata sessione, permessi, rate limit, servizio indisponibile, spazio, dimensione/formato, cap video, race post-write, sostituzione e fallback contabilità R2.
+
+Baseline: 78 file Officina/SQL e Worker fuori handler upload/versione identici. Non sostituisce smoke reali: login/attivazione, Salva/riapertura, upload reale, PIN, pagina pubblica, QR/NFC, generazione lotto etichette sono ANCORA DA ESEGUIRE in staging. Non usare questa frase come attestazione di produzione funzionante.
+
+### Accesso GitHub bloccato
+Il connettore rifiuta create_branch con HTTP 403 `Resource not accessible by integration`. Git locale non ha autenticazione disponibile. Commit locali conservati; push e PR non effettuati finché non viene autorizzato l’accesso. Nessuna fusione in main o pubblicazione.

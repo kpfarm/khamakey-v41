@@ -1554,6 +1554,7 @@ label{font-weight:500}
 .section-header.is-step-name{margin-bottom:12px}
 .section-header.is-step-name .section-title{display:none}
 .section-header.is-step-name .section-sub{margin-top:0}
+.pin-save-btn{justify-self:start;margin-top:4px;min-height:44px}
 
 /* Colore scelto fermo. Zoom della foto sul blu dello strumento. */
 .palette-btn.active{border-color:var(--navy);transform:none}

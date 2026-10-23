@@ -8,6 +8,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- **Moments v326 + CSS v307 (2026-10-23)** — live
+  - In Condividi, sotto Nuovo PIN, c’è Salva. Sul telefono la barra di salvataggio compare anche se cambi solo il PIN. Il PIN non finisce nel testo della pagina: resta l’hash di prima.
+  - NFC, upload e pagina dell’oggetto **invariati**.
 - **Vault (2026-10-23)** — controllo grafica editor, nessun deploy
   - Niente illustrazioni. Le guide restano quelle già scritte. L’ordine delle sezioni non si cambia. La grafica del prodotto si applica da questo repo, un passo alla volta.
 - **Moments CSS v306 (2026-10-23)** — live

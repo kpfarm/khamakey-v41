@@ -8,7 +8,7 @@
 
 | Live | Versione | Nota |
 |------|----------|------|
-| Editor Moments | **v325 live** · CSS **v306** | Colore fermo e zoom blu. Pagina oggetto invariata |
+| Editor Moments | **v326 live** · CSS **v307** | Salva sotto il nuovo PIN. Pagina oggetto invariata |
 | Worker | **v255-transfer-guard** | L’email fallita non cancella un invito più recente |
 | Officina | **v203** | PNG codice più basso |
 

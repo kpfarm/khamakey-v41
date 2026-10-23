@@ -1006,6 +1006,8 @@ async function refreshMomentTransferCard(row){
 }
 let editorDirty = false;
 let savedEditorSnapshot = "";
+let savedPinDraft = "";
+let savedPinEnabled = null;
 let lastPreviewHash = "";
 let previewDebounceTimer = null;
 let previewFetchId = 0;
@@ -4817,6 +4819,7 @@ function renderPrivacyPanel(row, state = {}){
       </label>
       <label>${lfSpan("Nuovo PIN")}<input name="access_pin" inputmode="numeric" autocomplete="new-password" placeholder="${esc(localizeFieldPhrase("Es. 1234 — lascia vuoto per non cambiare"))}" data-lf-placeholder="Es. 1234 — lascia vuoto per non cambiare"></label>
       <p class="field-hint">${lfSpan("Chi avvicina il tag NFC dovrà inserire questo PIN per aprire la pagina.")}</p>
+      <button type="submit" class="primary pin-save-btn" data-i18n="shell.save">${esc(t("shell.save"))}</button>
     </div>
     <div class="editor-card smart-card">
       <p class="ecard-title">${lfSpan("Ricordi nel tempo")}</p>
@@ -6037,6 +6040,7 @@ function settleEditorBaseline(form, options, id){
     return;
   }
   savedEditorSnapshot = now;
+  capturePinBaseline(form);
   editorDirty = false;
   updateSaveStatus(true);
 }
@@ -7196,6 +7200,25 @@ function readFormState(formNode){
   };
 }
 
+function readPinDraft(formNode){
+  return {
+    pin: String(formNode?.querySelector?.('[name="access_pin"]')?.value || "").trim(),
+    enabled: formNode?.querySelector?.('[name="pin_enabled"]')?.value === "true"
+  };
+}
+
+function capturePinBaseline(formNode){
+  const draft = readPinDraft(formNode);
+  savedPinDraft = draft.pin;
+  savedPinEnabled = draft.enabled;
+}
+
+function pinFieldsDirty(formNode){
+  if(!formNode?.querySelector?.('[name="access_pin"]') && !formNode?.querySelector?.('[name="pin_enabled"]')) return false;
+  const draft = readPinDraft(formNode);
+  return draft.pin !== savedPinDraft || draft.enabled !== savedPinEnabled;
+}
+
 function formSnapshotForDirty(formNode){
   // Stesso percorso del Salva: altrimenti sanitize (public_locale/RSVP/…) fa ripartire il banner «non salvato».
   return JSON.stringify(sanitizeStateForSave(readFormState(formNode)));
@@ -7211,7 +7234,7 @@ function markEditorDirty(formNode, options = {}){
     if(!formNode?.isConnected || formNode !== liveForm || suppressDirtyUi || saveInFlight) return;
     try{
       const snapshot = formSnapshotForDirty(formNode);
-      editorDirty = snapshot !== savedEditorSnapshot;
+      editorDirty = snapshot !== savedEditorSnapshot || pinFieldsDirty(formNode);
       updateSaveStatus(!editorDirty);
       const flag = document.getElementById("unsavedFlag");
       if(flag) flag.hidden = !editorDirty;
@@ -7631,6 +7654,7 @@ async function saveMoment(event,row, options = {}){
     }else{
       try{ savedEditorSnapshot = formSnapshotForDirty(formNode); }
       catch{ savedEditorSnapshot = persistedSnapshot; }
+      capturePinBaseline(formNode);
       editorDirty = false;
     }
     lastPreviewHash = savedEditorSnapshot;

@@ -18,10 +18,10 @@ import {
 } from "./moments-i18n.js?v=236";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=268";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=232";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=328";
-import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=238";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=329";
+import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=329";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=218";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=266";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=329";
 import { localizeMomentTemplate } from "./moments-i18n-templates.js?v=226";
 import {
   uploadImage,
@@ -166,7 +166,7 @@ import {
 } from "./moment-editor-kit.js?v=192";
 import { renderRsvpSharePanel, bindRsvpSharePanel, refreshRsvpShareLocale } from "./moment-rsvp-kit.js?v=221";
 import { bindRsvpResponsesPanel, refreshRsvpResponsesLocale } from "./moment-rsvp-responses.js?v=222";
-import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=225";
+import { renderMomentDashboardShell, bindMomentDashboard, refreshMomentDashboardLocale } from "./moment-editor-dashboard.js?v=329";
 import { renderRsvpFieldsEditor, readRsvpFieldsFromForm, bindRsvpFieldsEditor, normalizeRsvpSection, rsvpGuestPreviewLines } from "./moment-rsvp-fields.js?v=221";
 import {
   renderHoroscopePeoplePanel,
@@ -1063,8 +1063,17 @@ function invalidateLivePreview(){
   lastPreviewHash = "";
 }
 
+function showEditorOperation(key, type = ""){
+  const node = document.getElementById("editorOperationStatus");
+  if(!node) return;
+  node.hidden = !key;
+  node.textContent = key ? t(key) : "";
+  node.classList.toggle("error", type === "error");
+}
+
 function setUploadBusy(busy){
   uploadBusy = Boolean(busy);
+  showEditorOperation(uploadBusy ? "save.uploading_file" : "");
   if(!uploadBusy){
     flushQueuedMomentSave();
     if(historyBurst) scheduleHistorySeal(60);
@@ -1083,8 +1092,8 @@ function showEditorSaveFeedback(message, type = "error"){
   setStatus(editorStatus, message, type);
   const saveStatus = document.getElementById("editorSaveStatus");
   if(saveStatus){
-    saveStatus.textContent = type === "ok" ? t("shell.saved") : (message || t("shell.save_fail"));
-    saveStatus.classList.toggle("dirty", type !== "ok");
+    saveStatus.textContent = type === "ok" ? t(editorDirty ? "shell.unsaved" : "shell.saved") : (message || t("shell.save_fail"));
+    saveStatus.classList.toggle("dirty", type !== "ok" || editorDirty);
   }
   const barMsg = document.querySelector("#momentsSaveBar .save-msg");
   if(barMsg && type === "error" && message){
@@ -3014,18 +3023,21 @@ function giftReadyMissing(state){
   return missing;
 }
 
-function giftReadyMessage(state){
+function giftReadyMessage(state, row, dirty = editorDirty){
   const missing = giftReadyMissing(state);
-  if(!missing.length) return t("overview.gift.ready");
+  if(!missing.length){
+    if(dirty) return t("overview.gift.save_first");
+    return t(row?.public_visible ? "overview.gift.ready" : "overview.gift.publish_first");
+  }
   const last = missing[missing.length - 1];
   const head = missing.slice(0, -1);
   const what = head.length ? `${head.join(", ")} ${t("overview.gift.and")} ${last}` : last;
   return t(missing.length === 1 ? "overview.gift.missing.one" : "overview.gift.missing.many", { what });
 }
 
-function renderGiftReadyLine(state){
+function renderGiftReadyLine(state, row){
   const ready = giftReadyMissing(state).length === 0;
-  return `<p class="gift-ready${ready ? " is-ready" : ""}" id="giftReadyLine">${esc(giftReadyMessage(state))}</p>`;
+  return `<p class="gift-ready${ready ? " is-ready" : ""}" id="giftReadyLine">${esc(giftReadyMessage(state, row, false))}</p>`;
 }
 
 function refreshGiftReadyLine(formNode){
@@ -3037,7 +3049,8 @@ function refreshGiftReadyLine(formNode){
   }catch{
     return;
   }
-  el.textContent = giftReadyMessage(state);
+  const row = rows.find(item => item.id === formEventId(formNode));
+  el.textContent = giftReadyMessage(state, row);
   el.classList.toggle("is-ready", giftReadyMissing(state).length === 0);
 }
 
@@ -3138,7 +3151,7 @@ function renderHowItWorksCard(row, state){
 function renderOverviewPanel(row, state, publicUrl){
   return `<div class="editor-panel ${activeEditorPanel === "overview" ? "active" : ""}" data-editor-panel="overview">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.overview),editorPanelSubtitle(EDITOR_PANELS.overview))}
-    ${renderGiftReadyLine(state)}
+    ${renderGiftReadyLine(state, row)}
     ${renderHowItWorksCard(row, state)}
     ${renderPlanStorageCard(currentEntitlements)}
     ${renderMomentDashboardShell({ publicUrl, published:row.public_visible, slug:row.slug })}
@@ -4633,6 +4646,7 @@ function renderCoverPanel(state){
   return `<div class="editor-panel ${activeEditorPanel === "cover" ? "active" : ""}" data-editor-panel="cover">
     ${renderSectionHeader(editorPanelTitle(EDITOR_PANELS.cover),editorPanelSubtitle(EDITOR_PANELS.cover))}
     <div class="cover-stage">
+      <label class="cover-line">${lfSpan("Titolo della pagina")}<input name="title" value="${esc(state.title)}" required placeholder="${esc(localizeFieldPhrase("Es. Il nostro anniversario"))}" data-lf-placeholder="Es. Il nostro anniversario"></label>
       <div class="cover-preview-wrap">
         <input type="hidden" name="cover_url" id="coverUrlInput" value="${esc(state.cover_url)}">
         <div class="cover-upload-actions">
@@ -4643,7 +4657,6 @@ function renderCoverPanel(state){
         ${renderHowEmptyHint("cover", { hidden: pageHasCoverPhoto(state) })}
         <div id="coverFramerSlot">${renderCoverFramer(state)}</div>
       </div>
-      <label class="cover-line">${lfSpan("Titolo della pagina")}<input name="title" value="${esc(state.title)}" required placeholder="${esc(localizeFieldPhrase("Es. Il nostro anniversario"))}" data-lf-placeholder="Es. Il nostro anniversario"></label>
       <section class="cover-texts">
         <p class="cover-texts-title">${lfSpan("Sulla copertina")}</p>
         <p class="field-hint">${lfSpan("Facoltativi. Stanno intorno al titolo, sulla foto.")}</p>
@@ -4797,13 +4810,13 @@ function renderPrivacyPanel(row, state = {}){
           <b>${lfSpan("Pubblicata — chi ha il link la vede")}</b>
         </button>
         <button type="button" class="publish-pick ${row.public_visible ? "" : "on"}" data-set-visible="false">
-          <b>${lfSpan("Bozza — solo tu la modifichi")}</b>
+          <b>${lfSpan("Bozza — non visibile al pubblico")}</b>
         </button>
       </div>
       <label class="visually-hidden">${lfSpan("Stato pagina")}
         <select name="public_visible" id="publicVisibleSelect">
           <option value="true" data-lf-option="✅ Pubblicata — chi ha il link la vede" ${row.public_visible ? "selected" : ""}>${esc(localizeFieldPhrase("✅ Pubblicata — chi ha il link la vede"))}</option>
-          <option value="false" data-lf-option="🔒 Bozza — solo tu la modifichi" ${!row.public_visible ? "selected" : ""}>${esc(localizeFieldPhrase("🔒 Bozza — solo tu la modifichi"))}</option>
+          <option value="false" data-lf-option="🔒 Bozza — non visibile al pubblico" ${!row.public_visible ? "selected" : ""}>${esc(localizeFieldPhrase("🔒 Bozza — non visibile al pubblico"))}</option>
         </select>
       </label>
       <p class="field-hint">${lfSpan("Dopo aver scelto, tocca Salva.")}</p>
@@ -5107,12 +5120,17 @@ function updateSaveStatus(saved){
   }
   const saveBar = document.getElementById("momentsSaveBar");
   saveBar?.classList.toggle("visible",!saved);
+  if(saveBar){
+    saveBar.inert = saved;
+    saveBar.setAttribute("aria-hidden", String(saved));
+  }
   const barMsg = saveBar?.querySelector(".save-msg");
   if(barMsg && !saved){
     barMsg.setAttribute("data-i18n-html", "shell.save_bar");
     barMsg.innerHTML = t("shell.save_bar");
   }
   refreshUndoButtons();
+  refreshGiftReadyLine(liveEditorForm());
 }
 
 function refreshNavChrome(){
@@ -5796,6 +5814,7 @@ function renderDetail(id, options = {}){
         </div>
       </div>
       <p class="editor-action-hint" id="editorActionHint" hidden></p>
+      <p class="editor-operation-status" id="editorOperationStatus" role="status" aria-live="polite" aria-atomic="true" hidden></p>
       ${renderEditorProgress()}
       <p class="editor-topbar-help" data-i18n-html="nav.help_html">${t("nav.help_html")}</p>
       <div class="editor-layout">
@@ -7239,7 +7258,9 @@ function formSnapshotForDirty(formNode){
 
 function markEditorDirty(formNode, options = {}){
   if(suppressDirtyUi || historyRestore) return;
-  if(!saveInFlight) editorEditEpoch += 1;
+  editorEditEpoch += 1;
+  // A pending request can acknowledge only the snapshot it sent.
+  if(saveInFlight) editorDirty = true;
   if(historyBurst) scheduleHistorySeal(historyTargetIsText(historyBurstField) ? 480 : 80);
   scheduleHowEmptyHintRefresh(formNode);
   const applySnapshot = ()=>{
@@ -7481,12 +7502,17 @@ async function persistMediaToPage(formNode, row){
   const targetForm = stillOnProduct ? liveForm : formNode;
   const targetRow = rows.find(item => item.id === eventId) || row;
   if(!targetRow?.id) return false;
+  if(stillOnProduct) showEditorOperation("save.linking_file");
   const ok = await saveMoment(
     { preventDefault(){}, currentTarget: targetForm },
     targetRow,
     { quietOk: true, fromMedia: true, eventId }
   );
-  if(ok && stillOnProduct) showMediaUploadNotice(t("save.upload_saved"), "ok");
+  const sameProductNow = activeId === eventId && formEventId(liveEditorForm()) === eventId;
+  if(sameProductNow){
+    showEditorOperation(ok ? "" : "save.upload_not_saved", "error");
+    if(ok) showMediaUploadNotice(t(editorDirty ? "save.upload_saved_more_edits" : "save.upload_saved"), "ok");
+  }
   return ok;
 }
 
@@ -7706,6 +7732,8 @@ async function saveMoment(event,row, options = {}){
     const rowIndex = rows.findIndex(item=>item.id === row.id);
     if(rowIndex >= 0) rows[rowIndex] = row;
     refreshObjectsSwitcher();
+    if(formEventId(liveEditorForm()) === row.id) showEditorOperation("");
+    refreshGiftReadyLine(liveEditorForm());
     const titleNode = detail.querySelector(".detail-head h2");
     if(titleNode) titleNode.textContent = state.title || row.slug;
     detail.querySelectorAll(".status-pill.live, .status-pill.draft").forEach(pill=>{

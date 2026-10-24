@@ -3,7 +3,7 @@
 import { summarizeRsvpResponses, fetchMomentRsvpResponses } from "./moment-rsvp-responses.js";
 import { summarizeGuestbookMessages, fetchMomentGuestbookMessages } from "./moment-guestbook-kit.js";
 import { getUiLocale, appendUiLangToPublicUrl } from "./moments-i18n.js?v=224";
-import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=222";
+import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=329";
 
 function esc(value){
   return String(value ?? "").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
@@ -147,7 +147,7 @@ export async function paintMomentDashboard({
   ].filter(Boolean);
 
   if(stats){
-    const emptyIt = "Attiva RSVP o libro ospiti per vedere le statistiche.";
+    const emptyIt = "Attiva RSVP per vedere le statistiche delle risposte.";
     stats.innerHTML = chips.length
       ? chips.join("")
       : `<span class="dash-stat muted" data-lf="${esc(emptyIt)}">${esc(lf(emptyIt))}</span>`;

@@ -4,20 +4,20 @@ Un intervento per volta, con test ed esito registrato. Nessuna riscrittura gener
 
 | # | Operazione | Stato / criterio per chiuderla |
 |---|---|---|
-| 1 | Isolamento, rilascio e ripristino | Copia Git e test locali; database remoto separato creato vuoto dopo sospensione autorizzata Moment Custom; schema e permessi minimi pronti, 0 dati persistenti; anteprima/Worker/R2 locali avviati, 2 account fittizi e prime prove browser/HTTP pass; conflitti, altri formati, etichette e chip ancora aperti; verificare backup dati prima del rilascio |
-| 2 | Difetto scope `kindCap` nell'upload | Correzione minima v256 sul ramo, 22/22 test locali pass inclusi auth/quote/tipi/sostituzione; smoke reali ancora necessari |
-| 3 | Conflitti di salvataggio fra collaboratori | Riprodotta sovrascrittura A/B nel lab; retry vecchio payload rimosso nel candidato v328, 35 test e browser pass. Verificare separatamente atomicità di transazioni DB simultanee prima di chiudere |
-| 4 | Privacy dei collegamenti diretti ai file | Comportamento CDN nel codice: nessun PIN; definire requisito, testare senza sessione, preservare URL esistenti |
-| 5 | Backup e recupero contenuti | Da verificare: recupero separato di DB, file R2, associazioni e utenti, in ambiente di test |
-| 6 | Diagnostica errori | Da progettare: identificativo errore e log senza dati personali/segreti |
-| 7 | Spazi desktop | Osservato campo titolo circa 209 px a viewport 920 px; prototipo e test a più larghezze |
-| 8 | Percorso mobile | Prototipo separato, test utente su foto/dedica/anteprima/condivisione prima del codice online |
-| 9 | Regole visive/accessibilità | Seguire docs/01-brand; verificare contrasto, zoom, tastiera, focus e lettura assistita |
-| 10 | Bozza/salvato/pubblicato e guide | Osservato «pronto da regalare» su bozza; rimuovere indicazioni obsolete guestbook senza riattivare la funzione |
-| 11 | Stato upload | Distinguere trasferimento file e salvataggio pagina, verificare rete lenta/interrotta |
-| 12 | Regalo e proprietà | Collaborazione e trasferimento A → B → A verificati con account fittizi (24 controlli trasferimento); email catturata/Worker e guardie v183 verificati (38 test); consegna reale, nuovo signup, scadenza e concorrenza aperti. Vedi TRANSFER-CHECKPOINT.md; codici/slug reali invariati |
-| 13 | Promessa commerciale | Limiti inclusi e demo reperibili nello shop; piano unico incluso, nessun abbonamento introdotto |
-| 14 | Guide e coordinamento Git | Documentare ramo/percorso Windows, stato non-live e blocchi; mantenere versioni live, aggiornare log ad ogni intervento |
+| 1 | Isolamento, rilascio e ripristino | Laboratorio isolato e core verificato con fixture fittizie; candidati protetti separati, PR in bozza. Ripristino completo, generazione etichette/lettura chip fisico e rilascio ancora da completare. |
+| 2 | Difetto scope `kindCap` nell'upload | Fix candidato v256: regressioni upload e immagine reale riuscite nel lab. In suite corrente 108 test integrati; altri formati e dispositivi reali ancora da collaudare prima del rilascio. |
+| 3 | Conflitti di salvataggio fra collaboratori | Retry vecchia bozza rimosso; atomicità DB verificata separatamente nel laboratorio. Editor v329 rileva anche digitazione durante Salva: riproduzione e regressione browser riuscite. Produzione invariata; evidenze tecniche riservate locali. |
+| 4 | Privacy dei collegamenti diretti ai file | Decisione in attesa: proteggere anche i file delle pagine PIN oppure mantenerne la condivisione diretta. Domanda presentata all’utente; nessuna modifica ai collegamenti esistenti. |
+| 5 | Backup e recupero contenuti | Recupero dimostrativo DB/R2 riuscito su dati fittizi; recupero completo Auth/RLS/configurazioni ancora aperto. Backup esterno rinviato esplicitamente dall’utente; nessun servizio/costo attivato. |
+| 6 | Diagnostica errori | Da progettare e implementare: identificativo correlato e log privi di dati personali/segreti, verificando anche errori di rete. Nessun servizio esterno di monitoraggio attivato. |
+| 7 | Spazi desktop | Candidato CSS v311: a 920 px titolo da circa 209 a 433 px, nessun overflow nelle otto larghezze collaudate. Navigazione e anteprima conservate. Da revisione finale prima del rilascio. |
+| 8 | Percorso mobile | Candidato v329: titolo prima della foto; navigazione mobile Contenuti/Anteprima/Modifica/Condividi verificata. Da completare prova utente e upload completo su telefoni fisici. |
+| 9 | Regole visive/accessibilità | Focus visibile, campi mobile 16 px, barra Salva chiusa non focalizzabile e avvisi accessibili. Da completare contrasto sistematico, zoom e lettori vocali/dispositivi reali. |
+| 10 | Bozza/salvato/pubblicato e guide | Candidato v329: messaggi coerenti con bozza/pubblicazione/modifiche non salvate; correzione istruzioni obsolete sul libro ospiti. Nessuna riattivazione della funzione. |
+| 11 | Stato upload | Candidato v329: avvisi separati file in caricamento / file caricato e pagina in salvataggio / pagina non salvata; regressioni simulate su errore e cambio pagina riuscite. Rete interrotta e file grandi su telefono ancora aperti. |
+| 12 | Regalo e proprietà | Trasferimento A → B → A, revoca e percorso email catturata verificati nel lab. Invio reale, nuovo signup, scadenza e concorrenza restano aperti; nessun invio o dato cliente modificato. |
+| 13 | Promessa commerciale | Shop consultato in lettura: pagina inclusa e nessun abbonamento coerenti con il piano unico. Limiti visibili nell’editor; nessuna promessa di spazio illimitato introdotta. Da verifica incrociata completa prodotto/limiti/condizioni. |
+| 14 | Guide e coordinamento Git | Guide aggiornate per fase, Git su ramo dedicato e PR in bozza; dettagli tecnici riservati fuori repository pubblico. Versioni live restano distinte dai candidati e non si chiude il programma prima delle verifiche mancanti. |
 
 ## Componenti protetti
 

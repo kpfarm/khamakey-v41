@@ -1116,3 +1116,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 - Progetto consolidato da Pages v40 + Worker v22/v23
 - URL centralizzati in `config.js`
 - Git + GitHub (`kpfarm/khamakey-v41`)
+
+
+## Candidato editor v329 / CSS v311 — 24 ottobre 2026, NON LIVE
+Nel laboratorio: colonne più equilibrate fra 769 e 1279 px, titolo prima della foto anche nell’ordine tastiera, focus visibile e avvisi file distinti fra trasferimento e salvataggio. Il riepilogo distingue contenuti pronti, bozza privata, modifiche non salvate e pubblicazione; nessuna indicazione ad attivare il libro ospiti sospeso. «Bozza» descrive la visibilità pubblica senza negare l’accesso ai collaboratori. Barra Salva chiusa esclusa dalla tastiera e dalla lettura assistita.
+Riprodotto un ulteriore difetto del contatore modifiche durante richiesta in corso: prima 2/4 test fallivano, dopo 4/4 pass. Contatore ora registra anche la digitazione durante Salva; il riscontro non rende pulita una bozza successiva. Browser: primo salvataggio registra solo lo snapshot inviato, testo nuovo resta nel campo con avviso; secondo Salva ripristina il titolo originale della fixture. Nessun cambiamento a payload/RPC/autorizzazioni/Worker/SQL o Officina in questa fase.
+Verifiche: 108 test locali integrati, otto larghezze 320/390/768/769/920/1100/1280/1440 senza scroll orizzontale, campo titolo a 920 da 208,8 a 432,8 px, percorso mobile Contenuti → Anteprima → Modifica → Condividi e 7 controlli Auth ordinari. Non sostituiscono test su dispositivi fisici, lettore vocale reale, video/rete interrotta e revisione finale. Nessun deploy o merge. Vedi lab/EDITOR-UX-CHECKPOINT.md e lab/PLAN.md aggiornato.

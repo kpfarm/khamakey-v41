@@ -571,3 +571,5 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-10-24 | Codex laboratorio | Browser: login/attivazione/PNG/Salva/riapertura/PIN/redirect NFC pass, isolamento B su A confermato con JWT reali; 7 smoke HTTP e 31 test locali pass. Fixture e latenza documentate, conflitti/etichette/chip aperti. Nessun deploy o SQL produzione. |
 
 | 2026-10-24 | Codex laboratorio | Collaboratore B: invito/accettazione/save/upload/revoca verificati. Sovrascrittura stale-save riprodotta, retry automatico rimosso (candidato v328), messaggi IT/EN corretti; 35/35 test. Simultaneità DB ancora aperta, nessun deploy/SQL produzione. |
+
+| 2026-10-24 | Codex laboratorio | Trasferimento proprietà (2026-10-24, NON LIVE): accettazione browser A → B e ritorno A via RPC, 24 controlli reali pass; accessi vecchio titolare negati, contenuti/foto/PIN/slug/NFC invariati. Nessun difetto confermato nel core trasferimento. Email/Worker, scadenza, concorrenza e nuovo destinatario ancora da verificare. 35/35 test locali; vedi lab/TRANSFER-CHECKPOINT.md. Nessun deploy o SQL produzione. |

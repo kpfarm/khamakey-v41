@@ -15,7 +15,7 @@ Un intervento per volta, con test ed esito registrato. Nessuna riscrittura gener
 | 9 | Regole visive/accessibilità | Seguire docs/01-brand; verificare contrasto, zoom, tastiera, focus e lettura assistita |
 | 10 | Bozza/salvato/pubblicato e guide | Osservato «pronto da regalare» su bozza; rimuovere indicazioni obsolete guestbook senza riattivare la funzione |
 | 11 | Stato upload | Distinguere trasferimento file e salvataggio pagina, verificare rete lenta/interrotta |
-| 12 | Regalo e proprietà | Due percorsi cliente, trasferimento/inviti con account fittizi; non cambiare codici/slug reali |
+| 12 | Regalo e proprietà | Collaborazione e trasferimento A → B → A verificati con account fittizi (24 controlli trasferimento); email, nuovo signup, scadenza e concorrenza aperti. Vedi TRANSFER-CHECKPOINT.md; codici/slug reali invariati |
 | 13 | Promessa commerciale | Limiti inclusi e demo reperibili nello shop; piano unico incluso, nessun abbonamento introdotto |
 | 14 | Guide e coordinamento Git | Documentare ramo/percorso Windows, stato non-live e blocchi; mantenere versioni live, aggiornare log ad ogni intervento |
 

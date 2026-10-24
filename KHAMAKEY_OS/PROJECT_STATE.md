@@ -3,6 +3,8 @@
 > **Leggi questo file per primo** in ogni sessione AI.  
 > Ultimo aggiornamento: **2026-10-23** (Moments **v327** · CSS **v310**; Worker **v255**; SQL **v182**, file **v183** da applicare)
 
+- **Anteprima locale 2026-10-24 (NON LIVE)** — permessi minimi solo laboratorio, server 127.0.0.1:8080/8787 con R2 locale e filtri destinazione/operazioni. 31/31 test locali; prova SQL lotto → attivazione → Salva → PIN → NFC e isolamento due identità superata con ROLLBACK. Nessun account Auth creato; login/browser/upload reale ed etichette ancora da verificare. Vedi lab/PREVIEW-CHECKPOINT.md.
+
 ### Fonte di verità versioni
 
 ### Laboratorio separato autorizzato — 2026-10-23 (NON LIVE)

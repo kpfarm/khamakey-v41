@@ -191,3 +191,5 @@
 | 2026-10-23 | Codex laboratorio | Accesso GitHub sbloccato dopo installazione app; ramo pubblicato, alberi Git identici ai due commit locali testati, PR #6 in bozza. Main invariato, nessun deploy/SQL. Staging e smoke aperti. |
 
 | 2026-10-23 | Codex laboratorio | Schema solo laboratorio ricostruito, 70 tabelle / 102 funzioni / 124 policy / 4 trigger, 0 righe effettive. Accessi anon/auth chiusi; grants ampi respinti, non applicati. 27/27 test, Officina invariata. Staging e smoke aperti; nessun SQL produzione/deploy. Vedi lab/SCHEMA-CHECKPOINT.md. |
+
+| 2026-10-24 | Codex laboratorio | Permessi minimi e anteprima locale filtrata, R2 locale. 31/31 test; prova SQL core/NFC/PIN e isolamento account con rollback. Login browser/upload reale/etichette aperti, nessun deploy/SQL produzione. Vedi lab/PREVIEW-CHECKPOINT.md. |

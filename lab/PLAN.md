@@ -5,7 +5,7 @@ Un intervento per volta, con test ed esito registrato. Nessuna riscrittura gener
 | # | Operazione | Stato / criterio per chiuderla |
 |---|---|---|
 | 1 | Isolamento, rilascio e ripristino | Laboratorio isolato e core verificato con fixture fittizie; candidati protetti separati, PR in bozza. Ripristino completo, generazione etichette/lettura chip fisico e rilascio ancora da completare. |
-| 2 | Difetto scope `kindCap` nell'upload | Fix candidato v256: regressioni upload e immagine reale riuscite nel lab. In suite corrente 108 test integrati; altri formati e dispositivi reali ancora da collaudare prima del rilascio. |
+| 2 | Difetto scope `kindCap` nell'upload | Fix candidato v256: regressioni upload e immagine reale riuscite nel lab. In suite corrente 111 test integrati; altri formati e dispositivi reali ancora da collaudare prima del rilascio. |
 | 3 | Conflitti di salvataggio fra collaboratori | Retry vecchia bozza rimosso; atomicità DB verificata separatamente nel laboratorio. Editor v329 rileva anche digitazione durante Salva: riproduzione e regressione browser riuscite. Produzione invariata; evidenze tecniche riservate locali. |
 | 4 | Privacy dei collegamenti diretti ai file | Decisione in attesa: proteggere anche i file delle pagine PIN oppure mantenerne la condivisione diretta. Domanda presentata all’utente; nessuna modifica ai collegamenti esistenti. |
 | 5 | Backup e recupero contenuti | Recupero dimostrativo DB/R2 riuscito su dati fittizi; recupero completo Auth/RLS/configurazioni ancora aperto. Backup esterno rinviato esplicitamente dall’utente; nessun servizio/costo attivato. |

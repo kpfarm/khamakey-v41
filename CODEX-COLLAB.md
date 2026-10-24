@@ -385,3 +385,5 @@ In dubbio: **un agente per file condiviso per volta**, oppure branch feature + P
 
 
 Codex laboratorio — 2026-10-24: fase editor v329/CSS v311 conclusa, lock rilasciato su pages/moments.js, moments.css, moments.html, dashboard e dizionari. 108 test integrati, otto larghezze, prova browser modifiche durante Salva e 7 controlli Auth pass. Nessuna modifica Worker, SQL, Officina o produzione. Vedi lab/EDITOR-UX-CHECKPOINT.md.
+
+2026-10-24 — Rifinitura stessa fase editor: accessibilità della barra Salva conservata anche per redo e avvisi di errore; 3 regressioni dedicate. Solo laboratorio, nessun deploy; lock rilasciato.

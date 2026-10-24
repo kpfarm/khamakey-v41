@@ -1148,7 +1148,10 @@ function showMediaUploadNotice(message, type = "error", statusNode = null){
   if(line) line.textContent = text;
   box.hidden = false;
   const bar = document.getElementById("momentsSaveBar");
-  if(bar && type === "error") bar.classList.add("visible");
+  if(bar && type === "error"){
+    bar.classList.add("visible");
+    syncSaveBarAccessibility(bar);
+  }
   clearTimeout(mediaNoticeTimer);
   mediaNoticeTimer = 0;
   if(type === "error") return;
@@ -5112,6 +5115,13 @@ function ensureMomentsSaveDelegation(){
   }, true);
 }
 
+function syncSaveBarAccessibility(bar){
+  if(!bar) return;
+  const visible = bar.classList.contains("visible") || bar.classList.contains("has-redo");
+  bar.inert = !visible;
+  bar.setAttribute("aria-hidden", String(!visible));
+}
+
 function updateSaveStatus(saved){
   const node = document.getElementById("editorSaveStatus");
   if(node){
@@ -5120,10 +5130,7 @@ function updateSaveStatus(saved){
   }
   const saveBar = document.getElementById("momentsSaveBar");
   saveBar?.classList.toggle("visible",!saved);
-  if(saveBar){
-    saveBar.inert = saved;
-    saveBar.setAttribute("aria-hidden", String(saved));
-  }
+  syncSaveBarAccessibility(saveBar);
   const barMsg = saveBar?.querySelector(".save-msg");
   if(barMsg && !saved){
     barMsg.setAttribute("data-i18n-html", "shell.save_bar");
@@ -5248,6 +5255,7 @@ function refreshUndoButtons(){
   const redoOnly = redoOn && !editorDirty;
   bar?.classList.toggle("has-redo", redoOnly);
   bar?.classList.remove("has-history");
+  syncSaveBarAccessibility(bar);
   const barMsg = bar?.querySelector(".save-msg");
   if(barMsg && redoOnly){
     barMsg.hidden = false;

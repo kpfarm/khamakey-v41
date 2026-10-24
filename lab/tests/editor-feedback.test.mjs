@@ -41,3 +41,14 @@ for(const [name,ok,dirty,switchPage] of [['success',true,false,false],['save fai
 test('all file phase messages exist in Italian and English',()=>{
  for(const dict of [SAVE_MESSAGES_IT,SAVE_MESSAGES_EN])for(const k of ['save.uploading_file','save.linking_file','save.upload_not_saved','save.upload_saved_more_edits'])assert.ok(dict[k]);
 });
+const barSync=block('function syncSaveBarAccessibility(','function updateSaveStatus(');
+const historyButtons=block('function refreshUndoButtons(','function beginHistoryStep(');
+for(const redo of [false,true])test('clean page keeps redo-only controls accessible when present: '+redo,()=>{
+ const classes=new Set(),attrs={},bar={inert:true,classList:{contains:k=>classes.has(k),toggle:(k,v)=>v?classes.add(k):classes.delete(k),remove:k=>classes.delete(k)},setAttribute:(k,v)=>attrs[k]=v,querySelector:()=>null};
+ vm.runInNewContext(barSync+historyButtons+';refreshUndoButtons();',{canUndoEditor:()=>false,canRedoEditor:()=>redo,editorDirty:false,document:{querySelectorAll:()=>[],getElementById:()=>bar}});
+ assert.equal(bar.inert,!redo);assert.equal(attrs['aria-hidden'],String(!redo));
+});
+test('visible save error bar remains keyboard accessible',()=>{
+ const attrs={},bar={inert:true,classList:{contains:k=>k==='visible'},setAttribute:(k,v)=>attrs[k]=v};
+ vm.runInNewContext(barSync+';syncSaveBarAccessibility(bar);',{bar});assert.equal(bar.inert,false);assert.equal(attrs['aria-hidden'],'false');
+});

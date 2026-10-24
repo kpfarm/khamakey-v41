@@ -7,6 +7,8 @@
 
 - **Browser laboratorio 2026-10-24 (NON LIVE)** — 2 utenti fittizi senza email; login, attivazione, PNG R2 locale, Salva/riapertura, gate PIN e redirect NFC verificati nel browser. Account B senza pagina A; 7 controlli API con JWT reali pass, 31/31 test locali. Latenza/autosalvataggio transitori e stato modifiche da approfondire. 2 fixture artificiali, nessun staff persistente. Dettagli lab/BROWSER-CHECKPOINT.md.
 
+- **Collaborazione e save candidato v328 (2026-10-24, NON LIVE)** — invito reale RPC senza email, accettazione/modifica browser e upload B autorizzati; revoca nega lettura/save/upload anche con JWT già emesso. Riprodotta sovrascrittura da retry di bozza vecchia, rimossa sul ramo e verificata nel browser. 35/35 test; atomicità di due transazioni simultanee ancora da verificare. Live v327, Officina invariata. Vedi lab/COLLABORATION-CHECKPOINT.md.
+
 ### Fonte di verità versioni
 
 ### Laboratorio separato autorizzato — 2026-10-23 (NON LIVE)

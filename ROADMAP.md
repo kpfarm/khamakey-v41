@@ -569,3 +569,5 @@ Documentazione operativa: `SHOPIFY-SETUP.md`
 | 2026-10-24 | Codex laboratorio | Permessi minimi e anteprima locale filtrata, R2 locale. 31/31 test; prova SQL core/NFC/PIN e isolamento account con rollback. Login browser/upload reale/etichette aperti, nessun deploy/SQL produzione. Vedi lab/PREVIEW-CHECKPOINT.md. |
 
 | 2026-10-24 | Codex laboratorio | Browser: login/attivazione/PNG/Salva/riapertura/PIN/redirect NFC pass, isolamento B su A confermato con JWT reali; 7 smoke HTTP e 31 test locali pass. Fixture e latenza documentate, conflitti/etichette/chip aperti. Nessun deploy o SQL produzione. |
+
+| 2026-10-24 | Codex laboratorio | Collaboratore B: invito/accettazione/save/upload/revoca verificati. Sovrascrittura stale-save riprodotta, retry automatico rimosso (candidato v328), messaggi IT/EN corretti; 35/35 test. Simultaneità DB ancora aperta, nessun deploy/SQL produzione. |

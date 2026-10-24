@@ -241,7 +241,7 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 
 ### Laboratorio autorizzato 2026-10-23
 
-Ramo `codex/laboratorio-sicuro`, copia Windows `khamakey-v41-lab`, base `762eac7`. Eccezione esplicita dell'utente alla regola main/root Mac; non fondere/deployare automaticamente. Officina e SQL protetti. Owner **Codex laboratorio**, checkpoint browser/Auth reale chiuso e lock rilasciato; correzione candidata pubblicata solo su ramo/PR #6 in bozza. Ambito del lavoro su `lab/**`, documentazione e sola correzione scope `handleMediaUpload` in `worker/worker.js`; nessuna modifica auth/CSP/RLS/quote. Gli altri agenti leggano questo ramo prima di modificare le stesse righe. Il lock su ramo non è un lock pubblicato su main: verificare nuovamente main prima di proporre il merge.
+Ramo `codex/laboratorio-sicuro`, copia Windows `khamakey-v41-lab`, base `762eac7`. Eccezione esplicita dell'utente alla regola main/root Mac; non fondere/deployare automaticamente. Officina e SQL protetti. Owner **Codex laboratorio**, checkpoint collaborazione/save candidato v328 chiuso e lock rilasciato; correzione candidata pubblicata solo su ramo/PR #6 in bozza. Ambito autorizzato su `lab/**`, documentazione, correzione scope `handleMediaUpload` in `worker/worker.js` e fix minimo retry conflitto `pages/moments.js` con messaggi IT/EN/cache v328; nessuna modifica auth/CSP/RLS/quote. Gli altri agenti leggano questo ramo prima di modificare le stesse righe. Il lock su ramo non è un lock pubblicato su main: verificare nuovamente main prima di proporre il merge.
 
 
 > Aggiornare questa tabella **su Git** quando si inizia o finisce un task che tocca l’area.

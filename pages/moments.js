@@ -18,7 +18,7 @@ import {
 } from "./moments-i18n.js?v=236";
 import { AUTH_MESSAGES_EN, AUTH_MESSAGES_IT } from "./moments-i18n-auth.js?v=268";
 import { SHELL_MESSAGES_EN, SHELL_MESSAGES_IT } from "./moments-i18n-shell.js?v=232";
-import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=242";
+import { SAVE_MESSAGES_EN, SAVE_MESSAGES_IT } from "./moments-i18n-save.js?v=328";
 import { NAV_MESSAGES_EN, NAV_MESSAGES_IT } from "./moments-i18n-nav.js?v=238";
 import { SECTION_MESSAGES_EN, SECTION_MESSAGES_IT, SECTION_PHRASE_EN, SECTION_SUBTITLE_EN } from "./moments-i18n-sections.js?v=218";
 import { FIELD_PHRASE_EN } from "./moments-i18n-fields.js?v=266";
@@ -7638,10 +7638,6 @@ async function saveMoment(event,row, options = {}){
         : supabase.rpc("save_my_moment_page", payload);
     };
     let { data: saveData, error } = await invokeSave(row.updated_at || null);
-    if(error && String(error.message || "").includes("CONFLICT_STALE_SAVE")){
-      await refreshEventUpdatedAt(row);
-      ({ data: saveData, error } = await invokeSave(row.updated_at || null));
-    }
     if(error){
       console.error(error);
       const msg = String(error.message || "");

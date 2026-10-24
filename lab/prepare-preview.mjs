@@ -27,7 +27,7 @@ export function prepare() {
   writeFileSync(join(pages,'config.js'),rewriteDestinations(config));
   // Only generated code is adapted. Source Worker/Pages and protected NFC files are untouched.
   const worker=readFileSync(join(root,'worker/worker.js'),'utf8');
-  writeFileSync(join(runtime,'worker-core.mjs'),`import { labFetch as fetch } from '../../lab/network.mjs';\n`+rewriteDestinations(worker));
+  writeFileSync(join(runtime,'worker-core.mjs'),`import { labMailFetch as fetch } from '../../lab/mail-network.mjs';\n`+rewriteDestinations(worker));
   writeFileSync(join(runtime,'settings.mjs'),'export default '+JSON.stringify(settings)+';\n');
   writeFileSync(join(runtime,'wrangler.toml'),`name = "khamakey-moments-laboratory-local"\nmain = "../../lab/worker-entry.mjs"\ncompatibility_date = "2026-06-25"\n[[r2_buckets]]\nbinding = "MEDIA"\nbucket_name = "khamakey-moments-laboratory-local"\nremote = false\n`);
   return {root,pages,runtime};

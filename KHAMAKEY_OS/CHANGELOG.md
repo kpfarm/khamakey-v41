@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- Email trasferimento (2026-10-24, NON LIVE): pulsanti originali → Worker → email catturata locale → link → login/accettazione B → editor verificati; nessuna consegna reale. SQL v183 originale applicata solo al lab, fallimento email e conservazione invito più recente verificati. 26 controlli del ciclo e 38/38 test locali pass; fixture restituita ad A, Officina/produzione invariate. Vedi lab/TRANSFER-MAIL-CHECKPOINT.md.
+
+
+
 - Trasferimento proprietà (2026-10-24, NON LIVE): accettazione browser A → B e ritorno A via RPC, 24 controlli reali pass; accessi vecchio titolare negati, contenuti/foto/PIN/slug/NFC invariati. Nessun difetto confermato nel core trasferimento. Email/Worker, scadenza, concorrenza e nuovo destinatario ancora da verificare. 35/35 test locali; vedi lab/TRANSFER-CHECKPOINT.md. Nessun deploy o SQL produzione.
 
 

@@ -239,6 +239,8 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 
 ## Lock attivi
 
+Codex concluso, lock rilasciato 2026-10-24: test email trasferimento solo laboratorio, lab/mail-network.mjs, worker-entry/prepare/network, lab/transfer*, test e documentazione. Provider email intercettato localmente; nessun invio reale o chiave provider. SQL v183 originale applicata solo al lab; Officina e produzione intoccate.
+
 Laboratorio trasferimento 2026-10-24: Codex: prove concluse, lock rilasciato su `lab/transfer*`, `lab/network.mjs` e documentazione. Test tra soli account fittizi nel progetto ybmnrtvksvndpdiofmqm; nessuna modifica SQL produzione, Officina o invio email reale. Nessuna correzione SQL necessaria per le prove svolte. Esiti in lab/TRANSFER-CHECKPOINT.md; percorso email ancora da collaudare.
 
 ### Laboratorio autorizzato 2026-10-23

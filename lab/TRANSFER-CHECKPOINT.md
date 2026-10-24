@@ -1,5 +1,7 @@
 # Trasferimento proprietà — 2026-10-24 (NON LIVE)
 
+Aggiornamento successivo: percorso Worker con email catturata e SQL v183 solo lab verificato in TRANSFER-MAIL-CHECKPOINT.md. Le sezioni seguenti descrivono il checkpoint precedente.
+
 ## Ambito e risultato
 
 Solo Supabase ybmnrtvksvndpdiofmqm, server 127.0.0.1:8080/8787 e pagina artificiale 46d02893-9668-4583-9ffd-64615c8f80c9. Account A/B @example.invalid, nessun cliente. Nessuna modifica a produzione, Officina, SQL storico, renderer o codice applicativo. Nessuna correzione del trasferimento necessaria per le prove svolte.

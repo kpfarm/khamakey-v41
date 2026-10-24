@@ -127,3 +127,8 @@ Le istruzioni storiche di sequenza sopra non sono un bootstrap per un database v
 ## Collaborazione e conflitti — 2026-10-24, NON LIVE
 
 - **Collaborazione e save candidato v328 (2026-10-24, NON LIVE)** — invito reale RPC senza email, accettazione/modifica browser e upload B autorizzati; revoca nega lettura/save/upload anche con JWT già emesso. Riprodotta sovrascrittura da retry di bozza vecchia, rimossa sul ramo e verificata nel browser. 35/35 test; atomicità di due transazioni simultanee ancora da verificare. Live v327, Officina invariata. Vedi lab/COLLABORATION-CHECKPOINT.md.
+
+
+## Email trasferimento nel laboratorio
+
+Email trasferimento (2026-10-24, NON LIVE): pulsanti originali → Worker → email catturata locale → link → login/accettazione B → editor verificati; nessuna consegna reale. SQL v183 originale applicata solo al lab, fallimento email e conservazione invito più recente verificati. 26 controlli del ciclo e 38/38 test locali pass; fixture restituita ad A, Officina/produzione invariate. Vedi lab/TRANSFER-MAIL-CHECKPOINT.md.

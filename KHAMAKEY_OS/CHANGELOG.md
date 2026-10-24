@@ -8,6 +8,34 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- Prima verifica produzione 2026-10-24, su richiesta utente: sole letture di catalogo/permessi/advisory e asset pubblici; nessun SQL modificativo o operazione su pagine cliente. Dettagli delle criticità aperte nel rapporto locale riservato, non pubblicati nel repository pubblico. Prove limitate alla fixture lab e annullate con rollback verificato. Vedi lab/PRODUCTION-AUDIT-CHECKPOINT.md; nessun fix/deploy in questa fase.
+
+
+
+- Email trasferimento (2026-10-24, NON LIVE): pulsanti originali → Worker → email catturata locale → link → login/accettazione B → editor verificati; nessuna consegna reale. SQL v183 originale applicata solo al lab, fallimento email e conservazione invito più recente verificati. 26 controlli del ciclo e 38/38 test locali pass; fixture restituita ad A, Officina/produzione invariate. Vedi lab/TRANSFER-MAIL-CHECKPOINT.md.
+
+
+
+- Trasferimento proprietà (2026-10-24, NON LIVE): accettazione browser A → B e ritorno A via RPC, 24 controlli reali pass; accessi vecchio titolare negati, contenuti/foto/PIN/slug/NFC invariati. Nessun difetto confermato nel core trasferimento. Email/Worker, scadenza, concorrenza e nuovo destinatario ancora da verificare. 35/35 test locali; vedi lab/TRANSFER-CHECKPOINT.md. Nessun deploy o SQL produzione.
+
+
+
+- **Collaborazione e save candidato v328 (2026-10-24, NON LIVE)** — invito reale RPC senza email, accettazione/modifica browser e upload B autorizzati; revoca nega lettura/save/upload anche con JWT già emesso. Riprodotta sovrascrittura da retry di bozza vecchia, rimossa sul ramo e verificata nel browser. 35/35 test; atomicità di due transazioni simultanee ancora da verificare. Live v327, Officina invariata. Vedi lab/COLLABORATION-CHECKPOINT.md.
+
+
+- **Browser laboratorio 2026-10-24 (NON LIVE)** — 2 utenti fittizi senza email; login, attivazione, PNG R2 locale, Salva/riapertura, gate PIN e redirect NFC verificati nel browser. Account B senza pagina A; 7 controlli API con JWT reali pass, 31/31 test locali. Latenza/autosalvataggio transitori e stato modifiche da approfondire. 2 fixture artificiali, nessun staff persistente. Dettagli lab/BROWSER-CHECKPOINT.md.
+
+
+- **Anteprima locale 2026-10-24 (NON LIVE)** — permessi minimi solo laboratorio, server 127.0.0.1:8080/8787 con R2 locale e filtri destinazione/operazioni. 31/31 test locali; prova SQL lotto → attivazione → Salva → PIN → NFC e isolamento due identità superata con ROLLBACK. Nessun account Auth creato; login/browser/upload reale ed etichette ancora da verificare. Vedi lab/PREVIEW-CHECKPOINT.md.
+
+
+- **Checkpoint schema laboratorio 2026-10-23 (NON LIVE)** — 70 tabelle, 102 funzioni, 124 policy, 4 trigger; conteggio effettivo 0 righe. Accessi anon/auth chiusi (0 tabelle, 0 funzioni); grants ampi respinti e non applicati, segreto legacy escluso dalla copia. 27/27 test locali. Staging funzionale ancora aperto; produzione/Officina invariate. Dettagli: `lab/SCHEMA-CHECKPOINT.md`.
+
+
+- **Worker v256 candidato laboratorio (NON LIVE, 2026-10-23)** — corregge scope kindCap tra pre/post-check upload. Prima 7 test falliti, dopo 22/22 pass. Quote, auth e renderer invariati; 78 file Officina/SQL verificati. Smoke reali ancora da fare; accesso GitHub sbloccato e PR #6 in bozza, nessun merge/deploy.
+
+- **Laboratorio Codex (2026-10-23, NON LIVE)** — ramo autorizzato `codex/laboratorio-sicuro` da `762eac7`, piano 14 operazioni e controlli locali isolati. Database laboratorio vuoto creato dopo sospensione autorizzata Moment Custom; nessun dato copiato, nessun progetto eliminato, nessun deploy o SQL. Officina e URL NFC protetti. Vedi `lab/README.md`.
+
 - **Moments v327 (2026-10-23)** — live
   - Nella sezione Musica, «Carica immagine» (copertina del brano) apre di nuovo la scelta della foto. Stesso intervento sul conto alla rovescia. Audio, Salva e pagina dell’oggetto **invariati**.
 - **Moments CSS v310 (2026-10-23)** — live
@@ -1088,3 +1116,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 - Progetto consolidato da Pages v40 + Worker v22/v23
 - URL centralizzati in `config.js`
 - Git + GitHub (`kpfarm/khamakey-v41`)
+
+
+## Candidato editor v329 / CSS v311 — 24 ottobre 2026, NON LIVE
+Nel laboratorio: colonne più equilibrate fra 769 e 1279 px, titolo prima della foto anche nell’ordine tastiera, focus visibile e avvisi file distinti fra trasferimento e salvataggio. Il riepilogo distingue contenuti pronti, bozza privata, modifiche non salvate e pubblicazione; nessuna indicazione ad attivare il libro ospiti sospeso. «Bozza» descrive la visibilità pubblica senza negare l’accesso ai collaboratori. Barra Salva chiusa esclusa dalla tastiera e dalla lettura assistita.
+Riprodotto un ulteriore difetto del contatore modifiche durante richiesta in corso: prima 2/4 test fallivano, dopo 4/4 pass. Contatore ora registra anche la digitazione durante Salva; il riscontro non rende pulita una bozza successiva. Browser: primo salvataggio registra solo lo snapshot inviato, testo nuovo resta nel campo con avviso; secondo Salva ripristina il titolo originale della fixture. Nessun cambiamento a payload/RPC/autorizzazioni/Worker/SQL o Officina in questa fase.
+Verifiche: 111 test locali integrati, otto larghezze 320/390/768/769/920/1100/1280/1440 senza scroll orizzontale, campo titolo a 920 da 208,8 a 432,8 px, percorso mobile Contenuti → Anteprima → Modifica → Condividi e 7 controlli Auth ordinari. Non sostituiscono test su dispositivi fisici, lettore vocale reale, video/rete interrotta e revisione finale. Nessun deploy o merge. Vedi lab/EDITOR-UX-CHECKPOINT.md e lab/PLAN.md aggiornato.
+
+2026-10-24 — Rifinitura stessa fase editor: accessibilità della barra Salva conservata anche per redo e avvisi di errore; 3 regressioni dedicate. Solo laboratorio, nessun deploy; lock rilasciato.

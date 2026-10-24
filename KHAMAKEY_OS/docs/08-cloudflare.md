@@ -123,3 +123,24 @@ Dev vars: `worker/.env.example` → `.dev.vars` (solo locale).
 Config: `pages/config.js` (`PAGES_BASE_URL`, `WORKER_BASE_URL`) + `worker/wrangler.toml` (`PAGES_ASSET_BASE`, `WORKER_PUBLIC_BASE`).
 
 Supabase Auth → Site URL `https://app.khamakeymoments.com` e Redirect URLs `https://app.khamakeymoments.com/**` (+ keep `https://khamakey-app.pages.dev/**`).
+
+## Laboratorio isolato — 2026-10-23, non deployato
+
+Copia/ramo autorizzati e condizioni in `../../lab/README.md`. Database di prova vuoto `ybmnrtvksvndpdiofmqm`, creato dopo sospensione autorizzata Moment Custom. Schema, Worker e bucket staging da preparare; nessuna migrazione o binding di produzione toccati. Worker candidato v256 corregge soltanto lo scope di kindCap in handleMediaUpload: 22 test locali pass, contro 7 fallimenti della base. Officina/SQL e renderer fuori upload identici alla baseline. Rilascio bloccato fino a smoke completo e decisione di pubblicazione. Accesso GitHub sbloccato il 2026-10-23 dopo installazione ChatGPT Codex Connector sul repository. Ramo pubblicato e verificato identico alla copia testata; PR #6 in bozza: https://github.com/kpfarm/khamakey-v41/pull/6. Nessun merge/deploy/SQL; staging completo e smoke ancora aperti.
+
+## Anteprima separata — 2026-10-24
+
+- **Anteprima locale 2026-10-24 (NON LIVE)** — permessi minimi solo laboratorio, server 127.0.0.1:8080/8787 con R2 locale e filtri destinazione/operazioni. 31/31 test locali; prova SQL lotto → attivazione → Salva → PIN → NFC e isolamento due identità superata con ROLLBACK. Nessun account Auth creato; login/browser/upload reale ed etichette ancora da verificare. Vedi lab/PREVIEW-CHECKPOINT.md.
+
+## Prove browser e account fittizi — 2026-10-24
+
+- **Browser laboratorio 2026-10-24 (NON LIVE)** — 2 utenti fittizi senza email; login, attivazione, PNG R2 locale, Salva/riapertura, gate PIN e redirect NFC verificati nel browser. Account B senza pagina A; 7 controlli API con JWT reali pass, 31/31 test locali. Latenza/autosalvataggio transitori e stato modifiche da approfondire. 2 fixture artificiali, nessun staff persistente. Dettagli lab/BROWSER-CHECKPOINT.md.
+
+## Collaborazione e conflitti — 2026-10-24, NON LIVE
+
+- **Collaborazione e save candidato v328 (2026-10-24, NON LIVE)** — invito reale RPC senza email, accettazione/modifica browser e upload B autorizzati; revoca nega lettura/save/upload anche con JWT già emesso. Riprodotta sovrascrittura da retry di bozza vecchia, rimossa sul ramo e verificata nel browser. 35/35 test; atomicità di due transazioni simultanee ancora da verificare. Live v327, Officina invariata. Vedi lab/COLLABORATION-CHECKPOINT.md.
+
+
+## Email trasferimento nel laboratorio
+
+Email trasferimento (2026-10-24, NON LIVE): pulsanti originali → Worker → email catturata locale → link → login/accettazione B → editor verificati; nessuna consegna reale. SQL v183 originale applicata solo al lab, fallimento email e conservazione invito più recente verificati. 26 controlli del ciclo e 38/38 test locali pass; fixture restituita ad A, Officina/produzione invariate. Vedi lab/TRANSFER-MAIL-CHECKPOINT.md.

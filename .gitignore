@@ -29,3 +29,7 @@ npm-debug.log*
 
 # Export chat locali (non versionare)
 CHAT-EXPORT*.md
+
+# Isolated laboratory generated files and credentials
+/.lab/
+/worker/pnpm-lock.yaml

@@ -183,3 +183,29 @@
 ---
 
 *Aggiungi una riga qui a ogni sessione significativa. Aggiornare anche `../../ROADMAP.md`.*
+
+| 2026-10-23 | Codex laboratorio | Ramo autorizzato codex/laboratorio-sicuro, base 762eac7; ambiente Supabase vuoto ybmnrtvksvndpdiofmqm; Moment Custom sospeso su richiesta. 22 test locali, baseline: 7 fallimenti da kindCap fuori scope, 15 pass. Nessun deploy/SQL/Officina. Vedi lab/README.md. |
+
+| 2026-10-23 | Codex laboratorio | Worker v256 candidato: scope kindCap, 22/22 test locali pass contro 7 fail base; Officina/SQL invariati. Nessun deploy o SQL. Push/PR bloccati (GitHub 403 scrittura, Git senza autenticazione). Lock rilasciato, staging/schema e smoke aperti. |
+
+| 2026-10-23 | Codex laboratorio | Accesso GitHub sbloccato dopo installazione app; ramo pubblicato, alberi Git identici ai due commit locali testati, PR #6 in bozza. Main invariato, nessun deploy/SQL. Staging e smoke aperti. |
+
+| 2026-10-23 | Codex laboratorio | Schema solo laboratorio ricostruito, 70 tabelle / 102 funzioni / 124 policy / 4 trigger, 0 righe effettive. Accessi anon/auth chiusi; grants ampi respinti, non applicati. 27/27 test, Officina invariata. Staging e smoke aperti; nessun SQL produzione/deploy. Vedi lab/SCHEMA-CHECKPOINT.md. |
+
+| 2026-10-24 | Codex laboratorio | Permessi minimi e anteprima locale filtrata, R2 locale. 31/31 test; prova SQL core/NFC/PIN e isolamento account con rollback. Login browser/upload reale/etichette aperti, nessun deploy/SQL produzione. Vedi lab/PREVIEW-CHECKPOINT.md. |
+
+| 2026-10-24 | Codex laboratorio | Browser: login/attivazione/PNG/Salva/riapertura/PIN/redirect NFC pass, isolamento B su A confermato con JWT reali; 7 smoke HTTP e 31 test locali pass. Fixture e latenza documentate, conflitti/etichette/chip aperti. Nessun deploy o SQL produzione. |
+
+| 2026-10-24 | Codex laboratorio | Collaboratore B: invito/accettazione/save/upload/revoca verificati. Sovrascrittura stale-save riprodotta, retry automatico rimosso (candidato v328), messaggi IT/EN corretti; 35/35 test. Simultaneità DB ancora aperta, nessun deploy/SQL produzione. |
+
+| 2026-10-24 | Codex laboratorio | Trasferimento proprietà (2026-10-24, NON LIVE): accettazione browser A → B e ritorno A via RPC, 24 controlli reali pass; accessi vecchio titolare negati, contenuti/foto/PIN/slug/NFC invariati. Nessun difetto confermato nel core trasferimento. Email/Worker, scadenza, concorrenza e nuovo destinatario ancora da verificare. 35/35 test locali; vedi lab/TRANSFER-CHECKPOINT.md. Nessun deploy o SQL produzione. |
+
+| 2026-10-24 | Codex laboratorio | Email trasferimento (2026-10-24, NON LIVE): pulsanti originali → Worker → email catturata locale → link → login/accettazione B → editor verificati; nessuna consegna reale. SQL v183 originale applicata solo al lab, fallimento email e conservazione invito più recente verificati. 26 controlli del ciclo e 38/38 test locali pass; fixture restituita ad A, Officina/produzione invariate. Vedi lab/TRANSFER-MAIL-CHECKPOINT.md. |
+
+| 2026-10-24 | Codex laboratorio | Prima verifica produzione 2026-10-24, su richiesta utente: sole letture di catalogo/permessi/advisory e asset pubblici; nessun SQL modificativo o operazione su pagine cliente. Dettagli delle criticità aperte nel rapporto locale riservato, non pubblicati nel repository pubblico. Prove limitate alla fixture lab e annullate con rollback verificato. Vedi lab/PRODUCTION-AUDIT-CHECKPOINT.md; nessun fix/deploy in questa fase. |
+
+
+## Candidato editor v329 / CSS v311 — 24 ottobre 2026, NON LIVE
+Nel laboratorio: colonne più equilibrate fra 769 e 1279 px, titolo prima della foto anche nell’ordine tastiera, focus visibile e avvisi file distinti fra trasferimento e salvataggio. Il riepilogo distingue contenuti pronti, bozza privata, modifiche non salvate e pubblicazione; nessuna indicazione ad attivare il libro ospiti sospeso. «Bozza» descrive la visibilità pubblica senza negare l’accesso ai collaboratori. Barra Salva chiusa esclusa dalla tastiera e dalla lettura assistita.
+Riprodotto un ulteriore difetto del contatore modifiche durante richiesta in corso: prima 2/4 test fallivano, dopo 4/4 pass. Contatore ora registra anche la digitazione durante Salva; il riscontro non rende pulita una bozza successiva. Browser: primo salvataggio registra solo lo snapshot inviato, testo nuovo resta nel campo con avviso; secondo Salva ripristina il titolo originale della fixture. Nessun cambiamento a payload/RPC/autorizzazioni/Worker/SQL o Officina in questa fase.
+Verifiche: 111 test locali integrati, otto larghezze 320/390/768/769/920/1100/1280/1440 senza scroll orizzontale, campo titolo a 920 da 208,8 a 432,8 px, percorso mobile Contenuti → Anteprima → Modifica → Condividi e 7 controlli Auth ordinari. Non sostituiscono test su dispositivi fisici, lettore vocale reale, video/rete interrotta e revisione finale. Nessun deploy o merge. Vedi lab/EDITOR-UX-CHECKPOINT.md e lab/PLAN.md aggiornato.

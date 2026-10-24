@@ -8,6 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ## [Unreleased]
 
+- Prima verifica produzione 2026-10-24, su richiesta utente: sole letture di catalogo/permessi/advisory e asset pubblici; nessun SQL modificativo o operazione su pagine cliente. Dettagli delle criticità aperte nel rapporto locale riservato, non pubblicati nel repository pubblico. Prove limitate alla fixture lab e annullate con rollback verificato. Vedi lab/PRODUCTION-AUDIT-CHECKPOINT.md; nessun fix/deploy in questa fase.
+
+
+
 - Email trasferimento (2026-10-24, NON LIVE): pulsanti originali → Worker → email catturata locale → link → login/accettazione B → editor verificati; nessuna consegna reale. SQL v183 originale applicata solo al lab, fallimento email e conservazione invito più recente verificati. 26 controlli del ciclo e 38/38 test locali pass; fixture restituita ad A, Officina/produzione invariate. Vedi lab/TRANSFER-MAIL-CHECKPOINT.md.
 
 

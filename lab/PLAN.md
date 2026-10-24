@@ -4,7 +4,7 @@ Un intervento per volta, con test ed esito registrato. Nessuna riscrittura gener
 
 | # | Operazione | Stato / criterio per chiuderla |
 |---|---|---|
-| 1 | Isolamento, rilascio e ripristino | Copia Git e test locali; database remoto separato creato vuoto dopo sospensione autorizzata Moment Custom; schema e permessi minimi pronti, 0 dati persistenti; anteprima/Worker/R2 locali avviati, account fittizi e prove browser ancora aperti; verificare backup dati prima del rilascio |
+| 1 | Isolamento, rilascio e ripristino | Copia Git e test locali; database remoto separato creato vuoto dopo sospensione autorizzata Moment Custom; schema e permessi minimi pronti, 0 dati persistenti; anteprima/Worker/R2 locali avviati, 2 account fittizi e prime prove browser/HTTP pass; conflitti, altri formati, etichette e chip ancora aperti; verificare backup dati prima del rilascio |
 | 2 | Difetto scope `kindCap` nell'upload | Correzione minima v256 sul ramo, 22/22 test locali pass inclusi auth/quote/tipi/sostituzione; smoke reali ancora necessari |
 | 3 | Conflitti di salvataggio fra collaboratori | Rischio statico in `moments.js`: ripetizione payload vecchio con timestamp nuovo; riprodurre su due account di test prima di modificare |
 | 4 | Privacy dei collegamenti diretti ai file | Comportamento CDN nel codice: nessun PIN; definire requisito, testare senza sessione, preservare URL esistenti |

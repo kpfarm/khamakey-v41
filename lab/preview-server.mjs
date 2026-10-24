@@ -28,5 +28,13 @@ createServer(async(req,res)=>{
     let data=await readFile(file);
     if(extname(file)==='.html') data=Buffer.from(data.toString().replace(/<body([^>]*)>/i,'<body$1><div style="background:#ffe8a3;color:#231800;padding:8px;text-align:center;font:14px sans-serif">LABORATORIO SEPARATO · solo account e contenuti di prova</div>'));
     res.setHeader('Content-Type',mime[extname(file)]||'application/octet-stream');res.writeHead(200);res.end(req.method==='HEAD'?undefined:data);
-  } catch {res.writeHead(404);res.end('Preview resource unavailable');}
+  } catch(error) {
+    const proxy=req.url.startsWith('/supabase/');
+    if(proxy) {
+      // Route and error type only: never log credentials, bodies or query parameters.
+      console.error('Laboratory upstream unavailable',req.method,new URL(req.url,APP_ORIGIN).pathname,error.cause?.code||error.code||error.name);
+      res.writeHead(502,{'Content-Type':'application/json'});
+      res.end(JSON.stringify({message:'Laboratory upstream temporarily unavailable',code:'LAB_UPSTREAM_UNAVAILABLE'}));
+    } else {res.writeHead(404);res.end('Preview resource unavailable');}
+  }
 }).listen(8080,'127.0.0.1',()=>console.log('Isolated preview: '+APP_ORIGIN+'/moments'));

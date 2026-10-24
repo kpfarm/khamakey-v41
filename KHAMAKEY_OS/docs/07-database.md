@@ -119,3 +119,7 @@ Le istruzioni storiche di sequenza sopra non sono un bootstrap per un database v
 ## Anteprima separata — 2026-10-24
 
 - **Anteprima locale 2026-10-24 (NON LIVE)** — permessi minimi solo laboratorio, server 127.0.0.1:8080/8787 con R2 locale e filtri destinazione/operazioni. 31/31 test locali; prova SQL lotto → attivazione → Salva → PIN → NFC e isolamento due identità superata con ROLLBACK. Nessun account Auth creato; login/browser/upload reale ed etichette ancora da verificare. Vedi lab/PREVIEW-CHECKPOINT.md.
+
+## Prove browser e account fittizi — 2026-10-24
+
+- **Browser laboratorio 2026-10-24 (NON LIVE)** — 2 utenti fittizi senza email; login, attivazione, PNG R2 locale, Salva/riapertura, gate PIN e redirect NFC verificati nel browser. Account B senza pagina A; 7 controlli API con JWT reali pass, 31/31 test locali. Latenza/autosalvataggio transitori e stato modifiche da approfondire. 2 fixture artificiali, nessun staff persistente. Dettagli lab/BROWSER-CHECKPOINT.md.

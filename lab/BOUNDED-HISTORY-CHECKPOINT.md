@@ -1,0 +1,9 @@
+# Tre passaggi Annulla/Ripeti — laboratorio, NON LIVE
+
+25 ottobre 2026. Nel runtime privato dell’editor completo, limite ridotto da 40 a 3 operazioni. Ripeti ripercorre gli stessi passaggi annullati; una nuova modifica elimina il ramo avanti. Nessuna cronologia visibile o archivio di tutte le versioni nel database. Gli autosalvataggi invariati non consumano un passaggio. Rimossa la scorciatoia alla copia salvata che avrebbe aggirato il limite quando le tre operazioni sono esaurite.
+
+Nel browser: quattro modifiche salvate → esattamente tre Annulla e tre Ripeti, disabilitazione corretta delle frecce; riapertura mantiene il contenuto, non la cronologia. Rimozione/recupero/rimozione/recupero di PNG sintetica e nuova modifica che interrompe Ripeti verificati con Auth/database reali del laboratorio e R2 locale. Due rappresentazioni salvate concordi, file SHA-256 identico, bozza privata e flag PIN abilitato. Larghezza mobile, non dispositivo fisico.
+
+Prima di applicare un passo che toglie un riferimento, registra ora la protezione del file sul percorso dedicato: copre anche Annulla dopo un nuovo upload. Se la registrazione fallisce il passo non viene consumato. 119 test isolati/regressioni/baseline pass; 20 verifiche workerd/R2 locali pass con Auth/DB simulati, distinte dal ciclo browser reale.
+
+Avviato il passo successivo con inventario effettivo in sola lettura e classificatore privato, privo di capacità di cancellazione. File non referenziati nello stato salvato non vengono automaticamente considerati eliminabili: manca ancora il coordinamento con tutte le sessioni e i salvataggi. Pulizia automatica, durata definitiva, limite byte e sostituzioni a spazio quasi pieno restano aperti. Nessuna quota modificata, migrazione, nuovo costo, deploy o modifica Officina/produzione. Pacchetto non pronto al rilascio. Vault e programma aggiornati; codice/evidenze operative restano privati.

@@ -109,3 +109,31 @@ Bucket `khamakey-media` (SQL v44):
 2. Documentare in questo file
 3. Applicare in Supabase SQL Editor
 4. Aggiornare `PROJECT_STATE.md`
+
+## Laboratorio separato — 2026-10-23 (NON LIVE)
+
+- **Checkpoint schema laboratorio 2026-10-23 (NON LIVE)** — 70 tabelle, 102 funzioni, 124 policy, 4 trigger; conteggio effettivo 0 righe. Accessi anon/auth chiusi (0 tabelle, 0 funzioni); grants ampi respinti e non applicati, segreto legacy escluso dalla copia. 27/27 test locali. Staging funzionale ancora aperto; produzione/Officina invariate. Dettagli: `lab/SCHEMA-CHECKPOINT.md`.
+
+Le istruzioni storiche di sequenza sopra non sono un bootstrap per un database vuoto. Per il laboratorio è stato letto il catalogo strutturale senza righe: generatore con destinazione fissa e accessi chiusi. Non rieseguirlo sul database esistente. Snapshot e SQL generati in .lab/ esclusa da Git.
+
+## Anteprima separata — 2026-10-24
+
+- **Anteprima locale 2026-10-24 (NON LIVE)** — permessi minimi solo laboratorio, server 127.0.0.1:8080/8787 con R2 locale e filtri destinazione/operazioni. 31/31 test locali; prova SQL lotto → attivazione → Salva → PIN → NFC e isolamento due identità superata con ROLLBACK. Nessun account Auth creato; login/browser/upload reale ed etichette ancora da verificare. Vedi lab/PREVIEW-CHECKPOINT.md.
+
+## Prove browser e account fittizi — 2026-10-24
+
+- **Browser laboratorio 2026-10-24 (NON LIVE)** — 2 utenti fittizi senza email; login, attivazione, PNG R2 locale, Salva/riapertura, gate PIN e redirect NFC verificati nel browser. Account B senza pagina A; 7 controlli API con JWT reali pass, 31/31 test locali. Latenza/autosalvataggio transitori e stato modifiche da approfondire. 2 fixture artificiali, nessun staff persistente. Dettagli lab/BROWSER-CHECKPOINT.md.
+
+## Collaborazione e conflitti — 2026-10-24, NON LIVE
+
+- **Collaborazione e save candidato v328 (2026-10-24, NON LIVE)** — invito reale RPC senza email, accettazione/modifica browser e upload B autorizzati; revoca nega lettura/save/upload anche con JWT già emesso. Riprodotta sovrascrittura da retry di bozza vecchia, rimossa sul ramo e verificata nel browser. 35/35 test; atomicità di due transazioni simultanee ancora da verificare. Live v327, Officina invariata. Vedi lab/COLLABORATION-CHECKPOINT.md.
+
+
+## Email trasferimento nel laboratorio
+
+Email trasferimento (2026-10-24, NON LIVE): pulsanti originali → Worker → email catturata locale → link → login/accettazione B → editor verificati; nessuna consegna reale. SQL v183 originale applicata solo al lab, fallimento email e conservazione invito più recente verificati. 26 controlli del ciclo e 38/38 test locali pass; fixture restituita ad A, Officina/produzione invariate. Vedi lab/TRANSFER-MAIL-CHECKPOINT.md.
+
+
+## Verifica produzione in lettura
+
+Prima verifica produzione 2026-10-24, su richiesta utente: sole letture di catalogo/permessi/advisory e asset pubblici; nessun SQL modificativo o operazione su pagine cliente. Dettagli delle criticità aperte nel rapporto locale riservato, non pubblicati nel repository pubblico. Prove limitate alla fixture lab e annullate con rollback verificato. Vedi lab/PRODUCTION-AUDIT-CHECKPOINT.md; nessun fix/deploy in questa fase.

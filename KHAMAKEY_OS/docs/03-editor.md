@@ -178,3 +178,13 @@ python3 ~/.codex/skills/khamakey-release-workflow/scripts/sync_public_css.py pag
 - [x] Tabella risposte RSVP (backend v70 + pannello editor)
 - [x] Libro degli ospiti con moderazione (v108) — **escluso dal prodotto** da Moments v179 / Worker v167 (codice in repo, non in menu né pubblico)
 - [ ] Smoke test wizard 5 settori
+
+## Collaborazione e conflitti — 2026-10-24, NON LIVE
+
+- **Collaborazione e save candidato v328 (2026-10-24, NON LIVE)** — invito reale RPC senza email, accettazione/modifica browser e upload B autorizzati; revoca nega lettura/save/upload anche con JWT già emesso. Riprodotta sovrascrittura da retry di bozza vecchia, rimossa sul ramo e verificata nel browser. 35/35 test; atomicità di due transazioni simultanee ancora da verificare. Live v327, Officina invariata. Vedi lab/COLLABORATION-CHECKPOINT.md.
+
+
+## Candidato editor v329 / CSS v311 — 24 ottobre 2026, NON LIVE
+Nel laboratorio: colonne più equilibrate fra 769 e 1279 px, titolo prima della foto anche nell’ordine tastiera, focus visibile e avvisi file distinti fra trasferimento e salvataggio. Il riepilogo distingue contenuti pronti, bozza privata, modifiche non salvate e pubblicazione; nessuna indicazione ad attivare il libro ospiti sospeso. «Bozza» descrive la visibilità pubblica senza negare l’accesso ai collaboratori. Barra Salva chiusa esclusa dalla tastiera e dalla lettura assistita.
+Riprodotto un ulteriore difetto del contatore modifiche durante richiesta in corso: prima 2/4 test fallivano, dopo 4/4 pass. Contatore ora registra anche la digitazione durante Salva; il riscontro non rende pulita una bozza successiva. Browser: primo salvataggio registra solo lo snapshot inviato, testo nuovo resta nel campo con avviso; secondo Salva ripristina il titolo originale della fixture. Nessun cambiamento a payload/RPC/autorizzazioni/Worker/SQL o Officina in questa fase.
+Verifiche: 111 test locali integrati, otto larghezze 320/390/768/769/920/1100/1280/1440 senza scroll orizzontale, campo titolo a 920 da 208,8 a 432,8 px, percorso mobile Contenuti → Anteprima → Modifica → Condividi e 7 controlli Auth ordinari. Non sostituiscono test su dispositivi fisici, lettore vocale reale, video/rete interrotta e revisione finale. Nessun deploy o merge. Vedi lab/EDITOR-UX-CHECKPOINT.md e lab/PLAN.md aggiornato.

@@ -3,7 +3,36 @@
 > **Leggi questo file per primo** in ogni sessione AI.  
 > Ultimo aggiornamento: **2026-10-23** (Moments **v327** · CSS **v310**; Worker **v255**; SQL **v182**, file **v183** da applicare)
 
+- **Anteprima locale 2026-10-24 (NON LIVE)** — permessi minimi solo laboratorio, server 127.0.0.1:8080/8787 con R2 locale e filtri destinazione/operazioni. 31/31 test locali; prova SQL lotto → attivazione → Salva → PIN → NFC e isolamento due identità superata con ROLLBACK. Nessun account Auth creato; login/browser/upload reale ed etichette ancora da verificare. Vedi lab/PREVIEW-CHECKPOINT.md.
+
+- **Browser laboratorio 2026-10-24 (NON LIVE)** — 2 utenti fittizi senza email; login, attivazione, PNG R2 locale, Salva/riapertura, gate PIN e redirect NFC verificati nel browser. Account B senza pagina A; 7 controlli API con JWT reali pass, 31/31 test locali. Latenza/autosalvataggio transitori e stato modifiche da approfondire. 2 fixture artificiali, nessun staff persistente. Dettagli lab/BROWSER-CHECKPOINT.md.
+
+- **Collaborazione e save candidato v328 (2026-10-24, NON LIVE)** — invito reale RPC senza email, accettazione/modifica browser e upload B autorizzati; revoca nega lettura/save/upload anche con JWT già emesso. Riprodotta sovrascrittura da retry di bozza vecchia, rimossa sul ramo e verificata nel browser. 35/35 test; atomicità di due transazioni simultanee ancora da verificare. Live v327, Officina invariata. Vedi lab/COLLABORATION-CHECKPOINT.md.
+
+
+
+- Trasferimento proprietà (2026-10-24, NON LIVE): accettazione browser A → B e ritorno A via RPC, 24 controlli reali pass; accessi vecchio titolare negati, contenuti/foto/PIN/slug/NFC invariati. Nessun difetto confermato nel core trasferimento. Email/Worker, scadenza, concorrenza e nuovo destinatario ancora da verificare. 35/35 test locali; vedi lab/TRANSFER-CHECKPOINT.md. Nessun deploy o SQL produzione.
+
+
+
+- Email trasferimento (2026-10-24, NON LIVE): pulsanti originali → Worker → email catturata locale → link → login/accettazione B → editor verificati; nessuna consegna reale. SQL v183 originale applicata solo al lab, fallimento email e conservazione invito più recente verificati. 26 controlli del ciclo e 38/38 test locali pass; fixture restituita ad A, Officina/produzione invariate. Vedi lab/TRANSFER-MAIL-CHECKPOINT.md.
+
+
+
+- Prima verifica produzione 2026-10-24, su richiesta utente: sole letture di catalogo/permessi/advisory e asset pubblici; nessun SQL modificativo o operazione su pagine cliente. Dettagli delle criticità aperte nel rapporto locale riservato, non pubblicati nel repository pubblico. Prove limitate alla fixture lab e annullate con rollback verificato. Vedi lab/PRODUCTION-AUDIT-CHECKPOINT.md; nessun fix/deploy in questa fase.
+
 ### Fonte di verità versioni
+
+### Laboratorio separato autorizzato — 2026-10-23 (NON LIVE)
+
+- L'utente autorizza copia Windows `C:\Users\khama\Desktop\nuove collezioni\khamakey-v41-lab`, ramo `codex/laboratorio-sicuro`, eccezione esplicita a main/root Mac. Base `762eac7`. Non fondere/deployare automaticamente.
+- Piano, limiti di isolamento e verifiche: `../lab/README.md`, `../lab/PLAN.md`. Versioni live sopra invariate.
+- Database laboratorio creato inizialmente vuoto: `ybmnrtvksvndpdiofmqm` (eu-west-1), costo di creazione quotato 0 USD/mese. Su autorizzazione esplicita dell’utente sospeso Moment Custom `bftmldytlhuznintdmdl` (INACTIVE); Business già inattivo. Nessuna cancellazione/upgrade/copia dati. Produzione Moments `cuxlwaocjqwzluycznyp` non modificata.
+- Worker candidato NON LIVE `v256-media-kindcap-scope`: correzione scope kindCap, 22/22 test locali pass (base: 7 fail). 78 file Officina/SQL e resto Worker verificati identici. Nessuna certificazione staging end-to-end, nessun SQL di produzione o deploy. Accesso GitHub sbloccato il 2026-10-23 dopo installazione ChatGPT Codex Connector sul repository. Ramo pubblicato e verificato identico alla copia testata; PR #6 in bozza: https://github.com/kpfarm/khamakey-v41/pull/6. Nessun merge/deploy/SQL di produzione; staging completo e smoke ancora aperti.
+- **Checkpoint schema laboratorio 2026-10-23 (NON LIVE)** — 70 tabelle, 102 funzioni, 124 policy, 4 trigger; conteggio effettivo 0 righe. Accessi anon/auth chiusi (0 tabelle, 0 funzioni); grants ampi respinti e non applicati, segreto legacy escluso dalla copia. 27/27 test locali. Staging funzionale ancora aperto; produzione/Officina invariate. Dettagli: `lab/SCHEMA-CHECKPOINT.md`.
+
+- Prima di ulteriori cambi: leggere `lab/README.md`, verificare branch/main e lock. Non avviare il frontend sorgente: la configurazione punta ancora a produzione.
+
 
 | Cosa | Dove leggere |
 |------|----------------|
@@ -255,3 +284,9 @@ npx wrangler deploy
 ```
 
 Ordine release: **Worker prima** se cambia renderer NFC, poi **Pages**.
+
+
+## Candidato editor v329 / CSS v311 — 24 ottobre 2026, NON LIVE
+Nel laboratorio: colonne più equilibrate fra 769 e 1279 px, titolo prima della foto anche nell’ordine tastiera, focus visibile e avvisi file distinti fra trasferimento e salvataggio. Il riepilogo distingue contenuti pronti, bozza privata, modifiche non salvate e pubblicazione; nessuna indicazione ad attivare il libro ospiti sospeso. «Bozza» descrive la visibilità pubblica senza negare l’accesso ai collaboratori. Barra Salva chiusa esclusa dalla tastiera e dalla lettura assistita.
+Riprodotto un ulteriore difetto del contatore modifiche durante richiesta in corso: prima 2/4 test fallivano, dopo 4/4 pass. Contatore ora registra anche la digitazione durante Salva; il riscontro non rende pulita una bozza successiva. Browser: primo salvataggio registra solo lo snapshot inviato, testo nuovo resta nel campo con avviso; secondo Salva ripristina il titolo originale della fixture. Nessun cambiamento a payload/RPC/autorizzazioni/Worker/SQL o Officina in questa fase.
+Verifiche: 111 test locali integrati, otto larghezze 320/390/768/769/920/1100/1280/1440 senza scroll orizzontale, campo titolo a 920 da 208,8 a 432,8 px, percorso mobile Contenuti → Anteprima → Modifica → Condividi e 7 controlli Auth ordinari. Non sostituiscono test su dispositivi fisici, lettore vocale reale, video/rete interrotta e revisione finale. Nessun deploy o merge. Vedi lab/EDITOR-UX-CHECKPOINT.md e lab/PLAN.md aggiornato.

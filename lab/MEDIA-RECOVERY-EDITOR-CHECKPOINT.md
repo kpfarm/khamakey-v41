@@ -1,0 +1,9 @@
+# Recupero media nell’editor completo — checkpoint laboratorio
+
+25 ottobre 2026, NON LIVE. Collegati autosalvataggio e frecce Annulla/Ripeti alla verifica dei media nel vero editor locale, mantenendo gli overlay preesistenti e la grafica corrente. Prima di reintrodurre un file, il server ne controlla disponibilità e permessi. Errori o risposte superate non consumano il passaggio. Rimozione e sostituzione conservano prudentemente il file precedente; lo spazio continua a essere conteggiato.
+
+71 test isolati, 15 regressioni salvataggio e controllo baseline protetto pass; 18 controlli con workerd/R2 locali, Auth/DB simulati. Successivo ciclo browser con Auth/database reali del solo laboratorio: PNG sintetica caricata, rimossa, autosalvata, recuperata con Annulla e rimossa nuovamente con Ripeti; sostituzione e ritorno all’originale provati anche in emulazione mobile 390 px. Riferimenti persistiti e byte SHA-256 verificati. Bozza privata e flag PIN abilitato conservati; non un nuovo confronto dell’hash PIN o prova su telefono fisico.
+
+Verificati rifiuto recupero senza login/di altra pagina e inaccessibilità del registro interno. Test NFC sulla fixture privata non conclusivo: risposta 503 sia dalla baseline precedente sia dal candidato; il risolutore pubblico non trova una destinazione e la pagina risulta non pubblicata. Nessuna modifica al core NFC o pubblicazione forzata. Il ciclo pubblico completo resta un gate distinto prima del rilascio.
+
+Nessuna pulizia automatica, migrazione, nuovo servizio/costo o deploy. Durata e pulizia coordinate con tutte le sessioni, spazio quasi esaurito, sostituzioni video/audio e matrice completa dei media restano aperti. La durata di 24 ore è solo sperimentale. Non distribuire questa fase sui clienti. Codice ed evidenze operative restano nella consegna privata; programma e guide aggiornati. Produzione, Officina e sorgenti condivisi protetti invariati.

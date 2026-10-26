@@ -239,6 +239,17 @@ Più il messaggio è specifico, meno rischio che un altro agente lavori sulle st
 
 ## Lock attivi
 
+Audit produzione in sola lettura 2026-10-24 concluso, nessun lock applicativo mantenuto. Solo documentazione pubblica neutra in questo checkpoint; rapporto dettagliato riservato locale, fuori Git. Nessuna modifica produzione/Officina, prove su fixture lab terminate con rollback.
+
+Codex concluso, lock rilasciato 2026-10-24: test email trasferimento solo laboratorio, lab/mail-network.mjs, worker-entry/prepare/network, lab/transfer*, test e documentazione. Provider email intercettato localmente; nessun invio reale o chiave provider. SQL v183 originale applicata solo al lab; Officina e produzione intoccate.
+
+Laboratorio trasferimento 2026-10-24: Codex: prove concluse, lock rilasciato su `lab/transfer*`, `lab/network.mjs` e documentazione. Test tra soli account fittizi nel progetto ybmnrtvksvndpdiofmqm; nessuna modifica SQL produzione, Officina o invio email reale. Nessuna correzione SQL necessaria per le prove svolte. Esiti in lab/TRANSFER-CHECKPOINT.md; percorso email ancora da collaudare.
+
+### Laboratorio autorizzato 2026-10-23
+
+Ramo `codex/laboratorio-sicuro`, copia Windows `khamakey-v41-lab`, base `762eac7`. Eccezione esplicita dell'utente alla regola main/root Mac; non fondere/deployare automaticamente. Officina e SQL protetti. Owner **Codex laboratorio**, checkpoint collaborazione/save candidato v328 chiuso e lock rilasciato; correzione candidata pubblicata solo su ramo/PR #6 in bozza. Ambito autorizzato su `lab/**`, documentazione, correzione scope `handleMediaUpload` in `worker/worker.js` e fix minimo retry conflitto `pages/moments.js` con messaggi IT/EN/cache v328; nessuna modifica auth/CSP/RLS/quote. Gli altri agenti leggano questo ramo prima di modificare le stesse righe. Il lock su ramo non è un lock pubblicato su main: verificare nuovamente main prima di proporre il merge.
+
+
 > Aggiornare questa tabella **su Git** quando si inizia o finisce un task che tocca l’area.
 
 | Area | Owner / stato | File / azioni da non toccare senza lock |
@@ -371,3 +382,8 @@ In dubbio: **un agente per file condiviso per volta**, oppure branch feature + P
 | `STRIPE-PERSONAL-SETUP.md` | Setup Stripe temporaneo |
 | `SHOPIFY-SETUP.md` | Catalogo e webhook Shopify |
 | `.cursor/rules/git-commit-workflow.mdc` | Commit, versioni, deploy |
+
+
+Codex laboratorio — 2026-10-24: fase editor v329/CSS v311 conclusa, lock rilasciato su pages/moments.js, moments.css, moments.html, dashboard e dizionari. 108 test integrati, otto larghezze, prova browser modifiche durante Salva e 7 controlli Auth pass. Nessuna modifica Worker, SQL, Officina o produzione. Vedi lab/EDITOR-UX-CHECKPOINT.md.
+
+2026-10-24 — Rifinitura stessa fase editor: accessibilità della barra Salva conservata anche per redo e avvisi di errore; 3 regressioni dedicate. Solo laboratorio, nessun deploy; lock rilasciato.

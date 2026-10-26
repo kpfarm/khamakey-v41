@@ -10,7 +10,7 @@ const ALLOWED_EVENTS = new Set([
   "add_to_cart",
   "order_sent"
 ]);
-const WORKER_VERSION = "v255-transfer-guard";
+const WORKER_VERSION = "v256-media-kindcap-scope";
 
 /** Moments public /m/ chrome only (not Business i18n snapshots). Default IT. */
 const MOMENTS_PUBLIC_LOCALES = ["it", "en"];
@@ -2058,6 +2058,8 @@ async function handleMediaUpload(request, env) {
     let planKey = "moments_free";
     let storageMb = DEFAULT_MOMENTS_PLAN_LIMITS.storage_mb;
     let maxBytes = storageMb * 1024 * 1024;
+    // Shared by the pre-check and post-write check; do not redeclare inside a block.
+    let kindCap = null;
 
     if (scope === "moments") {
       // Fail-closed: senza entitlements leggibili non si carica (niente bypass quota).
@@ -2097,7 +2099,7 @@ async function handleMediaUpload(request, env) {
       }
 
       // Cap oggetti video/audio/PDF (folder R2). Immagini escluse: cover/galleria/journey condividono images/.
-      const kindCap = momentsKindObjectCap(planLimits, kind);
+      kindCap = momentsKindObjectCap(planLimits, kind);
       if (kindCap != null) {
         const folderName = momentsKindFolder(kind);
         let kindCount = 0;
